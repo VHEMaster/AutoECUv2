@@ -211,7 +211,16 @@ void Error_Handler(void);
 #define FLEXIO2_SYNC_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
+#define LD_GPIO_Port GPIOI
 
+#define LD1_Pin GPIO_PIN_12
+#define LD1_GPIO_Port LD_GPIO_Port
+#define LD2_Pin GPIO_PIN_13
+#define LD2_GPIO_Port LD_GPIO_Port
+#define LD3_Pin GPIO_PIN_14
+#define LD3_GPIO_Port LD_GPIO_Port
+#define LD4_Pin GPIO_PIN_15
+#define LD4_GPIO_Port LD_GPIO_Port
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
