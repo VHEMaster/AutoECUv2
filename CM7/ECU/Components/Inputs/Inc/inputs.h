@@ -27,6 +27,7 @@ typedef void (*input_func_ch_init_t)(input_if_id_t interface_id, input_ch_id_t c
 typedef void (*input_func_ch_configure_t)(input_if_id_t interface_id, input_ch_id_t channel_id, const void *configuration, void *usrdata);
 
 typedef void (*input_func_ch_get_t)(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
+typedef void (*input_func_ch_irq_cb_t)(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t value, void *usrdata);
 
 typedef struct {
     input_func_if_init_t if_init;
@@ -53,8 +54,10 @@ void input_if_reconfigure(input_if_id_t interface_id, const void *configuration)
 
 input_id_t input_ch_register(input_if_id_t interface_id, input_ch_id_t channel, const void *configuration);
 void input_ch_reconfigure(input_id_t channel_id, const void *configuration);
+void input_ch_register_irq_cb(input_id_t channel_id, input_func_ch_irq_cb_t irq_callback);
 void input_ch_debounce(input_id_t channel_id, time_delta_us_t debounce_time);
 
+void input_ch_irq_handler(input_id_t channel_id, input_value_t value);
 void input_get_value(input_id_t channel_id, input_value_t *value, time_delta_us_t *time);
 
 #endif /* INC_INPUTS_H_ */
