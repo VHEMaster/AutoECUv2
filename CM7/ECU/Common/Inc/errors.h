@@ -5,12 +5,19 @@
  *      Author: VHEMaster
  */
 
-#ifndef INC_ERRORS_H_
-#define INC_ERRORS_H_
+#ifndef COMMON_INC_ERRORS_H_
+#define COMMON_INC_ERRORS_H_
 
 typedef enum {
   E_OK = 0,
-  E_ERROR = -1
+  E_FAULT = -1,
+  E_TIMEOUT = -2,
+  E_AGAIN = -3,
+  E_PENDING = -4,
+  E_PARAM = -5,
+  E_IO = -6,
+  E_NOT_SUPPORTED = -10,
+  E_NOT_OVERFLOW = -11,
 }error_t;
 
-#endif /* INC_ERRORS_H_ */
+#endif /* COMMON_INC_ERRORS_H_ */
