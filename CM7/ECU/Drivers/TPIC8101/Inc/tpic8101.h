@@ -5,13 +5,14 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_TPIC8101_INC_TPIC8101_H_
-#define COMPONENTS_TPIC8101_INC_TPIC8101_H_
+#ifndef DRIVERS_TPIC8101_INC_TPIC8101_H_
+#define DRIVERS_TPIC8101_INC_TPIC8101_H_
 
 #include "errors.h"
 #include "time.h"
 #include "gpio.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 typedef struct {
     spi_slave_t spi;
@@ -43,4 +44,4 @@ error_t tpic8101_cfg_update(tpic8101_ctx_t *ctx);
 
 error_t tpic8101_get_integrator_value(tpic8101_ctx_t *ctx, uint16_t *value);
 
-#endif /* COMPONENTS_TPIC8101_INC_TPIC8101_H_ */
+#endif /* DRIVERS_TPIC8101_INC_TPIC8101_H_ */

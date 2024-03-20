@@ -5,13 +5,14 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_MAX31855_INC_MAX31855_H_
-#define COMPONENTS_MAX31855_INC_MAX31855_H_
+#ifndef DRIVERS_MAX31855_INC_MAX31855_H_
+#define DRIVERS_MAX31855_INC_MAX31855_H_
 
 #include "errors.h"
 #include "time.h"
 #include "gpio.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 #define MAX31855_DEFAULT_POLL_PERIOD_US   (100 * TIME_MS_TO_US)
 
@@ -46,4 +47,4 @@ error_t max31855_update(tle6240_ctx_t *ctx);
 error_t max31855_get_temperature(tle6240_ctx_t *ctx, float *temperature);
 
 
-#endif /* COMPONENTS_MAX31855_INC_MAX31855_H_ */
+#endif /* DRIVERS_MAX31855_INC_MAX31855_H_ */

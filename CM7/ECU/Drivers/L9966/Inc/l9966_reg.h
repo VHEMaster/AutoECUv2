@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_L9966_INC_L9966_REG_H_
-#define COMPONENTS_L9966_INC_L9966_REG_H_
+#ifndef DRIVERS_L9966_INC_L9966_REG_H_
+#define DRIVERS_L9966_INC_L9966_REG_H_
 
 #include <stdint.h>
 
@@ -388,4 +388,4 @@ typedef struct {
     }u;
 }l9966_reg_sqncr_result_voltage_t;
 
-#endif /* COMPONENTS_L9966_INC_L9966_REG_H_ */
+#endif /* DRIVERS_L9966_INC_L9966_REG_H_ */

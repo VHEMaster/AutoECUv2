@@ -13,9 +13,10 @@ typedef enum {
   E_FAULT = -1,
   E_TIMEOUT = -2,
   E_AGAIN = -3,
-  E_PENDING = -4,
+  E_BUSY = -4,
   E_PARAM = -5,
   E_IO = -6,
+  E_HAL = -7,
   E_NOT_SUPPORTED = -10,
   E_NOT_OVERFLOW = -11,
 }error_t;

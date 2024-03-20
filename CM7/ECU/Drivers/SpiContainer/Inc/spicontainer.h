@@ -5,11 +5,12 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_SPICONTAINER_INC_SPICONTAINER_H_
-#define COMPONENTS_SPICONTAINER_INC_SPICONTAINER_H_
+#ifndef DRIVERS_SPICONTAINER_INC_SPICONTAINER_H_
+#define DRIVERS_SPICONTAINER_INC_SPICONTAINER_H_
 
 #include "main.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 #define SPICONTAINER_SPIS_MAX   4u
 
@@ -29,4 +30,4 @@ void spicontainer_rx_irq(spicontainer_t *ctx, SPI_HandleTypeDef *hspi);
 void spicontainer_tx_rx_irq(spicontainer_t *ctx, SPI_HandleTypeDef *hspi);
 void spicontainer_error_irq(spicontainer_t *ctx, SPI_HandleTypeDef *hspi);
 
-#endif /* COMPONENTS_SPICONTAINER_INC_SPICONTAINER_H_ */
+#endif /* DRIVERS_SPICONTAINER_INC_SPICONTAINER_H_ */

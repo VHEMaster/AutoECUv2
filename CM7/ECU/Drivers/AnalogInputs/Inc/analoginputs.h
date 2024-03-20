@@ -8,7 +8,7 @@
 #ifndef INC_ANALOGINPUTS_H_
 #define INC_ANALOGINPUTS_H_
 
-#include "inputs.h"
+#include "../../../Drivers/Inputs/Inc/inputs.h"
 
 typedef float analog_input_value_t;
 

@@ -5,12 +5,13 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_TLE6240GP_INC_TLE6240_H_
-#define COMPONENTS_TLE6240GP_INC_TLE6240_H_
+#ifndef DRIVERS_TLE6240GP_INC_TLE6240_H_
+#define DRIVERS_TLE6240GP_INC_TLE6240_H_
 
 #include "errors.h"
 #include "gpio.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 #define MAX31855_DEFAULT_POLL_PERIOD_US   (1 * TIME_MS_TO_US)
 
@@ -78,4 +79,4 @@ bool tle6240_ch_is_direct(tle6240_ctx_t *ctx, uint8_t channel);
 
 
 
-#endif /* COMPONENTS_TLE6240GP_INC_TLE6240_H_ */
+#endif /* DRIVERS_TLE6240GP_INC_TLE6240_H_ */

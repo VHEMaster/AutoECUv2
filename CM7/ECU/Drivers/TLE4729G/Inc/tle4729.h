@@ -5,13 +5,14 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_TLE4729G_INC_TLE4729_H_
-#define COMPONENTS_TLE4729G_INC_TLE4729_H_
+#ifndef DRIVERS_TLE4729G_INC_TLE4729_H_
+#define DRIVERS_TLE4729G_INC_TLE4729_H_
 
 #include "errors.h"
 #include "time.h"
 #include "gpio.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 #define MAX31855_DEFAULT_POLL_PERIOD_US   (100 * TIME_MS_TO_US)
 
@@ -56,4 +57,4 @@ error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position);
 bool tle4729_is_moving(tle4729_ctx_t *ctx);
 bool tle4729_is_failure(tle4729_ctx_t *ctx);
 
-#endif /* COMPONENTS_TLE4729G_INC_TLE4729_H_ */
+#endif /* DRIVERS_TLE4729G_INC_TLE4729_H_ */

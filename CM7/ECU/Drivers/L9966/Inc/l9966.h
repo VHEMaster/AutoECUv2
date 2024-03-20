@@ -5,13 +5,14 @@
  *      Author: VHEMaster
  */
 
-#ifndef COMPONENTS_L9966_INC_L9966_H_
-#define COMPONENTS_L9966_INC_L9966_H_
+#ifndef DRIVERS_L9966_INC_L9966_H_
+#define DRIVERS_L9966_INC_L9966_H_
 
 #include "gpio.h"
 #include "main.h"
 #include "errors.h"
-#include "spi.h"
+
+#include "../../../Drivers/Spi/Inc/spi.h"
 
 typedef struct {
     spi_slave_t spi;
@@ -38,4 +39,4 @@ error_t l9966_burst_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data, uint
 error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *data, uint8_t len);
 
 
-#endif /* COMPONENTS_L9966_INC_L9966_H_ */
+#endif /* DRIVERS_L9966_INC_L9966_H_ */
