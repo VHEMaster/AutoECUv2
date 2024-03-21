@@ -11,6 +11,7 @@
 error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status = HAL_OK;
 
   do {
     if(spi == NULL || cfg == NULL || cfg->hspi == NULL) {
@@ -18,6 +19,7 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
       break;
     }
 
+    spi->state = SPI_STATE_RESET;
     spi->cfg = *cfg;
 
     if(spi->cfg.timeout == 0) {
@@ -26,6 +28,38 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
 
     if(spi->cfg.use_dma && spi->cfg.dma_usage_threshold < SPI_DMA_THR_MIN) {
       spi->cfg.dma_usage_threshold = SPI_DMA_THR_MIN;
+    }
+
+    if(spi->cfg.use_dma || spi->cfg.use_interrupt) {
+      if(spi->cfg.tx_cplt_cb != NULL) {
+        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_COMPLETE_CB_ID, spi->cfg.tx_cplt_cb);
+      } else {
+        err = E_PARAM;
+        break;
+      }
+      if(spi->cfg.rx_cplt_cb != NULL) {
+        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_RX_COMPLETE_CB_ID, spi->cfg.rx_cplt_cb);
+      } else {
+        err = E_PARAM;
+        break;
+      }
+      if(spi->cfg.txrx_cplt_cb != NULL) {
+        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_RX_COMPLETE_CB_ID, spi->cfg.txrx_cplt_cb);
+      } else {
+        err = E_PARAM;
+        break;
+      }
+      if(spi->cfg.err_cplt_cb != NULL) {
+        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_ERROR_CB_ID, spi->cfg.err_cplt_cb);
+      } else {
+        err = E_PARAM;
+        break;
+      }
+
+      if(status != HAL_OK) {
+        err = E_HAL;
+        break;
+      }
     }
 
     spi->busy = false;

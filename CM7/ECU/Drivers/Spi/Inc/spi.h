@@ -27,10 +27,16 @@ typedef struct {
   bool use_dma;
   uint8_t dma_usage_threshold;
   time_delta_us_t timeout;
+
+  pSPI_CallbackTypeDef tx_cplt_cb;
+  pSPI_CallbackTypeDef rx_cplt_cb;
+  pSPI_CallbackTypeDef txrx_cplt_cb;
+  pSPI_CallbackTypeDef err_cplt_cb;
 }spi_cfg_t;
 
 typedef enum {
-  SPI_STATE_IDLE = 0,
+  SPI_STATE_RESET = 0,
+  SPI_STATE_IDLE,
   SPI_STATE_WAIT_TX,
   SPI_STATE_WAIT_RX,
   SPI_STATE_WAIT_TXRX,

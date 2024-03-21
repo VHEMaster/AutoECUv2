@@ -17,6 +17,7 @@ typedef enum {
   E_PARAM = -5,
   E_IO = -6,
   E_HAL = -7,
+  E_NOTRDY = -8,
   E_NOT_SUPPORTED = -10,
   E_NOT_OVERFLOW = -11,
 }error_t;
