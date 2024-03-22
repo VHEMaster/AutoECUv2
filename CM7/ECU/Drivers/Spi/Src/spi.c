@@ -199,13 +199,14 @@ error_t spi_slave_configure_callback(spi_slave_t *spi_slave, spi_op_cplt_cb_t ca
 error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes)
 {
   error_t err = E_OK;
+  spi_t *spi = spi_slave->spi;
 
-  if(spi_slave->spi->state == SPI_STATE_IDLE && spi_slave->spi->busy == false) {
+  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
     gpio_reset(&spi_slave->nss_pin);
-    spi_slave->spi->busy = true;
-    spi_slave->spi->slave_own = spi_slave;
-    spi_slave->spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi_slave->spi->err_callback = spi_private_error_cb;
+    spi->busy = true;
+    spi->slave_own = spi_slave;
+    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+    spi->err_callback = spi_private_error_cb;
 
     err = spi_private_transmit(spi_slave, data, bytes);
 
@@ -233,13 +234,14 @@ error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data)
 error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes)
 {
   error_t err = E_OK;
+  spi_t *spi = spi_slave->spi;
 
-  if(spi_slave->spi->state == SPI_STATE_IDLE && spi_slave->spi->busy == false) {
+  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
     gpio_reset(&spi_slave->nss_pin);
-    spi_slave->spi->busy = true;
-    spi_slave->spi->slave_own = spi_slave;
-    spi_slave->spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi_slave->spi->err_callback = spi_private_error_cb;
+    spi->busy = true;
+    spi->slave_own = spi_slave;
+    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+    spi->err_callback = spi_private_error_cb;
 
     err = spi_private_receive(spi_slave, data, bytes);
 
@@ -268,13 +270,14 @@ error_t spi_receive_word(spi_slave_t *spi_slave, uint32_t *data)
 error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t bytes)
 {
   error_t err = E_OK;
+  spi_t *spi = spi_slave->spi;
 
-  if(spi_slave->spi->state == SPI_STATE_IDLE && spi_slave->spi->busy == false) {
+  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
     gpio_reset(&spi_slave->nss_pin);
-    spi_slave->spi->busy = true;
-    spi_slave->spi->slave_own = spi_slave;
-    spi_slave->spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi_slave->spi->err_callback = spi_private_error_cb;
+    spi->busy = true;
+    spi->slave_own = spi_slave;
+    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+    spi->err_callback = spi_private_error_cb;
 
     err = spi_private_transmit_receive(spi_slave, transmit, receive, bytes);
 
@@ -288,15 +291,16 @@ error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, v
 error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_bytes, void *receive, uint8_t rx_bytes)
 {
   error_t err = E_OK;
+  spi_t *spi = spi_slave->spi;
 
-  if(spi_slave->spi->state == SPI_STATE_IDLE && spi_slave->spi->busy == false) {
+  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
     gpio_reset(&spi_slave->nss_pin);
-    spi_slave->spi->busy = true;
-    spi_slave->spi->slave_own = spi_slave;
-    spi_slave->spi->rx_buffer = receive;
-    spi_slave->spi->rx_bytes = rx_bytes;
-    spi_slave->spi->cplt_callback = spi_private_tx_then_rx_tx_cplt_cb;
-    spi_slave->spi->err_callback = spi_private_error_cb;
+    spi->busy = true;
+    spi->slave_own = spi_slave;
+    spi->rx_buffer = receive;
+    spi->rx_bytes = rx_bytes;
+    spi->cplt_callback = spi_private_tx_then_rx_tx_cplt_cb;
+    spi->err_callback = spi_private_error_cb;
 
     err = spi_private_transmit(spi_slave, transmit, tx_bytes);
 
@@ -310,20 +314,21 @@ error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, 
 error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_bytes, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_bytes, time_delta_us_t poll_period, time_delta_us_t timeout)
 {
   error_t err = E_OK;
+  spi_t *spi = spi_slave->spi;
 
-  if(spi_slave->spi->state == SPI_STATE_IDLE && spi_slave->spi->busy == false) {
+  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
     gpio_reset(&spi_slave->nss_pin);
-    spi_slave->spi->busy = true;
-    spi_slave->spi->slave_own = spi_slave;
-    spi_slave->spi->rx_mask = rx_mask;
-    spi_slave->spi->rx_value = rx_value;
-    spi_slave->spi->rx_buffer = receive;
-    spi_slave->spi->rx_bytes = rx_bytes;
-    spi_slave->spi->poll_period = rx_bytes;
-    spi_slave->spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
-    spi_slave->spi->err_callback = spi_private_error_cb;
-    spi_slave->spi->time_poll_begin = time_get_current_us();
-    spi_slave->spi->time_poll_timeout = timeout;
+    spi->busy = true;
+    spi->slave_own = spi_slave;
+    spi->rx_mask = rx_mask;
+    spi->rx_value = rx_value;
+    spi->rx_buffer = receive;
+    spi->rx_bytes = rx_bytes;
+    spi->poll_period = poll_period;
+    spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
+    spi->err_callback = spi_private_error_cb;
+    spi->time_poll_begin = time_get_current_us();
+    spi->time_poll_timeout = timeout;
 
     err = spi_private_transmit(spi_slave, transmit, tx_bytes);
 
@@ -337,20 +342,21 @@ error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint
 error_t spi_sync(spi_slave_t *spi_slave)
 {
   error_t err = E_AGAIN;
+  spi_t *spi = spi_slave->spi;
   uint32_t time_transaction, now;
 
-  if(spi_slave->spi->slave_own != spi_slave && spi_slave->spi->busy == false) {
-    if(spi_slave->spi->state == SPI_STATE_DONE) {
+  if(spi->slave_own == spi_slave && spi->busy == true) {
+    if(spi->state == SPI_STATE_DONE) {
       spi_private_slave_reset(spi_slave);
       err = E_OK;
-    } else if(spi_slave->spi->state == SPI_STATE_ERROR) {
-      err = spi_slave->spi->errorcode;
+    } else if(spi->state == SPI_STATE_ERROR) {
+      err = spi->errorcode;
       spi_private_slave_reset(spi_slave);
     } else {
-      time_transaction = spi_slave->spi->time_transaction;
+      time_transaction = spi->time_transaction;
       now = time_get_current_us();
-      if(spi_slave->spi->poll_scheduled == false) {
-        if(time_diff(now, time_transaction) >= spi_slave->spi->cfg.timeout) {
+      if(spi->poll_scheduled == false) {
+        if(time_diff(now, time_transaction) >= spi->cfg.timeout) {
           err = E_TIMEOUT;
           spi_private_error_cb(spi_slave, err);
           spi_private_slave_reset(spi_slave);
