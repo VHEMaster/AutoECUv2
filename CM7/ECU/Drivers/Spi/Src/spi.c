@@ -30,6 +30,7 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
       spi->cfg.dma_usage_threshold = SPI_DMA_THR_MIN;
     }
 
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1UL)
     if(spi->cfg.use_dma || spi->cfg.use_interrupt) {
       if(spi->cfg.tx_cplt_cb != NULL) {
         status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_COMPLETE_CB_ID, spi->cfg.tx_cplt_cb);
@@ -61,6 +62,7 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
         break;
       }
     }
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
     spi->busy = false;
     spi->state = SPI_STATE_IDLE;
