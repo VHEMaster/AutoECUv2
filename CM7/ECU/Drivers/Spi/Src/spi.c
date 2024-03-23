@@ -79,12 +79,11 @@ void spi_loop_main(spi_t *spi)
 
 void spi_loop_slow(spi_t *spi)
 {
-  spi_private_poll_loop(spi);
 }
 
 void spi_loop_fast(spi_t *spi)
 {
-
+  spi_private_poll_loop(spi);
 }
 
 

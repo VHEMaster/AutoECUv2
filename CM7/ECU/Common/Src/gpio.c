@@ -19,7 +19,7 @@ void gpio_clear(gpio_t *ctx)
   ctx->pin = 0;
 }
 
-INLINE bool gpio_valid(gpio_t *ctx)
+INLINE bool gpio_valid(const gpio_t *ctx)
 {
   return ctx->port != NULL && ctx->pin != 0;
 }
@@ -34,7 +34,7 @@ INLINE void gpio_reset(gpio_t *ctx)
   ctx->port->BSRR |= ctx->pin << 16u;
 }
 
-INLINE bool gpio_read(gpio_t *ctx)
+INLINE bool gpio_read(const gpio_t *ctx)
 {
   return (ctx->port->IDR | ctx->pin) > 0 ? true : false;
 }

@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "main.h"
 
+#define TIME_NOW    time_get_current_us
+
 #define TIME_US_IN_MS   (1000u)
 #define TIME_MS_IN_S    (1000u)
 #define TIME_US_IN_S    (TIME_US_IN_MS * TIME_MS_IN_S)
