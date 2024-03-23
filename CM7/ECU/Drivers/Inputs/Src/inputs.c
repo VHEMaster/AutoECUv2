@@ -198,40 +198,6 @@ error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t pollin
   return err;
 }
 
-error_t input_ch_irq_handler(input_id_t channel_id, input_value_t value)
-{
-  error_t err = E_OK;
-  input_ch_ctx_t *ch;
-  time_us_t now;
-
-  do {
-    if(channel_id < 0 || channel_id >= input_ctx.chs_count) {
-      err = E_PARAM;
-      break;
-    }
-
-    now = time_get_current_us();
-
-    ch = &input_ctx.chs[channel_id];
-
-    if(ch->value != value) {
-      ch->value_change_time = now;
-    }
-    ch->value_time = now;
-    ch->value = value;
-
-    if(ch->if_ptr->func_ch_irq_cb != NULL) {
-      ch->if_ptr->func_ch_irq_cb(ch->if_id, ch->id, value, ch->usrdata);
-    }
-    if(ch->func_irq_cb != NULL) {
-      ch->func_irq_cb(ch->if_id, ch->id, value, ch->usrdata);
-    }
-
-  } while(0);
-
-  return err;
-}
-
 error_t input_ch_source_gpio(input_id_t channel_id, const gpio_t *gpio, bool invert)
 {
   error_t err = E_OK;
@@ -298,11 +264,38 @@ error_t input_ch_source_ptr(input_id_t channel_id, volatile input_value_t *point
   return err;
 }
 
+error_t input_ch_source_direct(input_id_t channel_id, input_value_t initial_value)
+{
+  error_t err = E_OK;
+  input_ch_ctx_t *ch;
+  time_us_t now;
+
+  do {
+    if(channel_id < 0 || channel_id >= input_ctx.chs_count) {
+      err = E_PARAM;
+      break;
+    }
+
+    now = time_get_current_us();
+
+    ch = &input_ctx.chs[channel_id];
+    ch->source = INPUT_SOURCE_DIRECT;
+    ch->val_direct = initial_value;
+    ch->value = initial_value;
+    ch->value_change_time = now;
+    ch->value_time = now;
+
+  } while(0);
+
+  return err;
+}
+
 error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_us_t *time)
 {
   error_t err = E_OK;
   input_ch_ctx_t *ch;
   time_us_t now, valtime;
+
   do {
     if(channel_id < 0 || channel_id >= input_ctx.chs_count || value == NULL) {
       err = E_PARAM;
@@ -321,6 +314,47 @@ error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_
       valtime = ch->value_change_time;
       now = time_get_current_us();
       *time = time_diff(now, valtime);
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t input_set_value(input_id_t channel_id, input_value_t value, bool force_irq)
+{
+  error_t err = E_OK;
+  input_ch_ctx_t *ch;
+  bool gen_cb = force_irq;
+  time_us_t now;
+
+  do {
+    if(channel_id < 0 || channel_id >= input_ctx.chs_count) {
+      err = E_PARAM;
+      break;
+    }
+
+    now = time_get_current_us();
+
+    ch = &input_ctx.chs[channel_id];
+    if(ch->debounce_time) {
+      ch->val_direct = value;
+    } else {
+      if(ch->value != value) {
+        gen_cb = true;
+        ch->value_change_time = now;
+      }
+      ch->val_direct = value;
+      ch->value = value;
+      ch->value_time = now;
+
+      if(gen_cb == true) {
+        if(ch->if_ptr->func_ch_irq_cb != NULL) {
+          ch->if_ptr->func_ch_irq_cb(ch->if_id, ch->id, value, ch->usrdata);
+        }
+        if(ch->func_irq_cb != NULL) {
+          ch->func_irq_cb(ch->if_id, ch->id, value, ch->usrdata);
+        }
+      }
     }
   } while(0);
 
