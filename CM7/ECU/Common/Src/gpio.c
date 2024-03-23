@@ -36,7 +36,7 @@ INLINE void gpio_reset(gpio_t *ctx)
 
 INLINE bool gpio_read(const gpio_t *ctx)
 {
-  return (ctx->port->IDR | ctx->pin) > 0 ? true : false;
+  return (ctx->port->IDR & ctx->pin) > 0 ? true : false;
 }
 
 INLINE void gpio_write(gpio_t *ctx, bool value)

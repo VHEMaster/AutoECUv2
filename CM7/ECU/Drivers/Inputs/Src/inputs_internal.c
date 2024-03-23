@@ -16,21 +16,27 @@ void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polling_mode)
 
   if(polling_mode == INPUT_POLLING_MODE_FAST) {
     for(int i = 0; i < ctx->ifs_count; i++) {
-      deltatime = time_diff(now, interface->time_fast_last);
       interface = &ctx->ifs[i];
-      interface->func_if_periodic_fast(interface->id, deltatime, interface->usrdata);
+      deltatime = time_diff(now, interface->time_fast_last);
+      if(interface->func_if_periodic_fast) {
+        interface->func_if_periodic_fast(interface->id, deltatime, interface->usrdata);
+      }
     }
   } else if(polling_mode == INPUT_POLLING_MODE_SLOW) {
     for(int i = 0; i < ctx->ifs_count; i++) {
-      deltatime = time_diff(now, interface->time_slow_last);
       interface = &ctx->ifs[i];
-      interface->func_if_periodic_slow(interface->id, deltatime, interface->usrdata);
+      deltatime = time_diff(now, interface->time_slow_last);
+      if(interface->func_if_periodic_slow) {
+        interface->func_if_periodic_slow(interface->id, deltatime, interface->usrdata);
+      }
     }
   } else if(polling_mode == INPUT_POLLING_MODE_MAIN) {
     for(int i = 0; i < ctx->ifs_count; i++) {
-      deltatime = time_diff(now, interface->time_main_last);
       interface = &ctx->ifs[i];
-      interface->func_if_periodic_main(interface->id, deltatime, interface->usrdata);
+      deltatime = time_diff(now, interface->time_main_last);
+      if(interface->func_if_periodic_main) {
+        interface->func_if_periodic_main(interface->id, deltatime, interface->usrdata);
+      }
     }
   }
 
@@ -59,7 +65,11 @@ error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling_mode_t po
     } else if(ch->source == INPUT_SOURCE_PTR) {
       val = *ch->val_pointer;
     } else if(ch->source == INPUT_SOURCE_FUNC) {
-      err = ch->if_ptr->func_ch_get(ch->if_id, ch->id, &val, ch->usrdata);
+      if(ch->func_get != NULL) {
+        err = ch->func_get(ch->if_id, ch->id, &val, ch->usrdata);
+      } else if(ch->if_ptr->func_ch_get != NULL) {
+        err = ch->if_ptr->func_ch_get(ch->if_id, ch->id, &val, ch->usrdata);
+      }
     }
     if(ch->debounce_time) {
       valtime = ch->value_time;

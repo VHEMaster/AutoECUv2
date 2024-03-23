@@ -101,7 +101,7 @@ input_id_t input_ch_register(input_if_id_t interface_id, input_ch_id_t channel_i
   input_ch_ctx_t *channel;
 
   id_count = id_new + 1;
-  if(interface_id < input_ctx.ifs_count && channel_id < input_ctx.chs_count) {
+  if(interface_id < input_ctx.ifs_count && input_ctx.chs_count < INPUTS_CHS_MAX) {
     if(id_count < INPUTS_CHS_MAX) {
       interface = &input_ctx.ifs[interface_id];
       channel = &input_ctx.chs[id_new];
@@ -175,6 +175,23 @@ error_t input_ch_debounce(input_id_t channel_id, time_delta_us_t debounce_time)
     }
 
     input_ctx.chs[channel_id].debounce_time = debounce_time;
+
+  } while(0);
+
+  return err;
+}
+
+error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t polling_mode)
+{
+  error_t err = E_OK;
+
+  do {
+    if(channel_id < 0 || channel_id >= input_ctx.chs_count || polling_mode >= INPUT_POLLING_MODE_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    input_ctx.chs[channel_id].polling_mode = polling_mode;
 
   } while(0);
 
@@ -261,7 +278,7 @@ error_t input_ch_source_func(input_id_t channel_id, input_func_ch_get_t func)
   return err;
 }
 
-error_t input_ch_source_ptr(input_id_t channel_id, input_value_t *pointer)
+error_t input_ch_source_ptr(input_id_t channel_id, volatile input_value_t *pointer)
 {
   error_t err = E_OK;
   input_ch_ctx_t *ch;
