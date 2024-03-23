@@ -28,6 +28,7 @@ typedef struct input_ch_ctx_tag {
     gpio_t gpio;
     bool gpio_invert;
     volatile input_value_t *val_pointer;
+    input_value_t val_direct;
 
     input_func_ch_get_t func_get;
     input_func_ch_irq_cb_t func_irq_cb;

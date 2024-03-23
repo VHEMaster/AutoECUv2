@@ -69,6 +69,14 @@ error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling_mode_t po
         err = ch->func_get(ch->if_id, ch->id, &val, ch->usrdata);
       } else if(ch->if_ptr->func_ch_get != NULL) {
         err = ch->if_ptr->func_ch_get(ch->if_id, ch->id, &val, ch->usrdata);
+      } else {
+        val = 0;
+      }
+    } else if(ch->source == INPUT_SOURCE_DIRECT) {
+      if(ch->debounce_time) {
+        val = ch->val_direct;
+      } else {
+        val = val_ret;
       }
     }
     if(ch->debounce_time) {
