@@ -19,7 +19,8 @@ typedef enum {
   E_HAL = -7,
   E_NOTRDY = -8,
   E_OVERFLOW = -9,
-  E_NOT_SUPPORTED = -10,
+  E_NOTSUPPORT = -10,
+  E_INVALACT = -11,
 }error_t;
 
 #endif /* COMMON_INC_ERRORS_H_ */

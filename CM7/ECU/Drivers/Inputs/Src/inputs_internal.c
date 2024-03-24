@@ -43,7 +43,7 @@ void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polling_mode)
   for(int c = 0; c < ctx->chs_count; c++) {
     ch = &ctx->chs[c];
 
-    inputs_internal_channel_poll(ch, polling_mode);
+    (void)inputs_internal_channel_poll(ch, polling_mode);
   }
 }
 

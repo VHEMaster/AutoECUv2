@@ -76,7 +76,7 @@ error_t input_ch_debounce(input_id_t channel_id, time_delta_us_t debounce_time);
 error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t polling_mode);
 error_t input_ch_source_gpio(input_id_t channel_id, const gpio_t *gpio, bool invert);
 error_t input_ch_source_func(input_id_t channel_id, input_func_ch_get_t func);
-error_t input_ch_source_ptr(input_id_t channel_id, volatile input_value_t *pointer);
+error_t input_ch_source_ptr(input_id_t channel_id, volatile const input_value_t *pointer);
 error_t input_ch_source_direct(input_id_t channel_id, input_value_t initial_value);
 
 error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_us_t *time);
