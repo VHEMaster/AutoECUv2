@@ -58,8 +58,6 @@ typedef struct {
 
     output_func_ch_set_t ch_set;
     output_func_ch_get_t ch_get;
-
-    void *usrdata;
 }output_if_cfg_t;
 
 void outputs_init(void);

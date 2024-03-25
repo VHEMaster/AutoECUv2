@@ -42,18 +42,23 @@ output_if_id_t output_if_register(const output_if_cfg_t *cfg, void *usrdata)
   id_count = id_new + 1;
   if(id_count < OUTPUTS_IFS_MAX) {
     interface = &output_ctx.ifs[id_new];
+    memset(interface, 0u, sizeof(output_if_ctx_t));
+
     interface->chs_count = 0;
     interface->id = id_new;
-    interface->func_if_init = cfg->if_init;
-    interface->func_if_configure = cfg->if_configure;
-    interface->func_if_periodic_main = cfg->if_periodic_main;
-    interface->func_if_periodic_slow = cfg->if_periodic_slow;
-    interface->func_if_periodic_fast = cfg->if_periodic_fast;
 
-    interface->func_ch_init = cfg->ch_init;
-    interface->func_ch_configure = cfg->ch_configure;
-    interface->func_ch_get = cfg->ch_get;
-    interface->func_ch_set = cfg->ch_set;
+    if(cfg != NULL) {
+      interface->func_if_init = cfg->if_init;
+      interface->func_if_configure = cfg->if_configure;
+      interface->func_if_periodic_main = cfg->if_periodic_main;
+      interface->func_if_periodic_slow = cfg->if_periodic_slow;
+      interface->func_if_periodic_fast = cfg->if_periodic_fast;
+
+      interface->func_ch_init = cfg->ch_init;
+      interface->func_ch_configure = cfg->ch_configure;
+      interface->func_ch_get = cfg->ch_get;
+      interface->func_ch_set = cfg->ch_set;
+    }
     interface->usrdata = usrdata;
 
     now = time_get_current_us();
@@ -62,6 +67,10 @@ output_if_id_t output_if_register(const output_if_cfg_t *cfg, void *usrdata)
     interface->time_fast_last = now;
 
     output_ctx.ifs_count = id_count;
+
+    if(interface->func_if_init != NULL) {
+      interface->func_if_init(interface->id, interface->usrdata);
+    }
   } else {
     id_new = E_OVERFLOW;
   }
@@ -115,6 +124,10 @@ output_id_t output_ch_register(output_if_id_t interface_id, output_ch_id_t chann
 
       interface->chs_ptrs[interface->chs_count++] = channel;
       output_ctx.chs_count = id_count;
+
+      if(interface->func_ch_init != NULL) {
+        interface->func_ch_init(interface->id, channel->id, interface->usrdata);
+      }
     } else {
       id_new = E_OVERFLOW;
     }
