@@ -9,6 +9,7 @@
 #include "bool.h"
 #include "outputs.h"
 #include "outputs_internal.h"
+#include "compiler.h"
 
 static output_ctx_t output_ctx;
 
@@ -261,7 +262,7 @@ error_t output_ch_periodic_polling_mode(output_id_t channel_id, output_polling_m
   return err;
 }
 
-error_t output_set_value(output_id_t channel_id, output_value_t value)
+ITCM_FUNC error_t output_set_value(output_id_t channel_id, output_value_t value)
 {
   error_t err = E_OK;
   output_ch_ctx_t *ch;
@@ -284,7 +285,7 @@ error_t output_set_value(output_id_t channel_id, output_value_t value)
   return err;
 }
 
-error_t output_get_value(output_id_t channel_id, output_value_t *value)
+ITCM_FUNC error_t output_get_value(output_id_t channel_id, output_value_t *value)
 {
   error_t err = E_OK;
   output_ch_ctx_t *ch;
@@ -303,7 +304,7 @@ error_t output_get_value(output_id_t channel_id, output_value_t *value)
   return err;
 }
 
-error_t output_set_periodic(output_id_t channel_id, bool once, output_value_t value_on, output_value_t value_off, time_delta_us_t time_on, time_delta_us_t time_off)
+ITCM_FUNC error_t output_set_periodic(output_id_t channel_id, bool once, output_value_t value_on, output_value_t value_off, time_delta_us_t time_on, time_delta_us_t time_off)
 {
   error_t err = E_OK;
   output_ch_ctx_t *ch;
@@ -336,7 +337,7 @@ error_t output_set_periodic(output_id_t channel_id, bool once, output_value_t va
   return err;
 }
 
-error_t output_reset_periodic(output_id_t channel_id, output_value_t value)
+ITCM_FUNC error_t output_reset_periodic(output_id_t channel_id, output_value_t value)
 {
   error_t err = E_OK;
   output_ch_ctx_t *ch;

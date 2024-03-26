@@ -6,8 +6,9 @@
  */
 
 #include "inputs_internal.h"
+#include "compiler.h"
 
-void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polling_mode)
+ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polling_mode)
 {
   input_if_ctx_t *interface;
   input_ch_ctx_t *ch;
@@ -47,7 +48,7 @@ void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polling_mode)
   }
 }
 
-error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling_mode_t polling_mode)
+ITCM_FUNC error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling_mode_t polling_mode)
 {
   input_value_t val, val_ret;
   time_us_t valtime, now;

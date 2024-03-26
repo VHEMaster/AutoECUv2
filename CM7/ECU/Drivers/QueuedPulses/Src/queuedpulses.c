@@ -91,7 +91,7 @@ error_t queuedpulses_output_configure(output_id_t output, output_value_t value_o
   return err;
 }
 
-void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
+ITCM_FUNC void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
 {
   queuedpulse_timer_t *timer = NULL;
   queuedpulse_output_t *out = NULL;
@@ -156,7 +156,7 @@ void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
   }
 }
 
-error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
+ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
 {
   error_t err = E_OK;
   queuedpulse_output_t *out = NULL;
@@ -331,9 +331,10 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
   return err;
 }
 
-error_t queuedpulses_reset_all(void)
+ITCM_FUNC error_t queuedpulses_reset_all(void)
 {
   error_t err = E_OK;
+  error_t err_tmp;
   queuedpulse_output_t *out;
   queuedpulse_timer_t *timer;
   queuedpulse_entry_t *entry;
@@ -346,7 +347,10 @@ error_t queuedpulses_reset_all(void)
     out->queue_entry = NULL;
     out->timer = NULL;
 
-    err |= output_set_value(out->id, out->value_off);
+    err_tmp = output_set_value(out->id, out->value_off);
+    if(err_tmp != E_OK) {
+      err = err_tmp;
+    }
   }
 
   for(int i = 0; i < queuedpulse_ctx.timers_count; i++) {

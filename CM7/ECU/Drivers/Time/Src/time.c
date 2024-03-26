@@ -18,12 +18,12 @@ void time_init_timebase(volatile time_us_t *timebase, time_us_t mask)
   g_time_mask = mask;
 }
 
-INLINE time_us_t time_get_current_us(void)
+ITCM_FUNC time_us_t time_get_current_us(void)
 {
   return *g_time_timebase;
 }
 
-INLINE time_us_t time_diff(time_us_t a, time_us_t b)
+ITCM_FUNC time_us_t time_diff(time_us_t a, time_us_t b)
 {
   time_us_t retval;
 

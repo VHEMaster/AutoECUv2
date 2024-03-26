@@ -6,6 +6,7 @@
  */
 
 #include "analoginputs.h"
+#include "compiler.h"
 
 typedef struct {
   float gain;
@@ -36,7 +37,7 @@ error_t analog_input_configure(input_id_t channel_id, float gain, float offset)
   return err;
 }
 
-error_t analog_input_get_value(input_id_t channel_id, analog_input_value_t *value)
+ITCM_FUNC error_t analog_input_get_value(input_id_t channel_id, analog_input_value_t *value)
 {
   error_t err = E_OK;
   input_value_t in_val = 0;

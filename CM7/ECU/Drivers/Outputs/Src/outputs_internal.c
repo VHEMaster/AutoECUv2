@@ -6,8 +6,9 @@
  */
 
 #include "outputs_internal.h"
+#include "compiler.h"
 
-void outputs_internal_loop(output_ctx_t *ctx, output_polling_mode_t polling_mode)
+ITCM_FUNC void outputs_internal_loop(output_ctx_t *ctx, output_polling_mode_t polling_mode)
 {
   output_if_ctx_t *interface;
   output_ch_ctx_t *ch;
@@ -47,7 +48,7 @@ void outputs_internal_loop(output_ctx_t *ctx, output_polling_mode_t polling_mode
   }
 }
 
-error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_polling_mode_t polling_mode)
+ITCM_FUNC error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_polling_mode_t polling_mode)
 {
   error_t err = E_OK;
   time_us_t now, valtime;
@@ -96,7 +97,7 @@ error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_polling_mode_t
   return err;
 }
 
-error_t outputs_internal_set_value(output_ch_ctx_t *ch, output_value_t value)
+ITCM_FUNC error_t outputs_internal_set_value(output_ch_ctx_t *ch, output_value_t value)
 {
   error_t err = E_OK;
   bool gpio_invert;
@@ -119,7 +120,7 @@ error_t outputs_internal_set_value(output_ch_ctx_t *ch, output_value_t value)
   return err;
 }
 
-error_t outputs_internal_get_value(output_ch_ctx_t *ch, output_value_t *value)
+ITCM_FUNC error_t outputs_internal_get_value(output_ch_ctx_t *ch, output_value_t *value)
 {
   error_t err = E_OK;
   bool gpio_invert;

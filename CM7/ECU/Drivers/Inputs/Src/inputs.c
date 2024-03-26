@@ -9,6 +9,7 @@
 #include "bool.h"
 #include "inputs.h"
 #include "inputs_internal.h"
+#include "compiler.h"
 
 static input_ctx_t input_ctx;
 
@@ -290,7 +291,7 @@ error_t input_ch_source_direct(input_id_t channel_id, input_value_t initial_valu
   return err;
 }
 
-error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_us_t *time)
+ITCM_FUNC error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_us_t *time)
 {
   error_t err = E_OK;
   input_ch_ctx_t *ch;
@@ -320,7 +321,7 @@ error_t input_get_value(input_id_t channel_id, input_value_t *value, time_delta_
   return err;
 }
 
-error_t input_set_value(input_id_t channel_id, input_value_t value, bool force_irq)
+ITCM_FUNC error_t input_set_value(input_id_t channel_id, input_value_t value, bool force_irq)
 {
   error_t err = E_OK;
   input_ch_ctx_t *ch;

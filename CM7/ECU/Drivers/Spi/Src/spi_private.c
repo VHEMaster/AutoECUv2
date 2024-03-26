@@ -8,7 +8,7 @@
 #include "spi_private.h"
 #include "compiler.h"
 
-INLINE void spi_private_slave_reset(spi_slave_t *spi_slave)
+ITCM_FUNC INLINE void spi_private_slave_reset(spi_slave_t *spi_slave)
 {
   spi_t *spi = spi_slave->spi;
   spi->state = SPI_STATE_IDLE;
@@ -18,7 +18,7 @@ INLINE void spi_private_slave_reset(spi_slave_t *spi_slave)
   spi->busy = false;
 }
 
-INLINE void spi_private_irq_handler(spi_t *spi, error_t errorcode)
+ITCM_FUNC INLINE void spi_private_irq_handler(spi_t *spi, error_t errorcode)
 {
   if(spi != NULL) {
     if(errorcode == E_OK) {
@@ -33,14 +33,14 @@ INLINE void spi_private_irq_handler(spi_t *spi, error_t errorcode)
   }
 }
 
-void spi_private_call_slave_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_call_slave_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   if(spi_slave->cplt_callback) {
     spi_slave->cplt_callback(spi_slave, errorcode);
   }
 }
 
-void spi_private_error_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_error_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   spi_t *spi = spi_slave->spi;
 
@@ -51,7 +51,7 @@ void spi_private_error_cb(spi_slave_t *spi_slave, error_t errorcode)
   spi_private_call_slave_cb(spi_slave, errorcode);
 }
 
-void spi_private_txrx_full_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_txrx_full_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   spi_t *spi = spi_slave->spi;
 
@@ -62,7 +62,7 @@ void spi_private_txrx_full_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
   spi_private_call_slave_cb(spi_slave, errorcode);
 }
 
-void spi_private_tx_then_rx_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_tx_then_rx_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   spi_t *spi = spi_slave->spi;
 
@@ -75,7 +75,7 @@ void spi_private_tx_then_rx_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode
   }
 }
 
-void spi_private_tx_and_poll_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_tx_and_poll_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   spi_t *spi = spi_slave->spi;
 
@@ -88,7 +88,7 @@ void spi_private_tx_and_poll_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcod
   }
 }
 
-void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   spi_t *spi = spi_slave->spi;
   const uint8_t *mask = spi->rx_mask;
@@ -131,7 +131,7 @@ void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_t errorcod
   }
 }
 
-INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, const void *tx_data, const void *rx_data, uint16_t size)
+ITCM_FUNC INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, const void *tx_data, const void *rx_data, uint16_t size)
 {
   HAL_StatusTypeDef status = HAL_ERROR;
   error_t err = E_HAL;
@@ -165,7 +165,7 @@ INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, const void *
   return err;
 }
 
-INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void *data, uint16_t size)
+ITCM_FUNC INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void *data, uint16_t size)
 {
   HAL_StatusTypeDef status = HAL_ERROR;
   error_t err = E_HAL;
@@ -199,7 +199,7 @@ INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void *data, ui
   return err;
 }
 
-INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data, uint16_t size)
+ITCM_FUNC INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data, uint16_t size)
 {
   HAL_StatusTypeDef status = HAL_ERROR;
   error_t err = E_HAL;
@@ -233,7 +233,7 @@ INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data, uint16_t 
   return err;
 }
 
-void spi_private_poll_loop(spi_t *spi)
+ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
 {
   uint32_t poll_timestamp, now;
 

@@ -7,6 +7,7 @@
 
 #include "spi.h"
 #include "spi_private.h"
+#include "compiler.h"
 
 error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
 {
@@ -79,6 +80,7 @@ void spi_loop_main(spi_t *spi)
 
 void spi_loop_slow(spi_t *spi)
 {
+
 }
 
 void spi_loop_fast(spi_t *spi)
@@ -195,7 +197,7 @@ error_t spi_slave_configure_callback(spi_slave_t *spi_slave, spi_op_cplt_cb_t ca
   return err;
 }
 
-error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes)
+ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
@@ -216,21 +218,21 @@ error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes)
   return err;
 }
 
-error_t spi_transmit_byte(spi_slave_t *spi_slave, uint8_t data)
+ITCM_FUNC error_t spi_transmit_byte(spi_slave_t *spi_slave, uint8_t data)
 {
   return spi_transmit(spi_slave, &data, sizeof(data));
 }
 
-error_t spi_transmit_halfword(spi_slave_t *spi_slave, uint16_t data)
+ITCM_FUNC error_t spi_transmit_halfword(spi_slave_t *spi_slave, uint16_t data)
 {
   return spi_transmit(spi_slave, &data, sizeof(data));
 }
-error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data)
+ITCM_FUNC error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data)
 {
   return spi_transmit(spi_slave, &data, sizeof(data));
 }
 
-error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes)
+ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
@@ -251,22 +253,22 @@ error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes)
   return err;
 }
 
-error_t spi_receive_byte(spi_slave_t *spi_slave, uint8_t *data)
+ITCM_FUNC error_t spi_receive_byte(spi_slave_t *spi_slave, uint8_t *data)
 {
   return spi_receive(spi_slave, data, sizeof(data));
 }
 
-error_t spi_receive_halfword(spi_slave_t *spi_slave, uint16_t *data)
+ITCM_FUNC error_t spi_receive_halfword(spi_slave_t *spi_slave, uint16_t *data)
 {
   return spi_receive(spi_slave, data, sizeof(data));
 }
 
-error_t spi_receive_word(spi_slave_t *spi_slave, uint32_t *data)
+ITCM_FUNC error_t spi_receive_word(spi_slave_t *spi_slave, uint32_t *data)
 {
   return spi_receive(spi_slave, data, sizeof(data));
 }
 
-error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t bytes)
+ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t bytes)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
@@ -287,7 +289,7 @@ error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, v
   return err;
 }
 
-error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_bytes, void *receive, uint8_t rx_bytes)
+ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_bytes, void *receive, uint8_t rx_bytes)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
@@ -310,7 +312,7 @@ error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, 
   return err;
 }
 
-error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_bytes, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_bytes, time_delta_us_t poll_period, time_delta_us_t timeout)
+ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_bytes, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_bytes, time_delta_us_t poll_period, time_delta_us_t timeout)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
@@ -338,7 +340,7 @@ error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint
   return err;
 }
 
-error_t spi_sync(spi_slave_t *spi_slave)
+ITCM_FUNC error_t spi_sync(spi_slave_t *spi_slave)
 {
   error_t err = E_AGAIN;
   spi_t *spi = spi_slave->spi;
@@ -369,30 +371,30 @@ error_t spi_sync(spi_slave_t *spi_slave)
   return err;
 }
 
-error_t spi_transmit_byte_and_poll_byte(spi_slave_t *spi_slave, uint8_t transmit, uint8_t *receive, uint8_t rx_mask, uint8_t rx_value, time_delta_us_t poll_period, time_delta_us_t timeout)
+ITCM_FUNC error_t spi_transmit_byte_and_poll_byte(spi_slave_t *spi_slave, uint8_t transmit, uint8_t *receive, uint8_t rx_mask, uint8_t rx_value, time_delta_us_t poll_period, time_delta_us_t timeout)
 {
   return spi_transmit_and_poll(spi_slave, &transmit, sizeof(transmit), &receive, &rx_mask, &rx_value, sizeof(rx_value), poll_period, timeout);
 }
 
-void spi_tx_irq(spi_t *spi)
+ITCM_FUNC void spi_tx_irq(spi_t *spi)
 {
   spi->state = SPI_STATE_TX_CPLT;
   spi_private_irq_handler(spi, E_OK);
 }
 
-void spi_rx_irq(spi_t *spi)
+ITCM_FUNC void spi_rx_irq(spi_t *spi)
 {
   spi->state = SPI_STATE_RX_CPLT;
   spi_private_irq_handler(spi, E_OK);
 }
 
-void spi_tx_rx_irq(spi_t *spi)
+ITCM_FUNC void spi_tx_rx_irq(spi_t *spi)
 {
   spi->state = SPI_STATE_TXRX_CPLT;
   spi_private_irq_handler(spi, E_OK);
 }
 
-void spi_error_irq(spi_t *spi)
+ITCM_FUNC void spi_error_irq(spi_t *spi)
 {
   spi->state = SPI_STATE_IRQ_ERROR;
   spi_private_irq_handler(spi, E_IO);
