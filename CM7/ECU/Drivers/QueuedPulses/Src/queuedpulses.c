@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "queuedpulses.h"
+#include "queuedpulses_internal.h"
 #include "compiler.h"
 
 static queuedpulse_ctx_t queuedpulse_ctx;
@@ -124,8 +125,7 @@ void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
       timer->entry_assigned->next = NULL;
       timer->entry_assigned = NULL;
 
-      __HAL_TIM_DISABLE_IT(timer->htim, TIM_IT_UPDATE);
-      __HAL_TIM_DISABLE(timer->htim);
+      queuedpulses_internal_tim_disable(timer);
 
       if(entry) {
         out = entry->output_assigned;
@@ -148,20 +148,7 @@ void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
           prd -= diff;
         }
 
-        while(prd > 0x10000) {
-          prd >>= 1;
-          psc <<= 1;
-        }
-
-        timer->htim->Instance->PSC = psc - 1;
-        timer->htim->Instance->ARR = prd - 1;
-        timer->htim->Instance->EGR |= 1;
-
-        __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
-        __HAL_TIM_CLEAR_FLAG(timer->htim, TIM_FLAG_UPDATE);
-
-        __HAL_TIM_ENABLE_IT(timer->htim, TIM_IT_UPDATE);
-        __HAL_TIM_ENABLE(timer->htim);
+        queuedpulses_internal_tim_enable(timer, prd, psc);
       }
 
       ExitCritical(prim);
@@ -178,13 +165,11 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
   queuedpulse_timer_t *timer_temp = NULL;
   queuedpulse_entry_t *entry_temp_prev = NULL;
   queuedpulse_entry_t *entry_temp_next = NULL;
-  uint32_t index, prim, psc, prd;
+  uint32_t index, prim;
   bool bit_busy = true;
   bool timer_immediate_change = true;
 
   bool tim_free_found = false;
-  bool out_already_active = false;
-  time_us_t tim_abs_value;
   time_delta_us_t tim_rel_value;
   time_delta_us_t pulse_diff = 0u;
 
@@ -259,8 +244,7 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
 
         entry_temp_next = timer->entry_assigned;
         do {
-          tim_abs_value = entry_temp_next->time + entry_temp_next->pulse;
-          tim_rel_value = time_diff(tim_abs_value, now);
+          tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry_temp_next, now);
 
           if(pulse >= tim_rel_value) {
             entry_temp_prev = entry_temp_next;
@@ -297,8 +281,8 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
     } else {
       timer = out->timer;
       entry = out->queue_entry;
-      tim_abs_value = entry->time + entry->pulse;
-      tim_rel_value = time_diff(tim_abs_value, now);
+      tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry, now);
+
       pulse_diff = tim_rel_value;
       entry->pulse = pulse + pulse_diff;
       entry->time = now;
@@ -307,8 +291,7 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
         entry_temp_next = timer->entry_assigned;
         do {
           if(entry != entry_temp_next) {
-            tim_abs_value = entry_temp_next->time + entry_temp_next->pulse;
-            tim_rel_value = time_diff(tim_abs_value, now);
+            tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry_temp_next, now);
 
             if(entry->pulse >= tim_rel_value) {
               entry_temp_prev = entry_temp_next;
@@ -333,28 +316,12 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
     }
 
     if(timer_immediate_change == true) {
-      __HAL_TIM_DISABLE_IT(timer->htim, TIM_IT_UPDATE);
-      __HAL_TIM_DISABLE(timer->htim);
+      queuedpulses_internal_tim_disable(timer);
 
       timer->output_assigned = out;
       timer->entry_assigned = entry;
 
-      psc = timer->prescaler_default;
-      prd = entry->pulse;
-      while(prd > 0x10000) {
-        prd >>= 1;
-        psc <<= 1;
-      }
-
-      timer->htim->Instance->PSC = psc - 1;
-      timer->htim->Instance->ARR = prd - 1;
-      timer->htim->Instance->EGR |= 1;
-
-      __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
-      __HAL_TIM_CLEAR_FLAG(timer->htim, TIM_FLAG_UPDATE);
-
-      __HAL_TIM_ENABLE_IT(timer->htim, TIM_IT_UPDATE);
-      __HAL_TIM_ENABLE(timer->htim);
+      queuedpulses_internal_tim_enable(timer, entry->pulse, timer->prescaler_default);
     }
 
     ExitCritical(prim);
@@ -364,12 +331,44 @@ error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
   return err;
 }
 
-error_t queuedpulses_reset(output_id_t output)
-{
-
-}
-
 error_t queuedpulses_reset_all(void)
 {
+  error_t err = E_OK;
+  queuedpulse_output_t *out;
+  queuedpulse_timer_t *timer;
+  queuedpulse_entry_t *entry;
+  uint32_t prim;
 
+  prim = EnterCritical();
+
+  for(int i = 0; i < OUTPUTS_CHS_MAX; i++) {
+    out = &queuedpulse_ctx.outputs[i];
+    out->queue_entry = NULL;
+    out->timer = NULL;
+
+    err |= output_set_value(out->id, out->value_off);
+  }
+
+  for(int i = 0; i < queuedpulse_ctx.timers_count; i++) {
+    timer = &queuedpulse_ctx.timers[i];
+    timer->entry_assigned = NULL;
+    timer->output_assigned = NULL;
+    queuedpulses_internal_tim_disable(timer);
+  }
+
+  for(int i = 0; i < QUEUEDPULSE_QUEUE_ENTRIES; i++) {
+    entry = &queuedpulse_ctx.queue.entries[i];
+    entry->next = NULL;
+    entry->output_assigned = NULL;
+    entry->timer = NULL;
+    entry->time = 0u;
+    entry->pulse = 0u;
+  }
+
+  queuedpulse_ctx.queue.index_next = 0u;
+  queuedpulse_ctx.queue.entries_bitmap = 0u;
+
+  ExitCritical(prim);
+
+  return err;
 }
