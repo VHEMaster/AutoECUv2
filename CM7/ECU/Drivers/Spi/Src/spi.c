@@ -12,7 +12,9 @@
 error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
 {
   error_t err = E_OK;
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1UL)
   HAL_StatusTypeDef status = HAL_OK;
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
   do {
     if(spi == NULL || cfg == NULL || cfg->hspi == NULL) {
@@ -106,33 +108,64 @@ error_t spi_slave_init(spi_t *spi, spi_slave_t *slave, const gpio_t *nss_pin)
 
     slave->spi = spi;
     slave->nss_pin = *nss_pin;
+    gpio_set(&slave->nss_pin);
+
+    slave->prescaler = spi->cfg.prescaler;
+    slave->datasize = spi->cfg.datasize;
+    slave->mode = spi->cfg.mode;
+    slave->cplt_callback = NULL;
   } while(0);
 
   return err;
 }
 
-
-error_t spi_configure_prescaler(spi_t *spi, uint16_t prescaler)
+ITCM_FUNC INLINE error_t spi_configure_prescaler(spi_t *spi, uint16_t prescaler)
 {
   error_t err = E_OK;
-  HAL_StatusTypeDef status;
 
-  spi->cfg.hspi->Init.BaudRatePrescaler = prescaler;
-  status = HAL_SPI_Init(spi->cfg.hspi);
+  spi->cfg.prescaler = prescaler;
 
-  if(status != HAL_OK) {
-    err = E_HAL;
+  return err;
+}
+
+
+ITCM_FUNC INLINE error_t spi_configure_mode(spi_t *spi, spi_mode_t mode)
+{
+  error_t err = E_OK;
+
+  if(mode >= SPI_MODE_MAX) {
+    err = E_PARAM;
+  } else {
+    spi->cfg.mode = mode;
   }
 
   return err;
 }
 
-error_t spi_configure_mode(spi_t *spi, spi_mode_t mode)
+ITCM_FUNC INLINE error_t spi_configure_datasize(spi_t *spi, uint8_t datasize)
+{
+  error_t err = E_OK;
+
+  spi->cfg.datasize = datasize;
+
+  return err;
+}
+
+ITCM_FUNC INLINE error_t spi_configure_timeout(spi_t *spi, time_delta_us_t timeout)
+{
+  error_t err = E_OK;
+
+  spi->cfg.timeout = timeout;
+
+  return err;
+}
+
+ITCM_FUNC INLINE error_t spi_configure_flush(spi_t *spi)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status;
 
-  switch(mode) {
+  switch(spi->cfg.mode) {
     case SPI_MODE_0:
       spi->cfg.hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
       spi->cfg.hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
@@ -154,41 +187,59 @@ error_t spi_configure_mode(spi_t *spi, spi_mode_t mode)
       break;
   }
 
-  if(err == E_OK) {
-    status = HAL_SPI_Init(spi->cfg.hspi);
+  spi->cfg.hspi->Init.DataSize = spi->cfg.datasize - 1;
+  spi->cfg.hspi->Init.BaudRatePrescaler = spi->cfg.prescaler;
 
-    if(status != HAL_OK) {
-      err = E_HAL;
-    }
-  }
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
+  spi->cfg.hspi->MspInitCallback = spi_private_msp_config_dummy_cb;
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
-  return err;
-}
-
-error_t spi_configure_datasize(spi_t *spi, uint8_t datasize)
-{
-  error_t err = E_OK;
-  HAL_StatusTypeDef status;
-
-  spi->cfg.hspi->Init.DataSize = datasize - 1;
   status = HAL_SPI_Init(spi->cfg.hspi);
-
   if(status != HAL_OK) {
     err = E_HAL;
   }
 
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
+  spi->cfg.hspi->MspInitCallback = NULL;
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
+
   return err;
 }
-error_t spi_configure_timeout(spi_t *spi, time_delta_us_t timeout)
+
+
+ITCM_FUNC INLINE error_t spi_slave_configure_prescaler(spi_slave_t *spi_slave, uint16_t prescaler)
 {
   error_t err = E_OK;
 
-  spi->cfg.timeout = timeout;
+  spi_slave->prescaler = prescaler;
+  spi_slave->prescaler_configured = true;
 
   return err;
 }
 
-error_t spi_slave_configure_callback(spi_slave_t *spi_slave, spi_op_cplt_cb_t callback)
+
+ITCM_FUNC INLINE error_t spi_slave_configure_mode(spi_slave_t *spi_slave, spi_mode_t mode)
+{
+  error_t err = E_OK;
+
+  spi_slave->mode = mode;
+  spi_slave->mode_configured = true;
+
+  return err;
+}
+
+ITCM_FUNC INLINE error_t spi_slave_configure_datasize(spi_slave_t *spi_slave, uint8_t datasize)
+{
+  error_t err = E_OK;
+
+  spi_slave->datasize = datasize;
+  spi_slave->datasize_configured = true;
+
+
+  return err;
+}
+
+ITCM_FUNC INLINE error_t spi_slave_configure_callback(spi_slave_t *spi_slave, spi_op_cplt_cb_t callback)
 {
   error_t err = E_OK;
 
@@ -202,18 +253,24 @@ ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
-  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-    gpio_reset(&spi_slave->nss_pin);
-    spi->busy = true;
-    spi->slave_own = spi_slave;
-    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi->err_callback = spi_private_error_cb;
+  do {
+    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      err = spi_private_slave_reconfigure(spi_slave);
+      if(err != E_OK) {
+        break;
+      }
 
-    err = spi_private_transmit(spi_slave, data, bytes);
+      spi->busy = true;
+      spi->slave_own = spi_slave;
+      spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+      spi->err_callback = spi_private_error_cb;
 
-  } else {
-    err = spi_sync(spi_slave);
-  }
+      err = spi_private_transmit(spi_slave, data, bytes);
+
+    } else {
+      err = spi_sync(spi_slave);
+    }
+  } while(0);
 
   return err;
 }
@@ -237,18 +294,24 @@ ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
-  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-    gpio_reset(&spi_slave->nss_pin);
-    spi->busy = true;
-    spi->slave_own = spi_slave;
-    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi->err_callback = spi_private_error_cb;
+  do {
+    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      err = spi_private_slave_reconfigure(spi_slave);
+      if(err != E_OK) {
+        break;
+      }
 
-    err = spi_private_receive(spi_slave, data, bytes);
+      spi->busy = true;
+      spi->slave_own = spi_slave;
+      spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+      spi->err_callback = spi_private_error_cb;
 
-  } else {
-    err = spi_sync(spi_slave);
-  }
+      err = spi_private_receive(spi_slave, data, bytes);
+
+    } else {
+      err = spi_sync(spi_slave);
+    }
+  } while(0);
 
   return err;
 }
@@ -273,18 +336,24 @@ ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *t
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
-  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-    gpio_reset(&spi_slave->nss_pin);
-    spi->busy = true;
-    spi->slave_own = spi_slave;
-    spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi->err_callback = spi_private_error_cb;
+  do {
+    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      err = spi_private_slave_reconfigure(spi_slave);
+      if(err != E_OK) {
+        break;
+      }
 
-    err = spi_private_transmit_receive(spi_slave, transmit, receive, bytes);
+      spi->busy = true;
+      spi->slave_own = spi_slave;
+      spi->cplt_callback = spi_private_txrx_full_cplt_cb;
+      spi->err_callback = spi_private_error_cb;
 
-  } else {
-    err = spi_sync(spi_slave);
-  }
+      err = spi_private_transmit_receive(spi_slave, transmit, receive, bytes);
+
+    } else {
+      err = spi_sync(spi_slave);
+    }
+  } while(0);
 
   return err;
 }
@@ -294,20 +363,26 @@ ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
-  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-    gpio_reset(&spi_slave->nss_pin);
-    spi->busy = true;
-    spi->slave_own = spi_slave;
-    spi->rx_buffer = receive;
-    spi->rx_bytes = rx_bytes;
-    spi->cplt_callback = spi_private_tx_then_rx_tx_cplt_cb;
-    spi->err_callback = spi_private_error_cb;
+  do {
+    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      err = spi_private_slave_reconfigure(spi_slave);
+      if(err != E_OK) {
+        break;
+      }
 
-    err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+      spi->busy = true;
+      spi->slave_own = spi_slave;
+      spi->rx_buffer = receive;
+      spi->rx_bytes = rx_bytes;
+      spi->cplt_callback = spi_private_tx_then_rx_tx_cplt_cb;
+      spi->err_callback = spi_private_error_cb;
 
-  } else {
-    err = spi_sync(spi_slave);
-  }
+      err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+
+    } else {
+      err = spi_sync(spi_slave);
+    }
+  } while(0);
 
   return err;
 }
@@ -317,25 +392,31 @@ ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *tran
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
-  if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-    gpio_reset(&spi_slave->nss_pin);
-    spi->busy = true;
-    spi->slave_own = spi_slave;
-    spi->rx_mask = rx_mask;
-    spi->rx_value = rx_value;
-    spi->rx_buffer = receive;
-    spi->rx_bytes = rx_bytes;
-    spi->poll_period = poll_period;
-    spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
-    spi->err_callback = spi_private_error_cb;
-    spi->time_poll_begin = time_get_current_us();
-    spi->time_poll_timeout = timeout;
+  do {
+    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      err = spi_private_slave_reconfigure(spi_slave);
+      if(err != E_OK) {
+        break;
+      }
 
-    err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+      spi->busy = true;
+      spi->slave_own = spi_slave;
+      spi->rx_mask = rx_mask;
+      spi->rx_value = rx_value;
+      spi->rx_buffer = receive;
+      spi->rx_bytes = rx_bytes;
+      spi->poll_period = poll_period;
+      spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
+      spi->err_callback = spi_private_error_cb;
+      spi->time_poll_begin = time_get_current_us();
+      spi->time_poll_timeout = timeout;
 
-  } else {
-    err = spi_sync(spi_slave);
-  }
+      err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+
+    } else {
+      err = spi_sync(spi_slave);
+    }
+  } while(0);
 
   return err;
 }

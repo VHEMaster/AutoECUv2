@@ -21,6 +21,7 @@ typedef enum {
   E_OVERFLOW = -9,
   E_NOTSUPPORT = -10,
   E_INVALACT = -11,
+  E_BADRESP = -12,
 }error_t;
 
 #endif /* COMMON_INC_ERRORS_H_ */

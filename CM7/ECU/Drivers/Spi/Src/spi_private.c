@@ -140,6 +140,7 @@ ITCM_FUNC INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, co
   spi->state = SPI_STATE_WAIT_TXRX;
   spi->time_transaction = time_get_current_us();
 
+  gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
     status = HAL_SPI_TransmitReceive_DMA(spi->cfg.hspi, (const uint8_t *)tx_data, (uint8_t *)rx_data, size);
     if(status == HAL_OK) {
@@ -174,6 +175,7 @@ ITCM_FUNC INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void
   spi->state = SPI_STATE_WAIT_TX;
   spi->time_transaction = time_get_current_us();
 
+  gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
     status = HAL_SPI_Transmit_DMA(spi->cfg.hspi, (const uint8_t *)data, size);
     if(status == HAL_OK) {
@@ -208,6 +210,7 @@ ITCM_FUNC INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data,
   spi->state = SPI_STATE_WAIT_RX;
   spi->time_transaction = time_get_current_us();
 
+  gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
     status = HAL_SPI_Receive_DMA(spi->cfg.hspi, (uint8_t *)data, size);
     if(status == HAL_OK) {
@@ -248,3 +251,44 @@ ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
     }
   }
 }
+
+ITCM_FUNC error_t spi_private_slave_reconfigure(spi_slave_t *spi_slave)
+{
+  error_t err = E_OK;
+  bool config_change = false;
+  spi_cfg_t *spi_cfg = &spi_slave->spi->cfg;
+
+  do {
+    if(spi_slave->prescaler_configured && spi_cfg->prescaler != spi_slave->prescaler) {
+      err |= spi_configure_prescaler(spi_slave->spi, spi_slave->prescaler);
+      config_change = true;
+    }
+    if(spi_slave->datasize_configured && spi_cfg->datasize != spi_slave->datasize) {
+      err |= spi_configure_datasize(spi_slave->spi, spi_slave->datasize);
+      config_change = true;
+    }
+    if(spi_slave->mode_configured && spi_cfg->mode != spi_slave->mode) {
+      err |= spi_configure_mode(spi_slave->spi, spi_slave->mode);
+      config_change = true;
+    }
+    if(err != E_OK) {
+      break;
+    }
+
+    if(config_change == true) {
+      err |= spi_configure_flush(spi_slave->spi);
+      if(err != E_OK) {
+        break;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
+void spi_private_msp_config_dummy_cb(SPI_HandleTypeDef *hspi)
+{
+
+}
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */

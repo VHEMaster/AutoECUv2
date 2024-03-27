@@ -26,4 +26,10 @@ error_t spi_private_transmit_receive(spi_slave_t *spi_slave, const void *tx_data
 error_t spi_private_transmit(spi_slave_t *spi_slave, const void *data, uint16_t size);
 error_t spi_private_receive(spi_slave_t *spi_slave, void *data, uint16_t size);
 
+error_t spi_private_slave_reconfigure(spi_slave_t *spi_slave);
+
+#if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
+void spi_private_msp_config_dummy_cb(SPI_HandleTypeDef *hspi);
+#endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
+
 #endif /* DRIVERS_SPI_INC_SPI_PRIVATE_H_ */
