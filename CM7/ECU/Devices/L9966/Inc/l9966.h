@@ -12,7 +12,7 @@
 #include "main.h"
 #include "errors.h"
 
-#include "../../../Drivers/Spi/Inc/spi.h"
+#include "spi.h"
 
 typedef struct {
     spi_slave_t spi;

@@ -68,8 +68,8 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
     spi->busy = false;
-    spi->state = SPI_STATE_IDLE;
 
+    spi->state = SPI_STATE_IDLE;
   } while(0);
 
   return err;
@@ -119,7 +119,7 @@ error_t spi_slave_init(spi_t *spi, spi_slave_t *slave, const gpio_t *nss_pin)
   return err;
 }
 
-ITCM_FUNC INLINE error_t spi_configure_prescaler(spi_t *spi, uint16_t prescaler)
+ITCM_FUNC INLINE error_t spi_configure_prescaler(spi_t *spi, uint32_t prescaler)
 {
   error_t err = E_OK;
 

@@ -50,7 +50,7 @@ typedef struct {
   uint8_t dma_usage_threshold;
   time_delta_us_t timeout;
 
-  uint16_t prescaler;
+  uint32_t prescaler;
   spi_mode_t mode;
   uint8_t datasize;
 
@@ -107,7 +107,7 @@ void spi_loop_fast(spi_t *spi);
 
 error_t spi_slave_init(spi_t *spi, spi_slave_t *slave, const gpio_t *nss_pin);
 
-error_t spi_configure_prescaler(spi_t *spi, uint16_t prescaler);
+error_t spi_configure_prescaler(spi_t *spi, uint32_t prescaler);
 error_t spi_configure_mode(spi_t *spi, spi_mode_t mode);
 error_t spi_configure_datasize(spi_t *spi, uint8_t datasize);
 error_t spi_configure_timeout(spi_t *spi, time_delta_us_t timeout);

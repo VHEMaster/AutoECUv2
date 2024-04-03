@@ -327,6 +327,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    HAL_IWDG_Refresh(&hiwdg2);
     osDelay(1);
   }
   /* USER CODE END 5 */
