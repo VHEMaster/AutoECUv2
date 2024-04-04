@@ -13,43 +13,75 @@
 #include "errors.h"
 #include "spi.h"
 
-static spi_cfg_t ecu_config_spi[ECU_SPI_IF_MAX] = {
-    {
-        .datasize = 32,
-        .hspi = &hspi2,
-        .mode = SPI_MODE_1,
-        .prescaler = SPI_BAUDRATEPRESCALER_8,
-        .timeout = 10 * TIME_US_IN_MS,
-        .use_dma = false,
-        .use_interrupt = true,
-    }, //ECU_SPI_IF_FLEXIO1
-    {
-        .datasize = 32,
-        .hspi = &hspi3,
-        .mode = SPI_MODE_1,
-        .prescaler = SPI_BAUDRATEPRESCALER_8,
-        .timeout = 10 * TIME_US_IN_MS,
-        .use_dma = false,
-        .use_interrupt = true,
-    }, //ECU_SPI_IF_FLEXIO2
-    {
-        .datasize = 8,
-        .hspi = &hspi5,
-        .mode = SPI_MODE_1,
-        .prescaler = SPI_BAUDRATEPRESCALER_16,
-        .timeout = 10 * TIME_US_IN_MS,
-        .use_dma = false,
-        .use_interrupt = true,
-    }, //ECU_SPI_IF_OUTS
-    {
-        .datasize = 8,
-        .hspi = &hspi6,
-        .mode = SPI_MODE_1,
-        .prescaler = SPI_BAUDRATEPRESCALER_16,
-        .timeout = 10 * TIME_US_IN_MS,
-        .use_dma = false,
-        .use_interrupt = true,
-    }, //ECU_SPI_IF_MISC
+typedef struct {
+    spi_cfg_t spi_cfg;
+    ecu_spi_slave_cfg_t slaves_cfg[ECU_SPI_IFS_SLAVE_MAX];
+}ecu_config_spi_if_t;
+
+static ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
+  {
+    .spi_cfg = {
+      .datasize = 32,
+      .hspi = &hspi2,
+      .mode = SPI_MODE_1,
+      .prescaler = SPI_BAUDRATEPRESCALER_8,
+      .timeout = 10 * TIME_US_IN_MS,
+      .use_dma = false,
+      .use_interrupt = true,
+    },
+    .slaves_cfg = {
+        { .slave_enum = ECU_SPI_SLAVE_FLEXIO1, .nss_pin = { .port = SPI2_NSS_FLEXIO1_GPIO_Port, .pin = SPI2_NSS_FLEXIO1_Pin } },
+    },
+  }, //ECU_SPI_IF_FLEXIO1
+  {
+    .spi_cfg = {
+      .datasize = 32,
+      .hspi = &hspi3,
+      .mode = SPI_MODE_1,
+      .prescaler = SPI_BAUDRATEPRESCALER_8,
+      .timeout = 10 * TIME_US_IN_MS,
+      .use_dma = false,
+      .use_interrupt = true,
+      },
+      .slaves_cfg = {
+          { .slave_enum = ECU_SPI_SLAVE_FLEXIO2, .nss_pin = { .port = SPI3_NSS_FLEXIO2_GPIO_Port, .pin = SPI3_NSS_FLEXIO2_Pin } },
+      },
+  }, //ECU_SPI_IF_FLEXIO2
+  {
+    .spi_cfg = {
+      .datasize = 8,
+      .hspi = &hspi5,
+      .mode = SPI_MODE_1,
+      .prescaler = SPI_BAUDRATEPRESCALER_16,
+      .timeout = 10 * TIME_US_IN_MS,
+      .use_dma = false,
+      .use_interrupt = true,
+    },
+    .slaves_cfg = {
+        { .slave_enum = ECU_SPI_SLAVE_OUTS1, .nss_pin = { .port = SPI5_NSS_OUTS1_GPIO_Port, .pin = SPI5_NSS_OUTS1_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_OUTS2, .nss_pin = { .port = SPI5_NSS_OUTS2_GPIO_Port, .pin = SPI5_NSS_OUTS2_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_OUTSM1, .nss_pin = { .port = SPI5_NSS_OUTSM1_GPIO_Port, .pin = SPI5_NSS_OUTSM1_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_OUTSM2, .nss_pin = { .port = SPI5_NSS_OUTSM2_GPIO_Port, .pin = SPI5_NSS_OUTSM2_Pin } },
+    },
+  }, //ECU_SPI_IF_OUTS
+  {
+    .spi_cfg = {
+      .datasize = 8,
+      .hspi = &hspi6,
+      .mode = SPI_MODE_1,
+      .prescaler = SPI_BAUDRATEPRESCALER_16,
+      .timeout = 10 * TIME_US_IN_MS,
+      .use_dma = false,
+      .use_interrupt = true,
+    },
+    .slaves_cfg = {
+        { .slave_enum = ECU_SPI_SLAVE_EGT1, .nss_pin = { .port = SPI6_NSS_EGT1_GPIO_Port, .pin = SPI6_NSS_EGT1_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_EGT2, .nss_pin = { .port = SPI6_NSS_EGT2_GPIO_Port, .pin = SPI6_NSS_EGT2_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_KNOCK, .nss_pin = { .port = SPI6_NSS_KNOCK_GPIO_Port, .pin = SPI6_NSS_KNOCK_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_LAMBDA1, .nss_pin = { .port = SPI6_NSS_LAMBDA1_GPIO_Port, .pin = SPI6_NSS_LAMBDA1_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_LAMBDA2, .nss_pin = { .port = SPI6_NSS_LAMBDA2_GPIO_Port, .pin = SPI6_NSS_LAMBDA2_Pin } },
+    },
+  }, //ECU_SPI_IF_MISC
 };
 
 #if (USE_HAL_SPI_REGISTER_CALLBACKS == 1UL)
@@ -144,6 +176,25 @@ error_t ecu_config_spi_get_if_cfg(spi_cfg_t *spi_cfg, ecu_spi_if_enum_t interfac
 
   if(spi_cfg != NULL && interface < ECU_SPI_IF_MAX) {
     memcpy(spi_cfg, &ecu_config_spi[interface], sizeof(spi_cfg_t));
+  } else {
+    err = E_PARAM;
+  }
+
+  return err;
+}
+
+error_t ecu_config_spi_get_slave_cfg(ecu_spi_slave_cfg_t *config, ecu_spi_if_enum_t interface, ecu_spi_if_slave_enum_t slave)
+{
+  error_t err = E_OK;
+  bool valid;
+
+  if(config != NULL && interface < ECU_SPI_IF_MAX && slave < ECU_SPI_IFS_SLAVE_MAX) {
+    valid = gpio_valid(&ecu_config_spi[interface].slaves_cfg[slave].nss_pin);
+    if(valid == true) {
+      memcpy(config, &ecu_config_spi[interface].slaves_cfg[slave], sizeof(ecu_spi_slave_cfg_t));
+    } else {
+      err = E_NOTSUPPORT;
+    }
   } else {
     err = E_PARAM;
   }
