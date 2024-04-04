@@ -1367,8 +1367,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM16;
     HAL_GPIO_Init(OUTS1_IN11_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_I2CEx_EnableFastModePlus(SYSCFG_PMCR_I2C_PB8_FMP);
-
   /* USER CODE BEGIN TIM16_MspPostInit 1 */
 
   /* USER CODE END TIM16_MspPostInit 1 */
@@ -1389,8 +1387,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM17;
     HAL_GPIO_Init(OUTS1_IN12_GPIO_Port, &GPIO_InitStruct);
-
-    HAL_I2CEx_EnableFastModePlus(SYSCFG_PMCR_I2C_PB9_FMP);
 
   /* USER CODE BEGIN TIM17_MspPostInit 1 */
 

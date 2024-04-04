@@ -1954,7 +1954,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOG, LAMBDA_NRST_Pin|OUTS_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FLEXIO_NRST_GPIO_Port, FLEXIO_NRST_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(FLEXIO_NRST_GPIO_Port, FLEXIO_NRST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, FDCAN1_LBK_Pin|SPI2_NSS_FLEXIO1_Pin, GPIO_PIN_SET);

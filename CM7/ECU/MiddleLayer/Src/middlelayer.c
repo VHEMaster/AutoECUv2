@@ -8,6 +8,7 @@
 
 #include "middlelayer.h"
 #include "middlelayer_spi.h"
+#include "middlelayer_gpio.h"
 #include "config_extern.h"
 #include "core.h"
 
@@ -70,6 +71,8 @@ void middlelayer_init(void)
   middlelayer_start_time_counter();
 
   middlelayer_spi_init();
+
+  middlelayer_gpio_init();
 
   middlelayer_start_timers();
 }

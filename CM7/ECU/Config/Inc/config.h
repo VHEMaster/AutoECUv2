@@ -9,5 +9,6 @@
 #define CONFIG_INC_CONFIG_H_
 
 #include "config_spi.h"
+#include "config_gpio.h"
 
 #endif /* CONFIG_INC_CONFIG_H_ */

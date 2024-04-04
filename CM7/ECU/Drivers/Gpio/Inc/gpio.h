@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "bool.h"
+#include "errors.h"
 
 typedef struct {
     GPIO_TypeDef *port;
@@ -27,5 +28,8 @@ void gpio_reset(gpio_t *ctx);
 bool gpio_read(const gpio_t *ctx);
 void gpio_write(gpio_t *ctx, bool value);
 void gpio_toggle(gpio_t *ctx);
+
+void gpio_configure_direct_output(gpio_t *ctx, bool initial_value);
+void gpio_configure_pwm_output(gpio_t *ctx, uint32_t alternate);
 
 #endif /* COMMON_INC_GPIO_H_ */

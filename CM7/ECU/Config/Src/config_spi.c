@@ -14,8 +14,8 @@
 #include "spi.h"
 
 typedef struct {
-    spi_cfg_t spi_cfg;
-    ecu_spi_slave_cfg_t slaves_cfg[ECU_SPI_IFS_SLAVE_MAX];
+  spi_cfg_t spi_cfg;
+  ecu_spi_slave_cfg_t slaves_cfg[ECU_SPI_IFS_SLAVE_MAX];
 }ecu_config_spi_if_t;
 
 static ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
