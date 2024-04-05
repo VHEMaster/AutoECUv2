@@ -124,7 +124,8 @@ int main(void)
   MX_MDMA_Init();
   MX_IWDG2_Init();
   /* USER CODE BEGIN 2 */
-
+  __HAL_DBGMCU_FREEZE_IWDG1();
+  __HAL_DBGMCU_FREEZE2_IWDG2();
   /* USER CODE END 2 */
 
   /* Init scheduler */

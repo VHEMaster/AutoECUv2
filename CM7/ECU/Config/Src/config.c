@@ -1,0 +1,51 @@
+/*
+ * config.c
+ *
+ *  Created on: Apr 5, 2024
+ *      Author: VHEMaster
+ */
+
+#include "main.h"
+#include "config.h"
+#include "config_extern.h"
+#include "compiler.h"
+#include "time.h"
+
+INLINE void ecu_config_set_io_enabled(bool enabled) {
+  HAL_GPIO_WritePin(LOGIC_OE_GPIO_Port, LOGIC_OE_Pin, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+INLINE void ecu_config_set_ignition_enabled(bool enabled) {
+  HAL_GPIO_WritePin(IGN_NEN_GPIO_Port, IGN_NEN_Pin, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
+}
+
+INLINE void ecu_config_iwgd_refresh(void) {
+  HAL_IWDG_Refresh(&hiwdg1);
+}
+
+void ecu_config_ll_init(void)
+{
+  __HAL_DBGMCU_FREEZE_TIM5();
+  __HAL_DBGMCU_FREEZE_IWDG1();
+  __HAL_DBGMCU_FREEZE2_IWDG2();
+}
+
+void ecu_config_start_counter(void)
+{
+  htim5.Init.Period = ECU_TIMEBASE_MASK;
+
+  HAL_TIM_Base_Init(&htim5);
+
+  time_init_timebase(&htim5.Instance->CNT, ECU_TIMEBASE_MASK);
+
+  HAL_TIM_Base_Start(&htim5);
+}
+
+void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, pTIM_CallbackTypeDef func_tim_fast_irq_cb)
+{
+  HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_slow_irq_cb);
+  HAL_TIM_RegisterCallback(&htim7, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_fast_irq_cb);
+
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start_IT(&htim7);
+}

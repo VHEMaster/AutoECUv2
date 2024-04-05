@@ -35,8 +35,6 @@ typedef enum {
 typedef enum {
   ECU_IN_IF_FLEXIO1 = 0,
   ECU_IN_IF_FLEXIO2,
-  ECU_IN_IF_EGT1,
-  ECU_IN_IF_EGT2,
   ECU_IN_IF_ADC1,
   ECU_IN_IF_MAX
 }ecu_gpio_input_if_t;

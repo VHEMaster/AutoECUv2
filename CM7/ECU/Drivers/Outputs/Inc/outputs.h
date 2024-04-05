@@ -13,7 +13,7 @@
 #include "gpio.h"
 #include "time.h"
 
-#define OUTPUTS_IFS_MAX    8u
+#define OUTPUTS_IFS_MAX    16u
 #define OUTPUTS_CHS_MAX    64u
 
 typedef int32_t output_value_t;

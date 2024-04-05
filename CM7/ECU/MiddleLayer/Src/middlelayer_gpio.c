@@ -6,8 +6,11 @@
  */
 
 #include "middlelayer_gpio.h"
+#include "config_queuedpulses.h"
 #include "compiler.h"
 #include "config_gpio.h"
+
+#include "config_extern.h"
 
 void middlelayer_gpio_init(void)
 {
@@ -19,4 +22,6 @@ void middlelayer_gpio_init(void)
   err = ecu_config_gpio_output_init();
 
   err = ecu_config_gpio_input_init();
+
+  err = ecu_config_queuedpulses_init();
 }

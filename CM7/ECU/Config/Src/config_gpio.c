@@ -66,62 +66,63 @@ typedef struct {
 
 static error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
 static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
+static error_t ecu_config_gpio_flexio_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata);
+static error_t ecu_config_gpio_adc_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata);
 
 static ecu_config_gpio_t ecu_config_gpio = {
     .outputs_if = {
         {
             .htim = &htim1,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM1
         {
             .htim = &htim13,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM2
         {
             .htim = &htim14,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM3
         {
             .htim = &htim16,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM4
         {
             .htim = &htim17,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM5
         {
-            .cfg = {. ch_set = ecu_config_gpio_spi_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_spi_ch_set, },
+            .usrdata = NULL,
         }, //ECU_OUT_IF_OUTS1_SPI
         {
             .htim = &htim3,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS2_PWM1
         {
             .htim = &htim4,
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS2_PWM2
         {
-            .cfg = {. ch_set = ecu_config_gpio_spi_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_spi_ch_set, },
+            .usrdata = NULL,
         }, //ECU_OUT_IF_OUTS2_SPI
         {
-            .cfg = {. ch_set = ecu_config_gpio_ch_set, },
+            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_IGN
     },
     .inputs_if = {
         {
-
+            .cfg = { .ch_get = ecu_config_gpio_flexio_ch_get, },
+            .usrdata = NULL,
         }, //ECU_IN_IF_FLEXIO1
         {
-
+            .cfg = { .ch_get = ecu_config_gpio_flexio_ch_get, },
+            .usrdata = NULL,
         }, //ECU_IN_IF_FLEXIO2
         {
-
-        }, //ECU_IN_IF_EGT1
-        {
-
-        }, //ECU_IN_IF_EGT2
-        {
-
+            .cfg = { .ch_get = ecu_config_gpio_adc_ch_get, },
+            .usrdata = NULL,
         }, //ECU_IN_IF_ADC1
     },
     .outputs = {
@@ -131,7 +132,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS1_CH1_GPIO_Port, .pin = OUTS1_CH1_Pin },
             .tim_alternate = GPIO_AF1_TIM1,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN1
         {
             .if_id = ECU_OUT_IF_OUTS1_PWM1,
@@ -139,7 +140,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS1_CH2_GPIO_Port, .pin = OUTS1_CH2_Pin },
             .tim_alternate = GPIO_AF1_TIM1,
             .tim_channel = TIM_CHANNEL_2,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN2
         {
             .if_id = ECU_OUT_IF_OUTS1_PWM1,
@@ -147,7 +148,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS1_CH3_GPIO_Port, .pin = OUTS1_CH3_Pin },
             .tim_alternate = GPIO_AF1_TIM1,
             .tim_channel = TIM_CHANNEL_3,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN3
         {
             .if_id = ECU_OUT_IF_OUTS1_PWM1,
@@ -155,7 +156,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS1_CH4_GPIO_Port, .pin = OUTS1_CH4_Pin },
             .tim_alternate = GPIO_AF1_TIM1,
             .tim_channel = TIM_CHANNEL_4,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN4
         {
             .if_id = ECU_OUT_IF_OUTS1_SPI,
@@ -183,31 +184,31 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS1_IN9_GPIO_Port, .pin = OUTS1_IN9_Pin },
             .tim_alternate = GPIO_AF9_TIM13,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN9
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM2,
+            .if_id = ECU_OUT_IF_OUTS1_PWM3,
             .output_ch_id = 9,
             .pin = { .port = OUTS1_IN10_GPIO_Port, .pin = OUTS1_IN10_Pin },
             .tim_alternate = GPIO_AF9_TIM14,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN10
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM2,
+            .if_id = ECU_OUT_IF_OUTS1_PWM4,
             .output_ch_id = 10,
             .pin = { .port = OUTS1_IN11_GPIO_Port, .pin = OUTS1_IN11_Pin },
             .tim_alternate = GPIO_AF1_TIM16,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN11
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM2,
+            .if_id = ECU_OUT_IF_OUTS1_PWM5,
             .output_ch_id = 11,
             .pin = { .port = OUTS1_IN12_GPIO_Port, .pin = OUTS1_IN12_Pin },
             .tim_alternate = GPIO_AF1_TIM17,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN12
         {
             .if_id = ECU_OUT_IF_OUTS1_SPI,
@@ -230,12 +231,12 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = NULL, .pin = 0 },
         }, //ECU_OUT_PORT1_PIN16
         {
-            .if_id = ECU_OUT_IF_OUTS2_PWM1,
+            .if_id = ECU_OUT_IF_OUTS2_PWM2,
             .output_ch_id = 0,
             .pin = { .port = OUTS2_CH1_GPIO_Port, .pin = OUTS2_CH1_Pin },
             .tim_alternate = GPIO_AF2_TIM3,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN1
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM1,
@@ -243,7 +244,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH2_GPIO_Port, .pin = OUTS2_CH2_Pin },
             .tim_alternate = GPIO_AF2_TIM3,
             .tim_channel = TIM_CHANNEL_2,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN2
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM1,
@@ -251,7 +252,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH3_GPIO_Port, .pin = OUTS2_CH3_Pin },
             .tim_alternate = GPIO_AF2_TIM3,
             .tim_channel = TIM_CHANNEL_3,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN3
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM1,
@@ -259,7 +260,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH4_GPIO_Port, .pin = OUTS2_CH4_Pin },
             .tim_alternate = GPIO_AF2_TIM3,
             .tim_channel = TIM_CHANNEL_4,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN4
         {
             .if_id = ECU_OUT_IF_OUTS2_SPI,
@@ -287,7 +288,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH9_GPIO_Port, .pin = OUTS2_CH9_Pin },
             .tim_alternate = GPIO_AF2_TIM4,
             .tim_channel = TIM_CHANNEL_1,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN9
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM2,
@@ -295,7 +296,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH10_GPIO_Port, .pin = OUTS2_CH10_Pin },
             .tim_alternate = GPIO_AF2_TIM4,
             .tim_channel = TIM_CHANNEL_2,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN10
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM2,
@@ -303,7 +304,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH11_GPIO_Port, .pin = OUTS2_CH11_Pin },
             .tim_alternate = GPIO_AF2_TIM4,
             .tim_channel = TIM_CHANNEL_3,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN11
         {
             .if_id = ECU_OUT_IF_OUTS2_PWM2,
@@ -311,7 +312,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = OUTS2_CH12_GPIO_Port, .pin = OUTS2_CH12_Pin },
             .tim_alternate = GPIO_AF2_TIM4,
             .tim_channel = TIM_CHANNEL_4,
-            .gpio_invert = false,
+            .gpio_invert = true,
         }, //ECU_OUT_PORT2_PIN12
         {
             .if_id = ECU_OUT_IF_OUTS2_SPI,
@@ -490,6 +491,7 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 9,
             .pin = { .port = NULL, .pin = 0 },
+
         }, //ECU_IN_PORT2_PIN10
         {
             .if_id = ECU_IN_IF_FLEXIO2,
@@ -594,6 +596,24 @@ static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch
   return err;
 }
 
+static error_t ecu_config_gpio_flexio_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata)
+{
+  error_t err = E_NOTSUPPORT;
+
+
+
+  return err;
+}
+
+static error_t ecu_config_gpio_adc_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata)
+{
+  error_t err = E_NOTSUPPORT;
+
+
+
+  return err;
+}
+
 static ITCM_FUNC error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata)
 {
   error_t err = E_OK;
@@ -635,9 +655,10 @@ error_t ecu_config_gpio_output_init(void)
 
       ecu_config_gpio.outputs_if[ecu_config_gpio.outputs[i].if_id].channels[ecu_config_gpio.outputs[i].output_ch_id] = &ecu_config_gpio.outputs[i];
 
+
       valid = gpio_valid(&ecu_config_gpio.outputs[i].pin);
       if(valid == true) {
-        err = output_ch_dest_gpio(ecu_config_gpio.outputs[i].output_id, &ecu_config_gpio.outputs[i].pin, ecu_config_gpio.outputs[i].gpio_invert);
+        err = ecu_config_gpio_output_set_mode(i, ECU_GPIO_TYPE_DIRECT);
         if(err != E_OK) {
           break;
         }
@@ -685,6 +706,11 @@ error_t ecu_config_gpio_input_init(void)
         if(err != E_OK) {
           break;
         }
+      } else if(ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get != NULL) {
+        err = input_ch_source_func(ecu_config_gpio.inputs[i].input_id, ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get);
+        if(err != E_OK) {
+          break;
+        }
       }
     }
 
@@ -716,6 +742,11 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
 
       gpio_configure_direct_output(&ecu_config_gpio.outputs[pin].pin, ecu_config_gpio.outputs[pin].gpio_invert);
 
+      err = output_ch_dest_gpio(ecu_config_gpio.outputs[pin].output_id, &ecu_config_gpio.outputs[pin].pin, ecu_config_gpio.outputs[pin].gpio_invert);
+      if(err != E_OK) {
+        break;
+      }
+
     } else if(type == ECU_GPIO_TYPE_PWM) {
       err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
       if(err != E_OK) {
@@ -732,6 +763,12 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
       if(err != E_OK) {
         break;
       }
+
+      err = output_ch_dest_func(ecu_config_gpio.outputs[pin].output_id, ecu_config_gpio.outputs_if[ecu_config_gpio.outputs[pin].if_id].cfg.ch_set);
+      if(err != E_OK) {
+        break;
+      }
+
     }
 
     ecu_config_gpio.outputs[pin].type = type;
@@ -821,13 +858,20 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_conf
     prescaler = roundf(prescaler_flt);
     period = roundf(period_flt);
 
-    prescaler = CLAMP(prescaler, 1, tim_prescaler_max);
-    period = CLAMP(period, 1, tim_period_max);
+    prescaler = CLAMP(prescaler, 1, tim_prescaler_max) - 1;
+    period = CLAMP(period, 1, tim_period_max) - 1;
 
-    htim->Init.Prescaler = prescaler - 1;
-    htim->Init.Period = period - 1;
+    if(htim->Init.Prescaler != prescaler || htim->Init.Period != period) {
+      htim->Init.Prescaler = prescaler;
+      htim->Init.Period = period;
+      status = HAL_TIM_Base_Init(htim);
+      if(status != HAL_OK) {
+        err = E_HAL;
+        break;
+      }
+    }
 
-    status = HAL_TIM_Base_Init(htim);
+    status = HAL_TIM_PWM_Start(htim, ecu_config_gpio.outputs[pin].tim_channel);
     if(status != HAL_OK) {
       err = E_HAL;
       break;
