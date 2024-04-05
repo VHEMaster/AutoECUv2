@@ -47,6 +47,8 @@ void middlelayer_init(void)
   middlelayer_devices_init();
 
   ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_fast_irq);
+
+  core_init();
 }
 
 void middlelayer_loop(void)

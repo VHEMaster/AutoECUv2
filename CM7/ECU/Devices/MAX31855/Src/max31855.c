@@ -31,7 +31,7 @@ static void max31855_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
   }
 }
 
-error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint8_t spi_prescaler)
+error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint32_t spi_prescaler)
 {
   error_t err = E_OK;
 

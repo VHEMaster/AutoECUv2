@@ -89,7 +89,7 @@ typedef struct spi_slave_tag {
   gpio_t nss_pin;
   spi_op_cplt_cb_t cplt_callback;
 
-  uint16_t prescaler;
+  uint32_t prescaler;
   spi_mode_t mode;
   uint8_t datasize;
 
@@ -113,7 +113,7 @@ error_t spi_configure_datasize(spi_t *spi, uint8_t datasize);
 error_t spi_configure_timeout(spi_t *spi, time_delta_us_t timeout);
 error_t spi_configure_flush(spi_t *spi);
 
-error_t spi_slave_configure_prescaler(spi_slave_t *spi_slave, uint16_t prescaler);
+error_t spi_slave_configure_prescaler(spi_slave_t *spi_slave, uint32_t prescaler);
 error_t spi_slave_configure_mode(spi_slave_t *spi_slave, spi_mode_t mode);
 error_t spi_slave_configure_datasize(spi_slave_t *spi_slave, uint8_t datasize);
 

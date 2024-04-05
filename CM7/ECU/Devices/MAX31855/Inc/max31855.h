@@ -60,7 +60,7 @@ typedef struct {
     bool comm_busy;
 }max31855_ctx_t;
 
-error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint8_t spi_prescaler);
+error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint32_t spi_prescaler);
 void max31855_loop_main(max31855_ctx_t *ctx);
 void max31855_loop_slow(max31855_ctx_t *ctx);
 void max31855_loop_fast(max31855_ctx_t *ctx);

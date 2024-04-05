@@ -207,7 +207,7 @@ ITCM_FUNC INLINE error_t spi_configure_flush(spi_t *spi)
 }
 
 
-ITCM_FUNC INLINE error_t spi_slave_configure_prescaler(spi_slave_t *spi_slave, uint16_t prescaler)
+ITCM_FUNC INLINE error_t spi_slave_configure_prescaler(spi_slave_t *spi_slave, uint32_t prescaler)
 {
   error_t err = E_OK;
 
