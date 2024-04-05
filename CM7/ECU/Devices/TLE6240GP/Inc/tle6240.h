@@ -11,9 +11,9 @@
 #include "errors.h"
 #include "gpio.h"
 
-#include "../../../Drivers/Spi/Inc/spi.h"
+#include "spi.h"
 
-#define MAX31855_DEFAULT_POLL_PERIOD_US   (1 * TIME_MS_TO_US)
+#define TLE6240_DEFAULT_POLL_PERIOD_US   (1 * TIME_MS_TO_US)
 
 typedef enum {
   TLE6240_DIAG_NORMAL = 0,
@@ -52,14 +52,18 @@ typedef struct {
     gpio_t input_pins[8];
     gpio_t reset_pin;
     gpio_t fault_pin;
+}tle6240_init_ctx_t;
+
+typedef struct {
+    tle6240_init_ctx_t init_ctx;
     tle6240_diag_t diag;
     uint16_t output_state;
 }tle6240_ctx_t;
 
-error_t tle6240_init(tle6240_ctx_t *ctx);
-error_t tle6240_loop_main(tle6240_ctx_t *ctx);
-error_t tle6240_loop_slow(tle6240_ctx_t *ctx);
-error_t tle6240_loop_fast(tle6240_ctx_t *ctx);
+error_t tle6240_init(tle6240_ctx_t *ctx, const tle6240_init_ctx_t *init_ctx);
+void tle6240_loop_main(tle6240_ctx_t *ctx);
+void tle6240_loop_slow(tle6240_ctx_t *ctx);
+void tle6240_loop_fast(tle6240_ctx_t *ctx);
 
 error_t tle6240_write_all_masked(tle6240_ctx_t *ctx, uint16_t mask, uint16_t value);
 error_t tle6240_write_all(tle6240_ctx_t *ctx, uint16_t value);
@@ -74,9 +78,5 @@ bool tle6240_ch_read(tle6240_ctx_t *ctx, uint8_t channel);
 
 bool tle6240_ch_is_serial(tle6240_ctx_t *ctx, uint8_t channel);
 bool tle6240_ch_is_direct(tle6240_ctx_t *ctx, uint8_t channel);
-
-
-
-
 
 #endif /* DRIVERS_TLE6240GP_INC_TLE6240_H_ */

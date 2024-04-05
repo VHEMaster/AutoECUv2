@@ -12,10 +12,6 @@
 #include "time.h"
 #include "gpio.h"
 
-#include "../../../Drivers/Spi/Inc/spi.h"
-
-#define MAX31855_DEFAULT_POLL_PERIOD_US   (100 * TIME_MS_TO_US)
-
 typedef enum {
   TLE4729_MODE_STBY = 0,
   TLE4729_MODE_HOLD,
@@ -43,9 +39,9 @@ typedef struct {
 }tle4729_ctx_t;
 
 error_t tle4729_init(tle4729_ctx_t *ctx);
-error_t tle4729_loop_main(tle4729_ctx_t *ctx);
-error_t tle4729_loop_slow(tle4729_ctx_t *ctx);
-error_t tle4729_loop_fast(tle4729_ctx_t *ctx);
+void tle4729_loop_main(tle4729_ctx_t *ctx);
+void tle4729_loop_slow(tle4729_ctx_t *ctx);
+void tle4729_loop_fast(tle4729_ctx_t *ctx);
 
 error_t tle4729_enable(tle4729_ctx_t *ctx, bool enabled);
 error_t tle4729_set_clamp(tle4729_ctx_t *ctx, int32_t pos_min, int32_t pos_max);

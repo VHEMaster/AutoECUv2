@@ -45,6 +45,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1810874428" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
@@ -60,6 +61,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/SpiContainer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/TLE6240GP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/TLE4729G/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Devices/CJ125/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/MAX31855/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
@@ -123,7 +125,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Devices/TPIC8101" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -184,6 +186,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/SpiContainer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/TLE6240GP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/TLE4729G/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Devices/CJ125/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/MAX31855/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>

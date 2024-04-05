@@ -12,6 +12,27 @@
 
 #include "config_extern.h"
 
+void middlelayer_gpio_loop_main(void)
+{
+  inputs_loop_main();
+  outputs_loop_main();
+  queuedpulses_loop_main();
+}
+
+void middlelayer_gpio_loop_slow(void)
+{
+  inputs_loop_slow();
+  outputs_loop_slow();
+  queuedpulses_loop_slow();
+}
+
+void middlelayer_gpio_loop_fast(void)
+{
+  inputs_loop_fast();
+  outputs_loop_fast();
+  queuedpulses_loop_fast();
+}
+
 void middlelayer_gpio_init(void)
 {
   error_t err = E_OK;
