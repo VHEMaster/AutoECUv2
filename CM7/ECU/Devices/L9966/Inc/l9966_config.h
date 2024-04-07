@@ -8,12 +8,13 @@
 #ifndef DEVICES_L9966_INC_L9966_CONFIG_H_
 #define DEVICES_L9966_INC_L9966_CONFIG_H_
 
-#include "l9966_reg.h"
+#define L9966_DEV_ID          0x5A
 
 #define L9966_CHANNELS        15u
-#define L9966_SQNCR_CMDS      15u
-#define L9966_SQNCR_COUNT     2u
+#define L9966_EU_COUNT        2u
 #define L9966_SENT_CHANNELS   4u
+#define L9966_RRx_COUNT       3u
+
 
 typedef enum {
   L9966_CFG_CSC_CSS_FORCE0 = 0,
@@ -456,20 +457,10 @@ typedef enum {
   L9966_CFG_SQNCR_IM_MAX = 7,
 }l9966_config_sqncr_im_t;
 
-typedef enum {
-  L9966_CFG_SQNCR_EOOF_CLEAR = 0,
-  L9966_CFG_SQNCR_EOOF_SC_CPLT = 1,
-  L9966_CFG_SQNCR_EOOF_EU1_EL_CL_REACH = 2,
-  L9966_CFG_SQNCR_EOOF_EU2_EL_CL_REACH = 4,
-  L9966_CFG_SQNCR_EOOF_MAX = 7,
-}l9966_config_sqncr_eoof_t;
-
 typedef struct {
     l9966_config_sqncr_pc_t int_eu1_pc_conf;
     l9966_config_sqncr_pc_t int_eu2_pc_conf;
     l9966_config_sqncr_im_t interrupt_mask;
-    l9966_config_sqncr_eoof_t end_of_operation_flag;
-    l9966_config_sqncr_eoof_t end_of_operation_flag;
 }l9966_config_sqncr_imf_t;
 
 typedef enum {
@@ -555,14 +546,14 @@ typedef struct {
 }l9966_config_sqncr_ctrl_eu_t;
 
 typedef struct {
-    l9966_config_sqncr_ctrl_eu_t sqncr_cfg[L9966_SQNCR_COUNT];
+    l9966_config_sqncr_ctrl_eu_t sqncr_cfg[L9966_EU_COUNT];
     l9966_config_sqncr_scce_t sync_copy_cmd_en;
 }l9966_config_sqncr_ctrl_t;
 
 typedef struct {
     l9966_config_sqncr_imf_t interrupt_mask_flag;
     l9966_config_sqncr_ctrl_t ctrl_config;
-    l9966_config_sqncr_cmd_t cmd_config[L9966_SQNCR_CMDS];
+    l9966_config_sqncr_cmd_t cmd_config[L9966_CHANNELS];
 }l9966_config_sqncr_t;
 
 typedef struct {
@@ -577,7 +568,6 @@ typedef struct {
     l9966_config_vrs_t vrs_config;
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
-
 }l9966_config_t;
 
 #endif /* DEVICES_L9966_INC_L9966_CONFIG_H_ */
