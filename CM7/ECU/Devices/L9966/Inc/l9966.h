@@ -11,7 +11,6 @@
 #include "gpio.h"
 #include "main.h"
 #include "errors.h"
-
 #include "spi.h"
 
 typedef struct {
