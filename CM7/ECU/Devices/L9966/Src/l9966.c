@@ -50,7 +50,7 @@ error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
     err = spi_slave_configure_callback(ctx->init.spi_slave, l9966_cplt_cb);
     BREAK_IF(err != E_OK);
 
-    ctx->initialized = true;
+    ctx->ready = true;
 
   } while(0);
 
@@ -59,14 +59,14 @@ error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
 
 void l9966_loop_main(l9966_ctx_t *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx->ready) {
 
   }
 }
 
 void l9966_loop_slow(l9966_ctx_t *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx->ready) {
 
   }
 }
@@ -75,7 +75,7 @@ void l9966_loop_fast(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;
 
-  if(ctx->initialized) {
+  if(ctx->ready) {
     err = l9966_fsm(ctx);
     if(err != E_OK && err != E_AGAIN) {
       //TODO: set error in future
@@ -93,7 +93,9 @@ error_t l9966_write_config(l9966_ctx_t *ctx, const l9966_config_t *config)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->configure_request == false) {
-      memcpy(&ctx->config, config, sizeof(l9966_config_t));
+      if(&ctx->config != config) {
+        memcpy(&ctx->config, config, sizeof(l9966_config_t));
+      }
       ctx->configure_errcode = E_AGAIN;
       ctx->configure_request = true;
     } else if(ctx->configure_errcode != E_AGAIN) {
@@ -136,7 +138,7 @@ error_t l9966_reset(l9966_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(ctx->reset_request == false) {
       ctx->reset_errcode = E_AGAIN;

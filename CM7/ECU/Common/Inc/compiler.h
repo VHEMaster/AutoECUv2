@@ -30,6 +30,7 @@
 #define BREAKPOINT(x) __BKPT((x))
 #define BREAK_IF_ACTION(condition, action) { if((condition)) { (action); break; } }
 #define BREAK_IF(condition) { if((condition)) { break; } }
+#define PARITY_ODD_CHECK(value) __builtin_parity((value))
 
 #if __CORTEX_M == (7)
 STATIC_INLINE void CacheInvalidate(void * buffer, uint32_t size)

@@ -156,21 +156,11 @@ error_t ecu_devices_init(void)
     device = &ecu_config_devices.devices[i];
     device->initialized = false;
 
-    if(device->type >= ECU_DEVICE_TYPE_MAX) {
-      err = E_FAULT;
-      break;
-    }
-
-    if(device->ctx == NULL) {
-      err = E_FAULT;
-      break;
-    }
+    BREAK_IF_ACTION(device->type >= ECU_DEVICE_TYPE_MAX, err = E_FAULT);
+    BREAK_IF_ACTION(device->ctx == NULL, err = E_FAULT);
 
     interface = &ecu_config_devices.interfaces[device->type];
-    if(device->instance >= interface->instance_max) {
-      err = E_FAULT;
-      break;
-    }
+    BREAK_IF_ACTION(device->instance >= interface->instance_max, err = E_FAULT);
   }
 
   return err;

@@ -170,6 +170,18 @@ error_t ecu_config_spi_register_callbacks(spi_cfg_t *spi_cfg, ecu_spi_if_enum_t 
   return err;
 }
 
+error_t ecu_config_spi_init(void)
+{
+  error_t err = E_OK;
+
+  for(int i = 0; i < ECU_SPI_IF_MAX; i++) {
+    err = spi_configure_flush_config(&ecu_config_spi[i].spi_cfg);
+    BREAK_IF(err != E_OK);
+  }
+
+  return err;
+}
+
 error_t ecu_config_spi_get_if_cfg(spi_cfg_t *spi_cfg, ecu_spi_if_enum_t interface)
 {
   error_t err = E_OK;

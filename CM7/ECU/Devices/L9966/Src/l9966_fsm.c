@@ -40,6 +40,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       case L9966_RESET_HARD_RESET:
         ctx->reset_action_timestamp = now;
         gpio_reset(&ctx->init.nrst_pin);
+        ctx->reset_fsm_state = L9966_RESET_HARD_WAIT_RESET;
         break;
       case L9966_RESET_HARD_WAIT_RESET:
         if(time_diff(now, ctx->reset_action_timestamp) >= L9966_RESET_HARD_WAIT_RESET_US) {
@@ -50,6 +51,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       case L9966_RESET_HARD_SET:
         ctx->reset_action_timestamp = now;
         gpio_set(&ctx->init.nrst_pin);
+        ctx->reset_fsm_state = L9966_RESET_HARD_WAIT_SET;
         break;
       case L9966_RESET_HARD_WAIT_SET:
         if(time_diff(now, ctx->reset_action_timestamp) >= L9966_RESET_HARD_WAIT_SET_US) {
@@ -140,6 +142,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         }
         ctx->reset_fsm_state = L9966_RESET_CONDITION;
         ctx->version_valid = true;
+        ctx->initialized = true;
         err = E_OK;
         break;
       default:
@@ -559,8 +562,8 @@ static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
       case L9966_CONFIGURE_CONDITION:
         if(ctx->initialized) {
           if((ctx->configure_request == true && ctx->configure_errcode == E_AGAIN) ||
-              (ctx->status_valid == true && ctx->status.config_check == L9966_CTRL_GS_CC_LOST) ||
-              (uint8_t)ctx->status.config_check != (uint8_t)ctx->config.status.config_check) {
+              (ctx->configured == true && ((ctx->status_valid == true && ctx->status.config_check == L9966_CTRL_GS_CC_LOST) ||
+              (uint8_t)ctx->status.config_check != (uint8_t)ctx->config.status.config_check))) {
             ctx->configure_fsm_state = L9966_CONFIGURE_REG_TRANSLATE;
             ctx->configure_errcode = E_AGAIN;
             err = E_AGAIN;

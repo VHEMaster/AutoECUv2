@@ -33,7 +33,7 @@ typedef struct {
     gpio_t sync_pin;
     gpio_t nrst_pin;
     gpio_t int_pin;
-    uint8_t chip_address;
+    uint16_t chip_address;
 }l9966_init_ctx_t;
 
 typedef enum {
@@ -114,11 +114,13 @@ typedef struct {
 
     float rrx[L9966_RRx_COUNT];
     time_delta_us_t digital_poll_period;
+    bool ready;
     bool initialized;
     bool configured;
     bool configure_request;
     uint8_t configure_cmd_index;
     error_t configure_errcode;
+    bool spi_busy;
 
 
     bool version_valid;

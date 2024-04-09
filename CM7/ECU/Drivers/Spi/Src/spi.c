@@ -162,45 +162,50 @@ ITCM_FUNC INLINE error_t spi_configure_timeout(spi_t *spi, time_delta_us_t timeo
 
 ITCM_FUNC INLINE error_t spi_configure_flush(spi_t *spi)
 {
+  return spi_configure_flush_config(&spi->cfg);
+}
+
+ITCM_FUNC INLINE error_t spi_configure_flush_config(spi_cfg_t *spi_cfg)
+{
   error_t err = E_OK;
   HAL_StatusTypeDef status;
 
-  switch(spi->cfg.mode) {
+  switch(spi_cfg->mode) {
     case SPI_MODE_0:
-      spi->cfg.hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
-      spi->cfg.hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+      spi_cfg->hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      spi_cfg->hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
       break;
     case SPI_MODE_1:
-      spi->cfg.hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
-      spi->cfg.hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+      spi_cfg->hspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      spi_cfg->hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
       break;
     case SPI_MODE_2:
-      spi->cfg.hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
-      spi->cfg.hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+      spi_cfg->hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+      spi_cfg->hspi->Init.CLKPhase = SPI_PHASE_1EDGE;
       break;
     case SPI_MODE_3:
-      spi->cfg.hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
-      spi->cfg.hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+      spi_cfg->hspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+      spi_cfg->hspi->Init.CLKPhase = SPI_PHASE_2EDGE;
       break;
     default:
       err = E_PARAM;
       break;
   }
 
-  spi->cfg.hspi->Init.DataSize = spi->cfg.datasize - 1;
-  spi->cfg.hspi->Init.BaudRatePrescaler = spi->cfg.prescaler;
+  spi_cfg->hspi->Init.DataSize = spi_cfg->datasize - 1;
+  spi_cfg->hspi->Init.BaudRatePrescaler = spi_cfg->prescaler;
 
 #if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
-  spi->cfg.hspi->MspInitCallback = spi_private_msp_config_dummy_cb;
+  spi_cfg->hspi->MspInitCallback = spi_private_msp_config_dummy_cb;
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
-  status = HAL_SPI_Init(spi->cfg.hspi);
+  status = HAL_SPI_Init(spi_cfg->hspi);
   if(status != HAL_OK) {
     err = E_HAL;
   }
 
 #if (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
-  spi->cfg.hspi->MspInitCallback = NULL;
+  spi_cfg->hspi->MspInitCallback = NULL;
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
   return err;

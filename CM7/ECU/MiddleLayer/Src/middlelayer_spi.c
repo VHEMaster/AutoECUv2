@@ -41,6 +41,11 @@ static error_t middlelayer_spi_if_init(ecu_spi_if_enum_t interface)
 
     if_ctx = &middlelayer_spi_ctx.ifs[interface];
 
+    err = ecu_config_spi_init();
+    if(err != E_OK) {
+      break;
+    }
+
     err = ecu_config_spi_get_if_cfg(&if_ctx->spi_cfg, interface);
     if(err != E_OK) {
       break;

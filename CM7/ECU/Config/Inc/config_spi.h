@@ -58,6 +58,7 @@ typedef struct {
   ecu_spi_slave_enum_t slave_enum;
 }ecu_spi_slave_cfg_t;
 
+error_t ecu_config_spi_init(void);
 error_t ecu_config_spi_register_callbacks(spi_cfg_t *spi_cfg, ecu_spi_if_enum_t interface);
 error_t ecu_config_spi_get_if_cfg(spi_cfg_t *spi_cfg, ecu_spi_if_enum_t interface);
 error_t ecu_config_spi_get_slave_cfg(ecu_spi_slave_cfg_t *config, ecu_spi_if_enum_t interface, ecu_spi_if_slave_enum_t slave);

@@ -26,6 +26,8 @@ INLINE void ecu_config_iwgd_refresh(void) {
 void ecu_config_ll_init(void)
 {
   __HAL_DBGMCU_FREEZE_TIM5();
+  __HAL_DBGMCU_FREEZE_TIM6();
+  __HAL_DBGMCU_FREEZE_TIM7();
   __HAL_DBGMCU_FREEZE_IWDG1();
   __HAL_DBGMCU_FREEZE2_IWDG2();
 }
