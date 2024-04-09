@@ -9,6 +9,7 @@
 #define DRIVERS_L9966_INC_L9966_REG_H_
 
 #include <stdint.h>
+#include "errors.h"
 
 #define L9966_FRAME_CFG_ADDR_LOW            0x8000
 #define L9966_FRAME_CFG_ADDR_HIGH           0xC000
@@ -77,34 +78,12 @@ typedef struct {
     union {
         uint16_t data;
         struct {
-            uint16_t VER_ID : 8;
+            uint16_t Payload : 8;
             uint16_t : 7;
             uint16_t Parity : 1;
         }bits;
     }u;
-}l9966_reg_dev_v_t;
-
-typedef struct {
-    union {
-        uint16_t data;
-        struct {
-            uint16_t HW_REV : 8;
-            uint16_t : 7;
-            uint16_t Parity : 1;
-        }bits;
-    }u;
-}l9966_reg_hw_rev_t;
-
-typedef struct {
-    union {
-        uint16_t data;
-        struct {
-            uint16_t DEV_ID : 8;
-            uint16_t : 7;
-            uint16_t Parity : 1;
-        }bits;
-    }u;
-}l9966_reg_dev_id_t;
+}l9966_reg_version_t;
 
 typedef struct {
     union {
@@ -387,5 +366,34 @@ typedef struct {
         }bits;
     }u;
 }l9966_reg_sqncr_result_voltage_t;
+
+typedef struct {
+    uint16_t addr;
+    const uint16_t *value;
+}l9966_reg_cfg_map_raw_item_t;
+
+typedef struct {
+    l9966_reg_curr_src_ctrl_t curr_src_ctrl[15];
+    l9966_reg_switch_route_t switch_route;
+    l9966_reg_dwt_volt_src_lsf_ctrl_t dwt_volt_src_lsf_ctrl;
+    l9966_reg_gtm_to_sent_route_t gtm_to_sent_route[2];
+    l9966_reg_active_discharge_lsf_ctrl_t active_discharge_lsf_ctrl;
+    l9966_reg_wak_msk_t wak_msk;
+    l9966_reg_sleep_config_t sleep_config;
+    l9966_reg_sqncr_int_msk_flg_t sqncr_int_msk_flg;
+    l9966_reg_vrs_t reg_vrs;
+    l9966_reg_adc_timing_t adc_timing;
+    l9966_reg_sqncr_cmd_t sqncr_cmd[15];
+    l9966_reg_sqncr_ctrl_t sqncr_ctrl;
+    l9966_reg_gen_status_t status;
+}l9966_reg_cfg_map_data_t;
+
+typedef struct {
+    uint16_t raw_count;
+    l9966_reg_cfg_map_raw_item_t raw[42];
+    l9966_reg_cfg_map_data_t data;
+}l9966_reg_cfg_map_t;
+
+error_t l9966_reg_init(l9966_reg_cfg_map_t *register_map);
 
 #endif /* DRIVERS_L9966_INC_L9966_REG_H_ */

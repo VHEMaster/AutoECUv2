@@ -147,6 +147,7 @@ void Error_Handler(void);
 #define OUTS2_CH12_GPIO_Port GPIOD
 #define FLEXIO1_WAKE_Pin GPIO_PIN_8
 #define FLEXIO1_WAKE_GPIO_Port GPIOJ
+#define FLEXIO1_WAKE_EXTI_IRQn EXTI9_5_IRQn
 #define OUTS1_CH3_Pin GPIO_PIN_9
 #define OUTS1_CH3_GPIO_Port GPIOJ
 #define FLEXIO2_WAKE_Pin GPIO_PIN_10

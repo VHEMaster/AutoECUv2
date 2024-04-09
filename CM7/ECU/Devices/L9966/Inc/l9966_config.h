@@ -15,7 +15,6 @@
 #define L9966_SENT_CHANNELS   4u
 #define L9966_RRx_COUNT       3u
 
-
 typedef enum {
   L9966_CFG_CSC_CSS_FORCE0 = 0,
   L9966_CFG_CSC_CSS_CH1,
@@ -93,7 +92,7 @@ typedef struct {
 
 typedef enum {
   L9966_CFG_SR_AUX_EVENODD_CH_VRS = 0,
-  L9966_CFG_SR_AUX_EVENODD_CH_CTRL_CFG,
+  L9966_CFG_SR_AUX_EVENODD_CH_CONFIG_CFG,
   L9966_CFG_SR_AUX_EVENODD_CH_MAX,
 }l9966_config_sr_aux_evenoddch_t;
 
@@ -363,6 +362,12 @@ typedef struct {
 }l9966_config_wc_t;
 
 typedef enum {
+  L9966_CFG_VRS_DED_DISABLED = 0,
+  L9966_CFG_VRS_DED_ENABLED,
+  L9966_CFG_VRS_DED_MAX,
+}l9966_config_vrs_ded_t;
+
+typedef enum {
   L9966_CFG_VRS_DCC_DISABLED = 0,
   L9966_CFG_VRS_DCC_READOUT_CLEAR,
   L9966_CFG_VRS_DCC_MAX,
@@ -419,6 +424,7 @@ typedef enum {
 }l9966_config_vrs_ffe_t;
 
 typedef struct {
+    l9966_config_vrs_ded_t double_edge_detection;
     l9966_config_vrs_dcc_t diag_clr_cmd;
     l9966_config_vrs_mhf_t min_hyst_force;
     l9966_config_vrs_sel_t vrs_mode_sel;
@@ -454,7 +460,7 @@ typedef enum {
   L9966_CFG_SQNCR_IM_SC_MASK = 1,
   L9966_CFG_SQNCR_IM_EU1_MASK = 2,
   L9966_CFG_SQNCR_IM_EU2_MASK = 4,
-  L9966_CFG_SQNCR_IM_MAX = 7,
+  L9966_CFG_SQNCR_IM_MAX = 8,
 }l9966_config_sqncr_im_t;
 
 typedef struct {
@@ -529,32 +535,58 @@ typedef struct {
 }l9966_config_sqncr_cmd_t;
 
 typedef enum {
-  L9966_CFG_SQNCR_CTRL_SYNC_DISABLED = 0,
-  L9966_CFG_SQNCR_CTRL_SYNC_ENABLED,
-  L9966_CFG_SQNCR_CTRL_SYNC_MAX,
-}l9966_config_sqncr_ctrl_se_t;
+  L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED = 0,
+  L9966_CFG_SQNCR_CONFIG_SYNC_ENABLED,
+  L9966_CFG_SQNCR_CONFIG_SYNC_MAX,
+}l9966_config_sqncr_config_se_t;
 
 typedef enum {
-  L9966_CFG_SQNCR_CTRL_SCC_DISABLED = 0,
-  L9966_CFG_SQNCR_CTRL_SCC_ENABLED,
-  L9966_CFG_SQNCR_CTRL_SCC_MAX,
+  L9966_CFG_SQNCR_CONFIG_SCC_DISABLED = 0,
+  L9966_CFG_SQNCR_CONFIG_SCC_ENABLED,
+  L9966_CFG_SQNCR_CONFIG_SCC_MAX,
 }l9966_config_sqncr_scce_t;
 
 typedef struct {
-    l9966_config_sqncr_ctrl_se_t sync_pin_enabled;
+    l9966_config_sqncr_config_se_t sync_pin_enabled;
     l9966_config_sqncr_pc_t init_pc;
-}l9966_config_sqncr_ctrl_eu_t;
+}l9966_config_sqncr_config_eu_t;
 
 typedef struct {
-    l9966_config_sqncr_ctrl_eu_t sqncr_cfg[L9966_EU_COUNT];
+    l9966_config_sqncr_config_eu_t sqncr_cfg[L9966_EU_COUNT];
     l9966_config_sqncr_scce_t sync_copy_cmd_en;
-}l9966_config_sqncr_ctrl_t;
+}l9966_config_sqncr_config_t;
 
 typedef struct {
     l9966_config_sqncr_imf_t interrupt_mask_flag;
-    l9966_config_sqncr_ctrl_t ctrl_config;
+    l9966_config_sqncr_config_t control;
     l9966_config_sqncr_cmd_t cmd_config[L9966_CHANNELS];
 }l9966_config_sqncr_t;
+
+typedef enum {
+  L9966_CONFIG_GS_CC_0 = 0x0,
+  L9966_CONFIG_GS_CC_1 = 0x1,
+  L9966_CONFIG_GS_CC_3 = 0x3,
+  L9966_CONFIG_GS_CC_LOST = 0x2,
+  L9966_CONFIG_GS_CC_MAX = 0x4,
+}l9966_config_gs_cc_t;
+
+typedef enum {
+  L9966_CONFIG_GS_OTM_DISABLED = 0,
+  L9966_CONFIG_GS_OTM_ENABLED,
+  L9966_CONFIG_GS_OTM_MAX
+}l9966_config_gs_otm_t;
+
+typedef enum {
+  L9966_CONFIG_GS_CS_ADC_RAW = 0,
+  L9966_CONFIG_GS_CS_ADC_CALIBRATED,
+  L9966_CONFIG_GS_CS_MAX
+}l9966_config_gs_cs_t;
+
+typedef struct {
+    l9966_config_gs_cc_t config_check;
+    l9966_config_gs_cs_t calib_sel;
+    l9966_config_gs_otm_t overtemperature_mask;
+}l9966_config_status_t;
 
 typedef struct {
     l9966_config_csc_t curr_src_ctrl[L9966_CHANNELS];
@@ -568,6 +600,7 @@ typedef struct {
     l9966_config_vrs_t vrs_config;
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
+    l9966_config_status_t status;
 }l9966_config_t;
 
 #endif /* DEVICES_L9966_INC_L9966_CONFIG_H_ */

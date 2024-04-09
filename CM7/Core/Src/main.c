@@ -1945,9 +1945,6 @@ static void MX_GPIO_Init(void)
                           |SPI6_NSS_LAMBDA1_Pin|SPI6_NSS_LAMBDA2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(FLEXIO1_WAKE_GPIO_Port, FLEXIO1_WAKE_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(KNOCK_INT_GPIO_Port, KNOCK_INT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -2034,7 +2031,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : FLEXIO1_WAKE_Pin */
   GPIO_InitStruct.Pin = FLEXIO1_WAKE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(FLEXIO1_WAKE_GPIO_Port, &GPIO_InitStruct);
