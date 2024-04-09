@@ -17,10 +17,10 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
-  l9966_reg_soft_rst_cmd_t soft_rst_cmd;
-  l9966_reg_version_t version_payload;
+  l9966_reg_soft_rst_cmd_t soft_rst_cmd = {0};
+  l9966_reg_version_t version_payload = {0};
 
-  do {
+  while(true) {
     err = E_AGAIN;
     now = time_get_current_us();
 
@@ -91,11 +91,18 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       case L9966_RESET_SOFT_STEP_3_REQ:
         err = l9966_reg_write(ctx, L9966_REG_SOFT_RST_CMD, ctx->fsm_tx_payload);
         if(err == E_OK) {
-          ctx->reset_fsm_state = L9966_RESET_SOFT_VERSION_DEV_V_REQ;
+          ctx->reset_action_timestamp = now;
+          ctx->reset_fsm_state = L9966_RESET_SOFT_WAIT;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
           ctx->reset_fsm_state = L9966_RESET_CONDITION;
+        }
+        break;
+      case L9966_RESET_SOFT_WAIT:
+        if(time_diff(now, ctx->reset_action_timestamp) >= L9966_RESET_SOFT_WAIT_US) {
+          ctx->reset_fsm_state = L9966_RESET_SOFT_VERSION_DEV_V_REQ;
+          continue;
         }
         break;
       case L9966_RESET_SOFT_VERSION_DEV_V_REQ:
@@ -148,7 +155,8 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -159,7 +167,7 @@ static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
   time_us_t now;
   l9966_reg_gen_status_t status;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->check_status_fsm_state) {
@@ -188,12 +196,15 @@ static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
           ctx->status.overtemperature_fault = status.u.bits.OT_FLT;
           ctx->status_valid = true;
           ctx->check_status_fsm_state = L9966_CHECK_STATUS_CONDITION;
+        } else if(err != E_OK) {
+          ctx->status_valid = false;
         }
         break;
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -204,7 +215,7 @@ static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
   time_us_t now;
   l9966_reg_dig_in_stat_t status;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->read_dig_in_fsm_state) {
@@ -231,7 +242,8 @@ static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -242,7 +254,7 @@ static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
   bool int_pin_triggered = false;
   l9966_reg_sqncr_int_msk_flg_t status;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->check_irq_flags_fsm_state) {
@@ -271,7 +283,8 @@ static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -287,7 +300,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
   uint32_t prim;
   l9966_config_sqncr_cmd_pd_t rr_index;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->read_sqncr_fsm_state) {
@@ -381,7 +394,8 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -394,7 +408,7 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
   float result_float, resistor;
   l9966_ctrl_sc_pd_t rr_index;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->read_sc_fsm_state) {
@@ -449,7 +463,8 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -459,7 +474,7 @@ static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
   error_t err;
   l9966_reg_sc_conf_t data;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->sc_maintain_fsm_state) {
@@ -491,7 +506,8 @@ static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -501,7 +517,7 @@ static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
   error_t err;
   l9966_reg_sqncr_ctrl_t data;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->eu_maintain_fsm_state) {
@@ -546,7 +562,8 @@ static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }
@@ -555,7 +572,7 @@ static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
 {
   error_t err;
 
-  do {
+  while(true) {
     err = E_OK;
 
     switch(ctx->configure_fsm_state) {
@@ -612,7 +629,8 @@ static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
       default:
         break;
     }
-  } while(0);
+    break;
+  }
 
   return err;
 }

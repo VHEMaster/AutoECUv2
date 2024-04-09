@@ -25,7 +25,8 @@
 #define L9966_SPI_MODE                        (SPI_MODE_1)
 
 #define L9966_RESET_HARD_WAIT_RESET_US        (100)
-#define L9966_RESET_HARD_WAIT_SET_US          (100)
+#define L9966_RESET_HARD_WAIT_SET_US          (1 * TIME_US_IN_MS)
+#define L9966_RESET_SOFT_WAIT_US              (1 * TIME_US_IN_MS)
 
 typedef struct {
     spi_slave_t *spi_slave;
@@ -46,6 +47,7 @@ typedef enum {
   L9966_RESET_SOFT_STEP_1_REQ,
   L9966_RESET_SOFT_STEP_2_REQ,
   L9966_RESET_SOFT_STEP_3_REQ,
+  L9966_RESET_SOFT_WAIT,
   L9966_RESET_SOFT_VERSION_DEV_V_REQ,
   L9966_RESET_SOFT_VERSION_HW_REV_REQ,
   L9966_RESET_SOFT_VERSION_DEV_ID_REQ,
