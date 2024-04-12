@@ -214,10 +214,10 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
 
       if(config->sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
         BREAK_IF_ACTION(config->sequencer_config.cmd_config[i].pu_div_sel >= L9966_CFG_SQNCR_CMD_PU_MAX, err = E_PARAM);
-        reg->data.sqncr_cmd[i].u.bits.NXT_PC = config->sequencer_config.cmd_config[i].pu_div_sel;
+        reg->data.sqncr_cmd[i].u.bits.PUP_DIV = config->sequencer_config.cmd_config[i].pu_div_sel;
       } else if(config->sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
         BREAK_IF_ACTION(config->sequencer_config.cmd_config[i].pu_div_sel >= L9966_CFG_SQNCR_CMD_DIV_MAX, err = E_PARAM);
-        reg->data.sqncr_cmd[i].u.bits.NXT_PC = config->sequencer_config.cmd_config[i].pu_div_sel;
+        reg->data.sqncr_cmd[i].u.bits.PUP_DIV = config->sequencer_config.cmd_config[i].pu_div_sel;
       }
     }
 

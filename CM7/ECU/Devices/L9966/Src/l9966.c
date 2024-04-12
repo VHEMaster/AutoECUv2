@@ -116,7 +116,6 @@ error_t l9966_set_rrx_value(l9966_ctx_t *ctx, uint8_t rrx, float value)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || rrx >= L9966_RRx_COUNT, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     ctx->rrx[rrx] = value;
 

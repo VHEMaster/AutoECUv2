@@ -14,6 +14,7 @@ typedef struct {
     ecu_spi_slave_enum_t slave_index;
     l9966_init_ctx_t init;
     l9966_config_t config_default;
+    float rrx[L9966_RRx_COUNT];
     l9966_ctx_t *ctx;
 }ecu_devices_flexio_ctx_t;
 
@@ -21,12 +22,13 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
     {
       .slave_index = ECU_SPI_SLAVE_FLEXIO1,
       .init = {
-          .nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
+          //.nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
           .wake_pin = { .port = FLEXIO1_WAKE_GPIO_Port, .pin = FLEXIO1_WAKE_Pin },
           .sync_pin = { .port = FLEXIO1_SYNC_GPIO_Port, .pin = FLEXIO1_SYNC_Pin },
           .int_pin = { .port = FLEXIO1_INT_GPIO_Port, .pin = FLEXIO1_INT_Pin },
           .chip_address = L9966_FRAME_CFG_ADDR_LOW,
       },
+      .rrx = { 220.0f, 8200.0f, 51000.0f },
       .config_default = {
 
       },
@@ -34,12 +36,13 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
     {
       .slave_index = ECU_SPI_SLAVE_FLEXIO2,
       .init = {
-          //.nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
+          .nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
           .wake_pin = { .port = FLEXIO2_WAKE_GPIO_Port, .pin = FLEXIO2_WAKE_Pin },
           .sync_pin = { .port = FLEXIO2_SYNC_GPIO_Port, .pin = FLEXIO2_SYNC_Pin },
           .int_pin = { .port = FLEXIO2_INT_GPIO_Port, .pin = FLEXIO2_INT_Pin },
           .chip_address = L9966_FRAME_CFG_ADDR_HIGH,
       },
+      .rrx = { 220.0f, 8200.0f, 51000.0f },
       .config_default = {
 
       },
@@ -61,6 +64,12 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     err = l9966_init(flexio_ctx->ctx, &flexio_ctx->init);
+    BREAK_IF(err != E_OK);
+
+    for(int i = 0; i < L9966_RRx_COUNT; i++) {
+      err = l9966_set_rrx_value(flexio_ctx->ctx, i, flexio_ctx->rrx[i]);
+      BREAK_IF(err != E_OK);
+    }
     BREAK_IF(err != E_OK);
 
     memcpy(&flexio_ctx->ctx->config, &flexio_ctx->config_default, sizeof(l9966_config_t));

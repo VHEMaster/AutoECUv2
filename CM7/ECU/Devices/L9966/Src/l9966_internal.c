@@ -38,11 +38,17 @@ error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
         ctx->spi_busy = false;
         *data = ctx->rx_payload[1];
 
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_VERIFY_MASK) != L9966_FRAME_MISO_VERIFY_VALUE, err = E_BADRESP);
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_ECHO_REG_MASK) != reg, err = E_BADRESP);
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F) != 0, err = E_BADRESP);
-        BREAK_IF_ACTION(ctx->rx_payload[1] == 0xFFFF, err = E_BADRESP);
+        if((ctx->rx_payload[0] & L9966_FRAME_MISO_VERIFY_MASK) != L9966_FRAME_MISO_VERIFY_VALUE ||
+            (ctx->rx_payload[0] & L9966_FRAME_MISO_ECHO_REG_MASK) != reg ||
+            ctx->rx_payload[1] == 0xFFFF) {
+          ctx->bad_responses_cnt++;
+          err = E_BADRESP;
+          break;
+        }
 
+        if((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F)) {
+          ctx->bad_frames_reported_cnt++;
+        }
       }
     }
     break;
@@ -59,7 +65,7 @@ error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
   while(true) {
     if(ctx->spi_busy == false) {
       ctx->tx_payload[0] = ctx->init.chip_address & L9966_FRAME_CFG_ADDR_MASK;
-      ctx->tx_payload[0] |= L9966_FRAME_READ;
+      ctx->tx_payload[0] |= L9966_FRAME_WRITE;
       ctx->tx_payload[0] |= L9966_FRAME_CLK_MON_ON;
       ctx->tx_payload[0] |= reg << L9966_FRAME_REG_SHIFT;
       if(PARITY_ODD_CHECK(ctx->tx_payload[0]) == false) {
@@ -81,11 +87,17 @@ error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
         ctx->spi_busy = false;
         data = ctx->rx_payload[1];
 
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_VERIFY_MASK) != L9966_FRAME_MISO_VERIFY_VALUE, err = E_BADRESP);
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_ECHO_REG_MASK) != reg, err = E_BADRESP);
-        BREAK_IF_ACTION((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F) != 0, err = E_BADRESP);
-        BREAK_IF_ACTION(ctx->rx_payload[1] == 0xFFFF, err = E_BADRESP);
+        if((ctx->rx_payload[0] & L9966_FRAME_MISO_VERIFY_MASK) != L9966_FRAME_MISO_VERIFY_VALUE ||
+            (ctx->rx_payload[0] & L9966_FRAME_MISO_ECHO_REG_MASK) != reg ||
+            ctx->rx_payload[1] == 0xFFFF) {
+          ctx->bad_responses_cnt++;
+          err = E_BADRESP;
+          break;
+        }
 
+        if((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F)) {
+          ctx->bad_frames_reported_cnt++;
+        }
       }
     }
     break;
@@ -117,7 +129,12 @@ error_t l9966_is_int_pin_triggered(l9966_ctx_t *ctx, bool *triggered)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(gpio_valid(&ctx->init.int_pin) == false, err = E_INVALACT);
 
-    *triggered = gpio_read(&ctx->init.int_pin) == true;
+    if(ctx->int_triggered == true) {
+      ctx->int_triggered = false;
+      *triggered = true;
+    } else {
+      *triggered = gpio_read(&ctx->init.int_pin) == true;
+    }
 
   } while(0);
 

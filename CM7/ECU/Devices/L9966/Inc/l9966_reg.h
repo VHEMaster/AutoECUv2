@@ -15,8 +15,8 @@
 #define L9966_FRAME_CFG_ADDR_HIGH           0xC000
 #define L9966_FRAME_CFG_ADDR_MASK           0xC000
 
-#define L9966_FRAME_READ                    0x2000
-#define L9966_FRAME_WRITE                   0x0000
+#define L9966_FRAME_READ                    0x0000
+#define L9966_FRAME_WRITE                   0x2000
 #define L9966_FRAME_CLK_MON_ON              0x1000
 #define L9966_FRAME_CLK_MON_OFF             0x0000
 #define L9966_FRAME_PAR_MOSI_INST           0x0001
@@ -43,8 +43,8 @@
 #define L9966_REG_ADC_TIMING                0x82
 #define L9966_REG_SC_RESULT                 0x83
 #define L9966_REG_SQNCR_CMD_x               0xC1
-#define L9966_REG_SQNCR_CTRL                0xC0
-#define L9966_REG_SQNCR_RSLT_COPY_CMD       0xCF
+#define L9966_REG_SQNCR_CTRL                0xD0
+#define L9966_REG_SQNCR_RSLT_COPY_CMD       0xDF
 #define L9966_REG_DIN_IN_STAT               0xE0
 #define L9966_REG_SQNCR_RESULT_x            0xE1
 

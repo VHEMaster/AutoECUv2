@@ -123,6 +123,9 @@ typedef struct {
     uint8_t configure_cmd_index;
     error_t configure_errcode;
     bool spi_busy;
+    uint32_t bad_frames_reported_cnt;
+    uint32_t bad_responses_cnt;
+    uint32_t configuration_lost_cnt;
 
 
     bool version_valid;
