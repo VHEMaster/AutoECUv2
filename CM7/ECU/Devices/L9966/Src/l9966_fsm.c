@@ -301,6 +301,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
   l9966_config_sqncr_cmd_pd_t rr_index;
   bool eu_enabled = false;
   bool data_available;
+  bool copy_cplt = false;
 
   while(true) {
     err = E_OK;
@@ -326,6 +327,12 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
               ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_SPI_COPY_REQ;
             }
             if(ctx->read_sqncr_fsm_state != L9966_READ_SQNCR_CONDITION) {
+              if(ctx->config.sequencer_config.control.sync_copy_cmd_en) {
+                ctx->sync_timestamp = now;
+                if(gpio_valid(&ctx->init.sync_pin)) {
+                  gpio_set(&ctx->init.sync_pin);
+                }
+              }
               err = E_AGAIN;
               continue;
             }
@@ -333,15 +340,32 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
         }
         break;
       case L9966_READ_SQNCR_SPI_COPY_REQ:
-        err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.u.data);
-        if(err == E_OK) {
+        copy_cplt = false;
+        if(ctx->config.sequencer_config.control.sync_copy_cmd_en) {
+          err = E_AGAIN;
           now = time_get_current_us();
-          ctx->sqncr_cmd_ready_mask_temp = status.u.bits.SQNCR_RESULTx;
+          if(time_diff(now, ctx->sync_timestamp) >= L9966_SYNC_WAIT_US) {
+            if(gpio_valid(&ctx->init.sync_pin)) {
+              gpio_reset(&ctx->init.sync_pin);
+            }
+            copy_cplt = true;
+            ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
+          }
+        } else {
+          err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.u.data);
+          if(err == E_OK) {
+            now = time_get_current_us();
+            ctx->sqncr_cmd_ready_mask_temp = status.u.bits.SQNCR_RESULTx;
+            ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
+            copy_cplt = true;
+          }
+        }
+        if(copy_cplt) {
           ctx->sqncr_result_poll_last = now;
 
-          ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
           if(ctx->sqncr_cmd_ready_mask_temp == 0) {
             ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CONDITION;
+            err = E_OK;
           } else {
             ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CMD_DEFINE;
             ctx->read_sqncr_cmd_index = 0;

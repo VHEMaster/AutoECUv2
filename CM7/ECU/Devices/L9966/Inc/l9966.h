@@ -20,13 +20,14 @@
 #include "l9966_config.h"
 
 #define L9966_DEFAULT_DIGITAL_POLL_PERIOD     (10 * TIME_US_IN_MS)
-#define L9966_SQNCR_RESULT_POLL_PERIOD        (1 * TIME_US_IN_MS)
+#define L9966_SQNCR_RESULT_POLL_PERIOD        (50 * TIME_US_IN_MS)
 #define L9966_STATUS_POLL_PERIOD              (100 * TIME_US_IN_MS)
 #define L9966_SPI_MODE                        (SPI_MODE_1)
 
 #define L9966_RESET_HARD_WAIT_RESET_US        (100)
 #define L9966_RESET_HARD_WAIT_SET_US          (1 * TIME_US_IN_MS)
 #define L9966_RESET_SOFT_WAIT_US              (1 * TIME_US_IN_MS)
+#define L9966_SYNC_WAIT_US                    (10)
 
 typedef struct {
     spi_slave_t *spi_slave;
@@ -177,6 +178,7 @@ typedef struct {
     time_us_t read_dig_in_last;
     time_us_t sqncr_result_poll_last;
     time_us_t reset_action_timestamp;
+    time_us_t sync_timestamp;
 
     bool sc_int;
     bool eu_int[L9966_EU_COUNT];
