@@ -8,6 +8,7 @@
 #include <string.h>
 #include <limits.h>
 #include <math.h>
+#include "config_devices.h"
 #include "config_gpio.h"
 #include "config_extern.h"
 #include "config_rcc.h"
@@ -37,6 +38,8 @@ typedef struct {
     uint32_t tim_channel_falling;
     uint32_t tim_channel_rising_falling;
     ecu_config_gpio_input_cb_t irq_cb;
+    ecu_gpio_input_type_t supported_modes;
+    ecu_gpio_input_type_t current_mode;
     bool gpio_invert;
     void *usrdata;
 }ecu_config_gpio_input_t;
@@ -66,8 +69,8 @@ typedef struct {
 
 static error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
 static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
-static error_t ecu_config_gpio_flexio_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata);
-static error_t ecu_config_gpio_adc_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata);
+static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
+static error_t ecu_config_gpio_adc_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
 
 static ecu_config_gpio_t ecu_config_gpio = {
     .outputs_if = {
@@ -388,76 +391,91 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 0,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN1
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 1,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN2
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 2,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN3
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 3,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN4
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 4,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN5
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 5,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN6
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 6,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN7
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 7,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN8
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 8,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN9
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 9,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN10
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 10,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN11
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 11,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN12
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 12,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN13
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 13,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN14
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 14,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN15
         {
             .if_id = ECU_IN_IF_FLEXIO1,
@@ -466,57 +484,68 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .tim_alternate = GPIO_AF2_TIM12,
             .htim = &htim12,
             .tim_channel_rising_falling = TIM_CHANNEL_1,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_VRS
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 0,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN1
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 1,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN2
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 2,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN3
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 3,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN4
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 9,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
 
         }, //ECU_IN_PORT2_PIN10
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 10,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN11
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 11,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN12
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 12,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN13
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 13,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN14
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 14,
             .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN15
         {
             .if_id = ECU_IN_IF_FLEXIO2,
@@ -525,14 +554,17 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .tim_alternate = GPIO_AF2_TIM12,
             .htim = &htim12,
             .tim_channel_rising_falling = TIM_CHANNEL_2,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_VRS
         {
             .if_id = ECU_IN_IF_ADC1,
             .input_ch_id = 0,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_ADC1_IN1
         {
             .if_id = ECU_IN_IF_ADC1,
             .input_ch_id = 1,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_ADC1_IN1
     },
 };
@@ -589,23 +621,86 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_value_internal(ecu_config_gpio_
 
 static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+  ecu_config_gpio_output_t *channel = NULL;
+  tle6240_ctx_t *ctx = NULL;
 
+  do {
+    BREAK_IF_ACTION(interface_id >= ITEMSOF(ecu_config_gpio.outputs_if), err = E_PARAM);
+    BREAK_IF_ACTION(channel_id >= ITEMSOF(ecu_config_gpio.outputs_if[interface_id].channels), err = E_PARAM);
 
+    channel = ecu_config_gpio.outputs_if[interface_id].channels[channel_id];
+    switch(channel->if_id) {
+      case ECU_OUT_IF_OUTS1_SPI:
+        err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_1, &ctx);
+        break;
+      case ECU_OUT_IF_OUTS2_SPI:
+        err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_2, &ctx);
+        break;
+      default:
+        err = E_NOTSUPPORT;
+        break;
+    }
+
+    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(ctx == NULL, err = E_FAULT);
+
+    err = tle6240_ch_write(ctx, channel->output_ch_id, value > 0 ? true : false);
+
+  } while(0);
 
   return err;
 }
 
-static error_t ecu_config_gpio_flexio_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata)
+static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+  ecu_config_gpio_input_t *channel = NULL;
+  l9966_ctx_t *ctx = NULL;
+  float l9966_output_value = 0;
+  l9966_ctrl_dig_inputs_t l9966_digital_value = 0;
 
+  do {
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(interface_id >= ITEMSOF(ecu_config_gpio.inputs_if), err = E_PARAM);
+    BREAK_IF_ACTION(channel_id >= ITEMSOF(ecu_config_gpio.inputs_if[interface_id].channels), err = E_PARAM);
 
+    channel = ecu_config_gpio.inputs_if[interface_id].channels[channel_id];
+    switch(channel->if_id) {
+      case ECU_IN_IF_FLEXIO1:
+        err = ecu_devices_get_flexio_ctx(ECU_DEVICE_FLEXIO_1, &ctx);
+        break;
+      case ECU_IN_IF_FLEXIO2:
+        err = ecu_devices_get_flexio_ctx(ECU_DEVICE_FLEXIO_2, &ctx);
+        break;
+      default:
+        err = E_NOTSUPPORT;
+        break;
+    }
+
+    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(ctx == NULL, err = E_FAULT);
+
+    switch(ecu_config_gpio.inputs_if[interface_id].channels[channel_id]->current_mode) {
+      case ECU_GPIO_INPUT_TYPE_ANALOG:
+        err = l9966_read_sqncr_output(ctx, channel->input_ch_id, &l9966_output_value);
+        *value = roundf(l9966_output_value * INPUTS_VOLTAGE_MULTIPLIER);
+        break;
+      case ECU_GPIO_INPUT_TYPE_DIGITAL:
+        err = l9966_read_inputs(ctx, &l9966_digital_value);
+        *value = (l9966_digital_value >> channel->input_ch_id) & 1;
+        break;
+      default:
+        err = E_NOTSUPPORT;
+        break;
+    }
+
+  } while(0);
 
   return err;
 }
 
-static error_t ecu_config_gpio_adc_ch_get(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t *value, void *usrdata)
+static error_t ecu_config_gpio_adc_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata)
 {
   error_t err = E_NOTSUPPORT;
 
@@ -687,9 +782,7 @@ error_t ecu_config_gpio_input_init(void)
       }
     }
 
-    if(err != E_OK) {
-      break;
-    }
+    BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ITEMSOF(ecu_config_gpio.inputs); i++) {
       ecu_config_gpio.inputs[i].input_id = input_ch_register(ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].input_if_id, ecu_config_gpio.inputs[i].input_ch_id, ecu_config_gpio.inputs[i].usrdata);
@@ -702,15 +795,37 @@ error_t ecu_config_gpio_input_init(void)
 
       valid = gpio_valid(&ecu_config_gpio.inputs[i].pin);
       if(valid == true) {
+        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
+        BREAK_IF(err != E_OK);
+
+        BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+
+        err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
+        BREAK_IF(err != E_OK);
+
         err = input_ch_source_gpio(ecu_config_gpio.inputs[i].input_id, &ecu_config_gpio.inputs[i].pin, ecu_config_gpio.inputs[i].gpio_invert);
-        if(err != E_OK) {
-          break;
-        }
+        BREAK_IF(err != E_OK);
+
       } else if(ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get != NULL) {
-        err = input_ch_source_func(ecu_config_gpio.inputs[i].input_id, ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get);
-        if(err != E_OK) {
-          break;
+
+        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
+        BREAK_IF(err != E_OK);
+
+        if(valid == true) {
+          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
+          BREAK_IF(err != E_OK);
+        } else {
+          err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_ANALOG, &valid);
+          BREAK_IF(err != E_OK);
+
+          BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+
+          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_ANALOG);
+          BREAK_IF(err != E_OK);
         }
+
+        err = input_ch_source_func(ecu_config_gpio.inputs[i].input_id, ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get);
+        BREAK_IF(err != E_OK);
       }
     }
 
@@ -960,6 +1075,58 @@ error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *
     }
 
     *support = true;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode)
+{
+  error_t err = E_OK;
+  bool valid = false;
+
+  do {
+    err = ecu_config_gpio_input_has_mode_support(pin, mode, &valid);
+    if(err != E_OK) {
+      break;
+    }
+
+    if(valid != true) {
+      err = E_NOTSUPPORT;
+      break;
+    }
+
+    err = E_PARAM;
+
+    for(uint8_t i = 1; i > 0 && i <= mode; i <<= 1) {
+      if(i == mode) {
+        ecu_config_gpio.inputs[pin].current_mode = mode;
+        err = E_OK;
+        break;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support)
+{
+  error_t err = E_OK;
+
+  do {
+    if(pin >= ECU_IN_MAX || support == NULL || mode >= ECU_GPIO_INPUT_TYPE_MAX || mode == 0) {
+      err = E_PARAM;
+      break;
+    }
+
+    if((ecu_config_gpio.inputs[pin].supported_modes & mode) == mode) {
+      *support = true;
+    } else {
+      *support = false;
+    }
 
   } while(0);
 

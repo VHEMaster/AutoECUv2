@@ -28,7 +28,7 @@
 #define ITCM_FUNC __attribute__((section(".itcm_func")))
 #define IS_DEBUGGER_ATTACHED() ((DBGMCU->CR & 0x07) > 0)
 #define BREAKPOINT(x) __BKPT((x))
-#define BREAK_IF_ACTION(condition, action) { if((condition)) { (action); break; } }
+#define BREAK_IF_ACTION(condition, action) { if((condition)) { {action;} break; } }
 #define BREAK_IF(condition) { if((condition)) { break; } }
 #define PARITY_ODD_CHECK(value) __builtin_parity((value))
 

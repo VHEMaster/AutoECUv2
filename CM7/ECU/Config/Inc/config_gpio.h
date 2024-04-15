@@ -19,6 +19,12 @@ typedef enum {
 }ecu_gpio_output_type_t;
 
 typedef enum {
+  ECU_GPIO_INPUT_TYPE_ANALOG = 1,
+  ECU_GPIO_INPUT_TYPE_DIGITAL = 2,
+  ECU_GPIO_INPUT_TYPE_MAX = 4,
+}ecu_gpio_input_type_t;
+
+typedef enum {
   ECU_OUT_IF_OUTS1_PWM1 = 0,
   ECU_OUT_IF_OUTS1_PWM2,
   ECU_OUT_IF_OUTS1_PWM3,
@@ -136,5 +142,7 @@ error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id
 error_t ecu_config_gpio_input_init(void);
 error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_config_gpio_input_cb_t callback);
 error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio);
+error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode);
+error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support);
 
 #endif /* CONFIG_INC_CONFIG_GPIO_H_ */

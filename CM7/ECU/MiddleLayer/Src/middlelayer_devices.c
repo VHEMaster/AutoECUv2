@@ -35,18 +35,18 @@ void middlelayer_devices_init(void)
 
   do {
     err = ecu_devices_init();
-    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_DEVICE_FLEXIO_MAX; i++) {
       err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_FLEXIO, i, &device_ctx);
-      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_devices_flexio_init(i, (l9966_ctx_t *)device_ctx);
-      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_FLEXIO, i, true);
-      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
-    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
   } while(0);
 }

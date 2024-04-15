@@ -49,7 +49,7 @@ static const l9966_config_t ecu_devices_flexio_config_default = {
             .comparator_threshold = L9966_CFG_CSC_CT_1,
             .current_source_value = L9966_CFG_CSC_CSV_4,
             .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-            .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
+            .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
             .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
         }, // IO4
         {
@@ -87,7 +87,7 @@ static const l9966_config_t ecu_devices_flexio_config_default = {
         {
             .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
             .comparator_threshold = L9966_CFG_CSC_CT_1,
-            .current_source_value = L9966_CFG_CSC_CSV_2,
+            .current_source_value = L9966_CFG_CSC_CSV_4,
             .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
             .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
             .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,

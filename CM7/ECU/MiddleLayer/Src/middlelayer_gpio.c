@@ -40,9 +40,15 @@ void middlelayer_gpio_init(void)
   //TODO: Create DTC of GPIO init
   (void)err;
 
-  err = ecu_config_gpio_output_init();
+  do {
+    err = ecu_config_gpio_output_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-  err = ecu_config_gpio_input_init();
+    err = ecu_config_gpio_input_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-  err = ecu_config_queuedpulses_init();
+    err = ecu_config_queuedpulses_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+  } while(0);
 }

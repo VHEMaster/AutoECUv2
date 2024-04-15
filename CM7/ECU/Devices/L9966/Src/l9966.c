@@ -126,7 +126,14 @@ error_t l9966_set_rrx_value(l9966_ctx_t *ctx, uint8_t rrx, float value)
 
 error_t l9966_set_dig_poll_period(l9966_ctx_t *ctx, time_delta_us_t period)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    ctx->digital_poll_period = period;
+
+  } while(0);
 
   return err;
 }
@@ -238,19 +245,14 @@ error_t l9966_stop_sqncr(l9966_ctx_t *ctx)
 error_t l9966_read_sqncr_output(l9966_ctx_t *ctx, uint8_t cmd_index, float *sqncr_output)
 {
   error_t err = E_OK;
-  uint32_t prim;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || sqncr_output == NULL || cmd_index >= L9966_CHANNELS, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
 
-    prim = EnterCritical();
     if((ctx->sqncr_cmd_ready_mask & (1 << cmd_index)) == 0) {
       err = E_AGAIN;
-    } else {
-      ctx->sqncr_cmd_ready_mask &= ~(1 << cmd_index);
     }
-    ExitCritical(prim);
 
     *sqncr_output = ctx->sqncr_cmd_results[cmd_index];
 
