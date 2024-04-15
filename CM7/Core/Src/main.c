@@ -1924,7 +1924,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LAMBDA_HEATER_NEN_GPIO_Port, LAMBDA_HEATER_NEN_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LOGIC_OE_GPIO_Port, LOGIC_OE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LOGIC_OE_GPIO_Port, LOGIC_OE_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOF, IGN_CH5_Pin|IGN_CH6_Pin|IGN_CH7_Pin|IGN_CH8_Pin

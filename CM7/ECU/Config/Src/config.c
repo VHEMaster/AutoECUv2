@@ -11,10 +11,6 @@
 #include "compiler.h"
 #include "time.h"
 
-INLINE void ecu_config_set_io_enabled(bool enabled) {
-  HAL_GPIO_WritePin(LOGIC_OE_GPIO_Port, LOGIC_OE_Pin, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
-}
-
 INLINE void ecu_config_set_ignition_enabled(bool enabled) {
   HAL_GPIO_WritePin(IGN_NEN_GPIO_Port, IGN_NEN_Pin, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }

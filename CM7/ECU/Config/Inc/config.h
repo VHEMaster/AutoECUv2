@@ -18,7 +18,6 @@ void ecu_config_ll_init(void);
 void ecu_config_start_counter(void);
 void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, pTIM_CallbackTypeDef func_tim_fast_irq_cb);
 
-void ecu_config_set_io_enabled(bool enabled);
 void ecu_config_set_ignition_enabled(bool enabled);
 void ecu_config_iwgd_refresh(void);
 
