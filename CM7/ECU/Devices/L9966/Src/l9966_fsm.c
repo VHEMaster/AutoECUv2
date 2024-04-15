@@ -411,19 +411,32 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
             result_voltage.u.data = ctx->fsm_rx_payload;
             if(result_voltage.u.bits.NEW_RESULT_FLAG) {
               result_float = result_voltage.u.bits.ADC_RESULT * 0.000244140625f;
-              switch(ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel) {
-                case L9966_CFG_SQNCR_CMD_DIV_5V:
-                  result_float *= 5.0f;
+              switch(ctx->read_sqncr_cmd_index + 1) {
+                case L9966_CFG_SQNCR_PC_UBSW:
+                  result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
                   break;
-                case L9966_CFG_SQNCR_CMD_DIV_20V:
-                  result_float *= 20.0f;
+                case L9966_CFG_SQNCR_PC_VI5V:
+                  result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
                   break;
-                case L9966_CFG_SQNCR_CMD_DIV_40V:
-                  result_float *= 40.0f;
+                case L9966_CFG_SQNCR_PC_VIX:
+                  result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
                   break;
-                case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                  result_float *= 1.25f;
                 default:
+                  switch(ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel) {
+                    case L9966_CFG_SQNCR_CMD_DIV_5V:
+                      result_float *= 5.0f;
+                      break;
+                    case L9966_CFG_SQNCR_CMD_DIV_20V:
+                      result_float *= 20.0f;
+                      break;
+                    case L9966_CFG_SQNCR_CMD_DIV_40V:
+                      result_float *= 40.0f;
+                      break;
+                    case L9966_CFG_SQNCR_CMD_DIV_1V25:
+                      result_float *= 1.25f;
+                    default:
+                      break;
+                  }
                   break;
               }
               data_available = true;
@@ -488,19 +501,32 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
           } else if(ctx->sc_control.r_volt_sel == L9966_CTRL_SC_RVM_VOLTAGE) {
             result_voltage.u.data = ctx->fsm_rx_payload;
             result_float = result_voltage.u.bits.ADC_RESULT * 0.000244140625f;
-            switch(ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel) {
-              case L9966_CFG_SQNCR_CMD_DIV_5V:
-                result_float *= 5.0f;
+            switch(ctx->sc_control.adc_mux + 1) {
+              case L9966_CFG_SQNCR_PC_UBSW:
+                result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
                 break;
-              case L9966_CFG_SQNCR_CMD_DIV_20V:
-                result_float *= 20.0f;
+              case L9966_CFG_SQNCR_PC_VI5V:
+                result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
                 break;
-              case L9966_CFG_SQNCR_CMD_DIV_40V:
-                result_float *= 40.0f;
+              case L9966_CFG_SQNCR_PC_VIX:
+                result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
                 break;
-              case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                result_float *= 1.25f;
               default:
+                switch(ctx->sc_control.pu_div_sel) {
+                  case L9966_CFG_SQNCR_CMD_DIV_5V:
+                    result_float *= 5.0f;
+                    break;
+                  case L9966_CFG_SQNCR_CMD_DIV_20V:
+                    result_float *= 20.0f;
+                    break;
+                  case L9966_CFG_SQNCR_CMD_DIV_40V:
+                    result_float *= 40.0f;
+                    break;
+                  case L9966_CFG_SQNCR_CMD_DIV_1V25:
+                    result_float *= 1.25f;
+                  default:
+                    break;
+                }
                 break;
             }
           }

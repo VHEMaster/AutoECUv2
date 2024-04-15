@@ -29,7 +29,7 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
     reg->data.status.u.bits.OT_MASK = config->status.overtemperature_mask;
 
     for(int i = 0; i < ITEMSOF(config->curr_src_ctrl); i++) {
-      if(config->gtm_to_sent_route[i].pullup == L9966_CFG_GTSR_PU_OFF) {
+      if(i >= 4 || config->gtm_to_sent_route[i].pullup == L9966_CFG_GTSR_PU_OFF) {
         if((i == 8 && (config->dwt_volt_src_lsf_ctrl.lambda_enabled_chx & L9966_CFG_DVSLC_LE_ENABLED_CH1) != 0) ||
             (i == 9 && (config->dwt_volt_src_lsf_ctrl.lambda_enabled_chx & L9966_CFG_DVSLC_LE_ENABLED_CH2) != 0) ||
             (i == 10 && (config->dwt_volt_src_lsf_ctrl.lambda_enabled_chx & L9966_CFG_DVSLC_LE_ENABLED_CH3) != 0) ||
@@ -66,6 +66,7 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
         reg->data.curr_src_ctrl[i].u.bits.MODE = L9966_CFG_CSC_CCP_INVERT_FALSE;
       }
     }
+    BREAK_IF(err != E_OK);
 
     BREAK_IF_ACTION(config->switch_route.aux_even_channel >= L9966_CFG_SR_AUX_EVENODD_CH_MAX, err = E_PARAM);
     reg->data.switch_route.u.bits.AUX_EVENCH = config->switch_route.aux_even_channel;
@@ -220,6 +221,7 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
         reg->data.sqncr_cmd[i].u.bits.PUP_DIV = config->sequencer_config.cmd_config[i].pu_div_sel;
       }
     }
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
