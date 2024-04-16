@@ -623,29 +623,35 @@ static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch
 {
   error_t err = E_OK;
   ecu_config_gpio_output_t *channel = NULL;
+  ecu_config_gpio_outputs_if_t *interface = NULL;
   tle6240_ctx_t *ctx = NULL;
 
   do {
     BREAK_IF_ACTION(interface_id >= ITEMSOF(ecu_config_gpio.outputs_if), err = E_PARAM);
     BREAK_IF_ACTION(channel_id >= ITEMSOF(ecu_config_gpio.outputs_if[interface_id].channels), err = E_PARAM);
 
+    interface = &ecu_config_gpio.outputs_if[interface_id];
     channel = ecu_config_gpio.outputs_if[interface_id].channels[channel_id];
-    switch(channel->if_id) {
-      case ECU_OUT_IF_OUTS1_SPI:
-        err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_1, &ctx);
-        break;
-      case ECU_OUT_IF_OUTS2_SPI:
-        err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_2, &ctx);
-        break;
-      default:
-        err = E_NOTSUPPORT;
-        break;
+    if(interface->usrdata == NULL) {
+      switch(channel->if_id) {
+        case ECU_OUT_IF_OUTS1_SPI:
+          err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_1, &ctx);
+          break;
+        case ECU_OUT_IF_OUTS2_SPI:
+          err = ecu_devices_get_output_ctx(ECU_DEVICE_OUTPUT_2, &ctx);
+          break;
+        default:
+          err = E_NOTSUPPORT;
+          break;
+      }
+      BREAK_IF(err != E_OK);
+      interface->usrdata = ctx;
     }
 
-    BREAK_IF(err != E_OK);
+    ctx = (tle6240_ctx_t *)interface->usrdata;
     BREAK_IF_ACTION(ctx == NULL, err = E_FAULT);
 
-    err = tle6240_ch_write(ctx, channel->output_ch_id, value > 0 ? true : false);
+    err = tle6240_ch_write(interface->usrdata, channel->output_ch_id, value > 0 ? true : false);
 
   } while(0);
 
@@ -1150,6 +1156,39 @@ error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio)
   return err;
 }
 
+error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id)
+{
+  error_t err = E_OK;
+
+  do {
+    if(pin >= ECU_OUT_MAX || id == NULL) {
+      err = E_PARAM;
+      break;
+    }
+
+    *id = ecu_config_gpio.outputs[pin].output_id;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id)
+{
+  error_t err = E_OK;
+
+  do {
+    if(pin >= ECU_IN_MAX || id == NULL) {
+      err = E_PARAM;
+      break;
+    }
+
+    *id = ecu_config_gpio.inputs[pin].input_id;
+
+  } while(0);
+
+  return err;
+}
 
 error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_config_gpio_input_cb_t callback)
 {
