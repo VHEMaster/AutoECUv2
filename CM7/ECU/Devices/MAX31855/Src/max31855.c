@@ -31,7 +31,7 @@ static void max31855_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
   }
 }
 
-error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint32_t spi_prescaler)
+error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave)
 {
   error_t err = E_OK;
 
@@ -42,8 +42,6 @@ error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave, uint32_t spi_
   ctx->time_last = 0u;
   ctx->update_triggered = true;
   ctx->poll_period = MAX31855_DEFAULT_POLL_PERIOD_US;
-
-  err |= spi_slave_configure_prescaler(spi_slave, spi_prescaler);
   err |= spi_slave_configure_datasize(spi_slave, MAX31855_SPI_32B_DATASIZE == true ? 32 : 8);
   err |= spi_slave_configure_mode(spi_slave, MAX31855_SPI_MODE);
   err |= spi_slave_configure_callback(spi_slave, max31855_cplt_cb);

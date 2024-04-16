@@ -10,10 +10,24 @@
 
 #include "errors.h"
 #include "gpio.h"
-
+#include "time.h"
 #include "spi.h"
 
-#define TLE6240_DEFAULT_POLL_PERIOD_US   (1 * TIME_MS_TO_US)
+#define TLE6240_DEFAULT_POLL_PERIOD_US      (50 * TIME_US_IN_MS)
+#define TLE6240_SPI_MODE                    (SPI_MODE_1)
+#define TLE6240_ECHO_INCREMENT_VALUE        (0xF15A)
+
+#define TLE6240_CTRL_CH1_CH8_FULL_DIAG      (0x00)
+#define TLE6240_CTRL_CH1_CH8_STATE_DIAG     (0xC0)
+#define TLE6240_CTRL_CH1_CH8_ECHO           (0xA0)
+#define TLE6240_CTRL_CH1_CH8_OR_WRITE_OR    (0x30)
+#define TLE6240_CTRL_CH1_CH8_OR_WRITE_AND   (0xF0)
+
+#define TLE6240_CTRL_CH9_CH16_FULL_DIAG     (0x0F)
+#define TLE6240_CTRL_CH9_CH16_STATE_DIAG    (0xCF)
+#define TLE6240_CTRL_CH9_CH16_ECHO          (0xAF)
+#define TLE6240_CTRL_CH9_CH16_OR_WRITE_OR   (0x3F)
+#define TLE6240_CTRL_CH9_CH16_OR_WRITE_AND  (0xFF)
 
 typedef enum {
   TLE6240_DIAG_NORMAL = 0,
@@ -22,9 +36,21 @@ typedef enum {
   TLE6240_DIAG_SHORTGND = 3,
 }tle6240_diag_codes_t;
 
+typedef enum {
+  TLE6240_PROCESS_RESET = -1,
+  TLE6240_PROCESS_CONDITION,
+  TLE6240_PROCESS_WRITE_1_TO_8,
+  TLE6240_PROCESS_WRITE_9_TO_16,
+  TLE6240_PROCESS_ECHO_REQUEST,
+  TLE6240_PROCESS_ECHO_CHECK,
+  TLE6240_PROCESS_MAX,
+}tle6240_process_fsm_t;
+
 typedef struct {
+    error_t comm_status;
     union {
-        uint32_t word;
+        uint32_t dword;
+        uint16_t hword[2];
         uint8_t bytes[4];
         struct {
             tle6240_diag_codes_t ch1 : 2;
@@ -44,20 +70,36 @@ typedef struct {
             tle6240_diag_codes_t ch15 : 2;
             tle6240_diag_codes_t ch16 : 2;
         }data;
-    }u;
+    }diag;
 }tle6240_diag_t;
 
 typedef struct {
-    spi_slave_t spi;
+    spi_slave_t *spi_slave;
+    tle6240_diag_t diag;
     gpio_t input_pins[8];
     gpio_t reset_pin;
     gpio_t fault_pin;
 }tle6240_init_ctx_t;
 
 typedef struct {
-    tle6240_init_ctx_t init_ctx;
+    tle6240_init_ctx_t init;
     tle6240_diag_t diag;
+    tle6240_process_fsm_t process_fsm;
+    uint16_t output_temp;
     uint16_t output_state;
+    bool output_updated;
+    time_delta_us_t poll_period;
+    time_us_t poll_last;
+    bool spi_busy;
+    bool ready;
+    uint16_t echo_value;
+
+    uint8_t ctrl;
+    uint8_t data;
+    uint16_t diag_hword;
+
+    uint16_t tx_payload;
+    uint16_t rx_payload;
 }tle6240_ctx_t;
 
 error_t tle6240_init(tle6240_ctx_t *ctx, const tle6240_init_ctx_t *init_ctx);
