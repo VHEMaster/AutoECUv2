@@ -61,15 +61,15 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         break;
       case L9966_RESET_SOFT_STEP_PREPARE:
         ctx->reset_fsm_state = L9966_RESET_SOFT_STEP_1_REQ;
-        soft_rst_cmd.u.bits.AC = L9966_CTRL_SOFT_RESET_CMD_FIRST;
-        ctx->fsm_tx_payload = soft_rst_cmd.u.data;
+        soft_rst_cmd.bits.AC = L9966_CTRL_SOFT_RESET_CMD_FIRST;
+        ctx->fsm_tx_payload = soft_rst_cmd.data;
         continue;
       case L9966_RESET_SOFT_STEP_1_REQ:
         err = l9966_reg_write(ctx, L9966_REG_SOFT_RST_CMD, ctx->fsm_tx_payload);
         if(err == E_OK) {
           ctx->reset_fsm_state = L9966_RESET_SOFT_STEP_2_REQ;
-          soft_rst_cmd.u.bits.AC = L9966_CTRL_SOFT_RESET_CMD_SECOND;
-          ctx->fsm_tx_payload = soft_rst_cmd.u.data;
+          soft_rst_cmd.bits.AC = L9966_CTRL_SOFT_RESET_CMD_SECOND;
+          ctx->fsm_tx_payload = soft_rst_cmd.data;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
@@ -80,8 +80,8 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         err = l9966_reg_write(ctx, L9966_REG_SOFT_RST_CMD, ctx->fsm_tx_payload);
         if(err == E_OK) {
           ctx->reset_fsm_state = L9966_RESET_SOFT_STEP_3_REQ;
-          soft_rst_cmd.u.bits.AC = L9966_CTRL_SOFT_RESET_CMD_THIRD;
-          ctx->fsm_tx_payload = soft_rst_cmd.u.data;
+          soft_rst_cmd.bits.AC = L9966_CTRL_SOFT_RESET_CMD_THIRD;
+          ctx->fsm_tx_payload = soft_rst_cmd.data;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
@@ -109,8 +109,8 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         err = l9966_reg_read(ctx, L9966_REG_DEV_V, &ctx->fsm_rx_payload);
         if(err == E_OK) {
           ctx->reset_fsm_state = L9966_RESET_SOFT_VERSION_HW_REV_REQ;
-          version_payload.u.data = ctx->fsm_rx_payload;
-          ctx->version.dev_ver = version_payload.u.bits.Payload;
+          version_payload.data = ctx->fsm_rx_payload;
+          ctx->version.dev_ver = version_payload.bits.Payload;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
@@ -121,8 +121,8 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         err = l9966_reg_read(ctx, L9966_REG_HW_REV, &ctx->fsm_rx_payload);
         if(err == E_OK) {
           ctx->reset_fsm_state = L9966_RESET_SOFT_VERSION_DEV_ID_REQ;
-          version_payload.u.data = ctx->fsm_rx_payload;
-          ctx->version.hw_rev = version_payload.u.bits.Payload;
+          version_payload.data = ctx->fsm_rx_payload;
+          ctx->version.hw_rev = version_payload.bits.Payload;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
@@ -133,8 +133,8 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         err = l9966_reg_read(ctx, L9966_REG_DEV_ID, &ctx->fsm_rx_payload);
         if(err == E_OK) {
           ctx->reset_fsm_state = L9966_RESET_SOFT_VERSION_VERIFY;
-          version_payload.u.data = ctx->fsm_rx_payload;
-          ctx->version.dev_id = version_payload.u.bits.Payload;
+          version_payload.data = ctx->fsm_rx_payload;
+          ctx->version.dev_id = version_payload.bits.Payload;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
@@ -182,18 +182,18 @@ static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
         }
         break;
       case L9966_CHECK_STATUS_SPI_REQ:
-        err = l9966_reg_read(ctx, L9966_REG_GEN_STATUS, &status.u.data);
+        err = l9966_reg_read(ctx, L9966_REG_GEN_STATUS, &status.data);
         if(err == E_OK) {
           now = time_get_current_us();
           ctx->status_check_last = now;
-          ctx->status.config_check = status.u.bits.CONFIG_CHECK;
-          ctx->status.calib_sel = status.u.bits.CALIB_SEL;
-          ctx->status.calib_fault = status.u.bits.CALIB_FLT;
-          ctx->status.trim_fault = status.u.bits.TRIM_FLT;
-          ctx->status.overtemperature_mask = status.u.bits.OT_MASK;
-          ctx->status.wakeup_event = status.u.bits.WAK_UP;
-          ctx->status.supply_3v3_fault = status.u.bits.V33_FLT;
-          ctx->status.overtemperature_fault = status.u.bits.OT_FLT;
+          ctx->status.config_check = status.bits.CONFIG_CHECK;
+          ctx->status.calib_sel = status.bits.CALIB_SEL;
+          ctx->status.calib_fault = status.bits.CALIB_FLT;
+          ctx->status.trim_fault = status.bits.TRIM_FLT;
+          ctx->status.overtemperature_mask = status.bits.OT_MASK;
+          ctx->status.wakeup_event = status.bits.WAK_UP;
+          ctx->status.supply_3v3_fault = status.bits.V33_FLT;
+          ctx->status.overtemperature_fault = status.bits.OT_FLT;
           ctx->status_valid = true;
           ctx->check_status_fsm_state = L9966_CHECK_STATUS_CONDITION;
         } else if(err != E_OK) {
@@ -230,11 +230,11 @@ static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
         }
         break;
       case L9966_READ_DIG_IN_SPI_REQ:
-        err = l9966_reg_read(ctx, L9966_REG_DIN_IN_STAT, &status.u.data);
+        err = l9966_reg_read(ctx, L9966_REG_DIN_IN_STAT, &status.data);
         if(err == E_OK) {
           now = time_get_current_us();
           ctx->read_dig_in_last = now;
-          ctx->digital_inputs = status.u.bits.DIN_INx;
+          ctx->digital_inputs = status.bits.DIN_INx;
           ctx->digital_inputs_valid = true;
           ctx->read_dig_in_fsm_state = L9966_READ_DIG_IN_CONDITION;
         }
@@ -271,11 +271,11 @@ static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
         }
         break;
       case L9966_CHECK_IRQ_FLAGS_SPI_REQ:
-        err = l9966_reg_read(ctx, L9966_REG_SQNCR_INT_MSK_FLG, &status.u.data);
+        err = l9966_reg_read(ctx, L9966_REG_SQNCR_INT_MSK_FLG, &status.data);
         if(err == E_OK) {
-          ctx->sc_int |= (status.u.bits.INTx & 1) != 0;
+          ctx->sc_int |= (status.bits.INTx & 1) != 0;
           for(int i = 0; i < L9966_EU_COUNT; i++) {
-            ctx->eu_int[i] |= (status.u.bits.INTx & (1 << (i + 1))) != 0;
+            ctx->eu_int[i] |= (status.bits.INTx & (1 << (i + 1))) != 0;
           }
           ctx->check_irq_flags_fsm_state = L9966_CHECK_IRQ_FLAGS_CONDITION;
         }
@@ -352,10 +352,10 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
             ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
           }
         } else {
-          err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.u.data);
+          err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.data);
           if(err == E_OK) {
             now = time_get_current_us();
-            ctx->sqncr_cmd_ready_mask_temp = status.u.bits.SQNCR_RESULTx;
+            ctx->sqncr_cmd_ready_mask_temp = status.bits.SQNCR_RESULTx;
             ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
             copy_cplt = true;
           }
@@ -396,21 +396,21 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
         if(err == E_OK) {
           data_available = false;
           if(ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
-            result_resistor.u.data = ctx->fsm_rx_payload;
-            if(result_resistor.u.bits.ADC_RESULT != 0x0000) {
+            result_resistor.data = ctx->fsm_rx_payload;
+            if(result_resistor.bits.ADC_RESULT != 0x0000) {
               rr_index = ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel;
               if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
                 resistor = 1000000.0f;
               } else {
                 resistor = ctx->rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
               }
-              result_float = (float)result_resistor.u.bits.ADC_RESULT * 0.00048828125f * resistor;
+              result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
               data_available = true;
             }
           } else if(ctx->config.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
-            result_voltage.u.data = ctx->fsm_rx_payload;
-            if(result_voltage.u.bits.NEW_RESULT_FLAG) {
-              result_float = result_voltage.u.bits.ADC_RESULT * 0.000244140625f;
+            result_voltage.data = ctx->fsm_rx_payload;
+            if(result_voltage.bits.NEW_RESULT_FLAG) {
+              result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
               switch(ctx->read_sqncr_cmd_index + 1) {
                 case L9966_CFG_SQNCR_PC_UBSW:
                   result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
@@ -490,17 +490,17 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
         err = l9966_reg_read(ctx, L9966_REG_SC_RESULT, &ctx->fsm_rx_payload);
         if(err == E_OK) {
           if(ctx->sc_control.r_volt_sel == L9966_CTRL_SC_RVM_RESISTANCE) {
-            result_resistor.u.data = ctx->fsm_rx_payload;
+            result_resistor.data = ctx->fsm_rx_payload;
             rr_index = ctx->sc_control.pu_div_sel;
             if(rr_index == L9966_CTRL_SC_PU_DISABLED) {
               resistor = 1000000.0f;
             } else {
               resistor = ctx->rrx[rr_index - L9966_CTRL_SC_PU_RR1];
             }
-            result_float = (float)result_resistor.u.bits.ADC_RESULT * 0.00048828125f * resistor;
+            result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
           } else if(ctx->sc_control.r_volt_sel == L9966_CTRL_SC_RVM_VOLTAGE) {
-            result_voltage.u.data = ctx->fsm_rx_payload;
-            result_float = result_voltage.u.bits.ADC_RESULT * 0.000244140625f;
+            result_voltage.data = ctx->fsm_rx_payload;
+            result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
             switch(ctx->sc_control.adc_mux + 1) {
               case L9966_CFG_SQNCR_PC_UBSW:
                 result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
@@ -563,12 +563,12 @@ static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
             ctx->sc_int = false;
             ctx->sc_maintain_fsm_state = L9966_MAINTAIN_SC_SPI_WRITE_REQ;
 
-            data.u.data = 0;
-            data.u.bits.ADC_RUN = ctx->sc_enabled_accept == true;
-            data.u.bits.ADC_MUX = ctx->sc_control.adc_mux;
-            data.u.bits.PUP_DIV = ctx->sc_control.pu_div_sel;
-            data.u.bits.R_VOLT_MEAS_SELECT = ctx->sc_control.r_volt_sel;
-            ctx->fsm_tx_payload = data.u.data;
+            data.data = 0;
+            data.bits.ADC_RUN = ctx->sc_enabled_accept == true;
+            data.bits.ADC_MUX = ctx->sc_control.adc_mux;
+            data.bits.PUP_DIV = ctx->sc_control.pu_div_sel;
+            data.bits.R_VOLT_MEAS_SELECT = ctx->sc_control.r_volt_sel;
+            ctx->fsm_tx_payload = data.data;
 
             err = E_AGAIN;
             continue;
@@ -613,17 +613,17 @@ static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
           }
         }
         if(ctx->eu_maintain_fsm_state != L9966_MAINTAIN_EU_CONDITION) {
-          data->u.bits.EU1_EN = ctx->eu_enabled_accept[0] && ctx->config.sequencer_config.control.sqncr_cfg[0].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED;
-          data->u.bits.EU2_EN = ctx->eu_enabled_accept[1] && ctx->config.sequencer_config.control.sqncr_cfg[1].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED;
+          data->bits.EU1_EN = ctx->eu_enabled_accept[0] && ctx->config.sequencer_config.control.sqncr_cfg[0].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED;
+          data->bits.EU2_EN = ctx->eu_enabled_accept[1] && ctx->config.sequencer_config.control.sqncr_cfg[1].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED;
 
-          data->u.bits.EU1_SYNC_EN = ctx->eu_enabled_accept[0] && ctx->config.sequencer_config.control.sqncr_cfg[0].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_ENABLED;
-          data->u.bits.EU2_SYNC_EN = ctx->eu_enabled_accept[1] && ctx->config.sequencer_config.control.sqncr_cfg[1].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_ENABLED;
+          data->bits.EU1_SYNC_EN = ctx->eu_enabled_accept[0] && ctx->config.sequencer_config.control.sqncr_cfg[0].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_ENABLED;
+          data->bits.EU2_SYNC_EN = ctx->eu_enabled_accept[1] && ctx->config.sequencer_config.control.sqncr_cfg[1].sync_pin_enabled == L9966_CFG_SQNCR_CONFIG_SYNC_ENABLED;
 
-          data->u.bits.INIT_PC_EU1 = ctx->config.sequencer_config.control.sqncr_cfg[0].init_pc;
-          data->u.bits.INIT_PC_EU2 = ctx->config.sequencer_config.control.sqncr_cfg[1].init_pc;
+          data->bits.INIT_PC_EU1 = ctx->config.sequencer_config.control.sqncr_cfg[0].init_pc;
+          data->bits.INIT_PC_EU2 = ctx->config.sequencer_config.control.sqncr_cfg[1].init_pc;
 
-          data->u.bits.SYNC_COPY_CMD_EN = ctx->config.sequencer_config.control.sync_copy_cmd_en;
-          ctx->fsm_tx_payload = data->u.data;
+          data->bits.SYNC_COPY_CMD_EN = ctx->config.sequencer_config.control.sync_copy_cmd_en;
+          ctx->fsm_tx_payload = data->data;
 
           err = E_AGAIN;
           continue;
