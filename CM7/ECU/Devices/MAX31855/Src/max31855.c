@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "max31855.h"
+#include "compiler.h"
 
 static void max31855_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
@@ -35,16 +36,28 @@ error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave)
 {
   error_t err = E_OK;
 
-  memset(ctx, 0u, sizeof(max31855_ctx_t));
+  do {
+    memset(ctx, 0u, sizeof(max31855_ctx_t));
 
-  ctx->spi_slave = spi_slave;
-  ctx->spi_slave->usrdata = ctx;
-  ctx->time_last = 0u;
-  ctx->update_triggered = true;
-  ctx->poll_period = MAX31855_DEFAULT_POLL_PERIOD_US;
-  err |= spi_slave_configure_datasize(spi_slave, MAX31855_SPI_32B_DATASIZE == true ? 32 : 8);
-  err |= spi_slave_configure_mode(spi_slave, MAX31855_SPI_MODE);
-  err |= spi_slave_configure_callback(spi_slave, max31855_cplt_cb);
+    ctx->spi_slave = spi_slave;
+    ctx->spi_slave->usrdata = ctx;
+    ctx->time_last = 0u;
+    ctx->update_triggered = true;
+    ctx->poll_period = MAX31855_DEFAULT_POLL_PERIOD_US;
+
+    err = spi_slave_configure_datasize(spi_slave, MAX31855_SPI_32B_DATASIZE == true ? 32 : 8);
+    BREAK_IF(err != E_OK);
+
+    err = spi_slave_configure_mode(spi_slave, MAX31855_SPI_MODE);
+    BREAK_IF(err != E_OK);
+
+    err = spi_slave_configure_callback(spi_slave, max31855_cplt_cb);
+    BREAK_IF(err != E_OK);
+
+
+    ctx->ready = true;
+  } while(0);
+
 
   return err;
 }
@@ -61,23 +74,25 @@ void max31855_loop_slow(max31855_ctx_t *ctx)
 
   now = time_get_current_us();
 
-  if(ctx->comm_busy == false) {
-    if(time_diff(now, ctx->time_last) >= ctx->poll_period) {
-      err = spi_transmit_and_receive(ctx->spi_slave, &ctx->payload_tx, &ctx->payload_rx, sizeof(uint32_t));
-      if(err == E_AGAIN) {
-        ctx->time_last = now;
-        ctx->comm_busy = true;
-      } else if(err == E_OK) {
-        ctx->time_last = now;
-        ctx->comm_busy = false;
-      } else if(err != E_BUSY) {
-        ctx->comm_errorcode = err;
+  if(ctx->ready == true) {
+    if(ctx->comm_busy == false) {
+      if(time_diff(now, ctx->time_last) >= ctx->poll_period) {
+        err = spi_transmit_and_receive(ctx->spi_slave, &ctx->payload_tx, &ctx->payload_rx, MAX31855_SPI_32B_DATASIZE == true ? 1 : sizeof(uint32_t));
+        if(err == E_AGAIN) {
+          ctx->time_last = now;
+          ctx->comm_busy = true;
+        } else if(err == E_OK) {
+          ctx->time_last = now;
+          ctx->comm_busy = false;
+        } else if(err != E_BUSY) {
+          ctx->comm_errorcode = err;
+        }
       }
-    }
-  } else {
-    err = spi_sync(ctx->spi_slave);
-    if(err == E_OK) {
-      ctx->comm_busy = false;
+    } else {
+      err = spi_sync(ctx->spi_slave);
+      if(err == E_OK) {
+        ctx->comm_busy = false;
+      }
     }
   }
 }

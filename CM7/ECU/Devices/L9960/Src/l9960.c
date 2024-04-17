@@ -5,11 +5,45 @@
  *      Author: VHEMaster
  */
 
+#include <string.h>
 #include "l9960.h"
+#include "l9960_fsm.h"
+#include "l9960_internal.h"
+#include "compiler.h"
+
+static void l9960_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+{
+  l9960_ctx_t *ctx = (l9960_ctx_t *)spi_slave->usrdata;
+
+  //TODO: is it really needed?
+  (void)ctx;
+}
 
 error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL || init_ctx->spi_slave == NULL, err = E_PARAM);
+
+    memset(ctx, 0u, sizeof(l9960_ctx_t));
+    memcpy(&ctx->init, init_ctx, sizeof(l9960_init_ctx_t));
+    ctx->init.spi_slave->usrdata = ctx;
+
+    l9960_set_enabled(ctx, false);
+
+    err = spi_slave_configure_datasize(ctx->init.spi_slave, 16);
+    BREAK_IF(err != E_OK);
+
+    err = spi_slave_configure_mode(ctx->init.spi_slave, L9960_SPI_MODE);
+    BREAK_IF(err != E_OK);
+
+    err = spi_slave_configure_callback(ctx->init.spi_slave, l9960_cplt_cb);
+    BREAK_IF(err != E_OK);
+
+    ctx->ready = true;
+
+  } while(0);
 
   return err;
 }
@@ -26,5 +60,65 @@ void l9960_loop_slow(l9960_ctx_t *ctx)
 
 void l9960_loop_fast(l9960_ctx_t *ctx)
 {
+  error_t err = E_OK;
 
+  if(ctx->ready) {
+    err = l9960_fsm(ctx);
+    if(err != E_OK && err != E_AGAIN) {
+      //TODO: set error in future
+    }
+  }
+}
+
+error_t l9960_reset(l9960_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    if(ctx->reset_request == false) {
+      ctx->reset_errcode = E_AGAIN;
+      ctx->reset_request = true;
+    } else if(ctx->reset_errcode != E_AGAIN) {
+      err = ctx->reset_errcode;
+      ctx->reset_request = false;
+    } else {
+      err = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t l9960_get_version(l9960_ctx_t *ctx, l9960_version_t *ver)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || ver == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->version_valid != true, err = E_AGAIN);
+
+    memcpy(ver, &ctx->version, sizeof(l9960_version_t));
+  } while(0);
+
+  return err;
+}
+
+error_t l9960_get_status(l9960_ctx_t *ctx, l9960_status_t *status)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || status == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->status_valid != true, err = E_AGAIN);
+
+    memcpy(status, &ctx->status, sizeof(l9960_status_t));
+  } while(0);
+
+  return err;
 }

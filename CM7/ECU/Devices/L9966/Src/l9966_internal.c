@@ -49,6 +49,8 @@ error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
         if((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F)) {
           ctx->bad_frames_reported_cnt++;
         }
+      } else if(err == E_BUSY) {
+        err = E_AGAIN;
       }
     }
     break;
@@ -98,6 +100,8 @@ error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
         if((ctx->rx_payload[0] & L9966_FRAME_MISO_TRANS_F)) {
           ctx->bad_frames_reported_cnt++;
         }
+      } else if(err == E_BUSY) {
+        err = E_AGAIN;
       }
     }
     break;

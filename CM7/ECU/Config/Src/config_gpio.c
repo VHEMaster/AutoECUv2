@@ -689,11 +689,11 @@ static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_c
 
     switch(ecu_config_gpio.inputs_if[interface_id].channels[channel_id]->current_mode) {
       case ECU_GPIO_INPUT_TYPE_ANALOG:
-        err = l9966_read_sqncr_output(ctx, channel->input_ch_id, &l9966_output_value);
+        err = l9966_get_sqncr_output(ctx, channel->input_ch_id, &l9966_output_value);
         *value = roundf(l9966_output_value * INPUTS_VOLTAGE_MULTIPLIER);
         break;
       case ECU_GPIO_INPUT_TYPE_DIGITAL:
-        err = l9966_read_inputs(ctx, &l9966_digital_value);
+        err = l9966_get_inputs(ctx, &l9966_digital_value);
         *value = (l9966_digital_value >> channel->input_ch_id) & 1;
         break;
       default:

@@ -26,6 +26,8 @@ error_t tle6240_serial_operation(tle6240_ctx_t *ctx, uint8_t ctrl, uint8_t data,
         if(diag != NULL) {
           *diag = ctx->rx_payload;
         }
+      } else if(err == E_BUSY) {
+        err = E_AGAIN;
       }
     }
     break;

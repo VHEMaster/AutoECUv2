@@ -8,8 +8,6 @@
 #ifndef DEVICES_L9960_INC_L9960_REG_H_
 #define DEVICES_L9960_INC_L9960_REG_H_
 
-#define L9966_ELECTRONIC_ID     (0x03B)
-
 typedef enum {
   L9960_REG_ADDR_NOT_USED = 0,
   L9960_REG_ADDR_OC_MONITOR,
@@ -31,6 +29,7 @@ typedef enum {
 }l9960_reg_addr_t;
 
 typedef enum {
+  L9960_REG_DATA_NONE = 0,
   L9960_REG_DATA_0 = 1,
   L9960_REG_DATA_1 = 2,
   L9960_REG_DATA_2 = 4,
@@ -43,6 +42,17 @@ typedef enum {
   L9960_REG_DATA_9 = 512,
   L9960_REG_DATA_10 = 1024,
 }l9960_reg_data_t;
+
+typedef enum {
+  L9960_REG_DIAG_OFF_NOTUSED = 0,
+  L9960_REG_DIAG_OFF_OPENLOAD,
+  L9960_REG_DIAG_OFF_SHORTBATT,
+  L9960_REG_DIAG_OFF_SHORTGND,
+  L9960_REG_DIAG_OFF_NOFAILURE,
+  L9960_REG_DIAG_OFF_NOTRIGGER_INCORRECT,
+  L9960_REG_DIAG_OFF_NOTRIGGER_THZNOTEXPIRED,
+  L9960_REG_DIAG_OFF_NOTDONE,
+}l9960_reg_diag_off_t;
 
 typedef union {
     uint16_t data;
@@ -124,5 +134,184 @@ typedef union {
         uint16_t always_zero : 10;
     }bits;
 }l9960_cmd_off_state_diag_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t ocl0 : 2;
+        uint16_t always_zero1 : 1;
+        uint16_t ocl1 : 2;
+        uint16_t always_zero2 : 1;
+        uint16_t och0 : 2;
+        uint16_t always_zero3 : 1;
+        uint16_t och1 : 2;
+        uint16_t always_zero4 : 1;
+    }bits;
+}l9960_resp_oc_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t always_zero : 1;
+        uint16_t diag_clr_en_echo : 1;
+        uint16_t always_one : 1;
+        uint16_t tsw_low_current_echo : 1;
+        uint16_t tdiag1_echo : 3;
+        uint16_t vsr_echo : 1;
+        uint16_t isr_echo : 1;
+        uint16_t nosr_echo : 1;
+        uint16_t cl_echo : 2;
+    }bits;
+}l9960_resp_config1_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t uv_win_echo : 1;
+        uint16_t always_zero : 1;
+        uint16_t nspread_echo : 1;
+        uint16_t uv_prot_en_echo : 1;
+        uint16_t otwarn_thr_var_echo : 3;
+        uint16_t otsd_thr_var_echo : 3;
+        uint16_t in1_in2_if_latch : 1;
+        uint16_t in1_in2_if_echo : 1;
+    }bits;
+}l9960_resp_config2_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t otwarn_tsec_en_echo : 1;
+        uint16_t always_zero : 6;
+        uint16_t tvvl_echo : 4;
+        uint16_t vvl_mode_echo : 1;
+    }bits;
+}l9960_resp_config3_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t always_zero1 : 1;
+        uint16_t reserved : 9;
+        uint16_t always_zero2 : 1;
+        uint16_t tdsr_echo : 1;
+    }bits;
+}l9960_resp_config4_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t always_zero : 9;
+        uint16_t cc_latch_state : 1;
+        uint16_t config_cc_echo : 1;
+        uint16_t por_status : 1;
+    }bits;
+}l9960_resp_config5_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t vps_uv : 1;
+        uint16_t vdd_uv_reg : 1;
+        uint16_t vdd_ov_reg : 1;
+        uint16_t ilim_reg : 1;
+        uint16_t ngfail : 1;
+        uint16_t vps_uv_reg : 1;
+        uint16_t hwsc_lbist_status : 3;
+        uint16_t bridge_en : 1;
+        uint16_t dis_status : 1;
+        uint16_t ndis_status : 1;
+    }bits;
+}l9960_resp_states1_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t ol_on_status : 2;
+        uint16_t notsd_reg : 1;
+        uint16_t notsd : 1;
+        uint16_t otwarn_reg : 1;
+        uint16_t otwarn : 1;
+        uint16_t otsd_cnt : 6;
+    }bits;
+}l9960_resp_states2_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t always_zero1 : 1;
+        uint16_t error_cnt : 4;
+        uint16_t uv_cnt_reached : 1;
+        uint16_t always_zero2 : 6;
+    }bits;
+}l9960_resp_states3_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t diag_off : 3;
+        uint16_t always_zero : 9;
+    }bits;
+}l9960_resp_osd_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t reserved : 9;
+        uint16_t vdd_ov_l : 3;
+    }bits;
+}l9960_resp_rsvd3_vol_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t vdd_uv : 1;
+        uint16_t vdd_ov : 1;
+        uint16_t ignored : 2;
+        uint16_t reserved : 8;
+    }bits;
+}l9960_resp_rsvd3_vou_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t assp : 1;
+        uint16_t always_zero : 1;
+        uint16_t asic_name : 10;
+    }bits;
+}l9960_resp_eid_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t always_zero : 6;
+        uint16_t silicon_version : 4;
+        uint16_t supplier : 2;
+    }bits;
+}l9960_resp_sv_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t code_version : 8;
+        uint16_t always_zero : 4;
+    }bits;
+}l9960_resp_lhwv_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t wafer_x : 6;
+        uint16_t wafer_y : 6;
+    }bits;
+}l9960_resp_trace1_t;
+
+typedef union {
+    uint16_t data;
+    struct {
+        uint16_t wafer_number : 5;
+        uint16_t reserved : 7;
+    }bits;
+}l9960_resp_trace2_t;
 
 #endif /* DEVICES_L9960_INC_L9960_REG_H_ */

@@ -119,10 +119,10 @@ typedef enum {
 }l9960_config_iif_t;
 
 typedef enum {
-  L9960_CONFIG_OTW_DISABLED = 0,
-  L9960_CONFIG_OTW_ENABLED,
-  L9960_CONFIG_OTW_MAX,
-}l9960_config_otw_t;
+  L9960_CONFIG_OTWTSE_DISABLED = 0,
+  L9960_CONFIG_OTWTSDE_ENABLED,
+  L9960_CONFIG_OTWTSE_MAX,
+}l9960_config_otwtse_t;
 
 typedef enum {
   L9960_CONFIG_TVVL_0US = 0,
@@ -164,7 +164,7 @@ typedef struct {
     l9960_config_otw_t otwarn_thr_var;
     l9960_config_otsd_t otsd_thr_var;
     l9960_config_iif_t in1_in2_if;
-    l9960_config_otw_t otwarn_tsec_en;
+    l9960_config_otwtse_t otwarn_tsec_en;
     l9960_config_tvvl_t tvvl;
     l9960_config_vvl_t vvl_mode;
     l9960_config_olon_t ol_on;

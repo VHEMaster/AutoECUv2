@@ -1931,7 +1931,7 @@ static void MX_GPIO_Init(void)
                           |IGN_CH1_Pin|IGN_CH2_Pin|IGN_CH3_Pin|IGN_CH4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, MOTOR1_DIR_Pin|MOTOR2_DIR_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOF, MOTOR1_DIR_Pin|MOTOR2_DIR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, SPI6_NSS_EGT1_Pin|SPI6_NSS_EGT2_Pin, GPIO_PIN_SET);

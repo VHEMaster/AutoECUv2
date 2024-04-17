@@ -9,6 +9,7 @@
 #include "config_devices.h"
 #include "config_flexio.h"
 #include "config_output.h"
+#include "config_motor.h"
 #include "config_egt.h"
 #include "compiler.h"
 
@@ -32,7 +33,7 @@ void middlelayer_devices_init(void)
   error_t err = E_OK;
   void *device_ctx;
 
-  //TODO: Create DTC of GPIO init
+  //TODO: Create DTC of devices init
   (void)err;
 
   do {
@@ -75,6 +76,17 @@ void middlelayer_devices_init(void)
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
+    for(int i = 0; i < ECU_DEVICE_MOTOR_MAX; i++) {
+      err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_MOTOR, i, &device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_motor_init(i, (l9960_ctx_t *)device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_MOTOR, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
   } while(0);
 }

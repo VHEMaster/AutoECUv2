@@ -161,7 +161,7 @@ error_t l9966_reset(l9966_ctx_t *ctx)
   return err;
 }
 
-error_t l9966_read_version(l9966_ctx_t *ctx, l9966_ctrl_ver_t *ver)
+error_t l9966_get_version(l9966_ctx_t *ctx, l9966_ctrl_ver_t *ver)
 {
   error_t err = E_OK;
 
@@ -176,7 +176,7 @@ error_t l9966_read_version(l9966_ctx_t *ctx, l9966_ctrl_ver_t *ver)
   return err;
 }
 
-error_t l9966_read_status(l9966_ctx_t *ctx, l9966_ctrl_gs_t *status)
+error_t l9966_get_status(l9966_ctx_t *ctx, l9966_ctrl_gs_t *status)
 {
   error_t err = E_OK;
 
@@ -191,7 +191,7 @@ error_t l9966_read_status(l9966_ctx_t *ctx, l9966_ctrl_gs_t *status)
   return err;
 }
 
-error_t l9966_read_inputs(l9966_ctx_t *ctx, l9966_ctrl_dig_inputs_t *dig_inputs)
+error_t l9966_get_inputs(l9966_ctx_t *ctx, l9966_ctrl_dig_inputs_t *dig_inputs)
 {
   error_t err = E_OK;
 
@@ -242,7 +242,7 @@ error_t l9966_stop_sqncr(l9966_ctx_t *ctx)
   return err;
 }
 
-error_t l9966_read_sqncr_output(l9966_ctx_t *ctx, uint8_t cmd_index, float *sqncr_output)
+error_t l9966_get_sqncr_output(l9966_ctx_t *ctx, uint8_t cmd_index, float *sqncr_output)
 {
   error_t err = E_OK;
 
@@ -293,7 +293,7 @@ error_t l9966_poll_sc(l9966_ctx_t *ctx)
   return err;
 }
 
-error_t l9966_read_sc(l9966_ctx_t *ctx, float *sc_output)
+error_t l9966_get_sc(l9966_ctx_t *ctx, float *sc_output)
 {
   error_t err = E_OK;
 

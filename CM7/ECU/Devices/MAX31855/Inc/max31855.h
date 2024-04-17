@@ -58,6 +58,7 @@ typedef struct {
     time_delta_us_t poll_period;
     error_t comm_errorcode;
     bool comm_busy;
+    bool ready;
 }max31855_ctx_t;
 
 error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave);

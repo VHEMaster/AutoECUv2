@@ -53,7 +53,7 @@ error_t tle6240_fsm(tle6240_ctx_t *ctx)
           ctx->data = (ctx->output_temp >> 8) & 0xFF;
           err = E_AGAIN;
           continue;
-        } else if(err != E_AGAIN && err != E_BUSY) {
+        } else if(err != E_AGAIN) {
           ctx->process_fsm = TLE6240_PROCESS_RESET;
           ctx->diag.comm_status = E_IO;
         }
@@ -66,7 +66,7 @@ error_t tle6240_fsm(tle6240_ctx_t *ctx)
           ctx->ctrl = TLE6240_CTRL_CH1_CH8_ECHO;
           err = E_AGAIN;
           continue;
-        } else if(err != E_AGAIN && err != E_BUSY) {
+        } else if(err != E_AGAIN) {
           ctx->process_fsm = TLE6240_PROCESS_RESET;
           ctx->diag.comm_status = E_IO;
         }
@@ -80,7 +80,7 @@ error_t tle6240_fsm(tle6240_ctx_t *ctx)
           ctx->data = ctx->echo_value & 0xFF;
           err = E_AGAIN;
           continue;
-        } else if(err != E_AGAIN && err != E_BUSY) {
+        } else if(err != E_AGAIN) {
           ctx->process_fsm = TLE6240_PROCESS_RESET;
           ctx->diag.comm_status = E_IO;
         }
@@ -98,7 +98,7 @@ error_t tle6240_fsm(tle6240_ctx_t *ctx)
           ctx->poll_last = now;
           ctx->process_fsm = TLE6240_PROCESS_CONDITION;
 
-        } else if(err != E_AGAIN && err != E_BUSY) {
+        } else if(err != E_AGAIN) {
           ctx->process_fsm = TLE6240_PROCESS_RESET;
           ctx->diag.comm_status = E_IO;
         }
