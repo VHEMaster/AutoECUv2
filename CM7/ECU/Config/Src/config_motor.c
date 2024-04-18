@@ -22,7 +22,25 @@ typedef struct {
 }ecu_devices_motor_ctx_t;
 
 static const l9960_config_t ecu_devices_motor_config_default = {
-
+    .comm_check = L9960_CONFIG_CC_ENABLED,
+    .diag_clr_en = L9960_CONFIG_DCE_ENABLED,
+    .tsw_low_current = L9960_CONFIG_TLC_GATEFB_OR_OUTON,
+    .tdiag1 = L9960_CONFIG_TD1_45US,
+    .voltage_slew_rate = L9960_CONFIG_VSR_FAST,
+    .current_slow_rate = L9960_CONFIG_ISR_FAST,
+    .no_slew_rate = L9960_CONFIG_NOSR_NOT_ALLOWED,
+    .temp_depent_slew_rate = L9960_CONFIG_TDSR_NOT_ALLOWED,
+    .current_limit = L9960_CONFIG_CL_RANGE1,
+    .undervoltage_window = L9960_CONFIG_UVW_20US,
+    .spread_spectrum = L9960_CONFIG_SS_ENABLED,
+    .undervoltage_protection = L9960_CONFIG_UVP_DISABLED,
+    .otwarn_thr_var = L9960_CONFIG_OTW_0,
+    .otsd_thr_var = L9960_CONFIG_OTSD_0,
+    .in1_in2_if = L9960_CONFIG_IIF_PWM_DIR,
+    .otwarn_tsec_en = L9960_CONFIG_OTWTSE_DISABLED,
+    .tvvl = L9960_CONFIG_TVVL_400US,
+    .vvl_mode = L9960_CONFIG_VVL_DISABLED,
+    .ol_on = L9960_CONFIG_OLON_ENABLED,
 };
 
 static ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {

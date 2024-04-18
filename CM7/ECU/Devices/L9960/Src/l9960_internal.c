@@ -39,7 +39,7 @@ error_t l9960_serial_operation(l9960_ctx_t *ctx, l9960_request_payload_t request
   return err;
 }
 
-void l9960_set_enabled(l9960_ctx_t *ctx, bool enabled)
+void l9960_internal_set_enabled(l9960_ctx_t *ctx, bool enabled)
 {
   if(gpio_valid(&ctx->init.dis_pin)) {
     gpio_write(&ctx->init.dis_pin, !enabled);

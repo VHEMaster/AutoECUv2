@@ -29,17 +29,37 @@
 #define L9966_HWSC_TIMEOUT            (100 * TIME_US_IN_MS)
 
 typedef enum {
-  L9960_STATUS_OC_OVERCURRENT = 0,
-  L9960_STATUS_OC_OK = 2,
-  L9960_STATUS_OC_SHORT = 3,
+  L9960_STATUS_OC_OK = 0,
+  L9960_STATUS_OC_SHORT = 1,
+  L9960_STATUS_OC_OVERCURRENT = 2,
 }l9960_status_oc_t;
 
 typedef enum {
-  L9960_STATUS_OL_DISABLED = 0,
-  L9960_STATUS_OL_NOTDONE = 1,
-  L9960_STATUS_OL_OPENLOAD = 2,
-  L9960_STATUS_OL_OK = 3,
+  L9960_STATUS_OL_OK = 0,
+  L9960_STATUS_OL_OPENLOAD = 1,
+  L9960_STATUS_OL_NOTDONE = 2,
+  L9960_STATUS_OL_DISABLED = 3,
 }l9960_status_openload_t;
+
+typedef enum {
+  L9960_STATUS_CC_OK = 0,
+  L9960_STATUS_CC_FAIL
+}l9960_status_cc_t;
+
+typedef enum {
+  L9960_STATUS_OV_OK = 0,
+  L9960_STATUS_OV_FAIL
+}l9960_status_ov_t;
+
+typedef enum {
+  L9960_STATUS_UV_OK = 0,
+  L9960_STATUS_UV_FAIL
+}l9960_status_uv_t;
+
+typedef enum {
+  L9960_STATUS_OT_OK = 0,
+  L9960_STATUS_OT_FAIL
+}l9960_status_ot_t;
 
 typedef struct {
     uint16_t electronic_id;
@@ -52,23 +72,30 @@ typedef struct {
 }l9960_version_t;
 
 typedef struct {
-    union {
-        uint8_t data;
-        struct {
-            l9960_status_oc_t ocl0 : 2;
-            l9960_status_oc_t ocl1 : 2;
-            l9960_status_oc_t och0 : 2;
-            l9960_status_oc_t och1 : 2;
-        }bits;
-    }overcurrent;
-    l9960_status_openload_t openload;
-    struct {
-        l9960_resp_config5_t config5;
-        l9960_resp_states1_t states1;
-        l9960_resp_states2_t states2;
-        l9960_resp_states3_t states3;
-    }regs;
+    l9960_resp_oc_t overcurrent;
+    l9960_resp_config5_t config5;
+    l9960_resp_states1_t states1;
+    l9960_resp_states2_t states2;
+    l9960_resp_states3_t states3;
 }l9960_status_t;
+
+typedef union {
+    uint32_t data;
+    struct {
+        l9960_status_oc_t ocl0 : 2;
+        l9960_status_oc_t ocl1 : 2;
+        l9960_status_oc_t och0 : 2;
+        l9960_status_oc_t och1 : 2;
+        l9960_status_openload_t ol : 2;
+        l9960_status_cc_t cc : 1;
+        l9960_status_ov_t ov_5v: 1;
+        l9960_status_uv_t uv_5v : 1;
+        l9960_status_uv_t uv_12v : 1;
+        l9960_status_ot_t ot_warn : 1;
+        l9960_status_ot_t ot_shutdown : 1;
+
+    }bits;
+}l9960_diag_t;
 
 typedef enum {
   L9960_RESET_CONDITION = 0,
@@ -152,9 +179,11 @@ typedef struct {
 
     bool version_valid;
     bool status_valid;
+    bool diag_valid;
     l9960_version_t version;
     l9960_status_t status;
     l9960_config_t config;
+    l9960_diag_t diag;
 
     l9960_process_fsm_t process_fsm;
     l9960_reset_fsm_t reset_fsm_state;
@@ -185,12 +214,16 @@ void l9960_loop_slow(l9960_ctx_t *ctx);
 void l9960_loop_fast(l9960_ctx_t *ctx);
 
 error_t l9960_write_config(l9960_ctx_t *ctx, const l9960_config_t *config);
+
 error_t l9960_reset(l9960_ctx_t *ctx);
 error_t l9960_hwsc(l9960_ctx_t *ctx);
 error_t l9960_diagoff(l9960_ctx_t *ctx);
 
+error_t l9960_set_enabled(l9960_ctx_t *ctx, bool enabled);
+
 error_t l9960_get_version(l9960_ctx_t *ctx, l9960_version_t *ver);
 error_t l9960_get_status(l9960_ctx_t *ctx, l9960_status_t *status);
+error_t l9960_get_diagnostic(l9960_ctx_t *ctx, l9960_diag_t *diag);
 
 
 

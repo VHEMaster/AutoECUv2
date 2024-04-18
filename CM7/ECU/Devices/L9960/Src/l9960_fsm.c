@@ -17,7 +17,6 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
-  l9960_resp_oc_t resp_oc;
 
 
   while(true) {
@@ -49,11 +48,7 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
       case L9960_STATUS_REQUEST1:
         err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          resp_oc.data = ctx->response.bits.data;
-          ctx->status.overcurrent.bits.ocl0 = resp_oc.bits.ocl0;
-          ctx->status.overcurrent.bits.och0 = resp_oc.bits.och0;
-          ctx->status.overcurrent.bits.ocl1 = resp_oc.bits.ocl1;
-          ctx->status.overcurrent.bits.och1 = resp_oc.bits.och1;
+          ctx->status.overcurrent.data = ctx->response.bits.data;
 
           ctx->status_fsm_state = L9960_STATUS_REQUEST2;
           ctx->request.bits.addr = L9960_REG_ADDR_STATUS_REQ;
@@ -65,7 +60,7 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
       case L9960_STATUS_REQUEST2:
         err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          ctx->status.regs.config5.data = ctx->response.bits.data;
+          ctx->status.config5.data = ctx->response.bits.data;
 
           ctx->status_fsm_state = L9960_STATUS_REQUEST3;
           ctx->request.bits.addr = L9960_REG_ADDR_STATUS_REQ;
@@ -77,7 +72,7 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
       case L9960_STATUS_REQUEST3:
         err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          ctx->status.regs.states1.data = ctx->response.bits.data;
+          ctx->status.states1.data = ctx->response.bits.data;
           ctx->status_hwsc_update = true;
 
           ctx->status_fsm_state = L9960_STATUS_REQUEST4;
@@ -90,9 +85,7 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
       case L9960_STATUS_REQUEST4:
         err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          ctx->status.regs.states2.data = ctx->response.bits.data;
-
-          ctx->status.openload = ctx->status.regs.states2.bits.ol_on_status;
+          ctx->status.states2.data = ctx->response.bits.data;
 
           ctx->status_fsm_state = L9960_STATUS_REQUEST5;
           ctx->request.bits.addr = L9960_REG_ADDR_STATUS_REQ;
@@ -104,11 +97,24 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
       case L9960_STATUS_REQUEST5:
         err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          ctx->status.regs.states3.data = ctx->response.bits.data;
+          ctx->status.states3.data = ctx->response.bits.data;
+
+          ctx->diag.bits.ol = ctx->status.states2.bits.ol_on_status ^ 3;
+          ctx->diag.bits.ocl0 = ctx->status.overcurrent.bits.ocl0 ^ 2;
+          ctx->diag.bits.och0 = ctx->status.overcurrent.bits.och0 ^ 2;
+          ctx->diag.bits.ocl1 = ctx->status.overcurrent.bits.ocl1 ^ 2;
+          ctx->diag.bits.och1 = ctx->status.overcurrent.bits.och1 ^ 2;
+          ctx->diag.bits.cc = ctx->status.config5.bits.cc_latch_state ^ 1;
+          ctx->diag.bits.ov_5v = ctx->status.states1.bits.vdd_ov_reg;
+          ctx->diag.bits.uv_5v = ctx->status.states1.bits.vdd_uv_reg;
+          ctx->diag.bits.uv_12v = ctx->status.states1.bits.vps_uv_reg;
+          ctx->diag.bits.ot_warn = ctx->status.states2.bits.otwarn_reg;
+          ctx->diag.bits.ot_shutdown = ctx->status.states2.bits.notsd_reg ^ 1;
 
           ctx->status_fsm_state = L9960_STATUS_CONDITION;
           ctx->status_timestamp = now;
           ctx->status_valid = true;
+          ctx->diag_valid = true;
           err = E_OK;
         }
         break;
@@ -139,7 +145,7 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
     switch(ctx->reset_fsm_state) {
       case L9960_RESET_CONDITION:
         if(ctx->reset_request == true && ctx->reset_errcode == E_AGAIN) {
-          l9960_set_enabled(ctx, false);
+          l9960_internal_set_enabled(ctx, false);
           ctx->reset_fsm_state = L9960_RESET_VERSION_REQUEST1;
           ctx->request.bits.addr = L9960_REG_ADDR_ID_REQ;
           ctx->request.bits.data = L9960_REG_DATA_NONE;
@@ -264,7 +270,7 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
     switch(ctx->diagoff_fsm_state) {
       case L9960_DIAGOFF_CONDITION:
         if(ctx->diagoff_request == true && ctx->diagoff_errcode == E_AGAIN) {
-          l9960_set_enabled(ctx, false);
+          l9960_internal_set_enabled(ctx, false);
           ctx->diagoff_fsm_state = L9960_DIAGOFF_INITIAL;
           diag_req.data = 0;
           diag_req.bits.trig = 1;
@@ -379,7 +385,7 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
     switch(ctx->hwsc_fsm_state) {
       case L9960_HWSC_CONDITION:
         if(ctx->hwsc_request == true && ctx->hwsc_errcode == E_AGAIN) {
-          l9960_set_enabled(ctx, false);
+          l9960_internal_set_enabled(ctx, false);
           ctx->hwsc_fsm_state = L9960_HWSC_INITIAL;
 
           hwsc_req.data = 0;
@@ -404,7 +410,7 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
       case L9960_HWSC_STATUS:
         if(ctx->status_hwsc_update) {
           ctx->status_hwsc_update = false;
-          ctx->hwsc_status = ctx->status.regs.states1.bits.hwsc_lbist_status;
+          ctx->hwsc_status = ctx->status.states1.bits.hwsc_lbist_status;
           switch(ctx->hwsc_status) {
             case L9960_REG_HWSC_FAIL:
             case L9960_REG_HWSC_FAIL_LBIST_PASS:
