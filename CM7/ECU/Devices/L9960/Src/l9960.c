@@ -93,6 +93,52 @@ error_t l9960_reset(l9960_ctx_t *ctx)
   return err;
 }
 
+error_t l9960_hwsc(l9960_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    if(ctx->hwsc_request == false) {
+      ctx->hwsc_errcode = E_AGAIN;
+      ctx->hwsc_request = true;
+    } else if(ctx->hwsc_errcode != E_AGAIN) {
+      err = ctx->hwsc_errcode;
+      ctx->hwsc_request = false;
+    } else {
+      err = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t l9960_diagoff(l9960_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    if(ctx->diagoff_request == false) {
+      ctx->diagoff_errcode = E_AGAIN;
+      ctx->diagoff_request = true;
+    } else if(ctx->diagoff_errcode != E_AGAIN) {
+      err = ctx->diagoff_errcode;
+      ctx->diagoff_request = false;
+    } else {
+      err = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t l9960_get_version(l9960_ctx_t *ctx, l9960_version_t *ver)
 {
   error_t err = E_OK;
