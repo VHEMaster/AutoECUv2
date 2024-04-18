@@ -14,7 +14,7 @@ typedef enum {
   L9960_REG_ADDR_RESTART_TRIGGER,
   L9960_REG_ADDR_CONFIG_1,
   L9960_REG_ADDR_CONFIG_2,
-  L9960_REG_ADDR_CPMFOG_3,
+  L9960_REG_ADDR_CONFIG_3,
   L9960_REG_ADDR_CONFIG_4,
   L9960_REG_ADDR_CONFIG_REQ,
   L9960_REG_ADDR_STATUS_REQ,
@@ -324,5 +324,12 @@ typedef union {
         uint16_t reserved : 7;
     }bits;
 }l9960_resp_trace2_t;
+
+typedef struct {
+  l9960_cmd_config1_t config1;
+  l9960_cmd_config2_t config2;
+  l9960_cmd_config3_t config3;
+  l9960_cmd_config4_t config4;
+}l9960_reg_cfg_t;
 
 #endif /* DEVICES_L9960_INC_L9960_REG_H_ */

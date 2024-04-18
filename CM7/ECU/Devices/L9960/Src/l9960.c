@@ -102,15 +102,15 @@ error_t l9960_write_config(l9960_ctx_t *ctx, const l9960_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
-    if(ctx->configure_request == false) {
+    if(ctx->config_request == false) {
       if(&ctx->config != config) {
         memcpy(&ctx->config, config, sizeof(l9960_config_t));
       }
-      ctx->configure_errcode = E_AGAIN;
-      ctx->configure_request = true;
-    } else if(ctx->configure_errcode != E_AGAIN) {
-      err = ctx->configure_errcode;
-      ctx->configure_request = false;
+      ctx->config_errcode = E_AGAIN;
+      ctx->config_request = true;
+    } else if(ctx->config_errcode != E_AGAIN) {
+      err = ctx->config_errcode;
+      ctx->config_request = false;
     } else {
       err = E_AGAIN;
     }

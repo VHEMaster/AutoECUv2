@@ -149,6 +149,16 @@ typedef enum {
   L9960_PROCESS_MAX
 }l9960_process_fsm_t;
 
+typedef enum {
+  L9960_CONFIG_CONDITION = 0,
+  L9960_CONFIG_TRANSLATE,
+  L9960_CONFIG_REQUEST1,
+  L9960_CONFIG_REQUEST2,
+  L9960_CONFIG_REQUEST3,
+  L9960_CONFIG_REQUEST4,
+  L9960_CONFIG_MAX
+}l9960_config_fsm_t;
+
 typedef struct {
     spi_slave_t *spi_slave;
     gpio_t dis_pin;
@@ -173,23 +183,25 @@ typedef struct {
     error_t diagoff_errcode;
     l9960_reg_diagoff_t diagoff_status;
 
-    bool configure_request;
-    error_t configure_errcode;
-    uint8_t configure_cmd_index;
+    bool config_request;
+    error_t config_errcode;
 
     bool version_valid;
     bool status_valid;
     bool diag_valid;
     l9960_version_t version;
     l9960_status_t status;
-    l9960_config_t config;
     l9960_diag_t diag;
+
+    l9960_config_t config;
+    l9960_reg_cfg_t reg_cfg;
 
     l9960_process_fsm_t process_fsm;
     l9960_reset_fsm_t reset_fsm_state;
     l9960_status_fsm_t status_fsm_state;
     l9960_diagoff_fsm_t diagoff_fsm_state;
     l9960_hwsc_fsm_t hwsc_fsm_state;
+    l9960_config_fsm_t config_fsm_state;
 
 
     l9960_request_payload_t request;

@@ -9,6 +9,7 @@
 #include "l9960_fsm.h"
 #include "l9960_reg.h"
 #include "l9960_config.h"
+#include "l9960_cfg_reg.h"
 #include "compiler.h"
 #include "errors.h"
 #include "time.h"
@@ -43,6 +44,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_4;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       case L9960_STATUS_REQUEST1:
@@ -55,6 +60,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_NONE;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       case L9960_STATUS_REQUEST2:
@@ -67,6 +76,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_0;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       case L9960_STATUS_REQUEST3:
@@ -80,6 +93,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_1;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       case L9960_STATUS_REQUEST4:
@@ -92,6 +109,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_NONE;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       case L9960_STATUS_REQUEST5:
@@ -116,6 +137,10 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
           ctx->status_valid = true;
           ctx->diag_valid = true;
           err = E_OK;
+        } else if(err != E_AGAIN) {
+          ctx->status_valid = false;
+          ctx->status_fsm_state = L9960_STATUS_CONDITION;
+          ctx->status_timestamp = now;
         }
         break;
       default:
@@ -163,6 +188,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_0;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_VERSION_REQUEST2:
@@ -176,6 +204,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_1;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_VERSION_REQUEST3:
@@ -190,6 +221,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_NONE;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_VERSION_REQUEST4:
@@ -203,6 +237,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->request.bits.data = L9960_REG_DATA_0;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_VERSION_REQUEST5:
@@ -220,6 +257,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->request.bits.data = restart_trigger.data;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_TRIGGER:
@@ -231,6 +271,9 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
           ctx->reset_fsm_state = L9960_RESET_VERSION_VERIFY;
           err = E_AGAIN;
           continue;
+        } else if(err != E_AGAIN) {
+          ctx->reset_errcode = err;
+          ctx->reset_fsm_state = L9960_RESET_CONDITION;
         }
         break;
       case L9960_RESET_VERSION_VERIFY:
@@ -269,7 +312,7 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
 
     switch(ctx->diagoff_fsm_state) {
       case L9960_DIAGOFF_CONDITION:
-        if(ctx->diagoff_request == true && ctx->diagoff_errcode == E_AGAIN) {
+        if(ctx->initialized == true && ctx->diagoff_request == true && ctx->diagoff_errcode == E_AGAIN) {
           l9960_internal_set_enabled(ctx, false);
           ctx->diagoff_fsm_state = L9960_DIAGOFF_INITIAL;
           diag_req.data = 0;
@@ -288,6 +331,9 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
           ctx->diagoff_fsm_state = L9960_DIAGOFF_WAIT;
           ctx->diagoff_timestamp = now;
           ctx->diagoff_started = now;
+        } else if(err != E_AGAIN) {
+          ctx->diagoff_errcode = err;
+          ctx->diagoff_errcode = L9960_DIAGOFF_CONDITION;
         }
         err = E_AGAIN;
         break;
@@ -347,6 +393,9 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
             ctx->diagoff_fsm_state = L9960_DIAGOFF_DISABLE;
             continue;
           }
+        } else if(err != E_AGAIN) {
+          ctx->diagoff_errcode = err;
+          ctx->diagoff_errcode = L9960_DIAGOFF_CONDITION;
         }
         err = E_AGAIN;
         break;
@@ -361,6 +410,8 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
         err = l9960_serial_operation(ctx, ctx->request, NULL);
         if(err == E_OK) {
           ctx->diagoff_fsm_state = L9960_DIAGOFF_CONDITION;
+        } else if(err != E_AGAIN) {
+          ctx->diagoff_errcode = L9960_DIAGOFF_CONDITION;
         }
         break;
       default:
@@ -384,7 +435,7 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
 
     switch(ctx->hwsc_fsm_state) {
       case L9960_HWSC_CONDITION:
-        if(ctx->hwsc_request == true && ctx->hwsc_errcode == E_AGAIN) {
+        if(ctx->initialized == true && ctx->hwsc_request == true && ctx->hwsc_errcode == E_AGAIN) {
           l9960_internal_set_enabled(ctx, false);
           ctx->hwsc_fsm_state = L9960_HWSC_INITIAL;
 
@@ -405,6 +456,9 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
           ctx->hwsc_fsm_state = L9960_HWSC_STATUS;
           ctx->status_hwsc_update = false;
           ctx->hwsc_started = now;
+        } else if(err != E_AGAIN) {
+          ctx->hwsc_errcode = err;
+          ctx->hwsc_fsm_state = L9960_HWSC_CONDITION;
         }
         break;
       case L9960_HWSC_STATUS:
@@ -464,7 +518,117 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
         err = l9960_serial_operation(ctx, ctx->request, NULL);
         if(err == E_OK) {
           ctx->hwsc_fsm_state = L9960_HWSC_CONDITION;
+        } else if(err != E_AGAIN) {
+          ctx->hwsc_fsm_state = L9960_HWSC_CONDITION;
         }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
+static error_t l9960_fsm_configure(l9960_ctx_t *ctx)
+{
+  error_t err;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->config_fsm_state) {
+      case L9960_CONFIG_CONDITION:
+        if(ctx->initialized == true && ctx->config_request == true && ctx->config_errcode == E_AGAIN) {
+          ctx->config_fsm_state = L9960_CONFIG_TRANSLATE;
+          err = E_AGAIN;
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case L9960_CONFIG_TRANSLATE:
+        err = l9960_cfg_reg_translate(ctx);
+        if(err == E_OK) {
+          ctx->config_fsm_state = L9960_CONFIG_REQUEST1;
+          ctx->request.bits.addr = L9960_REG_ADDR_CONFIG_1;
+          ctx->request.bits.data = ctx->reg_cfg.config1.data;
+          err = E_AGAIN;
+          continue;
+        } else {
+          ctx->config_errcode = err;
+          ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+        }
+        break;
+      case L9960_CONFIG_REQUEST1:
+        err = l9960_serial_operation(ctx, ctx->request, NULL);
+        if(err == E_OK) {
+          ctx->config_fsm_state = L9960_CONFIG_REQUEST2;
+          ctx->request.bits.addr = L9960_REG_ADDR_CONFIG_2;
+          ctx->request.bits.data =  ctx->reg_cfg.config2.data;
+          err = E_AGAIN;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->config_errcode = err;
+          ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+        }
+        break;
+      case L9960_CONFIG_REQUEST2:
+        err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
+        if(err == E_OK) {
+          if(ctx->response.bits.addr == L9960_REG_ADDR_CONFIG_1 && ctx->response.bits.data == 0) {
+            ctx->config_fsm_state = L9960_CONFIG_REQUEST3;
+            ctx->request.bits.addr = L9960_REG_ADDR_CONFIG_3;
+            ctx->request.bits.data =  ctx->reg_cfg.config3.data;
+            err = E_AGAIN;
+            continue;
+          } else {
+            err = E_BADRESP;
+            ctx->config_errcode = err;
+            ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+          }
+        } else if(err != E_AGAIN) {
+          ctx->config_errcode = err;
+          ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+        }
+        break;
+      case L9960_CONFIG_REQUEST3:
+        err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
+        if(err == E_OK) {
+          if(ctx->response.bits.addr == L9960_REG_ADDR_CONFIG_2 && ctx->response.bits.data == 0) {
+            ctx->config_fsm_state = L9960_CONFIG_REQUEST4;
+            ctx->request.bits.addr = L9960_REG_ADDR_CONFIG_4;
+            ctx->request.bits.data =  ctx->reg_cfg.config4.data;
+            err = E_AGAIN;
+            continue;
+          } else {
+            err = E_BADRESP;
+            ctx->config_errcode = err;
+            ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+          }
+        } else if(err != E_AGAIN) {
+          ctx->config_errcode = err;
+          ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+        }
+        break;
+      case L9960_CONFIG_REQUEST4:
+        err = l9960_serial_operation(ctx, ctx->request, &ctx->response);
+        if(err == E_OK) {
+            if(ctx->response.bits.addr == L9960_REG_ADDR_CONFIG_3 && ctx->response.bits.data == 0) {
+            ctx->config_errcode = err;
+            ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+            ctx->configured = true;
+          } else {
+            err = E_BADRESP;
+            ctx->config_errcode = err;
+            ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+          }
+        } else if(err != E_AGAIN) {
+          ctx->config_errcode = err;
+          ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+        }
+        break;
         break;
       default:
         break;
@@ -496,7 +660,7 @@ error_t l9960_fsm(l9960_ctx_t *ctx)
         err = l9960_fsm_hwsc(ctx);
         break;
       case L9960_PROCESS_CONFIGURE:
-        //err = l9960_fsm_configure(ctx);
+        err = l9960_fsm_configure(ctx);
         break;
       default:
         break;

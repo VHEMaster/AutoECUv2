@@ -13,7 +13,7 @@
 
 typedef struct {
     ecu_spi_slave_enum_t slave_index;
-    l9960_config_t config;
+    l9960_config_t config_default;
     l9960_init_ctx_t init;
     gpio_t dir_pin;
     TIM_HandleTypeDef *htim_pwm;
@@ -52,7 +52,7 @@ static ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {
       .dir_pin = { .port = MOTOR1_DIR_GPIO_Port, .pin = MOTOR1_DIR_Pin },
       .htim_pwm = &htim8,
       .channel_pwm = TIM_CHANNEL_4,
-      .config = ecu_devices_motor_config_default,
+      .config_default = ecu_devices_motor_config_default,
     },
     {
       .slave_index = ECU_SPI_SLAVE_OUTSM2,
@@ -62,7 +62,7 @@ static ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {
       .dir_pin = { .port = MOTOR2_DIR_GPIO_Port, .pin = MOTOR2_DIR_Pin },
       .htim_pwm = &htim8,
       .channel_pwm = TIM_CHANNEL_3,
-      .config = ecu_devices_motor_config_default,
+      .config_default = ecu_devices_motor_config_default,
     },
 };
 
@@ -86,6 +86,8 @@ error_t ecu_devices_motor_init(ecu_device_motor_t instance, l9960_ctx_t *ctx)
 
     err = l9960_init(motor_ctx->ctx, &motor_ctx->init);
     BREAK_IF(err != E_OK);
+
+    memcpy(&motor_ctx->ctx->config, &motor_ctx->config_default, sizeof(l9960_config_t));
 
   } while(0);
 
