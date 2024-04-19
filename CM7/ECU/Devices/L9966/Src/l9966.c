@@ -97,7 +97,8 @@ error_t l9966_write_config(l9966_ctx_t *ctx, const l9966_config_t *config)
       }
       ctx->configure_errcode = E_AGAIN;
       ctx->configure_request = true;
-    } else if(ctx->configure_errcode != E_AGAIN) {
+    }
+    if(ctx->configure_errcode != E_AGAIN) {
       err = ctx->configure_errcode;
       ctx->configure_request = false;
     } else {
@@ -148,7 +149,8 @@ error_t l9966_reset(l9966_ctx_t *ctx)
     if(ctx->reset_request == false) {
       ctx->reset_errcode = E_AGAIN;
       ctx->reset_request = true;
-    } else if(ctx->reset_errcode != E_AGAIN) {
+    }
+    if(ctx->reset_errcode != E_AGAIN) {
       err = ctx->reset_errcode;
       ctx->reset_request = false;
     } else {

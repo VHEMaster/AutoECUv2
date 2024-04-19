@@ -108,7 +108,8 @@ error_t l9960_write_config(l9960_ctx_t *ctx, const l9960_config_t *config)
       }
       ctx->config_errcode = E_AGAIN;
       ctx->config_request = true;
-    } else if(ctx->config_errcode != E_AGAIN) {
+    }
+    if(ctx->config_errcode != E_AGAIN) {
       err = ctx->config_errcode;
       ctx->config_request = false;
     } else {
