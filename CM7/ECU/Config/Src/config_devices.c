@@ -11,7 +11,7 @@
 #define ECU_DEVICES_MAX (     \
     ECU_DEVICE_EGT_MAX +      \
     ECU_DEVICE_FLEXIO_MAX +   \
-    ECU_DEVICE_LAMBDA_MAX +   \
+    ECU_DEVICE_WBLS_MAX +   \
     ECU_DEVICE_STEPPER_MAX +  \
     ECU_DEVICE_OUTPUT_MAX +   \
     ECU_DEVICE_MOTOR_MAX)
@@ -43,7 +43,7 @@ typedef struct {
 
 static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_EGT_MAX] = {0};
 static l9966_ctx_t ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_MAX] = {0};
-static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_LAMBDA_MAX] = {0};
+static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX] = {0};
 static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX] = {0};
 static tle6240_ctx_t ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_MAX] = {0};
 static l9960_ctx_t ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_MAX] = {0};
@@ -66,7 +66,7 @@ static ecu_config_devices_t ecu_config_devices = {
             .loop_main = (ecu_device_loop_func_t)cj125_loop_main,
             .loop_slow = (ecu_device_loop_func_t)cj125_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)cj125_loop_fast,
-            .instance_max = ECU_DEVICE_LAMBDA_MAX,
+            .instance_max = ECU_DEVICE_WBLS_MAX,
         }, //ECU_DEVICE_TYPE_LAMBDA
         {
             .loop_main = (ecu_device_loop_func_t)tle4729_loop_main,
@@ -109,14 +109,14 @@ static ecu_config_devices_t ecu_config_devices = {
             .ctx = &ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_2],
         },
         {
-            .type = ECU_DEVICE_TYPE_LAMBDA,
-            .instance = ECU_DEVICE_LAMBDA_1,
-            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_LAMBDA_1],
+            .type = ECU_DEVICE_TYPE_WBLS,
+            .instance = ECU_DEVICE_WBLS_1,
+            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBLS_1],
         },
         {
-            .type = ECU_DEVICE_TYPE_LAMBDA,
-            .instance = ECU_DEVICE_LAMBDA_2,
-            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_LAMBDA_2],
+            .type = ECU_DEVICE_TYPE_WBLS,
+            .instance = ECU_DEVICE_WBLS_2,
+            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBLS_2],
         },
         {
             .type = ECU_DEVICE_TYPE_STEPPER,
@@ -283,9 +283,9 @@ error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **c
   return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_FLEXIO, instance, (void**)ctx);
 }
 
-error_t ecu_devices_get_lambda_ctx(ecu_device_lambda_t instance, cj125_ctx_t **ctx)
+error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx)
 {
-  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_LAMBDA, instance, (void**)ctx);
+  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_WBLS, instance, (void**)ctx);
 }
 
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx)

@@ -50,6 +50,29 @@ typedef enum {
   CJ125_PROCESS_MAX,
 }cj125_process_fsm_t;
 
+typedef enum {
+  CJ125_RESET_CONDITION = 0,
+  CJ125_RESET_IDENT,
+  CJ125_RESET_CHECK,
+  CJ125_RESET_REQUEST,
+  CJ125_RESET_MAX,
+}cj125_reset_fsm_t;
+
+typedef enum {
+  CJ125_DIAG_CONDITION = 0,
+  CJ125_DIAG_MAX,
+}cj125_diag_fsm_t;
+
+typedef enum {
+  CJ125_CONFIG_CONDITION = 0,
+  CJ125_CONFIG_MAX,
+}cj125_config_fsm_t;
+
+typedef enum {
+  CJ125_CALIB_CONDITION = 0,
+  CJ125_CALIB_MAX,
+}cj125_calib_fsm_t;
+
 typedef struct cj125_ctx_tag cj125_ctx_t;
 typedef void (*cj125_pid_cb_t)(cj125_ctx_t *ctx, time_us_t timestamp, void *usrdata);
 
@@ -115,10 +138,14 @@ typedef struct cj125_ctx_tag {
     cj125_regs_t regs;
     bool spi_busy;
     bool ready;
+    bool initialized;
     bool configured;
 
     bool calib_request;
     bool calib_accept;
+
+    bool reset_request;
+    error_t reset_errcode;
 
     bool config_request;
     error_t config_errcode;
@@ -130,6 +157,10 @@ typedef struct cj125_ctx_tag {
     cj125_data_t data;
 
     cj125_process_fsm_t process_fsm;
+    cj125_reset_fsm_t reset_fsm;
+    cj125_diag_fsm_t diag_fsm;
+    cj125_config_fsm_t config_fsm;
+    cj125_calib_fsm_t calib_fsm;
 
     cj125_payload_t request;
     cj125_payload_t response;
@@ -147,6 +178,7 @@ void cj125_loop_main(cj125_ctx_t *ctx);
 void cj125_loop_slow(cj125_ctx_t *ctx);
 void cj125_loop_fast(cj125_ctx_t *ctx);
 
+error_t cj125_reset(cj125_ctx_t *ctx);
 error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config);
 error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
 error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled);
@@ -154,6 +186,7 @@ error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled);
 error_t cj125_update_ref(cj125_ctx_t *ctx, float ref_voltage);
 error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage);
 error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage);
-error_t cj125_get_data(cj125_ctx_t *ctx, const cj125_data_t *data);
+error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data);
+error_t cj125_get_version(cj125_ctx_t *ctx, uint8_t *data);
 
 #endif /* DRIVERS_CJ125_INC_CJ125_H_ */

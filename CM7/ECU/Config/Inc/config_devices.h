@@ -19,7 +19,7 @@
 typedef enum {
   ECU_DEVICE_TYPE_EGT = 0,
   ECU_DEVICE_TYPE_FLEXIO,
-  ECU_DEVICE_TYPE_LAMBDA,
+  ECU_DEVICE_TYPE_WBLS,
   ECU_DEVICE_TYPE_STEPPER,
   ECU_DEVICE_TYPE_OUTPUT,
   ECU_DEVICE_TYPE_MOTOR,
@@ -42,10 +42,10 @@ typedef enum {
 }ecu_device_flexio_t;
 
 typedef enum {
-  ECU_DEVICE_LAMBDA_1 = 0,
-  ECU_DEVICE_LAMBDA_2,
-  ECU_DEVICE_LAMBDA_MAX
-}ecu_device_lambda_t;
+  ECU_DEVICE_WBLS_1 = 0,
+  ECU_DEVICE_WBLS_2,
+  ECU_DEVICE_WBLS_MAX
+}ecu_device_wbls_t;
 
 typedef enum {
   ECU_DEVICE_STEPPER_1 = 0,
@@ -74,7 +74,7 @@ error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_in
 
 error_t ecu_devices_get_egt_ctx(ecu_device_egt_t instance, max31855_ctx_t **ctx);
 error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **ctx);
-error_t ecu_devices_get_lambda_ctx(ecu_device_lambda_t instance, cj125_ctx_t **ctx);
+error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx);
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx);
 error_t ecu_devices_get_output_ctx(ecu_device_output_t instance, tle6240_ctx_t **ctx);
 error_t ecu_devices_get_motor_ctx(ecu_device_motor_t instance, l9960_ctx_t **ctx);

@@ -87,6 +87,29 @@ void cj125_loop_fast(cj125_ctx_t *ctx)
   }
 }
 
+error_t cj125_reset(cj125_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    if(ctx->reset_request == false) {
+      ctx->reset_errcode = E_AGAIN;
+      ctx->reset_request = true;
+    } else if(ctx->reset_errcode != E_AGAIN) {
+      err = ctx->reset_errcode;
+      ctx->reset_request = false;
+    } else {
+      err = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config)
 {
   error_t err = E_OK;
@@ -98,6 +121,7 @@ error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config)
     BREAK_IF_ACTION(config->res_to_temp_relation.items == 0 || config->res_to_temp_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->pump_ref_current >= CJ125_CONFIG_PRC_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->config_request == false) {
       if(&ctx->config != config) {
@@ -124,6 +148,8 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || ampfactor >= CJ125_AF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->ampfactor_request == false) {
       if(ctx->ampfactor != ampfactor) {
@@ -153,6 +179,7 @@ error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->calib_accept != ctx->calib_request) {
       err = E_AGAIN;
@@ -208,14 +235,31 @@ error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage)
   return err;
 }
 
-error_t cj125_get_data(cj125_ctx_t *ctx, const cj125_data_t *data)
+error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+  } while(0);
+
+  return err;
+}
+
+error_t cj125_get_version(cj125_ctx_t *ctx, uint8_t *data)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+
+    *data = ctx->regs.ident.data;
 
   } while(0);
 
