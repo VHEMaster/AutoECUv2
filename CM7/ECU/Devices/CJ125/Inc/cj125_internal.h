@@ -11,6 +11,6 @@
 #include "cj125.h"
 
 error_t cj125_serial_operation(cj125_ctx_t *ctx, cj125_payload_t request, cj125_payload_t *response);
-error_t cj125_update_data(cj125_ctx_t *ctx);
+error_t cj125_update_data(cj125_ctx_t *ctx, bool force);
 
 #endif /* DEVICES_CJ125GP_INC_CJ125_INTERNAL_H_ */

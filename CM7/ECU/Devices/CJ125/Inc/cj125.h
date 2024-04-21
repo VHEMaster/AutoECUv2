@@ -15,15 +15,21 @@
 
 #include "cj125_reg.h"
 
-#define CJ125_SPI_MODE                  (SPI_MODE_1)
+#define CJ125_SPI_MODE                          (SPI_MODE_1)
 
-#define CJ125_RELATION_ITEMS_MAX        (32)
-#define CJ125_DIAG_POLL_PERIOD_US       (100 * TIME_US_IN_MS)
-#define CJ125_PID_CB_DEFAULT_PERIOD_US  (5 * TIME_US_IN_MS)
+#define CJ125_RELATION_ITEMS_MAX                (32)
+#define CJ125_DIAG_POLL_PERIOD_US               (100 * TIME_US_IN_MS)
+#define CJ125_PID_CB_DEFAULT_PERIOD_US          (5 * TIME_US_IN_MS)
+
+#define CJ125_CALIBRATION_SAMPLES_TO_IGNORE     (3)
+#define CJ125_CALIBRATION_MIN_SAMPLES           (10)
+#define CJ125_CALIBRATION_MIN_PERIOD_US         (50 * TIME_US_IN_MS)
+#define CJ125_CALIBRATION_TIMEOUT_US            (200 * TIME_US_IN_MS)
 
 typedef enum {
-  CJ125_AF_8 = 8,
-  CJ125_AF_17 = 17
+  CJ125_AF_8 = 0,
+  CJ125_AF_17,
+  CJ125_AF_MAX
 }cj125_af_t;
 
 typedef enum {
@@ -46,6 +52,7 @@ typedef enum {
   CJ125_PROCESS_RESET = 0,
   CJ125_PROCESS_CONFIGURE,
   CJ125_PROCESS_DIAG,
+  CJ125_PROCESS_CALIBRATE,
   CJ125_PROCESS_MAX,
 }cj125_process_fsm_t;
 
@@ -69,6 +76,11 @@ typedef enum {
 
 typedef enum {
   CJ125_CALIB_CONDITION = 0,
+  CJ125_CALIB_INIT_READ,
+  CJ125_CALIB_INIT_WRITE,
+  CJ125_CALIB_SAMPLE,
+  CJ125_CALIB_INIT_RESTORE,
+  CJ125_CALIB_CALCULATE,
   CJ125_CALIB_MAX,
 }cj125_calib_fsm_t;
 
@@ -143,15 +155,25 @@ typedef struct cj125_ctx_tag {
     bool ready;
     bool initialized;
     bool configured;
-
-    bool calib_request;
-    bool calib_accept;
+    bool calibrated;
 
     bool reset_request;
     error_t reset_errcode;
 
     bool config_request;
     error_t config_errcode;
+
+    bool calib_request;
+    error_t calib_errcode;
+    bool calib_ok;
+
+    time_us_t calib_timestamp;
+    uint16_t calib_ignored;
+    uint16_t calib_samples;
+    float calib_ur_voltage;
+    float calib_ua_voltage;
+    float calib_ref_voltage;
+    uint8_t calib_init1_byte;
 
     bool ampfactor_request;
     error_t ampfactor_errcode;
@@ -176,6 +198,8 @@ typedef struct cj125_ctx_tag {
 
     bool ua_updated;
     bool ur_updated;
+    bool ref_ua_updated;
+    bool ref_ur_updated;
     bool data_lambda_valid;
     bool data_temp_valid;
 

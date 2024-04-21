@@ -64,7 +64,7 @@ void cj125_loop_slow(cj125_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
     if(ctx->ready && ctx->configured) {
-      err = cj125_update_data(ctx);
+      err = cj125_update_data(ctx, false);
       BREAK_IF(err != E_OK);
     }
   } while(0);
@@ -128,6 +128,7 @@ error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config)
     BREAK_IF_ACTION(config->curr_to_lambda_relation.items == 0 || config->curr_to_lambda_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->res_to_temp_relation.items == 0 || config->res_to_temp_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->pump_ref_current >= CJ125_CONFIG_PRC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->ampfactor >= CJ125_AF_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
@@ -158,6 +159,7 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ampfactor >= CJ125_AF_MAX, err = E_PARAM);
 
     if(ctx->ampfactor_request == false) {
       if(ctx->ampfactor != ampfactor) {
@@ -189,10 +191,13 @@ error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
-    if(ctx->calib_accept != ctx->calib_request) {
-      err = E_AGAIN;
-    } else if(enabled != ctx->calib_request) {
-      ctx->calib_request = enabled;
+    if(ctx->calib_request == false) {
+      ctx->calib_errcode = E_AGAIN;
+      ctx->calib_request = true;
+    } else if(ctx->calib_errcode != E_AGAIN) {
+      err = ctx->calib_errcode;
+      ctx->calib_request = false;
+    } else {
       err = E_AGAIN;
     }
 
@@ -209,6 +214,8 @@ error_t cj125_update_ref(cj125_ctx_t *ctx, float ref_voltage)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
     ctx->data.ref_voltage = ref_voltage;
+    ctx->ref_ur_updated = true;
+    ctx->ref_ua_updated = true;
 
   } while(0);
 
@@ -222,10 +229,8 @@ error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    if(ctx->data.ur_voltage != ur_voltage) {
-      ctx->data.ur_voltage = ur_voltage;
-      ctx->ur_updated = true;
-    }
+    ctx->data.ur_voltage = ur_voltage;
+    ctx->ur_updated = true;
 
   } while(0);
 
@@ -239,10 +244,8 @@ error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    if(ctx->data.ua_voltage != ua_voltage) {
-      ctx->data.ua_voltage = ua_voltage;
-      ctx->ua_updated = true;
-    }
+    ctx->data.ua_voltage = ua_voltage;
+    ctx->ua_updated = true;
 
   } while(0);
 
@@ -258,9 +261,11 @@ error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->data_temp_valid && ctx->data_lambda_valid, err = E_AGAIN);
 
     memcpy(data, &ctx->data, sizeof(cj125_data_t));
+
+    BREAK_IF_ACTION(ctx->calibrated == false, err = E_AGAIN);
+    BREAK_IF_ACTION(ctx->data_temp_valid && ctx->data_lambda_valid, err = E_AGAIN);
 
   } while(0);
 
