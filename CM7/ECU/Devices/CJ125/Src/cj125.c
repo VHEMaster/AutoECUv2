@@ -8,6 +8,7 @@
 #include <string.h>
 #include "cj125.h"
 #include "cj125_fsm.h"
+#include "cj125_internal.h"
 #include "compiler.h"
 
 static void cj125_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
@@ -57,7 +58,16 @@ void cj125_loop_main(cj125_ctx_t *ctx)
 
 void cj125_loop_slow(cj125_ctx_t *ctx)
 {
+  error_t err = E_OK;
 
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    if(ctx->ready && ctx->configured) {
+      err = cj125_update_data(ctx);
+      BREAK_IF(err != E_OK);
+    }
+  } while(0);
 }
 
 void cj125_loop_fast(cj125_ctx_t *ctx)
@@ -78,7 +88,6 @@ void cj125_loop_fast(cj125_ctx_t *ctx)
         }
       }
     }
-
 
   } while(0);
 
@@ -116,7 +125,6 @@ error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(config->ampfactor >= CJ125_AF_MAX , err = E_PARAM);
     BREAK_IF_ACTION(config->curr_to_lambda_relation.items == 0 || config->curr_to_lambda_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->res_to_temp_relation.items == 0 || config->res_to_temp_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->pump_ref_current >= CJ125_CONFIG_PRC_MAX, err = E_PARAM);
@@ -147,7 +155,7 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
   error_t err = E_OK;
 
   do {
-    BREAK_IF_ACTION(ctx == NULL || ampfactor >= CJ125_AF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
@@ -214,7 +222,10 @@ error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    ctx->data.ur_voltage = ur_voltage;
+    if(ctx->data.ur_voltage != ur_voltage) {
+      ctx->data.ur_voltage = ur_voltage;
+      ctx->ur_updated = true;
+    }
 
   } while(0);
 
@@ -228,7 +239,10 @@ error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    ctx->data.ua_voltage = ua_voltage;
+    if(ctx->data.ua_voltage != ua_voltage) {
+      ctx->data.ua_voltage = ua_voltage;
+      ctx->ua_updated = true;
+    }
 
   } while(0);
 
@@ -244,6 +258,9 @@ error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->data_temp_valid && ctx->data_lambda_valid, err = E_AGAIN);
+
+    memcpy(data, &ctx->data, sizeof(cj125_data_t));
 
   } while(0);
 

@@ -9,7 +9,6 @@
 #define COMMON_INC_TIME_H_
 
 #include <stdint.h>
-#include "main.h"
 
 #define TIME_NOW    time_get_current_us
 

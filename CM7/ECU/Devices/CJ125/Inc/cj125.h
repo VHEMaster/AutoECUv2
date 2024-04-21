@@ -22,9 +22,8 @@
 #define CJ125_PID_CB_DEFAULT_PERIOD_US  (5 * TIME_US_IN_MS)
 
 typedef enum {
-  CJ125_AF_8 = 0,
-  CJ125_AF_17,
-  CJ125_AF_MAX
+  CJ125_AF_8 = 8,
+  CJ125_AF_17 = 17
 }cj125_af_t;
 
 typedef enum {
@@ -100,9 +99,11 @@ typedef struct {
 typedef struct {
     cj125_config_relation_t res_to_temp_relation;
     cj125_config_relation_t curr_to_lambda_relation;
+    bool temp_ref_resistance_override;
     float temp_ref_resistance;
     float temp_ref_res_max_deviation;
     float shunt_resistance;
+    float pushpull_resistance;
     cj125_af_t ampfactor;
     cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
@@ -117,10 +118,12 @@ typedef struct {
     float heat_ref_voltage;
     float heat_ref_temp;
     float heat_ref_resistance;
+    float heat_resistance;
 
     cj125_af_t ampfactor;
     float lambda_ref_voltage;
     float lambda_radj;
+    float lambda_current;
 
     float ref_voltage;
     float ur_voltage;
@@ -171,6 +174,11 @@ typedef struct cj125_ctx_tag {
     time_us_t diag_timestamp;
     time_us_t pid_cb_timestamp;
 
+    bool ua_updated;
+    bool ur_updated;
+    bool data_lambda_valid;
+    bool data_temp_valid;
+
 }cj125_ctx_t;
 
 error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx);
@@ -182,6 +190,7 @@ error_t cj125_reset(cj125_ctx_t *ctx);
 error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config);
 error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
 error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled);
+
 
 error_t cj125_update_ref(cj125_ctx_t *ctx, float ref_voltage);
 error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage);
