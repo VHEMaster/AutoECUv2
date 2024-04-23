@@ -8,6 +8,7 @@
 #include <string.h>
 #include "cj125.h"
 #include "cj125_fsm.h"
+#include "cj125_heater.h"
 #include "cj125_internal.h"
 #include "compiler.h"
 
@@ -51,6 +52,71 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
   return err;
 }
 
+error_t cj125_heater_init(cj125_ctx_t *ctx, const cj125_heater_t *heater_cfg)
+{
+  error_t err = E_OK;;
+  HAL_StatusTypeDef status;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || heater_cfg == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(heater_cfg->heater_pwm == NULL || heater_cfg->tim_base_freq == 0, err = E_PARAM);
+
+    memcpy(&ctx->heater, heater_cfg, sizeof(cj125_heater_t));
+
+    if(gpio_valid(&ctx->heater.heater_en_pin)) {
+      gpio_reset(&ctx->heater.heater_en_pin);
+    }
+    if(gpio_valid(&ctx->heater.heater_nen_pin)) {
+      gpio_set(&ctx->heater.heater_nen_pin);
+    }
+
+    ctx->heater.tim_pulse = NULL;
+    switch(ctx->heater.heater_pwm_ch) {
+      case TIM_CHANNEL_1:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR1;
+        break;
+      case TIM_CHANNEL_2:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR2;
+        break;
+      case TIM_CHANNEL_3:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR3;
+        break;
+      case TIM_CHANNEL_4:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR4;
+        break;
+      case TIM_CHANNEL_5:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR5;
+        break;
+      case TIM_CHANNEL_6:
+        ctx->heater.tim_pulse = &ctx->heater.heater_pwm->Instance->CCR6;
+        break;
+      default:
+        break;
+    }
+    BREAK_IF_ACTION(ctx->heater.tim_pulse == NULL, err = E_FAULT);
+
+    *ctx->heater.tim_pulse = 0;
+
+    ctx->heater.tim_prescaler = ctx->heater.tim_base_freq / 1000000;
+    ctx->heater.tim_period = 1000000 / CJ125_HEATER_FREQ;
+    if(ctx->heater.heater_pwm->Init.Prescaler != (ctx->heater.tim_prescaler - 1) ||
+        ctx->heater.heater_pwm->Init.Period != (ctx->heater.tim_period - 1)) {
+      ctx->heater.heater_pwm->Init.Prescaler = ctx->heater.tim_prescaler - 1;
+      ctx->heater.heater_pwm->Init.Period = ctx->heater.tim_period - 1;
+      status = HAL_TIM_Base_Init(ctx->heater.heater_pwm);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    }
+
+    status = HAL_TIM_PWM_Start(ctx->heater.heater_pwm, ctx->heater.heater_pwm_ch);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    ctx->heater_ready = true;
+
+  } while(0);
+
+  return err;
+}
+
 void cj125_loop_main(cj125_ctx_t *ctx)
 {
 
@@ -63,30 +129,26 @@ void cj125_loop_slow(cj125_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
+    err = cj125_update_heater_voltage(ctx);
+    BREAK_IF(err != E_OK);
+
     if(ctx->ready && ctx->configured) {
       err = cj125_update_data(ctx, false);
       BREAK_IF(err != E_OK);
     }
+
   } while(0);
 }
 
 void cj125_loop_fast(cj125_ctx_t *ctx)
 {
   error_t err = E_OK;
-  time_us_t now = time_get_current_us();
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
     if(ctx->ready) {
       err = cj125_fsm(ctx);
-      if(ctx->configured) {
-        if(time_diff(now, ctx->pid_cb_timestamp) >= ctx->config.pid_cb_period) {
-          if(ctx->config.pid_cb != NULL) {
-            ctx->config.pid_cb(ctx, now, ctx->config.pid_cb_usrdata);
-          }
-        }
-      }
     }
 
   } while(0);
@@ -182,7 +244,7 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
   return err;
 }
 
-error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled)
+error_t cj125_calibrate(cj125_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -206,46 +268,28 @@ error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled)
   return err;
 }
 
-error_t cj125_update_ref(cj125_ctx_t *ctx, float ref_voltage)
+error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages)
 {
   error_t err = E_OK;
+  time_us_t now;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    ctx->data.ref_voltage = ref_voltage;
+    ctx->data.pwr_voltage = voltages->pwr;
+
+    ctx->data.ref_voltage = voltages->ref;
     ctx->ref_ur_updated = true;
     ctx->ref_ua_updated = true;
 
-  } while(0);
-
-  return err;
-}
-
-error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-
-    ctx->data.ur_voltage = ur_voltage;
+    ctx->data.ur_voltage = voltages->ur;
     ctx->ur_updated = true;
 
-  } while(0);
-
-  return err;
-}
-
-error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-
-    ctx->data.ua_voltage = ua_voltage;
+    ctx->data.ua_voltage = voltages->ua;
     ctx->ua_updated = true;
+
+    now = time_get_current_us();
+    ctx->voltages_timestamp = now;
 
   } while(0);
 
@@ -282,6 +326,37 @@ error_t cj125_get_version(cj125_ctx_t *ctx, uint8_t *data)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     *data = ctx->regs.ident.data;
+
+  } while(0);
+
+  return err;
+}
+
+error_t cj125_get_diag(cj125_ctx_t *ctx, cj125_diag_t *diag)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->diag_valid, err = E_AGAIN);
+
+    memcpy(diag, &ctx->diag, sizeof(cj125_diag_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t cj125_set_heatup(cj125_ctx_t *ctx, cj125_heatup_type_t type)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || type >= CJ125_HEATUP_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    ctx->heatup_type = type;
 
   } while(0);
 

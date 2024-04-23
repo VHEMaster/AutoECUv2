@@ -30,6 +30,8 @@
 #define BREAKPOINT(x) __BKPT((x))
 #define BREAK_IF_ACTION(condition, action) { if((condition)) { {action;} break; } }
 #define BREAK_IF(condition) { if((condition)) { break; } }
+#define RETURN_IF_ACTION(condition, errcode, action) { if((condition)) { {action;} return (errcode); } }
+#define RETURN_IF(condition, errcode) { if((condition)) { return (errcode); } }
 #define PARITY_ODD_CHECK(value) __builtin_parity((value))
 
 #if __CORTEX_M == (7)

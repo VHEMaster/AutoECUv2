@@ -100,4 +100,3 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
 
   return err;
 }
-

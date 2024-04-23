@@ -25,6 +25,11 @@
 #define CJ125_CALIBRATION_MIN_SAMPLES           (10)
 #define CJ125_CALIBRATION_MIN_PERIOD_US         (50 * TIME_US_IN_MS)
 #define CJ125_CALIBRATION_TIMEOUT_US            (200 * TIME_US_IN_MS)
+#define CJ125_VOLTAGES_TIMEOUT_US               (500 * TIME_US_IN_MS)
+
+#define CJ125_HEATER_MINIMUM_POWER_VOLTAGE      (5.0f)
+#define CJ125_HEATER_PID_PERIOD_US              (5 * TIME_US_IN_MS)
+#define CJ125_HEATER_FREQ                       (200)
 
 typedef enum {
   CJ125_AF_8 = 0,
@@ -38,6 +43,29 @@ typedef enum {
   CJ125_DIAG_NOPOWER,
   CJ125_DIAG_SHORTGND,
 }cj125_diag_enum_t;
+
+typedef enum {
+  CJ125_HEATUP_TYPE_OFF = 0,
+  CJ125_HEATUP_TYPE_PREHEAT,
+  CJ125_HEATUP_TYPE_OPERATING,
+  CJ125_HEATUP_TYPE_MAX
+}cj125_heatup_type_t;
+
+typedef enum {
+  CJ125_HEATUP_STATUS_OFF = 0,
+  CJ125_HEATUP_STATUS_PREHEAT,
+  CJ125_HEATUP_STATUS_HEATUP,
+  CJ125_HEATUP_STATUS_OPERATING,
+  CJ125_HEATUP_STATUS_MAX
+}cj125_heatup_status_t;
+
+typedef enum {
+  CJ125_OPERATING_STATUS_IDLE = 0,
+  CJ125_OPERATING_STATUS_CALIBRATION,
+  CJ125_OPERATING_STATUS_HEATUP,
+  CJ125_OPERATING_STATUS_OPERATING,
+  CJ125_OPERATING_STATUS_ERROR,
+}cj125_operating_status_t;
 
 typedef enum {
   CJ125_CONFIG_PRC_OFF = 0,
@@ -85,7 +113,7 @@ typedef enum {
 }cj125_calib_fsm_t;
 
 typedef struct cj125_ctx_tag cj125_ctx_t;
-typedef void (*cj125_pid_cb_t)(cj125_ctx_t *ctx, time_us_t timestamp, void *usrdata);
+typedef void (*cj125_cb_t)(cj125_ctx_t *ctx, void *usrdata);
 
 typedef union {
     uint8_t byte;
@@ -103,10 +131,29 @@ typedef struct {
 }cj125_init_ctx_t;
 
 typedef struct {
+    float pwr;
+    float ref;
+    float ua;
+    float ur;
+}cj125_voltages_t;
+
+typedef struct {
     uint8_t items;
     float input[CJ125_RELATION_ITEMS_MAX];
     float output[CJ125_RELATION_ITEMS_MAX];
 }cj125_config_relation_t;
+
+typedef struct {
+    TIM_HandleTypeDef *heater_pwm;
+    uint32_t heater_pwm_ch;
+    gpio_t heater_en_pin;
+    gpio_t heater_nen_pin;
+
+    uint32_t tim_base_freq;
+    uint32_t tim_prescaler;
+    uint32_t tim_period;
+    __IO uint32_t *tim_pulse;
+}cj125_heater_t;
 
 typedef struct {
     cj125_config_relation_t res_to_temp_relation;
@@ -117,10 +164,17 @@ typedef struct {
     float shunt_resistance;
     float pushpull_resistance;
     cj125_af_t ampfactor;
+
+    float heater_preheat_voltage;
+    float heater_initial_voltage;
+    float heater_initial_max_voltage;
+    float heater_max_voltage;
+    float heater_ramp_rate;
+    time_us_t heater_operating_timeout;
+
     cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
-    cj125_pid_cb_t pid_cb;
-    void *pid_cb_usrdata;
+
 }cj125_config_t;
 
 typedef struct {
@@ -137,9 +191,17 @@ typedef struct {
     float lambda_radj;
     float lambda_current;
 
+    float heater_voltage;
+    float heater_dutycycle;
+
+    float pwr_voltage;
     float ref_voltage;
     float ur_voltage;
     float ua_voltage;
+
+    cj125_heatup_status_t heatup_status;
+    cj125_operating_status_t operating_status;
+
 }cj125_data_t;
 
 typedef union {
@@ -150,9 +212,11 @@ typedef union {
 typedef struct cj125_ctx_tag {
     cj125_init_ctx_t init;
     cj125_config_t config;
+    cj125_heater_t heater;
     cj125_regs_t regs;
     bool spi_busy;
     bool ready;
+    bool heater_ready;
     bool initialized;
     bool configured;
     bool calibrated;
@@ -178,8 +242,10 @@ typedef struct cj125_ctx_tag {
     bool ampfactor_request;
     error_t ampfactor_errcode;
     cj125_af_t ampfactor;
+    cj125_heatup_type_t heatup_type;
 
     cj125_data_t data;
+    cj125_diag_t diag;
 
     cj125_process_fsm_t process_fsm;
     cj125_reset_fsm_t reset_fsm;
@@ -195,6 +261,7 @@ typedef struct cj125_ctx_tag {
 
     time_us_t diag_timestamp;
     time_us_t pid_cb_timestamp;
+    time_us_t voltages_timestamp;
 
     bool ua_updated;
     bool ur_updated;
@@ -202,10 +269,12 @@ typedef struct cj125_ctx_tag {
     bool ref_ur_updated;
     bool data_lambda_valid;
     bool data_temp_valid;
+    bool diag_valid;
 
 }cj125_ctx_t;
 
 error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx);
+error_t cj125_heater_init(cj125_ctx_t *ctx, const cj125_heater_t *heater_cfg);
 void cj125_loop_main(cj125_ctx_t *ctx);
 void cj125_loop_slow(cj125_ctx_t *ctx);
 void cj125_loop_fast(cj125_ctx_t *ctx);
@@ -213,13 +282,12 @@ void cj125_loop_fast(cj125_ctx_t *ctx);
 error_t cj125_reset(cj125_ctx_t *ctx);
 error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config);
 error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
-error_t cj125_calib_mode(cj125_ctx_t *ctx, bool enabled);
+error_t cj125_calibrate(cj125_ctx_t *ctx);
 
-
-error_t cj125_update_ref(cj125_ctx_t *ctx, float ref_voltage);
-error_t cj125_update_ur(cj125_ctx_t *ctx, float ur_voltage);
-error_t cj125_update_ua(cj125_ctx_t *ctx, float ua_voltage);
+error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages);
 error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data);
 error_t cj125_get_version(cj125_ctx_t *ctx, uint8_t *data);
+error_t cj125_get_diag(cj125_ctx_t *ctx, cj125_diag_t *diag);
+error_t cj125_set_heatup(cj125_ctx_t *ctx, cj125_heatup_type_t type);
 
 #endif /* DRIVERS_CJ125_INC_CJ125_H_ */
