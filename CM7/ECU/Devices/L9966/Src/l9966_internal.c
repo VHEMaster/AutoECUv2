@@ -203,7 +203,6 @@ error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *dat
       err = spi_transmit_and_receive(ctx->init.spi_slave, ctx->tx_payload, ctx->rx_payload, 2);
       if(err == E_OK) {
         ctx->spi_busy = false;
-        data = ctx->rx_payload[1];
 
         if((ctx->rx_payload[0] & L9966_FRAME_MISO_VERIFY_MASK) != L9966_FRAME_MISO_VERIFY_VALUE ||
             (ctx->rx_payload[0] & L9966_FRAME_MISO_ECHO_REG_MASK) != reg) {

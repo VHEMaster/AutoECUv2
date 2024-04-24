@@ -52,7 +52,8 @@ ITCM_FUNC error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_poll
 {
   error_t err = E_OK;
   time_us_t now, valtime;
-  time_delta_us_t diff, cmp_time;
+  time_delta_us_t diff;
+  time_delta_us_t cmp_time = 0;
   output_value_t value = ch->value;
   output_value_t value_expected = value;
 

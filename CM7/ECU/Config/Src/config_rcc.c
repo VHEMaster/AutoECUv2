@@ -10,8 +10,10 @@
 error_t ecu_config_get_tim_base_frequency(TIM_HandleTypeDef *htim, uint32_t *tim_base_freq)
 {
   RCC_ClkInitTypeDef clkConfig;
-  uint32_t freq, latency, periph_reg;
+  uint32_t freq = 0;
+  uint32_t latency, periph_reg;
   error_t err = E_OK;
+
 
   periph_reg = (uint32_t)htim->Instance;
 

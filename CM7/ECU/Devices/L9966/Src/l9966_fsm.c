@@ -478,6 +478,7 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
       case L9966_READ_SC_SPI_READ_REQ:
         err = l9966_reg_read(ctx, L9966_REG_SC_RESULT, &ctx->fsm_rx_payload);
         if(err == E_OK) {
+          result_float = 0.0f;
           if(ctx->sc_control.r_volt_sel == L9966_CTRL_SC_RVM_RESISTANCE) {
             result_resistor.data = ctx->fsm_rx_payload;
             rr_index = ctx->sc_control.pu_div_sel;
