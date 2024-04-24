@@ -19,7 +19,7 @@
 #define CJ125_SPI_MODE                          (SPI_MODE_1)
 
 #define CJ125_RELATION_ITEMS_MAX                (32)
-#define CJ125_DIAG_POLL_PERIOD_US               (100 * TIME_US_IN_MS)
+#define CJ125_DIAG_POLL_PERIOD_US               (20 * TIME_US_IN_MS)
 #define CJ125_PID_CB_DEFAULT_PERIOD_US          (5 * TIME_US_IN_MS)
 
 #define CJ125_CALIBRATION_SAMPLES_TO_IGNORE     (10)

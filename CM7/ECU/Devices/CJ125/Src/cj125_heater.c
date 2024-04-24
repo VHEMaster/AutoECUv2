@@ -26,7 +26,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
     math_pid_set_clamp(&ctx->heater_pid, -clamp_temp, clamp_temp);
 
     if(ctx->ready && ctx->configured && ctx->heater_ready &&
-        time_delta <= CJ125_VOLTAGES_TIMEOUT_US) {
+        time_delta <= CJ125_VOLTAGES_TIMEOUT_US && ctx->diag.byte == CJ125_DIAG_OK) {
       switch(ctx->heater_fsm) {
         case CJ125_HEATER_RESET:
           math_pid_reset(&ctx->heater_pid, now);
@@ -115,8 +115,9 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           break;
       }
     } else {
-      ctx->data.heater_voltage = 0;
+      ctx->data.heater_voltage = 0.0f;
       ctx->data.operating_status = CJ125_OPERATING_STATUS_IDLE;
+      ctx->heater_fsm = CJ125_HEATER_RESET;
     }
     break;
   }
