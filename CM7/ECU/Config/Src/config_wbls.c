@@ -54,7 +54,14 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .heater_initial_max_voltage = 11.0f,
     .heater_max_voltage = 13.0f,
     .heater_ramp_rate = 0.3f,
+    .heater_nominal_voltage = 7.5f,
     .heater_operating_timeout = 10 * TIME_US_IN_S,
+    .heater_pid_update_period = 5 * TIME_US_IN_MS,
+    .heater_pid_koffs = {
+        .Kp = 0.05f,
+        .Ki = 0.01f,
+        .Kd = 0.001f,
+    },
 };
 
 static ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
@@ -95,13 +102,13 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
     wbls_ctx->ctx = ctx;
 
-    memcpy(&wbls_ctx->ctx->config, &wbls_ctx->config_default, sizeof(cj125_config_t));
-
     err = middlelayer_spi_get_slave(&wbls_ctx->init.spi_slave, wbls_ctx->slave_index);
     BREAK_IF(err != E_OK);
 
     err = cj125_init(wbls_ctx->ctx, &wbls_ctx->init);
     BREAK_IF(err != E_OK);
+
+    memcpy(&wbls_ctx->ctx->config, &wbls_ctx->config_default, sizeof(cj125_config_t));
 
     err = ecu_config_get_tim_base_frequency(wbls_ctx->heater.heater_pwm, &wbls_ctx->heater.tim_base_freq);
     BREAK_IF(err != E_OK);
@@ -144,23 +151,6 @@ error_t ecu_devices_wbls_reset(ecu_device_wbls_t instance)
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
     err = cj125_reset(wbls_ctx->ctx);
-
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_devices_wbls_calibrate(ecu_device_wbls_t instance)
-{
-  error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
-
-  do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
-
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
-
-    err = cj125_calibrate(wbls_ctx->ctx);
 
   } while(0);
 

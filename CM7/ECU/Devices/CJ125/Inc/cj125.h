@@ -12,6 +12,7 @@
 #include "main.h"
 #include "errors.h"
 #include "spi.h"
+#include "pid.h"
 
 #include "cj125_reg.h"
 
@@ -28,8 +29,15 @@
 #define CJ125_VOLTAGES_TIMEOUT_US               (500 * TIME_US_IN_MS)
 
 #define CJ125_HEATER_MINIMUM_POWER_VOLTAGE      (5.0f)
-#define CJ125_HEATER_PID_PERIOD_US              (5 * TIME_US_IN_MS)
 #define CJ125_HEATER_FREQ                       (200)
+
+#define CJ125_CALIBRATION_UR_THRESHOLD_H        (0.7f)
+#define CJ125_CALIBRATION_UR_THRESHOLD_L        (1.2f)
+#define CJ125_CALIBRATION_UA_THRESHOLD_H        (1.7f)
+#define CJ125_CALIBRATION_UA_THRESHOLD_L        (1.3f)
+#define CJ125_CALIBRATION_REF_THRESHOLD_H       (5.3f)
+#define CJ125_CALIBRATION_REF_THRESHOLD_L       (4.7f)
+#define CJ125_CALIBRATION_RADJ_DEFAULT          (0.3f)
 
 typedef enum {
   CJ125_AF_8 = 0,
@@ -52,16 +60,7 @@ typedef enum {
 }cj125_heatup_type_t;
 
 typedef enum {
-  CJ125_HEATUP_STATUS_OFF = 0,
-  CJ125_HEATUP_STATUS_PREHEAT,
-  CJ125_HEATUP_STATUS_HEATUP,
-  CJ125_HEATUP_STATUS_OPERATING,
-  CJ125_HEATUP_STATUS_MAX
-}cj125_heatup_status_t;
-
-typedef enum {
   CJ125_OPERATING_STATUS_IDLE = 0,
-  CJ125_OPERATING_STATUS_CALIBRATION,
   CJ125_OPERATING_STATUS_HEATUP,
   CJ125_OPERATING_STATUS_OPERATING,
   CJ125_OPERATING_STATUS_ERROR,
@@ -85,10 +84,25 @@ typedef enum {
 }cj125_process_fsm_t;
 
 typedef enum {
+  CJ125_HEATER_RESET = 0,
+  CJ125_HEATER_PREHEAT,
+  CJ125_HEATER_HEATUP,
+  CJ125_HEATER_HEATUP_WAITING,
+  CJ125_HEATER_OPERATING,
+  CJ125_HEATER_ERROR,
+  CJ125_HEATER_MAX,
+}cj125_heater_fsm_t;
+
+typedef enum {
   CJ125_RESET_CONDITION = 0,
   CJ125_RESET_IDENT,
   CJ125_RESET_CHECK,
   CJ125_RESET_REQUEST,
+  CJ125_RESET_CALIB_INIT_READ,
+  CJ125_RESET_CALIB_INIT_WRITE,
+  CJ125_RESET_CALIB_SAMPLE,
+  CJ125_RESET_CALIB_INIT_RESTORE,
+  CJ125_RESET_CALIB_CALCULATE,
   CJ125_RESET_MAX,
 }cj125_reset_fsm_t;
 
@@ -101,16 +115,6 @@ typedef enum {
   CJ125_CONFIG_CONDITION = 0,
   CJ125_CONFIG_MAX,
 }cj125_config_fsm_t;
-
-typedef enum {
-  CJ125_CALIB_CONDITION = 0,
-  CJ125_CALIB_INIT_READ,
-  CJ125_CALIB_INIT_WRITE,
-  CJ125_CALIB_SAMPLE,
-  CJ125_CALIB_INIT_RESTORE,
-  CJ125_CALIB_CALCULATE,
-  CJ125_CALIB_MAX,
-}cj125_calib_fsm_t;
 
 typedef struct cj125_ctx_tag cj125_ctx_t;
 typedef void (*cj125_cb_t)(cj125_ctx_t *ctx, void *usrdata);
@@ -170,7 +174,10 @@ typedef struct {
     float heater_initial_max_voltage;
     float heater_max_voltage;
     float heater_ramp_rate;
+    float heater_nominal_voltage;
     time_us_t heater_operating_timeout;
+    math_pid_koffs_t heater_pid_koffs;
+    time_us_t heater_pid_update_period;
 
     cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
@@ -199,7 +206,6 @@ typedef struct {
     float ur_voltage;
     float ua_voltage;
 
-    cj125_heatup_status_t heatup_status;
     cj125_operating_status_t operating_status;
 
 }cj125_data_t;
@@ -219,7 +225,6 @@ typedef struct cj125_ctx_tag {
     bool heater_ready;
     bool initialized;
     bool configured;
-    bool calibrated;
 
     bool reset_request;
     error_t reset_errcode;
@@ -227,8 +232,6 @@ typedef struct cj125_ctx_tag {
     bool config_request;
     error_t config_errcode;
 
-    bool calib_request;
-    error_t calib_errcode;
     bool calib_ok;
 
     time_us_t calib_timestamp;
@@ -246,12 +249,13 @@ typedef struct cj125_ctx_tag {
 
     cj125_data_t data;
     cj125_diag_t diag;
+    math_pid_ctx_t heater_pid;
 
+    cj125_heater_fsm_t heater_fsm;
     cj125_process_fsm_t process_fsm;
     cj125_reset_fsm_t reset_fsm;
     cj125_diag_fsm_t diag_fsm;
     cj125_config_fsm_t config_fsm;
-    cj125_calib_fsm_t calib_fsm;
 
     cj125_payload_t request;
     cj125_payload_t response;
@@ -262,11 +266,9 @@ typedef struct cj125_ctx_tag {
     time_us_t diag_timestamp;
     time_us_t pid_cb_timestamp;
     time_us_t voltages_timestamp;
+    time_us_t heater_fsm_last;
 
-    bool ua_updated;
-    bool ur_updated;
-    bool ref_ua_updated;
-    bool ref_ur_updated;
+    bool voltages_updated;
     bool data_lambda_valid;
     bool data_temp_valid;
     bool diag_valid;
@@ -282,7 +284,6 @@ void cj125_loop_fast(cj125_ctx_t *ctx);
 error_t cj125_reset(cj125_ctx_t *ctx);
 error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config);
 error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
-error_t cj125_calibrate(cj125_ctx_t *ctx);
 
 error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages);
 error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data);

@@ -36,6 +36,8 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
       gpio_reset(&ctx->init.nrst_pin);
     }
 
+    math_pid_init(&ctx->heater_pid);
+
     err = spi_slave_configure_datasize(ctx->init.spi_slave, 16);
     BREAK_IF(err != E_OK);
 
@@ -44,6 +46,8 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
 
     err = spi_slave_configure_callback(ctx->init.spi_slave, cj125_cplt_cb);
     BREAK_IF(err != E_OK);
+
+    ctx->data.ampfactor = CJ125_AF_17;
 
     ctx->ready = true;
 
@@ -129,12 +133,21 @@ void cj125_loop_slow(cj125_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    err = cj125_update_heater_voltage(ctx);
-    BREAK_IF(err != E_OK);
-
     if(ctx->ready && ctx->configured) {
       err = cj125_update_data(ctx, false);
-      BREAK_IF(err != E_OK);
+      if(err != E_OK && err != E_AGAIN) {
+        //TODO: set error in future
+      }
+    }
+
+    err = cj125_heater_fsm(ctx);
+    if(err != E_OK && err != E_AGAIN) {
+      //TODO: set error in future
+    }
+
+    err = cj125_update_heater_voltage(ctx);
+    if(err != E_OK && err != E_AGAIN) {
+      //TODO: set error in future
     }
 
   } while(0);
@@ -244,30 +257,6 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
   return err;
 }
 
-error_t cj125_calibrate(cj125_ctx_t *ctx)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
-
-    if(ctx->calib_request == false) {
-      ctx->calib_errcode = E_AGAIN;
-      ctx->calib_request = true;
-    } else if(ctx->calib_errcode != E_AGAIN) {
-      err = ctx->calib_errcode;
-      ctx->calib_request = false;
-    } else {
-      err = E_AGAIN;
-    }
-
-  } while(0);
-
-  return err;
-}
-
 error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages)
 {
   error_t err = E_OK;
@@ -277,16 +266,10 @@ error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
     ctx->data.pwr_voltage = voltages->pwr;
-
     ctx->data.ref_voltage = voltages->ref;
-    ctx->ref_ur_updated = true;
-    ctx->ref_ua_updated = true;
-
     ctx->data.ur_voltage = voltages->ur;
-    ctx->ur_updated = true;
-
     ctx->data.ua_voltage = voltages->ua;
-    ctx->ua_updated = true;
+    ctx->voltages_updated = true;
 
     now = time_get_current_us();
     ctx->voltages_timestamp = now;
@@ -308,7 +291,6 @@ error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data)
 
     memcpy(data, &ctx->data, sizeof(cj125_data_t));
 
-    BREAK_IF_ACTION(ctx->calibrated == false, err = E_AGAIN);
     BREAK_IF_ACTION(ctx->data_temp_valid && ctx->data_lambda_valid, err = E_AGAIN);
 
   } while(0);

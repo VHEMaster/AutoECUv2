@@ -9,7 +9,6 @@
 #define DEVICES_CJ125_INC_CJ125_REG_H_
 
 #define CJ125_REG_IC_NUMBER     (0x0C)
-#define CJ125_REG_CMD_VALID     (0x00)
 #define CJ125_REG_CMD_NOT_VALID (0xFF)
 #define CJ125_REG_RESP_CHECK    (0x05)
 
@@ -21,6 +20,10 @@
 
 #define CJ125_REG_RD_INIT2      (0x7E)
 #define CJ125_REG_WR_INIT2      (0x5A)
+
+#define CJ125_LA_RA_NORMAL      (0)
+#define CJ125_LA_RA_CALIBRATE   (1)
+#define CJ125_SRESET_SET        (1)
 
 typedef union {
     uint8_t data;

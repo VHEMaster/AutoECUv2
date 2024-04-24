@@ -12,6 +12,8 @@
 error_t cj125_serial_operation(cj125_ctx_t *ctx, cj125_payload_t request, cj125_payload_t *response)
 {
   error_t err = E_OK;
+  cj125_payload_t payload;
+  cj125_reg_resp_t resp_payload;
 
   while(true) {
     if(ctx->spi_busy == false) {
@@ -26,6 +28,14 @@ error_t cj125_serial_operation(cj125_ctx_t *ctx, cj125_payload_t request, cj125_
       if(err == E_OK) {
         ctx->spi_busy = false;
         ctx->rx_payload = __REV16(ctx->rx_payload);
+
+        payload.word = ctx->rx_payload;
+        resp_payload.data = payload.bytes[0];
+        if(resp_payload.bits.check_value != CJ125_REG_RESP_CHECK) {
+          err = E_BADRESP;
+        } else if(payload.bytes[1] == CJ125_REG_CMD_NOT_VALID) {
+          err = E_BADRESP;
+        }
 
         if(response != NULL) {
           response->word = ctx->rx_payload;
@@ -53,9 +63,8 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
   sMathInterpolateInput mii_current, mii_temperature;
 
   if(ctx->configured || force) {
-    if((ctx->ur_updated && ctx->ref_ur_updated) || force) {
-      ctx->ref_ur_updated = false;
-      ctx->ur_updated = false;
+    if((ctx->voltages_updated) || force) {
+      ctx->voltages_updated = false;
 
       Vref = ctx->data.ref_voltage;
       Vvm = Vref * 0.5f;
@@ -70,11 +79,6 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
       ctx->data.temp_value = math_interpolate_1d(mii_temperature, ctx->config.res_to_temp_relation.output);
 
       ctx->data_temp_valid = true;
-    }
-
-    if((ctx->ua_updated && ctx->ref_ua_updated) || force) {
-      ctx->ref_ua_updated = false;
-      ctx->ua_updated = false;
 
       switch(ctx->data.ampfactor) {
         case CJ125_AF_8:
@@ -96,6 +100,7 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
 
       ctx->data_lambda_valid = true;
     }
+
   }
 
   return err;
