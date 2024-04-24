@@ -33,8 +33,6 @@ error_t cj125_serial_operation(cj125_ctx_t *ctx, cj125_payload_t request, cj125_
         resp_payload.data = payload.bytes[0];
         if(resp_payload.bits.check_value != CJ125_REG_RESP_CHECK) {
           err = E_BADRESP;
-        } else if(payload.bytes[1] == CJ125_REG_CMD_NOT_VALID) {
-          err = E_BADRESP;
         }
 
         if(response != NULL) {

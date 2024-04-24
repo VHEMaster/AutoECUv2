@@ -56,6 +56,9 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .ampfactor = CJ125_AF_17,
     .pump_ref_current = CJ125_CONFIG_PRC_OFF,
 
+    .reg_enscun = true,
+    .reg_set_dia_q = true,
+
     .heater_preheat_voltage = 2.0f,
     .heater_initial_voltage = 5.0f,
     .heater_initial_max_voltage = 11.0f,

@@ -49,9 +49,10 @@ typedef enum {
 
 typedef enum {
   CJ125_DIAG_OK = 0,
-  CJ125_DIAG_SHORTBATT,
-  CJ125_DIAG_NOPOWER,
-  CJ125_DIAG_SHORTGND,
+  CJ125_DIAG_SHORTBATT = 1,
+  CJ125_DIAG_NOPOWER = 2,
+  CJ125_DIAG_OPENLOAD = 2,
+  CJ125_DIAG_SHORTGND = 3,
 }cj125_diag_enum_t;
 
 typedef enum {
@@ -110,11 +111,14 @@ typedef enum {
 
 typedef enum {
   CJ125_DIAG_CONDITION = 0,
+  CJ125_DIAG_REQUEST,
   CJ125_DIAG_MAX,
 }cj125_diag_fsm_t;
 
 typedef enum {
   CJ125_CONFIG_CONDITION = 0,
+  CJ125_CONFIG_REQUEST_INIT1,
+  CJ125_CONFIG_REQUEST_INIT2,
   CJ125_CONFIG_MAX,
 }cj125_config_fsm_t;
 
@@ -170,6 +174,9 @@ typedef struct {
     float shunt_resistance;
     float pushpull_resistance;
     cj125_af_t ampfactor;
+
+    bool reg_enscun;
+    bool reg_set_dia_q;
 
     float heater_preheat_voltage;
     float heater_initial_voltage;
