@@ -173,6 +173,8 @@ typedef struct {
 
     l9966_fsm_state_t process_fsm;
 
+    time_us_t sqncr_last[L9966_CHANNELS];
+    time_delta_us_t sqncr_diff[L9966_CHANNELS];
     float sqncr_cmd_results[L9966_CHANNELS];
     float sc_result;
 

@@ -73,9 +73,9 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .heater_operating_timeout = 10 * TIME_US_IN_S,
     .heater_pid_update_period = 5 * TIME_US_IN_MS,
     .heater_pid_koffs = {
-        .Kp = 0.05f,
+        .Kp = 0.1f,
         .Ki = 0.01f,
-        .Kd = 0.001f,
+        .Kd = 0.0001f,
     },
 };
 

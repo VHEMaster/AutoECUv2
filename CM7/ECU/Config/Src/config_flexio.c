@@ -230,76 +230,91 @@ static const l9966_config_t ecu_devices_flexio_config_default = {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD2,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD1
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD3,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD2
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD4,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD3
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD5,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD4
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD6,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD5
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD7,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD6
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD8,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD7
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD9,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD8
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD10,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD9
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD11,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD10
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD12,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD11
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD13,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 1.0f,
               }, //CMD12
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD14,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 0.05f,
               }, //CMD13
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD15,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 0.05f,
               }, //CMD14
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD1,
                   .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
+                  .lpf = 0.05f,
               }, //CMD15
           }
       },

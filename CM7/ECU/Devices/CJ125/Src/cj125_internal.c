@@ -94,7 +94,7 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
       Vref_div_radj = Vref * ctx->data.lambda_radj;
       ua_volt_sub_vcc = ctx->data.ua_voltage - Vref_div_radj;
 
-      ctx->data.lambda_current = ua_volt_sub_vcc / (ctx->config.shunt_resistance * ampfactor);
+      ctx->data.lambda_current = ua_volt_sub_vcc / (ctx->config.shunt_resistance * ampfactor) * 1000.0f;
       mii_current = math_interpolate_input(ctx->data.lambda_current, ctx->config.curr_to_lambda_relation.input, ctx->config.curr_to_lambda_relation.items);
       ctx->data.lambda_value = math_interpolate_1d(mii_current, ctx->config.curr_to_lambda_relation.output);
 
