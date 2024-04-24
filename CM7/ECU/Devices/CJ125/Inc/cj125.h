@@ -28,6 +28,7 @@
 #define CJ125_CALIBRATION_TIMEOUT_US            (200 * TIME_US_IN_MS)
 #define CJ125_VOLTAGES_TIMEOUT_US               (500 * TIME_US_IN_MS)
 
+#define CJ125_HEATER_OPERATING_UR_LIMIT_H       (3.0f)
 #define CJ125_HEATER_MINIMUM_POWER_VOLTAGE      (5.0f)
 #define CJ125_HEATER_FREQ                       (200)
 
@@ -38,6 +39,7 @@
 #define CJ125_CALIBRATION_REF_THRESHOLD_L       (4.7f)
 #define CJ125_CALIBRATION_REF_THRESHOLD_H       (5.3f)
 #define CJ125_CALIBRATION_RADJ_DEFAULT          (0.3f)
+
 
 typedef enum {
   CJ125_AF_8 = 0,

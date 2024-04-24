@@ -99,9 +99,14 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           } else if(ctx->heatup_type == CJ125_HEATUP_TYPE_OFF ) {
             ctx->data.heater_voltage = 0.0f;
             ctx->heater_fsm = CJ125_HEATER_RESET;
+          } else if(ctx->data.ur_voltage >= CJ125_HEATER_OPERATING_UR_LIMIT_H) {
+            ctx->data.heater_voltage = 0;
+            ctx->data.operating_status = CJ125_OPERATING_STATUS_ERROR;
+            ctx->heater_fsm = CJ125_HEATER_ERROR;
           }
           break;
         case CJ125_HEATER_ERROR:
+          ctx->data.heater_voltage = 0.0f;
           if(ctx->heatup_type <= CJ125_HEATUP_TYPE_PREHEAT) {
             ctx->heater_fsm = CJ125_HEATER_RESET;
           }
