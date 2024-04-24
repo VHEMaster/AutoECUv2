@@ -16,6 +16,12 @@
 #include "gpio.h"
 
 typedef struct {
+    uint16_t exti_pin;
+    ecu_gpio_exti_cb_t func;
+    void *usrdata;
+}ecu_gpio_exti_ctx_t;
+
+typedef struct {
     gpio_t pin;
     ecu_gpio_output_if_t if_id;
     output_ch_id_t output_ch_id;
@@ -65,6 +71,7 @@ typedef struct {
     ecu_config_gpio_inputs_if_t inputs_if[ECU_IN_IF_MAX];
     ecu_config_gpio_output_t outputs[ECU_OUT_MAX];
     ecu_config_gpio_input_t inputs[ECU_IN_MAX];
+    ecu_gpio_exti_ctx_t exti[ECU_EXTI_MAX];
 }ecu_config_gpio_t;
 
 static error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
@@ -1286,6 +1293,50 @@ error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
     *gpio = ecu_config_gpio.inputs[pin].pin;
 
   } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_exti_init(void)
+{
+  error_t err = E_OK;
+
+  do {
+    memset(ecu_config_gpio.exti, 0, sizeof(ecu_config_gpio.exti));
+
+  } while(0);
+
+  return err;
+}
+
+void ecu_config_gpio_exti_call(uint16_t exti_pin)
+{
+  uint16_t masked_exti;
+
+  for(int i = 0; i < ECU_EXTI_MAX; i++) {
+    if(ecu_config_gpio.exti[i].func) {
+      if((exti_pin & ecu_config_gpio.exti[i].exti_pin)) {
+        ecu_config_gpio.exti[i].func(ecu_config_gpio.exti[i].usrdata);
+      }
+    } else {
+      break;
+    }
+  }
+}
+
+error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func, void *usrdata)
+{
+  error_t err = E_OVERFLOW;
+
+  for(int i = 0; i < ECU_EXTI_MAX; i++) {
+    if(ecu_config_gpio.exti[i].func == NULL) {
+      ecu_config_gpio.exti[i].exti_pin = exti_pin;
+      ecu_config_gpio.exti[i].usrdata = usrdata;
+      ecu_config_gpio.exti[i].func = func;
+      err = E_OK;
+      break;
+    }
+  }
 
   return err;
 }

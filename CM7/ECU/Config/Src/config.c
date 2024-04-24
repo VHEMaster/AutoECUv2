@@ -7,9 +7,15 @@
 
 #include "main.h"
 #include "config.h"
+#include "config_gpio.h"
 #include "config_extern.h"
 #include "compiler.h"
 #include "time.h"
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  ecu_config_gpio_exti_call(GPIO_Pin);
+}
 
 INLINE void ecu_config_set_ignition_enabled(bool enabled) {
   HAL_GPIO_WritePin(IGN_NEN_GPIO_Port, IGN_NEN_Pin, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);

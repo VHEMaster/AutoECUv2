@@ -47,6 +47,9 @@ void middlelayer_gpio_init(void)
     err = ecu_config_gpio_input_init();
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
+    err = ecu_config_gpio_exti_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
     err = ecu_config_queuedpulses_init();
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 

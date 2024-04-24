@@ -73,7 +73,6 @@ typedef enum {
 typedef enum {
   L9966_READ_SQNCR_CONDITION = 0,
   L9966_READ_SQNCR_SPI_COPY_REQ,
-  L9966_READ_SQNCR_CMD_DEFINE,
   L9966_READ_SQNCR_SPI_READ_REQ,
 }l9966_read_sqncr_fsm_state_t;
 
@@ -148,6 +147,7 @@ typedef struct {
     uint16_t fsm_tx_addr;
     uint16_t fsm_tx_payload;
     uint16_t fsm_rx_payload;
+    uint16_t fsm_rx_burst_payload[L9966_CHANNELS];
 
     bool reset_request;
     error_t reset_errcode;
@@ -169,17 +169,16 @@ typedef struct {
     l9966_maintain_sc_fsm_state_t sc_maintain_fsm_state;
     l9966_maintain_eu_fsm_state_t eu_maintain_fsm_state;
     l9966_configure_fsm_state_t configure_fsm_state;
-    uint8_t read_sqncr_cmd_index;
 
     l9966_fsm_state_t process_fsm;
 
-    time_us_t sqncr_last[L9966_CHANNELS];
-    time_delta_us_t sqncr_diff[L9966_CHANNELS];
+    time_us_t sqncr_last;
+    time_delta_us_t sqncr_diff;
     float sqncr_cmd_results[L9966_CHANNELS];
+    uint16_t sqncr_cmd_ready_mask;
+
     float sc_result;
 
-    uint16_t sqncr_cmd_ready_mask_temp;
-    uint16_t sqncr_cmd_ready_mask;
     bool sc_ready;
 
     bool digital_inputs_valid;

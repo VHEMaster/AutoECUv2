@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include "config_gpio.h"
 #include "config_flexio.h"
 #include "middlelayer_spi.h"
 #include "compiler.h"
@@ -15,6 +16,7 @@ typedef struct {
     l9966_init_ctx_t init;
     l9966_config_t config_default;
     l9966_ctx_t *ctx;
+    uint16_t int_exti_pin;
 }ecu_devices_flexio_ctx_t;
 
 static const l9966_config_t ecu_devices_flexio_config_default = {
@@ -340,6 +342,7 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
           .chip_address = L9966_FRAME_CFG_ADDR_LOW,
       },
       .config_default = ecu_devices_flexio_config_default,
+      .int_exti_pin = FLEXIO1_INT_Pin,
     },
     {
       .slave_index = ECU_SPI_SLAVE_FLEXIO2,
@@ -351,6 +354,7 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
           .chip_address = L9966_FRAME_CFG_ADDR_HIGH,
       },
       .config_default = ecu_devices_flexio_config_default,
+      .int_exti_pin = FLEXIO2_INT_Pin,
     },
 };
 
@@ -372,6 +376,9 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     memcpy(&flexio_ctx->ctx->config, &flexio_ctx->config_default, sizeof(l9966_config_t));
+
+    err = ecu_config_gpio_exti_register(flexio_ctx->int_exti_pin, (ecu_gpio_exti_cb_t)l9966_int_irq_handler, flexio_ctx->ctx);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

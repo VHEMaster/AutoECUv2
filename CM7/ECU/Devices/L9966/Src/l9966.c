@@ -21,6 +21,7 @@ static void l9966_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL || init_ctx->spi_slave == NULL, err = E_PARAM);

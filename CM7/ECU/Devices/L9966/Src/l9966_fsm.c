@@ -27,6 +27,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
     switch(ctx->reset_fsm_state) {
       case L9966_RESET_CONDITION:
         if(ctx->reset_request == true && ctx->reset_errcode == E_AGAIN) {
+          ctx->sqncr_cmd_ready_mask = 0;
           if(gpio_valid(&ctx->init.nrst_pin)) {
             ctx->reset_fsm_state = L9966_RESET_HARD_RESET;
           } else {
@@ -148,6 +149,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
           ctx->reset_errcode = E_OK;
         }
         ctx->reset_fsm_state = L9966_RESET_CONDITION;
+        ctx->sqncr_cmd_ready_mask = 0;
         ctx->version_valid = true;
         ctx->initialized = true;
         err = E_OK;
@@ -297,12 +299,10 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
   l9966_reg_sqncr_result_voltage_t result_voltage;
   l9966_reg_sqncr_result_resistor_t result_resistor;
   float result_float, result_old, resistor, lpf;
-  uint32_t prim;
   l9966_config_sqncr_cmd_pd_t rr_index;
   bool eu_enabled = false;
   bool data_available;
   bool copy_cplt = false;
-  uint32_t i;
 
   while(true) {
     err = E_OK;
@@ -350,124 +350,96 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
               gpio_reset(&ctx->init.sync_pin);
             }
             copy_cplt = true;
-            ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
           }
         } else {
           err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.data);
           if(err == E_OK) {
             now = time_get_current_us();
-            ctx->sqncr_cmd_ready_mask_temp = status.bits.SQNCR_RESULTx;
-            ctx->sqncr_cmd_ready_mask_temp = (1 << 15) - 1; //TODO: remove
             copy_cplt = true;
           }
         }
         if(copy_cplt) {
           ctx->sqncr_result_poll_last = now;
 
-          if(ctx->sqncr_cmd_ready_mask_temp == 0) {
-            ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CONDITION;
-            err = E_OK;
-          } else {
-            ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CMD_DEFINE;
-            ctx->read_sqncr_cmd_index = 0;
-            err = E_AGAIN;
-            continue;
-          }
+          ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_SPI_READ_REQ;
+          err = E_AGAIN;
+          continue;
         }
         break;
-      case L9966_READ_SQNCR_CMD_DEFINE:
-        err = E_AGAIN;
-        while((ctx->sqncr_cmd_ready_mask_temp & 1) == 0) {
-          if(ctx->sqncr_cmd_ready_mask_temp == 0) {
-            err = E_OK;
-            break;
-          }
-          ctx->sqncr_cmd_ready_mask_temp >>= 1;
-          ctx->read_sqncr_cmd_index++;
-        }
-        if(err == E_AGAIN) {
-          ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_SPI_READ_REQ;
-        } else {
-          ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CONDITION;
-          break;
-        }
-        /* no break */
       case L9966_READ_SQNCR_SPI_READ_REQ:
-        err = l9966_reg_read(ctx, L9966_REG_SQNCR_RESULT_x + ctx->read_sqncr_cmd_index, &ctx->fsm_rx_payload);
+        err = l9966_burst_reg_read(ctx, L9966_REG_SQNCR_RESULT_x, ctx->fsm_rx_burst_payload, L9966_CHANNELS);
         if(err == E_OK) {
-          data_available = false;
-          if(ctx->config.config_data.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
-            result_resistor.data = ctx->fsm_rx_payload;
-            if(result_resistor.bits.ADC_RESULT != 0x0000) {
-              rr_index = ctx->config.config_data.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel;
-              if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
-                resistor = 1000000.0f;
-              } else {
-                resistor = ctx->config.rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
+          now = time_get_current_us();
+
+          ctx->sqncr_diff = time_diff(now, ctx->sqncr_last);
+          ctx->sqncr_last = now;
+
+          for(int i = 0; i < L9966_CHANNELS; i++) {
+            data_available = false;
+            if(ctx->config.config_data.sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
+              result_resistor.data = ctx->fsm_rx_burst_payload[i];
+              if(result_resistor.bits.ADC_RESULT != 0x0000) {
+                rr_index = ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel;
+                if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
+                  resistor = 1000000.0f;
+                } else {
+                  resistor = ctx->config.rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
+                }
+                result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
+                data_available = true;
               }
-              result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
-              data_available = true;
-            }
-          } else if(ctx->config.config_data.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
-            result_voltage.data = ctx->fsm_rx_payload;
-            if(result_voltage.bits.NEW_RESULT_FLAG) {
-              result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
-              switch(ctx->read_sqncr_cmd_index + 1) {
-                case L9966_CFG_SQNCR_PC_UBSW:
-                  result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
-                  break;
-                case L9966_CFG_SQNCR_PC_VI5V:
-                  result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
-                  break;
-                case L9966_CFG_SQNCR_PC_VIX:
-                  result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
-                  break;
-                default:
-                  switch(ctx->config.config_data.sequencer_config.cmd_config[ctx->read_sqncr_cmd_index].pu_div_sel) {
-                    case L9966_CFG_SQNCR_CMD_DIV_5V:
-                      result_float *= 5.0f;
-                      break;
-                    case L9966_CFG_SQNCR_CMD_DIV_20V:
-                      result_float *= 20.0f;
-                      break;
-                    case L9966_CFG_SQNCR_CMD_DIV_40V:
-                      result_float *= 40.0f;
-                      break;
-                    case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                      result_float *= 1.25f;
-                    default:
-                      break;
-                  }
-                  break;
+            } else if(ctx->config.config_data.sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
+              result_voltage.data = ctx->fsm_rx_burst_payload[i];
+              if(result_voltage.bits.NEW_RESULT_FLAG) {
+                result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
+                switch(i + 1) {
+                  case L9966_CFG_SQNCR_PC_UBSW:
+                    result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
+                    break;
+                  case L9966_CFG_SQNCR_PC_VI5V:
+                    result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
+                    break;
+                  case L9966_CFG_SQNCR_PC_VIX:
+                    result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
+                    break;
+                  default:
+                    switch(ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel) {
+                      case L9966_CFG_SQNCR_CMD_DIV_5V:
+                        result_float *= 5.0f;
+                        break;
+                      case L9966_CFG_SQNCR_CMD_DIV_20V:
+                        result_float *= 20.0f;
+                        break;
+                      case L9966_CFG_SQNCR_CMD_DIV_40V:
+                        result_float *= 40.0f;
+                        break;
+                      case L9966_CFG_SQNCR_CMD_DIV_1V25:
+                        result_float *= 1.25f;
+                      default:
+                        break;
+                    }
+                    break;
+                }
+                data_available = true;
               }
-              data_available = true;
             }
-          }
 
-          if(data_available) {
-            prim = EnterCritical();
-            ctx->sqncr_cmd_ready_mask |= 1 << ctx->read_sqncr_cmd_index;
-
-            now = time_get_current_us();
-
-            i = ctx->read_sqncr_cmd_index;
-            ctx->sqncr_diff[i] = time_diff(now, ctx->sqncr_last[i]);
-            ctx->sqncr_last[i] = now;
-            result_old = ctx->sqncr_cmd_results[i];
-            lpf = ctx->config.config_data.sequencer_config.cmd_config[i].lpf;
-            if(lpf < 1.0f) {
-              result_float = result_float * lpf + result_old * (1.0f - lpf);
-            } else {
-              lpf = (ctx->sqncr_diff[i] / (float)TIME_US_IN_MS) * lpf;
+            if(data_available) {
+              result_old = ctx->sqncr_cmd_results[i];
+              lpf = ctx->config.config_data.sequencer_config.cmd_config[i].lpf;
               if(lpf < 1.0f) {
                 result_float = result_float * lpf + result_old * (1.0f - lpf);
+              } else {
+                lpf = (ctx->sqncr_diff / (float)TIME_US_IN_MS) * lpf;
+                if(lpf < 1.0f) {
+                  result_float = result_float * lpf + result_old * (1.0f - lpf);
+                }
               }
+              ctx->sqncr_cmd_results[i] = result_float;
+              ctx->sqncr_cmd_ready_mask |= 1 << i;
             }
-            ctx->sqncr_cmd_results[i] = result_float;
-            ExitCritical(prim);
           }
-          ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CMD_DEFINE;
-          ctx->sqncr_cmd_ready_mask_temp &= ~1;
+          ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CONDITION;
           err = E_AGAIN;
           continue;
         }
