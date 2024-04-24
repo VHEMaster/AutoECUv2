@@ -64,6 +64,7 @@ typedef enum {
 
 typedef enum {
   CJ125_OPERATING_STATUS_IDLE = 0,
+  CJ125_OPERATING_STATUS_PREHEAT,
   CJ125_OPERATING_STATUS_HEATUP,
   CJ125_OPERATING_STATUS_OPERATING,
   CJ125_OPERATING_STATUS_ERROR,
@@ -184,7 +185,7 @@ typedef struct {
     float heater_max_voltage;
     float heater_ramp_rate;
     float heater_nominal_voltage;
-    time_us_t heater_operating_timeout;
+    time_us_t heater_temperature_timeout;
     math_pid_koffs_t heater_pid_koffs;
     time_us_t heater_pid_update_period;
 

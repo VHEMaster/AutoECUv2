@@ -57,7 +57,7 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .pump_ref_current = CJ125_CONFIG_PRC_OFF,
 
     .reg_enscun = true,
-    .reg_set_dia_q = true,
+    .reg_set_dia_q = false,
 
     .heater_preheat_voltage = 2.0f,
     .heater_initial_voltage = 5.0f,
@@ -65,7 +65,7 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .heater_max_voltage = 13.0f,
     .heater_ramp_rate = 0.3f,
     .heater_nominal_voltage = 7.5f,
-    .heater_operating_timeout = 10 * TIME_US_IN_S,
+    .heater_temperature_timeout = 10 * TIME_US_IN_S,
     .heater_pid_update_period = 5 * TIME_US_IN_MS,
     .heater_pid_koffs = {
         .Kp = 0.1f,

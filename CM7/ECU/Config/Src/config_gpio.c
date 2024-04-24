@@ -1311,8 +1311,6 @@ error_t ecu_config_gpio_exti_init(void)
 
 void ecu_config_gpio_exti_call(uint16_t exti_pin)
 {
-  uint16_t masked_exti;
-
   for(int i = 0; i < ECU_EXTI_MAX; i++) {
     if(ecu_config_gpio.exti[i].func) {
       if((exti_pin & ecu_config_gpio.exti[i].exti_pin)) {

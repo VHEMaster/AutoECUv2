@@ -35,12 +35,12 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           ctx->data.operating_status = CJ125_OPERATING_STATUS_IDLE;
           if(ctx->heatup_type > CJ125_HEATUP_TYPE_OFF) {
             ctx->heater_fsm = CJ125_HEATER_PREHEAT;
-            ctx->data.operating_status = CJ125_OPERATING_STATUS_HEATUP;
+            ctx->data.operating_status = CJ125_OPERATING_STATUS_PREHEAT;
             continue;
           }
           break;
         case CJ125_HEATER_PREHEAT:
-          ctx->data.operating_status = CJ125_OPERATING_STATUS_HEATUP;
+          ctx->data.operating_status = CJ125_OPERATING_STATUS_PREHEAT;
           ctx->data.heater_voltage = ctx->config.heater_preheat_voltage;
           if(ctx->heatup_type > CJ125_HEATUP_TYPE_PREHEAT) {
             ctx->data.heater_voltage = ctx->config.heater_initial_voltage;
@@ -79,7 +79,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
             math_pid_reset(&ctx->heater_pid, now);
             math_pid_set_target(&ctx->heater_pid, ctx->data.heat_ref_temp);
             continue;
-          } else if(time_delta >= ctx->config.heater_operating_timeout) {
+          } else if(time_delta >= ctx->config.heater_temperature_timeout) {
             ctx->data.heater_voltage = 0;
             ctx->data.operating_status = CJ125_OPERATING_STATUS_ERROR;
             ctx->heater_fsm = CJ125_HEATER_ERROR;
