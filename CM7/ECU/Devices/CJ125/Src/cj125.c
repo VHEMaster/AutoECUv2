@@ -48,6 +48,7 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     ctx->data.ampfactor = CJ125_AF_17;
+    ctx->ampfactor_req_data = ctx->data.ampfactor;
 
     ctx->ready = true;
 
@@ -237,8 +238,8 @@ error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
     BREAK_IF_ACTION(ampfactor >= CJ125_AF_MAX, err = E_PARAM);
 
     if(ctx->ampfactor_request == false) {
-      if(ctx->ampfactor != ampfactor) {
-        ctx->ampfactor = ampfactor;
+      if(ctx->ampfactor_req_data != ampfactor) {
+        ctx->ampfactor_req_data = ampfactor;
         ctx->ampfactor_errcode = E_AGAIN;
         ctx->ampfactor_request = true;
       } else {

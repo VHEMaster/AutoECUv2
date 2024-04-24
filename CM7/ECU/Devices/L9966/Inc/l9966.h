@@ -94,9 +94,12 @@ typedef enum {
 
 typedef enum {
   L9966_CONFIGURE_CONDITION = 0,
+  L9966_CONFIGURE_SC_WAIT,
+  L9966_CONFIGURE_EU_DISABLE,
   L9966_CONFIGURE_REG_TRANSLATE,
   L9966_CONFIGURE_CMD_DEFINE,
   L9966_CONFIGURE_SPI_WRITE_REQ,
+  L9966_CONFIGURE_EU_RESTORE,
 }l9966_configure_fsm_state_t;
 
 typedef enum {
@@ -113,10 +116,15 @@ typedef enum {
 }l9966_fsm_state_t;
 
 typedef struct {
+    l9966_config_data_t config_data;
+    time_delta_us_t digital_poll_period;
+    bool eu_used[L9966_EU_COUNT];
+    float rrx[L9966_RRx_COUNT];
+}l9966_config_t;
+
+typedef struct {
     l9966_init_ctx_t init;
 
-    float rrx[L9966_RRx_COUNT];
-    time_delta_us_t digital_poll_period;
     bool ready;
     bool initialized;
     bool configured;
@@ -193,8 +201,6 @@ void l9966_loop_slow(l9966_ctx_t *ctx);
 void l9966_loop_fast(l9966_ctx_t *ctx);
 
 error_t l9966_write_config(l9966_ctx_t *ctx, const l9966_config_t *config);
-error_t l9966_set_rrx_value(l9966_ctx_t *ctx, uint8_t rrx, float value);
-error_t l9966_set_dig_poll_period(l9966_ctx_t *ctx, time_delta_us_t period);
 
 error_t l9966_reset(l9966_ctx_t *ctx);
 
@@ -202,8 +208,6 @@ error_t l9966_get_version(l9966_ctx_t *ctx, l9966_ctrl_ver_t *ver);
 error_t l9966_get_status(l9966_ctx_t *ctx, l9966_ctrl_gs_t *status);
 error_t l9966_get_inputs(l9966_ctx_t *ctx, l9966_ctrl_dig_inputs_t *dig_inputs);
 
-error_t l9966_start_sqncr(l9966_ctx_t *ctx);
-error_t l9966_stop_sqncr(l9966_ctx_t *ctx);
 error_t l9966_get_sqncr_output(l9966_ctx_t *ctx, uint8_t cmd_index, float *sqncr_output);
 
 error_t l9966_start_sc(l9966_ctx_t *ctx, const l9966_ctrl_sc_conf_t *cfg);

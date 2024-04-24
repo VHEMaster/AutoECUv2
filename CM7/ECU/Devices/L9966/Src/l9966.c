@@ -28,7 +28,6 @@ error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
     memset(ctx, 0u, sizeof(l9966_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(l9966_init_ctx_t));
     ctx->init.spi_slave->usrdata = ctx;
-    ctx->digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD;
 
     if(gpio_valid(&ctx->init.nrst_pin)) {
       gpio_reset(&ctx->init.nrst_pin);
@@ -110,34 +109,6 @@ error_t l9966_write_config(l9966_ctx_t *ctx, const l9966_config_t *config)
   return err;
 }
 
-error_t l9966_set_rrx_value(l9966_ctx_t *ctx, uint8_t rrx, float value)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL || rrx >= L9966_RRx_COUNT, err = E_PARAM);
-
-    ctx->rrx[rrx] = value;
-
-  } while(0);
-
-  return err;
-}
-
-error_t l9966_set_dig_poll_period(l9966_ctx_t *ctx, time_delta_us_t period)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-
-    ctx->digital_poll_period = period;
-
-  } while(0);
-
-  return err;
-}
-
 error_t l9966_reset(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -202,42 +173,6 @@ error_t l9966_get_inputs(l9966_ctx_t *ctx, l9966_ctrl_dig_inputs_t *dig_inputs)
     BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
 
     memcpy(dig_inputs, &ctx->digital_inputs, sizeof(l9966_ctrl_dig_inputs_t));
-  } while(0);
-
-  return err;
-}
-
-error_t l9966_start_sqncr(l9966_ctx_t *ctx)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->digital_inputs_valid != true, err = E_AGAIN);
-    BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
-
-    for(int i = 0; i < L9966_EU_COUNT; i++) {
-      ctx->eu_enabled[i] = true;
-    }
-
-  } while(0);
-
-  return err;
-}
-
-error_t l9966_stop_sqncr(l9966_ctx_t *ctx)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->digital_inputs_valid != true, err = E_AGAIN);
-    BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
-
-    for(int i = 0; i < L9966_EU_COUNT; i++) {
-      ctx->eu_enabled[i] = false;
-    }
-
   } while(0);
 
   return err;

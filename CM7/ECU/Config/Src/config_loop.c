@@ -8,6 +8,7 @@
 #include "config_loop.h"
 #include "compiler.h"
 #include "time.h"
+#include "bool.h"
 
 #define ECU_LOOP_MAX_CALLBACKS    (32)
 
@@ -53,18 +54,20 @@ static error_t ecu_config_loop_register(ecu_config_loop_callbacks_t *callbacks, 
 {
   error_t err = E_OK;
   uint32_t new_index;
+  bool found = false;
   time_us_t now = time_get_current_us();
 
   do {
     BREAK_IF_ACTION(callbacks->count >= ECU_LOOP_MAX_CALLBACKS, err = E_OVERFLOW);
 
     for(int i = 0; i < callbacks->count; i++) {
-      if(callbacks->items[i].func == func) {
-        err = E_EXISTS;
+      if(callbacks->items[i].func == func && callbacks->items[i].usrdata == usrdata) {
+        callbacks->items[i].period = period;
+        found = true;
         break;
       }
     }
-    BREAK_IF(err != E_OK);
+    BREAK_IF(found);
 
     new_index = callbacks->count++;
 

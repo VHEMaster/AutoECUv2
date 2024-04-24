@@ -15,7 +15,8 @@
 
 #define INPUTS_IFS_MAX    8u
 #define INPUTS_CHS_MAX    64u
-#define INPUTS_VOLTAGE_MULTIPLIER   (1000)
+#define INPUTS_ANALOG_MULTIPLIER   (1000.0f)
+#define INPUTS_ANALOG_MULTIPLIER_R (0.001f)
 
 typedef int32_t input_value_t;
 typedef int32_t input_if_id_t;

@@ -8,9 +8,13 @@
 #include <string.h>
 #include "config_rcc.h"
 #include "config_wbls.h"
+#include "config_loop.h"
+#include "config_gpio.h"
 #include "config_extern.h"
 #include "middlelayer_spi.h"
 #include "compiler.h"
+
+#define ECU_WBLS_VOLTAGE_UPDATE_PERIOD    (5 * TIME_US_IN_MS)
 
 typedef struct {
     ecu_spi_slave_enum_t slave_index;
@@ -18,6 +22,17 @@ typedef struct {
     cj125_config_t config_default;
     cj125_heater_t heater;
     cj125_ctx_t *ctx;
+    ecu_gpio_input_pin_t input_ua;
+    ecu_gpio_input_pin_t input_ur;
+    ecu_gpio_input_pin_t input_ref;
+    ecu_gpio_input_pin_t input_pwr;
+
+    input_id_t input_id_ua;
+    input_id_t input_id_ur;
+    input_id_t input_id_ref;
+    input_id_t input_id_pwr;
+
+
 
 }ecu_devices_wbls_ctx_t;
 
@@ -76,6 +91,10 @@ static ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
           .heater_pwm_ch = TIM_CHANNEL_1,
           .heater_nen_pin = { .port = LAMBDA_HEATER_NEN_GPIO_Port, .pin = LAMBDA_HEATER_NEN_Pin },
       },
+      .input_ua = ECU_IN_PORT2_PIN5,
+      .input_ur = ECU_IN_PORT2_PIN6,
+      .input_ref = ECU_IN_PORT2_V5V,
+      .input_pwr = ECU_IN_PORT2_VIGN,
     },
     {
       .slave_index = ECU_SPI_SLAVE_WBLS2,
@@ -88,8 +107,46 @@ static ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
           .heater_pwm_ch = TIM_CHANNEL_2,
           .heater_nen_pin = { .port = LAMBDA_HEATER_NEN_GPIO_Port, .pin = LAMBDA_HEATER_NEN_Pin },
       },
+      .input_ua = ECU_IN_PORT2_PIN7,
+      .input_ur = ECU_IN_PORT2_PIN8,
+      .input_ref = ECU_IN_PORT2_V5V,
+      .input_pwr = ECU_IN_PORT2_VIGN,
     },
 };
+
+static void ecu_devices_wbls_update_voltages_cb(ecu_devices_wbls_ctx_t *wbls_ctx)
+{
+  error_t err = E_OK;
+  cj125_voltages_t voltages;
+  input_value_t value;
+
+  do {
+    err = input_get_value(wbls_ctx->input_id_ua, &value, NULL);
+    BREAK_IF(err != E_OK);
+    voltages.ua = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
+
+    err = input_get_value(wbls_ctx->input_id_ur, &value, NULL);
+    BREAK_IF(err != E_OK);
+    voltages.ur = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
+
+    err = input_get_value(wbls_ctx->input_id_ref, &value, NULL);
+    BREAK_IF(err != E_OK);
+    voltages.ref = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
+
+    err = input_get_value(wbls_ctx->input_id_pwr, &value, NULL);
+    BREAK_IF(err != E_OK);
+    voltages.pwr = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
+
+    err = cj125_update_voltages(wbls_ctx->ctx, &voltages);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  if(err != E_OK && err != E_AGAIN) {
+    //TODO: set DTC here
+  }
+}
+
 
 error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
 {
@@ -117,22 +174,25 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     err = cj125_heater_init(wbls_ctx->ctx, &wbls_ctx->heater);
     BREAK_IF(err != E_OK);
 
-  } while(0);
+    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ua, &wbls_ctx->input_id_ua);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ur, &wbls_ctx->input_id_ur);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ref, &wbls_ctx->input_id_ref);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbls_ctx->input_pwr, &wbls_ctx->input_id_pwr);
+    BREAK_IF(err != E_OK);
 
-  return err;
-}
+    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ua, ECU_GPIO_INPUT_TYPE_ANALOG);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ur, ECU_GPIO_INPUT_TYPE_ANALOG);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ref, ECU_GPIO_INPUT_TYPE_ANALOG);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_pwr, ECU_GPIO_INPUT_TYPE_ANALOG);
+    BREAK_IF(err != E_OK);
 
-error_t ecu_devices_wbls_update_voltages(ecu_device_wbls_t instance, const cj125_voltages_t *voltages)
-{
-  error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
-
-  do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || voltages == NULL, err = E_PARAM);
-
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
-
-    err = cj125_update_voltages(wbls_ctx->ctx, voltages);
+    err = ecu_config_loop_register_slow((ecu_config_loop_cb_t)ecu_devices_wbls_update_voltages_cb, wbls_ctx, ECU_WBLS_VOLTAGE_UPDATE_PERIOD);
     BREAK_IF(err != E_OK);
 
   } while(0);

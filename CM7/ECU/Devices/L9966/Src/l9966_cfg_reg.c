@@ -11,12 +11,12 @@
 error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;
-  l9966_config_t *config;
+  l9966_config_data_t *config;
   l9966_reg_cfg_map_t *reg;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    config = &ctx->config;
+    config = &ctx->config.config_data;
     reg = &ctx->register_map;
 
     BREAK_IF_ACTION(config->status.calib_sel >= L9966_CONFIG_GS_CS_MAX, err = E_PARAM);

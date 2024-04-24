@@ -31,12 +31,12 @@
 #define CJ125_HEATER_MINIMUM_POWER_VOLTAGE      (5.0f)
 #define CJ125_HEATER_FREQ                       (200)
 
-#define CJ125_CALIBRATION_UR_THRESHOLD_H        (0.7f)
-#define CJ125_CALIBRATION_UR_THRESHOLD_L        (1.2f)
-#define CJ125_CALIBRATION_UA_THRESHOLD_H        (1.7f)
+#define CJ125_CALIBRATION_UR_THRESHOLD_L        (0.7f)
+#define CJ125_CALIBRATION_UR_THRESHOLD_H        (1.2f)
 #define CJ125_CALIBRATION_UA_THRESHOLD_L        (1.3f)
-#define CJ125_CALIBRATION_REF_THRESHOLD_H       (5.3f)
+#define CJ125_CALIBRATION_UA_THRESHOLD_H        (1.7f)
 #define CJ125_CALIBRATION_REF_THRESHOLD_L       (4.7f)
+#define CJ125_CALIBRATION_REF_THRESHOLD_H       (5.3f)
 #define CJ125_CALIBRATION_RADJ_DEFAULT          (0.3f)
 
 typedef enum {
@@ -244,7 +244,7 @@ typedef struct cj125_ctx_tag {
 
     bool ampfactor_request;
     error_t ampfactor_errcode;
-    cj125_af_t ampfactor;
+    cj125_af_t ampfactor_req_data;
     cj125_heatup_type_t heatup_type;
 
     cj125_data_t data;

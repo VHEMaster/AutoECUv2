@@ -611,6 +611,6 @@ typedef struct {
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
     l9966_config_status_t status;
-}l9966_config_t;
+}l9966_config_data_t;
 
 #endif /* DEVICES_L9966_INC_L9966_CONFIG_H_ */

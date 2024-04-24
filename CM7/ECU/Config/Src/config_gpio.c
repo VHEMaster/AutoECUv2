@@ -463,20 +463,38 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 12,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN13
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 13,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN14
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 14,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT1_PIN15
+        {
+            .if_id = ECU_IN_IF_FLEXIO1,
+            .input_ch_id = 12,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT1_V12V
+        {
+            .if_id = ECU_IN_IF_FLEXIO1,
+            .input_ch_id = 13,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT1_VREF
+        {
+            .if_id = ECU_IN_IF_FLEXIO1,
+            .input_ch_id = 14,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT1_VIGN
         {
             .if_id = ECU_IN_IF_FLEXIO1,
             .input_ch_id = 15,
@@ -512,6 +530,36 @@ static ecu_config_gpio_t ecu_config_gpio = {
         }, //ECU_IN_PORT2_PIN4
         {
             .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 4,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_PIN5
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 5,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_PIN6
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 6,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_PIN7
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 7,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_PIN8
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 8,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_PIN9
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 9,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
@@ -533,20 +581,38 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 12,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN13
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 13,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN14
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 14,
             .pin = { .port = NULL, .pin = 0 },
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG | ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
         }, //ECU_IN_PORT2_PIN15
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 12,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT2_V12V
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 13,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT2_VREF
+        {
+            .if_id = ECU_IN_IF_FLEXIO2,
+            .input_ch_id = 14,
+            .pin = { .port = NULL, .pin = 0 },
+            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
+        }, //ECU_IN_PORT2_VIGN
         {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 15,
@@ -690,7 +756,7 @@ static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_c
     switch(ecu_config_gpio.inputs_if[interface_id].channels[channel_id]->current_mode) {
       case ECU_GPIO_INPUT_TYPE_ANALOG:
         err = l9966_get_sqncr_output(ctx, channel->input_ch_id, &l9966_output_value);
-        *value = roundf(l9966_output_value * INPUTS_VOLTAGE_MULTIPLIER);
+        *value = roundf(l9966_output_value * INPUTS_ANALOG_MULTIPLIER);
         break;
       case ECU_GPIO_INPUT_TYPE_DIGITAL:
         err = l9966_get_inputs(ctx, &l9966_digital_value);

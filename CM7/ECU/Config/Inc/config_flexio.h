@@ -12,5 +12,6 @@
 #include "l9966.h"
 
 error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx);
+error_t ecu_devices_flexio_get_default_config(ecu_device_flexio_t instance, l9966_ctx_t *ctx);
 
 #endif /* CONFIG_INC_CONFIG_FLEXIO_H_ */

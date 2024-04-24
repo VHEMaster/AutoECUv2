@@ -112,7 +112,7 @@ static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
           ctx->reset_fsm = CJ125_RESET_CALIB_SAMPLE;
-          ctx->diag_timestamp = now;
+          ctx->calib_timestamp = now;
           ctx->calib_ignored = 0;
           ctx->calib_samples = 0;
           ctx->calib_ur_voltage = 0;

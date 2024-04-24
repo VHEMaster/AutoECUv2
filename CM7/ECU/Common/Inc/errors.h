@@ -23,6 +23,7 @@ typedef enum {
   E_INVALACT = -11,
   E_BADRESP = -12,
   E_BADVALUE = -13,
+  E_EXISTS = -14,
 }error_t;
 
 #endif /* COMMON_INC_ERRORS_H_ */
