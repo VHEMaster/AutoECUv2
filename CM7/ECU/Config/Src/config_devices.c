@@ -90,8 +90,8 @@ static ecu_config_devices_t ecu_config_devices = {
         }, //ECU_DEVICE_TYPE_MOTOR
         {
             .loop_main = (ecu_device_loop_func_t)qspi_loop_main,
-            .loop_slow = (ecu_device_loop_func_t)qspi_loop_main,
-            .loop_fast = (ecu_device_loop_func_t)qspi_loop_main,
+            .loop_slow = (ecu_device_loop_func_t)qspi_loop_slow,
+            .loop_fast = (ecu_device_loop_func_t)qspi_loop_fast,
             .instance_max = ECU_DEVICE_FLASH_MAX,
         }, //ECU_DEVICE_TYPE_FLASH
     },

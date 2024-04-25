@@ -262,8 +262,8 @@ void Error_Handler(void);
 #define NVIC_PRIO_TIM15 4
 #define NVIC_PRIO_TIM16 1
 #define NVIC_PRIO_TIM17 1
-#define NVIC_PRIO_QSPI 14
-#define NVIC_PRIO_MDMA 14
+#define NVIC_PRIO_QSPI 6
+#define NVIC_PRIO_MDMA 6
 #define NVIC_PRIO_HSEM1 15
 #define NVIC_PRIO_RAM_ECC 15
 #define NVIC_PRIO_CM4_TO_CM7_EV 15

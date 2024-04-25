@@ -6,6 +6,7 @@
  */
 
 #include "qspi.h"
+#include "qspi_fsm.h"
 #include "compiler.h"
 #include <string.h>
 
@@ -21,17 +22,39 @@ void qspi_loop_slow(qspi_ctx_t *ctx)
 
 void qspi_loop_fast(qspi_ctx_t *ctx)
 {
+  error_t err = E_OK;
 
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    err = qspi_fsm(ctx);
+    if(err != E_OK && err != E_AGAIN) {
+      //TODO: set DTC here?
+    }
+
+  } while(0);
 }
 
 void qspi_cplt_cb(qspi_ctx_t *ctx)
 {
-
+  if(ctx != NULL && ctx->ready == true) {
+    ctx->cmd_async_errcode = E_OK;
+  }
 }
 
 void qspi_err_cb(qspi_ctx_t *ctx)
 {
+  if(ctx != NULL && ctx->ready == true) {
+    ctx->cmd_async_errcode = E_IO;
+  }
+}
 
+void qspi_timeout_cb(qspi_ctx_t *ctx)
+{
+  if(ctx != NULL && ctx->ready == true) {
+    ctx->cmd_async_errcode = E_TIMEOUT;
+  }
 }
 
 error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
@@ -42,7 +65,14 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
     memset(ctx, 0, sizeof(qspi_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(qspi_init_t));
 
-    ctx->init_errcode = E_NOTRDY;
+    ctx->cmd_poll.Match = 0;
+    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
+    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
+    ctx->cmd_poll.StatusBytesSize = 1;
+    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
+    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
+
+    ctx->init_errcode = E_AGAIN;
     ctx->ready = true;
 
   } while(0);
@@ -151,12 +181,6 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -186,12 +210,6 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_sector_erase;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -221,12 +239,6 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_sector_erase;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -251,17 +263,11 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
     ctx->cmd_ptr = &ctx->init.cmd_ce;
     ctx->cmd_wren_needed = true;
 
-    ctx->cmd_errcode = E_AGAIN;
-    ctx->cmd_ready = true;
-
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_chip_erase;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
+
+    ctx->cmd_errcode = E_AGAIN;
+    ctx->cmd_ready = true;
 
     err = ctx->cmd_errcode;
 
@@ -323,12 +329,6 @@ error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, u
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -355,12 +355,6 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -425,12 +419,6 @@ error_t qspi_prot_write(qspi_ctx_t *ctx, const void *payload, uint32_t length)
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
@@ -457,12 +445,6 @@ error_t qspi_prot_lock(qspi_ctx_t *ctx)
 
     ctx->cmd_status_poll_needed = true;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-    ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
-    ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
-    ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
-    ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;

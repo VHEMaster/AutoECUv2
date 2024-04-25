@@ -486,10 +486,10 @@ void HAL_QSPI_MspInit(QSPI_HandleTypeDef* hqspi)
     hmdma_quadspi_fifo_th.Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
     hmdma_quadspi_fifo_th.Init.Priority = MDMA_PRIORITY_LOW;
     hmdma_quadspi_fifo_th.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
-    hmdma_quadspi_fifo_th.Init.SourceInc = MDMA_SRC_INC_WORD;
-    hmdma_quadspi_fifo_th.Init.DestinationInc = MDMA_DEST_INC_WORD;
-    hmdma_quadspi_fifo_th.Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
-    hmdma_quadspi_fifo_th.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
+    hmdma_quadspi_fifo_th.Init.SourceInc = MDMA_SRC_INC_BYTE;
+    hmdma_quadspi_fifo_th.Init.DestinationInc = MDMA_DEST_INC_BYTE;
+    hmdma_quadspi_fifo_th.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
+    hmdma_quadspi_fifo_th.Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
     hmdma_quadspi_fifo_th.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
     hmdma_quadspi_fifo_th.Init.BufferTransferLength = 1;
     hmdma_quadspi_fifo_th.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;

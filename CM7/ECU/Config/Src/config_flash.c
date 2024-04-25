@@ -20,16 +20,11 @@ typedef struct {
     qspi_init_t init;
 }ecu_devices_flash_ctx_t;
 
-static uint8_t ecu_devices_flash_rx_payload[ECU_DEVICE_FLASH_MAX][ECU_FLASH_PAGE_SIZE * ECU_FLASH_DIES_COUNT];
-static uint8_t ecu_devices_flash_tx_payload[ECU_DEVICE_FLASH_MAX][ECU_FLASH_PAGE_SIZE * ECU_FLASH_DIES_COUNT];
-
 static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
     {
         .init = {
             .hqspi = &hqspi,
             .memory_base_address = QSPI_BASE,
-            .tx_payload = ecu_devices_flash_tx_payload[ECU_DEVICE_FLASH_1],
-            .rx_payload = ecu_devices_flash_rx_payload[ECU_DEVICE_FLASH_1],
 
             .flash_dies_count = ECU_FLASH_DIES_COUNT,
             .flash_size = ECU_FLASH_SIZE * ECU_FLASH_DIES_COUNT,
@@ -237,6 +232,20 @@ static void ecu_devices_flash_err_cb(QSPI_HandleTypeDef *hqspi)
   }
 }
 
+static void ecu_devices_flash_timeout_cb(QSPI_HandleTypeDef *hqspi)
+{
+  ecu_devices_flash_ctx_t *flash_ctx;
+
+  for(int i = 0; i < ECU_DEVICE_FLASH_MAX; i++) {
+    flash_ctx = &ecu_devices_flash_ctx[i];
+
+    if(flash_ctx->init.hqspi == hqspi) {
+      qspi_timeout_cb(flash_ctx->ctx);
+      break;
+    }
+  }
+}
+
 error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -256,8 +265,10 @@ error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     status = HAL_QSPI_RegisterCallback(flash_ctx->init.hqspi, HAL_QSPI_ERROR_CB_ID, ecu_devices_flash_err_cb);
-    status |= HAL_QSPI_RegisterCallback(flash_ctx->init.hqspi, HAL_QSPI_ABORT_CB_ID, ecu_devices_flash_err_cb);
-    status |= HAL_QSPI_RegisterCallback(flash_ctx->init.hqspi, HAL_QSPI_TIMEOUT_CB_ID, ecu_devices_flash_err_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    status = HAL_QSPI_RegisterCallback(flash_ctx->init.hqspi, HAL_QSPI_ABORT_CB_ID, ecu_devices_flash_timeout_cb);
+    status |= HAL_QSPI_RegisterCallback(flash_ctx->init.hqspi, HAL_QSPI_TIMEOUT_CB_ID, ecu_devices_flash_timeout_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     err = qspi_init(flash_ctx->ctx, &flash_ctx->init);

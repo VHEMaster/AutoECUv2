@@ -14,7 +14,9 @@
 #include "errors.h"
 
 #define QSPI_STATUS_POLL_INTERVAL     (96 * 50)
-#define QSPI_CMD_TIMEOUT_US           (200)
+#define QSPI_CMD_TIMEOUT_US           (100)
+#define QSPI_PAYLOAD_TIMEOUT_US       (200)
+#define QSPI_ABORT_TIMEOUT_US         (1 * TIME_US_IN_MS)
 
 typedef enum {
   QSPI_STATUS_REG_BUSY1 = 1,
@@ -33,11 +35,14 @@ typedef struct {
 }qspi_jedec_t;
 
 typedef struct {
+    uint8_t mfg_id[2];
+    uint8_t device_type[2];
+    uint8_t device_id[2];
+}qspi_jedec_quad_t;
+
+typedef struct {
     QSPI_HandleTypeDef *hqspi;
     uint32_t memory_base_address;
-
-    void *tx_payload;
-    void *rx_payload;
 
     uint32_t flash_size;
     uint32_t flash_dies_count;
@@ -88,11 +93,41 @@ typedef struct {
     QSPI_CommandTypeDef cmd_lsid;
 }qspi_init_t;
 
+typedef enum {
+  QSPI_FSM_INIT_CONDITION = 0,
+  QSPI_FSM_INIT_QUAD_RST,
+  QSPI_FSM_INIT_RESET_EN,
+  QSPI_FSM_INIT_RESET,
+  QSPI_FSM_INIT_JEDEC,
+  QSPI_FSM_INIT_QUAD,
+  QSPI_FSM_INIT_MAX
+}qspi_fsm_init_t;
+
+typedef enum {
+  QSPI_FSM_PROCESS_CONDITION = 0,
+  QSPI_FSM_PROCESS_IO,
+  QSPI_FSM_PROCESS_MAX
+}qspi_fsm_process_t;
+
+typedef enum {
+  QSPI_FSM_IO_INITIAL = 0,
+  QSPI_FSM_IO_WREN_REQ,
+  QSPI_FSM_IO_WREN_WAIT,
+  QSPI_FSM_IO_CMD_REQ,
+  QSPI_FSM_IO_CMD_WAIT,
+  QSPI_FSM_IO_PAYLOAD_REQ,
+  QSPI_FSM_IO_PAYLOAD_WAIT,
+  QSPI_FSM_IO_STATUS_REQ,
+  QSPI_FSM_IO_STATUS_WAIT,
+  QSPI_FSM_IO_ABORT_REQ,
+  QSPI_FSM_IO_ABORT_WAIT,
+  QSPI_FSM_IO_MAX
+}qspi_fsm_io_t;
+
 typedef struct {
     qspi_init_t init;
     bool ready;
     bool initialized;
-    bool qspi_busy;
     bool locked;
     error_t init_errcode;
 
@@ -106,8 +141,13 @@ typedef struct {
     time_delta_us_t cmd_poll_timeout;
     error_t cmd_async_errcode;
     error_t cmd_errcode;
+    time_us_t cmd_timestamp;
 
-    qspi_status_reg_t status;
+    qspi_fsm_init_t fsm_init;
+    qspi_fsm_process_t fsm_process;
+    qspi_fsm_io_t fsm_io;
+
+    qspi_jedec_quad_t jedec_quad;
     qspi_jedec_t jedec;
     bool jedec_ready;
 }qspi_ctx_t;
@@ -121,6 +161,7 @@ void qspi_loop_fast(qspi_ctx_t *ctx);
 
 void qspi_cplt_cb(qspi_ctx_t *ctx);
 void qspi_err_cb(qspi_ctx_t *ctx);
+void qspi_timeout_cb(qspi_ctx_t *ctx);
 
 error_t qspi_lock(qspi_ctx_t *ctx);
 error_t qspi_unlock(qspi_ctx_t *ctx);
