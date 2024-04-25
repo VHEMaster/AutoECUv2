@@ -267,6 +267,8 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           if(err == E_OK) {
             ctx->fsm_init = QSPI_FSM_INIT_QUAD;
             ctx->cmd_ptr = &ctx->init.cmd_eqio;
+            ctx->cmd_status_poll_needed = true;
+            ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
             err = E_AGAIN;
             continue;
           } else {
@@ -281,6 +283,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_QUAD:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
+          ctx->cmd_status_poll_needed = false;
           ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
           ctx->init_errcode = err;
           ctx->initialized = true;

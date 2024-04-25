@@ -19,13 +19,12 @@
 #define QSPI_ABORT_TIMEOUT_US         (1 * TIME_US_IN_MS)
 
 typedef enum {
-  QSPI_STATUS_REG_BUSY1 = 1,
+  QSPI_STATUS_REG_BUSY = 1,
   QSPI_STATUS_REG_WEL = 2,
   QSPI_STATUS_REG_WSE = 4,
   QSPI_STATUS_REG_WSP = 8,
   QSPI_STATUS_REG_WPLD = 16,
   QSPI_STATUS_REG_SEC = 32,
-  QSPI_STATUS_REG_BUSY2 = 128,
 }qspi_status_reg_t;
 
 typedef struct {

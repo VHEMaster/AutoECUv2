@@ -66,7 +66,7 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
     memcpy(&ctx->init, init_ctx, sizeof(qspi_init_t));
 
     ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY1 | QSPI_STATUS_REG_BUSY2;
+    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY;
     ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
     ctx->cmd_poll.StatusBytesSize = 1;
     ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
