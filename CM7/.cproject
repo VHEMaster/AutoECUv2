@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
@@ -69,6 +70,7 @@
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includefiles.1835479612" name="Include files (-include)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includefiles" useByScannerDiscovery="false" valueType="includeFiles"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1940164150" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.502875375" name="MCU G++ Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler">
@@ -148,6 +150,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
@@ -168,6 +171,7 @@
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 								</option>
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includefiles.1356463035" name="Include files (-include)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includefiles" useByScannerDiscovery="false" valueType="includeFiles"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1820532889" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.143850788" name="MCU G++ Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler">

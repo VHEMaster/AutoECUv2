@@ -15,6 +15,7 @@
 #include "tle4729.h"
 #include "tle6240.h"
 #include "l9960.h"
+#include "qspi.h"
 
 typedef enum {
   ECU_DEVICE_TYPE_EGT = 0,
@@ -23,6 +24,7 @@ typedef enum {
   ECU_DEVICE_TYPE_STEPPER,
   ECU_DEVICE_TYPE_OUTPUT,
   ECU_DEVICE_TYPE_MOTOR,
+  ECU_DEVICE_TYPE_FLASH,
   ECU_DEVICE_TYPE_MAX
 }ecu_device_type_t;
 
@@ -64,6 +66,11 @@ typedef enum {
   ECU_DEVICE_MOTOR_MAX
 }ecu_device_motor_t;
 
+typedef enum {
+  ECU_DEVICE_FLASH_1 = 0,
+  ECU_DEVICE_FLASH_MAX
+}ecu_device_flash_t;
+
 error_t ecu_devices_init(void);
 void ecu_devices_loop_main(void);
 void ecu_devices_loop_slow(void);
@@ -78,5 +85,6 @@ error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx);
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx);
 error_t ecu_devices_get_output_ctx(ecu_device_output_t instance, tle6240_ctx_t **ctx);
 error_t ecu_devices_get_motor_ctx(ecu_device_motor_t instance, l9960_ctx_t **ctx);
+error_t ecu_devices_get_flash_ctx(ecu_device_motor_t instance, qspi_ctx_t **ctx);
 
 #endif /* CONFIG_INC_CONFIG_DEVICES_H_ */

@@ -10,6 +10,7 @@
 #include "config_flexio.h"
 #include "config_output.h"
 #include "config_motor.h"
+#include "config_flash.h"
 #include "config_wbls.h"
 #include "config_egt.h"
 #include "compiler.h"
@@ -97,6 +98,18 @@ void middlelayer_devices_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_WBLS, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_DEVICE_FLASH_MAX; i++) {
+      err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_FLASH, i, &device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_flash_init(i, (qspi_ctx_t *)device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_FLASH, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

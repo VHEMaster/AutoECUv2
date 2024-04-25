@@ -14,7 +14,8 @@
     ECU_DEVICE_WBLS_MAX +   \
     ECU_DEVICE_STEPPER_MAX +  \
     ECU_DEVICE_OUTPUT_MAX +   \
-    ECU_DEVICE_MOTOR_MAX)
+    ECU_DEVICE_MOTOR_MAX +   \
+    ECU_DEVICE_FLASH_MAX)
 
 typedef enum {
   ECU_DEVICE_LOOP_TYPE_MAIN = 0,
@@ -47,6 +48,7 @@ static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX] = {0};
 static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX] = {0};
 static tle6240_ctx_t ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_MAX] = {0};
 static l9960_ctx_t ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_MAX] = {0};
+static qspi_ctx_t ecu_config_qspi_ctx[ECU_DEVICE_FLASH_MAX] = {0};
 
 static ecu_config_devices_t ecu_config_devices = {
     .interfaces = {
@@ -86,6 +88,12 @@ static ecu_config_devices_t ecu_config_devices = {
             .loop_fast = (ecu_device_loop_func_t)l9960_loop_fast,
             .instance_max = ECU_DEVICE_MOTOR_MAX,
         }, //ECU_DEVICE_TYPE_MOTOR
+        {
+            .loop_main = (ecu_device_loop_func_t)qspi_loop_main,
+            .loop_slow = (ecu_device_loop_func_t)qspi_loop_main,
+            .loop_fast = (ecu_device_loop_func_t)qspi_loop_main,
+            .instance_max = ECU_DEVICE_FLASH_MAX,
+        }, //ECU_DEVICE_TYPE_FLASH
     },
     .devices = {
         {
@@ -142,6 +150,11 @@ static ecu_config_devices_t ecu_config_devices = {
             .type = ECU_DEVICE_TYPE_MOTOR,
             .instance = ECU_DEVICE_MOTOR_2,
             .ctx = &ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_2],
+        },
+        {
+            .type = ECU_DEVICE_TYPE_FLASH,
+            .instance = ECU_DEVICE_FLASH_1,
+            .ctx = &ecu_config_qspi_ctx[ECU_DEVICE_FLASH_1],
         },
     },
 };
@@ -303,3 +316,7 @@ error_t ecu_devices_get_motor_ctx(ecu_device_motor_t instance, l9960_ctx_t **ctx
   return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_MOTOR, instance, (void**)ctx);
 }
 
+error_t ecu_devices_get_flash_ctx(ecu_device_motor_t instance, qspi_ctx_t **ctx)
+{
+  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_FLASH, instance, (void**)ctx);
+}
