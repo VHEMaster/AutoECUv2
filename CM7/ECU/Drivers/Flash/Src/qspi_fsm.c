@@ -54,22 +54,17 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         break;
       case QSPI_FSM_IO_CMD_REQ:
         ctx->cmd_async_errcode = E_AGAIN;
-        if(ctx->cmd_ptr->DataMode == QSPI_DATA_NONE) {
-          status = HAL_QSPI_Command_IT(ctx->init.hqspi, ctx->cmd_ptr);
-          if(status == HAL_OK) {
+        status = HAL_QSPI_Command_IT(ctx->init.hqspi, ctx->cmd_ptr);
+        if(status == HAL_OK) {
+          if(ctx->cmd_ptr->DataMode == QSPI_DATA_NONE) {
             ctx->fsm_io = QSPI_FSM_IO_CMD_WAIT;
             ctx->cmd_timestamp = now;
           } else {
-            err = E_HAL;
-          }
-        } else {
-          status = HAL_QSPI_Command(ctx->init.hqspi, ctx->cmd_ptr, 0);
-          if(status == HAL_OK) {
             ctx->fsm_io = QSPI_FSM_IO_PAYLOAD_REQ;
             continue;
-          } else {
-            err = E_HAL;
           }
+        } else {
+          err = E_HAL;
         }
         break;
       case QSPI_FSM_IO_CMD_WAIT:
