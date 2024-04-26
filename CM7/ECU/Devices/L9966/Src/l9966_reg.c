@@ -13,29 +13,29 @@ error_t l9966_reg_init(l9966_reg_cfg_map_t *register_map)
   error_t err = E_OK;
   uint8_t map_index = 0;
 
+  register_map->raw[map_index].addr = L9966_REG_DWT_VOLT_SRC_LSF_CTRL;
+  register_map->raw[map_index].value = &register_map->data.dwt_volt_src_lsf_ctrl.data;
+  map_index++;
+
+  register_map->raw[map_index].addr = L9966_REG_SWITCH_ROUTE;
+  register_map->raw[map_index].value = &register_map->data.switch_route.data;
+  map_index++;
+
+  register_map->raw[map_index].addr = L9966_REG_ACTIVE_DISCHARGE_LSF_CTRL;
+  register_map->raw[map_index].value = &register_map->data.active_discharge_lsf_ctrl.data;
+  map_index++;
+
   for(int i = 0; i < ITEMSOF(register_map->data.curr_src_ctrl); i++) {
     register_map->raw[map_index].addr = L9966_REG_CURR_SRC_CTRL_x + i;
     register_map->raw[map_index].value = &register_map->data.curr_src_ctrl[i].data;
     map_index++;
   }
 
-  register_map->raw[map_index].addr = L9966_REG_SWITCH_ROUTE;
-  register_map->raw[map_index].value = &register_map->data.switch_route.data;
-  map_index++;
-
-  register_map->raw[map_index].addr = L9966_REG_DWT_VOLT_SRC_LSF_CTRL;
-  register_map->raw[map_index].value = &register_map->data.dwt_volt_src_lsf_ctrl.data;
-  map_index++;
-
   for(int i = 0; i < ITEMSOF(register_map->data.gtm_to_sent_route); i++) {
     register_map->raw[map_index].addr = L9966_REG_GTM_TO_SENT_ROUTE_x + i;
     register_map->raw[map_index].value = &register_map->data.gtm_to_sent_route[i].data;
     map_index++;
   }
-
-  register_map->raw[map_index].addr = L9966_REG_ACTIVE_DISCHARGE_LSF_CTRL;
-  register_map->raw[map_index].value = &register_map->data.active_discharge_lsf_ctrl.data;
-  map_index++;
 
   register_map->raw[map_index].addr = L9966_REG_WAK_MSK;
   register_map->raw[map_index].value = &register_map->data.wak_msk.data;
