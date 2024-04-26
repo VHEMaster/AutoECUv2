@@ -29,24 +29,13 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
         if(ctx->reset_request == true && ctx->reset_errcode == E_AGAIN) {
           ctx->sqncr_cmd_ready_mask = 0;
           if(gpio_valid(&ctx->init.nrst_pin)) {
-            ctx->reset_fsm_state = L9966_RESET_HARD_RESET;
+            ctx->reset_fsm_state = L9966_RESET_HARD_SET;
           } else {
             ctx->reset_fsm_state = L9966_RESET_SOFT_STEP_PREPARE;
           }
           continue;
         } else {
           err = E_OK;
-        }
-        break;
-      case L9966_RESET_HARD_RESET:
-        ctx->reset_action_timestamp = now;
-        gpio_reset(&ctx->init.nrst_pin);
-        ctx->reset_fsm_state = L9966_RESET_HARD_WAIT_RESET;
-        break;
-      case L9966_RESET_HARD_WAIT_RESET:
-        if(time_diff(now, ctx->reset_action_timestamp) >= L9966_RESET_HARD_WAIT_RESET_US) {
-          ctx->reset_fsm_state = L9966_RESET_HARD_SET;
-          continue;
         }
         break;
       case L9966_RESET_HARD_SET:

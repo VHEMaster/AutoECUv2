@@ -89,34 +89,34 @@ static const l9966_config_t ecu_devices_flexio_config_default = {
           {
               .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
               .comparator_threshold = L9966_CFG_CSC_CT_1,
-              .current_source_value = L9966_CFG_CSC_CSV_4,
+              .current_source_value = L9966_CFG_CSC_CSV_3,
               .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
+              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
           }, // IO9
           {
               .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
               .comparator_threshold = L9966_CFG_CSC_CT_1,
-              .current_source_value = L9966_CFG_CSC_CSV_4,
+              .current_source_value = L9966_CFG_CSC_CSV_3,
               .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
+              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
           }, // IO10
           {
               .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
               .comparator_threshold = L9966_CFG_CSC_CT_1,
-              .current_source_value = L9966_CFG_CSC_CSV_4,
+              .current_source_value = L9966_CFG_CSC_CSV_3,
               .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
+              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
           }, // IO11
           {
               .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
               .comparator_threshold = L9966_CFG_CSC_CT_1,
-              .current_source_value = L9966_CFG_CSC_CSV_4,
+              .current_source_value = L9966_CFG_CSC_CSV_3,
               .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+              .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
+              .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
           }, // IO12
           {
               .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
@@ -278,25 +278,25 @@ static const l9966_config_t ecu_devices_flexio_config_default = {
               }, //CMD8
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD10,
-                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                   .lpf = 1.0f,
               }, //CMD9
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD11,
-                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                   .lpf = 1.0f,
               }, //CMD10
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD12,
-                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                   .lpf = 1.0f,
               }, //CMD11
               {
                   .next_pc = L9966_CFG_SQNCR_PC_CMD13,
-                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                  .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                   .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                   .lpf = 1.0f,
               }, //CMD12
@@ -335,7 +335,7 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
     {
       .slave_index = ECU_SPI_SLAVE_FLEXIO1,
       .init = {
-          //.nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
+          .nrst_pin = { .port = FLEXIO_NRST_GPIO_Port, .pin = FLEXIO_NRST_Pin },
           .wake_pin = { .port = FLEXIO1_WAKE_GPIO_Port, .pin = FLEXIO1_WAKE_Pin },
           .sync_pin = { .port = FLEXIO1_SYNC_GPIO_Port, .pin = FLEXIO1_SYNC_Pin },
           .int_pin = { .port = FLEXIO1_INT_GPIO_Port, .pin = FLEXIO1_INT_Pin },

@@ -24,7 +24,6 @@
 #define L9966_STATUS_POLL_PERIOD              (100 * TIME_US_IN_MS)
 #define L9966_SPI_MODE                        (SPI_MODE_1)
 
-#define L9966_RESET_HARD_WAIT_RESET_US        (100)
 #define L9966_RESET_HARD_WAIT_SET_US          (1 * TIME_US_IN_MS)
 #define L9966_RESET_SOFT_WAIT_US              (1 * TIME_US_IN_MS)
 #define L9966_SYNC_WAIT_US                    (10)
