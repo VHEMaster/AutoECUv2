@@ -12,12 +12,21 @@
 #include "time.h"
 #include "gpio.h"
 
+#define TLE4729_RELATION_ITEMS_MAX    (16)
+
 typedef enum {
   TLE4729_MODE_STBY = 0,
   TLE4729_MODE_HOLD,
   TLE4729_MODE_NORMAL,
-  TLE4729_MODE_ACCELERATE
+  TLE4729_MODE_ACCELERATE,
+  TLE4729_MODE_MAX
 }tle4729_mode_t;
+
+typedef struct {
+    uint8_t items;
+    float input[TLE4729_RELATION_ITEMS_MAX];
+    float output[TLE4729_RELATION_ITEMS_MAX];
+}tle7429_config_relation_t;
 
 typedef struct {
     gpio_t i10;
@@ -28,29 +37,52 @@ typedef struct {
     gpio_t ph2;
     gpio_t error1;
     gpio_t error2;
-    bool failure;
+
+    uint32_t ph_bsrr[4];
+
+}tle4729_init_ctx_t;
+
+typedef struct {
+    tle7429_config_relation_t voltage_to_acceleration_steps;
+    tle7429_config_relation_t speed_to_step_time_ms;
 
     int32_t pos_min;
     int32_t pos_max;
+
+}tle4729_config_t;
+
+typedef struct {
+    tle4729_init_ctx_t init;
+    tle4729_config_t config;
+    bool enabled;
+    bool failure;
+    bool moving;
+    float pwr_voltage;
+    uint8_t current_step;
+    tle4729_mode_t current_mode;
+    float current_speed;
+    time_delta_us_t current_step_time;
+    time_us_t current_step_last;
+
     int32_t pos_target;
     int32_t pos_current;
-    time_delta_us_t us_per_step;
-    tle4729_mode_t mode;
+
 }tle4729_ctx_t;
 
-error_t tle4729_init(tle4729_ctx_t *ctx);
+error_t tle4729_init(tle4729_ctx_t *ctx, const tle4729_init_ctx_t *init_ctx);
+error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx);
 void tle4729_loop_main(tle4729_ctx_t *ctx);
 void tle4729_loop_slow(tle4729_ctx_t *ctx);
 void tle4729_loop_fast(tle4729_ctx_t *ctx);
 
 error_t tle4729_enable(tle4729_ctx_t *ctx, bool enabled);
-error_t tle4729_set_clamp(tle4729_ctx_t *ctx, int32_t pos_min, int32_t pos_max);
-error_t tle4729_set_mode(tle4729_ctx_t *ctx, tle4729_mode_t mode);
-error_t tle4729_set_us_per_step(tle4729_ctx_t *ctx, time_delta_us_t us_per_step);
+
+error_t tle4729_set_pwr_voltage(tle4729_ctx_t *ctx, float pwr_voltage);
 
 error_t tle4729_set_target(tle4729_ctx_t *ctx, int32_t position);
+error_t tle4729_get_target(tle4729_ctx_t *ctx, int32_t *position);
 error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position);
-bool tle4729_is_moving(tle4729_ctx_t *ctx);
-bool tle4729_is_failure(tle4729_ctx_t *ctx);
+error_t tle4729_get_current(tle4729_ctx_t *ctx, int32_t *position);
+error_t tle4729_is_failure(tle4729_ctx_t *ctx, bool *failure);
 
 #endif /* DRIVERS_TLE4729G_INC_TLE4729_H_ */
