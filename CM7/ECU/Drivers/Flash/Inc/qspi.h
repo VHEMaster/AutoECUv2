@@ -141,6 +141,7 @@ typedef struct {
     error_t cmd_async_errcode;
     error_t cmd_errcode;
     time_us_t cmd_timestamp;
+    bool cmd_uses_dma;
 
     qspi_fsm_init_t fsm_init;
     qspi_fsm_process_t fsm_process;

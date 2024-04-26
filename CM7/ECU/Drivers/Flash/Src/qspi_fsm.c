@@ -92,14 +92,17 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
       case QSPI_FSM_IO_PAYLOAD_REQ:
         ctx->cmd_async_errcode = E_AGAIN;
         status = HAL_ERROR;
-        //if(ctx->init.hqspi->hmdma != NULL && ctx->cmd_ptr->NbData >= 4) {
-        if(0) {
+        if(ctx->init.hqspi->hmdma != NULL && ctx->cmd_ptr->NbData >= 4) {
+          ctx->cmd_uses_dma = true;
           if(ctx->cmd_payload_tx != NULL && ctx->cmd_payload_rx == NULL) {
+            CacheClean(ctx->cmd_payload_tx, ctx->cmd_ptr->NbData);
             status = HAL_QSPI_Transmit_DMA(ctx->init.hqspi, (uint8_t *)ctx->cmd_payload_tx);
           } else if(ctx->cmd_payload_tx == NULL && ctx->cmd_payload_rx != NULL) {
+            CacheClean(ctx->cmd_payload_rx, ctx->cmd_ptr->NbData);
             status = HAL_QSPI_Receive_DMA(ctx->init.hqspi, (uint8_t *)ctx->cmd_payload_rx);
           }
         } else {
+          ctx->cmd_uses_dma = false;
           if(ctx->cmd_payload_tx != NULL && ctx->cmd_payload_rx == NULL) {
             status = HAL_QSPI_Transmit_IT(ctx->init.hqspi, (uint8_t *)ctx->cmd_payload_tx);
           } else if(ctx->cmd_payload_tx == NULL && ctx->cmd_payload_rx != NULL) {
@@ -115,6 +118,11 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         break;
       case QSPI_FSM_IO_PAYLOAD_WAIT:
         if(cmd_async_errcode == E_OK) {
+          if(ctx->cmd_uses_dma == true) {
+            if(ctx->cmd_payload_rx != NULL) {
+              CacheInvalidate(ctx->cmd_payload_rx, ctx->cmd_ptr->NbData);
+            }
+          }
           if(ctx->cmd_status_poll_needed == true) {
             ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
             continue;

@@ -35,17 +35,17 @@
 #define PARITY_ODD_CHECK(value) __builtin_parity((value))
 
 #if __CORTEX_M == (7)
-STATIC_INLINE void CacheInvalidate(void * buffer, uint32_t size)
+STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer % 32;
+  uint32_t aligned = (uint32_t)buffer & (__SCB_DCACHE_LINE_SIZE - 1);
   if(aligned == 0)
     SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, size);
   else SCB_InvalidateDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
 }
 
-STATIC_INLINE void CacheClean(void * buffer, uint32_t size)
+STATIC_INLINE void CacheClean(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer % 32;
+  uint32_t aligned = (uint32_t)buffer & (__SCB_DCACHE_LINE_SIZE - 1);
   if(aligned == 0)
     SCB_CleanDCache_by_Addr((uint32_t*)buffer, size);
   else SCB_CleanDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
