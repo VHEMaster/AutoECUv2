@@ -43,12 +43,12 @@ static ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_STEPPER_MAX]
           .voltage_to_step_time_mult = {
               .items = 7,
               .input = { 6.0f, 8.0f, 10.0f, 12.0f, 14.0f, 15.0f, 16.0f },
-              .output = { 1.20f, 1.15f, 1.10f, 1.05f, 1.00f, 0.95f, 0.90f },
+              .output = { 3.8f, 2.00f, 1.36f, 1.13f, 1.05f, 0.96f, 0.93f },
           },
           .speed_to_step_time_ms = {
-              .items = 6,
-              .input = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f },
-              .output = { 16.0f, 13.0f, 9.0f, 6.0f, 5.0f, 4.0f },
+              .items = 7,
+              .input = { 0.0f, 0.16f, 0.33f, 0.50f, 0.66f, 0.83f, 1.00f },
+              .output = { 14.0f, 9.0f, 7.0f, 5.0f, 3.5f, 2.4f, 2.0f },
           },
           .pos_min = 0,
           .pos_max = 127,
