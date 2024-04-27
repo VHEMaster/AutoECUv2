@@ -7,13 +7,16 @@
 
 #include "tle4729.h"
 #include "compiler.h"
+#include "interpolation.h"
+#include <math.h>
 #include <string.h>
 
 STATIC_INLINE void tle4729_set_mode(tle4729_ctx_t *ctx, tle4729_mode_t mode)
 {
   uint32_t prim;
 
-  if(ctx->current_mode != mode) {
+  if(ctx->last_mode != mode) {
+    ctx->last_mode = mode;
     ctx->current_mode = mode;
 
     prim = EnterCritical();
@@ -30,16 +33,15 @@ STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
   bool ph1;
   bool ph2;
   uint32_t prim;
-  uint8_t current_step = ctx->current_step;
+  uint8_t current_step;
 
   if(ctx->enabled == true) {
     if(ctx->current_speed > 0) {
-      current_step = (current_step + 1) & 0x3;
       ctx->pos_current++;
     } else if(ctx->current_speed < 0) {
-      current_step = (current_step - 1) & 0x3;
       ctx->pos_current--;
     }
+    current_step = ctx->pos_current & 3;
 
     if(ctx->init.ph1.port == ctx->init.ph2.port) {
       ctx->init.ph1.port->BSRR = ctx->init.ph_bsrr[current_step];
@@ -54,6 +56,47 @@ STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
 
     ctx->current_step = current_step;
   }
+}
+
+STATIC_INLINE void tle4729_calculate_next_move(tle4729_ctx_t *ctx)
+{
+  float acceleration_steps = ctx->config.acceleration_steps;
+  float r_acceleration_steps = 1.0f / acceleration_steps;
+  float speed = ctx->current_speed;
+  float step_time_mult = 1.0f;
+  float pos_accel_add;
+  time_us_t step_time_us;
+  sMathInterpolateInput mii_step_time_mult, mii_step_time_ms;
+
+  pos_accel_add = speed * acceleration_steps;
+
+  if(ctx->pos_target - ctx->pos_current > pos_accel_add) {
+    speed += r_acceleration_steps;
+  } else if(ctx->pos_target - ctx->pos_current < pos_accel_add) {
+    speed -= r_acceleration_steps;
+  } else {
+
+  }
+
+  speed = CLAMP(speed, -1.0f, 1.0f);
+  if(fabsf(speed) < (r_acceleration_steps * 0.5f)) {
+    if(ctx->pos_target == ctx->pos_current) {
+      ctx->moving = false;
+      speed = 0;
+    }
+  } else {
+    ctx->moving = true;
+  }
+
+  mii_step_time_mult = math_interpolate_input(ctx->pwr_voltage, ctx->config.voltage_to_step_time_mult.input, ctx->config.voltage_to_step_time_mult.items);
+  step_time_mult = math_interpolate_1d(mii_step_time_mult, ctx->config.voltage_to_step_time_mult.output);
+
+  mii_step_time_ms = math_interpolate_input(fabsf(speed), ctx->config.speed_to_step_time_ms.input, ctx->config.speed_to_step_time_ms.items);
+  step_time_us = math_interpolate_1d(mii_step_time_ms, ctx->config.speed_to_step_time_ms.output) * TIME_US_IN_MS;
+  step_time_us *= step_time_mult;
+
+  ctx->current_step_time = step_time_us;
+  ctx->current_speed = speed;
 }
 
 error_t tle4729_init(tle4729_ctx_t *ctx, const tle4729_init_ctx_t *init_ctx)
@@ -92,7 +135,7 @@ error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx
   do {
     BREAK_IF_ACTION(ctx == NULL || config_ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config_ctx->pos_max <= config_ctx->pos_min, err = E_PARAM);
-    BREAK_IF_ACTION(config_ctx->voltage_to_acceleration_steps.items == 0, err = E_PARAM);
+    BREAK_IF_ACTION(config_ctx->voltage_to_step_time_mult.items == 0, err = E_PARAM);
     BREAK_IF_ACTION(config_ctx->speed_to_step_time_ms.items == 0, err = E_PARAM);
 
     if(config_ctx != &ctx->config) {
@@ -143,21 +186,33 @@ void tle4729_loop_fast(tle4729_ctx_t *ctx)
     if(ctx->enabled) {
       if(ctx->moving == false) {
         if(ctx->pos_target != ctx->pos_current) {
-
+          tle4729_calculate_next_move(ctx);
+          tle4729_step_increment(ctx);
           ctx->current_step_last = now;
-          ctx->moving = true;
         }
       } else {
         if(time_diff(now, ctx->current_step_last) >= ctx->current_step_time) {
+          tle4729_calculate_next_move(ctx);
           tle4729_step_increment(ctx);
-
+          ctx->current_step_last = now;
         }
       }
 
       if(ctx->moving == true) {
         mode = TLE4729_MODE_ACCELERATE;
+        ctx->last_moving = now;
       } else {
-        mode = TLE4729_MODE_NORMAL;
+        if(mode == TLE4729_MODE_ACCELERATE) {
+          if(time_diff(now, ctx->last_moving) >= TLE4729_ACC_TO_NORM_TRANS_DELAY_US) {
+            mode = TLE4729_MODE_NORMAL;
+          }
+        } else if(mode == TLE4729_MODE_NORMAL) {
+          if(time_diff(now, ctx->last_moving) >= TLE4729_ACC_TO_NORM_TRANS_DELAY_US + TLE4729_NORM_TO_HOLD_TRANS_DELAY_US) {
+            mode = TLE4729_MODE_HOLD;
+          }
+        } else if(mode == TLE4729_MODE_STBY) {
+          mode = TLE4729_MODE_HOLD;
+        }
       }
     } else {
       mode = TLE4729_MODE_STBY;

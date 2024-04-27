@@ -39,15 +39,16 @@ static ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_STEPPER_MAX]
           .error2 = { .port = STEP_ERR_GPIO_Port, .pin = STEP_ERR_Pin },
       },
       .config_default = {
-          .voltage_to_acceleration_steps = {
+          .acceleration_steps = 8,
+          .voltage_to_step_time_mult = {
               .items = 7,
               .input = { 6.0f, 8.0f, 10.0f, 12.0f, 14.0f, 15.0f, 16.0f },
-              .output = { 15, 13, 11, 9, 8, 7, 6 },
+              .output = { 1.20f, 1.15f, 1.10f, 1.05f, 1.00f, 0.95f, 0.90f },
           },
           .speed_to_step_time_ms = {
-              .items = 7,
+              .items = 6,
               .input = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f },
-              .output = { 19.0f, 16.5f, 14.0f, 12.0f, 10.5f, 9.0f },
+              .output = { 16.0f, 14.0f, 10.0f, 9.0f, 8.0f, 7.0f },
           },
           .pos_min = 0,
           .pos_max = 127,
@@ -92,6 +93,9 @@ error_t ecu_devices_stepper_init(ecu_device_stepper_t instance, tle4729_ctx_t *c
     BREAK_IF(err != E_OK);
 
     memcpy(&stepper_ctx->ctx->config, &stepper_ctx->config_default, sizeof(tle4729_config_t));
+
+    err = ecu_config_gpio_input_get_id(stepper_ctx->input_pwr, &stepper_ctx->input_id_pwr);
+    BREAK_IF(err != E_OK);
 
     err = ecu_config_gpio_input_set_mode(stepper_ctx->input_pwr, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
