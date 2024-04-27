@@ -229,7 +229,14 @@ void tle4729_loop_fast(tle4729_ctx_t *ctx)
 
 error_t tle4729_enable(tle4729_ctx_t *ctx, bool enabled)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    ctx->enabled = enabled;
+
+  } while(0);
 
   return err;
 }
@@ -250,35 +257,90 @@ error_t tle4729_set_pwr_voltage(tle4729_ctx_t *ctx, float pwr_voltage)
 
 error_t tle4729_set_target(tle4729_ctx_t *ctx, int32_t position)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    ctx->pos_target = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+
+  } while(0);
 
   return err;
 }
 
 error_t tle4729_get_target(tle4729_ctx_t *ctx, int32_t *position)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || position, err = E_PARAM);
+
+    *position = ctx->pos_target;
+
+  } while(0);
 
   return err;
 }
 
 error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    ctx->pos_current = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+
+  } while(0);
 
   return err;
 }
 
 error_t tle4729_get_current(tle4729_ctx_t *ctx, int32_t *position)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || position, err = E_PARAM);
+
+    *position = ctx->pos_current;
+
+  } while(0);
+
+  return err;
+}
+
+error_t tle4729_pos_reset(tle4729_ctx_t *ctx, int32_t position)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    position = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+
+    prim = EnterCritical();
+    ctx->pos_target = position;
+    ctx->pos_current = position;
+    ExitCritical(prim);
+
+  } while(0);
 
   return err;
 }
 
 error_t tle4729_is_failure(tle4729_ctx_t *ctx, bool *failure)
 {
-  error_t err = E_NOTSUPPORT;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || failure, err = E_PARAM);
+
+    *failure = ctx->failure;
+
+  } while(0);
 
   return err;
 }

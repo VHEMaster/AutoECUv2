@@ -88,6 +88,7 @@ error_t tle4729_set_target(tle4729_ctx_t *ctx, int32_t position);
 error_t tle4729_get_target(tle4729_ctx_t *ctx, int32_t *position);
 error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position);
 error_t tle4729_get_current(tle4729_ctx_t *ctx, int32_t *position);
+error_t tle4729_pos_reset(tle4729_ctx_t *ctx, int32_t position);
 error_t tle4729_is_failure(tle4729_ctx_t *ctx, bool *failure);
 
 #endif /* DRIVERS_TLE4729G_INC_TLE4729_H_ */
