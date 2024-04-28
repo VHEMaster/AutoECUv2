@@ -543,6 +543,8 @@ typedef struct {
     l9966_config_sqncr_cmd_pd_t pu_div_sel;
     l9966_config_sqncr_cmd_rvm_t r_volt_sel;
     float lpf;
+    float v_gain;
+    float v_offset;
 }l9966_config_sqncr_cmd_t;
 
 typedef enum {

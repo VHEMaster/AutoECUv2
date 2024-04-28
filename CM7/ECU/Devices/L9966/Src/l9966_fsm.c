@@ -284,6 +284,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
+  l9966_config_sqncr_cmd_t *sqncr_cmd;
   l9966_reg_sqncr_rslt_copy_cmd_t status;
   l9966_reg_sqncr_result_voltage_t result_voltage;
   l9966_reg_sqncr_result_resistor_t result_resistor;
@@ -364,11 +365,12 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
           ctx->sqncr_last = now;
 
           for(int i = 0; i < L9966_CHANNELS; i++) {
+            sqncr_cmd = &ctx->config.config_data.sequencer_config.cmd_config[i];
             data_available = false;
-            if(ctx->config.config_data.sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
+            if(sqncr_cmd->r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
               result_resistor.data = ctx->fsm_rx_burst_payload[i];
               if(result_resistor.bits.ADC_RESULT != 0x0000) {
-                rr_index = ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel;
+                rr_index = sqncr_cmd->pu_div_sel;
                 if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
                   resistor = 1000000.0f;
                 } else {
@@ -377,7 +379,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                 result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
                 data_available = true;
               }
-            } else if(ctx->config.config_data.sequencer_config.cmd_config[i].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
+            } else if(sqncr_cmd->r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
               result_voltage.data = ctx->fsm_rx_burst_payload[i];
               if(result_voltage.bits.NEW_RESULT_FLAG) {
                 result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
@@ -392,7 +394,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                     result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
                     break;
                   default:
-                    switch(ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel) {
+                    switch(sqncr_cmd->pu_div_sel) {
                       case L9966_CFG_SQNCR_CMD_DIV_5V:
                         result_float *= 5.0f;
                         break;
@@ -410,12 +412,14 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                     break;
                 }
                 data_available = true;
+                result_float *= sqncr_cmd->v_gain;
+                result_float += sqncr_cmd->v_offset;
               }
             }
 
             if(data_available) {
               result_old = ctx->sqncr_cmd_results[i];
-              lpf = ctx->config.config_data.sequencer_config.cmd_config[i].lpf;
+              lpf = sqncr_cmd->lpf;
               if(lpf < 1.0f) {
                 result_float = result_float * lpf + result_old * (1.0f - lpf);
               } else {
