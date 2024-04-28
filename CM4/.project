@@ -35,6 +35,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
+			<name>Core/ThreadSafe/newlib_lock_glue.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/ThreadSafe/newlib_lock_glue.c</locationURI>
+		</link>
+		<link>
+			<name>Core/ThreadSafe/stm32_lock.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/ThreadSafe/stm32_lock.h</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c</locationURI>

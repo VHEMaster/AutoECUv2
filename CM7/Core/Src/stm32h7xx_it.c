@@ -56,9 +56,12 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
+extern DMA_HandleTypeDef hdma_adc2;
 extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
 extern DAC_HandleTypeDef hdac1;
 extern FDCAN_HandleTypeDef hfdcan1;
+extern HRTIM_HandleTypeDef hhrtim;
 extern MDMA_HandleTypeDef hmdma_quadspi_fifo_th;
 extern QSPI_HandleTypeDef hqspi;
 extern SPI_HandleTypeDef hspi2;
@@ -270,6 +273,20 @@ void DMA1_Stream1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 stream2 global interrupt.
+  */
+void DMA1_Stream2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc2);
+  /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream2_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 stream4 global interrupt.
   */
 void DMA1_Stream4_IRQHandler(void)
@@ -320,6 +337,7 @@ void ADC_IRQHandler(void)
 
   /* USER CODE END ADC_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
+  HAL_ADC_IRQHandler(&hadc2);
   /* USER CODE BEGIN ADC_IRQn 1 */
 
   /* USER CODE END ADC_IRQn 1 */
@@ -709,6 +727,34 @@ void QUADSPI_IRQHandler(void)
   /* USER CODE BEGIN QUADSPI_IRQn 1 */
 
   /* USER CODE END QUADSPI_IRQn 1 */
+}
+
+/**
+  * @brief This function handles HRTIM timer A global interrupt.
+  */
+void HRTIM1_TIMA_IRQHandler(void)
+{
+  /* USER CODE BEGIN HRTIM1_TIMA_IRQn 0 */
+
+  /* USER CODE END HRTIM1_TIMA_IRQn 0 */
+  HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_A);
+  /* USER CODE BEGIN HRTIM1_TIMA_IRQn 1 */
+
+  /* USER CODE END HRTIM1_TIMA_IRQn 1 */
+}
+
+/**
+  * @brief This function handles HRTIM timer B global interrupt.
+  */
+void HRTIM1_TIMB_IRQHandler(void)
+{
+  /* USER CODE BEGIN HRTIM1_TIMB_IRQn 0 */
+
+  /* USER CODE END HRTIM1_TIMB_IRQn 0 */
+  HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_B);
+  /* USER CODE BEGIN HRTIM1_TIMB_IRQn 1 */
+
+  /* USER CODE END HRTIM1_TIMB_IRQn 1 */
 }
 
 /**

@@ -53,7 +53,7 @@
 /* #define HAL_SRAM_MODULE_ENABLED   */
 /* #define HAL_SDRAM_MODULE_ENABLED   */
 /* #define HAL_HASH_MODULE_ENABLED   */
-/* #define HAL_HRTIM_MODULE_ENABLED   */
+#define HAL_HRTIM_MODULE_ENABLED
 /* #define HAL_HSEM_MODULE_ENABLED   */
 /* #define HAL_GFXMMU_MODULE_ENABLED   */
 /* #define HAL_JPEG_MODULE_ENABLED   */
