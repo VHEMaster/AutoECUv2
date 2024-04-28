@@ -9,21 +9,6 @@
 #include "compiler.h"
 #include <string.h>
 
-void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx)
-{
-  do {
-    BREAK_IF(ctx == NULL || ctx->status != PULSEDADC_STATUS_RUNNING);
-
-    HAL_HRTIM_SimpleBaseStop(ctx->init.hhrtim, ctx->init.hrtim_index);
-    HAL_ADC_Stop_DMA(ctx->init.hadc);
-
-    ctx->status = PULSEDADC_STATUS_OVERFLOW;
-    ctx->current_samples = ctx->init.samples_buffer_size;
-
-  } while(0);
-
-}
-
 error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -122,7 +107,7 @@ error_t pulsedadc_stop(pulsedadc_ctx_t *ctx)
   return err;
 }
 
-error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, int16_t **buffer, uint32_t *samples)
+error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, uint16_t **buffer, uint32_t *samples)
 {
   error_t err = E_OK;
 
@@ -158,3 +143,16 @@ error_t pulsedadc_get_status(pulsedadc_ctx_t *ctx, pulsedadc_status_t *status)
   return err;
 }
 
+void pulsedadc_adc_dma_error(pulsedadc_ctx_t *ctx)
+{
+  do {
+    BREAK_IF(ctx == NULL || ctx->status != PULSEDADC_STATUS_RUNNING);
+
+    HAL_HRTIM_SimpleBaseStop(ctx->init.hhrtim, ctx->init.hrtim_index);
+    HAL_ADC_Stop_DMA(ctx->init.hadc);
+
+    ctx->status = PULSEDADC_STATUS_OVERFLOW;
+    ctx->current_samples = ctx->init.samples_buffer_size;
+
+  } while(0);
+}

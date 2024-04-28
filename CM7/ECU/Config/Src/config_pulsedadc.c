@@ -54,9 +54,23 @@ static ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEVICE_PULSEDAD
     }
 };
 
+static void ecu_devices_pulsedadc_error_cb(ADC_HandleTypeDef *hadc)
+{
+  ecu_devices_pulsedadc_ctx_t *pulsedadc_ctx;
+
+  for(int i = 0; i < ITEMSOF(ecu_devices_pulsedadc_ctx); i++) {
+    pulsedadc_ctx = &ecu_devices_pulsedadc_ctx[i];
+
+    if(pulsedadc_ctx->init.hadc == hadc) {
+      pulsedadc_adc_dma_error(pulsedadc_ctx->ctx);
+    }
+  }
+}
+
 error_t ecu_devices_pulsedadc_init(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t *ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
   ecu_devices_pulsedadc_ctx_t *pulsedadc_ctx;
 
   do {
@@ -67,6 +81,11 @@ error_t ecu_devices_pulsedadc_init(ecu_device_pulsedadc_t instance, pulsedadc_ct
 
     err = ecu_config_get_tim_base_frequency(&htim2, &pulsedadc_ctx->init.base_frequency);
     BREAK_IF(err != E_OK);
+
+    status = HAL_ADC_RegisterCallback(pulsedadc_ctx->init.hadc, HAL_ADC_CONVERSION_COMPLETE_CB_ID, ecu_devices_pulsedadc_error_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    status = HAL_ADC_RegisterCallback(pulsedadc_ctx->init.hadc, HAL_ADC_ERROR_CB_ID, ecu_devices_pulsedadc_error_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     err = pulsedadc_init(pulsedadc_ctx->ctx, &pulsedadc_ctx->init);
     BREAK_IF(err != E_OK);
