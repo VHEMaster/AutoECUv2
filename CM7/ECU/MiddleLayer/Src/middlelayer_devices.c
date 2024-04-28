@@ -7,6 +7,7 @@
 
 #include "middlelayer_devices.h"
 #include "config_devices.h"
+#include "config_pulsedadc.h"
 #include "config_stepper.h"
 #include "config_flexio.h"
 #include "config_output.h"
@@ -41,6 +42,18 @@ void middlelayer_devices_init(void)
 
   do {
     err = ecu_devices_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_DEVICE_PULSEDADC_MAX; i++) {
+      err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_PULSEDADC, i, &device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_pulsedadc_init(i, (pulsedadc_ctx_t *)device_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_PULSEDADC, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_DEVICE_FLEXIO_MAX; i++) {

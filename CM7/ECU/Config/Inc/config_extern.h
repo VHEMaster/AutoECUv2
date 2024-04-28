@@ -11,13 +11,17 @@
 #include "main.h"
 
 extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
 extern DMA_HandleTypeDef hdma_adc1;
+extern DMA_HandleTypeDef hdma_adc2;
 
 extern CRC_HandleTypeDef hcrc;
 
 extern DAC_HandleTypeDef hdac1;
 
 extern FDCAN_HandleTypeDef hfdcan1;
+
+extern HRTIM_HandleTypeDef hhrtim;
 
 extern IWDG_HandleTypeDef hiwdg1;
 
