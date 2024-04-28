@@ -107,8 +107,6 @@ void middlelayer_init(void)
 {
   ecu_config_ll_init();
 
-  ecu_config_start_counter();
-
   middlelayer_spi_init();
 
   middlelayer_gpio_init();
@@ -116,6 +114,8 @@ void middlelayer_init(void)
   middlelayer_devices_init();
 
   core_init();
+
+  ecu_config_start_counter();
 
   ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_fast_irq);
 

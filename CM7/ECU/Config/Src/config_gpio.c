@@ -22,6 +22,7 @@ typedef struct {
 }ecu_gpio_exti_ctx_t;
 
 typedef struct {
+    ecu_gpio_output_pin_t output_pin;
     gpio_t pin;
     ecu_gpio_output_if_t if_id;
     output_ch_id_t output_ch_id;
@@ -34,18 +35,25 @@ typedef struct {
 }ecu_config_gpio_output_t;
 
 typedef struct {
+    ecu_gpio_input_pin_t input_pin;
     gpio_t pin;
     ecu_gpio_input_if_t if_id;
     input_ch_id_t input_ch_id;
     input_id_t input_id;
     TIM_HandleTypeDef *htim;
     uint32_t tim_alternate;
-    uint32_t tim_channel_rising;
-    uint32_t tim_channel_falling;
-    uint32_t tim_channel_rising_falling;
+    uint32_t tim_active_channel_rising_falling;
+    uint32_t tim_active_channel_rising;
+    uint32_t tim_active_channel_falling;
+    bool tim_channel_rising_falling_direct;
+    bool tim_channel_rising_direct;
+    bool tim_channel_falling_direct;
+    uint32_t tim_ic_filter;
+    ecu_gpio_input_capture_edge_t current_capture_edge;
     ecu_config_gpio_input_cb_t irq_cb;
     ecu_gpio_input_type_t supported_modes;
     ecu_gpio_input_type_t current_mode;
+    bool exti_support;
     bool gpio_invert;
     void *usrdata;
 }ecu_config_gpio_input_t;
@@ -77,7 +85,6 @@ typedef struct {
 static error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
 static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
 static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
-static error_t ecu_config_gpio_adc_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
 
 static ecu_config_gpio_t ecu_config_gpio = {
     .outputs_if = {
@@ -117,10 +124,6 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .cfg = { .ch_get = ecu_config_gpio_flexio_ch_get, },
             .usrdata = NULL,
         }, //ECU_IN_IF_FLEXIO2
-        {
-            .cfg = { .ch_get = ecu_config_gpio_adc_ch_get, },
-            .usrdata = NULL,
-        }, //ECU_IN_IF_ADC1
     },
     .outputs = {
         {
@@ -482,15 +485,6 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT1_VIGN
         {
-            .if_id = ECU_IN_IF_FLEXIO1,
-            .input_ch_id = 15,
-            .pin = { .port = FLEXIO1_VRSO_GPIO_Port, .pin = FLEXIO1_VRSO_Pin },
-            .tim_alternate = GPIO_AF2_TIM12,
-            .htim = &htim12,
-            .tim_channel_rising_falling = TIM_CHANNEL_1,
-            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
-        }, //ECU_IN_PORT1_VRS
-        {
             .if_id = ECU_IN_IF_FLEXIO2,
             .input_ch_id = 0,
             .pin = { .port = NULL, .pin = 0 },
@@ -600,24 +594,117 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT2_VIGN
         {
-            .if_id = ECU_IN_IF_FLEXIO2,
-            .input_ch_id = 15,
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 0,
+            .pin = { .port = FLEXIO1_VRSO_GPIO_Port, .pin = FLEXIO1_VRSO_Pin },
+            .tim_alternate = GPIO_AF2_TIM12,
+            .htim = &htim12,
+            .tim_active_channel_rising_falling = HAL_TIM_ACTIVE_CHANNEL_1,
+            .tim_channel_rising_falling_direct = true,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
+        }, //ECU_IN_PORT1_VRS
+        {
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 1,
             .pin = { .port = FLEXIO2_VRSO_GPIO_Port, .pin = FLEXIO2_VRSO_Pin },
             .tim_alternate = GPIO_AF2_TIM12,
             .htim = &htim12,
-            .tim_channel_rising_falling = TIM_CHANNEL_2,
-            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
+            .tim_active_channel_rising_falling = HAL_TIM_ACTIVE_CHANNEL_2,
+            .tim_channel_rising_falling_direct = true,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
         }, //ECU_IN_PORT2_VRS
         {
-            .if_id = ECU_IN_IF_ADC1,
-            .input_ch_id = 0,
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
-        }, //ECU_IN_ADC1_IN1
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 2,
+            .pin = { .port = FLEXIO1_SENT1_GPIO_Port, .pin = FLEXIO1_SENT1_Pin },
+            .tim_alternate = GPIO_AF1_TIM2,
+            .htim = &htim2,
+            .tim_active_channel_rising = HAL_TIM_ACTIVE_CHANNEL_1,
+            .tim_channel_rising_direct = true,
+            .tim_active_channel_falling = HAL_TIM_ACTIVE_CHANNEL_2,
+            .tim_channel_falling_direct = false,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
+        }, //ECU_IN_PORT1_SENT1
         {
-            .if_id = ECU_IN_IF_ADC1,
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 3,
+            .pin = { .port = FLEXIO1_SENT2_GPIO_Port, .pin = FLEXIO1_SENT2_Pin },
+            .tim_alternate = GPIO_AF2_TIM5,
+            .htim = &htim5,
+            .tim_active_channel_rising = HAL_TIM_ACTIVE_CHANNEL_1,
+            .tim_channel_rising_direct = false,
+            .tim_active_channel_falling = HAL_TIM_ACTIVE_CHANNEL_2,
+            .tim_channel_falling_direct = true,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
+        }, //ECU_IN_PORT1_SENT2
+        {
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 4,
+            .pin = { .port = FLEXIO1_SENT3_GPIO_Port, .pin = FLEXIO1_SENT3_Pin },
+            .tim_alternate = GPIO_AF1_TIM2,
+            .htim = &htim2,
+            .tim_active_channel_rising = HAL_TIM_ACTIVE_CHANNEL_3,
+            .tim_channel_rising_direct = true,
+            .tim_active_channel_falling = HAL_TIM_ACTIVE_CHANNEL_4,
+            .tim_channel_falling_direct = false,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
+        }, //ECU_IN_PORT1_SENT3
+        {
+            .if_id = ECU_IN_IF_TIM,
+            .input_ch_id = 5,
+            .pin = { .port = FLEXIO1_SENT4_GPIO_Port, .pin = FLEXIO1_SENT4_Pin },
+            .tim_alternate = GPIO_AF2_TIM5,
+            .htim = &htim5,
+            .tim_active_channel_rising = HAL_TIM_ACTIVE_CHANNEL_3,
+            .tim_channel_rising_direct = false,
+            .tim_active_channel_falling = HAL_TIM_ACTIVE_CHANNEL_4,
+            .tim_channel_falling_direct = true,
+            .tim_ic_filter = 15,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL | ECU_GPIO_INPUT_TYPE_CAPTURE,
+        }, //ECU_IN_PORT1_SENT4
+        {
+            .if_id = ECU_IN_IF_EXTI,
+            .input_ch_id = 0,
+            .pin = { .port = FLEXIO2_SENT1_GPIO_Port, .pin = FLEXIO2_SENT1_Pin },
+            .exti_support = true,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_SENT1
+        {
+            .if_id = ECU_IN_IF_EXTI,
             .input_ch_id = 1,
-            .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
-        }, //ECU_IN_ADC1_IN1
+            .pin = { .port = FLEXIO2_SENT2_GPIO_Port, .pin = FLEXIO2_SENT2_Pin },
+            .exti_support = true,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_SENT2
+        {
+            .if_id = ECU_IN_IF_EXTI,
+            .input_ch_id = 2,
+            .pin = { .port = FLEXIO2_SENT3_GPIO_Port, .pin = FLEXIO2_SENT3_Pin },
+            .exti_support = true,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_SENT3
+        {
+            .if_id = ECU_IN_IF_EXTI,
+            .input_ch_id = 3,
+            .pin = { .port = FLEXIO2_SENT4_GPIO_Port, .pin = FLEXIO2_SENT4_Pin },
+            .exti_support = true,
+            .current_capture_edge = ECU_IN_CAPTURE_EDGE_BOTH,
+            .supported_modes = ECU_GPIO_INPUT_TYPE_DIGITAL,
+        }, //ECU_IN_PORT2_SENT4
     },
 };
 
@@ -758,15 +845,6 @@ static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_c
   return err;
 }
 
-static error_t ecu_config_gpio_adc_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata)
-{
-  error_t err = E_NOTSUPPORT;
-
-
-
-  return err;
-}
-
 static ITCM_FUNC error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata)
 {
   error_t err = E_OK;
@@ -800,6 +878,7 @@ error_t ecu_config_gpio_output_init(void)
     }
 
     for(int i = 0; i < ITEMSOF(ecu_config_gpio.outputs); i++) {
+      ecu_config_gpio.outputs[i].output_pin = i;
       ecu_config_gpio.outputs[i].output_id = output_ch_register(ecu_config_gpio.outputs_if[ecu_config_gpio.outputs[i].if_id].output_if_id, ecu_config_gpio.outputs[i].output_ch_id, ecu_config_gpio.outputs[i].usrdata);
       if(ecu_config_gpio.outputs[i].output_id < 0) {
         err = E_FAULT;
@@ -826,10 +905,102 @@ error_t ecu_config_gpio_output_init(void)
   return err;
 }
 
+static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
+{
+  ecu_config_gpio_inputs_if_t *interface;
+  ecu_config_gpio_input_t *channel;
+  ecu_gpio_input_level_t level = ECU_IN_LEVEL_UNDEFINED;
+  uint32_t active_channel;
+
+  do {
+    BREAK_IF(htim == NULL);
+
+    active_channel = htim->Channel;
+    interface = &ecu_config_gpio.inputs_if[ECU_IN_IF_TIM];
+
+    for(int i = 0; i < ECU_IN_MAX; i++) {
+      channel = interface->channels[i];
+      BREAK_IF(channel == NULL);
+
+      if(channel->htim == htim) {
+        if(channel->irq_cb != NULL) {
+          if(channel->tim_active_channel_rising_falling == active_channel) {
+            if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_RISING) {
+              level = ECU_IN_LEVEL_HIGH;
+            } else if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_FALLING) {
+              level = ECU_IN_LEVEL_LOW;
+            } else {
+              level = ECU_IN_LEVEL_UNDEFINED;
+            }
+          } else if(channel->tim_active_channel_rising == active_channel) {
+            level = ECU_IN_LEVEL_HIGH;
+          } else if(channel->tim_active_channel_falling == active_channel) {
+            level = ECU_IN_LEVEL_LOW;
+          }
+          channel->irq_cb(channel->input_pin, level);
+        }
+      }
+    }
+
+  } while(0);
+}
+
+static void ecu_config_gpio_input_exti_cb(void *usrdata)
+{
+  ecu_config_gpio_input_t *input = (ecu_config_gpio_input_t *)usrdata;
+  ecu_gpio_input_level_t level = ECU_IN_LEVEL_UNDEFINED;
+
+  if(input != NULL) {
+    if(input->irq_cb != NULL) {
+      if(input->current_capture_edge == ECU_IN_CAPTURE_EDGE_RISING) {
+        level = ECU_IN_LEVEL_HIGH;
+      } else if(input->current_capture_edge == ECU_IN_CAPTURE_EDGE_FALLING) {
+        level = ECU_IN_LEVEL_LOW;
+      } else {
+        level = ECU_IN_LEVEL_UNDEFINED;
+      }
+      input->irq_cb(input->input_pin, level);
+    }
+  }
+}
+
+static error_t ecu_config_gpio_input_tim_ac_to_ch(uint32_t active_channel, uint32_t *tim_channel)
+{
+  error_t err = E_OK;
+
+  switch(active_channel) {
+    case HAL_TIM_ACTIVE_CHANNEL_1:
+      *tim_channel = TIM_CHANNEL_1;
+      break;
+    case HAL_TIM_ACTIVE_CHANNEL_2:
+      *tim_channel = TIM_CHANNEL_2;
+      break;
+    case HAL_TIM_ACTIVE_CHANNEL_3:
+      *tim_channel = TIM_CHANNEL_3;
+      break;
+    case HAL_TIM_ACTIVE_CHANNEL_4:
+      *tim_channel = TIM_CHANNEL_4;
+      break;
+    case HAL_TIM_ACTIVE_CHANNEL_5:
+      *tim_channel = TIM_CHANNEL_5;
+      break;
+    case HAL_TIM_ACTIVE_CHANNEL_6:
+      *tim_channel = TIM_CHANNEL_6;
+      break;
+    default:
+      err = E_PARAM;
+      break;
+  }
+
+  return err;
+}
+
 error_t ecu_config_gpio_input_init(void)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
   bool valid = false;
+  uint32_t tim_channel;
 
   do {
     for(int i = 0; i < ITEMSOF(ecu_config_gpio.inputs_if); i++) {
@@ -843,6 +1014,7 @@ error_t ecu_config_gpio_input_init(void)
     BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ITEMSOF(ecu_config_gpio.inputs); i++) {
+      ecu_config_gpio.inputs[i].input_pin = i;
       ecu_config_gpio.inputs[i].input_id = input_ch_register(ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].input_if_id, ecu_config_gpio.inputs[i].input_ch_id, ecu_config_gpio.inputs[i].usrdata);
       if(ecu_config_gpio.inputs[i].input_id < 0) {
         err = E_FAULT;
@@ -853,16 +1025,71 @@ error_t ecu_config_gpio_input_init(void)
 
       valid = gpio_valid(&ecu_config_gpio.inputs[i].pin);
       if(valid == true) {
-        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
+        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_CAPTURE, &valid);
         BREAK_IF(err != E_OK);
 
-        BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+        if(valid == true) {
+          BREAK_IF_ACTION(ecu_config_gpio.inputs[i].htim == NULL, err = E_NOTSUPPORT);
 
-        err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
-        BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_CAPTURE);
+          BREAK_IF(err != E_OK);
 
-        err = input_ch_source_gpio(ecu_config_gpio.inputs[i].input_id, &ecu_config_gpio.inputs[i].pin, ecu_config_gpio.inputs[i].gpio_invert);
-        BREAK_IF(err != E_OK);
+          err = input_ch_source_gpio(ecu_config_gpio.inputs[i].input_id, &ecu_config_gpio.inputs[i].pin, ecu_config_gpio.inputs[i].gpio_invert);
+          BREAK_IF(err != E_OK);
+
+          status = HAL_TIM_RegisterCallback(ecu_config_gpio.inputs[i].htim, HAL_TIM_IC_CAPTURE_CB_ID, ecu_config_gpio_input_capture_cb);
+          BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+          if(ecu_config_gpio.inputs[i].tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+            err = ecu_config_gpio_input_tim_ac_to_ch(ecu_config_gpio.inputs[i].tim_active_channel_falling, &tim_channel);
+            BREAK_IF(err != E_OK);
+
+            err = ecu_config_gpio_input_set_capture_edge(i, ecu_config_gpio.inputs[i].current_capture_edge);
+            BREAK_IF(err != E_OK);
+
+            status = HAL_TIM_IC_Start_IT(ecu_config_gpio.inputs[i].htim, tim_channel);
+            BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+          }
+          if(ecu_config_gpio.inputs[i].tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+            err = ecu_config_gpio_input_tim_ac_to_ch(ecu_config_gpio.inputs[i].tim_active_channel_rising, &tim_channel);
+            BREAK_IF(err != E_OK);
+
+            err = ecu_config_gpio_input_set_capture_edge(i, ecu_config_gpio.inputs[i].current_capture_edge);
+            BREAK_IF(err != E_OK);
+
+            status = HAL_TIM_IC_Start_IT(ecu_config_gpio.inputs[i].htim, tim_channel);
+            BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+          }
+          if(ecu_config_gpio.inputs[i].tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+            err = ecu_config_gpio_input_tim_ac_to_ch(ecu_config_gpio.inputs[i].tim_active_channel_rising_falling, &tim_channel);
+            BREAK_IF(err != E_OK);
+
+            err = ecu_config_gpio_input_set_capture_edge(i, ecu_config_gpio.inputs[i].current_capture_edge);
+            BREAK_IF(err != E_OK);
+
+            status = HAL_TIM_IC_Start_IT(ecu_config_gpio.inputs[i].htim, tim_channel);
+            BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+          }
+
+        } else {
+          err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
+          BREAK_IF(err != E_OK);
+
+          BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+
+          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
+          BREAK_IF(err != E_OK);
+
+          err = input_ch_source_gpio(ecu_config_gpio.inputs[i].input_id, &ecu_config_gpio.inputs[i].pin, ecu_config_gpio.inputs[i].gpio_invert);
+          BREAK_IF(err != E_OK);
+
+          if(ecu_config_gpio.inputs[i].exti_support == true) {
+            err = ecu_config_gpio_input_set_capture_edge(i, ecu_config_gpio.inputs[i].current_capture_edge);
+            BREAK_IF(err != E_OK);
+
+            ecu_config_gpio_exti_register(ecu_config_gpio.inputs[i].pin.pin, ecu_config_gpio_input_exti_cb, &ecu_config_gpio.inputs[i]);
+          }
+        }
 
       } else if(ecu_config_gpio.inputs_if[ecu_config_gpio.inputs[i].if_id].cfg.ch_get != NULL) {
 
@@ -1170,6 +1397,111 @@ error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_
   return err;
 }
 
+static error_t ecu_config_gpio_input_set_capture_edge_channel(ecu_config_gpio_input_t *input, uint32_t tim_channel, uint32_t tim_edge, bool direct)
+{
+  error_t err = E_OK;
+  HAL_StatusTypeDef status;
+  TIM_IC_InitTypeDef config_ic = {0};
+
+  do {
+    config_ic.ICPolarity = tim_edge;
+    config_ic.ICSelection = direct ? TIM_ICSELECTION_DIRECTTI : TIM_ICSELECTION_INDIRECTTI;
+    config_ic.ICPrescaler = TIM_ICPSC_DIV1;
+    config_ic.ICFilter = input->tim_ic_filter;
+
+    status = HAL_TIM_IC_ConfigChannel(input->htim, &config_ic, tim_channel);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpio_input_capture_edge_t capture_edge)
+{
+  error_t err = E_OK;
+  ecu_config_gpio_input_t *input;
+  GPIO_InitTypeDef gpio_init = {0};
+  uint32_t tim_channel;
+
+  do {
+    input = &ecu_config_gpio.inputs[pin];
+
+    if(input->current_mode == ECU_GPIO_INPUT_TYPE_CAPTURE && input->htim != NULL) {
+
+      if(capture_edge == ECU_IN_CAPTURE_EDGE_BOTH) {
+        if(input->tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED &&
+            (input->tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED ||
+                input->tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED)) {
+          err = E_INVALACT;
+          break;
+        }
+
+        if(input->tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+          err = ecu_config_gpio_input_tim_ac_to_ch(input->tim_active_channel_rising_falling, &tim_channel);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge_channel(input, tim_channel, TIM_INPUTCHANNELPOLARITY_BOTHEDGE, input->tim_channel_rising_falling_direct);
+          BREAK_IF(err != E_OK);
+
+        } else if(input->tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED && input->tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+          err = ecu_config_gpio_input_tim_ac_to_ch(input->tim_active_channel_rising, &tim_channel);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge_channel(input, tim_channel, TIM_INPUTCHANNELPOLARITY_RISING, input->tim_channel_rising_direct);
+          BREAK_IF(err != E_OK);
+
+          err = ecu_config_gpio_input_tim_ac_to_ch(input->tim_active_channel_falling, &tim_channel);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge_channel(input, tim_channel, TIM_INPUTCHANNELPOLARITY_FALLING, input->tim_channel_falling_direct);
+          BREAK_IF(err != E_OK);
+
+        } else {
+          err = E_NOTSUPPORT;
+          break;
+        }
+      } else {
+        if(input->tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+          err = ecu_config_gpio_input_tim_ac_to_ch(input->tim_active_channel_rising, &tim_channel);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge_channel(input, tim_channel, TIM_INPUTCHANNELPOLARITY_RISING, input->tim_channel_rising_direct);
+          BREAK_IF(err != E_OK);
+        }
+        if(input->tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+          err = ecu_config_gpio_input_tim_ac_to_ch(input->tim_active_channel_falling, &tim_channel);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge_channel(input, tim_channel, TIM_INPUTCHANNELPOLARITY_FALLING, input->tim_channel_falling_direct);
+          BREAK_IF(err != E_OK);
+        }
+      }
+
+    } else if(input->current_mode == ECU_GPIO_INPUT_TYPE_DIGITAL && input->exti_support == true) {
+      switch(capture_edge) {
+        case ECU_IN_CAPTURE_EDGE_BOTH:
+          gpio_init.Mode = GPIO_MODE_IT_RISING_FALLING;
+          break;
+        case ECU_IN_CAPTURE_EDGE_RISING:
+          gpio_init.Mode = GPIO_MODE_IT_RISING;
+          break;
+        case ECU_IN_CAPTURE_EDGE_FALLING:
+          gpio_init.Mode = GPIO_MODE_IT_FALLING;
+          break;
+        default:
+          err = E_PARAM;
+          break;
+      }
+      BREAK_IF(err != E_OK);
+
+      gpio_init.Pin = input->pin.pin;
+      gpio_init.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(input->pin.port, &gpio_init);
+    } else {
+      err = E_NOTSUPPORT;
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support)
 {
   error_t err = E_OK;
@@ -1290,13 +1622,11 @@ error_t ecu_config_gpio_exti_init(void)
 
 void ecu_config_gpio_exti_call(uint16_t exti_pin)
 {
-  for(int i = 0; i < ECU_EXTI_MAX; i++) {
-    if(ecu_config_gpio.exti[i].func) {
-      if((exti_pin & ecu_config_gpio.exti[i].exti_pin)) {
-        ecu_config_gpio.exti[i].func(ecu_config_gpio.exti[i].usrdata);
-      }
-    } else {
-      break;
+  uint8_t bit = POSITION_VAL(exti_pin);
+
+  if(bit < ECU_EXTI_MAX) {
+    if(ecu_config_gpio.exti[bit].func) {
+      ecu_config_gpio.exti[bit].func(ecu_config_gpio.exti[bit].usrdata);
     }
   }
 }
@@ -1305,13 +1635,14 @@ error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func
 {
   error_t err = E_OVERFLOW;
 
-  for(int i = 0; i < ECU_EXTI_MAX; i++) {
-    if(ecu_config_gpio.exti[i].func == NULL) {
-      ecu_config_gpio.exti[i].exti_pin = exti_pin;
-      ecu_config_gpio.exti[i].usrdata = usrdata;
-      ecu_config_gpio.exti[i].func = func;
+  uint8_t bit = POSITION_VAL(exti_pin);
+
+  if(bit < ECU_EXTI_MAX) {
+    if(ecu_config_gpio.exti[bit].func == NULL) {
+      ecu_config_gpio.exti[bit].exti_pin = exti_pin;
+      ecu_config_gpio.exti[bit].usrdata = usrdata;
+      ecu_config_gpio.exti[bit].func = func;
       err = E_OK;
-      break;
     }
   }
 

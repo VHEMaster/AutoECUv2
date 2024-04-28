@@ -25,7 +25,8 @@ typedef enum {
 typedef enum {
   ECU_GPIO_INPUT_TYPE_ANALOG = 1,
   ECU_GPIO_INPUT_TYPE_DIGITAL = 2,
-  ECU_GPIO_INPUT_TYPE_MAX = 4,
+  ECU_GPIO_INPUT_TYPE_CAPTURE = 4,
+  ECU_GPIO_INPUT_TYPE_MAX = 8,
 }ecu_gpio_input_type_t;
 
 typedef enum {
@@ -42,7 +43,8 @@ typedef enum {
 typedef enum {
   ECU_IN_IF_FLEXIO1 = 0,
   ECU_IN_IF_FLEXIO2,
-  ECU_IN_IF_ADC1,
+  ECU_IN_IF_TIM,
+  ECU_IN_IF_EXTI,
   ECU_IN_IF_MAX
 }ecu_gpio_input_if_t;
 
@@ -109,7 +111,6 @@ typedef enum {
   ECU_IN_PORT1_V12V,
   ECU_IN_PORT1_VREF,
   ECU_IN_PORT1_VIGN,
-  ECU_IN_PORT1_VRS,
   ECU_IN_PORT2_PIN1,
   ECU_IN_PORT2_PIN2,
   ECU_IN_PORT2_PIN3,
@@ -128,11 +129,31 @@ typedef enum {
   ECU_IN_PORT2_V12V,
   ECU_IN_PORT2_V5V,
   ECU_IN_PORT2_VIGN,
+  ECU_IN_PORT1_VRS,
   ECU_IN_PORT2_VRS,
-  ECU_IN_ADC1_IN1,
-  ECU_IN_ADC1_IN2,
+  ECU_IN_PORT1_SENT1,
+  ECU_IN_PORT1_SENT2,
+  ECU_IN_PORT1_SENT3,
+  ECU_IN_PORT1_SENT4,
+  ECU_IN_PORT2_SENT1,
+  ECU_IN_PORT2_SENT2,
+  ECU_IN_PORT2_SENT3,
+  ECU_IN_PORT2_SENT4,
   ECU_IN_MAX,
 }ecu_gpio_input_pin_t;
+
+typedef enum {
+  ECU_IN_LEVEL_LOW = 0,
+  ECU_IN_LEVEL_HIGH,
+  ECU_IN_LEVEL_UNDEFINED,
+}ecu_gpio_input_level_t;
+
+typedef enum {
+  ECU_IN_CAPTURE_EDGE_RISING = 0,
+  ECU_IN_CAPTURE_EDGE_FALLING,
+  ECU_IN_CAPTURE_EDGE_BOTH,
+  ECU_IN_CAPTURE_EDGE_MAX
+}ecu_gpio_input_capture_edge_t;
 
 typedef struct {
     float period_multiplier;
@@ -140,7 +161,7 @@ typedef struct {
     uint32_t frequency;
 }ecu_config_gpio_output_if_pwm_cfg_t;
 
-typedef void (*ecu_config_gpio_input_cb_t)(ecu_gpio_input_pin_t pin);
+typedef void (*ecu_config_gpio_input_cb_t)(ecu_gpio_input_pin_t pin, bool level);
 
 error_t ecu_config_gpio_output_init(void);
 error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_output_type_t type);
@@ -154,6 +175,7 @@ error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id
 error_t ecu_config_gpio_input_init(void);
 error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_config_gpio_input_cb_t callback);
 error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio);
+error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpio_input_capture_edge_t capture_edge);
 error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode);
 error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support);
 error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id);
