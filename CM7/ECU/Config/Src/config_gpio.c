@@ -86,21 +86,8 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .cfg = { .ch_set = ecu_config_gpio_ch_set, },
         }, //ECU_OUT_IF_OUTS1_PWM1
         {
-            .htim = &htim13,
             .cfg = { .ch_set = ecu_config_gpio_ch_set, },
-        }, //ECU_OUT_IF_OUTS1_PWM2
-        {
-            .htim = &htim14,
-            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
-        }, //ECU_OUT_IF_OUTS1_PWM3
-        {
-            .htim = &htim16,
-            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
-        }, //ECU_OUT_IF_OUTS1_PWM4
-        {
-            .htim = &htim17,
-            .cfg = { .ch_set = ecu_config_gpio_ch_set, },
-        }, //ECU_OUT_IF_OUTS1_PWM5
+        }, //ECU_OUT_IF_OUTS1_DIRECT1
         {
             .cfg = { .ch_set = ecu_config_gpio_spi_ch_set, },
             .usrdata = NULL,
@@ -189,35 +176,27 @@ static ecu_config_gpio_t ecu_config_gpio = {
             .pin = { .port = NULL, .pin = 0 },
         }, //ECU_OUT_PORT1_PIN8
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM2,
+            .if_id = ECU_OUT_IF_OUTS1_DIRECT1,
             .output_ch_id = 8,
             .pin = { .port = OUTS1_IN9_GPIO_Port, .pin = OUTS1_IN9_Pin },
-            .tim_alternate = GPIO_AF9_TIM13,
-            .tim_channel = TIM_CHANNEL_1,
             .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN9
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM3,
+            .if_id = ECU_OUT_IF_OUTS1_DIRECT1,
             .output_ch_id = 9,
             .pin = { .port = OUTS1_IN10_GPIO_Port, .pin = OUTS1_IN10_Pin },
-            .tim_alternate = GPIO_AF9_TIM14,
-            .tim_channel = TIM_CHANNEL_1,
             .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN10
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM4,
+            .if_id = ECU_OUT_IF_OUTS1_DIRECT1,
             .output_ch_id = 10,
             .pin = { .port = OUTS1_IN11_GPIO_Port, .pin = OUTS1_IN11_Pin },
-            .tim_alternate = GPIO_AF1_TIM16,
-            .tim_channel = TIM_CHANNEL_1,
             .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN11
         {
-            .if_id = ECU_OUT_IF_OUTS1_PWM5,
+            .if_id = ECU_OUT_IF_OUTS1_DIRECT1,
             .output_ch_id = 11,
             .pin = { .port = OUTS1_IN12_GPIO_Port, .pin = OUTS1_IN12_Pin },
-            .tim_alternate = GPIO_AF1_TIM17,
-            .tim_channel = TIM_CHANNEL_1,
             .gpio_invert = true,
         }, //ECU_OUT_PORT1_PIN12
         {
