@@ -723,6 +723,61 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     err = ecu_config_gpio_exti_register(flexio_ctx->int_exti_pin, (ecu_gpio_exti_cb_t)l9966_int_irq_handler, flexio_ctx->ctx);
     BREAK_IF(err != E_OK);
 
+    //TODO: REMOVE WHEN INITIALIZED BY CORE!!
+    flexio_ctx->ctx->reset_errcode = E_AGAIN;
+    flexio_ctx->ctx->reset_request = true;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_flexio_get_default_config(ecu_device_flexio_t instance, l9966_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_flexio_ctx_t *flexio_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
+
+    flexio_ctx = &ecu_devices_flexio_ctx[instance];
+
+    memcpy(config, &flexio_ctx->config_default, sizeof(l9966_config_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_flexio_configure(ecu_device_flexio_t instance, const l9966_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_flexio_ctx_t *flexio_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
+
+    flexio_ctx = &ecu_devices_flexio_ctx[instance];
+
+    err = l9966_configure(flexio_ctx->ctx, config);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_flexio_reset(ecu_device_flexio_t instance)
+{
+  error_t err = E_OK;
+  ecu_devices_flexio_ctx_t *flexio_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX, err = E_PARAM);
+
+    flexio_ctx = &ecu_devices_flexio_ctx[instance];
+
+    err = l9966_reset(flexio_ctx->ctx);
+
   } while(0);
 
   return err;

@@ -159,13 +159,13 @@ typedef struct {
     float period_multiplier;
     uint32_t pwm_period;
     uint32_t frequency;
-}ecu_config_gpio_output_if_pwm_cfg_t;
+}ecu_gpio_output_if_pwm_cfg_t;
 
-typedef void (*ecu_config_gpio_input_cb_t)(ecu_gpio_input_pin_t pin, bool level);
+typedef void (*ecu_gpio_input_cb_t)(ecu_gpio_input_pin_t pin, bool level);
 
 error_t ecu_config_gpio_output_init(void);
 error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_output_type_t type);
-error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_config_gpio_output_if_pwm_cfg_t *config);
+error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio_output_if_pwm_cfg_t *config);
 error_t ecu_config_gpio_output_pwm_set_value(ecu_gpio_output_pin_t pin, uint32_t value);
 error_t ecu_config_gpio_output_pwm_set_dutycycle(ecu_gpio_output_pin_t pin, float dutycycle);
 error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *support);
@@ -173,7 +173,7 @@ error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio);
 error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id);
 
 error_t ecu_config_gpio_input_init(void);
-error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_config_gpio_input_cb_t callback);
+error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gpio_input_cb_t callback);
 error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio);
 error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpio_input_capture_edge_t capture_edge);
 error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode);

@@ -75,6 +75,7 @@ typedef struct {
 }tle4729_ctx_t;
 
 error_t tle4729_init(tle4729_ctx_t *ctx, const tle4729_init_ctx_t *init_ctx);
+error_t tle4729_reset(tle4729_ctx_t *ctx);
 error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx);
 void tle4729_loop_main(tle4729_ctx_t *ctx);
 void tle4729_loop_slow(tle4729_ctx_t *ctx);

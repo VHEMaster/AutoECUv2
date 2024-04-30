@@ -200,7 +200,7 @@ void l9966_loop_main(l9966_ctx_t *ctx);
 void l9966_loop_slow(l9966_ctx_t *ctx);
 void l9966_loop_fast(l9966_ctx_t *ctx);
 
-error_t l9966_write_config(l9966_ctx_t *ctx, const l9966_config_t *config);
+error_t l9966_configure(l9966_ctx_t *ctx, const l9966_config_t *config);
 
 error_t l9966_reset(l9966_ctx_t *ctx);
 

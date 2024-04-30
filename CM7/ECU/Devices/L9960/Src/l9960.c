@@ -94,7 +94,7 @@ error_t l9960_reset(l9960_ctx_t *ctx)
   return err;
 }
 
-error_t l9960_write_config(l9960_ctx_t *ctx, const l9960_config_t *config)
+error_t l9960_configure(l9960_ctx_t *ctx, const l9960_config_t *config)
 {
   error_t err = E_OK;
 

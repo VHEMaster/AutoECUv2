@@ -93,3 +93,54 @@ error_t ecu_devices_motor_init(ecu_device_motor_t instance, l9960_ctx_t *ctx)
 
   return err;
 }
+
+error_t ecu_devices_motor_get_default_config(ecu_device_motor_t instance, l9960_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_motor_ctx_t *motor_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
+
+    motor_ctx = &ecu_devices_motor_ctx[instance];
+
+    memcpy(config, &motor_ctx->config_default, sizeof(l9960_config_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_motor_configure(ecu_device_motor_t instance, const l9960_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_motor_ctx_t *motor_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
+
+    motor_ctx = &ecu_devices_motor_ctx[instance];
+
+    err = l9960_configure(motor_ctx->ctx, config);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_motor_reset(ecu_device_motor_t instance)
+{
+  error_t err = E_OK;
+  ecu_devices_motor_ctx_t *motor_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+
+    motor_ctx = &ecu_devices_motor_ctx[instance];
+
+    err = l9960_reset(motor_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}

@@ -292,7 +292,7 @@ void cj125_loop_slow(cj125_ctx_t *ctx);
 void cj125_loop_fast(cj125_ctx_t *ctx);
 
 error_t cj125_reset(cj125_ctx_t *ctx);
-error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config);
+error_t cj125_configure(cj125_ctx_t *ctx, const cj125_config_t *config);
 error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
 
 error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages);

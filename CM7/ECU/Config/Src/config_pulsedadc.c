@@ -90,7 +90,6 @@ error_t ecu_devices_pulsedadc_init(ecu_device_pulsedadc_t instance, pulsedadc_ct
     err = pulsedadc_init(pulsedadc_ctx->ctx, &pulsedadc_ctx->init);
     BREAK_IF(err != E_OK);
 
-
   } while(0);
 
   return err;

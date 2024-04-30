@@ -128,6 +128,21 @@ error_t tle4729_init(tle4729_ctx_t *ctx, const tle4729_init_ctx_t *init_ctx)
   return err;
 }
 
+error_t tle4729_reset(tle4729_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    // Nothing to do here
+
+  } while(0);
+
+  return err;
+}
+
+
 error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx)
 {
   error_t err = E_OK;
@@ -146,7 +161,6 @@ error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx
 
   return err;
 }
-
 void tle4729_loop_main(tle4729_ctx_t *ctx)
 {
 

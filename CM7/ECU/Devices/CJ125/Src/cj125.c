@@ -195,7 +195,7 @@ error_t cj125_reset(cj125_ctx_t *ctx)
   return err;
 }
 
-error_t cj125_write_config(cj125_ctx_t *ctx, cj125_config_t *config)
+error_t cj125_configure(cj125_ctx_t *ctx, const cj125_config_t *config)
 {
   error_t err = E_OK;
 

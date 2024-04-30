@@ -195,6 +195,40 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
   return err;
 }
 
+error_t ecu_devices_wbls_get_default_config(ecu_device_wbls_t instance, cj125_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_wbls_ctx_t *wbls_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
+
+    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+
+    memcpy(config, &wbls_ctx->config_default, sizeof(cj125_config_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_devices_wbls_ctx_t *wbls_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
+
+    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+
+    err = cj125_configure(wbls_ctx->ctx, config);
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_devices_wbls_reset(ecu_device_wbls_t instance)
 {
   error_t err = E_OK;
