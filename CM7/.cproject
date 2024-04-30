@@ -50,7 +50,8 @@
 									<listOptionValue builtIn="false" value="../Math"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Hardware/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
@@ -154,7 +155,8 @@
 									<listOptionValue builtIn="false" value="../Math"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Hardware/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>

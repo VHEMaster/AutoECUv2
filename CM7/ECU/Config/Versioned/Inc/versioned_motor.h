@@ -1,12 +1,17 @@
 /*
- * l9960_config.h
+ * versioned_motor.h
  *
- *  Created on: Apr 16, 2024
+ *  Created on: Apr 30, 2024
  *      Author: VHEMaster
  */
 
-#ifndef DEVICES_L9960_INC_L9960_CONFIG_H_
-#define DEVICES_L9960_INC_L9960_CONFIG_H_
+#ifndef CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_
+#define CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_
+
+typedef enum {
+  MOTOR_CONFIG_VERSION_V1 = 0,
+  MOTOR_CONFIG_VERSION_MAX
+}motor_config_versions_t;
 
 typedef enum {
   L9960_CONFIG_CC_DISABLED = 0,
@@ -168,6 +173,8 @@ typedef struct {
     l9960_config_tvvl_t tvvl;
     l9960_config_vvl_t vvl_mode;
     l9960_config_olon_t ol_on;
-}l9960_config_t;
+}l9960_config_v1_t;
 
-#endif /* DEVICES_L9960_INC_L9960_CONFIG_H_ */
+typedef l9960_config_v1_t l9960_config_t;
+
+#endif /* CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_ */

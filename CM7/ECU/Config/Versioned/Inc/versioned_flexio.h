@@ -1,12 +1,17 @@
 /*
- * l9966_config.h
+ * versioned_flexio.h
  *
- *  Created on: Apr 7, 2024
+ *  Created on: Apr 30, 2024
  *      Author: VHEMaster
  */
 
-#ifndef DEVICES_L9966_INC_L9966_CONFIG_H_
-#define DEVICES_L9966_INC_L9966_CONFIG_H_
+#ifndef CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_
+#define CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_
+
+typedef enum {
+  FLEXIO_CONFIG_VERSION_V1 = 0,
+  FLEXIO_CONFIG_VERSION_MAX
+}flexio_config_versions_t;
 
 #define L9966_DEV_ID          0x5A
 
@@ -614,6 +619,8 @@ typedef struct {
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
     l9966_config_status_t status;
-}l9966_config_data_t;
+}l9966_config_data_v1_t;
 
-#endif /* DEVICES_L9966_INC_L9966_CONFIG_H_ */
+typedef l9966_config_data_v1_t l9966_config_data_t;
+
+#endif /* CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_ */

@@ -8,6 +8,7 @@
 #ifndef DRIVERS_L9966_INC_L9966_H_
 #define DRIVERS_L9966_INC_L9966_H_
 
+#include <versioned_flexio.h>
 #include "main.h"
 #include "errors.h"
 #include "gpio.h"
@@ -17,7 +18,6 @@
 
 #include "l9966_reg.h"
 #include "l9966_ctrl.h"
-#include "l9966_config.h"
 
 #define L9966_DEFAULT_DIGITAL_POLL_PERIOD     (10 * TIME_US_IN_MS)
 #define L9966_SQNCR_RESULT_POLL_PERIOD        (50 * TIME_US_IN_MS)

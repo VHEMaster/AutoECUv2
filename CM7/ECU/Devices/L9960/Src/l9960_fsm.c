@@ -8,7 +8,7 @@
 #include "l9960_internal.h"
 #include "l9960_fsm.h"
 #include "l9960_reg.h"
-#include "l9960_config.h"
+#include "l9960.h"
 #include "l9960_cfg_reg.h"
 #include "compiler.h"
 #include "errors.h"

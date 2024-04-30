@@ -32,8 +32,6 @@ typedef struct {
     input_id_t input_id_ref;
     input_id_t input_id_pwr;
 
-
-
 }ecu_devices_wbls_ctx_t;
 
 static const cj125_config_t ecu_devices_wbls_config_default = {
