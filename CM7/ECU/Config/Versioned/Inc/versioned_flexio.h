@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_
-#define CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_
+#ifndef CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_
+#define CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_
 
 typedef enum {
   FLEXIO_CONFIG_VERSION_V1 = 0,
@@ -623,4 +623,4 @@ typedef struct {
 
 typedef l9966_config_data_v1_t l9966_config_data_t;
 
-#endif /* CONFIG_VERSIONED_INC_VERSIONED_FLEXIO_H_ */
+#endif /* CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_ */

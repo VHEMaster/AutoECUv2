@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_
-#define CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_
+#ifndef CONFIG_PROJECT_INC_VERSIONED_MOTOR_H_
+#define CONFIG_PROJECT_INC_VERSIONED_MOTOR_H_
 
 typedef enum {
   MOTOR_CONFIG_VERSION_V1 = 0,
@@ -177,4 +177,4 @@ typedef struct {
 
 typedef l9960_config_v1_t l9960_config_t;
 
-#endif /* CONFIG_VERSIONED_INC_VERSIONED_MOTOR_H_ */
+#endif /* CONFIG_PROJECT_INC_VERSIONED_MOTOR_H_ */

@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
+#include <config_hw.h>
 #include "main.h"
-#include "config.h"
 #include "config_gpio.h"
 #include "config_extern.h"
 #include "compiler.h"

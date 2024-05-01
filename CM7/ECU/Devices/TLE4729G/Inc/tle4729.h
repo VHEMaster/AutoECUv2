@@ -12,7 +12,8 @@
 #include "time.h"
 #include "gpio.h"
 
-#define TLE4729_RELATION_ITEMS_MAX    (16)
+#include "versioned_stepper.h"
+
 #define TLE4729_ACC_TO_NORM_TRANS_DELAY_US    (200 * TIME_US_IN_MS)
 #define TLE4729_NORM_TO_HOLD_TRANS_DELAY_US   (600 * TIME_US_IN_MS)
 
@@ -23,12 +24,6 @@ typedef enum {
   TLE4729_MODE_ACCELERATE,
   TLE4729_MODE_MAX
 }tle4729_mode_t;
-
-typedef struct {
-    uint8_t items;
-    float input[TLE4729_RELATION_ITEMS_MAX];
-    float output[TLE4729_RELATION_ITEMS_MAX];
-}tle7429_config_relation_t;
 
 typedef struct {
     gpio_t i10;
@@ -43,16 +38,6 @@ typedef struct {
     uint32_t ph_bsrr[4];
 
 }tle4729_init_ctx_t;
-
-typedef struct {
-    tle7429_config_relation_t voltage_to_step_time_mult;
-    tle7429_config_relation_t speed_to_step_time_ms;
-    uint8_t acceleration_steps;
-
-    int32_t pos_min;
-    int32_t pos_max;
-
-}tle4729_config_t;
 
 typedef struct {
     tle4729_init_ctx_t init;

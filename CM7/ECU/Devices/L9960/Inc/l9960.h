@@ -8,7 +8,6 @@
 #ifndef DRIVERS_L9960_INC_L9960_H_
 #define DRIVERS_L9960_INC_L9960_H_
 
-#include <versioned_motor.h>
 #include "gpio.h"
 #include "main.h"
 #include "errors.h"
@@ -16,6 +15,7 @@
 #include "spi.h"
 
 #include "l9960_reg.h"
+#include "versioned_motor.h"
 
 #define L9966_ELECTRONIC_ID           (0x0E4)
 #define L9960_SPI_MODE                (SPI_MODE_1)

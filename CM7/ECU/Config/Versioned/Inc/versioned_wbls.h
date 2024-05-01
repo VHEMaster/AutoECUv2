@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_INC_VERSIONED_WBLS_H_
-#define CONFIG_VERSIONED_INC_VERSIONED_WBLS_H_
+#ifndef CONFIG_PROJECT_INC_VERSIONED_WBLS_H_
+#define CONFIG_PROJECT_INC_VERSIONED_WBLS_H_
 
 #include "bool.h"
 #include "pid.h"
@@ -71,4 +71,4 @@ typedef struct {
 
 typedef cj125_config_v1_t cj125_config_t;
 
-#endif /* CONFIG_VERSIONED_INC_VERSIONED_WBLS_H_ */
+#endif /* CONFIG_PROJECT_INC_VERSIONED_WBLS_H_ */

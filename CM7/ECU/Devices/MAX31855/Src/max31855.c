@@ -54,7 +54,6 @@ error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave)
     err = spi_slave_configure_callback(spi_slave, max31855_cplt_cb);
     BREAK_IF(err != E_OK);
 
-
     ctx->ready = true;
   } while(0);
 

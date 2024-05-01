@@ -185,7 +185,7 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     err = ecu_config_gpio_input_set_mode(wbls_ctx->input_pwr, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
 
-    err = ecu_config_loop_register_slow((ecu_config_loop_cb_t)ecu_devices_wbls_update_voltages_cb, wbls_ctx, ECU_WBLS_VOLTAGE_UPDATE_PERIOD);
+    err = ecu_loop_register_slow((ecu_loop_cb_t)ecu_devices_wbls_update_voltages_cb, wbls_ctx, ECU_WBLS_VOLTAGE_UPDATE_PERIOD);
     BREAK_IF(err != E_OK);
 
   } while(0);

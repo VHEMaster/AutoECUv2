@@ -6,12 +6,13 @@
  *      Author: VHEMaster
  */
 
+#include <config_hw.h>
 #include "middlelayer.h"
 #include "middlelayer_spi.h"
 #include "middlelayer_gpio.h"
 #include "middlelayer_devices.h"
 #include "config_loop.h"
-#include "config.h"
+#include "config_global.h"
 #include "core.h"
 #include "spi.h"
 #include "core.h"
@@ -64,7 +65,9 @@ static void middlelayer_tim_slow_irq(TIM_HandleTypeDef *htim)
   middlelayer_spi_loop_slow();
   middlelayer_devices_loop_slow();
 
-  ecu_config_loop_slow();
+  ecu_loop_slow();
+
+  ecu_config_global_loop_slow();
 
   core_loop_slow();
 
@@ -79,7 +82,9 @@ static void middlelayer_tim_fast_irq(TIM_HandleTypeDef *htim)
   middlelayer_spi_loop_fast();
   middlelayer_devices_loop_fast();
 
-  ecu_config_loop_fast();
+  ecu_loop_fast();
+
+  ecu_config_global_loop_fast();
 
   core_loop_fast();
 
@@ -96,7 +101,9 @@ void middlelayer_loop(void)
   middlelayer_spi_loop_main();
   middlelayer_devices_loop_main();
 
-  ecu_config_loop_main();
+  ecu_loop_main();
+
+  ecu_config_global_loop_main();
 
   core_loop_main();
 
@@ -112,6 +119,8 @@ void middlelayer_init(void)
   middlelayer_gpio_init();
 
   middlelayer_devices_init();
+
+  ecu_config_global_init();
 
   core_init();
 

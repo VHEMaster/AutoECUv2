@@ -8,7 +8,6 @@
 #ifndef DRIVERS_CJ125_INC_CJ125_H_
 #define DRIVERS_CJ125_INC_CJ125_H_
 
-#include <versioned_wbls.h>
 #include "gpio.h"
 #include "main.h"
 #include "errors.h"
@@ -16,6 +15,7 @@
 #include "pid.h"
 
 #include "cj125_reg.h"
+#include "versioned_wbls.h"
 
 #define CJ125_SPI_MODE                          (SPI_MODE_1)
 
