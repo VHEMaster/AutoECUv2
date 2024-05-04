@@ -424,14 +424,14 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .section_index = ECU_DEVICE_WBLS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 4,
-        .sector_index = 5,
+        .sector_index = 6,
     },
     {
         .section_type = FLASH_SECTION_TYPE_HW_WBLS,
         .section_index = ECU_DEVICE_WBLS_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 4,
-        .sector_index = 6,
+        .sector_index = 7,
     },
 };
 

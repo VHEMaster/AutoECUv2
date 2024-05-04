@@ -66,6 +66,7 @@ typedef struct {
 }flash_mem_layout_t;
 
 error_t flash_mem_layout_init(void);
+error_t flash_mem_layout_get_section_info(const flash_mem_layout_section_info_t **section_info, uint16_t section_type, uint16_t section_index);
 error_t flash_mem_layout_get(const flash_mem_layout_t **layout);
 
 #endif /* CONFIG_ECU_FLASH_INC_ECU_FLASH_MEMORY_LAYOUT_H_ */

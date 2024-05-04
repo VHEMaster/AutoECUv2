@@ -12,7 +12,6 @@
 #include "compiler.h"
 
 #include "flash_memory_layout.h"
-#include "flash_sections.h"
 
 typedef struct {
     qspi_ctx_t *ctx;

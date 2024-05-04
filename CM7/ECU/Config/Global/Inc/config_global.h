@@ -76,10 +76,20 @@ typedef struct {
 }ecu_config_calibration_ctx_t;
 
 typedef enum {
-  ECU_CONFIG_PROC_TRIG_TYPE_NONE = 0,
-  ECU_CONFIG_PROC_TRIG_TYPE_RESET,
-  ECU_CONFIG_PROC_TRIG_TYPE_CONFIGURE,
-}ecu_config_global_process_trigger_type_t;
+  ECU_CONFIG_RST_CFG_NONE = 0,
+  ECU_CONFIG_RST_CFG_RESET,
+  ECU_CONFIG_RST_CFG_CONFIGURE,
+}ecu_config_global_rst_cfg_type_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_RST_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_RST_CFG_PROCESS,
+}ecu_config_global_rst_cfg_fsm_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_PROCESS_CFG_RST = 0,
+  ECU_CONFIG_FSM_PROCESS_MAX,
+}ecu_config_global_process_fsm_t;
 
 typedef struct {
     uint32_t components_count;
@@ -89,7 +99,11 @@ typedef struct {
     bool components_ready;
     bool components_initialized;
     bool components_configured;
-    ecu_config_global_process_trigger_type_t process_trigger_type;
+
+    ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
+    ecu_config_global_process_fsm_t fsm_process;
+
+    ecu_config_global_rst_cfg_type_t process_trigger_type;
     error_t process_result;
     ecu_config_component_type_t process_comp_type;
     ecu_device_instance_t process_instance;

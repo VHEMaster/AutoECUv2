@@ -723,10 +723,6 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     err = ecu_config_gpio_exti_register(flexio_ctx->int_exti_pin, (ecu_gpio_exti_cb_t)l9966_int_irq_handler, flexio_ctx->ctx);
     BREAK_IF(err != E_OK);
 
-    //TODO: REMOVE WHEN INITIALIZED BY CORE!!
-    flexio_ctx->ctx->reset_errcode = E_AGAIN;
-    flexio_ctx->ctx->reset_request = true;
-
   } while(0);
 
   return err;
