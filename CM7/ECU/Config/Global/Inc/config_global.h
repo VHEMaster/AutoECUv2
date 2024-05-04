@@ -13,21 +13,20 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "flash.h"
 #include "config_devices.h"
 
+#include "config_flash.h"
 #include "config_flexio.h"
 #include "config_motor.h"
 #include "config_stepper.h"
 #include "config_wbls.h"
-#include "versioned_flexio.h"
-#include "versioned_motor.h"
-#include "versioned_stepper.h"
-#include "versioned_wbls.h"
 
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 
 typedef enum {
-  ECU_CONFIG_COMP_TYPE_FLEXIO = 0,
+  ECU_CONFIG_COMP_TYPE_FLASH = 0,
+  ECU_CONFIG_COMP_TYPE_FLEXIO,
   ECU_CONFIG_COMP_TYPE_MOTOR,
   ECU_CONFIG_COMP_TYPE_STEPPER,
   ECU_CONFIG_COMP_TYPE_WBLS,
@@ -35,11 +34,13 @@ typedef enum {
 }ecu_config_component_type_t;
 
 typedef enum {
+  ECU_CONFIG_CALIB_TYPE_ID = 0,
   ECU_CONFIG_CALIB_TYPE_MAX,
 }ecu_config_calibration_type_t;
 
 typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest);
-typedef error_t (*ecu_config_get_default_cfg_func_t)(ecu_device_instance_t instance, void *config);
+typedef error_t (*ecu_config_get_default_comp_cfg_func_t)(ecu_device_instance_t instance, void *config);
+typedef error_t (*ecu_config_get_default_calib_cfg_func_t)(void *config);
 typedef error_t (*ecu_config_configure_func_t)(ecu_device_instance_t instance, const void *config);
 typedef error_t (*ecu_config_reset_func_t)(ecu_device_instance_t instance);
 
@@ -52,9 +53,12 @@ typedef struct {
 typedef struct {
     ecu_device_type_t device_type;
     uint32_t instances_count;
-    ecu_config_get_default_cfg_func_t get_default_cfg_func;
+    flash_section_type_t flash_section_type;
+    ecu_config_get_default_comp_cfg_func_t get_default_cfg_func;
     ecu_config_configure_func_t configure_func;
     ecu_config_reset_func_t reset_func;
+    void *data_ptr;
+    uint32_t data_size;
     uint32_t versions_count;
     ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
 
@@ -63,6 +67,10 @@ typedef struct {
 }ecu_config_component_ctx_t;
 
 typedef struct {
+    flash_section_type_t flash_section_type;
+    ecu_config_get_default_calib_cfg_func_t get_default_cfg_func;
+    void *data_ptr;
+    uint32_t data_size;
     uint32_t versions_count;
     ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
 }ecu_config_calibration_ctx_t;

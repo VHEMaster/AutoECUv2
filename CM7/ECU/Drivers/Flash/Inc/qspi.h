@@ -154,6 +154,7 @@ typedef struct {
 
 
 error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx);
+error_t qspi_reset(qspi_ctx_t *ctx);
 
 void qspi_loop_main(qspi_ctx_t *ctx);
 void qspi_loop_slow(qspi_ctx_t *ctx);

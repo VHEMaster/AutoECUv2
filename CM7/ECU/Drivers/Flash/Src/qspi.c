@@ -72,8 +72,25 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
     ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
     ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
-    ctx->init_errcode = E_AGAIN;
     ctx->ready = true;
+
+  } while(0);
+
+  return err;
+}
+
+error_t qspi_reset(qspi_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    memset(&ctx->jedec_quad, 0, sizeof(ctx->jedec_quad));
+    memset(&ctx->jedec, 0, sizeof(ctx->jedec));
+    ctx->jedec_ready = false;
+    ctx->initialized = false;
+    ctx->init_errcode = E_AGAIN;
 
   } while(0);
 

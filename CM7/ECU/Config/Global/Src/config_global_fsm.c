@@ -37,13 +37,21 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
         } else {
           switch(ctx->process_trigger_type) {
             case ECU_CONFIG_PROC_TRIG_TYPE_RESET:
-              err = ctx->components[ctx->process_comp_type].reset_func(ctx->process_instance);
+              if(ctx->components[ctx->process_comp_type].reset_func != NULL) {
+                err = ctx->components[ctx->process_comp_type].reset_func(ctx->process_instance);
+              } else {
+                err = E_OK;
+              }
               ctx->components[ctx->process_comp_type].reset_errcode = err;
               //TODO: set DTC here
               break;
             case ECU_CONFIG_PROC_TRIG_TYPE_CONFIGURE:
-              //TODO: continue coding
-              err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, NULL);
+              if(ctx->components[ctx->process_comp_type].configure_func != NULL) {
+                err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].data_ptr +
+                    ctx->components[ctx->process_comp_type].data_size * ctx->process_instance);
+              } else {
+                err = E_OK;
+              }
               ctx->components[ctx->process_comp_type].config_errcode = err;
               //TODO: set DTC here
               break;

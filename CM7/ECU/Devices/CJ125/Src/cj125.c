@@ -59,7 +59,7 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
 
 error_t cj125_heater_init(cj125_ctx_t *ctx, const cj125_heater_t *heater_cfg)
 {
-  error_t err = E_OK;;
+  error_t err = E_OK;
   HAL_StatusTypeDef status;
 
   do {

@@ -8,12 +8,11 @@
 #include <string.h>
 #include "config_flash.h"
 #include "config_extern.h"
+#include "config_loop.h"
 #include "compiler.h"
 
-#define ECU_FLASH_SIZE                  0x400000
-#define ECU_FLASH_SECTOR_SIZE           0x1000
-#define ECU_FLASH_PAGE_SIZE             0x100
-#define ECU_FLASH_DIES_COUNT            2
+#include "flash_memory_layout.h"
+#include "flash_sections.h"
 
 typedef struct {
     qspi_ctx_t *ctx;
@@ -26,12 +25,12 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .hqspi = &hqspi,
             .memory_base_address = QSPI_BASE,
 
+            .flash_size = ECU_FLASH_SIZE,
             .flash_dies_count = ECU_FLASH_DIES_COUNT,
-            .flash_size = ECU_FLASH_SIZE * ECU_FLASH_DIES_COUNT,
-            .erase_sector_size = ECU_FLASH_SECTOR_SIZE * ECU_FLASH_DIES_COUNT,
-            .erase_sectors_number = ECU_FLASH_SIZE / ECU_FLASH_SECTOR_SIZE * ECU_FLASH_DIES_COUNT,
-            .prog_page_size = ECU_FLASH_PAGE_SIZE * ECU_FLASH_DIES_COUNT,
-            .prog_pages_number = ECU_FLASH_SIZE / ECU_FLASH_PAGE_SIZE * ECU_FLASH_DIES_COUNT,
+            .erase_sector_size = ECU_FLASH_SECTOR_SIZE,
+            .erase_sectors_number = ECU_FLASH_SIZE / ECU_FLASH_SECTOR_SIZE,
+            .prog_page_size = ECU_FLASH_PAGE_SIZE,
+            .prog_pages_number = ECU_FLASH_SIZE / ECU_FLASH_PAGE_SIZE,
             .otp_size = 2048,
             .prot_size = 18,
 
@@ -272,6 +271,24 @@ error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     err = qspi_init(flash_ctx->ctx, &flash_ctx->init);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_flash_reset(ecu_device_flash_t instance)
+{
+  error_t err = E_OK;
+  ecu_devices_flash_ctx_t *flash_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLASH_MAX, err = E_PARAM);
+
+    flash_ctx = &ecu_devices_flash_ctx[instance];
+
+    err = qspi_reset(flash_ctx->ctx);
     BREAK_IF(err != E_OK);
 
   } while(0);
