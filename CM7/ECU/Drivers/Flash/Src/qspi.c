@@ -119,6 +119,7 @@ error_t qspi_lock(qspi_ctx_t *ctx)
 
   return err;
 }
+
 error_t qspi_unlock(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;

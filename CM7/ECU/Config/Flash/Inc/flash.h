@@ -9,6 +9,7 @@
 #define CONFIG_FLASH_INC_FLASH_H_
 
 #include "errors.h"
+#include <stdint.h>
 
 typedef enum {
   FLASH_SECTION_TYPE_EMPTY = 0,
@@ -32,6 +33,20 @@ typedef enum {
   FLASH_SECTION_INDEX_INVALID = 0xFFFF
 }flash_section_index_t;
 
+typedef enum {
+  FLASH_ERASE_TYPE_NONE = 0,
+  FLASH_ERASE_TYPE_SECTOR,
+  FLASH_ERASE_TYPE_BLOCK
+}flash_erase_type_t;
+
 error_t flash_init(void);
+void flash_loop_fast(void);
+
+error_t flash_io_lock(void);
+error_t flash_io_unlock(void);
+
+error_t flash_io_read(uint32_t address, void *payload, uint32_t length);
+error_t flash_io_write(flash_erase_type_t erase_type, uint32_t address, const void *payload, uint32_t length);
+
 
 #endif /* CONFIG_FLASH_INC_FLASH_H_ */

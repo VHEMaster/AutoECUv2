@@ -202,6 +202,10 @@ void ecu_config_global_loop_fast(void)
       //TODO: set error in future
     }
   }
+
+  if(ctx->components_initialized) {
+    flash_loop_fast();
+  }
 }
 
 error_t ecu_config_global_components_reset(void)
