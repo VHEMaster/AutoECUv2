@@ -35,12 +35,28 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_CALIB_TYPE_ID = 0,
-  ECU_CONFIG_CALIB_TYPE_MAX,
+  ECU_CONFIG_CALIB_TYPE_MAX
 }ecu_config_calibration_type_t;
 
+typedef enum {
+  ECU_CONFIG_RUNTIME_TYPE_MAX
+}ecu_config_runtime_type_t;
+
+typedef enum {
+  ECU_CONFIG_TYPE_COMPONENT = 0,
+  ECU_CONFIG_TYPE_CALIBRATION,
+  ECU_CONFIG_TYPE_RUNTIME,
+  ECU_CONFIG_TYPE_MAX,
+}ecu_config_type_t;
+
+typedef enum {
+  ECU_CONFIG_OP_READ = 0,
+  ECU_CONFIG_OP_WRITE,
+  ECU_CONFIG_OP_MAX,
+}ecu_config_op_t;
+
 typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest);
-typedef error_t (*ecu_config_get_default_comp_cfg_func_t)(ecu_device_instance_t instance, void *config);
-typedef error_t (*ecu_config_get_default_calib_cfg_func_t)(void *config);
+typedef error_t (*ecu_config_get_default_cfg_func_t)(ecu_index_type_t index, void *config);
 typedef error_t (*ecu_config_configure_func_t)(ecu_device_instance_t instance, const void *config);
 typedef error_t (*ecu_config_reset_func_t)(ecu_device_instance_t instance);
 
@@ -51,29 +67,23 @@ typedef struct {
 }ecu_config_item_version_t;
 
 typedef struct {
-    ecu_device_type_t device_type;
-    uint32_t instances_count;
     flash_section_type_t flash_section_type;
-    ecu_config_get_default_comp_cfg_func_t get_default_cfg_func;
-    ecu_config_configure_func_t configure_func;
-    ecu_config_reset_func_t reset_func;
+    ecu_config_get_default_cfg_func_t get_default_cfg_func;
     void *data_ptr;
     uint32_t data_size;
     uint32_t versions_count;
     ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
+}ecu_config_generic_ctx_t;
 
+typedef struct {
+    ecu_device_type_t device_type;
+    uint32_t instances_count;
+    ecu_config_configure_func_t configure_func;
+    ecu_config_reset_func_t reset_func;
+    ecu_config_generic_ctx_t generic;
     error_t reset_errcode;
     error_t config_errcode;
 }ecu_config_component_ctx_t;
-
-typedef struct {
-    flash_section_type_t flash_section_type;
-    ecu_config_get_default_calib_cfg_func_t get_default_cfg_func;
-    void *data_ptr;
-    uint32_t data_size;
-    uint32_t versions_count;
-    ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
-}ecu_config_calibration_ctx_t;
 
 typedef enum {
   ECU_CONFIG_RST_CFG_NONE = 0,
@@ -95,10 +105,18 @@ typedef struct {
     uint32_t components_count;
     ecu_config_component_ctx_t *components;
     uint32_t calibrations_count;
-    ecu_config_calibration_ctx_t *calibrations;
+    ecu_config_generic_ctx_t *calibrations;
+    uint32_t runtimes_count;
+    ecu_config_generic_ctx_t *runtimes;
     bool components_ready;
     bool components_initialized;
     bool components_configured;
+
+    bool config_read_request;
+    bool config_write_request;
+    error_t config_rw_errcode;
+    ecu_config_type_t config_rw_type;
+    ecu_index_type_t config_rw_index;
 
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_process_fsm_t fsm_process;
@@ -115,5 +133,7 @@ void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
 error_t ecu_config_global_components_reset(void);
 error_t ecu_config_global_components_configure(void);
+
+error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index);
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_ */

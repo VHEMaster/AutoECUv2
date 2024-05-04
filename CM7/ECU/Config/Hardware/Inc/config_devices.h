@@ -18,6 +18,8 @@
 #include "l9960.h"
 #include "qspi.h"
 
+typedef uint32_t ecu_index_type_t;
+
 typedef enum {
   ECU_DEVICE_TYPE_PULSEDADC,
   ECU_DEVICE_TYPE_EGT,

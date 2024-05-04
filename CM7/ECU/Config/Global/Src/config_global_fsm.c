@@ -13,8 +13,9 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
   error_t err = E_OK;
 
   while(true) {
+    err = E_AGAIN;
+
     switch(ctx->fsm_rst_cfg) {
-      err = E_AGAIN;
       case ECU_CONFIG_FSM_RST_CFG_CONDITION:
         if(ctx->components_ready == true && ctx->process_trigger_type != ECU_CONFIG_RST_CFG_NONE && ctx->process_result == E_AGAIN) {
           switch(ctx->process_trigger_type) {
@@ -70,8 +71,8 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
                 break;
               case ECU_CONFIG_RST_CFG_CONFIGURE:
                 if(ctx->components[ctx->process_comp_type].configure_func != NULL) {
-                  err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].data_ptr +
-                      ctx->components[ctx->process_comp_type].data_size * ctx->process_instance);
+                  err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].generic.data_ptr +
+                      ctx->components[ctx->process_comp_type].generic.data_size * ctx->process_instance);
                 } else {
                   err = E_OK;
                 }
