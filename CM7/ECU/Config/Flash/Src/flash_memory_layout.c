@@ -13,366 +13,293 @@
 #include <stddef.h>
 
 static const flash_mem_layout_block_info_t flash_mem_layout_blocks[ECU_FLASH_BLOCKS_COUNT] = {
-
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_64K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_64K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
 /*
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_128K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_128K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_64K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_64K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
     {
         .sectors_count = ECU_FLASH_BLOCK_SIZE_16K / ECU_FLASH_SECTOR_SIZE,
-        .sector_size = ECU_FLASH_SECTOR_SIZE,
         .block_size = ECU_FLASH_BLOCK_SIZE_16K,
     },
 */
@@ -451,6 +378,7 @@ static uint32_t flash_mem_layout_block_index_to_address[ECU_FLASH_BLOCKS_COUNT] 
 
 static const flash_mem_layout_t flash_mem_layout = {
     .mem_size = ECU_FLASH_SIZE * ECU_FLASH_DIES_COUNT,
+    .sector_size = ECU_FLASH_SECTOR_SIZE,
     .blocks = ITEMSOF(flash_mem_layout_blocks),
     .blocks_info = flash_mem_layout_blocks,
     .blocks_addresses = flash_mem_layout_block_index_to_address,
@@ -498,10 +426,10 @@ error_t flash_mem_layout_init(void)
                 layout->section_type_to_addresses[index] == 0xFFFFFFFF &&
                 layout->sections_info[s].sector_index < layout->blocks_info[block_index].sectors_count &&
                 layout->sections_info[s].block_index < layout->blocks &&
-                (layout->sections_info[s].uses_full_block == true || (layout->blocks_info[block_index].sector_size * layout->sections_info[s].sector_index + layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size)) &&
+                (layout->sections_info[s].uses_full_block == true || (layout->sector_size * layout->sections_info[s].sector_index + layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size)) &&
                 (layout->sections_info[s].uses_full_block == false || (layout->sections_info[s].sector_index == 0 && layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size))) {
               address = layout->blocks_addresses[block_index];
-              address += layout->blocks_info[block_index].sector_size * layout->sections_info[s].sector_index;
+              address += layout->sector_size * layout->sections_info[s].sector_index;
               layout->section_type_to_addresses[index] = address;
               layout->section_type_to_section_layout[index] = s;
             } else {
@@ -552,26 +480,6 @@ error_t flash_mem_layout_get_section_address(uint32_t *address, uint16_t section
     BREAK_IF_ACTION(addr == 0xFFFFFFF, err = E_NOTSUPPORT);
 
     *address = addr;
-
-  } while(0);
-
-  return err;
-}
-
-error_t flash_mem_layout_get_block_size(uint16_t block_index, uint32_t *erase_size, uint32_t *sector_size)
-{
-  error_t err = E_OK;
-  const flash_mem_layout_t *layout = &flash_mem_layout;
-
-  do {
-    BREAK_IF_ACTION((erase_size == NULL && sector_size == NULL) || block_index >= ECU_FLASH_BLOCKS_COUNT, err = E_PARAM);
-
-    if(erase_size != NULL) {
-      *erase_size = layout->blocks_info[block_index].block_size;
-    }
-    if(sector_size != NULL) {
-      *sector_size = layout->blocks_info[block_index].sector_size;
-    }
 
   } while(0);
 

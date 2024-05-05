@@ -36,7 +36,6 @@
 
 typedef struct {
     uint32_t sectors_count;
-    uint32_t sector_size;
     uint32_t block_size;
 }flash_mem_layout_block_info_t;
 
@@ -56,6 +55,7 @@ typedef struct {
 
 typedef struct {
     uint32_t mem_size;
+    uint32_t sector_size;
     uint32_t blocks;
     uint32_t sections;
     const flash_mem_layout_block_info_t *blocks_info;
@@ -72,7 +72,6 @@ typedef struct {
 error_t flash_mem_layout_init(void);
 error_t flash_mem_layout_get_section_info(const flash_mem_layout_section_info_t **section_info, uint16_t section_type, uint16_t section_index);
 error_t flash_mem_layout_get_section_address(uint32_t *address, uint16_t section_type, uint16_t section_index);
-error_t flash_mem_layout_get_block_size(uint16_t block_index, uint32_t *erase_size, uint32_t *sector_size);
 error_t flash_mem_layout_get(const flash_mem_layout_t **layout);
 
 #endif /* CONFIG_ECU_FLASH_INC_ECU_FLASH_MEMORY_LAYOUT_H_ */
