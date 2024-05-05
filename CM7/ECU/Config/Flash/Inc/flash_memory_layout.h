@@ -11,6 +11,7 @@
 #include "errors.h"
 #include <stdint.h>
 #include "flash.h"
+#include "bool.h"
 
 #define ECU_FLASH_DIE_SIZE              0x400000
 #define ECU_FLASH_DIE_SECTOR_SIZE       0x1000
@@ -26,7 +27,7 @@
 #define ECU_FLASH_SECTOR_SIZE           (ECU_FLASH_DIE_SECTOR_SIZE * ECU_FLASH_DIES_COUNT)
 #define ECU_FLASH_PAGE_SIZE             (ECU_FLASH_DIE_PAGE_SIZE * ECU_FLASH_DIES_COUNT)
 
-#define ECU_FLASH_BLOCKS_COUNT          72
+#define ECU_FLASH_BLOCKS_COUNT          (72 / 2)
 #define ECU_FLASH_BLOCK_SIZE_16K        (ECU_FLASH_DIE_BLOCK_SIZE_8K * ECU_FLASH_DIES_COUNT)
 #define ECU_FLASH_BLOCK_SIZE_64K        (ECU_FLASH_DIE_BLOCK_SIZE_32K * ECU_FLASH_DIES_COUNT)
 #define ECU_FLASH_BLOCK_SIZE_128K       (ECU_FLASH_DIE_BLOCK_SIZE_64K * ECU_FLASH_DIES_COUNT)
@@ -50,6 +51,7 @@ typedef struct {
     uint16_t section_length;
     uint16_t block_index;
     uint16_t sector_index;
+    bool uses_full_block;
 }flash_mem_layout_section_info_t;
 
 typedef struct {
@@ -59,14 +61,18 @@ typedef struct {
     const flash_mem_layout_block_info_t *blocks_info;
     const flash_mem_layout_section_info_t *sections_info;
 
+    uint32_t *blocks_addresses;
     uint16_t section_type_max;
     uint16_t section_index_max;
     uint32_t section_type_to_section_layout_count;
     uint16_t *section_type_to_section_layout;
+    uint32_t *section_type_to_addresses;
 }flash_mem_layout_t;
 
 error_t flash_mem_layout_init(void);
 error_t flash_mem_layout_get_section_info(const flash_mem_layout_section_info_t **section_info, uint16_t section_type, uint16_t section_index);
+error_t flash_mem_layout_get_section_address(uint32_t *address, uint16_t section_type, uint16_t section_index);
+error_t flash_mem_layout_get_block_size(uint16_t block_index, uint32_t *erase_size, uint32_t *sector_size);
 error_t flash_mem_layout_get(const flash_mem_layout_t **layout);
 
 #endif /* CONFIG_ECU_FLASH_INC_ECU_FLASH_MEMORY_LAYOUT_H_ */

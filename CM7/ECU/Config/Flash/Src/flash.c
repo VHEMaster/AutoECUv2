@@ -21,13 +21,13 @@ error_t flash_init(void)
   error_t err = E_OK;
 
   do {
-    memset(&flash_runtime_ctx, 0u, sizeof(flash_runtime_ctx));;
+    memset(ctx, 0u, sizeof(flash_runtime_ctx_t));
 
     err = ecu_devices_get_flash_ctx(ECU_DEVICE_FLASH_1, &ctx->qspi_ctx);
     BREAK_IF(err != E_OK);
 
     err = flash_mem_layout_init();
-    BREAK_IF(err != E_OK)
+    BREAK_IF(err != E_OK);
 
     ctx->ready = true;
 
@@ -51,7 +51,7 @@ void flash_loop_fast(void)
   } while(0);
 }
 
-error_t flash_io_lock(void)
+error_t flash_lock(void)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
   error_t err = E_OK;
@@ -74,7 +74,7 @@ error_t flash_io_lock(void)
   return err;
 }
 
-error_t flash_io_unlock(void)
+error_t flash_unlock(void)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
   error_t err = E_OK;
@@ -95,7 +95,7 @@ error_t flash_io_unlock(void)
   return err;
 }
 
-error_t flash_io_read(uint32_t address, void *payload, uint32_t length)
+error_t flash_section_read(uint16_t section_type, uint16_t section_index, void *payload, uint32_t length)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
   error_t err = E_OK;
@@ -106,7 +106,8 @@ error_t flash_io_read(uint32_t address, void *payload, uint32_t length)
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {
-      ctx->cmd_address = address;
+      ctx->cmd_section_type = section_type;
+      ctx->cmd_section_index = section_index;
       ctx->cmd_payload_rx = payload;
       ctx->cmd_length = length;
 
@@ -125,7 +126,7 @@ error_t flash_io_read(uint32_t address, void *payload, uint32_t length)
   return err;
 }
 
-error_t flash_io_write(flash_erase_type_t erase_type, uint32_t address, const void *payload, uint32_t length)
+error_t flash_section_write(uint16_t section_type, uint16_t section_index, uint32_t address, const void *payload, uint32_t length)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
   error_t err = E_OK;
@@ -136,10 +137,10 @@ error_t flash_io_write(flash_erase_type_t erase_type, uint32_t address, const vo
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {
-      ctx->cmd_address = address;
+      ctx->cmd_section_type = section_type;
+      ctx->cmd_section_index = section_index;
       ctx->cmd_payload_tx = payload;
       ctx->cmd_length = length;
-      ctx->cmd_erase_type = erase_type;
 
       ctx->cmd_request = cmd;
       ctx->cmd_errcode = E_AGAIN;

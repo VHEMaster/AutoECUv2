@@ -8,6 +8,7 @@
 #include <string.h>
 #include "compiler.h"
 #include "flash.h"
+#include "flash_memory_layout.h"
 #include "config_global.h"
 #include "config_global_fsm.h"
 
@@ -132,6 +133,7 @@ error_t ecu_config_global_init(void)
 {
   error_t err = E_OK;
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+  const flash_mem_layout_section_info_t *section_info;
 
   do {
     memset(&ecu_config_global_runtime_ctx, 0u, sizeof(ecu_config_global_runtime_ctx));
@@ -151,6 +153,10 @@ error_t ecu_config_global_init(void)
 
     for(int c = 0; c < ctx->components_count; c++) {
       for(int i = 0; i < ctx->components[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->components[c].generic.flash_section_type, i);
+        BREAK_IF(err != E_OK);
+        BREAK_IF_ACTION(ctx->components[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+
         if(ctx->components[c].generic.get_default_cfg_func != NULL) {
           err = ctx->components[c].generic.get_default_cfg_func(i, ctx->components[c].generic.data_ptr + ctx->components[c].generic.data_size * i);
         }
@@ -160,6 +166,10 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->calibrations_count; c++) {
+      err = flash_mem_layout_get_section_info(&section_info, ctx->calibrations[c].flash_section_type, 0);
+      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(ctx->calibrations[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+
       if(ctx->calibrations[c].get_default_cfg_func != NULL) {
         err = ctx->calibrations[c].get_default_cfg_func(0, ctx->calibrations[c].data_ptr);
       }
@@ -168,6 +178,10 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->runtimes_count; c++) {
+      err = flash_mem_layout_get_section_info(&section_info, ctx->runtimes[c].flash_section_type, 0);
+      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(ctx->runtimes[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+
       if(ctx->runtimes[c].get_default_cfg_func != NULL) {
         err = ctx->runtimes[c].get_default_cfg_func(0, ctx->runtimes[c].data_ptr);
       }
