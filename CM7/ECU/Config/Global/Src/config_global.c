@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "compiler.h"
+#include "crc.h"
 #include "flash.h"
 #include "flash_memory_layout.h"
 #include "config_global.h"
@@ -138,6 +139,9 @@ error_t ecu_config_global_init(void)
   do {
     memset(&ecu_config_global_runtime_ctx, 0u, sizeof(ecu_config_global_runtime_ctx));
     memset(&ecu_config_global_engine, 0u, sizeof(ecu_config_global_engine));
+
+    err = crc_init();
+    BREAK_IF(err != E_OK);
 
     err = flash_init();
     BREAK_IF(err != E_OK);

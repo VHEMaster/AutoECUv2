@@ -230,6 +230,11 @@ void Error_Handler(void);
 #define LD4_Pin GPIO_PIN_15
 #define LD4_GPIO_Port LD_GPIO_Port
 
+#define NVIC_PRIO_DMA_M2M_1 5
+#define NVIC_PRIO_DMA_M2M_2 5
+#define NVIC_PRIO_DMA_M2M_3 5
+#define NVIC_PRIO_DMA_M2M_4 5
+
 #define NVIC_PRIO_ADC1 10
 #define NVIC_PRIO_ADC1_DMA 11
 #define NVIC_PRIO_ADC2 10
@@ -270,6 +275,7 @@ void Error_Handler(void);
 #define NVIC_PRIO_RAM_ECC 15
 #define NVIC_PRIO_CM4_TO_CM7_EV 15
 #define NVIC_PRIO_CORE_HOLD 15
+#define NVIC_PRIO_FLASH 15
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

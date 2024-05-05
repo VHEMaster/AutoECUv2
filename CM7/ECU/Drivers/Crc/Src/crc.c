@@ -6,19 +6,37 @@
  */
 
 #include "crc.h"
-#include "config_extern.h"
+#include "crc_fsm.h"
+#include "config_loop.h"
 #include "compiler.h"
 #include <string.h>
 
-typedef struct {
-    CRC_HandleTypeDef *hcrc;
-    DMA_HandleTypeDef *hdma;
-    bool ready;
-    bool locked;
-    bool busy;
-}crc_ctx_t;
-
 static crc_ctx_t crc_ctx = {0};
+
+static void crc_loop_fast(crc_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    err = crc_fsm(ctx);
+    if(err != E_OK && err != E_AGAIN) {
+      //TODO: set DTC here?
+    }
+
+  } while(0);
+}
+
+static void crc_dma_clpt_cb(DMA_HandleTypeDef *hdma)
+{
+  crc_ctx_t *ctx = &crc_ctx;
+
+  if(ctx->hdma == hdma) {
+    ctx->dma_errcode = E_OK;
+  }
+}
 
 error_t crc_init(void)
 {
@@ -30,6 +48,8 @@ error_t crc_init(void)
     memset(ctx, 0u, sizeof(crc_ctx_t));
 
     ctx->hcrc = &hcrc;
+    ctx->hdma = &hdma_memtomem_dma2_stream1;
+
     ctx->hcrc->Instance = CRC;
     ctx->hcrc->Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE;
     ctx->hcrc->Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE;
@@ -42,6 +62,21 @@ error_t crc_init(void)
 
     status = HAL_CRC_Init(ctx->hcrc);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    ctx->hdma->Init.Request = DMA_REQUEST_MEM2MEM;
+    ctx->hdma->Init.Direction = DMA_MEMORY_TO_MEMORY;
+    ctx->hdma->Init.PeriphInc = DMA_PINC_ENABLE;
+    ctx->hdma->Init.MemInc = DMA_MINC_DISABLE;
+    ctx->hdma->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    ctx->hdma->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    status = HAL_DMA_Init(ctx->hdma);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, crc_dma_clpt_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    err = ecu_loop_register_fast((ecu_loop_cb_t)crc_loop_fast, ctx, 0);
+    BREAK_IF(err != E_OK);
 
     ctx->ready = true;
 
@@ -81,7 +116,7 @@ error_t crc_unlock(void)
 
   do {
     prim = EnterCritical();
-    if(ctx->locked == false || ctx->busy != false) {
+    if(ctx->locked == false || ctx->cmd_ready != false) {
       err = E_INVALACT;
     } else {
       ctx->locked = false;
@@ -96,5 +131,30 @@ error_t crc_unlock(void)
 
 error_t crc_calculate(crc_checksum_t *crc, const void *payload, uint32_t length, bool reset)
 {
+  crc_ctx_t *ctx = &crc_ctx;
+  error_t err = E_OK;
 
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+
+    if(ctx->cmd_ready == false) {
+      ctx->cmd_address = (uint32_t)payload;
+      ctx->cmd_length = length;
+      ctx->cmd_reset = reset;
+
+      ctx->cmd_errcode = E_AGAIN;
+      ctx->cmd_ready = true;
+    }
+    if(ctx->cmd_errcode != E_AGAIN) {
+      *crc = ctx->hcrc->Instance->DR;
+      err = ctx->cmd_errcode;
+      ctx->cmd_ready = false;
+    } else {
+      err = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
 }
