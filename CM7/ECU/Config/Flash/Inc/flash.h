@@ -39,7 +39,7 @@ typedef enum {
 typedef struct {
     uint16_t section_type;
     uint16_t section_index;
-    uint16_t version;
+    uint16_t payload_version;
     uint16_t pages;
     uint16_t reserved[11];
     uint16_t crc;

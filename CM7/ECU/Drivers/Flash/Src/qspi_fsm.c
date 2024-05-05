@@ -339,7 +339,7 @@ static error_t qspi_fsm_process(qspi_ctx_t *ctx)
       case QSPI_FSM_PROCESS_IO:
         err = qspi_fsm_io(ctx);
         if(err != E_AGAIN) {
-          ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+          ctx->fsm_process = QSPI_FSM_PROCESS_CONDITION;
           ctx->cmd_errcode = err;
         }
         break;

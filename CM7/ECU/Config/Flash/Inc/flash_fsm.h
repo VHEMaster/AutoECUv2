@@ -11,6 +11,7 @@
 #include "flash.h"
 #include "crc.h"
 #include "config_devices.h"
+#include "flash_memory_layout.h"
 #include "bool.h"
 
 typedef enum {
@@ -25,6 +26,7 @@ typedef enum {
   FLASH_FSM_FLASH_LOCK,
   FLASH_FSM_SECTION_INFO,
   FLASH_FSM_SECTION_ADDR,
+
   FLASH_FSM_READ_HEADER,
   FLASH_FSM_READ_HEADER_SYNC,
   FLASH_FSM_READ_PAYLOAD,
@@ -34,9 +36,19 @@ typedef enum {
   FLASH_FSM_READ_CHECKSUM_PAYLOAD,
   FLASH_FSM_READ_CHECKSUM_UNLOCK,
   FLASH_FSM_READ_VERIFY,
-  FLASH_FSM_ERASE,
+
+  FLASH_FSM_WRITE_CHECKSUM_LOCK,
+  FLASH_FSM_WRITE_CHECKSUM_HEADER,
+  FLASH_FSM_WRITE_CHECKSUM_PAYLOAD,
+  FLASH_FSM_WRITE_CHECKSUM_UNLOCK,
+  FLASH_FSM_WRITE_ERASE,
+  FLASH_FSM_WRITE_ERASE_SYNC,
   FLASH_FSM_WRITE_HEADER,
+  FLASH_FSM_WRITE_HEADER_SYNC,
   FLASH_FSM_WRITE_PAYLOAD,
+  FLASH_FSM_WRITE_PAYLOAD_SYNC,
+  FLASH_FSM_WRITE_ADDR,
+
   FLASH_FSM_FLASH_UNLOCK,
   FLASH_FSM_MAX,
 }flash_fsm_process_t;
@@ -56,12 +68,16 @@ typedef struct {
     error_t cmd_errcode;
     error_t cmd_errcode_internal;
 
+    const flash_mem_layout_section_info_t *cmd_section;
     uint16_t cmd_section_type;
     uint16_t cmd_section_index;
+    uint16_t cmd_payload_version;
     const void *cmd_payload_tx;
     void *cmd_payload_rx;
     uint32_t cmd_address;
     uint32_t cmd_length;
+    uint32_t cmd_cur_len;
+    uint32_t cmd_left_len;
     flash_erase_type_t cmd_erase_type;
     flash_fsm_process_t fsm_process;
     flash_section_header_t section_header;
