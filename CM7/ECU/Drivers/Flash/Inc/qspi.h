@@ -65,7 +65,8 @@ typedef struct {
     QSPI_CommandTypeDef cmd_rsten;
     QSPI_CommandTypeDef cmd_rst;
     QSPI_CommandTypeDef cmd_eqio;
-    QSPI_CommandTypeDef cmd_rstqio;
+    QSPI_CommandTypeDef cmd_rstqios;
+    QSPI_CommandTypeDef cmd_rstqioq;
     QSPI_CommandTypeDef cmd_rdsr;
     QSPI_CommandTypeDef cmd_wrsr;
     QSPI_CommandTypeDef cmd_rdcr;
@@ -94,7 +95,8 @@ typedef struct {
 
 typedef enum {
   QSPI_FSM_INIT_CONDITION = 0,
-  QSPI_FSM_INIT_QUAD_RST,
+  QSPI_FSM_INIT_QUAD_RST1,
+  QSPI_FSM_INIT_QUAD_RST2,
   QSPI_FSM_INIT_RESET_EN,
   QSPI_FSM_INIT_RESET,
   QSPI_FSM_INIT_JEDEC,

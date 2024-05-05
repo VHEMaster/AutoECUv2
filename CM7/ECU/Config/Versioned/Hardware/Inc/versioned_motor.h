@@ -8,6 +8,9 @@
 #ifndef CONFIG_PROJECT_INC_VERSIONED_MOTOR_H_
 #define CONFIG_PROJECT_INC_VERSIONED_MOTOR_H_
 
+#include "compiler.h"
+#include <stdint.h>
+
 typedef enum {
   MOTOR_CONFIG_VERSION_V1 = 0,
   MOTOR_CONFIG_VERSION_MAX
@@ -173,7 +176,8 @@ typedef struct {
     l9960_config_tvvl_t tvvl;
     l9960_config_vvl_t vvl_mode;
     l9960_config_olon_t ol_on;
-}l9960_config_v1_t;
+    uint32_t align ALIGNED(32);
+}l9960_config_v1_t ALIGNED(32);
 
 typedef l9960_config_v1_t l9960_config_t;
 

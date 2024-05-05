@@ -8,6 +8,7 @@
 #ifndef CONFIG_VERSIONED_SOFTWARE_INC_VERSIONED_ID_H_
 #define CONFIG_VERSIONED_SOFTWARE_INC_VERSIONED_ID_H_
 
+#include "compiler.h"
 #include <stdint.h>
 
 typedef enum {
@@ -17,7 +18,8 @@ typedef enum {
 
 typedef struct {
     uint32_t reserved[128];
-}ecu_config_data_identification_v1_t;
+    uint32_t align ALIGNED(32);
+}ecu_config_data_identification_v1_t ALIGNED(32);
 
 typedef ecu_config_data_identification_v1_t ecu_config_data_identification_t;
 

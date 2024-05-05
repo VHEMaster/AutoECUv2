@@ -22,17 +22,22 @@ typedef enum {
 
 typedef enum {
   FLASH_FSM_CONDITION = 0,
+  FLASH_FSM_FLASH_LOCK,
   FLASH_FSM_SECTION_INFO,
   FLASH_FSM_SECTION_ADDR,
   FLASH_FSM_READ_HEADER,
+  FLASH_FSM_READ_HEADER_SYNC,
   FLASH_FSM_READ_PAYLOAD,
+  FLASH_FSM_READ_PAYLOAD_SYNC,
   FLASH_FSM_READ_CHECKSUM_LOCK,
   FLASH_FSM_READ_CHECKSUM_HEADER,
   FLASH_FSM_READ_CHECKSUM_PAYLOAD,
   FLASH_FSM_READ_CHECKSUM_UNLOCK,
+  FLASH_FSM_READ_VERIFY,
   FLASH_FSM_ERASE,
   FLASH_FSM_WRITE_HEADER,
   FLASH_FSM_WRITE_PAYLOAD,
+  FLASH_FSM_FLASH_UNLOCK,
   FLASH_FSM_MAX,
 }flash_fsm_process_t;
 
@@ -49,6 +54,7 @@ typedef struct {
 
     flash_cmd_type_t cmd_request;
     error_t cmd_errcode;
+    error_t cmd_errcode_internal;
 
     uint16_t cmd_section_type;
     uint16_t cmd_section_index;

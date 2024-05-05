@@ -149,7 +149,6 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
 
   do {
     BREAK_IF_ACTION(ctx == NULL || payload == NULL || length == 0, err = E_PARAM);
-    BREAK_IF_ACTION((address & (ctx->init.prog_page_size - 1)), err = E_PARAM);
     BREAK_IF_ACTION((address + length > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
@@ -158,7 +157,6 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
 
     ctx->cmd_ptr = &ctx->init.cmd_hsread;
     ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->AlternateBytes = 0;
     ctx->cmd_ptr->NbData = length;
     ctx->cmd_payload_tx = NULL;
     ctx->cmd_payload_rx = payload;
@@ -169,7 +167,7 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -182,8 +180,7 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
 
   do {
     BREAK_IF_ACTION(ctx == NULL || payload == NULL || length == 0, err = E_PARAM);
-    BREAK_IF_ACTION((address & (ctx->init.prog_page_size - 1)), err = E_PARAM);
-    BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
+    BREAK_IF_ACTION(((address & (ctx->init.prog_page_size - 1)) + length > ctx->init.prog_page_size), err = E_PARAM);
     BREAK_IF_ACTION((address + length > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
@@ -191,7 +188,6 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
 
     ctx->cmd_ptr = &ctx->init.cmd_prog;
     ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->AlternateBytes = 0;
     ctx->cmd_ptr->NbData = length;
     ctx->cmd_payload_tx = payload;
     ctx->cmd_payload_rx = NULL;
@@ -203,7 +199,7 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -232,7 +228,7 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -261,7 +257,7 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -287,7 +283,7 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -319,7 +315,7 @@ error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -351,7 +347,7 @@ error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, u
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -377,7 +373,7 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -409,7 +405,7 @@ error_t qspi_prot_read(qspi_ctx_t *ctx, void *payload, uint32_t length)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -441,7 +437,7 @@ error_t qspi_prot_write(qspi_ctx_t *ctx, const void *payload, uint32_t length)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 
@@ -467,7 +463,7 @@ error_t qspi_prot_lock(qspi_ctx_t *ctx)
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;
 
-    err = ctx->cmd_errcode;
+    err = E_OK;
 
   } while(0);
 

@@ -202,15 +202,27 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
     switch(ctx->fsm_init) {
       case QSPI_FSM_INIT_CONDITION:
         if(ctx->initialized == false && ctx->init_errcode == E_AGAIN) {
-          ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST;
-          ctx->cmd_ptr = &ctx->init.cmd_rstqio;
+          ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST1;
+          ctx->cmd_ptr = &ctx->init.cmd_rstqioq;
           ctx->cmd_status_poll_needed = false;
           ctx->cmd_wren_needed = false;
           err = E_AGAIN;
           continue;
         }
         break;
-      case QSPI_FSM_INIT_QUAD_RST:
+      case QSPI_FSM_INIT_QUAD_RST1:
+        err = qspi_fsm_io(ctx);
+        if(err == E_OK) {
+          ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST2;
+          ctx->cmd_ptr = &ctx->init.cmd_rstqios;
+          err = E_AGAIN;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+          ctx->init_errcode = err;
+        }
+        break;
+      case QSPI_FSM_INIT_QUAD_RST2:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_RESET_EN;
@@ -250,8 +262,6 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_JEDEC:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
-          ctx->cmd_payload_rx = NULL;
-
           for(int i = 0; i < ITEMSOF(ctx->jedec_quad.mfg_id); i++) {
             if(ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
               err = E_BADRESP;
@@ -267,6 +277,9 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
               err = E_BADRESP;
             }
           }
+
+          ctx->cmd_payload_rx = NULL;
+
           ctx->jedec.mfg_id = ctx->jedec_quad.mfg_id[0];
           ctx->jedec.device_type = ctx->jedec_quad.device_type[0];
           ctx->jedec.device_id = ctx->jedec_quad.device_id[0];

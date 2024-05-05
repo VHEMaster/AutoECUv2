@@ -59,14 +59,18 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .Instruction = 0x38,
                 .InstructionMode = QSPI_INSTRUCTION_1_LINE,
             },
-            .cmd_rstqio = {
+            .cmd_rstqios = {
+                .Instruction = 0xFF,
+                .InstructionMode = QSPI_INSTRUCTION_1_LINE,
+            },
+            .cmd_rstqioq = {
                 .Instruction = 0xFF,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
             },
             .cmd_rdsr = {
                 .Instruction = 0x05,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
-                .DummyCycles = 1,
+                .DummyCycles = 2,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 1 * ECU_FLASH_DIES_COUNT,
             },
@@ -80,7 +84,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .cmd_rdcr = {
                 .Instruction = 0x35,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
-                .DummyCycles = 1,
+                .DummyCycles = 2,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 1 * ECU_FLASH_DIES_COUNT,
             },
@@ -90,9 +94,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .Address = 0x00,
                 .AddressSize = 3,
                 .AddressMode = QSPI_ADDRESS_4_LINES,
-                .DummyCycles = 2,
-                .AlternateBytes = 0x00,
-                .AlternateBytesSize = 1,
+                .DummyCycles = 8,
                 .AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 0 * ECU_FLASH_DIES_COUNT,
@@ -107,7 +109,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .cmd_qjid = {
                 .Instruction = 0xAF,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
-                .DummyCycles = 1,
+                .DummyCycles = 2,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 3 * ECU_FLASH_DIES_COUNT,
             },
@@ -159,7 +161,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .cmd_rbpr = {
                 .Instruction = 0x72,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
-                .DummyCycles = 1,
+                .DummyCycles = 2,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 18 * ECU_FLASH_DIES_COUNT,
             },
@@ -180,7 +182,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .Address = 0x00,
                 .AddressSize = 2,
                 .AddressMode = QSPI_ADDRESS_4_LINES,
-                .DummyCycles = 3,
+                .DummyCycles = 6,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 0 * ECU_FLASH_DIES_COUNT,
             },

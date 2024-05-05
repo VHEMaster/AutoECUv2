@@ -8,6 +8,7 @@
 #ifndef CONFIG_PROJECT_INC_VERSIONED_STEPPER_H_
 #define CONFIG_PROJECT_INC_VERSIONED_STEPPER_H_
 
+#include "compiler.h"
 #include <stdint.h>
 
 typedef enum {
@@ -31,7 +32,8 @@ typedef struct {
     int32_t pos_min;
     int32_t pos_max;
 
-}tle4729_config_v1_t;
+    uint32_t align ALIGNED(32);
+}tle4729_config_v1_t ALIGNED(32);
 
 typedef tle4729_config_v1_t tle4729_config_t;
 

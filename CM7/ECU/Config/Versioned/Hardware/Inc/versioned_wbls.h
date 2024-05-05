@@ -11,6 +11,7 @@
 #include "bool.h"
 #include "pid.h"
 #include "time.h"
+#include "compiler.h"
 #include <stdint.h>
 
 typedef enum {
@@ -67,7 +68,8 @@ typedef struct {
     cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
 
-}cj125_config_v1_t;
+    uint32_t align ALIGNED(32);
+}cj125_config_v1_t ALIGNED(32);
 
 typedef cj125_config_v1_t cj125_config_t;
 

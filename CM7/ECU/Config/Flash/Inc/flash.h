@@ -9,6 +9,7 @@
 #define CONFIG_FLASH_INC_FLASH_H_
 
 #include "errors.h"
+#include "compiler.h"
 #include <stdint.h>
 
 #define ECU_FLASH_SECTION_HEADER_LENGTH     (sizeof(flash_section_header_t))
@@ -42,7 +43,7 @@ typedef struct {
     uint16_t pages;
     uint16_t reserved[11];
     uint16_t crc;
-}flash_section_header_t;
+}flash_section_header_t ALIGNED(32);
 
 error_t flash_init(void);
 void flash_loop_fast(void);

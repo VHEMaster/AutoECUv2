@@ -8,6 +8,9 @@
 #ifndef CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_
 #define CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_
 
+#include "compiler.h"
+#include <stdint.h>
+
 typedef enum {
   FLEXIO_CONFIG_VERSION_V1 = 0,
   FLEXIO_CONFIG_VERSION_MAX
@@ -619,7 +622,8 @@ typedef struct {
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
     l9966_config_status_t status;
-}l9966_config_data_v1_t;
+    uint32_t align ALIGNED(32);
+}l9966_config_data_v1_t ALIGNED(32);
 
 typedef l9966_config_data_v1_t l9966_config_data_t;
 
