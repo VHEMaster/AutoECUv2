@@ -62,6 +62,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
         err = flash_mem_layout_get_section_address(&address, ctx->cmd_section_type, ctx->cmd_section_index);
         if(err == E_OK) {
           ctx->cmd_address = address;
+          ctx->cmd_address_base = address;
 
           if(ctx->cmd_dupl_index >= 2) {
             if(ctx->cmd_request == FLASH_CMD_READ) {
@@ -79,18 +80,25 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
             address ^= ctx->qspi_ctx->init.flash_size >> 1;
             address |= ctx->cmd_address & insector_addr_mask;
             ctx->cmd_address = address;
+            ctx->cmd_address_base = address;
           }
-          ctx->cmd_dupl_index++;
           switch(ctx->cmd_request) {
             case FLASH_CMD_READ:
               ctx->fsm_process = FLASH_FSM_READ_HEADER;
               break;
             case FLASH_CMD_WRITE:
-              ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_LOCK;
+              ctx->cmd_left_len = ctx->cmd_length + ECU_FLASH_SECTION_HEADER_LENGTH;
+
+              if(ctx->cmd_dupl_index == 0) {
+                ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_LOCK;
+              } else {
+                ctx->fsm_process = FLASH_FSM_WRITE_ERASE;
+              }
               break;
             default:
               break;
           }
+          ctx->cmd_dupl_index++;
           continue;
         } else if(err != E_AGAIN) {
           ctx->cmd_errcode_internal = err;
@@ -210,9 +218,6 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           ctx->section_header.payload_version = ctx->cmd_payload_version;
           ctx->section_header.pages = ctx->cmd_section->section_length / ctx->qspi_ctx->init.prog_page_size;
 
-          ctx->cmd_left_len = ctx->cmd_length + ECU_FLASH_SECTION_HEADER_LENGTH;
-          ctx->cmd_cur_len = ctx->cmd_left_len > ctx->qspi_ctx->init.prog_page_size ? ctx->qspi_ctx->init.prog_page_size : ctx->cmd_left_len;
-
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_HEADER;
           continue;
         } else if(err != E_AGAIN) {
@@ -262,6 +267,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           continue;
         } else if(ctx->cmd_erase_type == FLASH_ERASE_TYPE_SECTOR) {
           err = qspi_sector_erase(ctx->qspi_ctx, ctx->cmd_address);
+          ctx->cmd_cur_len = MIN(ctx->cmd_left_len, ctx->qspi_ctx->init.erase_sector_size);
         } else if(ctx->cmd_erase_type == FLASH_ERASE_TYPE_BLOCK) {
           err = qspi_block_erase(ctx->qspi_ctx, ctx->cmd_address);
         } else {
@@ -279,7 +285,23 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_WRITE_ERASE_SYNC:
         err = qspi_sync(ctx->qspi_ctx);
         if(err == E_OK) {
-          ctx->fsm_process = FLASH_FSM_WRITE_HEADER;
+          if(ctx->cmd_erase_type == FLASH_ERASE_TYPE_SECTOR) {
+            ctx->cmd_address += ctx->cmd_cur_len;
+            ctx->cmd_left_len -= ctx->cmd_cur_len;
+            ctx->cmd_cur_len = MIN(ctx->cmd_left_len, ctx->qspi_ctx->init.erase_sector_size);
+            if(ctx->cmd_cur_len > 0) {
+              ctx->fsm_process = FLASH_FSM_WRITE_ERASE;
+              continue;
+            } else {
+              ctx->fsm_process = FLASH_FSM_WRITE_HEADER;
+            }
+          } else {
+            ctx->fsm_process = FLASH_FSM_WRITE_HEADER;
+          }
+          ctx->cmd_address = ctx->cmd_address_base;
+          ctx->cmd_left_len = ctx->cmd_length + ECU_FLASH_SECTION_HEADER_LENGTH;
+          ctx->cmd_cur_len = MIN(ctx->cmd_left_len, ctx->qspi_ctx->init.prog_page_size);
+
           continue;
         } else if(err != E_AGAIN) {
           ctx->cmd_errcode_internal = err;
@@ -328,7 +350,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           if(ctx->cmd_cur_len > 0) {
             ctx->fsm_process = FLASH_FSM_WRITE_PAYLOAD;
           } else {
-            ctx->fsm_process = FLASH_FSM_FLASH_UNLOCK;
+            ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
           }
           continue;
         } else if(err != E_AGAIN) {

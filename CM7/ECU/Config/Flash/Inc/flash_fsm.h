@@ -74,6 +74,7 @@ typedef struct {
     uint16_t cmd_payload_version;
     const void *cmd_payload_tx;
     void *cmd_payload_rx;
+    uint32_t cmd_address_base;
     uint32_t cmd_address;
     uint32_t cmd_length;
     uint32_t cmd_cur_len;
