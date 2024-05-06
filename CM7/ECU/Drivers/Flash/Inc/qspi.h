@@ -12,6 +12,7 @@
 #include "time.h"
 #include "bool.h"
 #include "errors.h"
+#include "compiler.h"
 
 #define QSPI_STATUS_POLL_INTERVAL     (96 * 50)
 #define QSPI_CMD_TIMEOUT_US           (100)
@@ -101,6 +102,7 @@ typedef enum {
   QSPI_FSM_INIT_RESET,
   QSPI_FSM_INIT_JEDEC,
   QSPI_FSM_INIT_QUAD,
+  QSPI_FSM_INIT_CFG,
   QSPI_FSM_INIT_MAX
 }qspi_fsm_init_t;
 
@@ -152,6 +154,8 @@ typedef struct {
     qspi_jedec_quad_t jedec_quad;
     qspi_jedec_t jedec;
     bool jedec_ready;
+
+    uint8_t payload_dummy[32] ALIGNED(32);
 }qspi_ctx_t;
 
 

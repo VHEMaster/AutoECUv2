@@ -251,6 +251,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_JEDEC;
           ctx->cmd_ptr = &ctx->init.cmd_jid;
+          ctx->cmd_payload_tx = NULL;
           ctx->cmd_payload_rx = &ctx->jedec_quad;
           err = E_AGAIN;
           continue;
@@ -279,6 +280,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           }
 
           ctx->cmd_payload_rx = NULL;
+          ctx->cmd_payload_tx = NULL;
 
           ctx->jedec.mfg_id = ctx->jedec_quad.mfg_id[0];
           ctx->jedec.device_type = ctx->jedec_quad.device_type[0];
@@ -304,6 +306,24 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_QUAD:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
+          ctx->fsm_init = QSPI_FSM_INIT_CFG;
+          ctx->cmd_ptr = &ctx->init.cmd_wrsr;
+          ctx->cmd_payload_tx = ctx->payload_dummy;
+          ctx->cmd_payload_rx = NULL;
+          ctx->cmd_wren_needed = false;
+          ctx->cmd_status_poll_needed = true;
+          ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
+          err = E_AGAIN;
+        } else if(err != E_AGAIN) {
+          ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+          ctx->init_errcode = err;
+        }
+        break;
+      case QSPI_FSM_INIT_CFG:
+        err = qspi_fsm_io(ctx);
+        if(err == E_OK) {
+          ctx->cmd_payload_tx = NULL;
+          ctx->cmd_payload_rx = NULL;
           ctx->cmd_status_poll_needed = false;
           ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
           ctx->init_errcode = err;

@@ -344,7 +344,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_WRITE_HEADER_VERIFY_SYNC:
         err = qspi_sync(ctx->qspi_ctx);
         if(err == E_OK) {
-          compare_success = true;
+          compare_success = memcmp(&ctx->section_header, ctx->cmd_write_verify, ECU_FLASH_SECTION_HEADER_LENGTH) == 0;
           if(compare_success == true) {
             ctx->cmd_left_len -= ECU_FLASH_SECTION_HEADER_LENGTH;
             ctx->cmd_cur_len -= ECU_FLASH_SECTION_HEADER_LENGTH;
@@ -394,7 +394,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_WRITE_PAYLOAD_VERIFY_SYNC:
         err = qspi_sync(ctx->qspi_ctx);
         if(err == E_OK) {
-          compare_success = true;
+          compare_success = memcmp(ctx->cmd_payload_tx_temp, ctx->cmd_write_verify, ctx->cmd_cur_len) == 0;
           if(compare_success == true) {
             ctx->cmd_payload_tx_temp += ctx->cmd_cur_len;
             ctx->cmd_address += ctx->cmd_cur_len;

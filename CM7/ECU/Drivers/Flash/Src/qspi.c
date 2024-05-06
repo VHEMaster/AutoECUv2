@@ -66,9 +66,10 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
     memcpy(&ctx->init, init_ctx, sizeof(qspi_init_t));
 
     ctx->cmd_poll.Match = 0;
-    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY;
+    ctx->cmd_poll.Mask = QSPI_STATUS_REG_BUSY | QSPI_STATUS_REG_WEL;
+    ctx->cmd_poll.Mask |= ctx->cmd_poll.Mask << 8;
     ctx->cmd_poll.Interval = QSPI_STATUS_POLL_INTERVAL;
-    ctx->cmd_poll.StatusBytesSize = 1;
+    ctx->cmd_poll.StatusBytesSize = 2;
     ctx->cmd_poll.MatchMode = QSPI_MATCH_MODE_AND;
     ctx->cmd_poll.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
@@ -213,7 +214,7 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION((address > ctx->init.flash_size), err = E_PARAM);
-    BREAK_IF_ACTION((address & ctx->init.erase_sector_size), err = E_PARAM);
+    BREAK_IF_ACTION((address & (ctx->init.erase_sector_size - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
@@ -242,7 +243,7 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION((address > ctx->init.flash_size), err = E_PARAM);
-    BREAK_IF_ACTION((address & ctx->init.erase_sector_size), err = E_PARAM);
+    BREAK_IF_ACTION((address & (ctx->init.erase_sector_size - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
