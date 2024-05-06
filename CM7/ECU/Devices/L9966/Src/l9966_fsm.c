@@ -28,6 +28,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       case L9966_RESET_CONDITION:
         if(ctx->reset_request == true && ctx->reset_errcode == E_AGAIN) {
           ctx->sqncr_cmd_ready_mask = 0;
+          memset(ctx->sqncr_cmd_results, 0u, sizeof(ctx->sqncr_cmd_results));
           if(gpio_valid(&ctx->init.nrst_pin)) {
             ctx->reset_fsm_state = L9966_RESET_HARD_SET;
           } else {
@@ -420,9 +421,11 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
             if(data_available) {
               result_old = ctx->sqncr_cmd_results[i];
               lpf = sqncr_cmd->lpf;
+              if(result_old == 0.0f) {
+                lpf = 1.0f;
+              }
+
               if(lpf < 1.0f) {
-                result_float = result_float * lpf + result_old * (1.0f - lpf);
-              } else {
                 lpf = (ctx->sqncr_diff / (float)TIME_US_IN_MS) * lpf;
                 if(lpf < 1.0f) {
                   result_float = result_float * lpf + result_old * (1.0f - lpf);

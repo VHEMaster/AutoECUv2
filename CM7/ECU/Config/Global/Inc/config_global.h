@@ -86,14 +86,10 @@ typedef struct {
 }ecu_config_component_ctx_t;
 
 typedef enum {
-  ECU_CONFIG_RST_CFG_NONE = 0,
-  ECU_CONFIG_RST_CFG_RESET,
-  ECU_CONFIG_RST_CFG_CONFIGURE,
-}ecu_config_global_rst_cfg_type_t;
-
-typedef enum {
   ECU_CONFIG_FSM_RST_CFG_CONDITION = 0,
-  ECU_CONFIG_FSM_RST_CFG_PROCESS,
+  ECU_CONFIG_FSM_RST_CFG_DEFINE,
+  ECU_CONFIG_FSM_RST_CFG_RESET,
+  ECU_CONFIG_FSM_RST_CFG_CONFIG,
 }ecu_config_global_rst_cfg_fsm_t;
 
 typedef enum {
@@ -110,7 +106,6 @@ typedef struct {
     ecu_config_generic_ctx_t *runtimes;
     bool components_ready;
     bool components_initialized;
-    bool components_configured;
 
     bool config_read_request;
     bool config_write_request;
@@ -121,7 +116,7 @@ typedef struct {
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_process_fsm_t fsm_process;
 
-    ecu_config_global_rst_cfg_type_t process_trigger_type;
+    bool process_comps_init;
     error_t process_result;
     ecu_config_component_type_t process_comp_type;
     ecu_device_instance_t process_instance;
@@ -131,8 +126,7 @@ error_t ecu_config_global_init(void);
 void ecu_config_global_loop_main(void);
 void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
-error_t ecu_config_global_components_reset(void);
-error_t ecu_config_global_components_configure(void);
+error_t ecu_config_global_components_initialize(void);
 
 error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index);
 

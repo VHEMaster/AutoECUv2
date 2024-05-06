@@ -14,7 +14,7 @@
 #include "middlelayer_spi.h"
 #include "compiler.h"
 
-#define ECU_WBLS_VOLTAGE_UPDATE_PERIOD    (5 * TIME_US_IN_MS)
+#define ECU_WBLS_VOLTAGE_UPDATE_PERIOD    (1500)
 
 typedef struct {
     ecu_spi_slave_enum_t slave_index;

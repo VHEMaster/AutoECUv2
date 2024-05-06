@@ -226,7 +226,7 @@ void ecu_config_global_loop_fast(void)
   }
 }
 
-error_t ecu_config_global_components_reset(void)
+error_t ecu_config_global_components_initialize(void)
 {
   error_t err = E_AGAIN;
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
@@ -234,37 +234,13 @@ error_t ecu_config_global_components_reset(void)
   do {
     BREAK_IF_ACTION(ctx->components_ready == false, err = E_NOTRDY);
 
-    if(ctx->process_trigger_type == ECU_CONFIG_RST_CFG_NONE) {
-      ctx->process_trigger_type = ECU_CONFIG_RST_CFG_RESET;
+    if(ctx->process_comps_init == false) {
+      ctx->process_comps_init = true;
       ctx->process_result = E_AGAIN;
-    }
-    if(ctx->process_trigger_type == ECU_CONFIG_RST_CFG_RESET) {
+    } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_trigger_type = ECU_CONFIG_RST_CFG_NONE;
-      }
-    }
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_config_global_components_configure(void)
-{
-  error_t err = E_AGAIN;
-  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
-
-  do {
-    BREAK_IF_ACTION(ctx->components_ready == false, err = E_NOTRDY);
-
-    if(ctx->process_trigger_type == ECU_CONFIG_RST_CFG_NONE) {
-      ctx->process_trigger_type = ECU_CONFIG_RST_CFG_CONFIGURE;
-      ctx->process_result = E_AGAIN;
-    }
-    if(ctx->process_trigger_type == ECU_CONFIG_RST_CFG_CONFIGURE) {
-      if(ctx->process_result != E_AGAIN) {
-        err = ctx->process_result;
-        ctx->process_trigger_type = ECU_CONFIG_RST_CFG_NONE;
+        ctx->process_comps_init = false;
       }
     }
   } while(0);

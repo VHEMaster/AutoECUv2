@@ -17,80 +17,72 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
 
     switch(ctx->fsm_rst_cfg) {
       case ECU_CONFIG_FSM_RST_CFG_CONDITION:
-        if(ctx->components_ready == true && ctx->process_trigger_type != ECU_CONFIG_RST_CFG_NONE && ctx->process_result == E_AGAIN) {
-          switch(ctx->process_trigger_type) {
-            case ECU_CONFIG_RST_CFG_RESET:
-              ctx->components_initialized = false;
-              break;
-            case ECU_CONFIG_RST_CFG_CONFIGURE:
-              ctx->components_configured = false;
-              break;
-            default:
-              break;
-          }
+        if(ctx->components_ready == true && ctx->process_comps_init == true && ctx->process_result == E_AGAIN) {
+          ctx->components_initialized = false;
           ctx->process_comp_type = 0;
           ctx->process_instance = 0;
-          ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_PROCESS;
+          ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_DEFINE;
           err = E_AGAIN;
+          for(int c = 0; c < ctx->components_count; c++) {
+            ctx->components[c].reset_errcode = err;
+            ctx->components[c].config_errcode = err;
+          }
           continue;
         } else {
           err = E_OK;
         }
         break;
-      case ECU_CONFIG_FSM_RST_CFG_PROCESS:
+      case ECU_CONFIG_FSM_RST_CFG_DEFINE:
         if(ctx->process_comp_type >= ctx->components_count) {
-          switch(ctx->process_trigger_type) {
-            case ECU_CONFIG_RST_CFG_RESET:
-              ctx->components_initialized = true;
-              break;
-            case ECU_CONFIG_RST_CFG_CONFIGURE:
-              ctx->components_configured = true;
-              break;
-            default:
-              break;
-          }
+          ctx->components_initialized = true;
           ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
+          err = E_AGAIN;
           if(ctx->process_instance >= ctx->components[ctx->process_comp_type].instances_count) {
             ctx->process_instance = 0;
             ctx->process_comp_type++;
-            err = E_AGAIN;
-            continue;
           } else {
-            switch(ctx->process_trigger_type) {
-              case ECU_CONFIG_RST_CFG_RESET:
-                if(ctx->components[ctx->process_comp_type].reset_func != NULL) {
-                  err = ctx->components[ctx->process_comp_type].reset_func(ctx->process_instance);
-                } else {
-                  err = E_OK;
-                }
-                ctx->components[ctx->process_comp_type].reset_errcode = err;
-                //TODO: set DTC here
-                break;
-              case ECU_CONFIG_RST_CFG_CONFIGURE:
-                if(ctx->components[ctx->process_comp_type].configure_func != NULL) {
-                  err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].generic.data_ptr +
-                      ctx->components[ctx->process_comp_type].generic.data_size * ctx->process_instance);
-                } else {
-                  err = E_OK;
-                }
-                ctx->components[ctx->process_comp_type].config_errcode = err;
-                //TODO: set DTC here
-                break;
-              default:
-                err = E_INVALACT;
-                break;
-            }
-            if(err != E_AGAIN) {
-              ctx->process_instance++;
-              err = E_AGAIN;
-              continue;
-            }
+            ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_RESET;
           }
+          continue;
         }
 
+        break;
+      case ECU_CONFIG_FSM_RST_CFG_RESET:
+        if(ctx->components[ctx->process_comp_type].reset_func != NULL) {
+          err = ctx->components[ctx->process_comp_type].reset_func(ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->components[ctx->process_comp_type].reset_errcode == E_AGAIN ||
+              ctx->components[ctx->process_comp_type].reset_errcode == E_OK) {
+            ctx->components[ctx->process_comp_type].reset_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_CONFIG;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_RST_CFG_CONFIG:
+        if(ctx->components[ctx->process_comp_type].configure_func != NULL) {
+          err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].generic.data_ptr +
+              ctx->components[ctx->process_comp_type].generic.data_size * ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->components[ctx->process_comp_type].config_errcode == E_AGAIN ||
+              ctx->components[ctx->process_comp_type].config_errcode == E_OK) {
+            ctx->components[ctx->process_comp_type].config_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_DEFINE;
+          ctx->process_instance++;
+          continue;
+        }
         break;
       default:
         break;

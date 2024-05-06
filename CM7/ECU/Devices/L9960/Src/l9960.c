@@ -80,7 +80,8 @@ error_t l9960_reset(l9960_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(ctx->reset_request == false) {
-      ctx->reset_errcode = E_AGAIN;
+      err = E_AGAIN;
+      ctx->reset_errcode = err;
       ctx->reset_request = true;
     } else if(ctx->reset_errcode != E_AGAIN) {
       err = ctx->reset_errcode;
@@ -106,7 +107,8 @@ error_t l9960_configure(l9960_ctx_t *ctx, const l9960_config_t *config)
       if(&ctx->config != config) {
         memcpy(&ctx->config, config, sizeof(l9960_config_t));
       }
-      ctx->config_errcode = E_AGAIN;
+      err = E_AGAIN;
+      ctx->config_errcode = err;
       ctx->config_request = true;
     }
     if(ctx->config_errcode != E_AGAIN) {
@@ -130,7 +132,8 @@ error_t l9960_hwsc(l9960_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->hwsc_request == false) {
-      ctx->hwsc_errcode = E_AGAIN;
+      err = E_AGAIN;
+      ctx->hwsc_errcode = err;
       ctx->hwsc_request = true;
     } else if(ctx->hwsc_errcode != E_AGAIN) {
       err = ctx->hwsc_errcode;
@@ -153,7 +156,8 @@ error_t l9960_diagoff(l9960_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
 
     if(ctx->diagoff_request == false) {
-      ctx->diagoff_errcode = E_AGAIN;
+      err = E_AGAIN;
+      ctx->diagoff_errcode = err;
       ctx->diagoff_request = true;
     } else if(ctx->diagoff_errcode != E_AGAIN) {
       err = ctx->diagoff_errcode;
