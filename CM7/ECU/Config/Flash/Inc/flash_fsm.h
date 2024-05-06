@@ -45,8 +45,12 @@ typedef enum {
   FLASH_FSM_WRITE_ERASE_SYNC,
   FLASH_FSM_WRITE_HEADER,
   FLASH_FSM_WRITE_HEADER_SYNC,
+  FLASH_FSM_WRITE_HEADER_VERIFY,
+  FLASH_FSM_WRITE_HEADER_VERIFY_SYNC,
   FLASH_FSM_WRITE_PAYLOAD,
   FLASH_FSM_WRITE_PAYLOAD_SYNC,
+  FLASH_FSM_WRITE_PAYLOAD_VERIFY,
+  FLASH_FSM_WRITE_PAYLOAD_VERIFY_SYNC,
   FLASH_FSM_WRITE_ADDR,
 
   FLASH_FSM_FLASH_UNLOCK,
@@ -72,6 +76,7 @@ typedef struct {
     uint16_t cmd_section_type;
     uint16_t cmd_section_index;
     uint16_t cmd_payload_version;
+    const void *cmd_payload_tx_temp;
     const void *cmd_payload_tx;
     void *cmd_payload_rx;
     uint32_t cmd_address_base;
@@ -86,6 +91,7 @@ typedef struct {
 
     uint32_t cmd_xaddress;
     uint8_t cmd_dupl_index;
+    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE];
 
 }flash_runtime_ctx_t;
 
