@@ -195,6 +195,9 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
+    ctx->cmd_poll_delay = ctx->init.delay_program_time;
+    ctx->cmd_poll_delay *= length;
+    ctx->cmd_poll_delay /= ctx->init.prog_page_size;
     ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
 
     ctx->cmd_errcode = E_AGAIN;
@@ -224,6 +227,7 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
+    ctx->cmd_poll_delay = ctx->init.delay_sector_erase;
     ctx->cmd_poll_timeout = ctx->init.timeout_sector_erase;
 
     ctx->cmd_errcode = E_AGAIN;
@@ -253,6 +257,7 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
+    ctx->cmd_poll_delay = ctx->init.delay_sector_erase;
     ctx->cmd_poll_timeout = ctx->init.timeout_sector_erase;
 
     ctx->cmd_errcode = E_AGAIN;
@@ -279,7 +284,42 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
+    ctx->cmd_poll_delay = ctx->init.delay_chip_erase;
     ctx->cmd_poll_timeout = ctx->init.timeout_chip_erase;
+
+    ctx->cmd_errcode = E_AGAIN;
+    ctx->cmd_ready = true;
+
+    err = E_OK;
+
+  } while(0);
+
+  return err;
+}
+
+error_t qspi_write_bpr(qspi_ctx_t *ctx, const uint8_t *bpr)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || bpr == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
+    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
+
+    ctx->cmd_ptr = &ctx->init.cmd_wbpr;
+    for(int i = 0; i < QSPI_BPR_SIZE; i++) {
+      ctx->bpr[i] = bpr[i];
+      ctx->payload_bpr[i * 2] = ctx->bpr[i];
+      ctx->payload_bpr[i * 2 + 1] = ctx->bpr[i];
+    }
+    ctx->cmd_payload_tx = ctx->payload_bpr;
+
+    ctx->cmd_wren_needed = true;
+
+    ctx->cmd_status_poll_needed = true;
+    ctx->cmd_poll_delay = 0;
+    ctx->cmd_poll_timeout = QSPI_BPR_TIMEOUT_US;
 
     ctx->cmd_errcode = E_AGAIN;
     ctx->cmd_ready = true;

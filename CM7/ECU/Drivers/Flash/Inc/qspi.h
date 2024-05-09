@@ -14,10 +14,14 @@
 #include "errors.h"
 #include "compiler.h"
 
-#define QSPI_STATUS_POLL_INTERVAL     (96 * 50)
+#define QSPI_STATUS_POLL_INTERVAL     (96 * 5)
+#define QSPI_QUAD_INIT_DELAY_US       (50)
 #define QSPI_CMD_TIMEOUT_US           (100)
 #define QSPI_PAYLOAD_TIMEOUT_US       (200)
 #define QSPI_ABORT_TIMEOUT_US         (1 * TIME_US_IN_MS)
+
+#define QSPI_BPR_TIMEOUT_US           (1 * TIME_US_IN_MS)
+#define QSPI_BPR_SIZE                 (18)
 
 typedef enum {
   QSPI_STATUS_REG_BUSY = 1,
@@ -62,6 +66,7 @@ typedef struct {
     time_delta_us_t timeout_chip_erase;
 
     qspi_jedec_t expected_jedec;
+    uint8_t bpr[QSPI_BPR_SIZE];
 
     QSPI_CommandTypeDef cmd_rsten;
     QSPI_CommandTypeDef cmd_rst;
@@ -102,7 +107,10 @@ typedef enum {
   QSPI_FSM_INIT_RESET,
   QSPI_FSM_INIT_JEDEC,
   QSPI_FSM_INIT_QUAD,
+  QSPI_FSM_INIT_QUAD_WAIT,
+  QSPI_FSM_INIT_QJEDEC,
   QSPI_FSM_INIT_CFG,
+  QSPI_FSM_INIT_BPR,
   QSPI_FSM_INIT_MAX
 }qspi_fsm_init_t;
 
@@ -120,6 +128,7 @@ typedef enum {
   QSPI_FSM_IO_CMD_WAIT,
   QSPI_FSM_IO_PAYLOAD_REQ,
   QSPI_FSM_IO_PAYLOAD_WAIT,
+  QSPI_FSM_IO_STATUS_DELAY,
   QSPI_FSM_IO_STATUS_REQ,
   QSPI_FSM_IO_STATUS_WAIT,
   QSPI_FSM_IO_ABORT_REQ,
@@ -141,6 +150,7 @@ typedef struct {
     bool cmd_ready;
     bool cmd_wren_needed;
     bool cmd_status_poll_needed;
+    time_delta_us_t cmd_poll_delay;
     time_delta_us_t cmd_poll_timeout;
     error_t cmd_async_errcode;
     error_t cmd_errcode;
@@ -151,10 +161,12 @@ typedef struct {
     qspi_fsm_process_t fsm_process;
     qspi_fsm_io_t fsm_io;
 
-    qspi_jedec_quad_t jedec_quad;
+    qspi_jedec_quad_t jedec_quad ALIGNED(32);
     qspi_jedec_t jedec;
     bool jedec_ready;
 
+    uint8_t bpr[QSPI_BPR_SIZE];
+    uint8_t payload_bpr[QSPI_BPR_SIZE * 2] ALIGNED(32);
     uint8_t payload_dummy[32] ALIGNED(32);
 }qspi_ctx_t;
 
@@ -178,6 +190,8 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
 error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address);
 error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address);
 error_t qspi_chip_erase(qspi_ctx_t *ctx);
+
+error_t qspi_write_bpr(qspi_ctx_t *ctx, const uint8_t *bpr);
 
 error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length);
 error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length);

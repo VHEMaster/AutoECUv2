@@ -31,15 +31,17 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .prog_page_size = ECU_FLASH_PAGE_SIZE,
             .prog_pages_number = ECU_FLASH_SIZE / ECU_FLASH_PAGE_SIZE,
             .otp_size = 2048,
-            .prot_size = 18,
+            .prot_size = QSPI_BPR_SIZE,
 
-            .delay_program_time = 1.5 * TIME_US_IN_MS,
-            .delay_sector_erase = 25 * TIME_US_IN_MS,
-            .delay_chip_erase = 50 * TIME_US_IN_MS,
+            .delay_program_time = 1.0 * TIME_US_IN_MS,
+            .delay_sector_erase = 18 * TIME_US_IN_MS,
+            .delay_chip_erase = 35 * TIME_US_IN_MS,
 
-            .timeout_program_time = 1 * TIME_US_IN_MS,
-            .timeout_sector_erase = 5 * TIME_US_IN_MS,
-            .timeout_chip_erase = 5 * TIME_US_IN_MS,
+            .timeout_program_time = 3 * TIME_US_IN_MS,
+            .timeout_sector_erase = 30 * TIME_US_IN_MS,
+            .timeout_chip_erase = 55 * TIME_US_IN_MS,
+
+            .bpr = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
             .expected_jedec = {
                 .mfg_id = 0xBF,
@@ -95,7 +97,6 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .AddressSize = QSPI_ADDRESS_24_BITS,
                 .AddressMode = QSPI_ADDRESS_4_LINES,
                 .DummyCycles = 6,
-                .AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES,
                 .DataMode = QSPI_DATA_4_LINES,
                 .NbData = 0 * ECU_FLASH_DIES_COUNT,
             },
@@ -163,13 +164,13 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
                 .DummyCycles = 2,
                 .DataMode = QSPI_DATA_4_LINES,
-                .NbData = 18 * ECU_FLASH_DIES_COUNT,
+                .NbData = QSPI_BPR_SIZE * ECU_FLASH_DIES_COUNT,
             },
             .cmd_wbpr = {
                 .Instruction = 0x42,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
                 .DataMode = QSPI_DATA_4_LINES,
-                .NbData = 18 * ECU_FLASH_DIES_COUNT,
+                .NbData = QSPI_BPR_SIZE * ECU_FLASH_DIES_COUNT,
             },
             .cmd_lbpr = {
                 .Instruction = 0x8D,

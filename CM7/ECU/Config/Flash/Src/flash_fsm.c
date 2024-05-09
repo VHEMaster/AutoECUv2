@@ -174,7 +174,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_READ_CHECKSUM_PAYLOAD:
-        err = crc_calculate(&ctx->checksum, &ctx->cmd_payload_rx, ctx->cmd_length, false);
+        err = crc_calculate(&ctx->checksum, ctx->cmd_payload_rx, ctx->cmd_length, false);
         if(err == E_OK) {
           ctx->fsm_process = FLASH_FSM_READ_CHECKSUM_UNLOCK;
           continue;
@@ -238,7 +238,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_WRITE_CHECKSUM_PAYLOAD:
-        err = crc_calculate(&ctx->checksum, &ctx->cmd_payload_tx, ctx->cmd_length, false);
+        err = crc_calculate(&ctx->checksum, ctx->cmd_payload_tx, ctx->cmd_length, false);
         if(err == E_OK) {
           ctx->section_header.crc = ctx->checksum;
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_UNLOCK;

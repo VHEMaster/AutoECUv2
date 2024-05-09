@@ -7,6 +7,7 @@
 
 #include "qspi_fsm.h"
 #include "compiler.h"
+#include <string.h>
 
 static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 {
@@ -72,10 +73,15 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
           if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
             ctx->fsm_io = QSPI_FSM_IO_PAYLOAD_REQ;
             continue;
-          }
-          else if(ctx->cmd_status_poll_needed == true) {
-            ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
-            continue;
+          } else if(ctx->cmd_status_poll_needed == true) {
+            if(ctx->cmd_poll_delay > 0) {
+              ctx->fsm_io = QSPI_FSM_IO_STATUS_DELAY;
+              ctx->cmd_timestamp = now;
+              break;
+            } else {
+              ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
+              continue;
+            }
           } else {
             ctx->fsm_io = QSPI_FSM_IO_INITIAL;
             err = cmd_async_errcode;
@@ -124,8 +130,14 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
             }
           }
           if(ctx->cmd_status_poll_needed == true) {
-            ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
-            continue;
+            if(ctx->cmd_poll_delay > 0) {
+              ctx->fsm_io = QSPI_FSM_IO_STATUS_DELAY;
+              ctx->cmd_timestamp = now;
+              break;
+            } else {
+              ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
+              continue;
+            }
           } else {
             ctx->fsm_io = QSPI_FSM_IO_INITIAL;
             err = cmd_async_errcode;
@@ -137,6 +149,14 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
           }
         } else {
           err = cmd_async_errcode;
+        }
+        break;
+      case QSPI_FSM_IO_STATUS_DELAY:
+        if(time_diff(now, ctx->cmd_timestamp) >= ctx->cmd_poll_delay) {
+          ctx->cmd_async_errcode = E_AGAIN;
+          ctx->fsm_io = QSPI_FSM_IO_STATUS_REQ;
+          ctx->cmd_timestamp = now;
+          continue;
         }
         break;
       case QSPI_FSM_IO_STATUS_REQ:
@@ -195,9 +215,11 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
+  time_us_t now;
 
   while(true) {
     err = E_OK;
+    now = time_get_current_us();
 
     switch(ctx->fsm_init) {
       case QSPI_FSM_INIT_CONDITION:
@@ -282,15 +304,11 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           ctx->cmd_payload_rx = NULL;
           ctx->cmd_payload_tx = NULL;
 
-          ctx->jedec.mfg_id = ctx->jedec_quad.mfg_id[0];
-          ctx->jedec.device_type = ctx->jedec_quad.device_type[0];
-          ctx->jedec.device_id = ctx->jedec_quad.device_id[0];
-          ctx->jedec_ready = true;
-
           if(err == E_OK) {
             ctx->fsm_init = QSPI_FSM_INIT_QUAD;
             ctx->cmd_ptr = &ctx->init.cmd_eqio;
             ctx->cmd_status_poll_needed = true;
+            ctx->cmd_poll_delay = 0;
             ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
             err = E_AGAIN;
             continue;
@@ -306,14 +324,67 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_QUAD:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
-          ctx->fsm_init = QSPI_FSM_INIT_CFG;
-          ctx->cmd_ptr = &ctx->init.cmd_wrsr;
-          ctx->cmd_payload_tx = ctx->payload_dummy;
-          ctx->cmd_payload_rx = NULL;
-          ctx->cmd_wren_needed = false;
-          ctx->cmd_status_poll_needed = true;
-          ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
+          ctx->fsm_init = QSPI_FSM_INIT_QUAD_WAIT;
+          ctx->cmd_timestamp = now;
           err = E_AGAIN;
+        } else if(err != E_AGAIN) {
+          ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+          ctx->init_errcode = err;
+        }
+        break;
+      case QSPI_FSM_INIT_QUAD_WAIT:
+        if(time_diff(now, ctx->cmd_timestamp) >= QSPI_QUAD_INIT_DELAY_US) {
+          ctx->fsm_init = QSPI_FSM_INIT_QJEDEC;
+          ctx->cmd_ptr = &ctx->init.cmd_qjid;
+          ctx->cmd_payload_tx = NULL;
+          ctx->cmd_payload_rx = &ctx->jedec_quad;
+          memset(&ctx->jedec_quad, 0, sizeof(ctx->jedec_quad));
+          err = E_AGAIN;
+          continue;
+        }
+        break;
+      case QSPI_FSM_INIT_QJEDEC:
+        err = qspi_fsm_io(ctx);
+        if(err == E_OK) {
+          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.mfg_id); i++) {
+            if(ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
+              err = E_BADRESP;
+            }
+          }
+          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_type); i++) {
+            if(ctx->jedec_quad.device_type[i] != ctx->init.expected_jedec.device_type) {
+              err = E_BADRESP;
+            }
+          }
+          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_id); i++) {
+            if(ctx->jedec_quad.device_id[i] != ctx->init.expected_jedec.device_id) {
+              err = E_BADRESP;
+            }
+          }
+
+          ctx->cmd_payload_rx = NULL;
+          ctx->cmd_payload_tx = NULL;
+
+          ctx->jedec.mfg_id = ctx->jedec_quad.mfg_id[0];
+          ctx->jedec.device_type = ctx->jedec_quad.device_type[0];
+          ctx->jedec.device_id = ctx->jedec_quad.device_id[0];
+          ctx->jedec_ready = true;
+
+          if(err == E_OK) {
+            ctx->fsm_init = QSPI_FSM_INIT_CFG;
+            ctx->cmd_ptr = &ctx->init.cmd_wrsr;
+            ctx->cmd_payload_tx = ctx->payload_dummy;
+            ctx->cmd_payload_rx = NULL;
+            ctx->cmd_wren_needed = false;
+            ctx->cmd_status_poll_needed = true;
+            ctx->cmd_poll_delay = 0;
+            ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
+            err = E_AGAIN;
+            continue;
+          } else {
+            ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+            ctx->init_errcode = err;
+          }
         } else if(err != E_AGAIN) {
           ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
           ctx->init_errcode = err;
@@ -322,8 +393,32 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_CFG:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
+          ctx->fsm_init = QSPI_FSM_INIT_BPR;
+          ctx->cmd_ptr = &ctx->init.cmd_wbpr;
+
+          for(int i = 0; i < QSPI_BPR_SIZE; i++) {
+            ctx->bpr[i] = ctx->init.bpr[i];
+            ctx->payload_bpr[i * 2] = ctx->bpr[i];
+            ctx->payload_bpr[i * 2 + 1] = ctx->bpr[i];
+          }
+
+          ctx->cmd_payload_tx = ctx->payload_bpr;
+          ctx->cmd_payload_rx = NULL;
+          ctx->cmd_wren_needed = true;
+          ctx->cmd_status_poll_needed = true;
+          ctx->cmd_poll_delay = 0;
+          ctx->cmd_poll_timeout = QSPI_BPR_TIMEOUT_US;
+        } else if(err != E_AGAIN) {
+          ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
+          ctx->init_errcode = err;
+        }
+        break;
+      case QSPI_FSM_INIT_BPR:
+        err = qspi_fsm_io(ctx);
+        if(err == E_OK) {
           ctx->cmd_payload_tx = NULL;
           ctx->cmd_payload_rx = NULL;
+          ctx->cmd_wren_needed = false;
           ctx->cmd_status_poll_needed = false;
           ctx->fsm_init = QSPI_FSM_INIT_CONDITION;
           ctx->init_errcode = err;
