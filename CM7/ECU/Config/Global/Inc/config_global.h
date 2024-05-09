@@ -25,8 +25,7 @@
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 
 typedef enum {
-  ECU_CONFIG_COMP_TYPE_FLASH = 0,
-  ECU_CONFIG_COMP_TYPE_FLEXIO,
+  ECU_CONFIG_COMP_TYPE_FLEXIO = 0,
   ECU_CONFIG_COMP_TYPE_MOTOR,
   ECU_CONFIG_COMP_TYPE_STEPPER,
   ECU_CONFIG_COMP_TYPE_WBLS,
@@ -93,19 +92,28 @@ typedef enum {
 }ecu_config_global_rst_cfg_fsm_t;
 
 typedef enum {
-  ECU_CONFIG_FSM_PROCESS_CFG_RST = 0,
+  ECU_CONFIG_FSM_FLASH_CONDITION = 0,
+  ECU_CONFIG_FSM_FLASH_DEFINE,
+  ECU_CONFIG_FSM_FLASH_RESET,
+}ecu_config_global_flash_fsm_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
+  ECU_CONFIG_FSM_PROCESS_CFG_RST,
   ECU_CONFIG_FSM_PROCESS_MAX,
 }ecu_config_global_process_fsm_t;
 
 typedef struct {
+    ecu_config_component_ctx_t *flash_ctx;
     uint32_t components_count;
     ecu_config_component_ctx_t *components;
     uint32_t calibrations_count;
     ecu_config_generic_ctx_t *calibrations;
     uint32_t runtimes_count;
     ecu_config_generic_ctx_t *runtimes;
-    bool components_ready;
+    bool global_ready;
     bool components_initialized;
+    bool flash_initialized;
 
     bool config_read_request;
     bool config_write_request;
@@ -113,10 +121,12 @@ typedef struct {
     ecu_config_type_t config_rw_type;
     ecu_index_type_t config_rw_index;
 
+    ecu_config_global_flash_fsm_t fsm_flash;
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_process_fsm_t fsm_process;
 
     bool process_comps_init;
+    bool process_flash_init;
     error_t process_result;
     ecu_config_component_type_t process_comp_type;
     ecu_device_instance_t process_instance;

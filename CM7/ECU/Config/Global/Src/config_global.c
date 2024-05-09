@@ -21,12 +21,13 @@ static ecu_config_global_engine_t ecu_config_global_engine = {0};
 
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 
+static ecu_config_component_ctx_t ecu_config_global_flash_ctx = {
+    .device_type = ECU_DEVICE_TYPE_FLASH,
+    .instances_count = ECU_DEVICE_FLASH_MAX,
+    .reset_func = (ecu_config_reset_func_t)ecu_devices_flash_reset,
+};
+
 static ecu_config_component_ctx_t ecu_config_global_component_ctx[ECU_CONFIG_COMP_TYPE_MAX] = {
-      {
-          .device_type = ECU_DEVICE_TYPE_FLASH,
-          .instances_count = ECU_DEVICE_FLASH_MAX,
-          .reset_func = (ecu_config_reset_func_t)ecu_devices_flash_reset,
-      }, //ECU_CONFIG_COMP_TYPE_FLASH
       {
           .device_type = ECU_DEVICE_TYPE_FLEXIO,
           .instances_count = ECU_DEVICE_FLEXIO_MAX,
@@ -146,6 +147,8 @@ error_t ecu_config_global_init(void)
     err = flash_init();
     BREAK_IF(err != E_OK);
 
+    ctx->flash_ctx = &ecu_config_global_flash_ctx;
+
     ctx->components_count = ITEMSOF(ecu_config_global_component_ctx);
     ctx->components = ecu_config_global_component_ctx;
 
@@ -193,7 +196,7 @@ error_t ecu_config_global_init(void)
     }
     BREAK_IF(err != E_OK);
 
-    ctx->components_ready = true;
+    ctx->global_ready = true;
   } while(0);
 
   return err;
@@ -214,16 +217,39 @@ void ecu_config_global_loop_fast(void)
   error_t err = E_OK;
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
 
-  if(ctx->components_ready) {
+  if(ctx->global_ready) {
     err = ecu_config_global_fsm(ctx);
     if(err != E_OK && err != E_AGAIN) {
       //TODO: set error in future
     }
   }
 
-  if(ctx->components_initialized) {
+  if(ctx->flash_initialized) {
     flash_loop_fast();
   }
+}
+
+error_t ecu_config_global_flash_initialize(void)
+{
+  error_t err = E_AGAIN;
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  do {
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->process_comps_init != false, err = E_INVALACT);
+
+    if(ctx->process_flash_init == false) {
+      ctx->process_flash_init = true;
+      ctx->process_result = E_AGAIN;
+    } else {
+      if(ctx->process_result != E_AGAIN) {
+        err = ctx->process_result;
+        ctx->process_flash_init = false;
+      }
+    }
+  } while(0);
+
+  return err;
 }
 
 error_t ecu_config_global_components_initialize(void)
@@ -232,7 +258,8 @@ error_t ecu_config_global_components_initialize(void)
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
 
   do {
-    BREAK_IF_ACTION(ctx->components_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
 
     if(ctx->process_comps_init == false) {
       ctx->process_comps_init = true;
@@ -257,7 +284,7 @@ error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, 
   do {
     BREAK_IF_ACTION(op >= ECU_CONFIG_OP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(type >= ECU_CONFIG_TYPE_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->components_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
 
     bp = op == ECU_CONFIG_OP_READ ? &ctx->config_read_request : &ctx->config_write_request;
     bn = op == ECU_CONFIG_OP_READ ? &ctx->config_write_request : &ctx->config_read_request;
