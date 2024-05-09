@@ -177,7 +177,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  MX_GPIO_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */
