@@ -167,6 +167,7 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     err = cj125_heater_init(wbls_ctx->ctx, &wbls_ctx->heater);
     BREAK_IF(err != E_OK);
 
+
     err = ecu_config_gpio_input_get_id(wbls_ctx->input_ua, &wbls_ctx->input_id_ua);
     BREAK_IF(err != E_OK);
     err = ecu_config_gpio_input_get_id(wbls_ctx->input_ur, &wbls_ctx->input_id_ur);
@@ -175,6 +176,15 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     BREAK_IF(err != E_OK);
     err = ecu_config_gpio_input_get_id(wbls_ctx->input_pwr, &wbls_ctx->input_id_pwr);
     BREAK_IF(err != E_OK);
+
+    err = ecu_config_gpio_input_lock(wbls_ctx->input_ua);
+    BREAK_IF(err != E_OK && err != E_BUSY);
+    err = ecu_config_gpio_input_lock(wbls_ctx->input_ur);
+    BREAK_IF(err != E_OK && err != E_BUSY);
+    err = ecu_config_gpio_input_lock(wbls_ctx->input_ref);
+    BREAK_IF(err != E_OK && err != E_BUSY);
+    err = ecu_config_gpio_input_lock(wbls_ctx->input_pwr);
+    BREAK_IF(err != E_OK && err != E_BUSY);
 
     err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ua, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);

@@ -880,23 +880,28 @@ error_t ecu_config_gpio_output_init(void)
     }
 
     for(int i = 0; i < ITEMSOF(ecu_gpio_setup.outputs); i++) {
-      ecu_gpio_setup.outputs[i].output_pin = i;
-      ecu_gpio_setup.outputs[i].output_id = output_ch_register(ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].output_if_id, ecu_gpio_setup.outputs[i].output_ch_id, ecu_gpio_setup.outputs[i].usrdata);
-      if(ecu_gpio_setup.outputs[i].output_id < 0) {
-        err = E_FAULT;
-        break;
-      }
-
-      ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].channels[ecu_gpio_setup.outputs[i].output_ch_id] = &ecu_gpio_setup.outputs[i];
-
-
-      valid = gpio_valid(&ecu_gpio_setup.outputs[i].pin);
-      if(valid == true) {
-        err = ecu_config_gpio_output_set_mode(i, ECU_GPIO_TYPE_DIRECT);
-        if(err != E_OK) {
+      ecu_gpio_setup.outputs[i].locked = true;
+      do {
+        ecu_gpio_setup.outputs[i].output_pin = i;
+        ecu_gpio_setup.outputs[i].output_id = output_ch_register(ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].output_if_id, ecu_gpio_setup.outputs[i].output_ch_id, ecu_gpio_setup.outputs[i].usrdata);
+        if(ecu_gpio_setup.outputs[i].output_id < 0) {
+          err = E_FAULT;
           break;
         }
-      }
+
+        ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].channels[ecu_gpio_setup.outputs[i].output_ch_id] = &ecu_gpio_setup.outputs[i];
+
+
+        valid = gpio_valid(&ecu_gpio_setup.outputs[i].pin);
+        if(valid == true) {
+          err = ecu_config_gpio_output_set_mode(i, ECU_GPIO_TYPE_DIRECT);
+          if(err != E_OK) {
+            break;
+          }
+        }
+      } while(0);
+      ecu_gpio_setup.outputs[i].locked = false;
+      BREAK_IF(err != E_OK);
     }
 
     if(err != E_OK) {
@@ -1016,109 +1021,113 @@ error_t ecu_config_gpio_input_init(void)
     BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ITEMSOF(ecu_gpio_setup.inputs); i++) {
-      ecu_gpio_setup.inputs[i].input_pin = i;
-      ecu_gpio_setup.inputs[i].input_id = input_ch_register(ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].input_if_id, ecu_gpio_setup.inputs[i].input_ch_id, ecu_gpio_setup.inputs[i].usrdata);
-      if(ecu_gpio_setup.inputs[i].input_id < 0) {
-        err = E_FAULT;
-        break;
-      }
+      ecu_gpio_setup.inputs[i].locked = true;
+      do {
+        ecu_gpio_setup.inputs[i].input_pin = i;
+        ecu_gpio_setup.inputs[i].input_id = input_ch_register(ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].input_if_id, ecu_gpio_setup.inputs[i].input_ch_id, ecu_gpio_setup.inputs[i].usrdata);
+        if(ecu_gpio_setup.inputs[i].input_id < 0) {
+          err = E_FAULT;
+          break;
+        }
 
-      ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].channels[ecu_gpio_setup.inputs[i].input_ch_id] = &ecu_gpio_setup.inputs[i];
+        ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].channels[ecu_gpio_setup.inputs[i].input_ch_id] = &ecu_gpio_setup.inputs[i];
 
-      valid = gpio_valid(&ecu_gpio_setup.inputs[i].pin);
-      if(valid == true) {
-        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_CAPTURE, &valid);
-        BREAK_IF(err != E_OK);
-
+        valid = gpio_valid(&ecu_gpio_setup.inputs[i].pin);
         if(valid == true) {
-          BREAK_IF_ACTION(ecu_gpio_setup.inputs[i].htim == NULL, err = E_NOTSUPPORT);
-
-          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_CAPTURE);
+          err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_CAPTURE, &valid);
           BREAK_IF(err != E_OK);
 
-          err = input_ch_source_gpio(ecu_gpio_setup.inputs[i].input_id, &ecu_gpio_setup.inputs[i].pin, ecu_gpio_setup.inputs[i].gpio_invert);
-          BREAK_IF(err != E_OK);
+          if(valid == true) {
+            BREAK_IF_ACTION(ecu_gpio_setup.inputs[i].htim == NULL, err = E_NOTSUPPORT);
 
-          status = HAL_TIM_RegisterCallback(ecu_gpio_setup.inputs[i].htim, HAL_TIM_IC_CAPTURE_CB_ID, ecu_config_gpio_input_capture_cb);
-          BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-
-          if(ecu_gpio_setup.inputs[i].tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
-            err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_falling, &tim_channel);
+            err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_CAPTURE);
             BREAK_IF(err != E_OK);
 
-            err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+            err = input_ch_source_gpio(ecu_gpio_setup.inputs[i].input_id, &ecu_gpio_setup.inputs[i].pin, ecu_gpio_setup.inputs[i].gpio_invert);
             BREAK_IF(err != E_OK);
 
-            status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
+            status = HAL_TIM_RegisterCallback(ecu_gpio_setup.inputs[i].htim, HAL_TIM_IC_CAPTURE_CB_ID, ecu_config_gpio_input_capture_cb);
             BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+            if(ecu_gpio_setup.inputs[i].tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_falling, &tim_channel);
+              BREAK_IF(err != E_OK);
+
+              err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+              BREAK_IF(err != E_OK);
+
+              status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
+              BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+            }
+            if(ecu_gpio_setup.inputs[i].tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising, &tim_channel);
+              BREAK_IF(err != E_OK);
+
+              err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+              BREAK_IF(err != E_OK);
+
+              status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
+              BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+            }
+            if(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling, &tim_channel);
+              BREAK_IF(err != E_OK);
+
+              err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+              BREAK_IF(err != E_OK);
+
+              status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
+              BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+            }
+
+          } else {
+            err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
+            BREAK_IF(err != E_OK);
+
+            BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+
+            err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
+            BREAK_IF(err != E_OK);
+
+            err = input_ch_source_gpio(ecu_gpio_setup.inputs[i].input_id, &ecu_gpio_setup.inputs[i].pin, ecu_gpio_setup.inputs[i].gpio_invert);
+            BREAK_IF(err != E_OK);
+
+            if(ecu_gpio_setup.inputs[i].exti_support == true) {
+              err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+              BREAK_IF(err != E_OK);
+
+              ecu_config_gpio_exti_register(ecu_gpio_setup.inputs[i].pin.pin, ecu_config_gpio_input_exti_cb, &ecu_gpio_setup.inputs[i]);
+            }
           }
-          if(ecu_gpio_setup.inputs[i].tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
-            err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising, &tim_channel);
-            BREAK_IF(err != E_OK);
 
-            err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
-            BREAK_IF(err != E_OK);
+        } else if(ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].cfg.ch_get != NULL) {
 
-            status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
-            BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-          }
-          if(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
-            err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling, &tim_channel);
-            BREAK_IF(err != E_OK);
-
-            err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
-            BREAK_IF(err != E_OK);
-
-            status = HAL_TIM_IC_Start_IT(ecu_gpio_setup.inputs[i].htim, tim_channel);
-            BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-          }
-
-        } else {
           err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
           BREAK_IF(err != E_OK);
 
-          BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
-
-          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
-          BREAK_IF(err != E_OK);
-
-          err = input_ch_source_gpio(ecu_gpio_setup.inputs[i].input_id, &ecu_gpio_setup.inputs[i].pin, ecu_gpio_setup.inputs[i].gpio_invert);
-          BREAK_IF(err != E_OK);
-
-          if(ecu_gpio_setup.inputs[i].exti_support == true) {
-            err = ecu_config_gpio_input_set_capture_edge(i, ecu_gpio_setup.inputs[i].current_capture_edge);
+          if(valid == true) {
+            err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
+            BREAK_IF(err != E_OK);
+          } else {
+            err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_ANALOG, &valid);
             BREAK_IF(err != E_OK);
 
-            ecu_config_gpio_exti_register(ecu_gpio_setup.inputs[i].pin.pin, ecu_config_gpio_input_exti_cb, &ecu_gpio_setup.inputs[i]);
+            BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
+
+            err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_ANALOG);
+            BREAK_IF(err != E_OK);
           }
-        }
 
-      } else if(ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].cfg.ch_get != NULL) {
-
-        err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_DIGITAL, &valid);
-        BREAK_IF(err != E_OK);
-
-        if(valid == true) {
-          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_DIGITAL);
-          BREAK_IF(err != E_OK);
-        } else {
-          err = ecu_config_gpio_input_has_mode_support(i, ECU_GPIO_INPUT_TYPE_ANALOG, &valid);
-          BREAK_IF(err != E_OK);
-
-          BREAK_IF_ACTION(valid != true, err = E_NOTSUPPORT);
-
-          err = ecu_config_gpio_input_set_mode(i, ECU_GPIO_INPUT_TYPE_ANALOG);
+          err = input_ch_source_func(ecu_gpio_setup.inputs[i].input_id, ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].cfg.ch_get);
           BREAK_IF(err != E_OK);
         }
+      } while(0);
 
-        err = input_ch_source_func(ecu_gpio_setup.inputs[i].input_id, ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].cfg.ch_get);
-        BREAK_IF(err != E_OK);
-      }
+      ecu_gpio_setup.inputs[i].locked = false;
+      BREAK_IF(err != E_OK);
     }
 
-    if(err != E_OK) {
-      break;
-    }
+    BREAK_IF(err != E_OK);
   } while(0);
 
   return err;
@@ -1134,6 +1143,8 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
       err = E_PARAM;
       break;
     }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
 
     if(type == ECU_GPIO_TYPE_DIRECT) {
       valid = gpio_valid(&ecu_gpio_setup.outputs[pin].pin);
@@ -1198,6 +1209,8 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
       err = E_PARAM;
       break;
     }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
 
     err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
     if(err != E_OK) {
@@ -1297,6 +1310,8 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_value(ecu_gpio_output_pin_t pin
       break;
     }
 
+    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
+
     if(valid != true) {
       err = E_NOTSUPPORT;
       break;
@@ -1331,6 +1346,8 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_dutycycle(ecu_gpio_output_pin_t
       break;
     }
 
+    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
+
     output = &ecu_gpio_setup.outputs[pin];
     output_if = &ecu_gpio_setup.outputs_if[output->if_id];
 
@@ -1354,6 +1371,8 @@ error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *
       err = E_PARAM;
       break;
     }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
 
     htim = ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[pin].if_id].htim;
     if(htim == NULL) {
@@ -1383,6 +1402,8 @@ error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_
       err = E_NOTSUPPORT;
       break;
     }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
 
     err = E_PARAM;
 
@@ -1428,6 +1449,8 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
 
   do {
     input = &ecu_gpio_setup.inputs[pin];
+
+    BREAK_IF_ACTION(input->locked == false, err = E_INVALACT);
 
     if(input->current_mode == ECU_GPIO_INPUT_TYPE_CAPTURE && input->htim != NULL) {
 
@@ -1514,6 +1537,8 @@ error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpi
       break;
     }
 
+    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
+
     if((ecu_gpio_setup.inputs[pin].supported_modes & mode) == mode) {
       *support = true;
     } else {
@@ -1586,6 +1611,8 @@ error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gp
       break;
     }
 
+    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
+
     ecu_gpio_setup.inputs[pin].irq_cb = callback;
 
   } while(0);
@@ -1602,6 +1629,8 @@ error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
       err = E_PARAM;
       break;
     }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
 
     *gpio = ecu_gpio_setup.inputs[pin].pin;
 
@@ -1658,16 +1687,13 @@ error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
   ecu_gpio_output_t *pin_ctx;
 
   do {
-    if(pin >= ECU_OUT_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin >= ECU_OUT_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
     prim = EnterCritical();
     if(pin_ctx->locked == true) {
-      err = E_AGAIN;
+      err = E_BUSY;
     } else {
       pin_ctx->locked = true;
       err = E_OK;
@@ -1686,10 +1712,7 @@ error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
   ecu_gpio_output_t *pin_ctx;
 
   do {
-    if(pin >= ECU_OUT_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin >= ECU_OUT_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
@@ -1714,16 +1737,13 @@ error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
   ecu_gpio_input_t *pin_ctx;
 
   do {
-    if(pin >= ECU_IN_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin >= ECU_IN_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
     prim = EnterCritical();
     if(pin_ctx->locked == true) {
-      err = E_AGAIN;
+      err = E_BUSY;
     } else {
       pin_ctx->locked = true;
       err = E_OK;
@@ -1742,10 +1762,7 @@ error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
   ecu_gpio_input_t *pin_ctx;
 
   do {
-    if(pin >= ECU_IN_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin >= ECU_IN_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
