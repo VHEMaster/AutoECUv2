@@ -32,6 +32,7 @@ typedef struct {
     bool gpio_invert;
     ecu_gpio_output_type_t type;
     void *usrdata;
+    bool locked;
 }ecu_gpio_output_t;
 
 typedef struct {
@@ -56,6 +57,7 @@ typedef struct {
     bool exti_support;
     bool gpio_invert;
     void *usrdata;
+    bool locked;
 }ecu_gpio_input_t;
 
 typedef struct {
@@ -1645,6 +1647,118 @@ error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func
       err = E_OK;
     }
   }
+
+  return err;
+}
+
+error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+  ecu_gpio_output_t *pin_ctx;
+
+  do {
+    if(pin >= ECU_OUT_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    pin_ctx = &ecu_gpio_setup.outputs[pin];
+
+    prim = EnterCritical();
+    if(pin_ctx->locked == true) {
+      err = E_AGAIN;
+    } else {
+      pin_ctx->locked = true;
+      err = E_OK;
+    }
+    ExitCritical(prim);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+  ecu_gpio_output_t *pin_ctx;
+
+  do {
+    if(pin >= ECU_OUT_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    pin_ctx = &ecu_gpio_setup.outputs[pin];
+
+    prim = EnterCritical();
+    if(pin_ctx->locked == false) {
+      err = E_INVALACT;
+    } else {
+      pin_ctx->locked = false;
+      err = E_OK;
+    }
+    ExitCritical(prim);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+  ecu_gpio_input_t *pin_ctx;
+
+  do {
+    if(pin >= ECU_IN_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    pin_ctx = &ecu_gpio_setup.inputs[pin];
+
+    prim = EnterCritical();
+    if(pin_ctx->locked == true) {
+      err = E_AGAIN;
+    } else {
+      pin_ctx->locked = true;
+      err = E_OK;
+    }
+    ExitCritical(prim);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+  ecu_gpio_input_t *pin_ctx;
+
+  do {
+    if(pin >= ECU_IN_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    pin_ctx = &ecu_gpio_setup.inputs[pin];
+
+    prim = EnterCritical();
+    if(pin_ctx->locked == false) {
+      err = E_INVALACT;
+    } else {
+      pin_ctx->locked = false;
+      err = E_OK;
+    }
+    ExitCritical(prim);
+
+  } while(0);
 
   return err;
 }

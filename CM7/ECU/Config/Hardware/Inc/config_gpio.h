@@ -171,6 +171,8 @@ error_t ecu_config_gpio_output_pwm_set_dutycycle(ecu_gpio_output_pin_t pin, floa
 error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *support);
 error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio);
 error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id);
+error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin);
+error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin);
 
 error_t ecu_config_gpio_input_init(void);
 error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gpio_input_cb_t callback);
@@ -179,6 +181,8 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
 error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode);
 error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support);
 error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id);
+error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin);
+error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin);
 
 error_t ecu_config_gpio_exti_init(void);
 error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func, void *usrdata);
