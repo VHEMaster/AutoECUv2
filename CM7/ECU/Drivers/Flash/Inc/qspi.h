@@ -45,6 +45,10 @@ typedef struct {
 }qspi_jedec_quad_t;
 
 typedef struct {
+    uint8_t bytes[QSPI_BPR_SIZE];
+}qspi_bpr_t;
+
+typedef struct {
     QSPI_HandleTypeDef *hqspi;
     uint32_t memory_base_address;
 
@@ -66,7 +70,7 @@ typedef struct {
     time_delta_us_t timeout_chip_erase;
 
     qspi_jedec_t expected_jedec;
-    uint8_t bpr[QSPI_BPR_SIZE];
+    qspi_bpr_t bpr;
 
     QSPI_CommandTypeDef cmd_rsten;
     QSPI_CommandTypeDef cmd_rst;
@@ -165,7 +169,7 @@ typedef struct {
     qspi_jedec_t jedec;
     bool jedec_ready;
 
-    uint8_t bpr[QSPI_BPR_SIZE];
+    qspi_bpr_t bpr;
     uint8_t payload_bpr[QSPI_BPR_SIZE * 2] ALIGNED(32);
     uint8_t payload_dummy[32] ALIGNED(32);
 }qspi_ctx_t;
@@ -191,15 +195,12 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address);
 error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address);
 error_t qspi_chip_erase(qspi_ctx_t *ctx);
 
-error_t qspi_write_bpr(qspi_ctx_t *ctx, const uint8_t *bpr);
 
 error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length);
 error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length);
 error_t qspi_otp_lock(qspi_ctx_t *ctx);
 
-error_t qspi_prot_read(qspi_ctx_t *ctx, void *payload, uint32_t length);
-error_t qspi_prot_write(qspi_ctx_t *ctx, const void *payload, uint32_t length);
-error_t qspi_prot_lock(qspi_ctx_t *ctx);
+error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr);
 
 error_t qspi_sync(qspi_ctx_t *ctx);
 

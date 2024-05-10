@@ -283,7 +283,7 @@ error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, 
 
   do {
     BREAK_IF_ACTION(op >= ECU_CONFIG_OP_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(type >= ECU_CONFIG_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(type > ECU_CONFIG_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
 
     bp = op == ECU_CONFIG_OP_READ ? &ctx->config_read_request : &ctx->config_write_request;

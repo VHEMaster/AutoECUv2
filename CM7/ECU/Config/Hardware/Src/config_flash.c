@@ -41,7 +41,7 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
             .timeout_sector_erase = 30 * TIME_US_IN_MS,
             .timeout_chip_erase = 55 * TIME_US_IN_MS,
 
-            .bpr = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            .bpr = { .bytes = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
 
             .expected_jedec = {
                 .mfg_id = 0xBF,

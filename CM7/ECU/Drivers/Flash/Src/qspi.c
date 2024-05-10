@@ -297,7 +297,7 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_write_bpr(qspi_ctx_t *ctx, const uint8_t *bpr)
+error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
 {
   error_t err = E_OK;
 
@@ -309,9 +309,9 @@ error_t qspi_write_bpr(qspi_ctx_t *ctx, const uint8_t *bpr)
 
     ctx->cmd_ptr = &ctx->init.cmd_wbpr;
     for(int i = 0; i < QSPI_BPR_SIZE; i++) {
-      ctx->bpr[i] = bpr[i];
-      ctx->payload_bpr[i * 2] = ctx->bpr[i];
-      ctx->payload_bpr[i * 2 + 1] = ctx->bpr[i];
+      ctx->bpr.bytes[i] = bpr->bytes[i];
+      ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
+      ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
     }
     ctx->cmd_payload_tx = ctx->payload_bpr;
 
@@ -406,96 +406,6 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ptr = &ctx->init.cmd_lsid;
-    ctx->cmd_wren_needed = true;
-
-    ctx->cmd_status_poll_needed = true;
-    ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-
-    ctx->cmd_errcode = E_AGAIN;
-    ctx->cmd_ready = true;
-
-    err = E_OK;
-
-  } while(0);
-
-  return err;
-}
-
-
-error_t qspi_prot_read(qspi_ctx_t *ctx, void *payload, uint32_t length)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL || payload == NULL || length == 0, err = E_PARAM);
-    BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
-    BREAK_IF_ACTION((length < ctx->init.prot_size), err = E_PARAM);
-    BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
-
-    ctx->cmd_ptr = &ctx->init.cmd_rbpr;
-    ctx->cmd_ptr->Address = 0;
-    ctx->cmd_ptr->NbData = length;
-    ctx->cmd_payload_tx = NULL;
-    ctx->cmd_payload_rx = payload;
-    ctx->cmd_wren_needed = true;
-
-    ctx->cmd_status_poll_needed = false;
-
-    ctx->cmd_errcode = E_AGAIN;
-    ctx->cmd_ready = true;
-
-    err = E_OK;
-
-  } while(0);
-
-  return err;
-}
-
-error_t qspi_prot_write(qspi_ctx_t *ctx, const void *payload, uint32_t length)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL || payload == NULL || length == 0, err = E_PARAM);
-    BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
-    BREAK_IF_ACTION((length < ctx->init.prot_size), err = E_PARAM);
-    BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
-
-    ctx->cmd_ptr = &ctx->init.cmd_wbpr;
-    ctx->cmd_ptr->Address = 0;
-    ctx->cmd_ptr->NbData = length;
-    ctx->cmd_payload_tx = payload;
-    ctx->cmd_payload_rx = NULL;
-    ctx->cmd_wren_needed = true;
-
-    ctx->cmd_status_poll_needed = true;
-    ctx->cmd_poll_timeout = ctx->init.timeout_program_time;
-
-    ctx->cmd_errcode = E_AGAIN;
-    ctx->cmd_ready = true;
-
-    err = E_OK;
-
-  } while(0);
-
-  return err;
-}
-
-error_t qspi_prot_lock(qspi_ctx_t *ctx)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
-
-    ctx->cmd_ptr = &ctx->init.cmd_lbpr;
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;

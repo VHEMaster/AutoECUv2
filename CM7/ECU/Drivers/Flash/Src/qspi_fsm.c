@@ -397,9 +397,9 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           ctx->cmd_ptr = &ctx->init.cmd_wbpr;
 
           for(int i = 0; i < QSPI_BPR_SIZE; i++) {
-            ctx->bpr[i] = ctx->init.bpr[i];
-            ctx->payload_bpr[i * 2] = ctx->bpr[i];
-            ctx->payload_bpr[i * 2 + 1] = ctx->bpr[i];
+            ctx->bpr.bytes[i] = ctx->init.bpr.bytes[i];
+            ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
+            ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
           }
 
           ctx->cmd_payload_tx = ctx->payload_bpr;
