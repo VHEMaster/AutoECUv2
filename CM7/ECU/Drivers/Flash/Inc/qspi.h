@@ -14,7 +14,7 @@
 #include "errors.h"
 #include "compiler.h"
 
-#define QSPI_STATUS_POLL_INTERVAL     (96 * 5)
+#define QSPI_STATUS_POLL_INTERVAL     (80 * 5)
 #define QSPI_QUAD_INIT_DELAY_US       (50)
 #define QSPI_CMD_TIMEOUT_US           (100)
 #define QSPI_PAYLOAD_TIMEOUT_US       (200)
