@@ -11,7 +11,7 @@
 #include "compiler.h"
 #include <string.h>
 
-error_t flash_fsm(flash_runtime_ctx_t *ctx)
+ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
 {
   error_t err = E_OK;
   uint32_t insector_addr_mask;

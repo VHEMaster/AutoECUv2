@@ -26,7 +26,7 @@ void middlelayer_gpio_loop_slow(void)
   queuedpulses_loop_slow();
 }
 
-void middlelayer_gpio_loop_fast(void)
+ITCM_FUNC void middlelayer_gpio_loop_fast(void)
 {
   inputs_loop_fast();
   outputs_loop_fast();

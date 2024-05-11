@@ -13,7 +13,7 @@
 
 static crc_ctx_t crc_ctx = {0};
 
-static void crc_loop_fast(crc_ctx_t *ctx)
+ITCM_FUNC static void crc_loop_fast(crc_ctx_t *ctx)
 {
   error_t err = E_OK;
 

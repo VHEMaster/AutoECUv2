@@ -27,7 +27,7 @@ void middlelayer_devices_loop_slow(void)
   ecu_devices_loop_slow();
 }
 
-void middlelayer_devices_loop_fast(void)
+ITCM_FUNC void middlelayer_devices_loop_fast(void)
 {
   ecu_devices_loop_fast();
 }

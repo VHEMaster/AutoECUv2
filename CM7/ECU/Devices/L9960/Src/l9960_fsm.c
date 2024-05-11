@@ -14,7 +14,7 @@
 #include "errors.h"
 #include "time.h"
 
-static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
+ITCM_FUNC static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -152,7 +152,7 @@ static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
   return err;
 }
 
-static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
+ITCM_FUNC static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
 {
   error_t err;
   l9960_resp_eid_t eid;
@@ -299,7 +299,7 @@ static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
   return err;
 }
 
-static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
+ITCM_FUNC static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
 {
   error_t err;
   l9960_cmd_off_state_diag_t diag_req;
@@ -423,7 +423,7 @@ static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
   return err;
 }
 
-static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
+ITCM_FUNC static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
 {
   error_t err;
   l9960_cmd_restart_trigger_t hwsc_req;
@@ -531,7 +531,7 @@ static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
   return err;
 }
 
-static error_t l9960_fsm_configure(l9960_ctx_t *ctx)
+ITCM_FUNC static error_t l9960_fsm_configure(l9960_ctx_t *ctx)
 {
   error_t err;
 
@@ -639,7 +639,7 @@ static error_t l9960_fsm_configure(l9960_ctx_t *ctx)
   return err;
 }
 
-error_t l9960_fsm(l9960_ctx_t *ctx)
+ITCM_FUNC error_t l9960_fsm(l9960_ctx_t *ctx)
 {
   error_t err;
 

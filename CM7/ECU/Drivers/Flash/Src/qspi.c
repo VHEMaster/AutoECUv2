@@ -20,7 +20,7 @@ void qspi_loop_slow(qspi_ctx_t *ctx)
 
 }
 
-void qspi_loop_fast(qspi_ctx_t *ctx)
+ITCM_FUNC void qspi_loop_fast(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -144,7 +144,7 @@ error_t qspi_unlock(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length)
+ITCM_FUNC error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length)
 {
   error_t err = E_OK;
 
@@ -175,7 +175,7 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
   return err;
 }
 
-error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length)
+ITCM_FUNC error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length)
 {
   error_t err = E_OK;
 
@@ -210,7 +210,7 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
   return err;
 }
 
-error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
+ITCM_FUNC error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
 {
   error_t err = E_OK;
 
@@ -240,7 +240,7 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
   return err;
 }
 
-error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
+ITCM_FUNC error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
 {
   error_t err = E_OK;
 
@@ -270,7 +270,7 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
   return err;
 }
 
-error_t qspi_chip_erase(qspi_ctx_t *ctx)
+ITCM_FUNC error_t qspi_chip_erase(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -297,7 +297,7 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
+ITCM_FUNC error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
 {
   error_t err = E_OK;
 
@@ -332,7 +332,7 @@ error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
 }
 
 
-error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length)
+ITCM_FUNC error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t length)
 {
   error_t err = E_OK;
 
@@ -363,7 +363,7 @@ error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t
   return err;
 }
 
-error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length)
+ITCM_FUNC error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, uint32_t length)
 {
   error_t err = E_OK;
 
@@ -395,7 +395,7 @@ error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, u
   return err;
 }
 
-error_t qspi_otp_lock(qspi_ctx_t *ctx)
+ITCM_FUNC error_t qspi_otp_lock(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -421,7 +421,7 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_sync(qspi_ctx_t *ctx)
+ITCM_FUNC error_t qspi_sync(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -441,7 +441,7 @@ error_t qspi_sync(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_get_jedec(qspi_ctx_t *ctx, qspi_jedec_t *jedec)
+ITCM_FUNC error_t qspi_get_jedec(qspi_ctx_t *ctx, qspi_jedec_t *jedec)
 {
   error_t err = E_OK;
 
@@ -457,7 +457,7 @@ error_t qspi_get_jedec(qspi_ctx_t *ctx, qspi_jedec_t *jedec)
   return err;
 }
 
-error_t qspi_memory_mapping_set(qspi_ctx_t *ctx, bool enabled)
+ITCM_FUNC error_t qspi_memory_mapping_set(qspi_ctx_t *ctx, bool enabled)
 {
   error_t err = E_AGAIN;
 

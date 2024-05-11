@@ -143,7 +143,7 @@ void middlelayer_spi_loop_slow(void)
   }
 }
 
-void middlelayer_spi_loop_fast(void)
+ITCM_FUNC void middlelayer_spi_loop_fast(void)
 {
   for(int i = 0; i < ECU_SPI_IF_MAX; i++) {
     if(middlelayer_spi_ctx.ifs[i].spi_if.cfg.hspi != NULL) {

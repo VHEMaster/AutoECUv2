@@ -219,7 +219,7 @@ void ecu_config_global_loop_slow(void)
 
 }
 
-void ecu_config_global_loop_fast(void)
+ITCM_FUNC void ecu_config_global_loop_fast(void)
 {
   error_t err = E_OK;
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;

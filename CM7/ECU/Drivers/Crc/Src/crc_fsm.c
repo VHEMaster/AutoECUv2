@@ -8,7 +8,7 @@
 #include "crc_fsm.h"
 #include "compiler.h"
 
-error_t crc_fsm(crc_ctx_t *ctx)
+ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status;

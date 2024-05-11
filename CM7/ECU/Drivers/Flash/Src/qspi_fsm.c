@@ -9,7 +9,7 @@
 #include "compiler.h"
 #include <string.h>
 
-static error_t qspi_fsm_io(qspi_ctx_t *ctx)
+ITCM_FUNC static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 {
   HAL_StatusTypeDef status;
   error_t err, cmd_async_errcode;
@@ -212,7 +212,7 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
   return err;
 }
 
-static error_t qspi_fsm_init(qspi_ctx_t *ctx)
+ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
   time_us_t now;
@@ -505,7 +505,7 @@ static error_t qspi_fsm_process(qspi_ctx_t *ctx)
   return err;
 }
 
-error_t qspi_fsm(qspi_ctx_t *ctx)
+ITCM_FUNC error_t qspi_fsm(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
 

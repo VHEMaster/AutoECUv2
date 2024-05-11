@@ -39,7 +39,7 @@ void queuedpulses_loop_slow(void)
 
 }
 
-void queuedpulses_loop_fast(void)
+ITCM_FUNC void queuedpulses_loop_fast(void)
 {
 
 }

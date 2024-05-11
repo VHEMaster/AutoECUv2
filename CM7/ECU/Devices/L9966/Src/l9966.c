@@ -70,7 +70,7 @@ void l9966_loop_slow(l9966_ctx_t *ctx)
   }
 }
 
-void l9966_loop_fast(l9966_ctx_t *ctx)
+ITCM_FUNC void l9966_loop_fast(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;
 

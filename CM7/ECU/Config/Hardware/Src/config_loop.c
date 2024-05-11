@@ -32,7 +32,7 @@ typedef struct {
 
 static ecu_loop_ctx_t ecu_loop_ctx = {0};
 
-static void ecu_loop_execute(ecu_loop_callbacks_t *callbacks)
+ITCM_FUNC static void ecu_loop_execute(ecu_loop_callbacks_t *callbacks)
 {
   time_us_t now;
   ecu_loop_callback_t *item;
@@ -95,7 +95,7 @@ void ecu_loop_slow(void)
   ecu_loop_execute(callbacks);
 }
 
-void ecu_loop_fast(void)
+ITCM_FUNC void ecu_loop_fast(void)
 {
   ecu_loop_callbacks_t *callbacks = &ecu_loop_ctx.fast;
 

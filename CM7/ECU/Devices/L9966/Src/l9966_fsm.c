@@ -14,7 +14,7 @@
 #include "time.h"
 #include <string.h>
 
-static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -154,7 +154,7 @@ static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -202,7 +202,7 @@ static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -241,7 +241,7 @@ static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
 {
   error_t err;
   bool int_pin_triggered = false;
@@ -282,7 +282,7 @@ static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -450,7 +450,7 @@ static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
 {
   error_t err;
   l9966_reg_sc_result_voltage_t result_voltage;
@@ -534,7 +534,7 @@ static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
 {
   error_t err;
   l9966_reg_sc_conf_t data;
@@ -577,7 +577,7 @@ static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
 {
   error_t err;
   l9966_reg_sqncr_ctrl_t *data = &ctx->register_map.data.sqncr_ctrl;
@@ -631,7 +631,7 @@ static error_t l9966_fsm_eu_maintain(l9966_ctx_t *ctx)
   return err;
 }
 
-static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
+ITCM_FUNC static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
 {
   error_t err;
   bool eu_disabled;
@@ -736,7 +736,7 @@ static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
   return err;
 }
 
-error_t l9966_fsm(l9966_ctx_t *ctx)
+ITCM_FUNC error_t l9966_fsm(l9966_ctx_t *ctx)
 {
   error_t err;
 

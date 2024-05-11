@@ -66,7 +66,7 @@ void max31855_loop_main(max31855_ctx_t *ctx)
 
 }
 
-void max31855_loop_slow(max31855_ctx_t *ctx)
+ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
 {
   time_us_t now;
   error_t err = E_OK;

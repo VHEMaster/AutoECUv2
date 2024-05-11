@@ -9,7 +9,7 @@
 #include "tle6240_internal.h"
 #include "compiler.h"
 
-error_t tle6240_fsm(tle6240_ctx_t *ctx)
+ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;

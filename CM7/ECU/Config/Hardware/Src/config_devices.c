@@ -197,7 +197,7 @@ error_t ecu_devices_init(void)
   return err;
 }
 
-static void ecu_devices_loop(ecu_config_device_loop_type_t loop_type)
+ITCM_FUNC static void ecu_devices_loop(ecu_config_device_loop_type_t loop_type)
 {
   ecu_config_device_if_instance_t *interface;
   ecu_config_device_instance_t *device;
@@ -261,7 +261,7 @@ void ecu_devices_loop_slow(void)
   ecu_devices_loop(ECU_DEVICE_LOOP_TYPE_SLOW);
 }
 
-void ecu_devices_loop_fast(void)
+ITCM_FUNC void ecu_devices_loop_fast(void)
 {
   ecu_devices_loop(ECU_DEVICE_LOOP_TYPE_FAST);
 }

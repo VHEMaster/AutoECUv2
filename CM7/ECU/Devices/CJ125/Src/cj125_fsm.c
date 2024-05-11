@@ -14,7 +14,7 @@
 
 #include <limits.h>
 
-static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
+ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -222,7 +222,7 @@ static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
   return err;
 }
 
-static error_t cj125_fsm_diag(cj125_ctx_t *ctx)
+ITCM_FUNC static error_t cj125_fsm_diag(cj125_ctx_t *ctx)
 {
   error_t err;
   time_us_t now;
@@ -264,7 +264,7 @@ static error_t cj125_fsm_diag(cj125_ctx_t *ctx)
   return err;
 }
 
-static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
+ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
 {
   error_t err;
 
@@ -333,7 +333,7 @@ static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
   return err;
 }
 
-error_t cj125_fsm(cj125_ctx_t *ctx)
+ITCM_FUNC error_t cj125_fsm(cj125_ctx_t *ctx)
 {
   error_t err;
 

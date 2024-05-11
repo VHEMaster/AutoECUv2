@@ -35,7 +35,7 @@ typedef struct {
 
 static ml_loop_time_msmt_t ml_loop_time_msmt = {0};
 
-static void middlelayer_time_msmt_start(ml_loop_time_msmnt_item_t *item)
+ITCM_FUNC static void middlelayer_time_msmt_start(ml_loop_time_msmnt_item_t *item)
 {
   time_us_t now = time_get_current_us();
 
@@ -43,7 +43,7 @@ static void middlelayer_time_msmt_start(ml_loop_time_msmnt_item_t *item)
   item->last = now;
 }
 
-static void middlelayer_time_msmt_stop(ml_loop_time_msmnt_item_t *item)
+ITCM_FUNC static void middlelayer_time_msmt_stop(ml_loop_time_msmnt_item_t *item)
 {
   time_us_t now = time_get_current_us();
   time_delta_us_t load = time_diff(now, item->last);
@@ -74,7 +74,7 @@ static void middlelayer_tim_slow_irq(TIM_HandleTypeDef *htim)
   middlelayer_time_msmt_stop(&ml_loop_time_msmt.slow);
 }
 
-static void middlelayer_tim_fast_irq(TIM_HandleTypeDef *htim)
+ITCM_FUNC static void middlelayer_tim_fast_irq(TIM_HandleTypeDef *htim)
 {
   middlelayer_time_msmt_start(&ml_loop_time_msmt.fast);
 

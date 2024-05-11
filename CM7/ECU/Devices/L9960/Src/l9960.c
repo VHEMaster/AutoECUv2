@@ -11,7 +11,7 @@
 #include "l9960_internal.h"
 #include "compiler.h"
 
-static void l9960_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
+ITCM_FUNC static void l9960_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 {
   l9960_ctx_t *ctx = (l9960_ctx_t *)spi_slave->usrdata;
 
@@ -19,7 +19,7 @@ static void l9960_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
   (void)ctx;
 }
 
-error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
+ITCM_FUNC error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
 
@@ -59,7 +59,7 @@ void l9960_loop_slow(l9960_ctx_t *ctx)
 
 }
 
-void l9960_loop_fast(l9960_ctx_t *ctx)
+ITCM_FUNC void l9960_loop_fast(l9960_ctx_t *ctx)
 {
   error_t err = E_OK;
 

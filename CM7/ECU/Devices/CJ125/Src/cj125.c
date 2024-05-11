@@ -154,7 +154,7 @@ void cj125_loop_slow(cj125_ctx_t *ctx)
   } while(0);
 }
 
-void cj125_loop_fast(cj125_ctx_t *ctx)
+ITCM_FUNC void cj125_loop_fast(cj125_ctx_t *ctx)
 {
   error_t err = E_OK;
 

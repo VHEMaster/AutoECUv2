@@ -67,7 +67,7 @@ void tle6240_loop_slow(tle6240_ctx_t *ctx)
 
 }
 
-void tle6240_loop_fast(tle6240_ctx_t *ctx)
+ITCM_FUNC void tle6240_loop_fast(tle6240_ctx_t *ctx)
 {
   error_t err = E_OK;
 

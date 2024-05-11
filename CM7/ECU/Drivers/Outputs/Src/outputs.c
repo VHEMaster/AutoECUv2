@@ -28,7 +28,7 @@ void outputs_loop_slow(void)
   outputs_internal_loop(&output_ctx, OUTPUT_POLLING_MODE_SLOW);
 }
 
-void outputs_loop_fast(void)
+ITCM_FUNC void outputs_loop_fast(void)
 {
   outputs_internal_loop(&output_ctx, OUTPUT_POLLING_MODE_FAST);
 }
