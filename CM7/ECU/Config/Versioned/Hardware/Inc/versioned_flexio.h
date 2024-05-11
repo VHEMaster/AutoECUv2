@@ -622,8 +622,8 @@ typedef struct {
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
     l9966_config_status_t status;
-    uint32_t align ALIGNED(32);
-}l9966_config_data_v1_t ALIGNED(32);
+    uint32_t align ALIGNED_CACHE;
+}l9966_config_data_v1_t ALIGNED_CACHE;
 
 typedef l9966_config_data_v1_t l9966_config_data_t;
 

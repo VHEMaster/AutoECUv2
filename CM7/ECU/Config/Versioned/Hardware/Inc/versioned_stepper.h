@@ -32,8 +32,8 @@ typedef struct {
     int32_t pos_min;
     int32_t pos_max;
 
-    uint32_t align ALIGNED(32);
-}tle4729_config_v1_t ALIGNED(32);
+    uint32_t align ALIGNED_CACHE;
+}tle4729_config_v1_t ALIGNED_CACHE;
 
 typedef tle4729_config_v1_t tle4729_config_t;
 

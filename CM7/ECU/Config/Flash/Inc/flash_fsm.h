@@ -96,8 +96,8 @@ typedef struct {
     uint32_t cmd_xaddress;
     uint8_t cmd_dupl_index;
 
-    flash_section_header_t section_header ALIGNED(32);
-    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE] ALIGNED(32);
+    flash_section_header_t section_header ALIGNED_CACHE;
+    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE] ALIGNED_CACHE;
 
 }flash_runtime_ctx_t;
 

@@ -46,7 +46,7 @@ typedef struct {
     uint16_t pages;
     uint16_t reserved[11];
     uint16_t crc;
-}flash_section_header_t ALIGNED(32);
+}flash_section_header_t ALIGNED_CACHE;
 
 error_t flash_init(void);
 void flash_loop_fast(void);

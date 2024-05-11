@@ -68,8 +68,8 @@ typedef struct {
     cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
 
-    uint32_t align ALIGNED(32);
-}cj125_config_v1_t ALIGNED(32);
+    uint32_t align ALIGNED_CACHE;
+}cj125_config_v1_t ALIGNED_CACHE;
 
 typedef cj125_config_v1_t cj125_config_t;
 

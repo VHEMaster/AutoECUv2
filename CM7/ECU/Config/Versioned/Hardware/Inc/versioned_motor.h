@@ -176,8 +176,8 @@ typedef struct {
     l9960_config_tvvl_t tvvl;
     l9960_config_vvl_t vvl_mode;
     l9960_config_olon_t ol_on;
-    uint32_t align ALIGNED(32);
-}l9960_config_v1_t ALIGNED(32);
+    uint32_t align ALIGNED_CACHE;
+}l9960_config_v1_t ALIGNED_CACHE;
 
 typedef l9960_config_v1_t l9960_config_t;
 

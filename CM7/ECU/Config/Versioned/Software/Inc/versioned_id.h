@@ -18,8 +18,8 @@ typedef enum {
 
 typedef struct {
     uint32_t reserved[128];
-    uint32_t align ALIGNED(32);
-}ecu_config_data_identification_v1_t ALIGNED(32);
+    uint32_t align ALIGNED_CACHE;
+}ecu_config_data_identification_v1_t ALIGNED_CACHE;
 
 typedef ecu_config_data_identification_v1_t ecu_config_data_identification_t;
 

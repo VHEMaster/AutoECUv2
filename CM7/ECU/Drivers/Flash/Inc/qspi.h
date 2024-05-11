@@ -174,13 +174,13 @@ typedef struct {
     qspi_fsm_process_t fsm_process;
     qspi_fsm_io_t fsm_io;
 
-    qspi_jedec_quad_t jedec_quad ALIGNED(32);
+    qspi_jedec_quad_t jedec_quad ALIGNED_CACHE;
     qspi_jedec_t jedec;
     bool jedec_ready;
 
     qspi_bpr_t bpr;
-    uint8_t payload_bpr[QSPI_BPR_SIZE * 2] ALIGNED(32);
-    uint8_t payload_dummy[32] ALIGNED(32);
+    uint8_t payload_bpr[QSPI_BPR_SIZE * 2] ALIGNED_CACHE;
+    uint8_t payload_dummy[32] ALIGNED_CACHE;
 }qspi_ctx_t;
 
 
