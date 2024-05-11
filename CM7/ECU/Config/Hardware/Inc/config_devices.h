@@ -19,6 +19,8 @@
 #include "qspi.h"
 
 typedef uint32_t ecu_index_type_t;
+typedef uint32_t ecu_instance_t;
+typedef ecu_instance_t ecu_device_instance_t;
 
 typedef enum {
   ECU_DEVICE_TYPE_PULSEDADC,
@@ -32,7 +34,6 @@ typedef enum {
   ECU_DEVICE_TYPE_MAX
 }ecu_device_type_t;
 
-typedef uint32_t ecu_device_instance_t;
 typedef void (*ecu_device_loop_func_t)(void *ctx);
 
 typedef enum {

@@ -101,6 +101,8 @@ typedef struct {
     QSPI_CommandTypeDef cmd_rsid;
     QSPI_CommandTypeDef cmd_psid;
     QSPI_CommandTypeDef cmd_lsid;
+
+    QSPI_MemoryMappedTypeDef mem_map;
 }qspi_init_t;
 
 typedef enum {

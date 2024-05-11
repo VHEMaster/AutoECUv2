@@ -200,6 +200,11 @@ static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
                 .Instruction = 0x85,
                 .InstructionMode = QSPI_INSTRUCTION_4_LINES,
             },
+
+            .mem_map = {
+                .TimeOutActivation = QSPI_TIMEOUT_COUNTER_DISABLE,
+                .TimeOutPeriod = 0,
+            },
         },
     },
 };

@@ -81,6 +81,7 @@ error_t flash_unlock(void)
   uint32_t prim;
 
   do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     prim = EnterCritical();
     if(ctx->locked == false || ctx->cmd_request != FLASH_CMD_NONE) {
       err = E_INVALACT;
@@ -95,19 +96,21 @@ error_t flash_unlock(void)
   return err;
 }
 
-error_t flash_section_read(uint16_t section_type, uint16_t section_index, void *payload, uint32_t length)
+error_t flash_section_read(uint16_t section_type, uint16_t section_index, flash_payload_version_t *payload_version, void *payload, uint32_t length)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
-  error_t err = E_OK;
+  error_t err = E_AGAIN;
   flash_cmd_type_t cmd = FLASH_CMD_READ;
 
   do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {
       ctx->cmd_section_type = section_type;
       ctx->cmd_section_index = section_index;
+      ctx->cmd_payload_version_p = payload_version;
       ctx->cmd_payload_rx = payload;
       ctx->cmd_length = length;
 
@@ -117,8 +120,6 @@ error_t flash_section_read(uint16_t section_type, uint16_t section_index, void *
     if(ctx->cmd_errcode != E_AGAIN) {
       err = ctx->cmd_errcode;
       ctx->cmd_request = FLASH_CMD_NONE;
-    } else {
-      err = E_AGAIN;
     }
 
   } while(0);
@@ -126,19 +127,21 @@ error_t flash_section_read(uint16_t section_type, uint16_t section_index, void *
   return err;
 }
 
-error_t flash_section_write(uint16_t section_type, uint16_t section_index, uint32_t address, const void *payload, uint32_t length)
+error_t flash_section_write(uint16_t section_type, uint16_t section_index, flash_payload_version_t payload_version, const void *payload, uint32_t length)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
-  error_t err = E_OK;
+  error_t err = E_AGAIN;
   flash_cmd_type_t cmd = FLASH_CMD_WRITE;
 
   do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {
       ctx->cmd_section_type = section_type;
       ctx->cmd_section_index = section_index;
+      ctx->cmd_payload_version = payload_version;
       ctx->cmd_payload_tx = payload;
       ctx->cmd_length = length;
 
@@ -148,8 +151,77 @@ error_t flash_section_write(uint16_t section_type, uint16_t section_index, uint3
     if(ctx->cmd_errcode != E_AGAIN) {
       err = ctx->cmd_errcode;
       ctx->cmd_request = FLASH_CMD_NONE;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t flash_mem_base_address(uint32_t *base_address)
+{
+  flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(base_address == NULL, err = E_PARAM);
+
+    *base_address = ctx->qspi_ctx->init.memory_base_address;
+
+  } while(0);
+
+  return err;
+}
+
+error_t flash_mem_section_address(uint32_t *section_address, uint16_t section_type, uint16_t section_index)
+{
+  flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(section_address == NULL, err = E_PARAM);
+
+    err = flash_mem_layout_get_section_address(section_address, section_type, section_index);
+
+  } while(0);
+
+  return err;
+}
+
+
+error_t flash_mem_header_len(uint32_t *header_len)
+{
+  flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(header_len == NULL, err = E_PARAM);
+
+    *header_len = ECU_FLASH_SECTION_HEADER_LENGTH;
+
+  } while(0);
+
+  return err;
+}
+
+error_t flash_memory_mapping_set(bool enabled)
+{
+  flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
+  error_t err = E_AGAIN;
+
+  do {
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE, err = E_INVALACT);
+
+    ctx->memory_mapping = enabled;
+    if(ctx->memory_mapping == ctx->memory_mapping_accept) {
+      err = ctx->cmd_errcode;
     } else {
-      err = E_AGAIN;
+      ctx->cmd_errcode = E_AGAIN;
     }
 
   } while(0);

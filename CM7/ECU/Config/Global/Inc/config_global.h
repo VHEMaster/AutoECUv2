@@ -29,15 +29,17 @@ typedef enum {
   ECU_CONFIG_COMP_TYPE_MOTOR,
   ECU_CONFIG_COMP_TYPE_STEPPER,
   ECU_CONFIG_COMP_TYPE_WBLS,
+  ECU_CONFIG_COMP_TYPE_ALL,
   ECU_CONFIG_COMP_TYPE_MAX
 }ecu_config_component_type_t;
 
 typedef enum {
-  ECU_CONFIG_CALIB_TYPE_ID = 0,
+  ECU_CONFIG_CALIB_TYPE_ALL,
   ECU_CONFIG_CALIB_TYPE_MAX
 }ecu_config_calibration_type_t;
 
 typedef enum {
+  ECU_CONFIG_RUNTIME_TYPE_ALL,
   ECU_CONFIG_RUNTIME_TYPE_MAX
 }ecu_config_runtime_type_t;
 
@@ -45,16 +47,18 @@ typedef enum {
   ECU_CONFIG_TYPE_COMPONENT = 0,
   ECU_CONFIG_TYPE_CALIBRATION,
   ECU_CONFIG_TYPE_RUNTIME,
+  ECU_CONFIG_TYPE_ALL,
   ECU_CONFIG_TYPE_MAX,
 }ecu_config_type_t;
 
 typedef enum {
-  ECU_CONFIG_OP_READ = 0,
+  ECU_CONFIG_OP_NONE = 0,
+  ECU_CONFIG_OP_READ,
   ECU_CONFIG_OP_WRITE,
   ECU_CONFIG_OP_MAX,
 }ecu_config_op_t;
 
-typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest);
+typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest, uint32_t dest_bytes);
 typedef error_t (*ecu_config_get_default_cfg_func_t)(ecu_index_type_t index, void *config);
 typedef error_t (*ecu_config_configure_func_t)(ecu_device_instance_t instance, const void *config);
 typedef error_t (*ecu_config_reset_func_t)(ecu_device_instance_t instance);
@@ -75,6 +79,15 @@ typedef struct {
 }ecu_config_generic_ctx_t;
 
 typedef struct {
+    flash_section_type_t flash_section_type;
+    ecu_config_get_default_cfg_func_t get_default_cfg_func;
+    uint16_t version_current;
+    const ecu_config_item_version_t *versions;
+    void *data_ptr;
+    uint32_t data_size;
+}ecu_op_req_ctx_t;
+
+typedef struct {
     ecu_device_type_t device_type;
     uint32_t instances_count;
     ecu_config_configure_func_t configure_func;
@@ -89,18 +102,35 @@ typedef enum {
   ECU_CONFIG_FSM_RST_CFG_DEFINE,
   ECU_CONFIG_FSM_RST_CFG_RESET,
   ECU_CONFIG_FSM_RST_CFG_CONFIG,
+  ECU_CONFIG_FSM_RST_CFG_MAX
 }ecu_config_global_rst_cfg_fsm_t;
 
 typedef enum {
   ECU_CONFIG_FSM_FLASH_CONDITION = 0,
   ECU_CONFIG_FSM_FLASH_DEFINE,
   ECU_CONFIG_FSM_FLASH_RESET,
+  ECU_CONFIG_FSM_FLASH_MAX
 }ecu_config_global_flash_fsm_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_OPERATION_CONDITION = 0,
+  ECU_CONFIG_FSM_OPERATION_LOCK,
+  ECU_CONFIG_FSM_OPERATION_DEFINE,
+  ECU_CONFIG_FSM_OPERATION_REQUEST,
+  ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK,
+  ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE,
+  ECU_CONFIG_FSM_OPERATION_TRANSLATE,
+  ECU_CONFIG_FSM_OPERATION_TRANSLATE_WRITE,
+  ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_DISABLE,
+  ECU_CONFIG_FSM_OPERATION_UNLOCK,
+  ECU_CONFIG_FSM_OPERATION_MAX
+}ecu_config_global_operation_fsm_t;
 
 typedef enum {
   ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
   ECU_CONFIG_FSM_PROCESS_CFG_RST,
-  ECU_CONFIG_FSM_PROCESS_MAX,
+  ECU_CONFIG_FSM_PROCESS_OPERATION,
+  ECU_CONFIG_FSM_PROCESS_MAX
 }ecu_config_global_process_fsm_t;
 
 typedef struct {
@@ -115,14 +145,25 @@ typedef struct {
     bool components_initialized;
     bool flash_initialized;
 
-    bool config_read_request;
-    bool config_write_request;
-    error_t config_rw_errcode;
-    ecu_config_type_t config_rw_type;
-    ecu_index_type_t config_rw_index;
+    ecu_config_op_t op_request;
+    error_t op_req_errcode_internal;
+    error_t op_req_errcode;
+    ecu_config_type_t op_req_type;
+    ecu_index_type_t op_req_index;
+    ecu_instance_t op_req_instance;
+    ecu_op_req_ctx_t op_req_ctx;
+
+    ecu_config_type_t op_type_index;
+    ecu_index_type_t op_index_max;
+    ecu_index_type_t op_index;
+    ecu_instance_t op_instance_max;
+    ecu_instance_t op_instance;
+    flash_payload_version_t op_version;
+    uint32_t op_translate_ptr;
 
     ecu_config_global_flash_fsm_t fsm_flash;
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
+    ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
     bool process_comps_init;
@@ -138,6 +179,6 @@ void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
 error_t ecu_config_global_components_initialize(void);
 
-error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index);
+error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index, ecu_instance_t instance);
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_ */

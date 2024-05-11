@@ -10,9 +10,12 @@
 
 #include "errors.h"
 #include "compiler.h"
+#include "bool.h"
 #include <stdint.h>
 
 #define ECU_FLASH_SECTION_HEADER_LENGTH     (sizeof(flash_section_header_t))
+
+typedef uint16_t flash_payload_version_t;
 
 typedef enum {
   FLASH_SECTION_TYPE_EMPTY = 0,
@@ -51,7 +54,12 @@ void flash_loop_fast(void);
 error_t flash_lock(void);
 error_t flash_unlock(void);
 
-error_t flash_section_read(uint16_t section_type, uint16_t section_index, void *payload, uint32_t length);
-error_t flash_section_write(uint16_t section_type, uint16_t section_index, uint32_t address, const void *payload, uint32_t length);
+error_t flash_section_read(uint16_t section_type, uint16_t section_index, flash_payload_version_t *payload_version, void *payload, uint32_t length);
+error_t flash_section_write(uint16_t section_type, uint16_t section_index, flash_payload_version_t payload_version, const void *payload, uint32_t length);
+error_t flash_mem_base_address(uint32_t *base_address);
+error_t flash_mem_section_address(uint32_t *section_address, uint16_t section_type, uint16_t section_index);
+error_t flash_mem_header_len(uint32_t *header_len);
+
+error_t flash_memory_mapping_set(bool enabled);
 
 #endif /* CONFIG_FLASH_INC_FLASH_H_ */

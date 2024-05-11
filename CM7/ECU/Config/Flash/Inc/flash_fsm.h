@@ -54,6 +54,12 @@ typedef enum {
   FLASH_FSM_WRITE_ADDR,
 
   FLASH_FSM_FLASH_UNLOCK,
+
+  FLASH_FSM_MEMORYMAPPING_LOCK,
+  FLASH_FSM_MEMORYMAPPING_HAL,
+  FLASH_FSM_MEMORYMAPPING_WAIT,
+  FLASH_FSM_MEMORYMAPPING_UNLOCK,
+
   FLASH_FSM_MAX,
 }flash_fsm_process_t;
 
@@ -72,10 +78,14 @@ typedef struct {
     error_t cmd_errcode;
     error_t cmd_errcode_internal;
 
+    bool memory_mapping;
+    bool memory_mapping_accept;
+
     const flash_mem_layout_section_info_t *cmd_section;
     uint16_t cmd_section_type;
     uint16_t cmd_section_index;
-    uint16_t cmd_payload_version;
+    flash_payload_version_t cmd_payload_version;
+    flash_payload_version_t *cmd_payload_version_p;
     const void *cmd_payload_tx_temp;
     const void *cmd_payload_tx;
     void *cmd_payload_rx;
