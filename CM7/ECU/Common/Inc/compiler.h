@@ -21,24 +21,27 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-#define STATIC_INLINE __attribute__((always_inline)) static inline
-#define INLINE __attribute__((always_inline)) inline
-#define ALIGNED(x) __attribute__((aligned(x)))
-#define ALIGNED_CACHE ALIGNED(__SCB_DCACHE_LINE_SIZE)
-#define BUFFER_DMA __attribute__((section(".dma_bss")))
-#define ITCM_FUNC __attribute__((section(".itcm_func")))
-#define IS_DEBUGGER_ATTACHED() ((DBGMCU->CR & 0x07) > 0)
-#define BREAKPOINT(x) __BKPT((x))
-#define BREAK_IF_ACTION(condition, action) { if((condition)) { {action;} break; } }
-#define BREAK_IF(condition) { if((condition)) { break; } }
-#define RETURN_IF_ACTION(condition, errcode, action) { if((condition)) { {action;} return (errcode); } }
-#define RETURN_IF(condition, errcode) { if((condition)) { return (errcode); } }
-#define PARITY_ODD_CHECK(value) __builtin_parity((value))
+#define ALIGNMENT_CACHE           (__SCB_DCACHE_LINE_SIZE)
+
+#define STATIC_INLINE             __attribute__((always_inline)) static inline
+#define INLINE                    __attribute__((always_inline)) inline
+#define ALIGNED(x)                __attribute__((aligned(x)))
+#define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
+#define BUFFER_DMA                __attribute__((section(".dma_bss")))
+#define ITCM_FUNC                 __attribute__((section(".itcm_func")))
+#define IS_DEBUGGER_ATTACHED()    ((DBGMCU->CR & 0x07) > 0)
+#define BREAKPOINT(x)             __BKPT((x))
+#define PARITY_ODD_CHECK(value)   __builtin_parity((value))
+
+#define BREAK_IF_ACTION(condition, action)              { if((condition)) { {action;} break; } }
+#define BREAK_IF(condition)                             { if((condition)) { break; } }
+#define RETURN_IF_ACTION(condition, errcode, action)    { if((condition)) { {action;} return (errcode); } }
+#define RETURN_IF(condition, errcode)                   { if((condition)) { return (errcode); } }
 
 #if __CORTEX_M == (7)
 STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer & (__SCB_DCACHE_LINE_SIZE - 1);
+  uint32_t aligned = (uint32_t)buffer & (ALIGNMENT_CACHE - 1);
   if(aligned == 0)
     SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, size);
   else SCB_InvalidateDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
@@ -46,7 +49,7 @@ STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
 
 STATIC_INLINE void CacheClean(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer & (__SCB_DCACHE_LINE_SIZE - 1);
+  uint32_t aligned = (uint32_t)buffer & (ALIGNMENT_CACHE - 1);
   if(aligned == 0)
     SCB_CleanDCache_by_Addr((uint32_t*)buffer, size);
   else SCB_CleanDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
