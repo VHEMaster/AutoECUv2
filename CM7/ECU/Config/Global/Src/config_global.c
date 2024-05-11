@@ -111,11 +111,23 @@ static ecu_config_component_ctx_t ecu_config_global_component_ctx[ECU_CONFIG_COM
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL] = {
-
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_ID,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
+        .data_ptr = &ecu_config_global_engine.sw.id,
+        .data_size = sizeof(ecu_config_global_engine.sw.id),
+        .versions_count = ECU_CONFIG_DATA_ID_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_DATA_ID_VERSION_V1,
+                .size = sizeof(ecu_config_data_identification_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_ID
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
-
 };
 
 error_t ecu_config_global_init(void)

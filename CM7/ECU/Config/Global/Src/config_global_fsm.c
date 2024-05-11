@@ -275,7 +275,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             }
 
             if(ctx->op_instance >= ctx->op_instance_max) {
-              if(ctx->op_req_index >= ctx->op_index_max) {
+              if(ctx->op_req_index >= ctx->op_index_max || ctx->op_req_type >= ECU_CONFIG_TYPE_ALL) {
                 ctx->op_index++;
                 ctx->op_instance = 0;
                 config_global_internal_calculate_instance_max(ctx);
@@ -359,7 +359,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           }
 
           if(err == E_OK) {
-            if(ctx->op_req_instance >= ctx->op_instance_max) {
+            if(ctx->op_req_instance >= ctx->op_instance_max || ctx->op_req_index >= ctx->op_index_max || ctx->op_req_type >= ECU_CONFIG_TYPE_ALL) {
               err = E_AGAIN;
               ctx->op_instance++;
               ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DEFINE;
@@ -459,7 +459,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             err = ctx->op_req_errcode_internal;
           }
           ctx->op_req_errcode = err;
-          ctx->fsm_process = ECU_CONFIG_FSM_OPERATION_CONDITION;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_CONDITION;
         }
         break;
       default:

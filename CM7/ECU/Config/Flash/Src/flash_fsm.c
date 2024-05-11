@@ -231,6 +231,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           ctx->section_header.section_index = ctx->cmd_section_index;
           ctx->section_header.payload_version = ctx->cmd_payload_version;
           ctx->section_header.pages = ctx->cmd_section->section_length / ctx->qspi_ctx->init.prog_page_size;
+          ctx->section_header.crc = 0;
 
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_HEADER;
           continue;

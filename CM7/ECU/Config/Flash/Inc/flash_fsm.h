@@ -96,12 +96,13 @@ typedef struct {
     uint32_t cmd_left_len;
     flash_erase_type_t cmd_erase_type;
     flash_fsm_process_t fsm_process;
-    flash_section_header_t section_header;
     crc_checksum_t checksum;
 
     uint32_t cmd_xaddress;
     uint8_t cmd_dupl_index;
-    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE];
+
+    flash_section_header_t section_header ALIGNED(32);
+    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE] ALIGNED(32);
 
 }flash_runtime_ctx_t;
 

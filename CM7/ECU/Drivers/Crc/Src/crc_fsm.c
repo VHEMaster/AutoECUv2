@@ -6,6 +6,7 @@
  */
 
 #include "crc_fsm.h"
+#include "compiler.h"
 
 error_t crc_fsm(crc_ctx_t *ctx)
 {
@@ -24,6 +25,7 @@ error_t crc_fsm(crc_ctx_t *ctx)
           ctx->dma_errcode = E_AGAIN;
           ctx->fsm_process = CRC_FSM_DMA_REQUEST;
 
+          CacheClean((const void *)ctx->cmd_address, ctx->cmd_len_cur);
           if(ctx->cmd_reset != false) {
             __HAL_CRC_DR_RESET(ctx->hcrc);
           }

@@ -34,6 +34,7 @@ typedef enum {
 }ecu_config_component_type_t;
 
 typedef enum {
+  ECU_CONFIG_CALIB_TYPE_ID,
   ECU_CONFIG_CALIB_TYPE_ALL,
   ECU_CONFIG_CALIB_TYPE_MAX
 }ecu_config_calibration_type_t;
