@@ -12,6 +12,7 @@
 #include "compiler.h"
 #include "errors.h"
 #include "time.h"
+#include <string.h>
 
 static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
 {

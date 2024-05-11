@@ -17,14 +17,12 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
   uint32_t insector_addr_mask;
   uint32_t address;
   bool compare_success;
-  HAL_StatusTypeDef status;
 
   while(true) {
     switch(ctx->fsm_process) {
       case FLASH_FSM_CONDITION:
         if(ctx->cmd_errcode == E_AGAIN) {
-          if(ctx->ready == true  && ctx->cmd_request != FLASH_CMD_NONE &&
-              ctx->memory_mapping == false && ctx->memory_mapping_accept == false) {
+          if(ctx->ready == true  && ctx->cmd_request != FLASH_CMD_NONE) {
             if(ctx->cmd_request < FLASH_CMD_MAX) {
               ctx->fsm_process = FLASH_FSM_FLASH_LOCK;
               ctx->cmd_errcode_internal = E_AGAIN;
@@ -36,11 +34,6 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
             if(ctx->cmd_errcode == E_AGAIN) {
               continue;
             }
-          } else if(ctx->memory_mapping != ctx->memory_mapping_accept) {
-            ctx->cmd_errcode = E_AGAIN;
-            ctx->cmd_errcode_internal = E_AGAIN;
-            ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_LOCK;
-            continue;
           }
         }
         break;
@@ -431,58 +424,6 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
         break;
 
       case FLASH_FSM_FLASH_UNLOCK:
-        err = qspi_unlock(ctx->qspi_ctx);
-        if(err != E_AGAIN) {
-          if(ctx->cmd_errcode_internal != E_AGAIN) {
-            err = ctx->cmd_errcode_internal;
-          }
-          ctx->cmd_errcode = err;
-          ctx->fsm_process = FLASH_FSM_CONDITION;
-        }
-        break;
-
-      case FLASH_FSM_MEMORYMAPPING_LOCK:
-        err = qspi_lock(ctx->qspi_ctx);
-        if(err == E_OK) {
-          ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_HAL;
-          continue;
-        } else if(err != E_AGAIN) {
-          ctx->cmd_errcode = err;
-          ctx->fsm_process = FLASH_FSM_CONDITION;
-        }
-        break;
-        break;
-      case FLASH_FSM_MEMORYMAPPING_HAL:
-        if(ctx->memory_mapping == false) {
-          status = HAL_QSPI_Abort(ctx->qspi_ctx->init.hqspi);
-        } else {
-          status = HAL_QSPI_MemoryMapped(ctx->qspi_ctx->init.hqspi, &ctx->qspi_ctx->init.cmd_hsread, &ctx->qspi_ctx->init.mem_map);
-        }
-        if(status != HAL_OK) {
-          err = E_HAL;
-          ctx->cmd_errcode_internal = err;
-          ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_UNLOCK;
-          continue;
-        } else {
-          if(ctx->memory_mapping == false) {
-            err = E_OK;
-            ctx->cmd_errcode_internal = E_OK;
-            ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_UNLOCK;
-            ctx->memory_mapping_accept = ctx->memory_mapping;
-          } else {
-            err = E_OK;
-            ctx->cmd_errcode = E_OK;
-            ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_WAIT;
-            ctx->memory_mapping_accept = ctx->memory_mapping;
-          }
-        }
-        break;
-      case FLASH_FSM_MEMORYMAPPING_WAIT:
-        if(ctx->memory_mapping == false || ctx->memory_mapping_accept == false) {
-          ctx->fsm_process = FLASH_FSM_MEMORYMAPPING_UNLOCK;
-        }
-        break;
-      case FLASH_FSM_MEMORYMAPPING_UNLOCK:
         err = qspi_unlock(ctx->qspi_ctx);
         if(err != E_AGAIN) {
           if(ctx->cmd_errcode_internal != E_AGAIN) {

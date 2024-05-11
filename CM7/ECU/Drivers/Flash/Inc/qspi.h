@@ -123,6 +123,10 @@ typedef enum {
 typedef enum {
   QSPI_FSM_PROCESS_CONDITION = 0,
   QSPI_FSM_PROCESS_IO,
+
+  QSPI_FSM_MEMORYMAPPING_HAL,
+  QSPI_FSM_MEMORYMAPPING_WAIT,
+
   QSPI_FSM_PROCESS_MAX
 }qspi_fsm_process_t;
 
@@ -148,6 +152,9 @@ typedef struct {
     bool initialized;
     bool locked;
     error_t init_errcode;
+
+    bool memory_mapping;
+    bool memory_mapping_accept;
 
     QSPI_AutoPollingTypeDef cmd_poll;
     QSPI_CommandTypeDef *cmd_ptr;
@@ -207,5 +214,7 @@ error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr);
 error_t qspi_sync(qspi_ctx_t *ctx);
 
 error_t qspi_get_jedec(qspi_ctx_t *ctx, qspi_jedec_t *jedec);
+
+error_t qspi_memory_mapping_set(qspi_ctx_t *ctx, bool enabled);
 
 #endif /* FLASH_QSPI_H */

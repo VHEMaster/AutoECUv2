@@ -74,7 +74,6 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
     switch(ctx->fsm_rst_cfg) {
       case ECU_CONFIG_FSM_RST_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_comps_init == true && ctx->process_result == E_AGAIN) {
-          ctx->op_req_errcode_internal = E_AGAIN;
           ctx->components_initialized = false;
           ctx->process_comp_type = 0;
           ctx->process_instance = 0;
@@ -221,6 +220,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             }
           }
 
+          ctx->op_req_errcode_internal = E_AGAIN;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_LOCK;
           continue;
         } else {
@@ -327,6 +327,13 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
               }
             } else if(ctx->op_version != ctx->op_req_ctx.version_current) {
               if(ctx->op_version > ctx->op_req_ctx.version_current) {
+                if(ctx->op_req_ctx.get_default_cfg_func != NULL) {
+                  err = ctx->op_req_ctx.get_default_cfg_func(ctx->op_instance, ctx->op_req_ctx.data_ptr);
+                } else {
+                  // TODO: set DTC here?
+                  err = E_OK;
+                }
+
                 err = E_BADVALUE;
                 // TODO: set DTC here?
                 err = E_OK;
@@ -352,7 +359,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                 }
 
                 err = E_AGAIN;
-                ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE;
+                ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_ACQUIRE;
                 continue;
               }
             }
@@ -376,6 +383,18 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           continue;
         }
         break;
+      case ECU_CONFIG_FSM_OPERATION_TRANSLATE_ACQUIRE:
+        err = ecu_devices_get_flash_ctx(ECU_DEVICE_FLASH_1, &ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+          continue;
+        }
+        break;
       case ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK:
         if(ctx->op_version == ctx->op_req_ctx.version_current) {
           err = E_AGAIN;
@@ -390,16 +409,18 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         }
 
         if(err == E_OK) {
-          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_LOCK;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
           continue;
         }
-
         continue;
-      case ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE:
-        err = flash_memory_mapping_set(true);
+      case ECU_CONFIG_FSM_OPERATION_TRANSLATE_LOCK:
+        err = qspi_lock(ctx->qspi_ctx);
         if(err == E_OK) {
-          err = E_AGAIN;
-          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE;
           continue;
         } else if(err != E_AGAIN) {
           ctx->op_req_errcode_internal = err;
@@ -407,8 +428,20 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           continue;
         }
         break;
+      case ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_ENABLE:
+        err = qspi_memory_mapping_set(ctx->qspi_ctx, true);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_UNLOCK;
+          continue;
+        }
+        break;
       case ECU_CONFIG_FSM_OPERATION_TRANSLATE:
-        if(ctx->op_req_ctx.versions[ctx->op_version + 1].translate_func == NULL) {
+        if(ctx->op_req_ctx.versions[ctx->op_version + 1].translate_func != NULL) {
           err = ctx->op_req_ctx.versions[ctx->op_version + 1].translate_func((void*)ctx->op_translate_ptr, ctx->op_req_ctx.data_ptr, ctx->op_req_ctx.versions[ctx->op_version + 1].size);
         } else {
           err = E_OK;
@@ -419,16 +452,33 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_DISABLE;
           continue;
         } else if(err != E_AGAIN) {
-          ctx->op_req_errcode_internal = err;
+          if(ctx->op_req_errcode_internal == E_AGAIN) {
+            ctx->op_req_errcode_internal = err;
+          }
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_DISABLE;
           continue;
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_TRANSLATE_MAPPING_DISABLE:
-        err = flash_memory_mapping_set(false);
+        err = qspi_memory_mapping_set(ctx->qspi_ctx, false);
         if(err == E_OK) {
           err = E_AGAIN;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_UNLOCK;
+          continue;
+        } else if(err != E_AGAIN) {
+          if(ctx->op_req_errcode_internal == E_AGAIN) {
+            ctx->op_req_errcode_internal = err;
+          }
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_UNLOCK;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_OPERATION_TRANSLATE_UNLOCK:
+        err = qspi_unlock(ctx->qspi_ctx);
+        if(err == E_OK) {
           if(ctx->op_req_errcode_internal != E_AGAIN) {
+            err = ctx->op_req_errcode_internal;
+            ctx->op_req_errcode = err;
             ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
           } else {
             ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_WRITE;
@@ -444,7 +494,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         err = flash_section_write(ctx->op_req_ctx.flash_section_type, ctx->op_instance, ctx->op_version + 1, ctx->op_req_ctx.data_ptr, ctx->op_req_ctx.versions[ctx->op_version + 1].size);
         if(err == E_OK) {
           ctx->op_version++;
-          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK;
           continue;
         } else if(err != E_AGAIN) {
           ctx->op_req_errcode_internal = err;

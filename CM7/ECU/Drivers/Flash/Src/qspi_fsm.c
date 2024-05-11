@@ -440,15 +440,22 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 static error_t qspi_fsm_process(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
 
   while(true) {
     err = E_OK;
 
     switch(ctx->fsm_process) {
       case QSPI_FSM_PROCESS_CONDITION:
-        if(ctx->initialized == true && ctx->cmd_ready == true && ctx->cmd_errcode == E_AGAIN) {
-          ctx->fsm_process = QSPI_FSM_PROCESS_IO;
-          continue;
+        if(ctx->cmd_errcode == E_AGAIN) {
+          if(ctx->initialized == true && ctx->cmd_ready == true &&
+              ctx->memory_mapping == false && ctx->memory_mapping_accept == false) {
+            ctx->fsm_process = QSPI_FSM_PROCESS_IO;
+            continue;
+          } else if(ctx->memory_mapping != ctx->memory_mapping_accept) {
+            ctx->fsm_process = QSPI_FSM_MEMORYMAPPING_HAL;
+            continue;
+          }
         }
         break;
       case QSPI_FSM_PROCESS_IO:
@@ -456,6 +463,37 @@ static error_t qspi_fsm_process(qspi_ctx_t *ctx)
         if(err != E_AGAIN) {
           ctx->fsm_process = QSPI_FSM_PROCESS_CONDITION;
           ctx->cmd_errcode = err;
+        }
+        break;
+
+      case QSPI_FSM_MEMORYMAPPING_HAL:
+        if(ctx->memory_mapping == false) {
+          status = HAL_QSPI_Abort(ctx->init.hqspi);
+        } else {
+          status = HAL_QSPI_MemoryMapped(ctx->init.hqspi, &ctx->init.cmd_hsread, &ctx->init.mem_map);
+        }
+        if(status != HAL_OK) {
+          err = E_HAL;
+          ctx->fsm_process = QSPI_FSM_PROCESS_CONDITION;
+          ctx->cmd_errcode = err;
+        } else {
+          if(ctx->memory_mapping == false) {
+            err = E_OK;
+            ctx->cmd_errcode = E_OK;
+            ctx->fsm_process = QSPI_FSM_PROCESS_CONDITION;
+            ctx->memory_mapping_accept = ctx->memory_mapping;
+          } else {
+            err = E_OK;
+            ctx->cmd_errcode = E_OK;
+            ctx->fsm_process = QSPI_FSM_MEMORYMAPPING_WAIT;
+            ctx->memory_mapping_accept = ctx->memory_mapping;
+          }
+        }
+        break;
+      case QSPI_FSM_MEMORYMAPPING_WAIT:
+        if(ctx->memory_mapping == false || ctx->memory_mapping_accept == false) {
+          ctx->fsm_process = QSPI_FSM_MEMORYMAPPING_HAL;
+          continue;
         }
         break;
       default:

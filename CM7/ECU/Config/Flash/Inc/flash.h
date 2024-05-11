@@ -60,6 +60,4 @@ error_t flash_mem_base_address(uint32_t *base_address);
 error_t flash_mem_section_address(uint32_t *section_address, uint16_t section_type, uint16_t section_index);
 error_t flash_mem_header_len(uint32_t *header_len);
 
-error_t flash_memory_mapping_set(bool enabled);
-
 #endif /* CONFIG_FLASH_INC_FLASH_H_ */

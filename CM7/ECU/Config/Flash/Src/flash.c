@@ -206,25 +206,3 @@ error_t flash_mem_header_len(uint32_t *header_len)
 
   return err;
 }
-
-error_t flash_memory_mapping_set(bool enabled)
-{
-  flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
-  error_t err = E_AGAIN;
-
-  do {
-    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE, err = E_INVALACT);
-
-    ctx->memory_mapping = enabled;
-    if(ctx->memory_mapping == ctx->memory_mapping_accept) {
-      err = ctx->cmd_errcode;
-    } else {
-      ctx->cmd_errcode = E_AGAIN;
-    }
-
-  } while(0);
-
-  return err;
-}

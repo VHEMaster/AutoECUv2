@@ -457,3 +457,24 @@ error_t qspi_get_jedec(qspi_ctx_t *ctx, qspi_jedec_t *jedec)
   return err;
 }
 
+error_t qspi_memory_mapping_set(qspi_ctx_t *ctx, bool enabled)
+{
+  error_t err = E_AGAIN;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
+    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
+
+    ctx->memory_mapping = enabled;
+    if(ctx->memory_mapping == ctx->memory_mapping_accept) {
+      err = ctx->cmd_errcode;
+    } else {
+      ctx->cmd_errcode = E_AGAIN;
+    }
+
+  } while(0);
+
+  return err;
+}
