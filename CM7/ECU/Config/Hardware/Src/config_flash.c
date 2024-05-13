@@ -18,10 +18,13 @@ typedef struct {
     qspi_init_t init;
 }ecu_devices_flash_ctx_t;
 
+static BUFFER_DMA qspi_dma_ctx_t ecu_devices_flash_dma_ctx [ECU_DEVICE_FLASH_MAX];
+
 static ecu_devices_flash_ctx_t ecu_devices_flash_ctx[ECU_DEVICE_FLASH_MAX] = {
     {
         .init = {
             .hqspi = &hqspi,
+            .dma_ctx = &ecu_devices_flash_dma_ctx[0],
             .memory_base_address = QSPI_BASE,
 
             .flash_size = ECU_FLASH_SIZE,

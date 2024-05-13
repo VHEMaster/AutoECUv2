@@ -110,7 +110,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         break;
 
       case FLASH_FSM_READ_HEADER:
-        err = qspi_fast_read(ctx->qspi_ctx, ctx->cmd_address, &ctx->section_header, ECU_FLASH_SECTION_HEADER_LENGTH);
+        err = qspi_fast_read(ctx->qspi_ctx, ctx->cmd_address, &ctx->dma_ctx->section_header, ECU_FLASH_SECTION_HEADER_LENGTH);
         if(err == E_OK) {
           ctx->fsm_process = FLASH_FSM_READ_HEADER_SYNC;
           continue;
@@ -122,7 +122,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_READ_HEADER_SYNC:
         err = qspi_sync(ctx->qspi_ctx);
         if(err == E_OK) {
-          if(ctx->section_header.section_type != ctx->cmd_section_type || ctx->section_header.section_index != ctx->cmd_section_index) {
+          if(ctx->dma_ctx->section_header.section_type != ctx->cmd_section_type || ctx->dma_ctx->section_header.section_index != ctx->cmd_section_index) {
             ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
             continue;
           }
@@ -165,7 +165,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_READ_CHECKSUM_HEADER:
-        err = crc_calculate(&ctx->checksum, &ctx->section_header, OFFSETOF(flash_section_header_t, crc), true);
+        err = crc_calculate(&ctx->checksum, &ctx->dma_ctx->section_header, OFFSETOF(flash_section_header_t, crc), true);
         if(err == E_OK) {
           ctx->fsm_process = FLASH_FSM_READ_CHECKSUM_PAYLOAD;
           continue;
@@ -199,16 +199,16 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_READ_VERIFY:
-        if(ctx->checksum != ctx->section_header.crc) {
+        if(ctx->checksum != ctx->dma_ctx->section_header.crc) {
           ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
           continue;
-        } else if(ctx->section_header.section_type != ctx->cmd_section_type || ctx->section_header.section_index != ctx->cmd_section_index) {
+        } else if(ctx->dma_ctx->section_header.section_type != ctx->cmd_section_type || ctx->dma_ctx->section_header.section_index != ctx->cmd_section_index) {
           ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
           continue;
         }
         if(err != E_AGAIN) {
           if(ctx->cmd_payload_version_p != NULL) {
-            *ctx->cmd_payload_version_p = ctx->section_header.payload_version;
+            *ctx->cmd_payload_version_p = ctx->dma_ctx->section_header.payload_version;
           }
           ctx->cmd_errcode_internal = err;
           ctx->fsm_process = FLASH_FSM_FLASH_UNLOCK;
@@ -218,12 +218,12 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_WRITE_CHECKSUM_LOCK:
         err = crc_lock();
         if(err == E_OK) {
-          memset(&ctx->section_header, 0u, sizeof(ctx->section_header));
-          ctx->section_header.section_type = ctx->cmd_section_type;
-          ctx->section_header.section_index = ctx->cmd_section_index;
-          ctx->section_header.payload_version = ctx->cmd_payload_version;
-          ctx->section_header.pages = ctx->cmd_section->section_length / ctx->qspi_ctx->init.prog_page_size;
-          ctx->section_header.crc = 0;
+          memset(&ctx->dma_ctx->section_header, 0u, sizeof(ctx->dma_ctx->section_header));
+          ctx->dma_ctx->section_header.section_type = ctx->cmd_section_type;
+          ctx->dma_ctx->section_header.section_index = ctx->cmd_section_index;
+          ctx->dma_ctx->section_header.payload_version = ctx->cmd_payload_version;
+          ctx->dma_ctx->section_header.pages = ctx->cmd_section->section_length / ctx->qspi_ctx->init.prog_page_size;
+          ctx->dma_ctx->section_header.crc = 0;
 
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_HEADER;
           continue;
@@ -233,7 +233,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_WRITE_CHECKSUM_HEADER:
-        err = crc_calculate(&ctx->checksum, &ctx->section_header, OFFSETOF(flash_section_header_t, crc), true);
+        err = crc_calculate(&ctx->checksum, &ctx->dma_ctx->section_header, OFFSETOF(flash_section_header_t, crc), true);
         if(err == E_OK) {
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_PAYLOAD;
           continue;
@@ -245,7 +245,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
       case FLASH_FSM_WRITE_CHECKSUM_PAYLOAD:
         err = crc_calculate(&ctx->checksum, ctx->cmd_payload_tx, ctx->cmd_length, false);
         if(err == E_OK) {
-          ctx->section_header.crc = ctx->checksum;
+          ctx->dma_ctx->section_header.crc = ctx->checksum;
           ctx->fsm_process = FLASH_FSM_WRITE_CHECKSUM_UNLOCK;
           continue;
         } else if(err != E_AGAIN) {
@@ -317,7 +317,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_WRITE_HEADER:
-        err = qspi_page_write(ctx->qspi_ctx, ctx->cmd_address, &ctx->section_header, ECU_FLASH_SECTION_HEADER_LENGTH);
+        err = qspi_page_write(ctx->qspi_ctx, ctx->cmd_address, &ctx->dma_ctx->section_header, ECU_FLASH_SECTION_HEADER_LENGTH);
         if(err == E_OK) {
           ctx->fsm_process = FLASH_FSM_WRITE_HEADER_SYNC;
           continue;
@@ -444,7 +444,7 @@ ITCM_FUNC error_t flash_fsm(flash_runtime_ctx_t *ctx)
         }
         break;
       case FLASH_FSM_WRITE_CHECKSUM_VERIFY:
-        if(ctx->checksum == ctx->section_header.crc) {
+        if(ctx->checksum == ctx->dma_ctx->section_header.crc) {
           ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
         } else {
           ctx->cmd_errcode_internal = err;

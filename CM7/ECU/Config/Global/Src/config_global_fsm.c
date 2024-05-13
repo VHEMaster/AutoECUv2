@@ -44,15 +44,14 @@ static error_t ecu_config_global_fsm_flash_init(ecu_config_global_runtime_ctx_t 
         } else {
           err = E_OK;
         }
-        if(err != E_AGAIN) {
-          if(ctx->flash_ctx->reset_errcode == E_AGAIN ||
-              ctx->flash_ctx->reset_errcode == E_OK) {
-            ctx->flash_ctx->reset_errcode = err;
-          }
+        if(err == E_OK) {
           err = E_AGAIN;
           ctx->fsm_flash = ECU_CONFIG_FSM_FLASH_DEFINE;
           ctx->process_instance++;
           continue;
+        } if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->fsm_flash = ECU_CONFIG_FSM_FLASH_CONDITION;
         }
         break;
       default:

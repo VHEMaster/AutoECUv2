@@ -17,7 +17,7 @@
 #include "versioned_sw.h"
 #include "config_engine.h"
 
-static ecu_config_global_engine_t ecu_config_global_engine = {0};
+static ALIGNED_CACHE BUFFER_DMA ecu_config_global_engine_t ecu_config_global_engine = {0};
 
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 

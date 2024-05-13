@@ -62,6 +62,8 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
   error_t err = E_OK;
 
   do {
+    BREAK_IF_ACTION(init_ctx->dma_ctx == NULL, err = E_PARAM);
+
     memset(ctx, 0, sizeof(qspi_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(qspi_init_t));
 
@@ -82,16 +84,22 @@ error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
 
 error_t qspi_reset(qspi_ctx_t *ctx)
 {
-  error_t err = E_OK;
+  error_t err = E_AGAIN;
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    memset(&ctx->jedec_quad, 0, sizeof(ctx->jedec_quad));
-    memset(&ctx->jedec, 0, sizeof(ctx->jedec));
-    ctx->jedec_ready = false;
-    ctx->initialized = false;
-    ctx->init_errcode = E_AGAIN;
+    if(ctx->init_request == false) {
+      memset(&ctx->init.dma_ctx->jedec_quad, 0, sizeof(ctx->init.dma_ctx->jedec_quad));
+      memset(&ctx->jedec, 0, sizeof(ctx->jedec));
+      ctx->jedec_ready = false;
+      ctx->initialized = false;
+      ctx->init_request = true;
+      ctx->init_errcode = E_AGAIN;
+    } else if(ctx->init_errcode != E_AGAIN) {
+      ctx->init_request = false;
+      err = ctx->init_errcode;
+    }
 
   } while(0);
 
@@ -310,10 +318,10 @@ ITCM_FUNC error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
     ctx->cmd_ptr = &ctx->init.cmd_wbpr;
     for(int i = 0; i < QSPI_BPR_SIZE; i++) {
       ctx->bpr.bytes[i] = bpr->bytes[i];
-      ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
-      ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
+      ctx->init.dma_ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
+      ctx->init.dma_ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
     }
-    ctx->cmd_payload_tx = ctx->payload_bpr;
+    ctx->cmd_payload_tx = ctx->init.dma_ctx->payload_bpr;
 
     ctx->cmd_wren_needed = true;
 

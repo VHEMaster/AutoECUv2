@@ -68,6 +68,10 @@ typedef enum {
 }flash_erase_type_t;
 
 typedef struct {
+  flash_section_header_t section_header ALIGNED_CACHE;
+}flash_runtime_dma_ctx_t;
+
+typedef struct {
     qspi_ctx_t *qspi_ctx;
     bool ready;
     bool locked;
@@ -96,8 +100,7 @@ typedef struct {
     uint32_t cmd_xaddress;
     uint8_t cmd_dupl_index;
 
-    flash_section_header_t section_header ALIGNED_CACHE;
-    uint8_t cmd_write_verify[ECU_FLASH_PAGE_SIZE] ALIGNED_CACHE;
+    flash_runtime_dma_ctx_t *dma_ctx;
 
 }flash_runtime_ctx_t;
 

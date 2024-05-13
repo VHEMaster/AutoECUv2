@@ -35,6 +35,7 @@ typedef struct {
     ecu_device_type_t type;
     ecu_device_instance_t instance;
     void *ctx;
+    void *dma_ctx;
     bool initialized;
 }ecu_config_device_instance_t;
 

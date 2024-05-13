@@ -223,7 +223,7 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 
     switch(ctx->fsm_init) {
       case QSPI_FSM_INIT_CONDITION:
-        if(ctx->initialized == false && ctx->init_errcode == E_AGAIN) {
+        if(ctx->init_request == true && ctx->init_errcode == E_AGAIN) {
           ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST1;
           ctx->cmd_ptr = &ctx->init.cmd_rstqioq;
           ctx->cmd_status_poll_needed = false;
@@ -274,7 +274,7 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           ctx->fsm_init = QSPI_FSM_INIT_JEDEC;
           ctx->cmd_ptr = &ctx->init.cmd_jid;
           ctx->cmd_payload_tx = NULL;
-          ctx->cmd_payload_rx = &ctx->jedec_quad;
+          ctx->cmd_payload_rx = &ctx->init.dma_ctx->jedec_quad;
           err = E_AGAIN;
           continue;
         } else if(err != E_AGAIN) {
@@ -285,18 +285,18 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_JEDEC:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.mfg_id); i++) {
-            if(ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.mfg_id); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
               err = E_BADRESP;
             }
           }
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_type); i++) {
-            if(ctx->jedec_quad.device_type[i] != ctx->init.expected_jedec.device_type) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.device_type); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.device_type[i] != ctx->init.expected_jedec.device_type) {
               err = E_BADRESP;
             }
           }
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_id); i++) {
-            if(ctx->jedec_quad.device_id[i] != ctx->init.expected_jedec.device_id) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.device_id); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.device_id[i] != ctx->init.expected_jedec.device_id) {
               err = E_BADRESP;
             }
           }
@@ -337,8 +337,8 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           ctx->fsm_init = QSPI_FSM_INIT_QJEDEC;
           ctx->cmd_ptr = &ctx->init.cmd_qjid;
           ctx->cmd_payload_tx = NULL;
-          ctx->cmd_payload_rx = &ctx->jedec_quad;
-          memset(&ctx->jedec_quad, 0, sizeof(ctx->jedec_quad));
+          ctx->cmd_payload_rx = &ctx->init.dma_ctx->jedec_quad;
+          memset(&ctx->init.dma_ctx->jedec_quad, 0, sizeof(ctx->init.dma_ctx->jedec_quad));
           err = E_AGAIN;
           continue;
         }
@@ -346,18 +346,18 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_QJEDEC:
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.mfg_id); i++) {
-            if(ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.mfg_id); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.mfg_id[i] != ctx->init.expected_jedec.mfg_id) {
               err = E_BADRESP;
             }
           }
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_type); i++) {
-            if(ctx->jedec_quad.device_type[i] != ctx->init.expected_jedec.device_type) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.device_type); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.device_type[i] != ctx->init.expected_jedec.device_type) {
               err = E_BADRESP;
             }
           }
-          for(int i = 0; i < ITEMSOF(ctx->jedec_quad.device_id); i++) {
-            if(ctx->jedec_quad.device_id[i] != ctx->init.expected_jedec.device_id) {
+          for(int i = 0; i < ITEMSOF(ctx->init.dma_ctx->jedec_quad.device_id); i++) {
+            if(ctx->init.dma_ctx->jedec_quad.device_id[i] != ctx->init.expected_jedec.device_id) {
               err = E_BADRESP;
             }
           }
@@ -365,15 +365,15 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
           ctx->cmd_payload_rx = NULL;
           ctx->cmd_payload_tx = NULL;
 
-          ctx->jedec.mfg_id = ctx->jedec_quad.mfg_id[0];
-          ctx->jedec.device_type = ctx->jedec_quad.device_type[0];
-          ctx->jedec.device_id = ctx->jedec_quad.device_id[0];
+          ctx->jedec.mfg_id = ctx->init.dma_ctx->jedec_quad.mfg_id[0];
+          ctx->jedec.device_type = ctx->init.dma_ctx->jedec_quad.device_type[0];
+          ctx->jedec.device_id = ctx->init.dma_ctx->jedec_quad.device_id[0];
           ctx->jedec_ready = true;
 
           if(err == E_OK) {
             ctx->fsm_init = QSPI_FSM_INIT_CFG;
             ctx->cmd_ptr = &ctx->init.cmd_wrsr;
-            ctx->cmd_payload_tx = ctx->payload_dummy;
+            ctx->cmd_payload_tx = ctx->init.dma_ctx->payload_dummy;
             ctx->cmd_payload_rx = NULL;
             ctx->cmd_wren_needed = false;
             ctx->cmd_status_poll_needed = true;
@@ -398,11 +398,11 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 
           for(int i = 0; i < QSPI_BPR_SIZE; i++) {
             ctx->bpr.bytes[i] = ctx->init.bpr.bytes[i];
-            ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
-            ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
+            ctx->init.dma_ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
+            ctx->init.dma_ctx->payload_bpr[i * 2 + 1] = ctx->bpr.bytes[i];
           }
 
-          ctx->cmd_payload_tx = ctx->payload_bpr;
+          ctx->cmd_payload_tx = ctx->init.dma_ctx->payload_bpr;
           ctx->cmd_payload_rx = NULL;
           ctx->cmd_wren_needed = true;
           ctx->cmd_status_poll_needed = true;

@@ -14,6 +14,7 @@
 #include <string.h>
 
 static flash_runtime_ctx_t flash_runtime_ctx = {0};
+static BUFFER_DMA ALIGNED_CACHE flash_runtime_dma_ctx_t flash_runtime_dma_ctx = {0};
 
 error_t flash_init(void)
 {
@@ -22,6 +23,7 @@ error_t flash_init(void)
 
   do {
     memset(ctx, 0u, sizeof(flash_runtime_ctx_t));
+    ctx->dma_ctx = &flash_runtime_dma_ctx;
 
     err = ecu_devices_get_flash_ctx(ECU_DEVICE_FLASH_1, &ctx->qspi_ctx);
     BREAK_IF(err != E_OK);
