@@ -100,6 +100,7 @@ input_id_t input_ch_register(input_if_id_t interface_id, input_ch_id_t channel_i
   input_id_t id_new = input_ctx.chs_count;
   input_if_ctx_t *interface;
   input_ch_ctx_t *channel;
+  error_t err;
 
   id_count = id_new + 1;
   if(interface_id < input_ctx.ifs_count && input_ctx.chs_count < INPUTS_CHS_MAX) {
@@ -117,6 +118,10 @@ input_id_t input_ch_register(input_if_id_t interface_id, input_ch_id_t channel_i
 
       interface->chs_ptrs[interface->chs_count++] = channel;
       input_ctx.chs_count = id_count;
+
+      channel->polling_mode = INPUT_POLLING_MODE_MAX;
+      err = input_ch_polling_mode(id_new, INPUT_POLLING_MODE_DIRECT);
+      RETURN_IF(err != E_OK,  err);
     } else {
       id_new = E_OVERFLOW;
     }
@@ -185,6 +190,10 @@ error_t input_ch_debounce(input_id_t channel_id, time_delta_us_t debounce_time)
 error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t polling_mode)
 {
   error_t err = E_OK;
+  input_ch_poll_ctx_t *poll_old;
+  input_ch_poll_ctx_t *poll_new;
+  input_polling_mode_t mode_old;
+  input_ch_ctx_t *channel;
 
   do {
     if(channel_id < 0 || channel_id >= input_ctx.chs_count || polling_mode >= INPUT_POLLING_MODE_MAX) {
@@ -192,7 +201,32 @@ error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t pollin
       break;
     }
 
-    input_ctx.chs[channel_id].polling_mode = polling_mode;
+    channel = &input_ctx.chs[channel_id];
+    mode_old = channel->polling_mode;
+
+    if(mode_old != polling_mode) {
+      poll_old = &input_ctx.poll[mode_old];
+      poll_new = &input_ctx.poll[polling_mode];
+      channel->polling_mode = polling_mode;
+
+      for(int c = 0; c < poll_old->channels_count; c++) {
+        if(poll_old->channels[c] == channel) {
+          poll_old->channels_count--;
+          poll_old->channels[c] = NULL;
+
+          for(int i = c; i < poll_old->channels_count; i++) {
+            poll_old->channels[i] = poll_old->channels[i + 1];
+          }
+          poll_old->channels[poll_old->channels_count] = NULL;
+          break;
+        }
+
+      }
+
+      poll_new->channels[poll_new->channels_count] = channel;
+      poll_new->channels_count++;
+
+    }
 
   } while(0);
 

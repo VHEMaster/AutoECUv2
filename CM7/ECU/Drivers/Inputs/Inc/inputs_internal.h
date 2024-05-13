@@ -61,11 +61,18 @@ typedef struct input_if_ctx_tag {
 }input_if_ctx_t;
 
 typedef struct {
+    uint32_t channels_count;
+    input_ch_ctx_t *channels[INPUTS_CHS_MAX];
+}input_ch_poll_ctx_t;
+
+typedef struct {
     input_if_ctx_t ifs[INPUTS_IFS_MAX];
     input_ch_ctx_t chs[INPUTS_CHS_MAX];
 
     uint32_t ifs_count;
     uint32_t chs_count;
+
+    input_ch_poll_ctx_t poll[INPUT_POLLING_MODE_MAX];
 
 }input_ctx_t;
 

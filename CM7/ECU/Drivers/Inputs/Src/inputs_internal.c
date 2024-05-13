@@ -14,37 +14,42 @@ ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polli
   input_ch_ctx_t *ch;
   time_delta_us_t deltatime;
   time_us_t now = time_get_current_us();
+  input_ch_poll_ctx_t *poll = NULL;
 
-  if(polling_mode == INPUT_POLLING_MODE_FAST) {
-    for(int i = 0; i < ctx->ifs_count; i++) {
-      interface = &ctx->ifs[i];
-      deltatime = time_diff(now, interface->time_fast_last);
-      if(interface->func_if_periodic_fast) {
-        interface->func_if_periodic_fast(interface->id, deltatime, interface->usrdata);
+  if(polling_mode < INPUT_POLLING_MODE_MAX) {
+    if(polling_mode == INPUT_POLLING_MODE_FAST) {
+      for(int i = 0; i < ctx->ifs_count; i++) {
+        interface = &ctx->ifs[i];
+        deltatime = time_diff(now, interface->time_fast_last);
+        if(interface->func_if_periodic_fast) {
+          interface->func_if_periodic_fast(interface->id, deltatime, interface->usrdata);
+        }
+      }
+    } else if(polling_mode == INPUT_POLLING_MODE_SLOW) {
+      for(int i = 0; i < ctx->ifs_count; i++) {
+        interface = &ctx->ifs[i];
+        deltatime = time_diff(now, interface->time_slow_last);
+        if(interface->func_if_periodic_slow) {
+          interface->func_if_periodic_slow(interface->id, deltatime, interface->usrdata);
+        }
+      }
+    } else if(polling_mode == INPUT_POLLING_MODE_MAIN) {
+      for(int i = 0; i < ctx->ifs_count; i++) {
+        interface = &ctx->ifs[i];
+        deltatime = time_diff(now, interface->time_main_last);
+        if(interface->func_if_periodic_main) {
+          interface->func_if_periodic_main(interface->id, deltatime, interface->usrdata);
+        }
       }
     }
-  } else if(polling_mode == INPUT_POLLING_MODE_SLOW) {
-    for(int i = 0; i < ctx->ifs_count; i++) {
-      interface = &ctx->ifs[i];
-      deltatime = time_diff(now, interface->time_slow_last);
-      if(interface->func_if_periodic_slow) {
-        interface->func_if_periodic_slow(interface->id, deltatime, interface->usrdata);
+
+    poll = &ctx->poll[polling_mode];
+    for(int c = 0; c < poll->channels_count; c++) {
+      ch = poll->channels[c];
+      if(ch != NULL) {
+        (void)inputs_internal_channel_poll(ch, polling_mode);
       }
     }
-  } else if(polling_mode == INPUT_POLLING_MODE_MAIN) {
-    for(int i = 0; i < ctx->ifs_count; i++) {
-      interface = &ctx->ifs[i];
-      deltatime = time_diff(now, interface->time_main_last);
-      if(interface->func_if_periodic_main) {
-        interface->func_if_periodic_main(interface->id, deltatime, interface->usrdata);
-      }
-    }
-  }
-
-  for(int c = 0; c < ctx->chs_count; c++) {
-    ch = &ctx->chs[c];
-
-    (void)inputs_internal_channel_poll(ch, polling_mode);
   }
 }
 
@@ -101,7 +106,6 @@ ITCM_FUNC error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling
       ch->value_time = now;
     }
   }
-
 
   if(irq_gen == true) {
     ch->value = val_ret;
