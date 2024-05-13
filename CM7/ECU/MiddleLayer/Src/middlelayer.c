@@ -57,7 +57,7 @@ ITCM_FUNC static void middlelayer_time_msmt_stop(ml_loop_time_msmnt_item_t *item
   item->load_last = load;
 }
 
-static void middlelayer_tim_slow_irq(TIM_HandleTypeDef *htim)
+static void middlelayer_tim_slow_irq(void *)
 {
   middlelayer_time_msmt_start(&ml_loop_time_msmt.slow);
 
@@ -74,7 +74,7 @@ static void middlelayer_tim_slow_irq(TIM_HandleTypeDef *htim)
   middlelayer_time_msmt_stop(&ml_loop_time_msmt.slow);
 }
 
-ITCM_FUNC static void middlelayer_tim_fast_irq(TIM_HandleTypeDef *htim)
+ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 {
   middlelayer_time_msmt_start(&ml_loop_time_msmt.fast);
 
@@ -126,6 +126,6 @@ void middlelayer_init(void)
 
   ecu_config_start_counter();
 
-  ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_fast_irq);
+  ecu_config_start_periodic_timers((pTIM_CallbackTypeDef)middlelayer_tim_slow_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
 
 }
