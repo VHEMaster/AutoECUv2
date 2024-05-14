@@ -398,6 +398,8 @@ typedef struct
   void (* BreakCallback)(struct __TIM_HandleTypeDef *htim);                     /*!< TIM Break Callback                                      */
   void (* Break2Callback)(struct __TIM_HandleTypeDef *htim);                    /*!< TIM Break2 Callback                                     */
 #endif /* USE_HAL_TIM_REGISTER_CALLBACKS */
+
+  void *usrdata[6];
 } TIM_HandleTypeDef;
 
 #if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)

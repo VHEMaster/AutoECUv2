@@ -161,7 +161,7 @@ typedef struct {
     uint32_t frequency;
 }ecu_gpio_output_if_pwm_cfg_t;
 
-typedef void (*ecu_gpio_input_cb_t)(ecu_gpio_input_pin_t pin, bool level);
+typedef void (*ecu_gpio_input_cb_t)(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level);
 
 error_t ecu_config_gpio_output_init(void);
 error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_output_type_t type);

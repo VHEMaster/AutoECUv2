@@ -914,40 +914,36 @@ error_t ecu_config_gpio_output_init(void)
 
 static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
 {
-  ecu_gpio_inputs_if_t *interface;
   ecu_gpio_input_t *channel;
   ecu_gpio_input_level_t level = ECU_IN_LEVEL_UNDEFINED;
-  uint32_t active_channel;
+  uint32_t active_channel, usrdata_index;
 
   do {
     BREAK_IF(htim == NULL);
 
     active_channel = htim->Channel;
-    interface = &ecu_gpio_setup.inputs_if[ECU_IN_IF_TIM];
+    usrdata_index = POSITION_VAL(active_channel);
+    BREAK_IF(usrdata_index >= ITEMSOF(htim->usrdata));
 
-    for(int i = 0; i < ECU_IN_MAX; i++) {
-      channel = interface->channels[i];
-      BREAK_IF(channel == NULL);
+    channel = htim->usrdata[usrdata_index];
+    BREAK_IF(channel == NULL);
+    BREAK_IF(channel->htim != htim);
+    BREAK_IF(channel->irq_cb == NULL);
 
-      if(channel->htim == htim) {
-        if(channel->irq_cb != NULL) {
-          if(channel->tim_active_channel_rising_falling == active_channel) {
-            if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_RISING) {
-              level = ECU_IN_LEVEL_HIGH;
-            } else if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_FALLING) {
-              level = ECU_IN_LEVEL_LOW;
-            } else {
-              level = ECU_IN_LEVEL_UNDEFINED;
-            }
-          } else if(channel->tim_active_channel_rising == active_channel) {
-            level = ECU_IN_LEVEL_HIGH;
-          } else if(channel->tim_active_channel_falling == active_channel) {
-            level = ECU_IN_LEVEL_LOW;
-          }
-          channel->irq_cb(channel->input_pin, level);
-        }
+    if(channel->tim_active_channel_rising_falling == active_channel) {
+      if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_RISING) {
+        level = ECU_IN_LEVEL_HIGH;
+      } else if(channel->current_capture_edge == ECU_IN_CAPTURE_EDGE_FALLING) {
+        level = ECU_IN_LEVEL_LOW;
+      } else {
+        level = ECU_IN_LEVEL_UNDEFINED;
       }
+    } else if(channel->tim_active_channel_rising == active_channel) {
+      level = ECU_IN_LEVEL_HIGH;
+    } else if(channel->tim_active_channel_falling == active_channel) {
+      level = ECU_IN_LEVEL_LOW;
     }
+    channel->irq_cb(channel->input_pin, level);
 
   } while(0);
 }
@@ -1050,6 +1046,8 @@ error_t ecu_config_gpio_input_init(void)
             BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
             if(ecu_gpio_setup.inputs[i].tim_active_channel_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              ecu_gpio_setup.inputs[i].htim->usrdata[POSITION_VAL(ecu_gpio_setup.inputs[i].tim_active_channel_falling)] = &ecu_gpio_setup.inputs[i];
+
               err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_falling, &tim_channel);
               BREAK_IF(err != E_OK);
 
@@ -1060,6 +1058,8 @@ error_t ecu_config_gpio_input_init(void)
               BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
             }
             if(ecu_gpio_setup.inputs[i].tim_active_channel_rising != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              ecu_gpio_setup.inputs[i].htim->usrdata[POSITION_VAL(ecu_gpio_setup.inputs[i].tim_active_channel_rising)] = &ecu_gpio_setup.inputs[i];
+
               err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising, &tim_channel);
               BREAK_IF(err != E_OK);
 
@@ -1070,6 +1070,8 @@ error_t ecu_config_gpio_input_init(void)
               BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
             }
             if(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling != HAL_TIM_ACTIVE_CHANNEL_CLEARED) {
+              ecu_gpio_setup.inputs[i].htim->usrdata[POSITION_VAL(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling)] = &ecu_gpio_setup.inputs[i];
+
               err = ecu_gpio_input_tim_ac_to_ch(ecu_gpio_setup.inputs[i].tim_active_channel_rising_falling, &tim_channel);
               BREAK_IF(err != E_OK);
 
