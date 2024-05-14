@@ -22,11 +22,11 @@ typedef struct {
     uint8_t items;
     float input[TLE4729_RELATION_ITEMS_MAX];
     float output[TLE4729_RELATION_ITEMS_MAX];
-}tle7429_config_relation_t;
+}tle4729_config_relation_t;
 
 typedef struct {
-    tle7429_config_relation_t voltage_to_step_time_mult;
-    tle7429_config_relation_t speed_to_step_time_ms;
+    tle4729_config_relation_t voltage_to_step_time_mult;
+    tle4729_config_relation_t speed_to_step_time_ms;
     uint8_t acceleration_steps;
 
     int32_t pos_min;

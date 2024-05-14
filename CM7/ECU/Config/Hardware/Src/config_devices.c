@@ -10,7 +10,7 @@
 
 #define ECU_DEVICES_MAX (     \
     ECU_DEVICE_PULSEDADC_MAX +      \
-    ECU_DEVICE_EGT_MAX +      \
+    ECU_DEVICE_TCS_MAX +      \
     ECU_DEVICE_FLEXIO_MAX +   \
     ECU_DEVICE_WBLS_MAX +   \
     ECU_DEVICE_STEPPER_MAX +  \
@@ -35,7 +35,6 @@ typedef struct {
     ecu_device_type_t type;
     ecu_device_instance_t instance;
     void *ctx;
-    void *dma_ctx;
     bool initialized;
 }ecu_config_device_instance_t;
 
@@ -45,7 +44,7 @@ typedef struct {
 }ecu_config_devices_t;
 
 static pulsedadc_ctx_t ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX] = {0};
-static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_EGT_MAX] = {0};
+static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_TCS_MAX] = {0};
 static l9966_ctx_t ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_MAX] = {0};
 static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX] = {0};
 static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX] = {0};
@@ -60,13 +59,13 @@ static ecu_config_devices_t ecu_config_devices = {
             //.loop_slow = (ecu_device_loop_func_t)pulsedadc_loop_slow,
             //.loop_fast = (ecu_device_loop_func_t)pulsedadc_loop_fast,
             .instance_max = ECU_DEVICE_PULSEDADC_MAX,
-        }, //ECU_DEVICE_TYPE_EGT
+        }, //ECU_DEVICE_TYPE_TCS
         {
             .loop_main = (ecu_device_loop_func_t)max31855_loop_main,
             .loop_slow = (ecu_device_loop_func_t)max31855_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)max31855_loop_fast,
-            .instance_max = ECU_DEVICE_EGT_MAX,
-        }, //ECU_DEVICE_TYPE_EGT
+            .instance_max = ECU_DEVICE_TCS_MAX,
+        }, //ECU_DEVICE_TYPE_TCS
         {
             .loop_main = (ecu_device_loop_func_t)l9966_loop_main,
             .loop_slow = (ecu_device_loop_func_t)l9966_loop_slow,
@@ -116,14 +115,14 @@ static ecu_config_devices_t ecu_config_devices = {
             .ctx = &ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_2],
         },
         {
-            .type = ECU_DEVICE_TYPE_EGT,
-            .instance = ECU_DEVICE_EGT_1,
-            .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_EGT_1],
+            .type = ECU_DEVICE_TYPE_TCS,
+            .instance = ECU_DEVICE_TCS_1,
+            .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_TCS_1],
         },
         {
-            .type = ECU_DEVICE_TYPE_EGT,
-            .instance = ECU_DEVICE_EGT_2,
-            .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_EGT_2],
+            .type = ECU_DEVICE_TYPE_TCS,
+            .instance = ECU_DEVICE_TCS_2,
+            .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_TCS_2],
         },
         {
             .type = ECU_DEVICE_TYPE_FLEXIO,
@@ -310,9 +309,9 @@ error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc
   return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_PULSEDADC, instance, (void**)ctx);
 }
 
-error_t ecu_devices_get_egt_ctx(ecu_device_egt_t instance, max31855_ctx_t **ctx)
+error_t ecu_devices_get_tcs_ctx(ecu_device_tcs_t instance, max31855_ctx_t **ctx)
 {
-  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_EGT, instance, (void**)ctx);
+  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_TCS, instance, (void**)ctx);
 }
 
 error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **ctx)

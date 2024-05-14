@@ -18,13 +18,11 @@
 #include "l9960.h"
 #include "qspi.h"
 
-typedef uint32_t ecu_index_type_t;
-typedef uint32_t ecu_instance_t;
-typedef ecu_instance_t ecu_device_instance_t;
+typedef uint32_t ecu_device_instance_t;
 
 typedef enum {
   ECU_DEVICE_TYPE_PULSEDADC,
-  ECU_DEVICE_TYPE_EGT,
+  ECU_DEVICE_TYPE_TCS,
   ECU_DEVICE_TYPE_FLEXIO,
   ECU_DEVICE_TYPE_WBLS,
   ECU_DEVICE_TYPE_STEPPER,
@@ -43,10 +41,10 @@ typedef enum {
 }ecu_device_pulsedadc_t;
 
 typedef enum {
-  ECU_DEVICE_EGT_1 = 0,
-  ECU_DEVICE_EGT_2,
-  ECU_DEVICE_EGT_MAX
-}ecu_device_egt_t;
+  ECU_DEVICE_TCS_1 = 0,
+  ECU_DEVICE_TCS_2,
+  ECU_DEVICE_TCS_MAX
+}ecu_device_tcs_t;
 
 typedef enum {
   ECU_DEVICE_FLEXIO_1 = 0,
@@ -91,7 +89,7 @@ error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t
 error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool initialized);
 
 error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t **ctx);
-error_t ecu_devices_get_egt_ctx(ecu_device_egt_t instance, max31855_ctx_t **ctx);
+error_t ecu_devices_get_tcs_ctx(ecu_device_tcs_t instance, max31855_ctx_t **ctx);
 error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **ctx);
 error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx);
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx);

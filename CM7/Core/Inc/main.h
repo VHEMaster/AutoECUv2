@@ -95,10 +95,10 @@ void Error_Handler(void);
 #define OUTS1_IN9_GPIO_Port GPIOA
 #define OUTS1_IN10_Pin GPIO_PIN_7
 #define OUTS1_IN10_GPIO_Port GPIOA
-#define SPI6_NSS_EGT1_Pin GPIO_PIN_4
-#define SPI6_NSS_EGT1_GPIO_Port GPIOC
-#define SPI6_NSS_EGT2_Pin GPIO_PIN_5
-#define SPI6_NSS_EGT2_GPIO_Port GPIOC
+#define SPI6_NSS_TCS1_Pin GPIO_PIN_4
+#define SPI6_NSS_TCS1_GPIO_Port GPIOC
+#define SPI6_NSS_TCS2_Pin GPIO_PIN_5
+#define SPI6_NSS_TCS2_GPIO_Port GPIOC
 #define OUTS2_CH3_Pin GPIO_PIN_0
 #define OUTS2_CH3_GPIO_Port GPIOB
 #define OUTS2_CH4_Pin GPIO_PIN_1

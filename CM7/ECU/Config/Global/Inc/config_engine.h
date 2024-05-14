@@ -20,12 +20,25 @@ typedef struct {
 }ecu_config_engine_hw_t;
 
 typedef struct {
+    ckp_config_t ckp[ECU_SENSOR_CKP_MAX];
+    cmp_config_t cmp[ECU_SENSOR_CMP_MAX];
+    ect_config_t ect[ECU_SENSOR_ECT_MAX];
+    egt_config_t egt[ECU_SENSOR_EGT_MAX];
+    iat_config_t iat[ECU_SENSOR_IAT_MAX];
+    maf_config_t maf[ECU_SENSOR_MAF_MAX];
+    map_config_t map[ECU_SENSOR_MAP_MAX];
+    tps_config_t tps[ECU_SENSOR_TPS_MAX];
+    aps_config_t aps[ECU_SENSOR_APS_MAX];
+}ecu_config_engine_sens_t;
+
+typedef struct {
     ecu_config_data_identification_t id;
 
 }ecu_config_engine_sw_t;
 
 typedef struct {
     ecu_config_engine_hw_t hw;
+    ecu_config_engine_sens_t sens;
     ecu_config_engine_sw_t sw;
 }ecu_config_global_engine_t;
 

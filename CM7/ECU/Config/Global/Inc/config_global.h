@@ -15,6 +15,7 @@
 
 #include "flash.h"
 #include "config_devices.h"
+#include "config_sensors.h"
 
 #include "config_flash.h"
 #include "config_flexio.h"
@@ -22,7 +23,21 @@
 #include "config_stepper.h"
 #include "config_wbls.h"
 
+#include "config_ckp.h"
+#include "config_cmp.h"
+#include "config_ect.h"
+#include "config_egt.h"
+#include "config_iat.h"
+#include "config_maf.h"
+#include "config_map.h"
+#include "config_tps.h"
+#include "config_aps.h"
+
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
+
+typedef uint32_t ecu_config_item_type_t;
+typedef uint32_t ecu_index_type_t;
+typedef uint32_t ecu_instance_t;
 
 typedef enum {
   ECU_CONFIG_COMP_TYPE_FLEXIO = 0,
@@ -32,6 +47,20 @@ typedef enum {
   ECU_CONFIG_COMP_TYPE_ALL,
   ECU_CONFIG_COMP_TYPE_MAX
 }ecu_config_component_type_t;
+
+typedef enum {
+  ECU_CONFIG_SENS_TYPE_CKP = 0,
+  ECU_CONFIG_SENS_TYPE_CMP,
+  ECU_CONFIG_SENS_TYPE_ECT,
+  ECU_CONFIG_SENS_TYPE_EGT,
+  ECU_CONFIG_SENS_TYPE_IAT,
+  ECU_CONFIG_SENS_TYPE_MAF,
+  ECU_CONFIG_SENS_TYPE_MAP,
+  ECU_CONFIG_SENS_TYPE_TPS,
+  ECU_CONFIG_SENS_TYPE_APS,
+  ECU_CONFIG_SENS_TYPE_ALL,
+  ECU_CONFIG_SENS_TYPE_MAX
+}ecu_config_sensor_type_t;
 
 typedef enum {
   ECU_CONFIG_CALIB_TYPE_ID,
@@ -61,8 +90,8 @@ typedef enum {
 
 typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest, uint32_t dest_bytes);
 typedef error_t (*ecu_config_get_default_cfg_func_t)(ecu_index_type_t index, void *config);
-typedef error_t (*ecu_config_configure_func_t)(ecu_device_instance_t instance, const void *config);
-typedef error_t (*ecu_config_reset_func_t)(ecu_device_instance_t instance);
+typedef error_t (*ecu_config_configure_func_t)(ecu_instance_t instance, const void *config);
+typedef error_t (*ecu_config_reset_func_t)(ecu_instance_t instance);
 
 typedef struct {
     uint32_t version;
@@ -89,7 +118,7 @@ typedef struct {
 }ecu_op_req_ctx_t;
 
 typedef struct {
-    ecu_device_type_t device_type;
+    ecu_config_item_type_t device_type;
     uint32_t instances_count;
     ecu_config_configure_func_t configure_func;
     ecu_config_reset_func_t reset_func;
@@ -105,6 +134,14 @@ typedef enum {
   ECU_CONFIG_FSM_RST_CFG_CONFIG,
   ECU_CONFIG_FSM_RST_CFG_MAX
 }ecu_config_global_rst_cfg_fsm_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_SENS_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_SENS_CFG_DEFINE,
+  ECU_CONFIG_FSM_SENS_CFG_RESET,
+  ECU_CONFIG_FSM_SENS_CFG_CONFIG,
+  ECU_CONFIG_FSM_SENS_CFG_MAX
+}ecu_config_global_sens_cfg_fsm_t;
 
 typedef enum {
   ECU_CONFIG_FSM_FLASH_CONDITION = 0,
@@ -133,6 +170,7 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
   ECU_CONFIG_FSM_PROCESS_CFG_RST,
+  ECU_CONFIG_FSM_PROCESS_SENS_CFG,
   ECU_CONFIG_FSM_PROCESS_OPERATION,
   ECU_CONFIG_FSM_PROCESS_MAX
 }ecu_config_global_process_fsm_t;
@@ -141,6 +179,8 @@ typedef struct {
     ecu_config_component_ctx_t *flash_ctx;
     uint32_t components_count;
     ecu_config_component_ctx_t *components;
+    uint32_t sensors_count;
+    ecu_config_component_ctx_t *sensors;
     uint32_t calibrations_count;
     ecu_config_generic_ctx_t *calibrations;
     uint32_t runtimes_count;
@@ -148,6 +188,7 @@ typedef struct {
     bool global_ready;
     bool components_initialized;
     bool flash_initialized;
+    bool sensors_initialized;
 
     ecu_config_op_t op_request;
     error_t op_req_errcode_internal;
@@ -168,12 +209,15 @@ typedef struct {
 
     ecu_config_global_flash_fsm_t fsm_flash;
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
+    ecu_config_global_sens_cfg_fsm_t fsm_sens_cfg;
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
     bool process_comps_init;
+    bool process_sens_init;
     bool process_flash_init;
     error_t process_result;
+    ecu_config_sensor_type_t process_sens_type;
     ecu_config_component_type_t process_comp_type;
     ecu_device_instance_t process_instance;
 }ecu_config_global_runtime_ctx_t;
@@ -183,6 +227,7 @@ void ecu_config_global_loop_main(void);
 void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
 error_t ecu_config_global_components_initialize(void);
+error_t ecu_config_global_sensors_initialize(void);
 
 error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index, ecu_instance_t instance);
 
