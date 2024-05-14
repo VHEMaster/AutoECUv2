@@ -1500,6 +1500,12 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
         }
       }
 
+      gpio_init.Pin = input->pin.pin;
+      gpio_init.Mode = GPIO_MODE_AF_PP;
+      gpio_init.Alternate = input->tim_alternate;
+      gpio_init.Pull = GPIO_NOPULL;
+      HAL_GPIO_Init(input->pin.port, &gpio_init);
+
     } else if(input->current_mode == ECU_GPIO_INPUT_TYPE_DIGITAL && input->exti_support == true) {
       switch(capture_edge) {
         case ECU_IN_CAPTURE_EDGE_BOTH:
