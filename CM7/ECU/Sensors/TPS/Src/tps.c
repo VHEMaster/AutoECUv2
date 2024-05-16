@@ -53,7 +53,7 @@ error_t tps_configure(tps_ctx_t *ctx, const tps_config_t *config)
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(*config));
+      memcpy(&ctx->config, config, sizeof(tps_config_t));
     }
 
     if(ctx->config.enabled == true) {

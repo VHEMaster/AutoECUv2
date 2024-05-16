@@ -18,7 +18,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
   bool enabled;
   input_value_t input_analog_value;
 
-  float speed, current, voltage, power_voltage, dutycycle;
+  float speed, current, voltage, power_voltage, dutycycle, target;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -40,6 +40,8 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     ctx->power_voltage = power_voltage;
 
     ctx->data.current_position = ctx->tps_data.position;
+    target = ctx->data.target_position;
+    target = CLAMP(target, 0.0f, 100.0f);
 
     enabled = ctx->data.enabled;
     err = ecu_devices_motor_set_enabled(ctx->config.sensor_tps, enabled);
@@ -63,7 +65,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       dutycycle = 0.0f;
     } else {
 
-      math_pid_set_target(&ctx->pid_position, ctx->data.target_position);
+      math_pid_set_target(&ctx->pid_position, target);
       speed = math_pid_update(&ctx->pid_position, ctx->position_current, now);
 
       math_pid_set_target(&ctx->pid_speed, speed);

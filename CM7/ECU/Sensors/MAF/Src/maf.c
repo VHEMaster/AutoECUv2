@@ -90,7 +90,7 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(*config));
+      memcpy(&ctx->config, config, sizeof(maf_config_t));
     }
 
     if(ctx->config.enabled == true) {
@@ -100,7 +100,6 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
       err = ecu_config_gpio_input_lock(ctx->config.input_pin);
       BREAK_IF(err != E_OK);
       ctx->pin_locked = true;
-
 
       switch(ctx->config.signal_mode) {
         case MAF_SIGNAL_MODE_ANALOG:

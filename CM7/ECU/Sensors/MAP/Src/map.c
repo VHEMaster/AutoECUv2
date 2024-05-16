@@ -35,7 +35,7 @@ error_t map_configure(map_ctx_t *ctx, const map_config_t *config)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(*config));
+      memcpy(&ctx->config, config, sizeof(map_config_t));
     }
 
     ctx->configured = true;

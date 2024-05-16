@@ -24,4 +24,6 @@ error_t ecu_devices_motor_set_enabled(ecu_device_motor_t instance, bool enabled)
 error_t ecu_devices_motor_set_dutycycle(ecu_device_motor_t instance, float dutycycle);
 error_t ecu_devices_motor_set_frequency(ecu_device_motor_t instance, float frequency);
 
+error_t ecu_devices_motor_reconfigure(ecu_device_motor_t instance);
+
 #endif /* CONFIG_INC_CONFIG_MOTOR_H_ */
