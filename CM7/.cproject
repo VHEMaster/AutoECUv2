@@ -59,7 +59,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/LL/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Hardware/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Software/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/LL/PulsedAdc/Inc"/>
@@ -117,10 +117,10 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
-						<entry excluding="Devices/TPIC8101" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry excluding="Devices/TPIC8101" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -180,7 +180,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/LL/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Hardware/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Software/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/LL/PulsedAdc/Inc"/>
@@ -237,11 +237,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
