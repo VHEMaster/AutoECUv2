@@ -12,6 +12,10 @@
 #include "bool.h"
 #include <stdint.h>
 
+#include "pid.h"
+#include "config_sensors.h"
+#include "config_devices.h"
+
 #define ETC_CONFIG_SIGNALS_MAX    (2)
 
 typedef enum {
@@ -21,6 +25,12 @@ typedef enum {
 
 typedef struct {
     bool enabled;
+    ecu_sensor_tps_t sensor_tps;
+    ecu_device_motor_t device_motor;
+
+    math_pid_koffs_t pid_position;
+    math_pid_koffs_t pid_speed;
+    math_pid_koffs_t pid_torque;
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;

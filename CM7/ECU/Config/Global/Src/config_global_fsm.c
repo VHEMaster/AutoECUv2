@@ -233,11 +233,102 @@ static error_t ecu_config_global_fsm_sens_cfg(ecu_config_global_runtime_ctx_t *c
   return err;
 }
 
+static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->fsm_module_cfg) {
+      case ECU_CONFIG_FSM_MODULE_CFG_CONDITION:
+        if(ctx->global_ready == true && ctx->process_module_init == true && ctx->process_result == E_AGAIN) {
+          ctx->modules_initialized = false;
+          ctx->process_module_type = 0;
+          ctx->process_instance = 0;
+          ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_DEFINE;
+          err = E_AGAIN;
+          for(int c = 0; c < ctx->modules_count; c++) {
+            ctx->modules[c].reset_errcode = err;
+            ctx->modules[c].config_errcode = err;
+          }
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case ECU_CONFIG_FSM_MODULE_CFG_DEFINE:
+        if(ctx->process_module_type >= ctx->modules_count) {
+          ctx->modules_initialized = true;
+          ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_CONDITION;
+          err = E_OK;
+          ctx->process_result = err;
+        } else {
+          err = E_AGAIN;
+          if(ctx->process_instance >= ctx->modules[ctx->process_module_type].instances_count) {
+            ctx->process_instance = 0;
+            ctx->process_module_type++;
+          } else {
+            ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_RESET;
+          }
+          continue;
+        }
+
+        break;
+      case ECU_CONFIG_FSM_MODULE_CFG_RESET:
+        if(ctx->modules[ctx->process_module_type].reset_func != NULL) {
+          err = ctx->modules[ctx->process_module_type].reset_func(ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->modules[ctx->process_module_type].reset_errcode == E_AGAIN ||
+              ctx->modules[ctx->process_module_type].reset_errcode == E_OK) {
+            ctx->modules[ctx->process_module_type].reset_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_CONFIG;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_MODULE_CFG_CONFIG:
+        if(ctx->modules[ctx->process_module_type].configure_func != NULL) {
+          err = ctx->modules[ctx->process_module_type].configure_func(ctx->process_instance, ctx->modules[ctx->process_module_type].generic.data_ptr +
+              ctx->modules[ctx->process_module_type].generic.data_size * ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->modules[ctx->process_module_type].config_errcode == E_AGAIN ||
+              ctx->modules[ctx->process_module_type].config_errcode == E_OK) {
+            ctx->modules[ctx->process_module_type].config_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_DEFINE;
+          ctx->process_instance++;
+          continue;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
 static void config_global_internal_calculate_index_max(ecu_config_global_runtime_ctx_t *ctx)
 {
   switch(ctx->op_type_index) {
     case ECU_CONFIG_TYPE_DEVICE:
       ctx->op_index_max = ctx->devices_count;
+      break;
+    case ECU_CONFIG_TYPE_SENSOR:
+      ctx->op_index_max = ctx->sensors_count;
+      break;
+    case ECU_CONFIG_TYPE_MODULE:
+      ctx->op_index_max = ctx->modules_count;
       break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_index_max = ctx->calibrations_count;
@@ -256,6 +347,12 @@ static void config_global_internal_calculate_instance_max(ecu_config_global_runt
   switch(ctx->op_type_index) {
     case ECU_CONFIG_TYPE_DEVICE:
       ctx->op_instance_max = ctx->devices[ctx->op_index].instances_count;
+      break;
+    case ECU_CONFIG_TYPE_SENSOR:
+      ctx->op_instance_max = ctx->sensors[ctx->op_index].instances_count;
+      break;
+    case ECU_CONFIG_TYPE_MODULE:
+      ctx->op_instance_max = ctx->modules[ctx->op_index].instances_count;
       break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_instance_max = 1;
@@ -346,6 +443,12 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             switch(ctx->op_type_index) {
               case ECU_CONFIG_TYPE_DEVICE:
                 req_ctx = &ctx->devices[ctx->op_index].generic;
+                break;
+              case ECU_CONFIG_TYPE_SENSOR:
+                req_ctx = &ctx->sensors[ctx->op_index].generic;
+                break;
+              case ECU_CONFIG_TYPE_MODULE:
+                req_ctx = &ctx->modules[ctx->op_index].generic;
                 break;
               case ECU_CONFIG_TYPE_CALIBRATION:
                 req_ctx = &ctx->calibrations[ctx->op_index];
@@ -619,6 +722,9 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
         break;
       case ECU_CONFIG_FSM_PROCESS_SENS_CFG:
         err = ecu_config_global_fsm_sens_cfg(ctx);
+        break;
+      case ECU_CONFIG_FSM_PROCESS_MODULE_CFG:
+        err = ecu_config_global_fsm_module_cfg(ctx);
         break;
       case ECU_CONFIG_FSM_PROCESS_OPERATION:
         err = ecu_config_global_fsm_operation(ctx);

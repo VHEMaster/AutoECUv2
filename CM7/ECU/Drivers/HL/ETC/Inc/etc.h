@@ -14,6 +14,14 @@
 #include <stdint.h>
 
 typedef struct {
+    bool enabled;
+    float target_position;
+    float current_position;
+    float dutycycle;
+    uint32_t diag;
+}etc_data_t;
+
+typedef struct {
     uint32_t dummy;
 }etc_init_ctx_t;
 
@@ -22,6 +30,8 @@ typedef struct {
     etc_config_t config;
     bool ready;
     bool configured;
+
+    etc_data_t data;
 
 }etc_ctx_t;
 

@@ -492,6 +492,7 @@ error_t ecu_config_global_flash_initialize(void)
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
 
     if(ctx->process_flash_init == false) {
@@ -517,6 +518,7 @@ error_t ecu_config_global_devices_initialize(void)
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
 
     if(ctx->process_devs_init == false) {
@@ -542,6 +544,7 @@ error_t ecu_config_global_sensors_initialize(void)
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
 
     if(ctx->process_sens_init == false) {
@@ -551,6 +554,32 @@ error_t ecu_config_global_sensors_initialize(void)
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
         ctx->process_sens_init = false;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_global_modules_initialize(void)
+{
+  error_t err = E_AGAIN;
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  do {
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+
+    if(ctx->process_module_init == false) {
+      ctx->process_module_init = true;
+      ctx->process_result = E_AGAIN;
+    } else {
+      if(ctx->process_result != E_AGAIN) {
+        err = ctx->process_result;
+        ctx->process_module_init = false;
       }
     }
   } while(0);

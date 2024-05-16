@@ -10,6 +10,7 @@
 #include "config_extern.h"
 #include "compiler.h"
 
+
 typedef struct {
     etc_config_t config_default;
     etc_init_ctx_t init;
@@ -18,6 +19,21 @@ typedef struct {
 
 static const etc_config_t ecu_modules_etc_config_default = {
     .enabled = true,
+    .sensor_tps = ECU_SENSOR_TPS_1,
+    .device_motor = ECU_DEVICE_MOTOR_1,
+
+    .pid_position = {
+        .Kp = 1.0f,
+        .Ki = 0.0f,
+        .Kd = 0.0f,
+    },
+    .pid_speed = {
+        .Kp = 1.0f,
+    },
+    .pid_torque = {
+        .Kp = 1.0f,
+        .Ki = 0.0f,
+    },
 };
 
 static ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
@@ -95,6 +111,58 @@ error_t ecu_modules_etc_reset(ecu_module_etc_t instance)
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
     err = etc_reset(etc_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_set_enabled(ecu_module_etc_t instance, bool enabled)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    etc_ctx->ctx->data.enabled = enabled;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_set_target_position(ecu_module_etc_t instance, float position)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    etc_ctx->ctx->data.target_position = position;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_get_data(ecu_module_etc_t instance, etc_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    *data = etc_ctx->ctx->data;
 
   } while(0);
 

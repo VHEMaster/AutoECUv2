@@ -84,6 +84,8 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_TYPE_DEVICE = 0,
+  ECU_CONFIG_TYPE_SENSOR,
+  ECU_CONFIG_TYPE_MODULE,
   ECU_CONFIG_TYPE_CALIBRATION,
   ECU_CONFIG_TYPE_RUNTIME,
   ECU_CONFIG_TYPE_ALL,
@@ -153,6 +155,14 @@ typedef enum {
 }ecu_config_global_sens_cfg_fsm_t;
 
 typedef enum {
+  ECU_CONFIG_FSM_MODULE_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_MODULE_CFG_DEFINE,
+  ECU_CONFIG_FSM_MODULE_CFG_RESET,
+  ECU_CONFIG_FSM_MODULE_CFG_CONFIG,
+  ECU_CONFIG_FSM_MODULE_CFG_MAX
+}ecu_config_global_module_cfg_fsm_t;
+
+typedef enum {
   ECU_CONFIG_FSM_FLASH_CONDITION = 0,
   ECU_CONFIG_FSM_FLASH_DEFINE,
   ECU_CONFIG_FSM_FLASH_RESET,
@@ -180,6 +190,7 @@ typedef enum {
   ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
   ECU_CONFIG_FSM_PROCESS_CFG_RST,
   ECU_CONFIG_FSM_PROCESS_SENS_CFG,
+  ECU_CONFIG_FSM_PROCESS_MODULE_CFG,
   ECU_CONFIG_FSM_PROCESS_OPERATION,
   ECU_CONFIG_FSM_PROCESS_MAX
 }ecu_config_global_process_fsm_t;
@@ -200,6 +211,7 @@ typedef struct {
     bool devices_initialized;
     bool flash_initialized;
     bool sensors_initialized;
+    bool modules_initialized;
 
     ecu_config_op_t op_request;
     error_t op_req_errcode_internal;
@@ -221,12 +233,14 @@ typedef struct {
     ecu_config_global_flash_fsm_t fsm_flash;
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_sens_cfg_fsm_t fsm_sens_cfg;
+    ecu_config_global_module_cfg_fsm_t fsm_module_cfg;
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
     bool process_flash_init;
     bool process_devs_init;
     bool process_sens_init;
+    bool process_module_init;
     error_t process_result;
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
@@ -240,6 +254,7 @@ void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
 error_t ecu_config_global_components_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
+error_t ecu_config_global_modules_initialize(void);
 
 error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index, ecu_instance_t instance);
 
