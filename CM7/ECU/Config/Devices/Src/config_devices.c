@@ -7,6 +7,7 @@
 
 #include "config_devices.h"
 #include "compiler.h"
+#include "bool.h"
 
 #define ECU_DEVICES_MAX (     \
     ECU_DEVICE_PULSEDADC_MAX +      \

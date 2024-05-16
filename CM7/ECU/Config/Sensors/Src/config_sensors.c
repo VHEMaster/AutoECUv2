@@ -7,6 +7,7 @@
 
 #include "config_sensors.h"
 #include "compiler.h"
+#include "bool.h"
 
 #define ECU_SENSORS_MAX (     \
     ECU_SENSOR_CKP_MAX +      \

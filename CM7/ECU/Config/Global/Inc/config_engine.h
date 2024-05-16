@@ -9,7 +9,8 @@
 #define CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_
 
 #include "versioned_sw.h"
-#include "versioned_hw.h"
+#include "versioned_devices.h"
+#include "versioned_modules.h"
 
 typedef struct {
     l9966_config_data_t flexio[ECU_DEVICE_FLEXIO_MAX];
@@ -17,7 +18,7 @@ typedef struct {
     tle4729_config_t stepper[ECU_DEVICE_STEPPER_MAX];
     cj125_config_t wbls[ECU_DEVICE_WBLS_MAX];
 
-}ecu_config_engine_hw_t;
+}ecu_config_engine_devs_t;
 
 typedef struct {
     ckp_config_t ckp[ECU_SENSOR_CKP_MAX];
@@ -32,13 +33,18 @@ typedef struct {
 }ecu_config_engine_sens_t;
 
 typedef struct {
+    etc_config_t etc[ECU_MODULE_ETC_MAX];
+}ecu_config_engine_modules_t;
+
+typedef struct {
     ecu_config_data_identification_t id;
 
 }ecu_config_engine_sw_t;
 
 typedef struct {
-    ecu_config_engine_hw_t hw;
+    ecu_config_engine_devs_t devs;
     ecu_config_engine_sens_t sens;
+    ecu_config_engine_modules_t modules;
     ecu_config_engine_sw_t sw;
 }ecu_config_global_engine_t;
 

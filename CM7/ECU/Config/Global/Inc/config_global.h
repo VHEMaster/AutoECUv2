@@ -16,6 +16,7 @@
 #include "flash.h"
 #include "config_devices.h"
 #include "config_sensors.h"
+#include "config_modules.h"
 
 #include "config_flash.h"
 #include "config_flexio.h"
@@ -33,6 +34,8 @@
 #include "config_tps.h"
 #include "config_aps.h"
 
+#include "config_etc.h"
+
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 
 typedef uint32_t ecu_config_item_type_t;
@@ -40,13 +43,13 @@ typedef uint32_t ecu_index_type_t;
 typedef uint32_t ecu_instance_t;
 
 typedef enum {
-  ECU_CONFIG_COMP_TYPE_FLEXIO = 0,
-  ECU_CONFIG_COMP_TYPE_MOTOR,
-  ECU_CONFIG_COMP_TYPE_STEPPER,
-  ECU_CONFIG_COMP_TYPE_WBLS,
-  ECU_CONFIG_COMP_TYPE_ALL,
-  ECU_CONFIG_COMP_TYPE_MAX
-}ecu_config_component_type_t;
+  ECU_CONFIG_DEV_TYPE_FLEXIO = 0,
+  ECU_CONFIG_DEV_TYPE_MOTOR,
+  ECU_CONFIG_DEV_TYPE_STEPPER,
+  ECU_CONFIG_DEV_TYPE_WBLS,
+  ECU_CONFIG_DEV_TYPE_ALL,
+  ECU_CONFIG_DEV_TYPE_MAX
+}ecu_config_device_type_t;
 
 typedef enum {
   ECU_CONFIG_SENS_TYPE_CKP = 0,
@@ -63,6 +66,12 @@ typedef enum {
 }ecu_config_sensor_type_t;
 
 typedef enum {
+  ECU_CONFIG_MODULE_TYPE_ETC = 0,
+  ECU_CONFIG_MODULE_TYPE_ALL,
+  ECU_CONFIG_MODULE_TYPE_MAX
+}ecu_config_module_type_t;
+
+typedef enum {
   ECU_CONFIG_CALIB_TYPE_ID,
   ECU_CONFIG_CALIB_TYPE_ALL,
   ECU_CONFIG_CALIB_TYPE_MAX
@@ -74,7 +83,7 @@ typedef enum {
 }ecu_config_runtime_type_t;
 
 typedef enum {
-  ECU_CONFIG_TYPE_COMPONENT = 0,
+  ECU_CONFIG_TYPE_DEVICE = 0,
   ECU_CONFIG_TYPE_CALIBRATION,
   ECU_CONFIG_TYPE_RUNTIME,
   ECU_CONFIG_TYPE_ALL,
@@ -125,7 +134,7 @@ typedef struct {
     ecu_config_generic_ctx_t generic;
     error_t reset_errcode;
     error_t config_errcode;
-}ecu_config_component_ctx_t;
+}ecu_config_device_ctx_t;
 
 typedef enum {
   ECU_CONFIG_FSM_RST_CFG_CONDITION = 0,
@@ -176,17 +185,19 @@ typedef enum {
 }ecu_config_global_process_fsm_t;
 
 typedef struct {
-    ecu_config_component_ctx_t *flash_ctx;
-    uint32_t components_count;
-    ecu_config_component_ctx_t *components;
+    ecu_config_device_ctx_t *flash_ctx;
+    uint32_t devices_count;
+    ecu_config_device_ctx_t *devices;
     uint32_t sensors_count;
-    ecu_config_component_ctx_t *sensors;
+    ecu_config_device_ctx_t *sensors;
+    uint32_t modules_count;
+    ecu_config_device_ctx_t *modules;
     uint32_t calibrations_count;
     ecu_config_generic_ctx_t *calibrations;
     uint32_t runtimes_count;
     ecu_config_generic_ctx_t *runtimes;
     bool global_ready;
-    bool components_initialized;
+    bool devices_initialized;
     bool flash_initialized;
     bool sensors_initialized;
 
@@ -214,11 +225,12 @@ typedef struct {
     ecu_config_global_process_fsm_t fsm_process;
 
     bool process_flash_init;
-    bool process_comps_init;
+    bool process_devs_init;
     bool process_sens_init;
     error_t process_result;
+    ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
-    ecu_config_component_type_t process_comp_type;
+    ecu_config_device_type_t process_module_type;
     ecu_device_instance_t process_instance;
 }ecu_config_global_runtime_ctx_t;
 

@@ -72,15 +72,15 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
 
     switch(ctx->fsm_rst_cfg) {
       case ECU_CONFIG_FSM_RST_CFG_CONDITION:
-        if(ctx->global_ready == true && ctx->process_comps_init == true && ctx->process_result == E_AGAIN) {
-          ctx->components_initialized = false;
-          ctx->process_comp_type = 0;
+        if(ctx->global_ready == true && ctx->process_devs_init == true && ctx->process_result == E_AGAIN) {
+          ctx->devices_initialized = false;
+          ctx->process_dev_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_DEFINE;
           err = E_AGAIN;
-          for(int c = 0; c < ctx->components_count; c++) {
-            ctx->components[c].reset_errcode = err;
-            ctx->components[c].config_errcode = err;
+          for(int c = 0; c < ctx->devices_count; c++) {
+            ctx->devices[c].reset_errcode = err;
+            ctx->devices[c].config_errcode = err;
           }
           continue;
         } else {
@@ -88,16 +88,16 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
         }
         break;
       case ECU_CONFIG_FSM_RST_CFG_DEFINE:
-        if(ctx->process_comp_type >= ctx->components_count) {
-          ctx->components_initialized = true;
+        if(ctx->process_dev_type >= ctx->devices_count) {
+          ctx->devices_initialized = true;
           ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->components[ctx->process_comp_type].instances_count) {
+          if(ctx->process_instance >= ctx->devices[ctx->process_dev_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_comp_type++;
+            ctx->process_dev_type++;
           } else {
             ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_RESET;
           }
@@ -106,15 +106,15 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
 
         break;
       case ECU_CONFIG_FSM_RST_CFG_RESET:
-        if(ctx->components[ctx->process_comp_type].reset_func != NULL) {
-          err = ctx->components[ctx->process_comp_type].reset_func(ctx->process_instance);
+        if(ctx->devices[ctx->process_dev_type].reset_func != NULL) {
+          err = ctx->devices[ctx->process_dev_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->components[ctx->process_comp_type].reset_errcode == E_AGAIN ||
-              ctx->components[ctx->process_comp_type].reset_errcode == E_OK) {
-            ctx->components[ctx->process_comp_type].reset_errcode = err;
+          if(ctx->devices[ctx->process_dev_type].reset_errcode == E_AGAIN ||
+              ctx->devices[ctx->process_dev_type].reset_errcode == E_OK) {
+            ctx->devices[ctx->process_dev_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_CONFIG;
@@ -122,16 +122,16 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
         }
         break;
       case ECU_CONFIG_FSM_RST_CFG_CONFIG:
-        if(ctx->components[ctx->process_comp_type].configure_func != NULL) {
-          err = ctx->components[ctx->process_comp_type].configure_func(ctx->process_instance, ctx->components[ctx->process_comp_type].generic.data_ptr +
-              ctx->components[ctx->process_comp_type].generic.data_size * ctx->process_instance);
+        if(ctx->devices[ctx->process_dev_type].configure_func != NULL) {
+          err = ctx->devices[ctx->process_dev_type].configure_func(ctx->process_instance, ctx->devices[ctx->process_dev_type].generic.data_ptr +
+              ctx->devices[ctx->process_dev_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->components[ctx->process_comp_type].config_errcode == E_AGAIN ||
-              ctx->components[ctx->process_comp_type].config_errcode == E_OK) {
-            ctx->components[ctx->process_comp_type].config_errcode = err;
+          if(ctx->devices[ctx->process_dev_type].config_errcode == E_AGAIN ||
+              ctx->devices[ctx->process_dev_type].config_errcode == E_OK) {
+            ctx->devices[ctx->process_dev_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_rst_cfg = ECU_CONFIG_FSM_RST_CFG_DEFINE;
@@ -236,8 +236,8 @@ static error_t ecu_config_global_fsm_sens_cfg(ecu_config_global_runtime_ctx_t *c
 static void config_global_internal_calculate_index_max(ecu_config_global_runtime_ctx_t *ctx)
 {
   switch(ctx->op_type_index) {
-    case ECU_CONFIG_TYPE_COMPONENT:
-      ctx->op_index_max = ctx->components_count;
+    case ECU_CONFIG_TYPE_DEVICE:
+      ctx->op_index_max = ctx->devices_count;
       break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_index_max = ctx->calibrations_count;
@@ -254,8 +254,8 @@ static void config_global_internal_calculate_index_max(ecu_config_global_runtime
 static void config_global_internal_calculate_instance_max(ecu_config_global_runtime_ctx_t *ctx)
 {
   switch(ctx->op_type_index) {
-    case ECU_CONFIG_TYPE_COMPONENT:
-      ctx->op_instance_max = ctx->components[ctx->op_index].instances_count;
+    case ECU_CONFIG_TYPE_DEVICE:
+      ctx->op_instance_max = ctx->devices[ctx->op_index].instances_count;
       break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_instance_max = 1;
@@ -344,8 +344,8 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             }
           } else {
             switch(ctx->op_type_index) {
-              case ECU_CONFIG_TYPE_COMPONENT:
-                req_ctx = &ctx->components[ctx->op_index].generic;
+              case ECU_CONFIG_TYPE_DEVICE:
+                req_ctx = &ctx->devices[ctx->op_index].generic;
                 break;
               case ECU_CONFIG_TYPE_CALIBRATION:
                 req_ctx = &ctx->calibrations[ctx->op_index];

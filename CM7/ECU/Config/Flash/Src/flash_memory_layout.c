@@ -515,6 +515,22 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .sector_index = 2,
         .uses_full_block = false,
     },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_ETC,
+        .section_index = ECU_MODULE_ETC_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 0,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_ETC,
+        .section_index = ECU_MODULE_ETC_2,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 1,
+        .uses_full_block = false,
+    },
 };
 
 static uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};
