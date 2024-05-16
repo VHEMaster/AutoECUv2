@@ -174,6 +174,7 @@ typedef struct {
     time_us_t sqncr_last;
     time_delta_us_t sqncr_diff;
     float sqncr_cmd_results[L9966_CHANNELS];
+    uint16_t sqncr_cmd_results_raw[L9966_CHANNELS];
     uint16_t sqncr_cmd_ready_mask;
 
     float sc_result;

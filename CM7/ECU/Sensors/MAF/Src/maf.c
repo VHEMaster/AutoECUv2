@@ -82,9 +82,9 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ctx->configured == true && ctx->pin_locked == true) {
-      (void)ecu_config_gpio_input_unlock(ctx->config.input_pin);
-      ctx->pin_locked = false;
+    if(ctx->configured == true) {
+      err = maf_reset(ctx);
+      BREAK_IF(err != E_OK);
     }
 
     ctx->configured = false;
@@ -93,43 +93,44 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
       memcpy(&ctx->config, config, sizeof(*config));
     }
 
-    err = ecu_config_gpio_input_get_id(ctx->config.input_pin, &ctx->input_id);
-    BREAK_IF(err != E_OK);
+    if(ctx->config.enabled == true) {
+      err = ecu_config_gpio_input_get_id(ctx->config.input_pin, &ctx->input_id);
+      BREAK_IF(err != E_OK);
 
-    err = ecu_config_gpio_input_lock(ctx->config.input_pin);
-    BREAK_IF(err != E_OK);
-    ctx->pin_locked = true;
+      err = ecu_config_gpio_input_lock(ctx->config.input_pin);
+      BREAK_IF(err != E_OK);
+      ctx->pin_locked = true;
 
 
-    switch(ctx->config.signal_mode) {
-      case MAF_SIGNAL_MODE_ANALOG:
-        err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_ANALOG);
-        BREAK_IF(err != E_OK);
-        err = ecu_config_gpio_input_register_callback(ctx->config.input_pin, NULL);
-        BREAK_IF(err != E_OK);
-        break;
-      case MAF_SIGNAL_MODE_FREQUENCY:
-        err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_CAPTURE);
-        BREAK_IF(err != E_OK);
-        err = ecu_config_gpio_input_set_capture_edge(ctx->config.input_pin, ECU_IN_CAPTURE_EDGE_BOTH);
-        BREAK_IF(err != E_OK);
-        err = ecu_config_gpio_input_set_usrdata(ctx->config.input_pin, ctx);
-        BREAK_IF(err != E_OK);
-        err = ecu_config_gpio_input_register_callback(ctx->config.input_pin, maf_gpio_input_cb);
-        BREAK_IF(err != E_OK);
-        break;
-      default:
-        err = E_PARAM;
+      switch(ctx->config.signal_mode) {
+        case MAF_SIGNAL_MODE_ANALOG:
+          err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_ANALOG);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_register_callback(ctx->config.input_pin, NULL);
+          BREAK_IF(err != E_OK);
+          break;
+        case MAF_SIGNAL_MODE_FREQUENCY:
+          err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_CAPTURE);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_capture_edge(ctx->config.input_pin, ECU_IN_CAPTURE_EDGE_BOTH);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_set_usrdata(ctx->config.input_pin, ctx);
+          BREAK_IF(err != E_OK);
+          err = ecu_config_gpio_input_register_callback(ctx->config.input_pin, maf_gpio_input_cb);
+          BREAK_IF(err != E_OK);
+          break;
+        default:
+          err = E_PARAM;
+      }
+      BREAK_IF(err != E_OK);
+
+      ctx->configured = true;
     }
-    BREAK_IF(err != E_OK);
-
-    ctx->configured = true;
 
   } while(0);
 
-  if(err != E_OK && ctx->pin_locked == true) {
-    (void)ecu_config_gpio_input_unlock(ctx->config.input_pin);
-    ctx->pin_locked = false;
+  if(err != E_OK) {
+    (void)maf_reset(ctx);
   }
 
   return err;
@@ -174,7 +175,8 @@ void maf_loop_slow(maf_ctx_t *ctx)
       if(ctx->started == true) {
         if(ctx->config.signal_mode == MAF_SIGNAL_MODE_ANALOG) {
           err = input_get_value(ctx->input_id, &input_analog_value, NULL);
-          BREAK_IF(err != E_OK);
+          BREAK_IF(err != E_OK && err != E_AGAIN);
+
           ctx->input_value = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
 
           if(ctx->input_value > ctx->config.signal_voltage_to_value.input_high) {

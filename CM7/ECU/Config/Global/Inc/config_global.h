@@ -213,9 +213,9 @@ typedef struct {
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
+    bool process_flash_init;
     bool process_comps_init;
     bool process_sens_init;
-    bool process_flash_init;
     error_t process_result;
     ecu_config_sensor_type_t process_sens_type;
     ecu_config_component_type_t process_comp_type;

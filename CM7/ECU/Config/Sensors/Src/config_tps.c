@@ -17,7 +17,39 @@ typedef struct {
 }ecu_sensors_tps_ctx_t;
 
 static const tps_config_t ecu_sensors_tps_config_default = {
+    .enabled = true,
+    .signals_used_count = 2,
+    .signals = {
+        {
+            .voltage_pos_min = 0.485f,
+            .voltage_pos_max = 4.682f,
 
+            .voltage_low_thr = 0.40f,
+            .voltage_high_thr = 4.76f,
+
+            .input_pin = ECU_IN_PORT2_PIN11,
+        },
+        {
+            .voltage_pos_min = 4.524f,
+            .voltage_pos_max = 0.328f,
+
+            .voltage_low_thr = 0.26f,
+            .voltage_high_thr = 4.60f,
+
+            .input_pin = ECU_IN_PORT2_PIN10,
+        },
+    },
+    .signals_position_imbalance_max = 0.5f,
+    .position_min = 0.0f,
+    .position_max = 107.0f,
+
+    .position_min_clamp = 0.0f,
+    .position_max_clamp = 100.0f,
+
+    .slew_rate = 4000.0f,
+    .dead_zone = 0.0f,
+
+    .boot_time = 50 * TIME_US_IN_MS,
 };
 
 static ecu_sensors_tps_ctx_t ecu_sensors_tps_ctx[ECU_SENSOR_TPS_MAX] = {

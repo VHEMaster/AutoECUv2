@@ -8,6 +8,7 @@
 #include "tps.h"
 #include "compiler.h"
 #include <string.h>
+#include <float.h>
 
 error_t tps_init(tps_ctx_t *ctx, const tps_init_ctx_t *init_ctx)
 {
@@ -34,13 +35,41 @@ error_t tps_configure(tps_ctx_t *ctx, const tps_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
+    if(ctx->configured == true) {
+      err = tps_reset(ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    ctx->configured = false;
+
     if(&ctx->config != config) {
       memcpy(&ctx->config, config, sizeof(*config));
     }
 
-    ctx->configured = true;
+    if(ctx->config.enabled == true) {
+      for(int i = 0; i < ctx->config.signals_used_count; i++) {
+        err = ecu_config_gpio_input_get_id(ctx->config.signals[i].input_pin, &ctx->input_ids[i]);
+        BREAK_IF(err != E_OK);
+
+        err = ecu_config_gpio_input_lock(ctx->config.signals[i].input_pin);
+        BREAK_IF(err != E_OK);
+        ctx->pins_locked[i] = true;
+
+        err = ecu_config_gpio_input_set_mode(ctx->config.signals[i].input_pin, ECU_GPIO_INPUT_TYPE_ANALOG);
+        BREAK_IF(err != E_OK);
+        err = ecu_config_gpio_input_register_callback(ctx->config.signals[i].input_pin, NULL);
+        BREAK_IF(err != E_OK);
+      }
+      BREAK_IF(err != E_OK);
+
+      ctx->configured = true;
+    }
 
   } while(0);
+
+  if(err != E_OK) {
+    (void)tps_reset(ctx);
+  }
 
   return err;
 }
@@ -55,6 +84,13 @@ error_t tps_reset(tps_ctx_t *ctx)
 
     ctx->configured = false;
 
+    for(int i = 0; i < TPS_CONFIG_SIGNALS_MAX; i++) {
+      if(ctx->pins_locked[i] == true) {
+        (void)ecu_config_gpio_input_unlock(ctx->config.signals[i].input_pin);
+        ctx->pins_locked[i] = false;
+      }
+    }
+
   } while(0);
 
   return err;
@@ -67,7 +103,115 @@ void tps_loop_main(tps_ctx_t *ctx)
 
 void tps_loop_slow(tps_ctx_t *ctx)
 {
+  time_us_t now = time_get_current_us();
+  error_t err = E_OK;
+  input_value_t input_analog_value;
+  time_delta_us_t time_delta;
+  const tps_config_signal_t *signal_cfg;
+  float voltage, pos_raw, imbalance, pos_unfiltered, pos_clamp, pos, allowed_rate, pos_diff;
+  float pos_min = FLT_MAX;
+  float pos_max = FLT_MIN;
+  bool signal_failed;
+  uint8_t signals_ok;
 
+  do {
+    BREAK_IF(ctx == NULL);
+    if(ctx->configured == true) {
+      time_delta = time_diff(now, ctx->signal_poll_time);
+
+      for(int i = 0; i < ctx->config.signals_used_count; i++) {
+        (void)input_get_value(ctx->input_ids[i], &input_analog_value, NULL);
+        voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
+        ctx->voltages[i] = voltage;
+      }
+
+      if(ctx->started == true) {
+        ctx->signal_poll_time = now;
+
+        for(int i = 0; i < ctx->config.signals_used_count; i++) {
+          signal_cfg = &ctx->config.signals[i];
+
+          err = input_get_value(ctx->input_ids[i], &input_analog_value, NULL);
+          BREAK_IF(err != E_OK && err != E_AGAIN);
+          err = E_OK;
+
+          signal_failed = false;
+          if(ctx->voltages[i] > signal_cfg->voltage_high_thr) {
+            ctx->diag_value |= TPS_DIAG_SIGNAL_1_LEVEL_HIGH << (i * 2);
+            signal_failed = true;
+          } else {
+            ctx->diag_value &= ~(TPS_DIAG_SIGNAL_1_LEVEL_HIGH << (i * 2));
+          }
+
+          if(ctx->voltages[i] < signal_cfg->voltage_low_thr) {
+            ctx->diag_value |= TPS_DIAG_SIGNAL_1_LEVEL_LOW << (i * 2);
+            signal_failed = true;
+          } else {
+            ctx->diag_value &= ~(TPS_DIAG_SIGNAL_1_LEVEL_LOW << (i * 2));
+          }
+
+          pos_raw = ctx->voltages[i] - signal_cfg->voltage_pos_min;
+          pos_raw /= signal_cfg->voltage_pos_max - signal_cfg->voltage_pos_min;
+          pos_raw *= ctx->config.position_max - ctx->config.position_min;
+          pos_raw += ctx->config.position_min;
+
+          ctx->positions_raw[i] = pos_raw;
+          ctx->signal_failed[i] = signal_failed;
+        }
+        BREAK_IF(err != E_OK);
+
+        imbalance = 0;
+        pos_unfiltered = 0;
+        signals_ok = 0;
+        for(int i = 0; i < ctx->config.signals_used_count; i++) {
+          if(ctx->signal_failed[i] == false) {
+            if(pos_min > ctx->positions_raw[i]) {
+              pos_min = ctx->positions_raw[i];
+            }
+            if(pos_max < ctx->positions_raw[i]) {
+              pos_max = ctx->positions_raw[i];
+            }
+            pos_unfiltered += ctx->positions_raw[i];
+            signals_ok++;
+          }
+        }
+        if(signals_ok > 0) {
+          pos_unfiltered /= signals_ok;
+          imbalance = pos_max - pos_min;
+          if(imbalance > ctx->config.signals_position_imbalance_max) {
+            ctx->diag_value |= TPS_DIAG_SIGNALS_IMBALANCE;
+          } else {
+            ctx->diag_value &= ~TPS_DIAG_SIGNALS_IMBALANCE;
+          }
+        }
+        ctx->position_imbalance = imbalance;
+        ctx->position_unfiltered = pos_unfiltered;
+
+        if(ctx->config.dead_zone > 0) {
+          pos_unfiltered = (pos_unfiltered - ctx->config.dead_zone) / ((100.0f - ctx->config.dead_zone) * 0.01f);
+        }
+        pos_clamp = CLAMP(pos_unfiltered, ctx->config.position_min_clamp, ctx->config.position_max_clamp);
+        pos = ctx->position;
+
+        allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
+        pos_diff = pos_clamp - pos;
+        pos_diff = CLAMP(pos_diff, -allowed_rate, allowed_rate);
+        pos += pos_diff;
+
+
+        ctx->position = pos;
+        ctx->poll_delta = time_delta;
+      } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
+        ctx->started = true;
+      }
+    } else {
+      ctx->signal_poll_time = now;
+      ctx->startup_time = now;
+      ctx->position_imbalance = 0;
+      ctx->position_unfiltered = 0;
+      ctx->position = 0;
+    }
+  } while(0);
 }
 
 ITCM_FUNC void tps_loop_fast(tps_ctx_t *ctx)

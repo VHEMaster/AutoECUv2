@@ -378,36 +378,38 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                 } else {
                   resistor = ctx->config.rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
                 }
+                ctx->sqncr_cmd_results_raw[i] = result_resistor.bits.ADC_RESULT;
                 result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
                 data_available = true;
               }
             } else if(sqncr_cmd->r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
               result_voltage.data = ctx->fsm_rx_burst_payload[i];
               if(result_voltage.bits.NEW_RESULT_FLAG) {
-                result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
+                ctx->sqncr_cmd_results_raw[i] = result_voltage.bits.ADC_RESULT;
+                result_float = result_voltage.bits.ADC_RESULT;
                 switch(i + 1) {
                   case L9966_CFG_SQNCR_PC_UBSW:
-                    result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
+                    result_float *= L9966_DIV_INTERNAL_UBSW * 0.0003f;
                     break;
                   case L9966_CFG_SQNCR_PC_VI5V:
-                    result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
+                    result_float *= L9966_DIV_INTERNAL_VI5V * 0.0003f;
                     break;
                   case L9966_CFG_SQNCR_PC_VIX:
-                    result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
+                    result_float *= L9966_DIV_INTERNAL_VIX * 0.0003f;
                     break;
                   default:
                     switch(sqncr_cmd->pu_div_sel) {
                       case L9966_CFG_SQNCR_CMD_DIV_5V:
-                        result_float *= 5.0f;
+                        result_float *= 0.00122f;
                         break;
                       case L9966_CFG_SQNCR_CMD_DIV_20V:
-                        result_float *= 20.0f;
+                        result_float *= 0.005f;
                         break;
                       case L9966_CFG_SQNCR_CMD_DIV_40V:
-                        result_float *= 40.0f;
+                        result_float *= 0.010f;
                         break;
                       case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                        result_float *= 1.25f;
+                        result_float *= 0.0003f;
                       default:
                         break;
                     }
