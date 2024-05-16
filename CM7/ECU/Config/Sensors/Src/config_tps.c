@@ -155,6 +155,7 @@ error_t ecu_sensors_tps_get_value(ecu_sensor_tps_t instance, ecu_sensor_tps_valu
     }
     result.position = tps_ctx->ctx->position;
     result.position_unfiltered = tps_ctx->ctx->position_unfiltered;
+    result.data_valid = tps_ctx->ctx->data_valid;
 
     *value = result;
 

@@ -36,7 +36,7 @@ error_t tps_configure(tps_ctx_t *ctx, const tps_config_t *config)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
 
-    BREAK_IF_ACTION(config->signals_used_count >= TPS_CONFIG_SIGNALS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->signals_used_count > TPS_CONFIG_SIGNALS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->position_min_clamp >= config->position_max_clamp, err = E_PARAM);
 
     for(int i = 0; i < config->signals_used_count; i++) {
@@ -120,7 +120,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
   const tps_config_signal_t *signal_cfg;
   float voltage, pos_raw, imbalance, pos_unfiltered, pos_clamp, pos, allowed_rate, pos_diff;
   float pos_min = FLT_MAX;
-  float pos_max = FLT_MIN;
+  float pos_max = -FLT_MAX;
   bool signal_failed;
   uint8_t signals_ok;
 
@@ -210,6 +210,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
 
         ctx->position = pos;
         ctx->poll_delta = time_delta;
+        ctx->data_valid = true;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }

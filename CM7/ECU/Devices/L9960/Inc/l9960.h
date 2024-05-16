@@ -22,11 +22,11 @@
 #define L9960_STATUS_POLL_PERIOD_UD   (10 * TIME_US_IN_MS)
 #define L9966_RESET_WAIT_US           (1 * TIME_US_IN_MS)
 
-#define L9966_DIAGOFF_WAIT_US         (5 * TIME_US_IN_MS)
-#define L9966_DIAGOFF_TIMEOUT         (100 * TIME_US_IN_MS)
-
 #define L9966_HWSC_WAIT_US            (5 * TIME_US_IN_MS)
-#define L9966_HWSC_TIMEOUT            (100 * TIME_US_IN_MS)
+#define L9966_HWSC_TIMEOUT            (200 * TIME_US_IN_MS)
+
+#define L9966_DIAGOFF_WAIT_US         (5 * TIME_US_IN_MS)
+#define L9966_DIAGOFF_TIMEOUT         (500 * TIME_US_IN_MS)
 
 typedef enum {
   L9960_STATUS_OC_OK = 0,
@@ -112,6 +112,7 @@ typedef enum {
 
 typedef enum {
   L9960_DIAGOFF_CONDITION = 0,
+  L9960_DIAGOFF_INITIAL_WAIT,
   L9960_DIAGOFF_INITIAL,
   L9960_DIAGOFF_WAIT,
   L9960_DIAGOFF_REQUEST,

@@ -25,12 +25,13 @@ typedef enum {
 
 typedef struct {
     bool enabled;
+    ecu_gpio_input_pin_t power_voltage_pin;
     ecu_sensor_tps_t sensor_tps;
     ecu_device_motor_t device_motor;
+    uint16_t pwm_freq;
 
     math_pid_koffs_t pid_position;
     math_pid_koffs_t pid_speed;
-    math_pid_koffs_t pid_torque;
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;

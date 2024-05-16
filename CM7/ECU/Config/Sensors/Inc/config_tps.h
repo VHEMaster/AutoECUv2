@@ -18,6 +18,7 @@ typedef struct {
     float positions[TPS_CONFIG_SIGNALS_MAX];
     float position;
     float position_unfiltered;
+    bool data_valid;
 }ecu_sensor_tps_value_t;
 
 error_t ecu_sensors_tps_init(ecu_sensor_tps_t instance, tps_ctx_t *ctx);

@@ -180,7 +180,7 @@ error_t l9960_set_enabled(l9960_ctx_t *ctx, bool enabled)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
-    l9960_set_enabled(ctx, enabled);
+    l9960_internal_set_enabled(ctx, enabled);
 
   } while(0);
 

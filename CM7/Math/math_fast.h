@@ -8,7 +8,7 @@
 #ifndef MATH_FAST_H_
 #define MATH_FAST_H_
 
-#include "defines.h"
+#include "compiler.h"
 
 STATIC_INLINE float fast_sqrt(float number)
 {

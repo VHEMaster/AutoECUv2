@@ -19,20 +19,18 @@ typedef struct {
 
 static const etc_config_t ecu_modules_etc_config_default = {
     .enabled = true,
+    .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .sensor_tps = ECU_SENSOR_TPS_1,
     .device_motor = ECU_DEVICE_MOTOR_1,
+    .pwm_freq = 4000,
 
     .pid_position = {
-        .Kp = 1.0f,
-        .Ki = 0.0f,
-        .Kd = 0.0f,
+        .Kp = 100.0,
+        .Ki = 50.0,
+        .Kd = 0.050f,
     },
     .pid_speed = {
-        .Kp = 1.0f,
-    },
-    .pid_torque = {
-        .Kp = 1.0f,
-        .Ki = 0.0f,
+        .Kp = 0.005f,
     },
 };
 

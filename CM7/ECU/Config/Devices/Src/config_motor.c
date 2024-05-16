@@ -7,10 +7,12 @@
 
 #include "config_motor.h"
 #include "config_extern.h"
+#include "config_rcc.h"
 #include "middlelayer_spi.h"
 #include "compiler.h"
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 typedef struct {
     ecu_spi_slave_enum_t slave_index;
@@ -22,12 +24,16 @@ typedef struct {
     __IO uint32_t *channel_ccr;
     bool tim_started;
     l9960_ctx_t *ctx;
+    float pwm_frequency;
+
+    bool pulse_dir;
+    uint32_t pulse_pwm;
 }ecu_devices_motor_ctx_t;
 
 static const l9960_config_t ecu_devices_motor_config_default = {
     .comm_check = L9960_CONFIG_CC_ENABLED,
     .diag_clr_en = L9960_CONFIG_DCE_ENABLED,
-    .tsw_low_current = L9960_CONFIG_TLC_GATEFB_OR_OUTON,
+    .tsw_low_current = L9960_CONFIG_TLC_GATEFB_ONLY,
     .tdiag1 = L9960_CONFIG_TD1_45US,
     .voltage_slew_rate = L9960_CONFIG_VSR_FAST,
     .current_slow_rate = L9960_CONFIG_ISR_FAST,
@@ -42,7 +48,7 @@ static const l9960_config_t ecu_devices_motor_config_default = {
     .in1_in2_if = L9960_CONFIG_IIF_PWM_DIR,
     .otwarn_tsec_en = L9960_CONFIG_OTWTSE_DISABLED,
     .tvvl = L9960_CONFIG_TVVL_400US,
-    .vvl_mode = L9960_CONFIG_VVL_DISABLED,
+    .vvl_mode = L9960_CONFIG_VVL_ENABLED,
     .ol_on = L9960_CONFIG_OLON_ENABLED,
 };
 
@@ -114,6 +120,29 @@ error_t ecu_devices_motor_get_default_config(ecu_device_motor_t instance, l9960_
   return err;
 }
 
+static void ecu_devices_motor_pulse_cplt(TIM_HandleTypeDef *htim)
+{
+  ecu_devices_motor_ctx_t *motor_ctx;
+  uint32_t usrdata_index = POSITION_VAL(htim->Channel);
+
+  do {
+    BREAK_IF(usrdata_index >= ITEMSOF(htim->usrdata));
+
+    motor_ctx = htim->usrdata[usrdata_index];
+
+    BREAK_IF(motor_ctx == NULL);
+
+    if(motor_ctx->channel_ccr != NULL) {
+      *motor_ctx->channel_ccr = motor_ctx->pulse_pwm;
+    }
+
+    if(gpio_valid(&motor_ctx->dir_pin)) {
+      gpio_write(&motor_ctx->dir_pin, motor_ctx->pulse_dir);
+    }
+
+  } while(0);
+}
+
 error_t ecu_devices_motor_configure(ecu_device_motor_t instance, const l9960_config_t *config)
 {
   error_t err = E_OK;
@@ -128,27 +157,35 @@ error_t ecu_devices_motor_configure(ecu_device_motor_t instance, const l9960_con
     switch(motor_ctx->channel_pwm) {
       case TIM_CHANNEL_1:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR1;
+        motor_ctx->htim_pwm->usrdata[0] = motor_ctx;
         break;
       case TIM_CHANNEL_2:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR2;
+        motor_ctx->htim_pwm->usrdata[1] = motor_ctx;
         break;
       case TIM_CHANNEL_3:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR3;
+        motor_ctx->htim_pwm->usrdata[2] = motor_ctx;
         break;
       case TIM_CHANNEL_4:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR4;
+        motor_ctx->htim_pwm->usrdata[3] = motor_ctx;
         break;
       case TIM_CHANNEL_5:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR5;
+        motor_ctx->htim_pwm->usrdata[4] = motor_ctx;
         break;
       case TIM_CHANNEL_6:
         motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR6;
+        motor_ctx->htim_pwm->usrdata[5] = motor_ctx;
         break;
       default:
         err = E_PARAM;
         break;
     }
     BREAK_IF(err != E_OK);
+
+    HAL_TIM_RegisterCallback(motor_ctx->htim_pwm, HAL_TIM_PWM_PULSE_FINISHED_CB_ID, ecu_devices_motor_pulse_cplt);
 
     err = l9960_configure(motor_ctx->ctx, config);
 
@@ -170,7 +207,7 @@ error_t ecu_devices_motor_reset(ecu_device_motor_t instance)
     err = l9960_reset(motor_ctx->ctx);
     if(err != E_AGAIN) {
       if(motor_ctx->tim_started) {
-        HAL_TIM_PWM_Stop(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
+        HAL_TIM_PWM_Stop_IT(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
         motor_ctx->tim_started = false;
       }
     }
@@ -225,14 +262,14 @@ error_t ecu_devices_motor_set_enabled(ecu_device_motor_t instance, bool enabled)
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
-    err = l9960_set_enabled(motor_ctx->ctx, enabled);
-    BREAK_IF(err != E_OK);
-
     if(motor_ctx->tim_started != enabled) {
+      err = l9960_set_enabled(motor_ctx->ctx, enabled);
+      BREAK_IF(err != E_OK);
+
       if(enabled == false) {
-        status = HAL_TIM_PWM_Stop(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
+        status = HAL_TIM_PWM_Stop_IT(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
       } else {
-        status = HAL_TIM_PWM_Start(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
+        status = HAL_TIM_PWM_Start_IT(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
       }
       BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
@@ -266,13 +303,43 @@ error_t ecu_devices_motor_set_dutycycle(ecu_device_motor_t instance, float dutyc
     value = roundf(value);
     ccr = MIN(value, arr);
 
-    if(motor_ctx->channel_ccr != NULL) {
-      *motor_ctx->channel_ccr = ccr;
-    }
-    if(gpio_valid(&motor_ctx->dir_pin)) {
-      gpio_write(&motor_ctx->dir_pin, dir);
-    }
+    motor_ctx->pulse_pwm = ccr;
+    motor_ctx->pulse_dir = dir;
 
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_motor_set_frequency(ecu_device_motor_t instance, float frequency)
+{
+  error_t err = E_OK;
+  ecu_devices_motor_ctx_t *motor_ctx;
+  uint32_t base_freq, arr, psc;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+
+    motor_ctx = &ecu_devices_motor_ctx[instance];
+
+    if(motor_ctx->pwm_frequency != frequency) {
+
+      err = ecu_config_get_tim_base_frequency(motor_ctx->htim_pwm, &base_freq);
+      BREAK_IF(err != E_OK);
+
+      psc = base_freq / 1000000;
+      arr = roundf((float)1000000.0f / frequency);
+
+      while((arr < ECU_CONFIG_MOTOR_PWM_DEPTH_MIN) && (psc > 1) && (arr < (USHRT_MAX / 2))) {
+        arr *= 2;
+        psc /= 2;
+      }
+
+      motor_ctx->htim_pwm->Instance->PSC = psc - 1;
+      motor_ctx->htim_pwm->Instance->ARR = arr - 1;
+
+      motor_ctx->pwm_frequency = frequency;
+    }
   } while(0);
 
   return err;

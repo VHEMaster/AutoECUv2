@@ -1146,8 +1146,6 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
-
     if(type == ECU_GPIO_TYPE_DIRECT) {
       valid = gpio_valid(&ecu_gpio_setup.outputs[pin].pin);
       if(valid == false) {
@@ -1211,8 +1209,6 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
       err = E_PARAM;
       break;
     }
-
-    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
 
     err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
     if(err != E_OK) {
@@ -1312,8 +1308,6 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_value(ecu_gpio_output_pin_t pin
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
-
     if(valid != true) {
       err = E_NOTSUPPORT;
       break;
@@ -1348,8 +1342,6 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_dutycycle(ecu_gpio_output_pin_t
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
-
     output = &ecu_gpio_setup.outputs[pin];
     output_if = &ecu_gpio_setup.outputs_if[output->if_id];
 
@@ -1373,8 +1365,6 @@ error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *
       err = E_PARAM;
       break;
     }
-
-    BREAK_IF_ACTION(ecu_gpio_setup.outputs[pin].locked == false, err = E_INVALACT);
 
     htim = ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[pin].if_id].htim;
     if(htim == NULL) {
@@ -1404,8 +1394,6 @@ error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_
       err = E_NOTSUPPORT;
       break;
     }
-
-    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
 
     err = E_PARAM;
 
@@ -1451,8 +1439,6 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
 
   do {
     input = &ecu_gpio_setup.inputs[pin];
-
-    BREAK_IF_ACTION(input->locked == false, err = E_INVALACT);
 
     if(input->current_mode == ECU_GPIO_INPUT_TYPE_CAPTURE && input->htim != NULL) {
 
@@ -1545,8 +1531,6 @@ error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpi
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
-
     if((ecu_gpio_setup.inputs[pin].supported_modes & mode) == mode) {
       *support = true;
     } else {
@@ -1619,8 +1603,6 @@ error_t ecu_config_gpio_input_set_usrdata(ecu_gpio_input_pin_t pin, void *usrdat
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
-
     ecu_gpio_setup.inputs[pin].usrdata = usrdata;
 
   } while(0);
@@ -1638,8 +1620,6 @@ error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gp
       break;
     }
 
-    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
-
     ecu_gpio_setup.inputs[pin].irq_cb = callback;
 
   } while(0);
@@ -1656,8 +1636,6 @@ error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
       err = E_PARAM;
       break;
     }
-
-    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
 
     *gpio = ecu_gpio_setup.inputs[pin].pin;
 

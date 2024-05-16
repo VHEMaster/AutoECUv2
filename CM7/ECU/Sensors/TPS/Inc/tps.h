@@ -41,6 +41,7 @@ typedef struct {
     float position_imbalance;
     float position_unfiltered;
     float position;
+    bool data_valid;
 
     tps_diag_t diag_value;
 

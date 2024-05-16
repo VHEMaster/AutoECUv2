@@ -42,7 +42,7 @@ INLINE void math_pid_set_clamp(math_pid_ctx_t *pid, float from, float to)
 INLINE void math_pid_init(math_pid_ctx_t *pid)
 {
   memset(pid, 0, sizeof(math_pid_ctx_t));
-  pid->ClampFrom = FLT_MIN;
+  pid->ClampFrom = -FLT_MAX;
   pid->ClampTo = FLT_MAX;
 }
 

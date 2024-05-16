@@ -9,16 +9,49 @@
 #define DRIVERS_HL_ETC_INC_ETC_H_
 
 #include "versioned_etc.h"
+#include "config_tps.h"
+#include "config_motor.h"
 #include "errors.h"
 #include "bool.h"
+#include "time.h"
 #include <stdint.h>
+
+#define ETC_TPS_TIMEOUT_US                          (200 * TIME_US_IN_MS)
+#define ETC_TPS_DEFAULT_POSITION_SAMPLES            (8)
+#define ETC_TPS_DEFAULT_POSITION_SAMPLE_PERIOD_US   (5 * TIME_US_IN_MS)
+
+typedef enum {
+  ETC_FSM_CONDITION = 0,
+  ETC_FSM_DISABLE,
+  ETC_FSM_HWSC,
+  ETC_FSM_DIAGOFF,
+  ETC_FSM_TPS_WAIT,
+  ETC_FSM_DEFAULT_SAMPLING,
+  ETC_FSM_MAX
+}etc_fsm_t;
+
+typedef enum {
+  ETC_DIAG_OK = 0,
+  ETC_DIAG_OPENLOAD = (1 << 0),
+  ETC_DIAG_OVERTEMP = (1 << 1),
+  ETC_DIAG_PWR_UNDERVOLT = (1 << 2),
+  ETC_DIAG_PWR_OVERVOLTAGE = (1 << 3),
+  ETC_DIAG_VDD_UNDERVOLT = (1 << 4),
+  ETC_DIAG_VDD_OVERVOLTAGE = (1 << 5),
+
+  ETC_DIAG_OVERCURRENT_H0 = (1 << 8),
+  ETC_DIAG_OVERCURRENT_L0 = (1 << 9),
+  ETC_DIAG_OVERCURRENT_H1 = (1 << 10),
+  ETC_DIAG_OVERCURRENT_L1 = (1 << 11),
+}etc_diag_t;
 
 typedef struct {
     bool enabled;
     float target_position;
     float current_position;
+    float default_position;
     float dutycycle;
-    uint32_t diag;
+    etc_diag_t diag;
 }etc_data_t;
 
 typedef struct {
@@ -31,7 +64,29 @@ typedef struct {
     bool ready;
     bool configured;
 
+    etc_fsm_t fsm_process;
+
     etc_data_t data;
+    ecu_sensor_tps_value_t tps_data;
+
+    float default_position_sampling;
+    uint8_t default_position_samples;
+
+    math_pid_ctx_t pid_position;
+    math_pid_ctx_t pid_speed;
+
+    bool reset_request;
+    error_t reset_errcode;
+    input_id_t power_voltage_pin;
+    float position_current;
+    float position_prev;
+    float power_voltage;
+    float output_voltage;
+    float current_speed;
+    float target_speed;
+
+    time_us_t reset_time;
+    time_us_t process_time;
 
 }etc_ctx_t;
 

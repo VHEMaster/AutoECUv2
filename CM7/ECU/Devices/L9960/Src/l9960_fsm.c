@@ -314,6 +314,16 @@ ITCM_FUNC static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
       case L9960_DIAGOFF_CONDITION:
         if(ctx->initialized == true && ctx->diagoff_request == true && ctx->diagoff_errcode == E_AGAIN) {
           l9960_internal_set_enabled(ctx, false);
+          ctx->diagoff_fsm_state = L9960_DIAGOFF_INITIAL_WAIT;
+          ctx->diagoff_timestamp = now;
+          err = E_AGAIN;
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case L9960_DIAGOFF_INITIAL_WAIT:
+        if(time_diff(now, ctx->diagoff_timestamp) >= L9966_DIAGOFF_WAIT_US) {
           ctx->diagoff_fsm_state = L9960_DIAGOFF_INITIAL;
           diag_req.data = 0;
           diag_req.bits.trig = 1;

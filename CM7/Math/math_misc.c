@@ -12,7 +12,7 @@
 INLINE void math_minmax(const float *array, unsigned int size, float *pmin, float *pmax)
 {
   float min = FLT_MAX;
-  float max = FLT_MIN;
+  float max = -FLT_MAX;
   float value;
 
   while(size--) {
