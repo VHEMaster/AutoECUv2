@@ -204,7 +204,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .fe_filt_en = L9966_CFG_VRS_FFE_MASKING_EN,
         },
         .adc_timing = {
-            .adc_volt_setting_time = L9966_CFG_AT_AVST_24US,
+            .adc_volt_setting_time = L9966_CFG_AT_AVST_16US,
             .pu1_setting_time = L9966_CFG_AT_PUST_200US,
             .pu2_setting_time = L9966_CFG_AT_PUST_400US,
             .pu3_setting_time = L9966_CFG_AT_PUST_600US,
@@ -545,7 +545,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .fe_filt_en = L9966_CFG_VRS_FFE_MASKING_EN,
         },
         .adc_timing = {
-            .adc_volt_setting_time = L9966_CFG_AT_AVST_24US,
+            .adc_volt_setting_time = L9966_CFG_AT_AVST_16US,
             .pu1_setting_time = L9966_CFG_AT_PUST_200US,
             .pu2_setting_time = L9966_CFG_AT_PUST_400US,
             .pu3_setting_time = L9966_CFG_AT_PUST_600US,
