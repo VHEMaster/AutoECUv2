@@ -35,6 +35,16 @@ error_t tps_configure(tps_ctx_t *ctx, const tps_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
+
+    BREAK_IF_ACTION(config->signals_used_count >= TPS_CONFIG_SIGNALS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->position_min_clamp >= config->position_max_clamp, err = E_PARAM);
+
+    for(int i = 0; i < config->signals_used_count; i++) {
+      BREAK_IF_ACTION(config->signals[i].voltage_low_thr >= config->signals[i].voltage_high_thr, err = E_PARAM);
+      BREAK_IF_ACTION(config->signals[i].input_pin >= ECU_IN_MAX, err = E_PARAM);
+    }
+    BREAK_IF(err != E_OK);
+
     if(ctx->configured == true) {
       err = tps_reset(ctx);
       BREAK_IF(err != E_OK);
@@ -197,7 +207,6 @@ void tps_loop_slow(tps_ctx_t *ctx)
         pos_diff = pos_clamp - pos;
         pos_diff = CLAMP(pos_diff, -allowed_rate, allowed_rate);
         pos += pos_diff;
-
 
         ctx->position = pos;
         ctx->poll_delta = time_delta;

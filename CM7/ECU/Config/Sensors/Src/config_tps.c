@@ -132,3 +132,51 @@ error_t ecu_sensors_tps_reset(ecu_sensor_tps_t instance)
 
   return err;
 }
+
+error_t ecu_sensors_tps_get_value(ecu_sensor_tps_t instance, ecu_sensor_tps_value_t *value)
+{
+  error_t err = E_OK;
+  ecu_sensors_tps_ctx_t *tps_ctx;
+  ecu_sensor_tps_value_t result;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    tps_ctx = &ecu_sensors_tps_ctx[instance];
+
+    BREAK_IF_ACTION(tps_ctx->ctx->started == false, err = E_NOTRDY);
+
+    result.signals_count = tps_ctx->ctx->config.signals_used_count;
+    for(int i = 0; i < result.signals_count; i++) {
+      result.active[i] = tps_ctx->ctx->signal_failed[i] == false;
+      result.voltages[i] = tps_ctx->ctx->voltages[i];
+      result.positions[i] = tps_ctx->ctx->positions_raw[i];
+    }
+    result.position = tps_ctx->ctx->position;
+    result.position_unfiltered = tps_ctx->ctx->position_unfiltered;
+
+    *value = result;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_tps_get_diag(ecu_sensor_tps_t instance, tps_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_sensors_tps_ctx_t *tps_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+
+    tps_ctx = &ecu_sensors_tps_ctx[instance];
+
+    *diag = tps_ctx->ctx->diag_value;
+
+  } while(0);
+
+  return err;
+}
