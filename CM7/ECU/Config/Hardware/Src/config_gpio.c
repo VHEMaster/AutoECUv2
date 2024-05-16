@@ -943,7 +943,7 @@ static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
     } else if(channel->tim_active_channel_falling == active_channel) {
       level = ECU_IN_LEVEL_LOW;
     }
-    channel->irq_cb(channel->input_pin, level);
+    channel->irq_cb(channel->input_pin, level, channel->usrdata);
 
   } while(0);
 }
@@ -962,7 +962,7 @@ static void ecu_config_gpio_input_exti_cb(void *usrdata)
       } else {
         level = ECU_IN_LEVEL_UNDEFINED;
       }
-      input->irq_cb(input->input_pin, level);
+      input->irq_cb(input->input_pin, level, input->usrdata);
     }
   }
 }
@@ -1603,6 +1603,25 @@ error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id)
     }
 
     *id = ecu_gpio_setup.inputs[pin].input_id;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_set_usrdata(ecu_gpio_input_pin_t pin, void *usrdata)
+{
+  error_t err = E_OK;
+
+  do {
+    if(pin >= ECU_IN_MAX) {
+      err = E_PARAM;
+      break;
+    }
+
+    BREAK_IF_ACTION(ecu_gpio_setup.inputs[pin].locked == false, err = E_INVALACT);
+
+    ecu_gpio_setup.inputs[pin].usrdata = usrdata;
 
   } while(0);
 
