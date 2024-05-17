@@ -33,6 +33,9 @@ typedef struct {
     math_pid_koffs_t pid_position;
     math_pid_koffs_t pid_speed;
 
+    float motor_reach_threshold;
+    time_delta_us_t motor_reach_timeout;
+
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;
 

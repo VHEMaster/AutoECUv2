@@ -31,28 +31,24 @@ typedef enum {
   ETC_FSM_MAX
 }etc_fsm_t;
 
-typedef enum {
-  ETC_DIAG_OK = 0,
-  ETC_DIAG_OPENLOAD = (1 << 0),
-  ETC_DIAG_OVERTEMP = (1 << 1),
-  ETC_DIAG_PWR_UNDERVOLT = (1 << 2),
-  ETC_DIAG_PWR_OVERVOLTAGE = (1 << 3),
-  ETC_DIAG_VDD_UNDERVOLT = (1 << 4),
-  ETC_DIAG_VDD_OVERVOLTAGE = (1 << 5),
-
-  ETC_DIAG_OVERCURRENT_H0 = (1 << 8),
-  ETC_DIAG_OVERCURRENT_L0 = (1 << 9),
-  ETC_DIAG_OVERCURRENT_H1 = (1 << 10),
-  ETC_DIAG_OVERCURRENT_L1 = (1 << 11),
+typedef union {
+    uint32_t data;
+    struct {
+        bool tps_error : 1;
+        bool motor_error : 1;
+        bool position_reach_failure : 1;
+        bool pwr_undervoltage;
+        bool pwr_overvoltage;
+    }bits;
 }etc_diag_t;
 
 typedef struct {
     bool enabled;
+    bool active;
     float target_position;
     float current_position;
     float default_position;
     float dutycycle;
-    etc_diag_t diag;
 }etc_data_t;
 
 typedef struct {
@@ -67,8 +63,12 @@ typedef struct {
 
     etc_fsm_t fsm_process;
 
+    etc_diag_t diag;
     etc_data_t data;
-    ecu_sensor_tps_value_t tps_data;
+    tps_data_t tps_data;
+
+    tps_diag_t tps_diag;
+    l9960_diag_t motor_diag;
 
     float default_position_sampling;
     uint8_t default_position_samples;
@@ -88,12 +88,16 @@ typedef struct {
 
     time_us_t reset_time;
     time_us_t process_time;
+    time_us_t pos_reach_time;
 
 }etc_ctx_t;
 
 error_t etc_init(etc_ctx_t *ctx, const etc_init_ctx_t *init_ctx);
 error_t etc_configure(etc_ctx_t *ctx, const etc_config_t *config);
 error_t etc_reset(etc_ctx_t *ctx);
+
+error_t etc_get_data(etc_ctx_t *ctx, etc_data_t *data);
+error_t etc_get_diag(etc_ctx_t *ctx, etc_diag_t *diag);
 
 void etc_loop_main(etc_ctx_t *ctx);
 void etc_loop_slow(etc_ctx_t *ctx);

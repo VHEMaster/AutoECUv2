@@ -132,7 +132,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
       for(int i = 0; i < ctx->config.signals_used_count; i++) {
         (void)input_get_value(ctx->input_ids[i], &input_analog_value, NULL);
         voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
-        ctx->voltages[i] = voltage;
+        ctx->data.voltages[i] = voltage;
       }
 
       if(ctx->started == true) {
@@ -146,27 +146,32 @@ void tps_loop_slow(tps_ctx_t *ctx)
           err = E_OK;
 
           signal_failed = false;
-          if(ctx->voltages[i] > signal_cfg->voltage_high_thr) {
-            ctx->diag_value |= TPS_DIAG_SIGNAL_1_LEVEL_HIGH << (i * 2);
+          if(ctx->data.voltages[i] > signal_cfg->voltage_high_thr) {
+            if(i == 0) ctx->diag.bits.signal1_level_high = true;
+            else if(i == 1) ctx->diag.bits.signal2_level_high = true;
             signal_failed = true;
           } else {
-            ctx->diag_value &= ~(TPS_DIAG_SIGNAL_1_LEVEL_HIGH << (i * 2));
+            if(i == 0) ctx->diag.bits.signal1_level_high = false;
+            else if(i == 1) ctx->diag.bits.signal2_level_high = false;
           }
 
-          if(ctx->voltages[i] < signal_cfg->voltage_low_thr) {
-            ctx->diag_value |= TPS_DIAG_SIGNAL_1_LEVEL_LOW << (i * 2);
+          if(ctx->data.voltages[i] < signal_cfg->voltage_low_thr) {
+            if(i == 0) ctx->diag.bits.signal1_level_low = true;
+            else if(i == 1) ctx->diag.bits.signal2_level_low = true;
             signal_failed = true;
           } else {
-            ctx->diag_value &= ~(TPS_DIAG_SIGNAL_1_LEVEL_LOW << (i * 2));
+            if(i == 0) ctx->diag.bits.signal1_level_low = false;
+            else if(i == 1) ctx->diag.bits.signal2_level_low = false;
           }
 
-          pos_raw = ctx->voltages[i] - signal_cfg->voltage_pos_min;
+          pos_raw = ctx->data.voltages[i] - signal_cfg->voltage_pos_min;
           pos_raw /= signal_cfg->voltage_pos_max - signal_cfg->voltage_pos_min;
           pos_raw *= ctx->config.position_max - ctx->config.position_min;
           pos_raw += ctx->config.position_min;
 
-          ctx->positions_raw[i] = pos_raw;
+          ctx->data.positions_raw[i] = pos_raw;
           ctx->signal_failed[i] = signal_failed;
+          ctx->data.active[i] = !signal_failed;
         }
         BREAK_IF(err != E_OK);
 
@@ -175,13 +180,13 @@ void tps_loop_slow(tps_ctx_t *ctx)
         signals_ok = 0;
         for(int i = 0; i < ctx->config.signals_used_count; i++) {
           if(ctx->signal_failed[i] == false) {
-            if(pos_min > ctx->positions_raw[i]) {
-              pos_min = ctx->positions_raw[i];
+            if(pos_min > ctx->data.positions_raw[i]) {
+              pos_min = ctx->data.positions_raw[i];
             }
-            if(pos_max < ctx->positions_raw[i]) {
-              pos_max = ctx->positions_raw[i];
+            if(pos_max < ctx->data.positions_raw[i]) {
+              pos_max = ctx->data.positions_raw[i];
             }
-            pos_unfiltered += ctx->positions_raw[i];
+            pos_unfiltered += ctx->data.positions_raw[i];
             signals_ok++;
           }
         }
@@ -189,37 +194,38 @@ void tps_loop_slow(tps_ctx_t *ctx)
           pos_unfiltered /= signals_ok;
           imbalance = pos_max - pos_min;
           if(imbalance > ctx->config.signals_position_imbalance_max) {
-            ctx->diag_value |= TPS_DIAG_SIGNALS_IMBALANCE;
+            ctx->diag.bits.signals_imbalance = true;
           } else {
-            ctx->diag_value &= ~TPS_DIAG_SIGNALS_IMBALANCE;
+            ctx->diag.bits.signals_imbalance = false;
           }
         }
-        ctx->position_imbalance = imbalance;
-        ctx->position_unfiltered = pos_unfiltered;
+        ctx->data.position_imbalance = imbalance;
+        ctx->data.position_unfiltered = pos_unfiltered;
 
         if(ctx->config.dead_zone > 0) {
           pos_unfiltered = (pos_unfiltered - ctx->config.dead_zone) / ((100.0f - ctx->config.dead_zone) * 0.01f);
         }
         pos_clamp = CLAMP(pos_unfiltered, ctx->config.position_min_clamp, ctx->config.position_max_clamp);
-        pos = ctx->position;
+        pos = ctx->data.position;
 
         allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
         pos_diff = pos_clamp - pos;
         pos_diff = CLAMP(pos_diff, -allowed_rate, allowed_rate);
         pos += pos_diff;
 
-        ctx->position = pos;
+        ctx->data.position = pos;
         ctx->poll_delta = time_delta;
-        ctx->data_valid = true;
+        ctx->data.data_valid = true;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
+      ctx->data.data_valid = false;
       ctx->signal_poll_time = now;
       ctx->startup_time = now;
-      ctx->position_imbalance = 0;
-      ctx->position_unfiltered = 0;
-      ctx->position = 0;
+      ctx->data.position_imbalance = 0;
+      ctx->data.position_unfiltered = 0;
+      ctx->data.position = 0;
     }
   } while(0);
 }
@@ -227,4 +233,38 @@ void tps_loop_slow(tps_ctx_t *ctx)
 ITCM_FUNC void tps_loop_fast(tps_ctx_t *ctx)
 {
 
+}
+
+error_t tps_get_value(tps_ctx_t *ctx, tps_data_t *data)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    *data = ctx->data;
+
+  } while(0);
+
+  return err;
+}
+
+error_t tps_get_diag(tps_ctx_t *ctx, tps_diag_t *diag)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    *diag = ctx->diag;
+
+  } while(0);
+
+  return err;
 }

@@ -20,6 +20,8 @@ error_t ecu_devices_motor_hwsc(ecu_device_motor_t instance);
 error_t ecu_devices_motor_diagoff(ecu_device_motor_t instance);
 error_t ecu_devices_motor_reset(ecu_device_motor_t instance);
 
+error_t ecu_devices_motor_get_diag(ecu_device_motor_t instance, l9960_diag_t *diag);
+
 error_t ecu_devices_motor_set_enabled(ecu_device_motor_t instance, bool enabled);
 error_t ecu_devices_motor_set_dutycycle(ecu_device_motor_t instance, float dutycycle);
 error_t ecu_devices_motor_set_frequency(ecu_device_motor_t instance, float frequency);

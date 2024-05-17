@@ -113,3 +113,35 @@ ITCM_FUNC void etc_loop_fast(etc_ctx_t *ctx)
 
   }
 }
+
+error_t etc_get_data(etc_ctx_t *ctx, etc_data_t *data)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    *data = ctx->data;
+
+  } while(0);
+
+  return err;
+}
+
+error_t etc_get_diag(etc_ctx_t *ctx, etc_diag_t *diag)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    *diag = ctx->diag;
+
+  } while(0);
+
+  return err;
+}

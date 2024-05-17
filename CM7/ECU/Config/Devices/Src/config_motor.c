@@ -32,7 +32,7 @@ typedef struct {
 
 static const l9960_config_t ecu_devices_motor_config_default = {
     .comm_check = L9960_CONFIG_CC_ENABLED,
-    .diag_clr_en = L9960_CONFIG_DCE_ENABLED,
+    .diag_clr_en = L9960_CONFIG_DCE_DISABLED,
     .tsw_low_current = L9960_CONFIG_TLC_GATEFB_ONLY,
     .tdiag1 = L9960_CONFIG_TD1_45US,
     .voltage_slew_rate = L9960_CONFIG_VSR_FAST,
@@ -266,6 +266,24 @@ error_t ecu_devices_motor_diagoff(ecu_device_motor_t instance)
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
     err = l9960_diagoff(motor_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_motor_get_diag(ecu_device_motor_t instance, l9960_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_devices_motor_ctx_t *motor_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+
+    motor_ctx = &ecu_devices_motor_ctx[instance];
+
+    err = l9960_get_diagnostic(motor_ctx->ctx, diag);
 
   } while(0);
 

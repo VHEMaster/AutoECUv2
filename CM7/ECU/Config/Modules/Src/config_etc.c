@@ -32,6 +32,9 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .pid_speed = {
         .Kp = 0.005f,
     },
+
+    .motor_reach_threshold = 4.0f,
+    .motor_reach_timeout = 200 * TIME_US_IN_MS,
 };
 
 static ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
