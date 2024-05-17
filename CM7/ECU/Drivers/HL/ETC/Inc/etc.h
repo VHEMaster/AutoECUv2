@@ -49,6 +49,7 @@ typedef struct {
     float current_position;
     float default_position;
     float dutycycle;
+    float output_voltage;
 }etc_data_t;
 
 typedef struct {
@@ -82,7 +83,6 @@ typedef struct {
     float position_current;
     float position_prev;
     float power_voltage;
-    float output_voltage;
     float current_speed;
     float target_speed;
 

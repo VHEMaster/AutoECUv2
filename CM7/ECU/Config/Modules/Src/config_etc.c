@@ -25,9 +25,9 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .pwm_freq = 4000,
 
     .pid_position = {
-        .Kp = 100.0,
+        .Kp = 150.0,
         .Ki = 50.0,
-        .Kd = 0.050f,
+        .Kd = 1.00f,
     },
     .pid_speed = {
         .Kp = 0.005f,

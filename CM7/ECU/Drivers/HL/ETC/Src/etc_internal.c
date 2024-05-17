@@ -94,7 +94,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->data.active = false;
       ctx->data.dutycycle = 0;
       ctx->target_speed = 0;
-      ctx->output_voltage = 0;
+      ctx->data.output_voltage = 0;
       math_pid_reset(&ctx->pid_position, now);
       math_pid_reset(&ctx->pid_speed, now);
       ctx->pos_reach_time = now;
@@ -106,6 +106,13 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
       math_pid_set_target(&ctx->pid_speed, speed);
       current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
+
+      //TODO: replace this piece of crap later :)
+      if(ctx->position_current < ctx->data.default_position - 0.3f) {
+        current += -0.3f;
+      } else if(ctx->position_current > ctx->data.default_position + 0.3f) {
+        current += 0.3f;
+      }
 
       dutycycle = current / power_voltage;
       dutycycle = CLAMP(dutycycle, -1.0f, 1.0f);
@@ -125,7 +132,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       }
 
       ctx->target_speed = speed;
-      ctx->output_voltage = voltage;
+      ctx->data.output_voltage = voltage;
       ctx->data.active = true;
     }
 
