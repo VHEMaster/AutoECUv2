@@ -38,10 +38,12 @@ error_t etc_fsm(etc_ctx_t *ctx)
         err = ecu_devices_motor_hwsc(ctx->config.device_motor);
         if(err == E_OK) {
           ctx->fsm_process = ETC_FSM_DIAGOFF;
+          ctx->diag.bits.hwsc_failed = false;
           continue;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
           ctx->fsm_process = ETC_FSM_CONDITION;
+          ctx->diag.bits.hwsc_failed = true;
         }
         break;
       case ETC_FSM_DIAGOFF:
@@ -50,9 +52,11 @@ error_t etc_fsm(etc_ctx_t *ctx)
         if(err == E_OK) {
           ctx->fsm_process = ETC_FSM_RECONFIGURE;
           ctx->reset_time = now;
+          ctx->diag.bits.diagoff_failed = false;
         } else if(err != E_AGAIN) {
           ctx->reset_errcode = err;
           ctx->fsm_process = ETC_FSM_CONDITION;
+          ctx->diag.bits.diagoff_failed = true;
         }
         break;
       case ETC_FSM_RECONFIGURE:

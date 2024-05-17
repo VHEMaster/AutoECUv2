@@ -61,6 +61,21 @@ typedef enum {
   L9960_STATUS_OT_FAIL
 }l9960_status_ot_t;
 
+typedef enum {
+  L9960_STATUS_DIAGOFF_OK = 0,
+  L9960_STATUS_DIAGOFF_OPENLOAD,
+  L9960_STATUS_DIAGOFF_SHORTBATT,
+  L9960_STATUS_DIAGOFF_SHORTGND,
+  L9960_STATUS_DIAGOFF_TIMEOUT,
+}l9960_status_diagoff_t;
+
+typedef enum {
+  L9960_STATUS_HWSC_OK = 0,
+  L9960_STATUS_HWSC_FAIL,
+  L9960_STATUS_HWSC_FAIL_LBIST_PASS,
+  L9960_STATUS_HWSC_TIMEOUT,
+}l9960_status_hwsc_t;
+
 typedef struct {
     uint16_t electronic_id;
     uint8_t silicon_version;
@@ -93,6 +108,9 @@ typedef union {
         l9960_status_uv_t uv_12v : 1;
         l9960_status_ot_t ot_warn : 1;
         l9960_status_ot_t ot_shutdown : 1;
+        l9960_status_diagoff_t diagoff : 3;
+        l9960_status_hwsc_t hwsc : 3;
+
 
     }bits;
 }l9960_diag_t;

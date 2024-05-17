@@ -366,11 +366,19 @@ ITCM_FUNC static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
           ctx->diagoff_status = diag_resp.bits.diag_off;
           switch(ctx->diagoff_status) {
             case L9960_REG_DIAGOFF_OPENLOAD:
+              ctx->diag.bits.diagoff = L9960_STATUS_DIAGOFF_OPENLOAD;
+              err = E_FAULT;
+              break;
             case L9960_REG_DIAGOFF_SHORTBATT:
+              ctx->diag.bits.diagoff = L9960_STATUS_DIAGOFF_SHORTBATT;
+              err = E_FAULT;
+              break;
             case L9960_REG_DIAGOFF_SHORTGND:
+              ctx->diag.bits.diagoff = L9960_STATUS_DIAGOFF_SHORTGND;
               err = E_FAULT;
               break;
             case L9960_REG_DIAGOFF_NOFAILURE:
+              ctx->diag.bits.diagoff = L9960_STATUS_DIAGOFF_OK;
               err = E_OK;
               break;
             case L9960_REG_DIAGOFF_NOTRIGGER_INCORRECT:
@@ -390,6 +398,7 @@ ITCM_FUNC static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
             continue;
           } else if(err == E_AGAIN) {
             if(time_diff(now, ctx->diagoff_started) >= L9966_DIAGOFF_TIMEOUT) {
+              ctx->diag.bits.diagoff = L9960_STATUS_DIAGOFF_TIMEOUT;
               err = E_TIMEOUT;
               ctx->diagoff_errcode = err;
               ctx->diagoff_fsm_state = L9960_DIAGOFF_DISABLE;
@@ -477,10 +486,15 @@ ITCM_FUNC static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
           ctx->hwsc_status = ctx->status.states1.bits.hwsc_lbist_status;
           switch(ctx->hwsc_status) {
             case L9960_REG_HWSC_FAIL:
+              ctx->diag.bits.hwsc = L9960_STATUS_HWSC_FAIL;
+              err = E_FAULT;
+              break;
             case L9960_REG_HWSC_FAIL_LBIST_PASS:
+              ctx->diag.bits.hwsc = L9960_STATUS_HWSC_FAIL_LBIST_PASS;
               err = E_FAULT;
               break;
             case L9960_REG_HWSC_PASS:
+              ctx->diag.bits.hwsc = L9960_STATUS_HWSC_OK;
               err = E_OK;
               break;
             case L9960_REG_HWSC_NOTDONE0:
@@ -501,6 +515,7 @@ ITCM_FUNC static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
             continue;
           } else if(err == E_AGAIN) {
             if(time_diff(now, ctx->hwsc_started) >= L9966_HWSC_TIMEOUT) {
+              ctx->diag.bits.hwsc = L9960_STATUS_HWSC_TIMEOUT;
               err = E_TIMEOUT;
               ctx->hwsc_errcode = err;
               ctx->hwsc_fsm_state = L9960_HWSC_DISABLE;

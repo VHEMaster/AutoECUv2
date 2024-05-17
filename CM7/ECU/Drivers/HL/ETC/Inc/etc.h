@@ -39,6 +39,8 @@ typedef union {
         bool position_reach_failure : 1;
         bool pwr_undervoltage;
         bool pwr_overvoltage;
+        bool hwsc_failed;
+        bool diagoff_failed;
     }bits;
 }etc_diag_t;
 
