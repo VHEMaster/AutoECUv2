@@ -18,10 +18,7 @@ typedef struct {
 }ecu_modules_etc_ctx_t;
 
 static const etc_config_t ecu_modules_etc_config_default = {
-    .enabled = true,
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
-    .sensor_tps = ECU_SENSOR_TPS_1,
-    .device_motor = ECU_DEVICE_MOTOR_1,
     .pwm_freq = 4000,
 
     .pid_position = {
@@ -44,6 +41,27 @@ static ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
       },
       .config_default = ecu_modules_etc_config_default,
     },
+    {
+      .init = {
+
+      },
+      .config_default = ecu_modules_etc_config_default,
+    },
+};
+
+static const bool ecu_sensors_etc_enabled_default[ECU_MODULE_ETC_MAX] = {
+    true,
+    false
+};
+
+static const ecu_sensor_tps_t ecu_sensors_etc_tps_default[ECU_MODULE_ETC_MAX] = {
+    ECU_SENSOR_TPS_1,
+    ECU_SENSOR_TPS_2
+};
+
+static const ecu_device_motor_t ecu_sensors_etc_motor_default[ECU_MODULE_ETC_MAX] = {
+    ECU_DEVICE_MOTOR_1,
+    ECU_DEVICE_MOTOR_2
 };
 
 error_t ecu_modules_etc_init(ecu_module_etc_t instance, etc_ctx_t *ctx)
@@ -56,6 +74,10 @@ error_t ecu_modules_etc_init(ecu_module_etc_t instance, etc_ctx_t *ctx)
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
     etc_ctx->ctx = ctx;
+
+    etc_ctx->config_default.enabled = ecu_sensors_etc_enabled_default[instance];
+    etc_ctx->config_default.sensor_tps = ecu_sensors_etc_tps_default[instance];
+    etc_ctx->config_default.device_motor = ecu_sensors_etc_motor_default[instance];
 
     err = etc_init(etc_ctx->ctx, &etc_ctx->init);
     BREAK_IF(err != E_OK);

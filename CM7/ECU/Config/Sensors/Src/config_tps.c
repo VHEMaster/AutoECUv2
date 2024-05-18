@@ -17,7 +17,6 @@ typedef struct {
 }ecu_sensors_tps_ctx_t;
 
 static const tps_config_t ecu_sensors_tps_config_default = {
-    .enabled = true,
     .signals_used_count = 2,
     .signals = {
         {
@@ -26,8 +25,6 @@ static const tps_config_t ecu_sensors_tps_config_default = {
 
             .voltage_low_thr = 0.40f,
             .voltage_high_thr = 4.76f,
-
-            .input_pin = ECU_IN_PORT2_PIN11,
         },
         {
             .voltage_pos_min = 4.524f,
@@ -35,8 +32,6 @@ static const tps_config_t ecu_sensors_tps_config_default = {
 
             .voltage_low_thr = 0.26f,
             .voltage_high_thr = 4.60f,
-
-            .input_pin = ECU_IN_PORT2_PIN10,
         },
     },
     .signals_position_imbalance_max = 0.5f,
@@ -52,7 +47,23 @@ static const tps_config_t ecu_sensors_tps_config_default = {
     .boot_time = 50 * TIME_US_IN_MS,
 };
 
+static const bool ecu_sensors_tps_enabled_default[ECU_SENSOR_TPS_MAX] = {
+    true,
+    false
+};
+
+static const ecu_gpio_input_pin_t ecu_sensors_tps_input_pin_default[ECU_SENSOR_TPS_MAX][TPS_CONFIG_SIGNALS_MAX] = {
+    { ECU_IN_PORT1_PIN9, ECU_IN_PORT1_PIN10 },
+    { ECU_IN_PORT1_PIN9, ECU_IN_PORT1_PIN10 }
+};
+
 static ecu_sensors_tps_ctx_t ecu_sensors_tps_ctx[ECU_SENSOR_TPS_MAX] = {
+    {
+      .init = {
+
+      },
+      .config_default = ecu_sensors_tps_config_default,
+    },
     {
       .init = {
 
@@ -71,6 +82,11 @@ error_t ecu_sensors_tps_init(ecu_sensor_tps_t instance, tps_ctx_t *ctx)
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
     tps_ctx->ctx = ctx;
+
+    tps_ctx->config_default.enabled = ecu_sensors_tps_enabled_default[instance];
+    for(int i = 0; i < TPS_CONFIG_SIGNALS_MAX; i++) {
+      tps_ctx->config_default.signals[i].input_pin = ecu_sensors_tps_input_pin_default[instance][i];
+    }
 
     err = tps_init(tps_ctx->ctx, &tps_ctx->init);
     BREAK_IF(err != E_OK);

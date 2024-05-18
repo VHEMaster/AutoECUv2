@@ -17,7 +17,6 @@ typedef struct {
 }ecu_sensors_maf_ctx_t;
 
 static const maf_config_t ecu_sensors_maf_config_default = {
-    .enabled = false,
     .signal_voltage_to_value = {
         .table = {
             .items = 256,
@@ -63,7 +62,16 @@ static const maf_config_t ecu_sensors_maf_config_default = {
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_mode = MAF_SIGNAL_MODE_ANALOG,
     .calc_mode = MAF_CALC_MODE_TABLE_VALUE,
-    .input_pin = ECU_IN_PORT2_PIN10,
+};
+
+static const bool ecu_sensors_maf_enabled_default[ECU_SENSOR_MAF_MAX] = {
+    false,
+    false
+};
+
+static const ecu_gpio_input_pin_t ecu_sensors_maf_input_pin_default[ECU_SENSOR_MAF_MAX] = {
+    ECU_IN_PORT1_PIN7,
+    ECU_IN_PORT1_PIN8
 };
 
 static ecu_sensors_maf_ctx_t ecu_sensors_maf_ctx[ECU_SENSOR_MAF_MAX] = {
@@ -77,9 +85,7 @@ static ecu_sensors_maf_ctx_t ecu_sensors_maf_ctx[ECU_SENSOR_MAF_MAX] = {
       .init = {
 
       },
-      .config_default = {
-
-      },
+      .config_default = ecu_sensors_maf_config_default,
     },
 };
 
@@ -93,6 +99,9 @@ error_t ecu_sensors_maf_init(ecu_sensor_maf_t instance, maf_ctx_t *ctx)
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
     maf_ctx->ctx = ctx;
+
+    maf_ctx->config_default.enabled = ecu_sensors_maf_enabled_default[instance];
+    maf_ctx->config_default.input_pin = ecu_sensors_maf_input_pin_default[instance];
 
     err = maf_init(maf_ctx->ctx, &maf_ctx->init);
     BREAK_IF(err != E_OK);
