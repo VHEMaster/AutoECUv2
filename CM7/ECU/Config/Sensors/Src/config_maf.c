@@ -20,7 +20,7 @@ static const maf_config_t ecu_sensors_maf_config_default = {
     .signal_voltage_to_value = {
         .table = {
             .items = 256,
-            .input = {
+            .output = {
                 -38.4f, -37.3f, -36.2f, -35.1f, -34.0f, -33.0f, -31.9f, -30.9f,
                 -29.9f, -28.9f, -27.9f, -27.0f, -26.1f, -25.1f, -24.3f, -23.4f,
                 -22.5f, -21.7f, -20.8f, -20.0f, -19.3f, -18.5f, -17.7f, -17.0f,
@@ -158,6 +158,42 @@ error_t ecu_sensors_maf_reset(ecu_sensor_maf_t instance)
     maf_ctx = &ecu_sensors_maf_ctx[instance];
 
     err = maf_reset(maf_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_maf_get_value(ecu_sensor_maf_t instance, maf_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_sensors_maf_ctx_t *maf_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    maf_ctx = &ecu_sensors_maf_ctx[instance];
+
+    err = maf_get_value(maf_ctx->ctx, data);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_maf_get_diag(ecu_sensor_maf_t instance, maf_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_sensors_maf_ctx_t *maf_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+
+    maf_ctx = &ecu_sensors_maf_ctx[instance];
+
+    err = maf_get_diag(maf_ctx->ctx, diag);
 
   } while(0);
 

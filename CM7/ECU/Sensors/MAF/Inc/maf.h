@@ -14,13 +14,20 @@
 #include "versioned_maf.h"
 #include <stdint.h>
 
-typedef enum {
-  MAF_DIAG_OK = 0,
-  MAF_DIAG_LEVEL_LOW = 1,
-  MAF_DIAG_LEVEL_HIGH = 2,
-  MAF_DIAG_FREQ_LOW = 4,
-  MAF_DIAG_FREQ_HIGH = 8,
+#define MAF_FREQ_ITEMS_COUNT    2
+
+typedef struct {
+  bool level_low : 1;
+  bool level_high : 1;
+  bool freq_low : 1;
+  bool freq_high : 1;
+  bool freq_no_signal : 1;
 }maf_diag_t;
+
+typedef struct {
+    float input_value;
+    float output_value;
+}maf_data_t;
 
 typedef struct {
     uint32_t dummy;
@@ -36,11 +43,11 @@ typedef struct {
     input_id_t input_id;
 
     uint8_t input_freq_index;
-    time_us_t input_freq_times[2];
+    time_us_t input_freq_times[MAF_FREQ_ITEMS_COUNT];
+    float input_freq_values[MAF_FREQ_ITEMS_COUNT];
 
-    float input_value;
-    float output_value;
-    maf_diag_t diag_value;
+    maf_data_t data;
+    maf_diag_t diag;
 
     bool started;
     time_us_t startup_time;
@@ -54,5 +61,8 @@ error_t maf_reset(maf_ctx_t *ctx);
 void maf_loop_main(maf_ctx_t *ctx);
 void maf_loop_slow(maf_ctx_t *ctx);
 void maf_loop_fast(maf_ctx_t *ctx);
+
+error_t maf_get_value(maf_ctx_t *ctx, maf_data_t *data);
+error_t maf_get_diag(maf_ctx_t *ctx, maf_diag_t *diag);
 
 #endif /* SENSORS_MAF_INC_MAF_H_ */
