@@ -19,7 +19,7 @@ typedef struct {
 static const map_config_t ecu_sensors_map_config_default = {
     .signal_voltage_to_value = {
         .input_low = 0.05f,
-        .input_high = 4.90f,
+        .input_high = 5.00f,
         .input_step = 5.0f / 256,
         .gain = 19000.0f,
         .offset = 10000.0f,
@@ -31,15 +31,25 @@ static const map_config_t ecu_sensors_map_config_default = {
 
 static const bool ecu_sensors_map_enabled_default[ECU_SENSOR_MAP_MAX] = {
     true,
-    false
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_map_input_pin_default[ECU_SENSOR_MAP_MAX] = {
     ECU_IN_PORT2_PIN10,
-    ECU_IN_PORT2_PIN11
 };
 
 static ecu_sensors_map_ctx_t ecu_sensors_map_ctx[ECU_SENSOR_MAP_MAX] = {
+    {
+      .init = {
+
+      },
+      .config_default = ecu_sensors_map_config_default,
+    },
+    {
+      .init = {
+
+      },
+      .config_default = ecu_sensors_map_config_default,
+    },
     {
       .init = {
 

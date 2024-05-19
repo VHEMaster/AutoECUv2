@@ -72,12 +72,14 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->signal_mode >= MAF_SIGNAL_MODE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->calc_mode >= MAF_CALC_MODE_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(config->signal_voltage_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(config->signal_frequency_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
 
+    if(config->calc_mode == MAF_CALC_MODE_TABLE_REF_VALUE || config->calc_mode == MAF_CALC_MODE_TABLE_VALUE) {
+      BREAK_IF_ACTION(config->signal_voltage_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
+      BREAK_IF_ACTION(config->signal_frequency_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
+      BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_ANALOG && config->signal_voltage_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
+      BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_FREQUENCY && config->signal_frequency_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
+    }
 
-    BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_ANALOG && config->signal_voltage_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
-    BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_FREQUENCY && config->signal_frequency_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(ctx->configured == true) {
