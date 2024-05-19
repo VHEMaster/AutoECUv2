@@ -49,12 +49,10 @@ static const tps_config_t ecu_sensors_tps_config_default = {
 
 static const bool ecu_sensors_tps_enabled_default[ECU_SENSOR_TPS_MAX] = {
     true,
-    false
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_tps_input_pin_default[ECU_SENSOR_TPS_MAX][TPS_CONFIG_SIGNALS_MAX] = {
     { ECU_IN_PORT1_PIN9, ECU_IN_PORT1_PIN10 },
-    { ECU_IN_PORT1_PIN9, ECU_IN_PORT1_PIN10 }
 };
 
 static ecu_sensors_tps_ctx_t ecu_sensors_tps_ctx[ECU_SENSOR_TPS_MAX] = {
