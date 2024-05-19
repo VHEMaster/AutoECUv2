@@ -170,6 +170,17 @@ typedef enum {
 }ecu_config_global_flash_fsm_t;
 
 typedef enum {
+  ECU_CONFIG_FSM_FLASH_ERASE_CONDITION = 0,
+  ECU_CONFIG_FSM_FLASH_ERASE_DEFINE,
+  ECU_CONFIG_FSM_FLASH_ERASE_ACQUIRE,
+  ECU_CONFIG_FSM_FLASH_ERASE_LOCK,
+  ECU_CONFIG_FSM_FLASH_ERASE_PERFORM,
+  ECU_CONFIG_FSM_FLASH_ERASE_SYNC,
+  ECU_CONFIG_FSM_FLASH_ERASE_UNLOCK,
+  ECU_CONFIG_FSM_FLASH_ERASE_MAX
+}ecu_config_global_flash_erase_fsm_t;
+
+typedef enum {
   ECU_CONFIG_FSM_OPERATION_CONDITION = 0,
   ECU_CONFIG_FSM_OPERATION_LOCK,
   ECU_CONFIG_FSM_OPERATION_DEFINE,
@@ -188,6 +199,7 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
+  ECU_CONFIG_FSM_PROCESS_FLASH_ERASE,
   ECU_CONFIG_FSM_PROCESS_CFG_RST,
   ECU_CONFIG_FSM_PROCESS_SENS_CFG,
   ECU_CONFIG_FSM_PROCESS_MODULE_CFG,
@@ -231,6 +243,7 @@ typedef struct {
     uint32_t op_translate_ptr;
 
     ecu_config_global_flash_fsm_t fsm_flash;
+    ecu_config_global_flash_erase_fsm_t fsm_flash_erase;
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_sens_cfg_fsm_t fsm_sens_cfg;
     ecu_config_global_module_cfg_fsm_t fsm_module_cfg;
@@ -242,6 +255,7 @@ typedef struct {
     bool process_sens_init;
     bool process_module_init;
     error_t process_result;
+    bool process_flash_erase;
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
     ecu_config_device_type_t process_module_type;
@@ -255,6 +269,8 @@ void ecu_config_global_loop_fast(void);
 error_t ecu_config_global_components_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
 error_t ecu_config_global_modules_initialize(void);
+
+error_t ecu_config_global_flash_erase(void);
 
 error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index, ecu_instance_t instance);
 

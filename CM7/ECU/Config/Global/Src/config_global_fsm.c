@@ -63,6 +63,108 @@ static error_t ecu_config_global_fsm_flash_init(ecu_config_global_runtime_ctx_t 
   return err;
 }
 
+static error_t ecu_config_global_fsm_flash_erase(ecu_config_global_runtime_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->fsm_flash_erase) {
+      case ECU_CONFIG_FSM_FLASH_ERASE_CONDITION:
+        if(ctx->global_ready == true && ctx->process_flash_erase == true && ctx->process_result == E_AGAIN) {
+          ctx->op_req_errcode_internal = E_AGAIN;
+          ctx->process_instance = 0;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_DEFINE;
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_DEFINE:
+        if(ctx->process_instance >= ctx->flash_ctx->instances_count) {
+          err = E_OK;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_CONDITION;
+          ctx->process_instance = 0;
+          ctx->process_result = err;
+        } else {
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_ACQUIRE;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_ACQUIRE:
+        err = ecu_devices_get_flash_ctx(ctx->process_instance, &ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_LOCK;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_CONDITION;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_LOCK:
+        err = qspi_lock(ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_PERFORM;
+          continue;
+        } if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_CONDITION;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_PERFORM:
+        err = qspi_chip_erase(ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_SYNC;
+          continue;
+        } if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_UNLOCK;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_SYNC:
+        err = qspi_sync(ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = E_AGAIN;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_UNLOCK;
+          continue;
+        } if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_UNLOCK;
+        }
+        break;
+      case ECU_CONFIG_FSM_FLASH_ERASE_UNLOCK:
+        err = qspi_unlock(ctx->qspi_ctx);
+        if(err == E_OK) {
+          err = ctx->op_req_errcode_internal;
+          if(err == E_AGAIN) {
+            ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_DEFINE;
+            ctx->process_instance++;
+          } else {
+            ctx->process_result = err;
+            ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_CONDITION;
+          }
+          continue;
+        } if(err != E_AGAIN) {
+          ctx->process_result = err;
+          ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_CONDITION;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
 static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -716,6 +818,9 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
     switch(ctx->fsm_process) {
       case ECU_CONFIG_FSM_PROCESS_FLASH_INIT:
         err = ecu_config_global_fsm_flash_init(ctx);
+        break;
+      case ECU_CONFIG_FSM_PROCESS_FLASH_ERASE:
+        err = ecu_config_global_fsm_flash_erase(ctx);
         break;
       case ECU_CONFIG_FSM_PROCESS_CFG_RST:
         err = ecu_config_global_fsm_rst_cfg(ctx);

@@ -622,9 +622,16 @@ typedef struct {
     l9966_config_at_t adc_timing;
     l9966_config_sqncr_t sequencer_config;
     l9966_config_status_t status;
-    uint32_t align ALIGNED_CACHE;
-}l9966_config_data_v1_t ALIGNED_CACHE;
+}l9966_config_data_t;
 
-typedef l9966_config_data_v1_t l9966_config_data_t;
+typedef struct {
+    l9966_config_data_t config_data;
+    time_delta_us_t digital_poll_period;
+    bool eu_used[L9966_EU_COUNT];
+    float rrx[L9966_RRx_COUNT];
+    uint32_t align ALIGNED_CACHE;
+}l9966_config_v1_t ALIGNED_CACHE;
+
+typedef l9966_config_v1_t l9966_config_t;
 
 #endif /* CONFIG_PROJECT_INC_VERSIONED_FLEXIO_H_ */

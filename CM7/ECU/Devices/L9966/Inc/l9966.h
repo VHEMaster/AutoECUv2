@@ -114,13 +114,6 @@ typedef enum {
 }l9966_fsm_state_t;
 
 typedef struct {
-    l9966_config_data_t config_data;
-    time_delta_us_t digital_poll_period;
-    bool eu_used[L9966_EU_COUNT];
-    float rrx[L9966_RRx_COUNT];
-}l9966_config_t;
-
-typedef struct {
     l9966_init_ctx_t init;
 
     bool ready;

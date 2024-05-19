@@ -58,12 +58,15 @@ static void maf_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t l
     if(++ctx->input_freq_index >= MAF_FREQ_ITEMS_COUNT) {
       ctx->input_freq_index = 0;
     }
+
+    ctx->freq_last_time = now;
   }
 }
 
 error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
 {
   error_t err = E_OK;
+  bool support = false;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
@@ -71,6 +74,10 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
     BREAK_IF_ACTION(config->calc_mode >= MAF_CALC_MODE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->signal_voltage_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->signal_frequency_to_value.table.items > MAF_RELATION_ITEMS_MAX, err = E_PARAM);
+
+
+    BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_ANALOG && config->signal_voltage_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
+    BREAK_IF_ACTION(config->signal_mode == MAF_SIGNAL_MODE_FREQUENCY && config->signal_frequency_to_value.table.items < MAF_RELATION_ITEMS_MIN, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(ctx->configured == true) {
@@ -100,8 +107,23 @@ error_t maf_configure(maf_ctx_t *ctx, const maf_config_t *config)
           BREAK_IF(err != E_OK);
           break;
         case MAF_SIGNAL_MODE_FREQUENCY:
-          err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_CAPTURE);
+          err = ecu_config_gpio_input_has_mode_support(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_CAPTURE, &support);
           BREAK_IF(err != E_OK);
+          if(support != false) {
+            err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_CAPTURE);
+            BREAK_IF(err != E_OK);
+          } else {
+            err = ecu_config_gpio_input_has_mode_support(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_DIGITAL, &support);
+            BREAK_IF(err != E_OK);
+            if(support != false) {
+              err = ecu_config_gpio_input_set_mode(ctx->config.input_pin, ECU_GPIO_INPUT_TYPE_DIGITAL);
+              BREAK_IF(err != E_OK);
+            } else {
+              err = E_NOTSUPPORT;
+            }
+          }
+          BREAK_IF(err != E_OK);
+
           err = ecu_config_gpio_input_set_capture_edge(ctx->config.input_pin, ECU_IN_CAPTURE_EDGE_BOTH);
           BREAK_IF(err != E_OK);
           err = ecu_config_gpio_input_set_usrdata(ctx->config.input_pin, ctx);
@@ -153,13 +175,14 @@ void maf_loop_main(maf_ctx_t *ctx)
 
 void maf_loop_slow(maf_ctx_t *ctx)
 {
-  time_us_t now = time_get_current_us();
   error_t err = E_OK;
   input_value_t input_analog_value;
   uint8_t freq_cnt;
   float freq, freq_res, value_div_step;
   sMathInterpolateInput interpolate_input = {0};
   const maf_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
+  time_us_t last_time = ctx->freq_last_time;
+  time_us_t now = time_get_current_us();
 
   do {
     BREAK_IF(ctx == NULL);
@@ -185,6 +208,14 @@ void maf_loop_slow(maf_ctx_t *ctx)
           }
         } else if(ctx->config.signal_mode == MAF_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
+
+          if(last_time != 0 && time_diff(now, last_time) >= MAF_FREQ_TIMEOUT_US) {
+            ctx->freq_last_time = 0;
+            for(int i = 0; i < MAF_FREQ_ITEMS_COUNT; i++) {
+              ctx->input_freq_values[i] = 0;
+            }
+          }
+
           freq_cnt = 0;
           freq_res = 0;
           for(int i = 0; i < MAF_FREQ_ITEMS_COUNT; i++) {
@@ -192,29 +223,27 @@ void maf_loop_slow(maf_ctx_t *ctx)
               freq = ctx->input_freq_values[i];
               freq_res += freq;
               freq_cnt++;
-
-              if(freq > ctx->config.signal_frequency_to_value.input_high) {
-                ctx->diag.freq_high = true;
-              } else {
-                ctx->diag.freq_high = false;
-              }
-              if(freq < ctx->config.signal_frequency_to_value.input_low) {
-                ctx->diag.freq_low = true;
-              } else {
-                ctx->diag.freq_low = false;
-              }
             }
           }
 
           if(freq_cnt > 0) {
             freq_res /= freq_cnt;
             ctx->diag.freq_no_signal = false;
+
+            if(freq_res > ctx->config.signal_frequency_to_value.input_high) {
+              ctx->diag.freq_high = true;
+            } else {
+              ctx->diag.freq_high = false;
+            }
+            if(freq_res < ctx->config.signal_frequency_to_value.input_low) {
+              ctx->diag.freq_low = true;
+            } else {
+              ctx->diag.freq_low = false;
+            }
           } else {
             ctx->diag.freq_no_signal = true;
           }
           ctx->data.input_value = freq_res;
-
-          ctx->data.output_value = 000;
         }
 
         if(signal_mode_cfg != NULL) {
@@ -247,6 +276,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
       ctx->startup_time = now;
       ctx->data.input_value = 0;
       ctx->data.output_value = 0;
+      ctx->freq_last_time = 0;
       memset(ctx->input_freq_times, 0, sizeof(ctx->input_freq_times));
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_times));
     }

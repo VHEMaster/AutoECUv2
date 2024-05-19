@@ -20,6 +20,7 @@ typedef enum {
 }maf_config_versions_t;
 
 #define MAF_RELATION_ITEMS_MAX    256
+#define MAF_RELATION_ITEMS_MIN    8
 
 typedef enum {
   MAF_SIGNAL_MODE_ANALOG = 0,

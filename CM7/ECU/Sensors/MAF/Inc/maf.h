@@ -15,6 +15,7 @@
 #include <stdint.h>
 
 #define MAF_FREQ_ITEMS_COUNT    2
+#define MAF_FREQ_TIMEOUT_US     (100 * TIME_US_IN_MS)
 
 typedef struct {
   bool level_low : 1;
@@ -51,6 +52,7 @@ typedef struct {
 
     bool started;
     time_us_t startup_time;
+    time_us_t freq_last_time;
 
 }maf_ctx_t;
 

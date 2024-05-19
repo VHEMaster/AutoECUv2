@@ -13,7 +13,7 @@
 #include "versioned_modules.h"
 
 typedef struct {
-    l9966_config_data_t flexio[ECU_DEVICE_FLEXIO_MAX];
+    l9966_config_t flexio[ECU_DEVICE_FLEXIO_MAX];
     l9960_config_t motor[ECU_DEVICE_MOTOR_MAX];
     tle4729_config_t stepper[ECU_DEVICE_STEPPER_MAX];
     cj125_config_t wbls[ECU_DEVICE_WBLS_MAX];
