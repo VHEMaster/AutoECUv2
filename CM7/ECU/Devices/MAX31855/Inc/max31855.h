@@ -18,32 +18,33 @@
 #define MAX31855_SPI_MODE           (SPI_MODE_0)
 #define MAX31855_SPI_32B_DATASIZE   (false)
 
-typedef struct {
-    union {
-        uint8_t byte;
-        struct {
-            bool comm : 1;
-            bool scv : 1;
-            bool scg : 1;
-            bool oc : 1;
-        }bits;
-    }u;
+typedef union {
+    uint8_t byte;
+    struct {
+        bool comm : 1;
+        bool scv : 1;
+        bool scg : 1;
+        bool oc : 1;
+    }bits;
 }max31855_diag_t;
 
 typedef struct {
-    union {
-        uint32_t dword;
-        struct {
-            bool diag_fault_oc : 1;
-            bool diag_fault_scg : 1;
-            bool diag_fault_scv : 1;
-            bool always_zero_0 : 1;
-            uint16_t junction_reference : 12;
-            bool diag_fault : 1;
-            bool always_zero_1 : 1;
-            uint16_t temperature_data : 14;
-        }bits;
-    } u;
+    float temperature;
+    float reference;
+}max31855_data_t;
+
+typedef union {
+    uint32_t dword;
+    struct {
+        bool diag_fault_oc : 1;
+        bool diag_fault_scg : 1;
+        bool diag_fault_scv : 1;
+        bool always_zero_0 : 1;
+        uint16_t junction_reference : 12;
+        bool diag_fault : 1;
+        bool always_zero_1 : 1;
+        uint16_t temperature_data : 14;
+    }bits;
 }max31855_payload_t;
 
 typedef struct {
@@ -66,11 +67,12 @@ void max31855_loop_main(max31855_ctx_t *ctx);
 void max31855_loop_slow(max31855_ctx_t *ctx);
 void max31855_loop_fast(max31855_ctx_t *ctx);
 
-error_t max31855_diagnostics(max31855_ctx_t *ctx, max31855_diag_t *diag);
 error_t max31855_set_poll_period(max31855_ctx_t *ctx, time_delta_us_t period);
 
 error_t max31855_trigger_update(max31855_ctx_t *ctx);
-error_t max31855_get_temperature(max31855_ctx_t *ctx, float *temperature);
+
+error_t max31855_get_diag(max31855_ctx_t *ctx, max31855_diag_t *diag);
+error_t max31855_get_data(max31855_ctx_t *ctx, max31855_data_t *data);
 
 
 #endif /* DRIVERS_MAX31855_INC_MAX31855_H_ */

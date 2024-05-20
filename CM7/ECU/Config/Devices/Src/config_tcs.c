@@ -46,3 +46,39 @@ error_t ecu_devices_tcs_init(ecu_device_tcs_t instance, max31855_ctx_t *ctx)
 
   return err;
 }
+
+error_t ecu_devices_tcs_get_data(ecu_device_tcs_t instance, max31855_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_devices_tcs_ctx_t *tcs_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_TCS_MAX || data == NULL, err = E_PARAM);
+
+    tcs_ctx = &ecu_devices_tcs_ctx[instance];
+
+    err = max31855_get_data(tcs_ctx->ctx, data);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_tcs_get_diag(ecu_device_tcs_t instance, max31855_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_devices_tcs_ctx_t *tcs_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_TCS_MAX || diag == NULL, err = E_PARAM);
+
+    tcs_ctx = &ecu_devices_tcs_ctx[instance];
+
+    err = max31855_get_diag(tcs_ctx->ctx, diag);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}

@@ -16,4 +16,7 @@ error_t ecu_sensors_egt_get_default_config(ecu_sensor_egt_t instance, egt_config
 error_t ecu_sensors_egt_configure(ecu_sensor_egt_t instance, const egt_config_t *config);
 error_t ecu_sensors_egt_reset(ecu_sensor_egt_t instance);
 
+error_t ecu_sensors_egt_get_value(ecu_sensor_egt_t instance, egt_data_t *data);
+error_t ecu_sensors_egt_get_diag(ecu_sensor_egt_t instance, egt_diag_t *diag);
+
 #endif /* CONFIG_INC_CONFIG_EGT_H_ */

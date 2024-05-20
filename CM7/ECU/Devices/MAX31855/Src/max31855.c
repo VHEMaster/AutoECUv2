@@ -16,14 +16,14 @@ static void max31855_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
 
   if(errorcode == E_OK) {
 #if MAX31855_SPI_32B_DATASIZE == true
-    payload.u.dword = ctx->payload_rx;
+    payload.dword = ctx->payload_rx;
 #else /* MAX31855_SPI_32B_DATASIZE */
-    payload.u.dword = __REV(ctx->payload_rx);
+    payload.dword = __REV(ctx->payload_rx);
 #endif /* MAX31855_SPI_32B_DATASIZE */
-    if(payload.u.bits.always_zero_0 == 0u && payload.u.bits.always_zero_1 == 0u) {
-      ctx->data.u.dword = payload.u.dword;
-      ctx->temperature = ctx->data.u.bits.temperature_data * 0.25f;
-      ctx->reference = ctx->data.u.bits.junction_reference * 0.0625f;
+    if(payload.bits.always_zero_0 == 0u && payload.bits.always_zero_1 == 0u) {
+      ctx->data.dword = payload.dword;
+      ctx->temperature = ctx->data.bits.temperature_data * 0.25f;
+      ctx->reference = ctx->data.bits.junction_reference * 0.0625f;
     } else {
       ctx->comm_errorcode = E_BADRESP;
     }
@@ -101,20 +101,6 @@ void max31855_loop_fast(max31855_ctx_t *ctx)
 
 }
 
-error_t max31855_diagnostics(max31855_ctx_t *ctx, max31855_diag_t *diag)
-{
-  error_t err = E_OK;
-
-  if(diag != NULL) {
-    diag->u.bits.comm = ctx->comm_errorcode != E_OK;
-    diag->u.bits.oc = ctx->data.u.bits.diag_fault_oc;
-    diag->u.bits.scg = ctx->data.u.bits.diag_fault_scg;
-    diag->u.bits.scv = ctx->data.u.bits.diag_fault_scv;
-  }
-
-  return err;
-}
-
 error_t max31855_set_poll_period(max31855_ctx_t *ctx, time_delta_us_t period)
 {
   error_t err = E_OK;
@@ -134,12 +120,34 @@ error_t max31855_trigger_update(max31855_ctx_t *ctx)
   return err;
 }
 
-error_t max31855_get_temperature(max31855_ctx_t *ctx, float *temperature)
+error_t max31855_get_diag(max31855_ctx_t *ctx, max31855_diag_t *diag)
 {
   error_t err = E_OK;
+  max31855_diag_t diag_temp;
 
-  if(temperature != NULL) {
-    *temperature = ctx->temperature;
+  if(diag != NULL) {
+    diag_temp.byte = 0;
+    diag_temp.bits.comm = ctx->comm_errorcode != E_OK;
+    diag_temp.bits.oc = ctx->data.bits.diag_fault_oc;
+    diag_temp.bits.scg = ctx->data.bits.diag_fault_scg;
+    diag_temp.bits.scv = ctx->data.bits.diag_fault_scv;
+
+    *diag = diag_temp;
+  }
+
+  return err;
+}
+
+error_t max31855_get_data(max31855_ctx_t *ctx, max31855_data_t *data)
+{
+  error_t err = E_OK;
+  max31855_data_t data_temp;
+
+  if(data != NULL) {
+    data_temp.temperature = ctx->temperature;
+    data_temp.reference = ctx->reference;
+
+    *data = data_temp;
   }
 
   return err;

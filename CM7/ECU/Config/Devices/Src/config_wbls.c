@@ -307,5 +307,3 @@ error_t ecu_devices_wbls_get_diag(ecu_device_wbls_t instance, cj125_diag_t *diag
 
   return err;
 }
-
-
