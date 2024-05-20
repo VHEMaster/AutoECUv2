@@ -490,19 +490,16 @@ error_t ecu_config_global_flash_initialize(void)
 
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_flash_erase != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_FLASH_INIT, err = E_INVALACT);
 
-    if(ctx->process_flash_init == false) {
-      ctx->process_flash_init = true;
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_FLASH_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_flash_init = false;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
       }
     }
   } while(0);
@@ -517,19 +514,16 @@ error_t ecu_config_global_devices_initialize(void)
 
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_flash_erase != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_DEVS_INIT, err = E_INVALACT);
 
-    if(ctx->process_devs_init == false) {
-      ctx->process_devs_init = true;
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_DEVS_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_devs_init = false;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
       }
     }
   } while(0);
@@ -544,19 +538,16 @@ error_t ecu_config_global_sensors_initialize(void)
 
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_flash_erase != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_SENS_INIT, err = E_INVALACT);
 
-    if(ctx->process_sens_init == false) {
-      ctx->process_sens_init = true;
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_SENS_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_sens_init = false;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
       }
     }
   } while(0);
@@ -571,19 +562,16 @@ error_t ecu_config_global_modules_initialize(void)
 
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_flash_erase != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_MODULES_INIT, err = E_INVALACT);
 
-    if(ctx->process_module_init == false) {
-      ctx->process_module_init = true;
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULES_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_module_init = false;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
       }
     }
   } while(0);
@@ -598,19 +586,16 @@ error_t ecu_config_global_flash_erase(void)
 
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_module_init != false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE, err = E_INVALACT);
 
-    if(ctx->process_flash_erase == false) {
-      ctx->process_flash_erase = true;
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
         err = ctx->process_result;
-        ctx->process_flash_erase = false;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
       }
     }
   } while(0);
@@ -627,11 +612,7 @@ error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, 
     BREAK_IF_ACTION(op >= ECU_CONFIG_OP_MAX || op <= ECU_CONFIG_OP_NONE, err = E_PARAM);
     BREAK_IF_ACTION(type >= ECU_CONFIG_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->process_flash_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_flash_erase != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_sens_init != false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_devs_init != false, err = E_INVALACT);
-
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE && ctx->op_request != op, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE && (ctx->op_req_type != type || ctx->op_req_index != index || ctx->op_req_instance != instance), err = E_INVALACT);
 

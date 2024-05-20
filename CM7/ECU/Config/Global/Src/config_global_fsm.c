@@ -17,7 +17,7 @@ static error_t ecu_config_global_fsm_flash_init(ecu_config_global_runtime_ctx_t 
 
     switch(ctx->fsm_flash) {
       case ECU_CONFIG_FSM_FLASH_CONDITION:
-        if(ctx->global_ready == true && ctx->process_flash_init == true && ctx->process_result == E_AGAIN) {
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_FLASH_INIT && ctx->process_result == E_AGAIN) {
           ctx->process_instance = 0;
           ctx->flash_initialized = false;
           ctx->fsm_flash = ECU_CONFIG_FSM_FLASH_RESET;
@@ -72,7 +72,7 @@ static error_t ecu_config_global_fsm_flash_erase(ecu_config_global_runtime_ctx_t
 
     switch(ctx->fsm_flash_erase) {
       case ECU_CONFIG_FSM_FLASH_ERASE_CONDITION:
-        if(ctx->global_ready == true && ctx->process_flash_erase == true && ctx->process_result == E_AGAIN) {
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE && ctx->process_result == E_AGAIN) {
           ctx->op_req_errcode_internal = E_AGAIN;
           ctx->process_instance = 0;
           ctx->fsm_flash_erase = ECU_CONFIG_FSM_FLASH_ERASE_DEFINE;
@@ -174,7 +174,7 @@ static error_t ecu_config_global_fsm_rst_cfg(ecu_config_global_runtime_ctx_t *ct
 
     switch(ctx->fsm_rst_cfg) {
       case ECU_CONFIG_FSM_RST_CFG_CONDITION:
-        if(ctx->global_ready == true && ctx->process_devs_init == true && ctx->process_result == E_AGAIN) {
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_DEVS_INIT && ctx->process_result == E_AGAIN) {
           ctx->devices_initialized = false;
           ctx->process_dev_type = 0;
           ctx->process_instance = 0;
@@ -259,7 +259,7 @@ static error_t ecu_config_global_fsm_sens_cfg(ecu_config_global_runtime_ctx_t *c
 
     switch(ctx->fsm_sens_cfg) {
       case ECU_CONFIG_FSM_SENS_CFG_CONDITION:
-        if(ctx->global_ready == true && ctx->process_sens_init == true && ctx->process_result == E_AGAIN) {
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_SENS_INIT && ctx->process_result == E_AGAIN) {
           ctx->sensors_initialized = false;
           ctx->process_sens_type = 0;
           ctx->process_instance = 0;
@@ -344,7 +344,7 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
 
     switch(ctx->fsm_module_cfg) {
       case ECU_CONFIG_FSM_MODULE_CFG_CONDITION:
-        if(ctx->global_ready == true && ctx->process_module_init == true && ctx->process_result == E_AGAIN) {
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_MODULES_INIT && ctx->process_result == E_AGAIN) {
           ctx->modules_initialized = false;
           ctx->process_module_type = 0;
           ctx->process_instance = 0;

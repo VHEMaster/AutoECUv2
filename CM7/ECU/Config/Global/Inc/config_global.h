@@ -207,6 +207,16 @@ typedef enum {
   ECU_CONFIG_FSM_PROCESS_MAX
 }ecu_config_global_process_fsm_t;
 
+typedef enum {
+  ECU_CONFIG_PROCESS_TYPE_NONE = 0,
+  ECU_CONFIG_PROCESS_TYPE_FLASH_INIT,
+  ECU_CONFIG_PROCESS_TYPE_DEVS_INIT,
+  ECU_CONFIG_PROCESS_TYPE_SENS_INIT,
+  ECU_CONFIG_PROCESS_TYPE_MODULES_INIT,
+  ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE,
+  ECU_CONFIG_PROCESS_TYPE_MAX,
+}ecu_config_global_process_type_t;
+
 typedef struct {
     ecu_config_device_ctx_t *flash_ctx;
     uint32_t devices_count;
@@ -250,12 +260,8 @@ typedef struct {
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
-    bool process_flash_init;
-    bool process_devs_init;
-    bool process_sens_init;
-    bool process_module_init;
+    ecu_config_global_process_type_t process_type;
     error_t process_result;
-    bool process_flash_erase;
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
     ecu_config_device_type_t process_module_type;
