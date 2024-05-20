@@ -18,6 +18,15 @@ typedef struct {
 
 static const ckp_config_t ecu_sensors_ckp_config_default = {
 
+    .boot_time = 100 * TIME_US_IN_MS,
+};
+
+static const bool ecu_sensors_ckp_enabled_default[ECU_SENSOR_CKP_MAX] = {
+    true,
+};
+
+static const ecu_gpio_input_pin_t ecu_sensors_ckp_input_pin_default[ECU_SENSOR_CKP_MAX] = {
+    ECU_IN_PORT1_VRS,
 };
 
 static ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
@@ -39,6 +48,9 @@ error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx)
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
     ckp_ctx->ctx = ctx;
+
+    ckp_ctx->config_default.enabled = ecu_sensors_ckp_enabled_default[instance];
+    ckp_ctx->config_default.input_pin = ecu_sensors_ckp_input_pin_default[instance];
 
     err = ckp_init(ckp_ctx->ctx, &ckp_ctx->init);
     BREAK_IF(err != E_OK);
@@ -95,6 +107,42 @@ error_t ecu_sensors_ckp_reset(ecu_sensor_ckp_t instance)
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 
     err = ckp_reset(ckp_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_ckp_get_value(ecu_sensor_ckp_t instance, ckp_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_sensors_ckp_ctx_t *ckp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    ckp_ctx = &ecu_sensors_ckp_ctx[instance];
+
+    err = ckp_get_value(ckp_ctx->ctx, data);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_ckp_get_diag(ecu_sensor_ckp_t instance, ckp_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_sensors_ckp_ctx_t *ckp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
+
+    ckp_ctx = &ecu_sensors_ckp_ctx[instance];
+
+    err = ckp_get_diag(ckp_ctx->ctx, diag);
 
   } while(0);
 

@@ -10,8 +10,20 @@
 
 #include "inputs.h"
 #include "errors.h"
+#include "time.h"
 #include "versioned_ckp.h"
 #include <stdint.h>
+
+typedef union {
+    uint32_t data;
+    struct {
+
+    }bits;
+}ckp_diag_t;
+
+typedef struct {
+
+}ckp_data_t;
 
 typedef struct {
     uint32_t dummy;
@@ -22,6 +34,16 @@ typedef struct {
     ckp_config_t config;
     bool ready;
     bool configured;
+    bool pin_locked;
+
+    input_id_t input_id;
+
+    ckp_data_t data;
+    ckp_diag_t diag;
+
+    bool started;
+    time_us_t startup_time;
+
 }ckp_ctx_t;
 
 error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx);
@@ -31,5 +53,8 @@ error_t ckp_reset(ckp_ctx_t *ctx);
 void ckp_loop_main(ckp_ctx_t *ctx);
 void ckp_loop_slow(ckp_ctx_t *ctx);
 void ckp_loop_fast(ckp_ctx_t *ctx);
+
+error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data);
+error_t ckp_get_diag(ckp_ctx_t *ctx, ckp_diag_t *diag);
 
 #endif /* SENSORS_CKP_INC_CKP_H_ */

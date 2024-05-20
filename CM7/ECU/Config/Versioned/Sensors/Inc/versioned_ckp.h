@@ -8,7 +8,10 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_CKP_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_CKP_H_
 
+#include "config_gpio.h"
+#include "time.h"
 #include "compiler.h"
+#include "bool.h"
 #include <stdint.h>
 
 typedef enum {
@@ -16,7 +19,13 @@ typedef enum {
   CKP_CONFIG_VERSION_MAX
 }ckp_config_versions_t;
 
+
 typedef struct {
+    bool enabled;
+
+    time_delta_us_t boot_time;
+
+    ecu_gpio_input_pin_t input_pin;
 
     uint32_t align ALIGNED_CACHE;
 }ckp_config_v1_t ALIGNED_CACHE;
