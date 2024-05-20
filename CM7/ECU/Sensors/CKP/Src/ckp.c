@@ -6,9 +6,20 @@
  */
 
 #include "ckp.h"
+#include "ckp_signals.h"
 #include "compiler.h"
 #include "interpolation.h"
 #include <string.h>
+
+static const ckp_signal_ref_cfg_t ckp_signal_ref_cfg[CKP_CONFIG_SIGNAL_REF_TYPE_MAX] = {
+    {
+        .func_init_cb = NULL,
+        .func_signal_cb = NULL,
+        .func_main_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_main,
+        .func_slow_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_slow,
+        .func_fast_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_fast,
+    }, //CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
+};
 
 error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx)
 {
@@ -27,14 +38,14 @@ error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx)
   return err;
 }
 
-static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
+ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   ckp_ctx_t *ctx = (ckp_ctx_t *)usrdata;
-  time_us_t now = time_get_current_us();
-  time_delta_us_t delta;
 
   if(ctx != NULL && ctx->configured != false) {
-
+    if(ctx->signal_ref_type_ctx.cfg->func_signal_cb != NULL) {
+      ctx->signal_ref_type_ctx.cfg->func_signal_cb(ctx, level, ctx->signal_ref_type_ctx.usrdata);
+    }
   }
 }
 
@@ -45,10 +56,11 @@ error_t ckp_configure(ckp_ctx_t *ctx, const ckp_config_t *config)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(config->signal_ref_type >= CKP_CONFIG_SIGNAL_REF_TYPE_MAX, err = E_PARAM);
 
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ctx->configured == true) {
+    if(ctx->configured != false) {
       err = ckp_reset(ctx);
       BREAK_IF(err != E_OK);
     }
@@ -60,6 +72,14 @@ error_t ckp_configure(ckp_ctx_t *ctx, const ckp_config_t *config)
     }
 
     if(ctx->config.enabled == true) {
+      ctx->signal_ref_type_ctx.cfg = &ckp_signal_ref_cfg[ctx->config.signal_ref_type];
+      ctx->signal_ref_type_ctx.usrdata = NULL;
+
+      if(ctx->signal_ref_type_ctx.cfg->func_init_cb != NULL) {
+        err = ctx->signal_ref_type_ctx.cfg->func_init_cb(ctx, ctx->init.instance_index, &ctx->signal_ref_type_ctx.usrdata);
+        BREAK_IF(err != E_OK);
+      }
+
       err = ecu_config_gpio_input_get_id(ctx->config.input_pin, &ctx->input_id);
       BREAK_IF(err != E_OK);
 
@@ -113,7 +133,7 @@ error_t ckp_reset(ckp_ctx_t *ctx)
 
     ctx->configured = false;
 
-    if(ctx->pin_locked == true) {
+    if(ctx->pin_locked != false) {
       (void)ecu_config_gpio_input_unlock(ctx->config.input_pin);
       ctx->pin_locked = false;
     }
@@ -125,7 +145,13 @@ error_t ckp_reset(ckp_ctx_t *ctx)
 
 void ckp_loop_main(ckp_ctx_t *ctx)
 {
-
+  if(ctx != NULL) {
+    if(ctx->configured != false && ctx->started != false) {
+      if(ctx->signal_ref_type_ctx.cfg->func_main_cb != NULL) {
+        ctx->signal_ref_type_ctx.cfg->func_main_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+      }
+    }
+  }
 }
 
 void ckp_loop_slow(ckp_ctx_t *ctx)
@@ -134,9 +160,11 @@ void ckp_loop_slow(ckp_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
-    if(ctx->configured == true) {
-      if(ctx->started == true) {
-
+    if(ctx->configured != false) {
+      if(ctx->started != false) {
+        if(ctx->signal_ref_type_ctx.cfg->func_slow_cb != NULL) {
+          ctx->signal_ref_type_ctx.cfg->func_slow_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+        }
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
@@ -148,7 +176,13 @@ void ckp_loop_slow(ckp_ctx_t *ctx)
 
 ITCM_FUNC void ckp_loop_fast(ckp_ctx_t *ctx)
 {
-
+  if(ctx != NULL) {
+    if(ctx->configured != false && ctx->started != false) {
+      if(ctx->signal_ref_type_ctx.cfg->func_fast_cb != NULL) {
+        ctx->signal_ref_type_ctx.cfg->func_fast_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+      }
+    }
+  }
 }
 
 error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)

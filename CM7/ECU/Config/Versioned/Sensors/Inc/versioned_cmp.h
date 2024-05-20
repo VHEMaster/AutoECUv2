@@ -19,7 +19,6 @@ typedef enum {
   CMP_CONFIG_VERSION_MAX
 }cmp_config_versions_t;
 
-
 typedef struct {
     bool enabled;
 

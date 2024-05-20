@@ -19,6 +19,10 @@ typedef enum {
   CKP_CONFIG_VERSION_MAX
 }ckp_config_versions_t;
 
+typedef enum {
+  CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2 = 0,
+  CKP_CONFIG_SIGNAL_REF_TYPE_MAX,
+}ckp_config_signal_ref_type_t;
 
 typedef struct {
     bool enabled;
@@ -26,6 +30,8 @@ typedef struct {
     time_delta_us_t boot_time;
 
     ecu_gpio_input_pin_t input_pin;
+
+    ckp_config_signal_ref_type_t signal_ref_type;
 
     uint32_t align ALIGNED_CACHE;
 }ckp_config_v1_t ALIGNED_CACHE;

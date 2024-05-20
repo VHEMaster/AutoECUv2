@@ -17,7 +17,7 @@ typedef struct {
 }ecu_sensors_ckp_ctx_t;
 
 static const ckp_config_t ecu_sensors_ckp_config_default = {
-
+    .signal_ref_type = CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2,
     .boot_time = 100 * TIME_US_IN_MS,
 };
 
@@ -32,7 +32,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_ckp_input_pin_default[ECU_SENSOR_C
 static ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
     {
       .init = {
-
+          .instance_index = CKP_INSTANCE_1,
       },
       .config_default = ecu_sensors_ckp_config_default,
     },

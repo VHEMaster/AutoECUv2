@@ -912,7 +912,7 @@ error_t ecu_config_gpio_output_init(void)
   return err;
 }
 
-static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
+ITCM_FUNC static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
 {
   ecu_gpio_input_t *channel;
   ecu_gpio_input_level_t level = ECU_IN_LEVEL_UNDEFINED;
@@ -948,7 +948,7 @@ static void ecu_config_gpio_input_capture_cb(TIM_HandleTypeDef *htim)
   } while(0);
 }
 
-static void ecu_config_gpio_input_exti_cb(void *usrdata)
+ITCM_FUNC static void ecu_config_gpio_input_exti_cb(void *usrdata)
 {
   ecu_gpio_input_t *input = (ecu_gpio_input_t *)usrdata;
   ecu_gpio_input_level_t level = ECU_IN_LEVEL_UNDEFINED;
@@ -1656,7 +1656,7 @@ error_t ecu_config_gpio_exti_init(void)
   return err;
 }
 
-void ecu_config_gpio_exti_call(uint16_t exti_pin)
+ITCM_FUNC void ecu_config_gpio_exti_call(uint16_t exti_pin)
 {
   uint8_t bit = POSITION_VAL(exti_pin);
 
