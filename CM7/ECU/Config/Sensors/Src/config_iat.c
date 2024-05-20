@@ -47,6 +47,7 @@ static const iat_config_t ecu_sensors_iat_config_default = {
         .calibration_temperature = 25,
         .thermistor_beta = 3500,
     },
+    .slew_rate = 20.0f,
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_mode = IAT_SIGNAL_MODE_VOLTAGE,
     .calc_mode = IAT_CALC_MODE_TABLE_REF_VALUE,

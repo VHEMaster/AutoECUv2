@@ -61,6 +61,7 @@ typedef struct {
     ect_config_signal_mode_cfg_t signal_voltage_to_value;
     ect_config_signal_mode_cfg_t signal_resistance_to_value;
     ect_config_resistance_calc_cfg_t signal_resistance_calculated;
+    float slew_rate;
 
     time_delta_us_t boot_time;
 

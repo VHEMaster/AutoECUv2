@@ -116,13 +116,15 @@ void iat_loop_slow(iat_ctx_t *ctx)
   input_value_t input_analog_value;
   sMathInterpolateInput interpolate_input = {0};
   const iat_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
-  float value_div_step, value;
+  float value_div_step, value, value_old, allowed_rate, value_diff;
   time_us_t now = time_get_current_us();
+  time_delta_us_t time_delta;
 
   do {
     BREAK_IF(ctx == NULL);
     if(ctx->configured == true) {
       if(ctx->started == true) {
+        time_delta = time_diff(now, ctx->poll_time);
 
         err = input_get_value(ctx->input_id, &input_analog_value, NULL);
         BREAK_IF(err != E_OK && err != E_AGAIN);
@@ -154,7 +156,7 @@ void iat_loop_slow(iat_ctx_t *ctx)
         if(signal_mode_cfg != NULL) {
           if(ctx->config.calc_mode == IAT_CALC_MODE_TABLE_REF_VALUE) {
             interpolate_input = math_interpolate_input(ctx->data.input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.items);
-            ctx->data.output_value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == IAT_CALC_MODE_TABLE_VALUE) {
             value_div_step = ctx->data.input_value / signal_mode_cfg->input_step;
             interpolate_input.input = ctx->data.input_value;
@@ -164,7 +166,7 @@ void iat_loop_slow(iat_ctx_t *ctx)
             interpolate_input.indexes[0] = CLAMP(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
             interpolate_input.indexes[1] = CLAMP(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
 
-            ctx->data.output_value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == IAT_CALC_MODE_RESISTANCE_CALCULATED) {
             value = 1.0f / ctx->config.signal_resistance_calculated.thermistor_beta;
             value *= logf(ctx->data.input_value / ctx->config.signal_resistance_calculated.calibration_resistance);
@@ -172,19 +174,32 @@ void iat_loop_slow(iat_ctx_t *ctx)
             value = 1.0f / value;
             value -= 273.0f;
 
-            ctx->data.output_value = value;
           } else {
-            ctx->data.output_value = 0;
+            value = 0;
           }
         } else {
-          ctx->data.output_value = 0;
+          value = 0;
         }
 
+
+        if(ctx->poll_time != 0) {
+          value_old = ctx->data.output_value;
+          allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
+          value_diff = value - value_old;
+          value_diff = CLAMP(value_diff, -allowed_rate, allowed_rate);
+          value = value_old + value_diff;
+        }
+
+        ctx->data.output_value = value;
+        ctx->poll_delta = time_delta;
+
+        ctx->poll_time = now;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
       ctx->startup_time = now;
+      ctx->poll_time = 0;
       ctx->data.input_value = 0;
       ctx->data.output_value = 0;
     }

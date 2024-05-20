@@ -45,6 +45,7 @@ static const ect_config_t ecu_sensors_ect_config_default = {
         .calibration_temperature = 25,
         .thermistor_beta = 4100,
     },
+    .slew_rate = 10.0f,
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_mode = ECT_SIGNAL_MODE_VOLTAGE,
     .calc_mode = ECT_CALC_MODE_TABLE_REF_VALUE,

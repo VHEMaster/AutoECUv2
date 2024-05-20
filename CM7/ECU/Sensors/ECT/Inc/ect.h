@@ -45,6 +45,8 @@ typedef struct {
 
     bool started;
     time_us_t startup_time;
+    time_us_t poll_time;
+    time_delta_us_t poll_delta;
 
 }ect_ctx_t;
 
