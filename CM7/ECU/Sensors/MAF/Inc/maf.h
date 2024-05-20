@@ -17,12 +17,15 @@
 #define MAF_FREQ_ITEMS_COUNT    2
 #define MAF_FREQ_TIMEOUT_US     (100 * TIME_US_IN_MS)
 
-typedef struct {
-  bool level_low : 1;
-  bool level_high : 1;
-  bool freq_low : 1;
-  bool freq_high : 1;
-  bool freq_no_signal : 1;
+typedef union {
+    uint32_t data;
+    struct {
+        bool level_low : 1;
+        bool level_high : 1;
+        bool freq_low : 1;
+        bool freq_high : 1;
+        bool freq_no_signal : 1;
+    }bits;
 }maf_diag_t;
 
 typedef struct {

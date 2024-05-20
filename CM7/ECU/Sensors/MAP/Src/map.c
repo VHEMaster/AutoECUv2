@@ -198,15 +198,15 @@ void map_loop_slow(map_ctx_t *ctx)
           signal_mode_cfg = &ctx->config.signal_voltage_to_value;
 
           if(ctx->data.input_value > signal_mode_cfg->input_high) {
-            ctx->diag.level_high = true;
+            ctx->diag.bits.level_high = true;
           } else {
-            ctx->diag.level_high = false;
+            ctx->diag.bits.level_high = false;
           }
 
           if(ctx->data.input_value < signal_mode_cfg->input_low) {
-            ctx->diag.level_low = true;
+            ctx->diag.bits.level_low = true;
           } else {
-            ctx->diag.level_low = false;
+            ctx->diag.bits.level_low = false;
           }
         } else if(ctx->config.signal_mode == MAP_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
@@ -230,20 +230,20 @@ void map_loop_slow(map_ctx_t *ctx)
 
           if(freq_cnt > 0) {
             freq_res /= freq_cnt;
-            ctx->diag.freq_no_signal = false;
+            ctx->diag.bits.freq_no_signal = false;
 
             if(freq_res > ctx->config.signal_frequency_to_value.input_high) {
-              ctx->diag.freq_high = true;
+              ctx->diag.bits.freq_high = true;
             } else {
-              ctx->diag.freq_high = false;
+              ctx->diag.bits.freq_high = false;
             }
             if(freq_res < ctx->config.signal_frequency_to_value.input_low) {
-              ctx->diag.freq_low = true;
+              ctx->diag.bits.freq_low = true;
             } else {
-              ctx->diag.freq_low = false;
+              ctx->diag.bits.freq_low = false;
             }
           } else {
-            ctx->diag.freq_no_signal = true;
+            ctx->diag.bits.freq_no_signal = true;
           }
           ctx->data.input_value = freq_res;
         }
