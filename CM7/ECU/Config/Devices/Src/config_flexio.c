@@ -357,7 +357,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .overtemperature_mask = L9966_CONFIG_GS_OTM_ENABLED,
         },
       },
-      .rrx = { 220.0f, 8200.0f, 51000.0f },
+      .rrx = { 220.0f, 2700.0f, 8200.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
       .eu_used = { true, false },
     },
@@ -698,7 +698,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .overtemperature_mask = L9966_CONFIG_GS_OTM_ENABLED,
         },
       },
-      .rrx = { 220.0f, 8200.0f, 51000.0f },
+      .rrx = { 220.0f, 2700.0f, 8200.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
       .eu_used = { true, false },
     }
