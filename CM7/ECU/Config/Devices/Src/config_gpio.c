@@ -1415,6 +1415,7 @@ static error_t ecu_config_gpio_input_set_capture_edge_channel(ecu_gpio_input_t *
   error_t err = E_OK;
   HAL_StatusTypeDef status;
   TIM_IC_InitTypeDef config_ic = {0};
+  bool tim_was_active = false;
 
   do {
     config_ic.ICPolarity = tim_edge;
@@ -1422,8 +1423,20 @@ static error_t ecu_config_gpio_input_set_capture_edge_channel(ecu_gpio_input_t *
     config_ic.ICPrescaler = TIM_ICPSC_DIV1;
     config_ic.ICFilter = input->tim_ic_filter;
 
+    tim_was_active = TIM_CHANNEL_STATE_GET(input->htim, tim_channel) == HAL_TIM_CHANNEL_STATE_BUSY;
+
+    if(tim_was_active == true) {
+      status = HAL_TIM_IC_Stop_IT(input->htim, tim_channel);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    }
+
     status = HAL_TIM_IC_ConfigChannel(input->htim, &config_ic, tim_channel);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    if(tim_was_active == true) {
+      status = HAL_TIM_IC_Start_IT(input->htim, tim_channel);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    }
 
   } while(0);
 
