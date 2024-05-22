@@ -34,14 +34,13 @@ typedef struct {
     time_delta_us_t delta_sum;
     uint8_t delta_count;
 
-    float quotient;
-
     bool initial_found;
 }ckp_signal_regular_60_2_runtime_index_ctx_t;
 
 typedef struct {
     ckp_signal_regular_60_2_runtime_index_ctx_t indexed[CKP_SIGNAL_REGULAR_60_2_INDEX_MAX];
     time_delta_us_t rpm_deltas[CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX];
+    uint8_t sync_signal_index;
     time_delta_us_t rpm_delta_sum;
     uint8_t rpm_delta_count;
     uint8_t rpm_delta_index;
@@ -95,6 +94,7 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
   bool initial_cur_found = false;
   bool initial_cycle = false;
   bool initial_found[2];
+  bool data_updated = false;
 
   prim = EnterCritical();
   data = ctx->data;
@@ -194,7 +194,6 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
 
     if(initial_cycle) {
       if(quotient > -0.5f && quotient < 0.5f) {
-        signal_ctx->runtime.indexed[index].quotient = quotient;
         signal_ctx->runtime.indexed[index].initial_found = true;
         initial_found[0] = true;
         initial_cur_found = true;
@@ -203,6 +202,7 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
           sync_pos_updated = true;
           data.current.position += 9.0f;
           data.current.timestamp = now;
+          data_updated = true;
         }
       }
     }
@@ -217,9 +217,11 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
       }
       sync_pos_updated = true;
       data.synchronized = true;
+      signal_ctx->runtime.sync_signal_index = index;
+      signal_ctx->runtime.signal_index = 0;
       data.current.timestamp = now;
       data.current.position = CKP_SIGNAL_REGULAR_60_2_ZERO_POINT;
-      signal_ctx->runtime.signal_index = 0;
+      data_updated = true;
     }
 
     if(!initial_cur_found) {
@@ -233,10 +235,13 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
 
     if(data.synchronized) {
       if(!sync_pos_updated) {
-        sync_pos_updated = true;
-        data.current.position += 3.0f;
-        data.current.timestamp = now;
-        data.valid = true;
+        if(signal_ctx->runtime.sync_signal_index == index) {
+          sync_pos_updated = true;
+          data.current.position += 6.0f;
+          data.current.timestamp = now;
+          data.valid = true;
+          data_updated = true;
+        }
       }
     } else {
       data.valid = false;
@@ -253,9 +258,11 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
       ctx->diag.bits.signal_extra_pulse = true;
     }
 
-    prim = EnterCritical();
-    ctx->data = data;
-    ExitCritical(prim);
+    if(data_updated) {
+      prim = EnterCritical();
+      ctx->data = data;
+      ExitCritical(prim);
+    }
 
   } while(0);
 
@@ -308,6 +315,15 @@ ITCM_FUNC void ckp_signal_regular_60_2_loop_fast(ckp_ctx_t *ctx, void *usrdata)
   ckp_signal_regular_60_2_ctx_t *signal_ctx = (ckp_signal_regular_60_2_ctx_t *)usrdata;
 
   (void)signal_ctx;
+
+  ckp_data_t data;
+  ckp_calculate_current_position(ctx, &data);
+
+  if(data.current_position >= angles[0] && data.current_position < angles[1]) {
+    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_RESET);
+  } else {
+    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_SET);
+  }
 
 }
 
