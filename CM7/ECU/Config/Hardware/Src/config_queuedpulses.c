@@ -43,12 +43,17 @@ error_t ecu_config_queuedpulses_init(void)
 {
   error_t err = E_OK;
 
-  for(int i = 0; i < ITEMSOF(ecu_config_queuedpulses.timers); i++) {
-    err = queuedpulses_timer_register(ecu_config_queuedpulses.timers[i].htim, ecu_config_queuedpulses.timers[i].irq);
-    if(err != E_OK) {
-      break;
+  do {
+    err = queuedpulses_init();
+    BREAK_IF(err != E_OK);
+
+    for(int i = 0; i < ITEMSOF(ecu_config_queuedpulses.timers); i++) {
+      err = queuedpulses_timer_register(ecu_config_queuedpulses.timers[i].htim, ecu_config_queuedpulses.timers[i].irq);
+      BREAK_IF(err != E_OK);
     }
-  }
+    BREAK_IF(err != E_OK);
+
+  } while(0);
 
   return err;
 }

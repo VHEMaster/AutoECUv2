@@ -187,11 +187,6 @@ ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse
       break;
     }
 
-    if(queuedpulse_ctx.queue.entries_bitmap == QUEUEDPULSE_ENTRIES_BITMAP_MAX) {
-      err = E_OVERFLOW;
-      break;
-    }
-
     if(queuedpulse_ctx.timers_count == 0) {
       err = E_NOTRDY;
       break;
@@ -201,19 +196,17 @@ ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse
 
     now = time_get_current_us();
     prim = EnterCritical();
+
+    if(queuedpulse_ctx.queue.entries_bitmap == QUEUEDPULSE_ENTRIES_BITMAP_MAX) {
+      ExitCritical(prim);
+      err = E_OVERFLOW;
+      break;
+    }
+
     if(out->timer == NULL)
     {
-      for(int i = 0; i < QUEUEDPULSE_QUEUE_ENTRIES && bit_busy == true; i++) {
-        index = queuedpulse_ctx.queue.index_next;
-        bit_busy = queuedpulse_ctx.queue.entries_bitmap & (1 << index);
-        if(bit_busy == false) {
-          entry = &queuedpulse_ctx.queue.entries[index];
-        }
-        if(++index >= QUEUEDPULSE_QUEUE_ENTRIES) {
-          index = 0;
-        }
-        queuedpulse_ctx.queue.index_next = index;
-      }
+      index = POSITION_VAL(~queuedpulse_ctx.queue.entries_bitmap);
+      entry = &queuedpulse_ctx.queue.entries[index];
       ExitCritical(prim);
 
       if(entry == NULL) {
@@ -370,7 +363,6 @@ ITCM_FUNC error_t queuedpulses_reset_all(void)
     entry->pulse = 0u;
   }
 
-  queuedpulse_ctx.queue.index_next = 0u;
   queuedpulse_ctx.queue.entries_bitmap = 0u;
 
   ExitCritical(prim);
