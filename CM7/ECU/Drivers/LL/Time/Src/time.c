@@ -65,34 +65,22 @@ ITCM_FUNC INLINE time_delta_tick_t time_tick_diff(time_us_t a, time_us_t b)
 
 ITCM_FUNC void time_msmt_start(time_msmnt_item_t *item)
 {
-  time_us_t now = time_get_current_us();
   time_tick_t tick = time_get_current_tick();
 
-  item->period = time_diff(now, item->last_time);
-  item->last_time = now;
+  item->period = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
   item->last_tick = tick;
 }
 
 ITCM_FUNC void time_msmt_stop(time_msmnt_item_t *item)
 {
-  time_us_t now = time_get_current_us();
   time_tick_t tick = time_get_current_tick();
-  time_delta_us_t load_time = time_diff(now, item->last_time);
-  time_delta_tick_t load_tick = time_tick_diff(tick, item->last_tick);
+  time_float_delta_us_t load_tick = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
 
-  if(item->load_max < load_time || item->load_max == 0) {
-    item->load_max = load_time;
+  if(item->load_max < load_tick || item->load_max == 0) {
+    item->load_max = load_tick;
   }
-  if(item->load_min > load_time || item->load_min == 0) {
-    item->load_min = load_time;
+  if(item->load_min > load_tick || item->load_min == 0) {
+    item->load_min = load_tick;
   }
-  item->load_last = load_time;
-
-  if(item->load_tick_max < load_tick || item->load_tick_max == 0) {
-    item->load_tick_max = load_tick;
-  }
-  if(item->load_tick_min > load_tick || item->load_tick_min == 0) {
-    item->load_tick_min = load_tick;
-  }
-  item->load_tick_last = load_tick;
+  item->load_last = load_tick;
 }
