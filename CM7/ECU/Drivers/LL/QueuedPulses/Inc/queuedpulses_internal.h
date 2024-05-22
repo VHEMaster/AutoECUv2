@@ -31,6 +31,7 @@ typedef struct queuedpulse_timer_tag {
     uint32_t prescaler_default;
     queuedpulse_entry_t *entry_assigned;
     queuedpulse_output_t *output_assigned;
+    uint32_t id;
 }queuedpulse_timer_t;
 
 typedef struct queuedpulse_output_tag {
@@ -44,15 +45,14 @@ typedef struct queuedpulse_output_tag {
 typedef struct {
     queuedpulse_entry_t entries[QUEUEDPULSE_QUEUE_ENTRIES];
     uint32_t entries_bitmap;
-    uint8_t index_next;
 }queuedpulse_queue_t;
 
 typedef struct {
     queuedpulse_queue_t queue;
     queuedpulse_output_t outputs[OUTPUTS_CHS_MAX];
     queuedpulse_timer_t timers[QUEUEDPULSE_TIMERS];
+    uint32_t timers_bitmap;
     uint32_t timers_count;
-    uint8_t timer_next;
 
 }queuedpulse_ctx_t;
 
