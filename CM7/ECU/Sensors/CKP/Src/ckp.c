@@ -46,11 +46,14 @@ ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
   uint32_t prim;
 
   if(ctx != NULL && ctx->configured != false) {
+    time_msmt_start(&ctx->load_signal_cb);
     if(ctx->signal_ref_type_ctx.cfg->func_signal_cb != NULL) {
       ctx->signal_ref_type_ctx.cfg->func_signal_cb(ctx, level, ctx->signal_ref_type_ctx.usrdata);
     }
+    time_msmt_stop(&ctx->load_signal_cb);
 
     if(data.synchronized) {
+      time_msmt_start(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
         data = ctx->data;
@@ -59,6 +62,7 @@ ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
 
         ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &data, &diag);
       }
+      time_msmt_stop(&ctx->load_update_cb);
     }
   }
 }
@@ -274,7 +278,7 @@ ITCM_FUNC error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)
   return err;
 }
 
-error_t ckp_get_diag(ckp_ctx_t *ctx, ckp_diag_t *diag)
+ITCM_FUNC error_t ckp_get_diag(ckp_ctx_t *ctx, ckp_diag_t *diag)
 {
   error_t err = E_OK;
 
