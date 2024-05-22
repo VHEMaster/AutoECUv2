@@ -185,7 +185,62 @@ ITCM_FUNC void ckp_loop_fast(ckp_ctx_t *ctx)
   }
 }
 
-error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)
+ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_data_t *data)
+{
+  error_t err = E_OK;
+  float pos, pos_prev, mult, time_delta;
+  ckp_data_t data_cur;
+  time_us_t now;
+  uint32_t prim;
+
+  prim = EnterCritical();
+  data_cur = ctx->data;
+  ExitCritical(prim);
+
+  now = time_get_current_us();
+
+  if(!data_cur.valid) {
+    return 0.0f;
+  }
+
+  time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
+  now = time_diff(now, data_cur.previous.timestamp);
+
+  if(data_cur.current.position < data_cur.previous.position) {
+    data_cur.current.position += 360.0f;
+  }
+
+  pos = data_cur.current.position - data_cur.previous.position;
+  mult = pos / time_delta;
+  pos = mult * now + data_cur.previous.position;
+
+  while(pos >= 180.0f)
+    pos -= 360.0f;
+
+  prim = EnterCritical();
+  pos_prev = ctx->req.position_prev;
+  if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
+    pos = pos_prev;
+  }
+
+  //Check for NaNs
+  if(pos != pos) {
+    data_cur.valid = false;
+    pos = 0.0f;
+  }
+
+  ctx->req.position_prev = pos;
+  ExitCritical(prim);
+
+  if(data != NULL) {
+    data_cur.current_position = pos;
+    *data = data_cur;
+  }
+
+  return err;
+}
+
+ITCM_FUNC error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)
 {
   error_t err = E_OK;
   uint32_t prim;
