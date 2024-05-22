@@ -27,7 +27,7 @@ typedef error_t (*ckp_signal_ref_init_cb_t)(ckp_ctx_t *ctx, ckp_instance_t insta
 typedef void (*ckp_signal_ref_loop_cb_t)(ckp_ctx_t *ctx, void *usrdata);
 typedef void (*ckp_signal_ref_signal_cb_t)(ckp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata);
 
-typedef void (*ckp_signal_update_cb_t)(void *usrdata, ckp_data_t *data, ckp_diag_t *diag);
+typedef void (*ckp_signal_update_cb_t)(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 
 typedef struct {
     ckp_signal_ref_init_cb_t func_init_cb;
@@ -76,6 +76,7 @@ typedef struct {
 typedef struct {
     ckp_instance_t instance_index;
     ckp_signal_update_cb_t signal_update_cb;
+    void *signal_update_usrdata;
 }ckp_init_ctx_t;
 
 typedef struct ckp_ctx_tag {

@@ -41,10 +41,24 @@ error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx)
 ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   ckp_ctx_t *ctx = (ckp_ctx_t *)usrdata;
+  ckp_data_t data;
+  ckp_diag_t diag;
+  uint32_t prim;
 
   if(ctx != NULL && ctx->configured != false) {
     if(ctx->signal_ref_type_ctx.cfg->func_signal_cb != NULL) {
       ctx->signal_ref_type_ctx.cfg->func_signal_cb(ctx, level, ctx->signal_ref_type_ctx.usrdata);
+    }
+
+    if(data.synchronized) {
+      if(ctx->init.signal_update_cb != NULL) {
+        prim = EnterCritical();
+        data = ctx->data;
+        diag = ctx->diag;
+        ExitCritical(prim);
+
+        ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &data, &diag);
+      }
     }
   }
 }

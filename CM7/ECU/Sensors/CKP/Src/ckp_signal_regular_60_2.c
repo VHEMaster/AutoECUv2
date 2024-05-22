@@ -315,6 +315,7 @@ void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level
       while(data.current.position >= 180.0f) {
         data.current.position -= 360.0f;
       }
+      data.current_position = data.current.position;
     }
 
     if(++signal_ctx->runtime.signal_index > CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX) {
@@ -372,22 +373,11 @@ void ckp_signal_regular_60_2_loop_slow(ckp_ctx_t *ctx, void *usrdata)
   }
 }
 
-volatile float angles[2] = { -116.0f, -104.0f };
-
 ITCM_FUNC void ckp_signal_regular_60_2_loop_fast(ckp_ctx_t *ctx, void *usrdata)
 {
   ckp_signal_regular_60_2_ctx_t *signal_ctx = (ckp_signal_regular_60_2_ctx_t *)usrdata;
 
   (void)signal_ctx;
-
-  ckp_data_t data;
-  ckp_calculate_current_position(ctx, &data);
-
-  if(data.current_position >= angles[0] && data.current_position < angles[1]) {
-    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_RESET);
-  } else {
-    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_SET);
-  }
 
 }
 
