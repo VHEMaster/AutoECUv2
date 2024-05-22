@@ -10,12 +10,10 @@
 
 #include "ckp.h"
 
-typedef struct {
-
-}ckp_signal_regular_60_2_ctx_t;
-
-void ckp_signal_regular_60_2_loop_main(ckp_ctx_t *ctx, ckp_signal_regular_60_2_ctx_t *signal_ctx);
-void ckp_signal_regular_60_2_loop_slow(ckp_ctx_t *ctx, ckp_signal_regular_60_2_ctx_t *signal_ctx);
-void ckp_signal_regular_60_2_loop_fast(ckp_ctx_t *ctx, ckp_signal_regular_60_2_ctx_t *signal_ctx);
+error_t ckp_signal_regular_60_2_init(ckp_ctx_t *ctx, ckp_instance_t instance_index, void **usrdata);
+void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata);
+void ckp_signal_regular_60_2_loop_main(ckp_ctx_t *ctx, void *usrdata);
+void ckp_signal_regular_60_2_loop_slow(ckp_ctx_t *ctx, void *usrdata);
+void ckp_signal_regular_60_2_loop_fast(ckp_ctx_t *ctx, void *usrdata);
 
 #endif /* SENSORS_CKP_INC_CKP_SIGNAL_REGULAR_60_2_H_ */

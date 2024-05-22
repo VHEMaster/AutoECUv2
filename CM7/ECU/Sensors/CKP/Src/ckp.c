@@ -13,11 +13,11 @@
 
 static const ckp_signal_ref_cfg_t ckp_signal_ref_cfg[CKP_CONFIG_SIGNAL_REF_TYPE_MAX] = {
     {
-        .func_init_cb = NULL,
-        .func_signal_cb = NULL,
-        .func_main_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_main,
-        .func_slow_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_slow,
-        .func_fast_cb = (ckp_signal_ref_loop_cb_t)ckp_signal_regular_60_2_loop_fast,
+        .func_init_cb = ckp_signal_regular_60_2_init,
+        .func_signal_cb = ckp_signal_regular_60_2_signal,
+        .func_main_cb = ckp_signal_regular_60_2_loop_main,
+        .func_slow_cb = ckp_signal_regular_60_2_loop_slow,
+        .func_fast_cb = ckp_signal_regular_60_2_loop_fast,
     }, //CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
 };
 
@@ -188,6 +188,7 @@ ITCM_FUNC void ckp_loop_fast(ckp_ctx_t *ctx)
 error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)
 {
   error_t err = E_OK;
+  uint32_t prim;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -195,7 +196,9 @@ error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
+    prim = EnterCritical();
     *data = ctx->data;
+    ExitCritical(prim);
 
   } while(0);
 

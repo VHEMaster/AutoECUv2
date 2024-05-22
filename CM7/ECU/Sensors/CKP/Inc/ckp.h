@@ -45,12 +45,24 @@ typedef struct {
 typedef union ckp_diag_tag {
     uint32_t data;
     struct {
-
+        bool signal_sequence : 1;
+        bool signal_extra_pulse : 1;
+        bool signal_missing_pulse : 1;
+        bool signal_missing_second_sync : 1;
     }bits;
 }ckp_diag_t;
 
-typedef struct ckp_data_tag {
+typedef struct {
+    float position;
+    time_us_t timestamp;
+}ckp_data_position_t;
 
+typedef struct ckp_data_tag {
+    ckp_data_position_t current;
+    ckp_data_position_t previous;
+    bool detected;
+    bool synchronized;
+    bool valid;
 }ckp_data_t;
 
 typedef struct {
