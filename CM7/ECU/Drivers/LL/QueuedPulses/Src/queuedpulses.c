@@ -12,6 +12,8 @@
 
 static queuedpulse_ctx_t queuedpulse_ctx;
 
+static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim);
+
 error_t queuedpulses_init(void)
 {
   error_t err = E_OK;
@@ -48,6 +50,7 @@ error_t queuedpulses_timer_register(TIM_HandleTypeDef *htim, IRQn_Type irq)
 {
   error_t err = E_OK;
   queuedpulse_timer_t *timer;
+  HAL_StatusTypeDef status;
 
   do {
     if(htim == NULL || irq <= 0) {
@@ -64,6 +67,11 @@ error_t queuedpulses_timer_register(TIM_HandleTypeDef *htim, IRQn_Type irq)
     timer->prescaler_default = htim->Instance->PSC + 1;
     timer->entry_assigned = NULL;
     timer->output_assigned = NULL;
+
+    timer->htim->usrdata[0] = timer;
+
+    status = HAL_TIM_RegisterCallback(timer->htim, HAL_TIM_PERIOD_ELAPSED_CB_ID, queuedpulses_tim_irq_handler);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     queuedpulse_ctx.timers_count++;
 
@@ -91,24 +99,17 @@ error_t queuedpulses_output_configure(output_id_t output, output_value_t value_o
   return err;
 }
 
-ITCM_FUNC void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
+ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
 {
   queuedpulse_timer_t *timer = NULL;
   queuedpulse_output_t *out = NULL;
   queuedpulse_entry_t *entry = NULL;
-  bool found = true;
   uint32_t prim, psc, prd, now, diff;
 
   if(htim != NULL) {
-    for(int i = 0; i < queuedpulse_ctx.timers_count; i++) {
-      timer = &queuedpulse_ctx.timers[i];
-      if(timer->htim == htim) {
-        found = true;
-        break;
-      }
-    }
+    timer = htim->usrdata[0];
 
-    if(found) {
+    if(timer != NULL) {
       prim = EnterCritical();
       out = timer->output_assigned;
       if(out != NULL) {
