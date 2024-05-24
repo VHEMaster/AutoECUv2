@@ -439,26 +439,26 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_3,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
             }, // IO10
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_3,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
             }, // IO11
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_3,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
             }, // IO12
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
@@ -572,7 +572,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .cmd_config = {
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD2,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                     .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
@@ -580,7 +580,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 }, //CMD1
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD3,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                     .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
@@ -588,7 +588,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 }, //CMD2
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD4,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                     .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
@@ -596,7 +596,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 }, //CMD3
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD5,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_20V,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
                     .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
