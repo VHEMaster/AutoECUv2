@@ -16,7 +16,6 @@
 
 #define MAX31855_DEFAULT_POLL_PERIOD_US   (100 * TIME_US_IN_MS)
 #define MAX31855_SPI_MODE           (SPI_MODE_0)
-#define MAX31855_SPI_32B_DATASIZE   (false)
 
 typedef union {
     uint8_t byte;

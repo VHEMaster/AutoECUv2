@@ -15,13 +15,9 @@ static void max31855_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
   max31855_payload_t payload;
 
   if(errorcode == E_OK) {
-#if MAX31855_SPI_32B_DATASIZE == true
-    payload.dword = ctx->payload_rx;
-#else /* MAX31855_SPI_32B_DATASIZE */
     payload.dword = __REV(ctx->payload_rx);
-#endif /* MAX31855_SPI_32B_DATASIZE */
+    ctx->data.dword = payload.dword;
     if(payload.bits.always_zero_0 == 0u && payload.bits.always_zero_1 == 0u) {
-      ctx->data.dword = payload.dword;
       ctx->temperature = ctx->data.bits.temperature_data * 0.25f;
       ctx->reference = ctx->data.bits.junction_reference * 0.0625f;
     } else {
@@ -45,7 +41,7 @@ error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave)
     ctx->update_triggered = true;
     ctx->poll_period = MAX31855_DEFAULT_POLL_PERIOD_US;
 
-    err = spi_slave_configure_datasize(spi_slave, MAX31855_SPI_32B_DATASIZE == true ? 32 : 8);
+    err = spi_slave_configure_datasize(spi_slave, 8);
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(spi_slave, MAX31855_SPI_MODE);
@@ -76,7 +72,7 @@ ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
   if(ctx->ready == true) {
     if(ctx->comm_busy == false) {
       if(time_diff(now, ctx->time_last) >= ctx->poll_period) {
-        err = spi_transmit_and_receive(ctx->spi_slave, &ctx->payload_tx, &ctx->payload_rx, MAX31855_SPI_32B_DATASIZE == true ? 1 : sizeof(uint32_t));
+        err = spi_transmit_and_receive(ctx->spi_slave, &ctx->payload_tx, &ctx->payload_rx, sizeof(uint32_t));
         if(err == E_AGAIN) {
           ctx->time_last = now;
           ctx->comm_busy = true;
