@@ -28,6 +28,7 @@ typedef struct {
     bool enabled;
 
     time_delta_us_t boot_time;
+    bool desync_on_error;
 
     ecu_gpio_input_pin_t input_pin;
 

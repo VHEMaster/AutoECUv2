@@ -111,6 +111,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
   bool initial_cycle = false;
   bool initial_found[2];
   bool data_updated = false;
+  bool desync_needed = false;
 
   prim = EnterCritical();
   data = ctx->data;
@@ -132,9 +133,8 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
 
     if(index == index_prev) {
       ctx->diag.bits.signal_sequence = true;
+      desync_needed = true;
       break;
-    } else {
-      ctx->diag.bits.signal_sequence = false;
     }
 
     delta_last = signal_ctx->runtime.indexed[index].delta_last;
@@ -254,10 +254,13 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       if(data.synchronized) {
         if(signal_ctx->runtime.signal_index != CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX) {
           ctx->diag.bits.signal_missing_pulse = true;
+          desync_needed = true;
         }
       }
+      if(!desync_needed) {
+        data.synchronized = true;
+      }
       sync_pos_updated = true;
-      data.synchronized = true;
       signal_ctx->runtime.sync_signal_index = index;
       signal_ctx->runtime.signal_index = 0;
       data.current.timestamp = now;
@@ -271,6 +274,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       for(int i = 1; i < CKP_SIGNAL_REGULAR_60_2_INDEX_MAX; i++) {
         if(initial_cur_found != signal_ctx->runtime.indexed[index_prev].initial_found) {
           ctx->diag.bits.signal_missing_second_sync = true;
+          desync_needed = true;
         }
       }
     }
@@ -321,11 +325,17 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     if(++signal_ctx->runtime.signal_index > CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX) {
       signal_ctx->runtime.signal_index = 0;
       ctx->diag.bits.signal_extra_pulse = true;
+      desync_needed = true;
     }
 
     if(data_updated) {
       prim = EnterCritical();
       ctx->data = data;
+      if(desync_needed) {
+        if(ctx->config.desync_on_error) {
+          ctx->data.synchronized = false;
+        }
+      }
       ExitCritical(prim);
     }
 

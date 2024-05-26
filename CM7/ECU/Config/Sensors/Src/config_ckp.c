@@ -17,6 +17,7 @@ typedef struct {
 }ecu_sensors_ckp_ctx_t;
 
 static const ckp_config_t ecu_sensors_ckp_config_default = {
+    .desync_on_error = true,
     .signal_ref_type = CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2,
     .boot_time = 100 * TIME_US_IN_MS,
 };
