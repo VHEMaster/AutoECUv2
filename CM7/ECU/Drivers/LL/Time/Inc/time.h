@@ -49,7 +49,8 @@ time_delta_us_t time_diff(time_us_t a, time_us_t b);
 
 void time_init_tickbase(volatile time_tick_t *tickbase, time_tick_t mask);
 time_tick_t time_get_current_tick(void);
-time_delta_tick_t time_diff(time_tick_t a, time_tick_t b);
+time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b);
+
 
 void time_msmt_start(time_msmnt_item_t *item);
 void time_msmt_stop(time_msmnt_item_t *item);

@@ -50,7 +50,7 @@ ITCM_FUNC INLINE time_delta_us_t time_diff(time_us_t a, time_us_t b)
   return retval;
 }
 
-ITCM_FUNC INLINE time_delta_tick_t time_tick_diff(time_us_t a, time_us_t b)
+ITCM_FUNC INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
 {
   time_us_t retval;
 
