@@ -17,8 +17,14 @@ typedef struct {
 }ecu_sensors_cmp_ctx_t;
 
 static const cmp_config_t ecu_sensors_cmp_config_default = {
-
+    .desync_on_error = true,
+    .signal_ref_type = CMP_CONFIG_SIGNAL_REF_TYPE_SINGLEPULSE,
     .boot_time = 100 * TIME_US_IN_MS,
+    .signal_ref_types_config = {
+        .singlepulse = {
+
+        },
+    },
 };
 
 static const bool ecu_sensors_cmp_enabled_default[ECU_SENSOR_CMP_MAX] = {
@@ -26,13 +32,13 @@ static const bool ecu_sensors_cmp_enabled_default[ECU_SENSOR_CMP_MAX] = {
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_cmp_input_pin_default[ECU_SENSOR_CMP_MAX] = {
-    ECU_IN_PORT2_VRS,
+    ECU_IN_PORT2_SENT2,
 };
 
 static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
     {
       .init = {
-
+          .instance_index = CMP_INSTANCE_1,
       },
       .config_default = ecu_sensors_cmp_config_default,
     },

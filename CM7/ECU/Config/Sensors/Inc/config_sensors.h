@@ -37,16 +37,16 @@ typedef enum {
 typedef void (*ecu_sensor_loop_func_t)(void *ctx);
 
 typedef enum {
-  ECU_SENSOR_CKP_1 = 0,
-  ECU_SENSOR_CKP_MAX
+  ECU_SENSOR_CKP_1 = CKP_INSTANCE_1,
+  ECU_SENSOR_CKP_MAX = CKP_INSTANCE_MAX
 }ecu_sensor_ckp_t;
 
 typedef enum {
-  ECU_SENSOR_CMP_1 = 0,
-  ECU_SENSOR_CMP_2,
-  ECU_SENSOR_CMP_3,
-  ECU_SENSOR_CMP_4,
-  ECU_SENSOR_CMP_MAX
+  ECU_SENSOR_CMP_1 = CMP_INSTANCE_1,
+  ECU_SENSOR_CMP_2 = CMP_INSTANCE_2,
+  ECU_SENSOR_CMP_3 = CMP_INSTANCE_3,
+  ECU_SENSOR_CMP_4 = CMP_INSTANCE_4,
+  ECU_SENSOR_CMP_MAX = CMP_INSTANCE_MAX
 }ecu_sensor_cmp_t;
 
 typedef enum {

@@ -6,9 +6,20 @@
  */
 
 #include "cmp.h"
+#include "cmp_signals.h"
 #include "compiler.h"
 #include "interpolation.h"
 #include <string.h>
+
+static const cmp_signal_ref_cfg_t cmp_signal_ref_cfg[CMP_CONFIG_SIGNAL_REF_TYPE_MAX] = {
+    {
+        .func_init_cb = cmp_signal_singlepulse_init,
+        .func_signal_cb = cmp_signal_singlepulse_signal,
+        .func_main_cb = cmp_signal_singlepulse_loop_main,
+        .func_slow_cb = cmp_signal_singlepulse_loop_slow,
+        .func_fast_cb = cmp_signal_singlepulse_loop_fast,
+    }, //CMP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
+};
 
 error_t cmp_init(cmp_ctx_t *ctx, const cmp_init_ctx_t *init_ctx)
 {
@@ -27,14 +38,32 @@ error_t cmp_init(cmp_ctx_t *ctx, const cmp_init_ctx_t *init_ctx)
   return err;
 }
 
-static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
+ITCM_FUNC static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;
-  time_us_t now = time_get_current_us();
-  time_delta_us_t delta;
+  cmp_data_t data;
+  cmp_diag_t diag;
+  uint32_t prim;
 
   if(ctx != NULL && ctx->configured != false) {
+    time_msmt_start(&ctx->load_signal_cb);
+    if(ctx->signal_ref_type_ctx.cfg->func_signal_cb != NULL) {
+      ctx->signal_ref_type_ctx.cfg->func_signal_cb(ctx, level, ctx->signal_ref_type_ctx.usrdata);
+    }
+    time_msmt_stop(&ctx->load_signal_cb);
 
+    if(data.synchronized) {
+      time_msmt_start(&ctx->load_update_cb);
+      if(ctx->init.signal_update_cb != NULL) {
+        prim = EnterCritical();
+        data = ctx->data;
+        diag = ctx->diag;
+        ExitCritical(prim);
+
+        ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &data, &diag);
+      }
+      time_msmt_stop(&ctx->load_update_cb);
+    }
   }
 }
 
@@ -45,10 +74,11 @@ error_t cmp_configure(cmp_ctx_t *ctx, const cmp_config_t *config)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(config->signal_ref_type >= CMP_CONFIG_SIGNAL_REF_TYPE_MAX, err = E_PARAM);
 
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ctx->configured == true) {
+    if(ctx->configured != false) {
       err = cmp_reset(ctx);
       BREAK_IF(err != E_OK);
     }
@@ -60,6 +90,14 @@ error_t cmp_configure(cmp_ctx_t *ctx, const cmp_config_t *config)
     }
 
     if(ctx->config.enabled == true) {
+      ctx->signal_ref_type_ctx.cfg = &cmp_signal_ref_cfg[ctx->config.signal_ref_type];
+      ctx->signal_ref_type_ctx.usrdata = NULL;
+
+      if(ctx->signal_ref_type_ctx.cfg->func_init_cb != NULL) {
+        err = ctx->signal_ref_type_ctx.cfg->func_init_cb(ctx, ctx->init.instance_index, &ctx->signal_ref_type_ctx.usrdata);
+        BREAK_IF(err != E_OK);
+      }
+
       err = ecu_config_gpio_input_get_id(ctx->config.input_pin, &ctx->input_id);
       BREAK_IF(err != E_OK);
 
@@ -113,7 +151,7 @@ error_t cmp_reset(cmp_ctx_t *ctx)
 
     ctx->configured = false;
 
-    if(ctx->pin_locked == true) {
+    if(ctx->pin_locked != false) {
       (void)ecu_config_gpio_input_unlock(ctx->config.input_pin);
       ctx->pin_locked = false;
     }
@@ -125,7 +163,13 @@ error_t cmp_reset(cmp_ctx_t *ctx)
 
 void cmp_loop_main(cmp_ctx_t *ctx)
 {
-
+  if(ctx != NULL) {
+    if(ctx->configured != false && ctx->started != false) {
+      if(ctx->signal_ref_type_ctx.cfg->func_main_cb != NULL) {
+        ctx->signal_ref_type_ctx.cfg->func_main_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+      }
+    }
+  }
 }
 
 void cmp_loop_slow(cmp_ctx_t *ctx)
@@ -134,9 +178,11 @@ void cmp_loop_slow(cmp_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
-    if(ctx->configured == true) {
-      if(ctx->started == true) {
-
+    if(ctx->configured != false) {
+      if(ctx->started != false) {
+        if(ctx->signal_ref_type_ctx.cfg->func_slow_cb != NULL) {
+          ctx->signal_ref_type_ctx.cfg->func_slow_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+        }
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
@@ -148,27 +194,16 @@ void cmp_loop_slow(cmp_ctx_t *ctx)
 
 ITCM_FUNC void cmp_loop_fast(cmp_ctx_t *ctx)
 {
-
+  if(ctx != NULL) {
+    if(ctx->configured != false && ctx->started != false) {
+      if(ctx->signal_ref_type_ctx.cfg->func_fast_cb != NULL) {
+        ctx->signal_ref_type_ctx.cfg->func_fast_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
+      }
+    }
+  }
 }
 
-error_t cmp_get_value(cmp_ctx_t *ctx, cmp_data_t *data)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
-
-    *data = ctx->data;
-
-  } while(0);
-
-  return err;
-}
-
-error_t cmp_get_diag(cmp_ctx_t *ctx, cmp_diag_t *diag)
+ITCM_FUNC error_t cmp_get_diag(cmp_ctx_t *ctx, cmp_diag_t *diag)
 {
   error_t err = E_OK;
 
