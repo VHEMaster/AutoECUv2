@@ -303,6 +303,9 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
           sync_pos_updated = true;
           data.current.position += 6.0f;
         }
+        if(data.current.position >= 0.0f && data.previous.position < 0.0f) {
+          data.rotates_count++;
+        }
       }
     } else {
       data.valid = false;
@@ -380,6 +383,7 @@ void ckp_signal_regular_60_2_loop_slow(ckp_ctx_t *ctx, void *usrdata)
   if(clean_trigger != false) {
     memset(&signal_ctx->runtime, 0, sizeof(signal_ctx->runtime));
     memset(&ctx->data, 0, sizeof(ctx->data));
+    memset(&ctx->req, 0, sizeof(ctx->req));
   }
 }
 

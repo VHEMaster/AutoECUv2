@@ -34,6 +34,8 @@ static ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
     {
       .init = {
           .instance_index = CKP_INSTANCE_1,
+          .signal_update_cb = NULL,
+          .signal_update_usrdata = NULL,
       },
       .config_default = ecu_sensors_ckp_config_default,
     },

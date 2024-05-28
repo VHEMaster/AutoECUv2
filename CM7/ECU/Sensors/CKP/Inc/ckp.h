@@ -64,12 +64,14 @@ typedef struct ckp_data_tag {
     float current_position;
     float period;
     float rpm;
+    uint32_t rotates_count;
     bool detected;
     bool synchronized;
     bool valid;
 }ckp_data_t;
 
 typedef struct {
+    bool position_valid;
     float position_prev;
 }ckp_req_t;
 

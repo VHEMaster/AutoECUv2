@@ -24,8 +24,18 @@ typedef enum {
   CMP_CONFIG_SIGNAL_REF_TYPE_MAX,
 }cmp_config_signal_ref_type_t;
 
-typedef struct {
+typedef enum {
+  CMP_CONFIG_SIGNAL_POLARITY_ACTIVE_HIGH = 0,
+  CMP_CONFIG_SIGNAL_POLARITY_ACTIVE_LOW,
+  CMP_CONFIG_SIGNAL_POLARITY_MAX,
+}cmp_config_signal_polarity_t;
 
+typedef struct {
+    float pulse_edge_pos_min;
+    float pulse_edge_pos_max;
+    float pulse_width_min;
+    float pulse_width_max;
+    cmp_config_signal_polarity_t polarity;
 }cmp_config_signal_ref_type_singlepulse_t;
 
 typedef struct {

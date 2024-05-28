@@ -8,6 +8,7 @@
 #ifndef SENSORS_CMP_INC_CMP_H_
 #define SENSORS_CMP_INC_CMP_H_
 
+#include "ckp.h"
 #include "inputs.h"
 #include "errors.h"
 #include "time.h"
@@ -31,6 +32,7 @@ typedef void (*cmp_signal_ref_loop_cb_t)(cmp_ctx_t *ctx, void *usrdata);
 typedef void (*cmp_signal_ref_signal_cb_t)(cmp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata);
 
 typedef void (*cmp_signal_update_cb_t)(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
+typedef error_t (*cmp_ckp_update_req_cb_t)(void *usrdata, ckp_data_t *data);
 
 typedef struct {
     cmp_signal_ref_init_cb_t func_init_cb;
@@ -49,10 +51,16 @@ typedef union cmp_diag_tag {
     uint32_t data;
     struct {
         bool signal_sequence : 1;
+        bool extra_signal : 1;
+        bool wrong_signal : 1;
+        bool missing_signal : 1;
     }bits;
 }cmp_diag_t;
 
 typedef struct cmp_data_tag {
+    float position;
+    float pulse_width;
+    float pulse_edge_pos[2];
     bool detected;
     bool synchronized;
     bool valid;
@@ -64,8 +72,11 @@ typedef struct {
 
 typedef struct  {
     cmp_instance_t instance_index;
+    ckp_instance_t ckp_instance_index;
     cmp_signal_update_cb_t signal_update_cb;
     void *signal_update_usrdata;
+    cmp_ckp_update_req_cb_t ckp_update_req_cb;
+    void *ckp_update_usrdata;
 }cmp_init_ctx_t;
 
 typedef struct cmp_ctx_tag {

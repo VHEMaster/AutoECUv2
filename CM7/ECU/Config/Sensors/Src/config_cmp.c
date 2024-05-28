@@ -7,8 +7,11 @@
 
 #include <string.h>
 #include "config_cmp.h"
+#include "config_ckp.h"
 #include "config_extern.h"
 #include "compiler.h"
+
+static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_data_t *data);
 
 typedef struct {
     cmp_config_t config_default;
@@ -22,7 +25,11 @@ static const cmp_config_t ecu_sensors_cmp_config_default = {
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_ref_types_config = {
         .singlepulse = {
-
+            .pulse_edge_pos_min = -140,
+            .pulse_edge_pos_max = -60,
+            .pulse_width_min = 50,
+            .pulse_width_max = 60,
+            .polarity = CMP_CONFIG_SIGNAL_POLARITY_ACTIVE_LOW,
         },
     },
 };
@@ -38,11 +45,32 @@ static const ecu_gpio_input_pin_t ecu_sensors_cmp_input_pin_default[ECU_SENSOR_C
 static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
     {
       .init = {
+          .ckp_instance_index = CKP_INSTANCE_1,
           .instance_index = CMP_INSTANCE_1,
+          .signal_update_cb = NULL,
+          .signal_update_usrdata = NULL,
+          .ckp_update_req_cb = ecu_sensors_cmp_ckp_update_req_cb,
+          .ckp_update_usrdata = &ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_1],
       },
       .config_default = ecu_sensors_cmp_config_default,
     },
 };
+
+ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_sensors_cmp_ctx_t *cmp_ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
+
+  do {
+    BREAK_IF_ACTION(cmp_ctx == NULL, err = E_PARAM);
+
+    err = ecu_sensors_ckp_get_value(cmp_ctx->init.ckp_instance_index, data);
+
+  } while(0);
+
+  return err;
+}
+
 
 error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
 {
