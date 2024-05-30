@@ -15,5 +15,6 @@ void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_t level,
 void cmp_signal_singlepulse_loop_main(cmp_ctx_t *ctx, void *usrdata);
 void cmp_signal_singlepulse_loop_slow(cmp_ctx_t *ctx, void *usrdata);
 void cmp_signal_singlepulse_loop_fast(cmp_ctx_t *ctx, void *usrdata);
+void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 
 #endif /* SENSORS_CMP_INC_CMP_SIGNAL_SINGLEPULSE_H_ */

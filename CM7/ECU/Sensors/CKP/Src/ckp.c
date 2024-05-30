@@ -52,7 +52,7 @@ ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
     }
     time_msmt_stop(&ctx->load_signal_cb);
 
-    if(data.synchronized) {
+    if(ctx->data.validity >= CKP_DATA_VALID) {
       time_msmt_start(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
@@ -175,6 +175,9 @@ void ckp_loop_main(ckp_ctx_t *ctx)
 void ckp_loop_slow(ckp_ctx_t *ctx)
 {
   time_us_t now = time_get_current_us();
+  ckp_data_t data;
+  ckp_diag_t diag;
+  uint32_t prim;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -183,6 +186,17 @@ void ckp_loop_slow(ckp_ctx_t *ctx)
         if(ctx->signal_ref_type_ctx.cfg->func_slow_cb != NULL) {
           ctx->signal_ref_type_ctx.cfg->func_slow_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
         }
+
+        prim = EnterCritical();
+        data = ctx->data;
+        diag = ctx->diag;
+        ExitCritical(prim);
+        if(data.validity <= CKP_DATA_DETECTED) {
+          if(ctx->init.signal_update_cb != NULL) {
+            ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &data, &diag);
+          }
+        }
+
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
@@ -203,13 +217,14 @@ ITCM_FUNC void ckp_loop_fast(ckp_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_data_t *data)
+ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_t *req_ctx, ckp_data_t *data)
 {
   error_t err = E_OK;
   float pos, pos_prev, mult, time_delta;
   ckp_data_t data_cur;
   time_us_t now;
   uint32_t prim;
+  bool use_local_req_ctx = false;
 
   prim = EnterCritical();
   data_cur = ctx->data;
@@ -217,45 +232,53 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_data
 
   now = time_get_current_us();
 
-  if(!data_cur.valid) {
-    return 0.0f;
-  }
-
-  prim = EnterCritical();
-
-  if(ctx->req.position_valid) {
-    time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
-    now = time_diff(now, data_cur.previous.timestamp);
-
-    if(data_cur.current.position < data_cur.previous.position) {
-      data_cur.current.position += 360.0f;
+  if(data_cur.validity >= CKP_DATA_VALID) {
+    if(req_ctx == NULL) {
+      use_local_req_ctx = true;
+      req_ctx = &ctx->req;
     }
 
-    pos = data_cur.current.position - data_cur.previous.position;
-    mult = pos / time_delta;
-    pos = mult * now + data_cur.previous.position;
-
-    while(pos >= 180.0f)
-      pos -= 360.0f;
-
-    pos_prev = ctx->req.position_prev;
-
-    if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
-      pos = pos_prev;
+    if(!use_local_req_ctx) {
+      prim = EnterCritical();
     }
-  } else {
-    pos = data_cur.current.position;
-  }
 
-  //Check for NaNs
-  if(pos != pos) {
-    data_cur.valid = false;
-    pos = 0.0f;
-  }
+    if(req_ctx->position_valid) {
+      time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
+      now = time_diff(now, data_cur.previous.timestamp);
 
-  ctx->req.position_prev = pos;
-  ctx->req.position_valid = true;
-  ExitCritical(prim);
+      if(data_cur.current.position < data_cur.previous.position) {
+        data_cur.current.position += 360.0f;
+      }
+
+      pos = data_cur.current.position - data_cur.previous.position;
+      mult = pos / time_delta;
+      pos = mult * now + data_cur.previous.position;
+
+      while(pos >= 180.0f)
+        pos -= 360.0f;
+
+      pos_prev = req_ctx->position_prev;
+
+      if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
+        pos = pos_prev;
+      }
+    } else {
+      pos = data_cur.current.position;
+    }
+
+    //Check for NaNs
+    if(pos != pos) {
+      data->validity = MIN(data->validity, CKP_DATA_SYNCHRONIZED);
+      pos = 0.0f;
+    }
+
+    req_ctx->position_prev = pos;
+    req_ctx->position_valid = true;
+
+    if(!use_local_req_ctx) {
+      ExitCritical(prim);
+    }
+  }
 
   if(data != NULL) {
     data_cur.current_position = pos;

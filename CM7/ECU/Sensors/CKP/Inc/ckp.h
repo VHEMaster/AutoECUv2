@@ -56,7 +56,16 @@ typedef union ckp_diag_tag {
 typedef struct {
     float position;
     time_us_t timestamp;
+    bool valid;
 }ckp_data_position_t;
+
+typedef enum {
+  CKP_DATA_NONE = 0,
+  CKP_DATA_DETECTED,
+  CKP_DATA_SYNCHRONIZED,
+  CKP_DATA_VALID,
+  CKP_DATA_MAX
+}ckp_data_validity_t;
 
 typedef struct ckp_data_tag {
     ckp_data_position_t current;
@@ -65,9 +74,7 @@ typedef struct ckp_data_tag {
     float period;
     float rpm;
     uint32_t rotates_count;
-    bool detected;
-    bool synchronized;
-    bool valid;
+    ckp_data_validity_t validity;
 }ckp_data_t;
 
 typedef struct {
@@ -112,7 +119,7 @@ void ckp_loop_main(ckp_ctx_t *ctx);
 void ckp_loop_slow(ckp_ctx_t *ctx);
 void ckp_loop_fast(ckp_ctx_t *ctx);
 
-error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_data_t *data);
+error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_t *req_ctx, ckp_data_t *data);
 error_t ckp_get_value(ckp_ctx_t *ctx, ckp_data_t *data);
 error_t ckp_get_diag(ckp_ctx_t *ctx, ckp_diag_t *diag);
 

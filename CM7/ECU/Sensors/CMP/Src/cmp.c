@@ -18,6 +18,7 @@ static const cmp_signal_ref_cfg_t cmp_signal_ref_cfg[CMP_CONFIG_SIGNAL_REF_TYPE_
         .func_main_cb = cmp_signal_singlepulse_loop_main,
         .func_slow_cb = cmp_signal_singlepulse_loop_slow,
         .func_fast_cb = cmp_signal_singlepulse_loop_fast,
+        .func_ckp_update_cb = cmp_signal_singlepulse_ckp_update,
     }, //CMP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
 };
 
@@ -52,7 +53,7 @@ ITCM_FUNC static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
     }
     time_msmt_stop(&ctx->load_signal_cb);
 
-    if(data.synchronized) {
+    if(data.validity >= CMP_DATA_VALID) {
       time_msmt_start(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
@@ -201,6 +202,42 @@ ITCM_FUNC void cmp_loop_fast(cmp_ctx_t *ctx)
       }
     }
   }
+}
+
+ITCM_FUNC void cmp_ckp_signal_update(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
+{
+  cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;
+
+  do {
+    BREAK_IF(ctx == NULL);
+    if(ctx->configured) {
+      if(ctx->started) {
+        if(ctx->signal_ref_type_ctx.cfg->func_ckp_update_cb != NULL) {
+          ctx->signal_ref_type_ctx.cfg->func_ckp_update_cb(ctx, ctx->signal_ref_type_ctx.usrdata, data, diag);
+        }
+      }
+    }
+  } while(0);
+}
+
+ITCM_FUNC error_t cmp_get_value(cmp_ctx_t *ctx, cmp_data_t *data)
+{
+  error_t err = E_OK;
+  uint32_t prim;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    prim = EnterCritical();
+    *data = ctx->data;
+    ExitCritical(prim);
+
+  } while(0);
+
+  return err;
 }
 
 ITCM_FUNC error_t cmp_get_diag(cmp_ctx_t *ctx, cmp_diag_t *diag)

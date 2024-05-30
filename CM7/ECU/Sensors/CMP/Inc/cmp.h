@@ -30,9 +30,10 @@ typedef union cmp_diag_tag cmp_diag_t;
 typedef error_t (*cmp_signal_ref_init_cb_t)(cmp_ctx_t *ctx, cmp_instance_t instance_index, void **usrdata);
 typedef void (*cmp_signal_ref_loop_cb_t)(cmp_ctx_t *ctx, void *usrdata);
 typedef void (*cmp_signal_ref_signal_cb_t)(cmp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata);
+typedef void (*cmp_signal_ref_ckp_update_cb_t)(cmp_ctx_t *ctx, void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 
 typedef void (*cmp_signal_update_cb_t)(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
-typedef error_t (*cmp_ckp_update_req_cb_t)(void *usrdata, ckp_data_t *data);
+typedef error_t (*cmp_ckp_update_req_cb_t)(void *usrdata, ckp_req_t *req, ckp_data_t *data);
 
 typedef struct {
     cmp_signal_ref_init_cb_t func_init_cb;
@@ -40,6 +41,7 @@ typedef struct {
     cmp_signal_ref_loop_cb_t func_main_cb;
     cmp_signal_ref_loop_cb_t func_slow_cb;
     cmp_signal_ref_loop_cb_t func_fast_cb;
+    cmp_signal_ref_ckp_update_cb_t func_ckp_update_cb;
 }cmp_signal_ref_cfg_t;
 
 typedef struct {
@@ -51,19 +53,26 @@ typedef union cmp_diag_tag {
     uint32_t data;
     struct {
         bool signal_sequence : 1;
-        bool extra_signal : 1;
         bool wrong_signal : 1;
+        bool extra_signal : 1;
         bool missing_signal : 1;
+        bool signal_width : 1;
+        bool bad_pulse : 1;
+        bool ckp_error : 1;
     }bits;
 }cmp_diag_t;
 
+typedef enum {
+  CMP_DATA_NONE = 0,
+  CMP_DATA_DETECTED,
+  CMP_DATA_SYNCHRONIZED,
+  CMP_DATA_VALID,
+  CMP_DATA_MAX
+}cmp_data_validity_t;
+
 typedef struct cmp_data_tag {
     float position;
-    float pulse_width;
-    float pulse_edge_pos[2];
-    bool detected;
-    bool synchronized;
-    bool valid;
+    cmp_data_validity_t validity;
 }cmp_data_t;
 
 typedef struct {
@@ -92,6 +101,8 @@ typedef struct cmp_ctx_tag {
     cmp_data_t data;
     cmp_diag_t diag;
 
+    ckp_req_t ckp_req;
+
     cmp_signal_ref_ctx_t signal_ref_type_ctx;
 
     bool started;
@@ -109,6 +120,7 @@ error_t cmp_reset(cmp_ctx_t *ctx);
 void cmp_loop_main(cmp_ctx_t *ctx);
 void cmp_loop_slow(cmp_ctx_t *ctx);
 void cmp_loop_fast(cmp_ctx_t *ctx);
+void cmp_ckp_signal_update(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 
 error_t cmp_get_value(cmp_ctx_t *ctx, cmp_data_t *data);
 error_t cmp_get_diag(cmp_ctx_t *ctx, cmp_diag_t *diag);

@@ -11,12 +11,19 @@
 #include "config_extern.h"
 #include "compiler.h"
 
-static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_data_t *data);
+static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_req_t *req, ckp_data_t *data);
+static void ecu_sensors_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
+
+typedef struct {
+    cmp_signal_update_cb_t callback;
+    void *usrdata;
+}ecu_sensors_cmp_cb_t;
 
 typedef struct {
     cmp_config_t config_default;
     cmp_init_ctx_t init;
     cmp_ctx_t *ctx;
+    ecu_sensors_cmp_cb_t signal_update_callbacks[ECU_SENSORS_CMP_CALLBACKS_MAX];
 }ecu_sensors_cmp_ctx_t;
 
 static const cmp_config_t ecu_sensors_cmp_config_default = {
@@ -39,7 +46,7 @@ static const bool ecu_sensors_cmp_enabled_default[ECU_SENSOR_CMP_MAX] = {
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_cmp_input_pin_default[ECU_SENSOR_CMP_MAX] = {
-    ECU_IN_PORT2_SENT2,
+    ECU_IN_PORT2_VRS, //ECU_IN_PORT2_SENT2
 };
 
 static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
@@ -47,8 +54,8 @@ static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
       .init = {
           .ckp_instance_index = CKP_INSTANCE_1,
           .instance_index = CMP_INSTANCE_1,
-          .signal_update_cb = NULL,
-          .signal_update_usrdata = NULL,
+          .signal_update_cb = ecu_sensors_cmp_signal_update_cb,
+          .signal_update_usrdata = &ecu_sensors_cmp_ctx[0],
           .ckp_update_req_cb = ecu_sensors_cmp_ckp_update_req_cb,
           .ckp_update_usrdata = &ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_1],
       },
@@ -56,7 +63,7 @@ static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
     },
 };
 
-ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_data_t *data)
+ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_req_t *req, ckp_data_t *data)
 {
   error_t err = E_OK;
   ecu_sensors_cmp_ctx_t *cmp_ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
@@ -64,13 +71,27 @@ ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_da
   do {
     BREAK_IF_ACTION(cmp_ctx == NULL, err = E_PARAM);
 
-    err = ecu_sensors_ckp_get_value(cmp_ctx->init.ckp_instance_index, data);
+    err = ecu_sensors_ckp_calculate_current_position(cmp_ctx->init.ckp_instance_index, req, data);
 
   } while(0);
 
   return err;
 }
 
+ITCM_FUNC static void ecu_sensors_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
+{
+  ecu_sensors_cmp_ctx_t *ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
+  ecu_sensors_cmp_cb_t *cb;
+
+  for(int i = 0; i < ECU_SENSORS_CMP_CALLBACKS_MAX; i++) {
+    cb = &ctx->signal_update_callbacks[i];
+    if(cb->callback != NULL) {
+      cb->callback(cb->usrdata, data, diag);
+    } else {
+      break;
+    }
+  }
+}
 
 error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
 {
@@ -86,8 +107,12 @@ error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
     cmp_ctx->config_default.enabled = ecu_sensors_cmp_enabled_default[instance];
     cmp_ctx->config_default.input_pin = ecu_sensors_cmp_input_pin_default[instance];
 
+    err = ecu_sensors_ckp_register_cb(ctx->init.ckp_instance_index, cmp_ckp_signal_update, cmp_ctx->ctx);
+    BREAK_IF(err != E_OK);
+
     err = cmp_init(cmp_ctx->ctx, &cmp_ctx->init);
     BREAK_IF(err != E_OK);
+
 
     memcpy(&cmp_ctx->ctx->config, &cmp_ctx->config_default, sizeof(cmp_config_t));
 
@@ -177,6 +202,37 @@ error_t ecu_sensors_cmp_get_diag(ecu_sensor_cmp_t instance, cmp_diag_t *diag)
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 
     err = cmp_get_diag(cmp_ctx->ctx, diag);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_cmp_register_cb(ecu_sensor_cmp_t instance, cmp_signal_update_cb_t callback, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_sensors_cmp_ctx_t *cmp_ctx;
+  ecu_sensors_cmp_cb_t *cb;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || callback == NULL, err = E_PARAM);
+
+    cmp_ctx = &ecu_sensors_cmp_ctx[instance];
+
+    err = E_OVERFLOW;
+
+    for(int i = 0; i < ECU_SENSORS_CMP_CALLBACKS_MAX; i++) {
+      cb = &cmp_ctx->signal_update_callbacks[i];
+      if(cb->callback == callback || cb->usrdata == usrdata) {
+        err = E_OK;
+        break;
+      } else if(cb->callback == NULL) {
+        cb->callback = callback;
+        cb->usrdata = usrdata;
+        err = E_OK;
+        break;
+      }
+    }
 
   } while(0);
 

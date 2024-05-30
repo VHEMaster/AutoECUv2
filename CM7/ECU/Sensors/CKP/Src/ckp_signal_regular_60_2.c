@@ -19,7 +19,7 @@
 
 #define CKP_SIGNAL_REGULAR_60_2_ABS_INDEX_MAX     8
 
-#define CKP_SIGNAL_REGULAR_60_2_DELTA_COUNT                 4
+#define CKP_SIGNAL_REGULAR_60_2_DELTA_COUNT       4
 
 typedef enum {
   CKP_SIGNAL_REGULAR_60_2_INDEX_0 = 0,
@@ -110,7 +110,6 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
   bool initial_cur_found = false;
   bool initial_cycle = false;
   bool initial_found[2];
-  bool data_updated = false;
   bool desync_needed = false;
 
   prim = EnterCritical();
@@ -205,7 +204,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     data.period = period_delta_sum * 0.000001f;
     data.rpm = 60.0f / data.period;
 
-    data.detected = true;
+    data.validity = MAX(data.validity, CKP_DATA_DETECTED);
     delta_diff = (float)delta - (float)delta_last;
     quotient = delta_diff / delta_mean_prev;
 
@@ -214,7 +213,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
 
     data.previous = data.current;
 
-    if(!data.synchronized || signal_ctx->runtime.signal_index > CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX - 2) {
+    if(data.validity < CKP_DATA_SYNCHRONIZED || signal_ctx->runtime.signal_index > CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX - 2) {
       if(!initial_found[0] && !initial_found[1]) {
         quotient -= 1.0f;
         initial_cycle = true;
@@ -231,7 +230,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
         initial_found[0] = true;
         initial_cur_found = true;
 
-        if(data.synchronized) {
+        if(data.validity >= CKP_DATA_SYNCHRONIZED) {
           sync_index = signal_ctx->runtime.sync_signal_index;
           signal_ctx->runtime.sync_sig_value = (float)signal_ctx->runtime.indexed[sync_index].sync_delta / (float)signal_ctx->runtime.indexed[sync_index ^ 1].sync_delta;
 
@@ -240,10 +239,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
           } else {
             data.current.position += 18.0f / (1.0f + signal_ctx->runtime.sync_sig_value);
           }
-
           sync_pos_updated = true;
-          data.current.timestamp = now;
-          data_updated = true;
         }
       }
     }
@@ -251,22 +247,21 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     if(initial_found[0] && initial_found[1]) {
       signal_ctx->runtime.indexed[index].initial_found = false;
       signal_ctx->runtime.indexed[index_prev].initial_found = false;
-      if(data.synchronized) {
+      if(data.validity >= CKP_DATA_SYNCHRONIZED) {
         if(signal_ctx->runtime.signal_index != CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX) {
           ctx->diag.bits.signal_missing_pulse = true;
           desync_needed = true;
         }
       }
       if(!desync_needed) {
-        data.synchronized = true;
+        data.validity = MAX(data.validity, CKP_DATA_SYNCHRONIZED);
       }
-      sync_pos_updated = true;
       signal_ctx->runtime.sync_signal_index = index;
       signal_ctx->runtime.signal_index = 0;
       data.current.timestamp = now;
       data.current.position = CKP_SIGNAL_REGULAR_60_2_ZERO_POINT;
       signal_ctx->runtime.indexed[index].abs_delta_count = abs_delta_count = 0;
-      data_updated = true;
+      sync_pos_updated = true;
     }
 
     if(!initial_cur_found) {
@@ -279,7 +274,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       }
     }
 
-    if(data.synchronized) {
+    if(data.validity >= CKP_DATA_SYNCHRONIZED) {
       sync_index = signal_ctx->runtime.sync_signal_index;
       if(sync_index == index) {
         if(signal_ctx->runtime.signal_index >= 2 + CKP_SIGNAL_REGULAR_60_2_ABS_INDEX_MAX && signal_ctx->runtime.signal_index < CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX - 4) {
@@ -300,27 +295,26 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
           }
           sync_pos_updated = true;
         } else if(signal_ctx->runtime.sync_signal_index == index) {
-          sync_pos_updated = true;
           data.current.position += 6.0f;
-        }
-        if(data.current.position >= 0.0f && data.previous.position < 0.0f) {
-          data.rotates_count++;
+          sync_pos_updated = true;
         }
       }
     } else {
-      data.valid = false;
       sync_pos_updated = false;
     }
 
     if(sync_pos_updated) {
       data.current.timestamp = now;
-      data.valid = true;
-      data_updated = true;
+      data.current.valid = true;
+      if(data.current.valid && data.previous.valid) {
+        data.validity = MAX(data.validity, CKP_DATA_VALID);
+      }
     }
 
-    if(data.valid) {
-      while(data.current.position >= 180.0f) {
+    if(data.validity >= CKP_DATA_VALID) {
+      if(data.current.position >= 180.0f) {
         data.current.position -= 360.0f;
+        data.rotates_count++;
       }
       data.current_position = data.current.position;
     }
@@ -331,16 +325,14 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       desync_needed = true;
     }
 
-    if(data_updated) {
-      prim = EnterCritical();
-      ctx->data = data;
-      if(desync_needed) {
-        if(ctx->config.desync_on_error) {
-          ctx->data.synchronized = false;
-        }
+    if(desync_needed) {
+      if(ctx->config.desync_on_error) {
+        data.validity = MIN(data.validity, CKP_DATA_DETECTED);
       }
-      ExitCritical(prim);
     }
+    prim = EnterCritical();
+    ctx->data = data;
+    ExitCritical(prim);
 
   } while(0);
 
