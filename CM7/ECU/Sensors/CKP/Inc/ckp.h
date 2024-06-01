@@ -97,7 +97,6 @@ typedef struct ckp_ctx_tag {
 
     input_id_t input_id;
 
-    ckp_req_t req;
     ckp_data_t data;
     ckp_diag_t diag;
 

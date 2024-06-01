@@ -111,7 +111,7 @@ ITCM_FUNC void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_leve
     }
 
     if(level == level_expected || level == ECU_IN_LEVEL_UNDEFINED) {
-      err = ctx->init.ckp_update_req_cb(ctx->init.ckp_update_usrdata, &ctx->ckp_req, &ckp_data);
+      err = ctx->init.ckp_update_req_cb(ctx->init.ckp_update_usrdata, NULL, &ckp_data);
       if(err != E_OK) {
         ctx->diag.bits.ckp_error = true;
         desync_needed = true;
@@ -227,7 +227,6 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
     if(data->validity < CKP_DATA_VALID) {
       clean_trigger = true;
     } else {
-      ctx->ckp_req.position_prev = data->current_position;
       if(signal_ctx->runtime.pulse_edge_first_found) {
         if(data->current_position > cfg_ctx->pulse_edge_pos_max || data->current_position < cfg_ctx->pulse_edge_pos_min) {
           signal_ctx->runtime.pulse_edge_first_found = false;
@@ -246,7 +245,6 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
     if(clean_trigger) {
       memset(&signal_ctx->runtime, 0, sizeof(signal_ctx->runtime));
       memset(&ctx->data, 0, sizeof(ctx->data));
-      memset(&ctx->ckp_req, 0, sizeof(ctx->ckp_req));
     }
 
   } while(0);

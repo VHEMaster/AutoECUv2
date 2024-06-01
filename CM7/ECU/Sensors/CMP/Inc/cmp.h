@@ -101,8 +101,6 @@ typedef struct cmp_ctx_tag {
     cmp_data_t data;
     cmp_diag_t diag;
 
-    ckp_req_t ckp_req;
-
     cmp_signal_ref_ctx_t signal_ref_type_ctx;
 
     bool started;

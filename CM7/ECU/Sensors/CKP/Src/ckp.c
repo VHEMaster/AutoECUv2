@@ -224,7 +224,6 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
   ckp_data_t data_cur;
   time_us_t now;
   uint32_t prim;
-  bool use_local_req_ctx = false;
 
   prim = EnterCritical();
   data_cur = ctx->data;
@@ -232,35 +231,32 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
 
   now = time_get_current_us();
 
+  pos = data_cur.current.position;
+
   if(data_cur.validity >= CKP_DATA_VALID) {
-    if(req_ctx == NULL) {
-      use_local_req_ctx = true;
-      req_ctx = &ctx->req;
-    }
+    if(req_ctx == NULL || req_ctx->position_valid) {
+      if(data_cur.current.timestamp != data_cur.previous.timestamp) {
+        time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
+        now = time_diff(now, data_cur.previous.timestamp);
 
-    if(!use_local_req_ctx) {
-      prim = EnterCritical();
-    }
+        if(data_cur.current.position < data_cur.previous.position) {
+          data_cur.current.position += 360.0f;
+        }
 
-    if(req_ctx->position_valid) {
-      time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
-      now = time_diff(now, data_cur.previous.timestamp);
-
-      if(data_cur.current.position < data_cur.previous.position) {
-        data_cur.current.position += 360.0f;
+        pos = data_cur.current.position - data_cur.previous.position;
+        mult = pos / time_delta;
+        pos = mult * now + data_cur.previous.position;
       }
-
-      pos = data_cur.current.position - data_cur.previous.position;
-      mult = pos / time_delta;
-      pos = mult * now + data_cur.previous.position;
 
       while(pos >= 180.0f)
         pos -= 360.0f;
 
-      pos_prev = req_ctx->position_prev;
+      if(req_ctx != NULL) {
+        pos_prev = req_ctx->position_prev;
 
-      if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
-        pos = pos_prev;
+        if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
+          pos = pos_prev;
+        }
       }
     } else {
       pos = data_cur.current.position;
@@ -272,11 +268,9 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
       pos = 0.0f;
     }
 
-    req_ctx->position_prev = pos;
-    req_ctx->position_valid = true;
-
-    if(!use_local_req_ctx) {
-      ExitCritical(prim);
+    if(req_ctx != NULL) {
+      req_ctx->position_prev = pos;
+      req_ctx->position_valid = true;
     }
   }
 
