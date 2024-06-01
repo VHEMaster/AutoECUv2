@@ -53,9 +53,10 @@ typedef union cmp_diag_tag {
     uint32_t data;
     struct {
         bool signal_sequence : 1;
+        bool no_signal : 1;
         bool wrong_signal : 1;
         bool extra_signal : 1;
-        bool missing_signal : 1;
+        bool signal_lost : 1;
         bool signal_width : 1;
         bool bad_pulse : 1;
         bool ckp_error : 1;

@@ -26,6 +26,7 @@ typedef struct {
     bool is_synchronized;
     bool is_rotate_index_odd;
     bool is_ckp_synced;
+    bool is_found_current_cycle;
 }cmp_signal_singlepulse_runtime_ctx_t;
 
 typedef struct {
@@ -141,6 +142,7 @@ ITCM_FUNC void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_leve
           pulse_width = signal_ctx->runtime.pulse_edge_pos[1] - signal_ctx->runtime.pulse_edge_pos[0];
           if(pulse_width >= cfg_ctx->pulse_width_min && pulse_width <= cfg_ctx->pulse_width_max) {
             data.validity = CMP_DATA_VALID;
+            signal_ctx->runtime.is_found_current_cycle = true;
           } else {
             ctx->diag.bits.signal_width = true;
             desync_needed = true;
@@ -223,6 +225,7 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
     BREAK_IF(signal_ctx == NULL);
 
     cfg_ctx = &ctx->config.signal_ref_types_config.singlepulse;
+    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_SET);
 
     if(data->validity < CKP_DATA_VALID) {
       clean_trigger = true;
@@ -234,7 +237,27 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
             ctx->diag.bits.bad_pulse = true;
           }
         }
+      } else if(signal_ctx->runtime.is_synchronized) {
+        if(!signal_ctx->runtime.is_found_current_cycle) {
+          if(signal_ctx->runtime.is_rotate_index_odd == (data->rotates_count & 1) &&
+              data->current_position > cfg_ctx->pulse_edge_pos_max) {
+            if(signal_ctx->runtime.is_ckp_synced) {
+              ctx->diag.bits.signal_lost = true;
+              clean_trigger = true;
+            }
+          }
+        } else {
+          if(signal_ctx->runtime.is_rotate_index_odd != (data->rotates_count & 1)) {
+            signal_ctx->runtime.is_found_current_cycle = false;
+          }
+        }
+      } else {
+        if(data->rotates_count >= 2 && data->current_position > cfg_ctx->pulse_edge_pos_max) {
+          ctx->diag.bits.no_signal = true;
+          clean_trigger = true;
+        }
       }
+
       if(!signal_ctx->runtime.is_ckp_synced) {
         if(data->current.position < data->previous.position) {
           signal_ctx->runtime.is_ckp_synced = true;
