@@ -358,6 +358,8 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
         },
       },
       .rrx = { 220.0f, 2700.0f, 8200.0f },
+      .rrx_switch_threshold_low = { 0.0f, 1000.0f, 10000.0f },
+      .rrx_switch_threshold_high = { 1500.0f, 15000.0f, 100000.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
       .eu_used = { true, false },
     },
@@ -699,6 +701,8 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
         },
       },
       .rrx = { 220.0f, 2700.0f, 8200.0f },
+      .rrx_switch_threshold_low = { 0.0f, 1000.0f, 10000.0f },
+      .rrx_switch_threshold_high = { 1500.0f, 15000.0f, 100000.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
       .eu_used = { true, false },
     }

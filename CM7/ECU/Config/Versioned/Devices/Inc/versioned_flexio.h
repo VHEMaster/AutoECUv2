@@ -629,6 +629,8 @@ typedef struct {
     time_delta_us_t digital_poll_period;
     bool eu_used[L9966_EU_COUNT];
     float rrx[L9966_RRx_COUNT];
+    float rrx_switch_threshold_low[L9966_RRx_COUNT];
+    float rrx_switch_threshold_high[L9966_RRx_COUNT];
     uint32_t align ALIGNED_CACHE;
 }l9966_config_v1_t ALIGNED_CACHE;
 
