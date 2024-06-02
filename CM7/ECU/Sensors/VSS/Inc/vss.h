@@ -27,6 +27,7 @@ typedef union {
 typedef struct {
     float pulses_per_second;
     float speed;
+    bool valid;
 }vss_data_t;
 
 typedef struct {

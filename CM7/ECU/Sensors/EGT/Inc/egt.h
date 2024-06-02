@@ -26,6 +26,7 @@ typedef union {
 typedef struct {
     float sensor_temperature;
     float reference_temperature;
+    bool valid;
 }egt_data_t;
 
 typedef struct {

@@ -86,6 +86,7 @@ void egt_loop_slow(egt_ctx_t *ctx)
 {
   error_t err = E_OK;
   time_us_t now = time_get_current_us();
+  bool data_valid = false;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -96,28 +97,33 @@ void egt_loop_slow(egt_ctx_t *ctx)
         err = ecu_devices_tcs_get_diag(ctx->config.tcs_instance, &ctx->device_diag);
         BREAK_IF(err != E_OK);
 
-        ctx->data.sensor_temperature = ctx->device_data.temperature;
-        ctx->data.reference_temperature = ctx->device_data.reference;
+        data_valid = true;
 
         if(ctx->device_diag.byte != 0) {
           ctx->diag.bits.device_error = true;
+          data_valid = false;
         }
 
         if(ctx->data.sensor_temperature > ctx->config.temperature_too_high) {
           ctx->diag.bits.temperature_too_high = true;
+          data_valid = false;
         }
 
         if(ctx->data.sensor_temperature < ctx->config.temperature_too_low) {
           ctx->diag.bits.temperature_too_low = true;
+          data_valid = false;
         }
+
+        ctx->data.sensor_temperature = ctx->device_data.temperature;
+        ctx->data.reference_temperature = ctx->device_data.reference;
+        ctx->data.valid = data_valid;
 
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
       ctx->startup_time = now;
-      ctx->data.sensor_temperature = 0;
-      ctx->data.reference_temperature = 0;
+      memset(&ctx->data, 0, sizeof(ctx->data));
     }
   } while(0);
 }

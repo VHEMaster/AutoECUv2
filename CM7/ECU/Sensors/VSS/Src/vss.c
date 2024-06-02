@@ -197,7 +197,7 @@ void vss_loop_slow(vss_ctx_t *ctx)
           ctx->data.pulses_per_second = 0.0f;
           ctx->data.speed = 0.0f;
         }
-
+        ctx->data.valid = true;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
@@ -210,7 +210,10 @@ void vss_loop_slow(vss_ctx_t *ctx)
       ctx->freq_last_time = 0;
       ctx->input_freq_count = 0;
       ctx->input_freq_index = 0;
-      memset(&ctx->data, 0, sizeof(ctx->data));
+
+      ctx->data.pulses_per_second = 0;
+      ctx->data.speed = 0;
+
       memset(ctx->input_freq_times, 0, sizeof(ctx->input_freq_times));
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }

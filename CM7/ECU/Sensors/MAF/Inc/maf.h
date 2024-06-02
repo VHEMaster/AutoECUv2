@@ -29,8 +29,10 @@ typedef union {
 }maf_diag_t;
 
 typedef struct {
-    float input_value;
-    float output_value;
+    float input_frequency;
+    float input_voltage;
+    float mass_air_flow;
+    bool valid;
 }maf_data_t;
 
 typedef struct {

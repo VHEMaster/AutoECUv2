@@ -180,30 +180,37 @@ void maf_loop_slow(maf_ctx_t *ctx)
   error_t err = E_OK;
   input_value_t input_analog_value;
   uint8_t freq_cnt;
-  float freq, freq_res, value_div_step;
+  float freq, value_div_step;
   sMathInterpolateInput interpolate_input = {0};
   const maf_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
   time_us_t last_time = ctx->freq_last_time;
   time_us_t now = time_get_current_us();
+  float input_value;
+  bool data_valid = false;
 
   do {
     BREAK_IF(ctx == NULL);
     if(ctx->configured == true) {
       if(ctx->started == true) {
+        data_valid = true;
+
         if(ctx->config.signal_mode == MAF_SIGNAL_MODE_ANALOG) {
           err = input_get_value(ctx->input_id, &input_analog_value, NULL);
           BREAK_IF(err != E_OK && err != E_AGAIN);
 
-          ctx->data.input_value = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
+          input_value = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
           signal_mode_cfg = &ctx->config.signal_voltage_to_value;
 
-          if(ctx->data.input_value > signal_mode_cfg->input_high) {
+          if(input_value > signal_mode_cfg->input_high) {
             ctx->diag.bits.level_high = true;
+            data_valid = false;
           }
 
-          if(ctx->data.input_value < signal_mode_cfg->input_low) {
+          if(input_value < signal_mode_cfg->input_low) {
             ctx->diag.bits.level_low = true;
+            data_valid = false;
           }
+          ctx->data.input_voltage = input_value;
         } else if(ctx->config.signal_mode == MAF_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
 
@@ -215,62 +222,70 @@ void maf_loop_slow(maf_ctx_t *ctx)
           }
 
           freq_cnt = 0;
-          freq_res = 0;
+          input_value = 0;
           for(int i = 0; i < MAF_FREQ_ITEMS_COUNT; i++) {
             if(ctx->input_freq_values[i] > 0) {
               freq = ctx->input_freq_values[i];
-              freq_res += freq;
+              input_value += freq;
               freq_cnt++;
             }
           }
 
           if(freq_cnt > 0) {
-            freq_res /= freq_cnt;
+            input_value /= freq_cnt;
             ctx->diag.bits.freq_no_signal = false;
 
-            if(freq_res > ctx->config.signal_frequency_to_value.input_high) {
+            if(input_value > ctx->config.signal_frequency_to_value.input_high) {
               ctx->diag.bits.freq_high = true;
+              data_valid = false;
             }
-            if(freq_res < ctx->config.signal_frequency_to_value.input_low) {
+            if(input_value < ctx->config.signal_frequency_to_value.input_low) {
               ctx->diag.bits.freq_low = true;
+              data_valid = false;
             }
           } else {
             ctx->diag.bits.freq_no_signal = true;
+            data_valid = false;
           }
-          ctx->data.input_value = freq_res;
+
+          ctx->data.input_frequency = input_value;
+        } else {
+          input_value = 0.0f;
+          data_valid = false;
         }
 
         if(signal_mode_cfg != NULL) {
           if(ctx->config.calc_mode == MAF_CALC_MODE_TABLE_REF_VALUE) {
-            interpolate_input = math_interpolate_input(ctx->data.input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.items);
-            ctx->data.output_value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            interpolate_input = math_interpolate_input(input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.items);
+            ctx->data.mass_air_flow = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == MAF_CALC_MODE_TABLE_VALUE) {
-            value_div_step = ctx->data.input_value / signal_mode_cfg->input_step;
-            interpolate_input.input = ctx->data.input_value;
+            value_div_step = input_value / signal_mode_cfg->input_step;
+            interpolate_input.input = input_value;
             interpolate_input.indexes[0] = floorf(value_div_step);
             interpolate_input.indexes[1] = interpolate_input.indexes[0] + 1;
             interpolate_input.mult = value_div_step - interpolate_input.indexes[0];
             interpolate_input.indexes[0] = CLAMP(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
             interpolate_input.indexes[1] = CLAMP(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
 
-            ctx->data.output_value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            ctx->data.mass_air_flow = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == MAF_CALC_MODE_OFFSET_GAIN) {
-            ctx->data.output_value = ctx->data.input_value * signal_mode_cfg->gain + signal_mode_cfg->offset;
+            ctx->data.mass_air_flow = input_value * signal_mode_cfg->gain + signal_mode_cfg->offset;
           } else {
-            ctx->data.output_value = 0;
+            ctx->data.mass_air_flow = 0;
           }
         } else {
-          ctx->data.output_value = 0;
+          ctx->data.mass_air_flow = 0;
+          data_valid = false;
         }
+        ctx->data.valid = data_valid;
 
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
       ctx->startup_time = now;
-      ctx->data.input_value = 0;
-      ctx->data.output_value = 0;
       ctx->freq_last_time = 0;
+      memset(&ctx->data, 0, sizeof(ctx->data));
       memset(ctx->input_freq_times, 0, sizeof(ctx->input_freq_times));
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }

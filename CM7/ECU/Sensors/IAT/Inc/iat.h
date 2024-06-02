@@ -24,7 +24,8 @@ typedef union {
 
 typedef struct {
     float input_value;
-    float output_value;
+    float temperature;
+    bool valid;
 }iat_data_t;
 
 typedef struct {

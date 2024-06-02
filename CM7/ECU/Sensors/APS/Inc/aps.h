@@ -33,7 +33,7 @@ typedef struct {
     float position_unfiltered;
     float position_imbalance;
     float position;
-    bool data_valid;
+    bool valid;
 }aps_data_t;
 
 typedef struct {

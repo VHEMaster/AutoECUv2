@@ -119,11 +119,14 @@ void iat_loop_slow(iat_ctx_t *ctx)
   float value_div_step, value, value_old, allowed_rate, value_diff;
   time_us_t now = time_get_current_us();
   time_delta_us_t time_delta;
+  bool data_valid = false;
 
   do {
     BREAK_IF(ctx == NULL);
     if(ctx->configured == true) {
       if(ctx->started == true) {
+        data_valid = true;
+
         time_delta = time_diff(now, ctx->poll_time);
 
         err = input_get_value(ctx->input_id, &input_analog_value, NULL);
@@ -143,10 +146,12 @@ void iat_loop_slow(iat_ctx_t *ctx)
 
         if(ctx->data.input_value > signal_mode_cfg->input_high) {
           ctx->diag.bits.level_high = true;
+          data_valid = false;
         }
 
         if(ctx->data.input_value < signal_mode_cfg->input_low) {
           ctx->diag.bits.level_low = true;
+          data_valid = false;
         }
 
         if(signal_mode_cfg != NULL) {
@@ -171,22 +176,25 @@ void iat_loop_slow(iat_ctx_t *ctx)
             value -= 273.0f;
 
           } else {
+            data_valid = false;
             value = 0;
           }
         } else {
+          data_valid = false;
           value = 0;
         }
 
 
         if(ctx->poll_time != 0) {
-          value_old = ctx->data.output_value;
+          value_old = ctx->data.temperature;
           allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
           value_diff = value - value_old;
           value_diff = CLAMP(value_diff, -allowed_rate, allowed_rate);
           value = value_old + value_diff;
         }
 
-        ctx->data.output_value = value;
+        ctx->data.temperature = value;
+        ctx->data.valid = data_valid;
         ctx->poll_delta = time_delta;
 
         ctx->poll_time = now;
@@ -197,7 +205,7 @@ void iat_loop_slow(iat_ctx_t *ctx)
       ctx->startup_time = now;
       ctx->poll_time = 0;
       ctx->data.input_value = 0;
-      ctx->data.output_value = 0;
+      ctx->data.temperature = 0;
     }
   } while(0);
 }

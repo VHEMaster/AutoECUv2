@@ -72,7 +72,7 @@ error_t etc_fsm(etc_ctx_t *ctx)
       case ETC_FSM_TPS_WAIT:
         err = ecu_sensors_tps_get_value(ctx->config.sensor_tps, &ctx->tps_data);
         if(err == E_OK) {
-          if(ctx->tps_data.data_valid == true) {
+          if(ctx->tps_data.valid == true) {
             ctx->default_position_sampling = ctx->tps_data.position;
             ctx->default_position_samples = 1;
             ctx->reset_time = now;
@@ -95,7 +95,7 @@ error_t etc_fsm(etc_ctx_t *ctx)
         if(time_diff(now, ctx->reset_time) > ETC_TPS_DEFAULT_POSITION_SAMPLE_PERIOD_US) {
           err = ecu_sensors_tps_get_value(ctx->config.sensor_tps, &ctx->tps_data);
           if(err == E_OK) {
-            if(ctx->tps_data.data_valid == true) {
+            if(ctx->tps_data.valid == true) {
               ctx->default_position_sampling += ctx->tps_data.position;
               if(++ctx->default_position_samples >= ETC_TPS_DEFAULT_POSITION_SAMPLES) {
                 ctx->default_position_sampling /= ctx->default_position_samples;

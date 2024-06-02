@@ -207,12 +207,12 @@ void tps_loop_slow(tps_ctx_t *ctx)
 
         ctx->data.position = pos;
         ctx->poll_delta = time_delta;
-        ctx->data.data_valid = true;
+        ctx->data.valid = true;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
-      ctx->data.data_valid = false;
+      ctx->data.valid = false;
       ctx->signal_poll_time = now;
       ctx->startup_time = now;
       ctx->data.position_imbalance = 0;
