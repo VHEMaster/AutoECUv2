@@ -101,20 +101,14 @@ void egt_loop_slow(egt_ctx_t *ctx)
 
         if(ctx->device_diag.byte != 0) {
           ctx->diag.bits.device_error = true;
-        } else {
-          ctx->diag.bits.device_error = false;
         }
 
         if(ctx->data.sensor_temperature > ctx->config.temperature_too_high) {
           ctx->diag.bits.temperature_too_high = true;
-        } else {
-          ctx->diag.bits.temperature_too_high = false;
         }
 
         if(ctx->data.sensor_temperature < ctx->config.temperature_too_low) {
           ctx->diag.bits.temperature_too_low = true;
-        } else {
-          ctx->diag.bits.temperature_too_low = false;
         }
 
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {

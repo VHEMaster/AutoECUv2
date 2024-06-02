@@ -143,14 +143,10 @@ void iat_loop_slow(iat_ctx_t *ctx)
 
         if(ctx->data.input_value > signal_mode_cfg->input_high) {
           ctx->diag.bits.level_high = true;
-        } else {
-          ctx->diag.bits.level_high = false;
         }
 
         if(ctx->data.input_value < signal_mode_cfg->input_low) {
           ctx->diag.bits.level_low = true;
-        } else {
-          ctx->diag.bits.level_low = false;
         }
 
         if(signal_mode_cfg != NULL) {

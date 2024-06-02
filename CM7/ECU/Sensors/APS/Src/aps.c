@@ -150,18 +150,12 @@ void aps_loop_slow(aps_ctx_t *ctx)
             if(i == 0) ctx->diag.bits.signal1_level_high = true;
             else if(i == 1) ctx->diag.bits.signal2_level_high = true;
             signal_failed = true;
-          } else {
-            if(i == 0) ctx->diag.bits.signal1_level_high = false;
-            else if(i == 1) ctx->diag.bits.signal2_level_high = false;
           }
 
           if(ctx->data.voltages[i] < signal_cfg->voltage_low_thr) {
             if(i == 0) ctx->diag.bits.signal1_level_low = true;
             else if(i == 1) ctx->diag.bits.signal2_level_low = true;
             signal_failed = true;
-          } else {
-            if(i == 0) ctx->diag.bits.signal1_level_low = false;
-            else if(i == 1) ctx->diag.bits.signal2_level_low = false;
           }
 
           pos_raw = ctx->data.voltages[i] - signal_cfg->voltage_pos_min;
@@ -195,8 +189,6 @@ void aps_loop_slow(aps_ctx_t *ctx)
           imbalance = pos_max - pos_min;
           if(imbalance > ctx->config.signals_position_imbalance_max) {
             ctx->diag.bits.signals_imbalance = true;
-          } else {
-            ctx->diag.bits.signals_imbalance = false;
           }
         }
         ctx->data.position_imbalance = imbalance;

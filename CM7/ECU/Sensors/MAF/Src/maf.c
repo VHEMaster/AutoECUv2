@@ -199,14 +199,10 @@ void maf_loop_slow(maf_ctx_t *ctx)
 
           if(ctx->data.input_value > signal_mode_cfg->input_high) {
             ctx->diag.bits.level_high = true;
-          } else {
-            ctx->diag.bits.level_high = false;
           }
 
           if(ctx->data.input_value < signal_mode_cfg->input_low) {
             ctx->diag.bits.level_low = true;
-          } else {
-            ctx->diag.bits.level_low = false;
           }
         } else if(ctx->config.signal_mode == MAF_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
@@ -234,13 +230,9 @@ void maf_loop_slow(maf_ctx_t *ctx)
 
             if(freq_res > ctx->config.signal_frequency_to_value.input_high) {
               ctx->diag.bits.freq_high = true;
-            } else {
-              ctx->diag.bits.freq_high = false;
             }
             if(freq_res < ctx->config.signal_frequency_to_value.input_low) {
               ctx->diag.bits.freq_low = true;
-            } else {
-              ctx->diag.bits.freq_low = false;
             }
           } else {
             ctx->diag.bits.freq_no_signal = true;
