@@ -91,6 +91,12 @@ typedef enum {
 }l9966_maintain_eu_fsm_state_t;
 
 typedef enum {
+  L9966_SQNCR_PUDIVSEL_CONDITION = 0,
+  L9966_SQNCR_PUDIVSEL_REG_TRANSLATE,
+  L9966_SQNCR_PUDIVSEL_SPI_WRITE_REQ,
+}l9966_sqncr_pudivsel_fsm_state_t;
+
+typedef enum {
   L9966_CONFIGURE_CONDITION = 0,
   L9966_CONFIGURE_SC_WAIT,
   L9966_CONFIGURE_EU_DISABLE,
@@ -108,6 +114,7 @@ typedef enum {
   L9966_PROCESS_READ_SQNCR,
   L9966_PROCESS_READ_DIG_IN,
   L9966_PROCESS_CONFIGURE,
+  L9966_PROCESS_SQNCR_PUDIVSEL,
   L9966_PROCESS_SC_MAINTAIN,
   L9966_PROCESS_EU_MAINTAIN,
   L9966_PROCESS_MAX,
@@ -127,6 +134,8 @@ typedef struct {
     uint32_t bad_responses_cnt;
     uint32_t configuration_lost_cnt;
 
+    uint8_t sqncr_pudivsel_cmd_index;
+    error_t sqncr_pudivsel_errcode;
 
     bool version_valid;
     bool status_valid;
@@ -140,6 +149,8 @@ typedef struct {
     uint16_t fsm_tx_payload;
     uint16_t fsm_rx_payload;
     uint16_t fsm_rx_burst_payload[L9966_CHANNELS];
+    uint8_t rr_index_requested[L9966_CHANNELS];
+    bool rr_index_changed[L9966_CHANNELS];
 
     bool reset_request;
     error_t reset_errcode;
@@ -161,11 +172,14 @@ typedef struct {
     l9966_maintain_sc_fsm_state_t sc_maintain_fsm_state;
     l9966_maintain_eu_fsm_state_t eu_maintain_fsm_state;
     l9966_configure_fsm_state_t configure_fsm_state;
+    l9966_sqncr_pudivsel_fsm_state_t sqncr_pudivsel_fsm_state;
 
     l9966_fsm_state_t process_fsm;
 
-    time_us_t sqncr_last;
     time_delta_us_t sqncr_diff;
+    time_us_t sqncr_last;
+    time_delta_us_t sqncr_diffs[L9966_CHANNELS];
+    time_us_t sqncr_lasts[L9966_CHANNELS];
     float sqncr_cmd_results[L9966_CHANNELS];
     uint16_t sqncr_cmd_results_raw[L9966_CHANNELS];
     uint16_t sqncr_cmd_ready_mask;

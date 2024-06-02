@@ -8,7 +8,7 @@
 #include "l9966_cfg_reg.h"
 #include "compiler.h"
 
-error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
+error_t l9966_cfg_reg_translate_all(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;
   l9966_config_data_t *config;
@@ -16,6 +16,22 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    for(int i = 0; i < L9966_RRx_COUNT - 1; i++) {
+      BREAK_IF_ACTION(ctx->config.rrx_switch_threshold_high[i] / ctx->config.rrx[i] > 8.0f, err = E_PARAM);
+    }
+    BREAK_IF(err != E_OK);
+
+    for(int i = 1; i < L9966_RRx_COUNT; i++) {
+      BREAK_IF_ACTION(ctx->config.rrx[i] / ctx->config.rrx_switch_threshold_low[i] > 8.0f, err = E_PARAM);
+    }
+    BREAK_IF(err != E_OK);
+
+    for(int i = 0; i < L9966_RRx_COUNT - 1; i++) {
+      BREAK_IF_ACTION(ctx->config.rrx_switch_threshold_low[i + 1] >= ctx->config.rrx_switch_threshold_high[i], err = E_PARAM);
+    }
+    BREAK_IF(err != E_OK);
+
     config = &ctx->config.config_data;
     reg = &ctx->register_map;
 
@@ -221,6 +237,35 @@ error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx)
         reg->data.sqncr_cmd[i].bits.PUP_DIV = config->sequencer_config.cmd_config[i].pu_div_sel;
       }
     }
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t l9966_cfg_reg_translate_sqncr_pudivsel(l9966_ctx_t *ctx, uint8_t channel)
+{
+  error_t err = E_OK;
+  l9966_config_data_t *config;
+  l9966_reg_cfg_map_t *reg;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    config = &ctx->config.config_data;
+    reg = &ctx->register_map;
+
+    BREAK_IF_ACTION(channel >= ITEMSOF(config->sequencer_config.cmd_config), err = E_PARAM);
+
+    if(config->sequencer_config.cmd_config[channel].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_RESISTANCE) {
+      BREAK_IF_ACTION(config->sequencer_config.cmd_config[channel].pu_div_sel >= L9966_CFG_SQNCR_CMD_PU_MAX, err = E_PARAM);
+      reg->data.sqncr_cmd[channel].bits.PUP_DIV = config->sequencer_config.cmd_config[channel].pu_div_sel;
+    } else if(config->sequencer_config.cmd_config[channel].r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
+      BREAK_IF_ACTION(config->sequencer_config.cmd_config[channel].pu_div_sel >= L9966_CFG_SQNCR_CMD_DIV_MAX, err = E_PARAM);
+      reg->data.sqncr_cmd[channel].bits.PUP_DIV = config->sequencer_config.cmd_config[channel].pu_div_sel;
+    }
+
     BREAK_IF(err != E_OK);
 
   } while(0);

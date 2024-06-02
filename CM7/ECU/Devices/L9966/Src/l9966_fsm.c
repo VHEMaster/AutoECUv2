@@ -295,6 +295,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
   bool eu_enabled = false;
   bool data_available;
   bool copy_cplt = false;
+  time_delta_us_t diff;
 
   while(true) {
     err = E_OK;
@@ -373,14 +374,36 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
               result_resistor.data = ctx->fsm_rx_burst_payload[i];
               if(result_resistor.bits.ADC_RESULT != 0x0000) {
                 rr_index = sqncr_cmd->pu_div_sel;
-                if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
-                  resistor = 1000000.0f;
+                if(rr_index == ctx->rr_index_requested[i]) {
+                  if(!ctx->rr_index_changed[i]) {
+                    if(rr_index == L9966_CFG_SQNCR_CMD_PU_DISABLED) {
+                      resistor = 1000000.0f;
+                    } else {
+                      resistor = ctx->config.rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
+                    }
+                    ctx->sqncr_cmd_results_raw[i] = result_resistor.bits.ADC_RESULT;
+                    result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
+                    data_available = true;
+
+                    if(rr_index != L9966_CFG_SQNCR_CMD_PU_DISABLED) {
+                      rr_index -= L9966_CFG_SQNCR_CMD_PU_RR1;
+                      if(rr_index + 1 < L9966_RRx_COUNT) {
+                        if(result_float > ctx->config.rrx_switch_threshold_high[rr_index]) {
+                          ctx->rr_index_requested[i] = L9966_CFG_SQNCR_CMD_PU_RR1 + rr_index + 1;
+                        }
+                      }
+                      if(rr_index > 0) {
+                        if(result_float < ctx->config.rrx_switch_threshold_low[rr_index]) {
+                          ctx->rr_index_requested[i] = L9966_CFG_SQNCR_CMD_PU_RR1 + rr_index - 1;
+                        }
+                      }
+                    }
+                  } else {
+                    ctx->rr_index_changed[i] = false;
+                  }
                 } else {
-                  resistor = ctx->config.rrx[rr_index - L9966_CFG_SQNCR_CMD_PU_RR1];
+                  ctx->rr_index_changed[i] = true;
                 }
-                ctx->sqncr_cmd_results_raw[i] = result_resistor.bits.ADC_RESULT;
-                result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
-                data_available = true;
               }
             } else if(sqncr_cmd->r_volt_sel == L9966_CFG_SQNCR_CMD_RVM_VOLTAGE) {
               result_voltage.data = ctx->fsm_rx_burst_payload[i];
@@ -428,8 +451,12 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                 lpf = 1.0f;
               }
 
+              diff = time_diff(now, ctx->sqncr_lasts[i]);
+              ctx->sqncr_diffs[i] = diff;
+              ctx->sqncr_lasts[i] = now;
+
               if(lpf < 1.0f) {
-                lpf = (ctx->sqncr_diff / (float)TIME_US_IN_MS) * lpf;
+                lpf = ((float)diff / (float)TIME_US_IN_MS) * lpf;
                 if(lpf < 1.0f) {
                   result_float = result_float * lpf + result_old * (1.0f - lpf);
                 }
@@ -684,8 +711,12 @@ ITCM_FUNC static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
         }
         break;
       case L9966_CONFIGURE_REG_TRANSLATE:
-        err = l9966_cfg_reg_translate(ctx);
+        err = l9966_cfg_reg_translate_all(ctx);
         if(err == E_OK) {
+          for(int i = 0; i < L9966_CHANNELS; i++) {
+            ctx->rr_index_requested[i] = ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel;
+          }
+
           ctx->configure_fsm_state = L9966_CONFIGURE_CMD_DEFINE;
           ctx->configure_cmd_index = 0;
           err = E_AGAIN;
@@ -738,6 +769,70 @@ ITCM_FUNC static error_t l9966_fsm_configure(l9966_ctx_t *ctx)
   return err;
 }
 
+ITCM_FUNC static error_t l9966_fsm_sqncr_pudivsel(l9966_ctx_t *ctx)
+{
+  error_t err;
+
+  while(true) {
+    err = E_OK;
+
+    switch(ctx->sqncr_pudivsel_fsm_state) {
+      case L9966_SQNCR_PUDIVSEL_CONDITION:
+        if(ctx->initialized) {
+          for(int i = 0; i < L9966_CHANNELS; i++) {
+            if(ctx->rr_index_requested[i] != ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel) {
+              ctx->rr_index_changed[i] = true;
+              ctx->config.config_data.sequencer_config.cmd_config[i].pu_div_sel = ctx->rr_index_requested[i];
+              ctx->sqncr_pudivsel_fsm_state = L9966_SQNCR_PUDIVSEL_REG_TRANSLATE;
+              ctx->sqncr_pudivsel_errcode = E_AGAIN;
+              ctx->sqncr_pudivsel_cmd_index = i;
+              break;
+            }
+          }
+          if(ctx->sqncr_pudivsel_errcode == E_AGAIN) {
+            err = E_AGAIN;
+            continue;
+          }
+        }
+        break;
+      case L9966_SQNCR_PUDIVSEL_REG_TRANSLATE:
+        err = l9966_cfg_reg_translate_sqncr_pudivsel(ctx, ctx->sqncr_pudivsel_cmd_index);
+        if(err == E_OK) {
+          ctx->sqncr_pudivsel_fsm_state = L9966_SQNCR_PUDIVSEL_SPI_WRITE_REQ;
+          ctx->fsm_tx_addr = L9966_REG_SQNCR_CMD_x + ctx->sqncr_pudivsel_cmd_index;
+          ctx->fsm_tx_payload = ctx->register_map.data.sqncr_cmd[ctx->sqncr_pudivsel_cmd_index].data;
+          ctx->rr_index_changed[ctx->sqncr_pudivsel_cmd_index] = true;
+          err = E_AGAIN;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->sqncr_pudivsel_errcode = err;
+          err = E_OK;
+        }
+        break;
+      case L9966_SQNCR_PUDIVSEL_SPI_WRITE_REQ:
+        err = l9966_reg_write(ctx, ctx->fsm_tx_addr, ctx->fsm_tx_payload);
+        if(err == E_OK) {
+          ctx->rr_index_changed[ctx->sqncr_pudivsel_cmd_index] = true;
+          ctx->sqncr_pudivsel_fsm_state = L9966_SQNCR_PUDIVSEL_CONDITION;
+          ctx->sqncr_pudivsel_errcode = err;
+          err = E_AGAIN;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->rr_index_changed[ctx->sqncr_pudivsel_cmd_index] = true;
+          ctx->sqncr_pudivsel_fsm_state = L9966_SQNCR_PUDIVSEL_CONDITION;
+          ctx->sqncr_pudivsel_errcode = err;
+          err = E_OK;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
 ITCM_FUNC error_t l9966_fsm(l9966_ctx_t *ctx)
 {
   error_t err;
@@ -754,6 +849,9 @@ ITCM_FUNC error_t l9966_fsm(l9966_ctx_t *ctx)
         break;
       case L9966_PROCESS_CONFIGURE:
         err = l9966_fsm_configure(ctx);
+        break;
+      case L9966_PROCESS_SQNCR_PUDIVSEL:
+        err = l9966_fsm_sqncr_pudivsel(ctx);
         break;
       case L9966_PROCESS_CHECK_IRQ_FLAGS:
         err = l9966_fsm_check_irq_flags(ctx);

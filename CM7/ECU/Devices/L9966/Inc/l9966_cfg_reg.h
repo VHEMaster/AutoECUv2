@@ -10,6 +10,7 @@
 
 #include "l9966.h"
 
-error_t l9966_cfg_reg_translate(l9966_ctx_t *ctx);
+error_t l9966_cfg_reg_translate_all(l9966_ctx_t *ctx);
+error_t l9966_cfg_reg_translate_sqncr_pudivsel(l9966_ctx_t *ctx, uint8_t channel);
 
 #endif /* DEVICES_L9966_INC_L9966_CFG_REG_H_ */
