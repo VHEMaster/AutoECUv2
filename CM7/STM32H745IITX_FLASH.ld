@@ -63,6 +63,34 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* Initialized data sections into "RAM" Ram type memory */
+  _siitcm_func = LOADADDR(.itcm_func);
+  . = ALIGN(4);
+  .itcm_func :
+  {
+    . = ALIGN(4);
+    _sitcm_func = .;        /* create a global symbol at data start */
+    __itcm_func_start__ = _sitcm_func;
+    *(.itcm_func)        /* .itcm_func sections */
+    *(.itcm_func*)       /* .itcm_func* sections */
+    
+    *(.text.HAL_ADC_St*)  	/* .text.HAL_* sections */
+    *(.text.HAL_DMA_St*)  	/* .text.HAL_* sections */
+    *(.text.HAL_SPI_T*)   	/* .text.HAL_* sections */
+    *(.text.HAL_SPI_R*)   	/* .text.HAL_* sections */
+    *(.text.HAL_TIM_S*)   	/* .text.HAL_* sections */
+    *(.text.HAL_HRTIM_S*) 	/* .text.HAL_* sections */
+    *(.text.HAL_UART_T*)  	/* .text.HAL_* sections */
+    *(.text.HAL_UART_R*)  	/* .text.HAL_* sections */
+    *(.text.HAL_USART_T*) 	/* .text.HAL_* sections */
+    *(.text.HAL_USART_R*) 	/* .text.HAL_* sections */
+
+    . = ALIGN(4);
+    _eitcm_func = .;        /* define a global symbol at data end */
+    __itcm_func_end__ = _eitcm_func;
+
+  } >ITCMRAM AT> FLASH
+  
   /* The program code and other data into "FLASH" Rom type memory */
   .text :
   {
@@ -131,23 +159,6 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
     . = ALIGN(4);
   } >FLASH
-
-  /* Initialized data sections into "RAM" Ram type memory */
-  _siitcm_func = LOADADDR(.itcm_func);
-  . = ALIGN(4);
-  .itcm_func :
-  {
-    . = ALIGN(4);
-    _sitcm_func = .;        /* create a global symbol at data start */
-    __itcm_func_start__ = _sitcm_func;
-    *(.itcm_func)        /* .itcm_func sections */
-    *(.itcm_func*)       /* .itcm_func* sections */
-
-    . = ALIGN(4);
-    _eitcm_func = .;        /* define a global symbol at data end */
-    __itcm_func_end__ = _eitcm_func;
-
-  } >ITCMRAM AT> FLASH
 
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);

@@ -8,7 +8,7 @@
 #include "l9966_internal.h"
 #include "compiler.h"
 
-error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
+ITCM_FUNC error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
 {
   error_t err = E_OK;
   uint16_t hword;
@@ -59,7 +59,7 @@ error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
   return err;
 }
 
-error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
+ITCM_FUNC error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
 {
   error_t err = E_OK;
   uint16_t hword;
@@ -110,7 +110,7 @@ error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
   return err;
 }
 
-error_t l9966_burst_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data, uint8_t len)
+ITCM_FUNC error_t l9966_burst_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data, uint8_t len)
 {
   error_t err = E_OK;
   uint16_t hword;
@@ -172,7 +172,7 @@ error_t l9966_burst_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data, uint
   return err;
 }
 
-error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *data, uint8_t len)
+ITCM_FUNC error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *data, uint8_t len)
 {
   error_t err = E_OK;
   uint16_t hword;
@@ -200,7 +200,7 @@ error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *dat
       err = E_AGAIN;
       continue;
     } else {
-      err = spi_transmit_and_receive(ctx->init.spi_slave, ctx->tx_payload, ctx->rx_payload, 2);
+      err = spi_transmit_and_receive(ctx->init.spi_slave, ctx->tx_payload, ctx->rx_payload, len + 1);
       if(err == E_OK) {
         ctx->spi_busy = false;
 
@@ -234,7 +234,7 @@ error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uint16_t *dat
   return err;
 }
 
-error_t l9966_is_int_pin_triggered(l9966_ctx_t *ctx, bool *triggered)
+ITCM_FUNC INLINE error_t l9966_is_int_pin_triggered(l9966_ctx_t *ctx, bool *triggered)
 {
   error_t err = E_OK;
 
