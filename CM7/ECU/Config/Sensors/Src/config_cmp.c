@@ -46,7 +46,7 @@ static const bool ecu_sensors_cmp_enabled_default[ECU_SENSOR_CMP_MAX] = {
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_cmp_input_pin_default[ECU_SENSOR_CMP_MAX] = {
-    ECU_IN_PORT2_VRS, //ECU_IN_PORT2_SENT2
+    ECU_IN_PORT2_SENT2,
 };
 
 static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {

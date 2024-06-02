@@ -34,7 +34,7 @@ void ecu_config_ll_init(void)
   __HAL_DBGMCU_FREEZE2_IWDG2();
 }
 
-void ecu_config_start_counter(void)
+void ecu_config_init_counter(void)
 {
   htim2.Init.Period = ECU_TICKBASE_MASK;
   htim5.Init.Period = ECU_TIMEBASE_MASK;
@@ -44,7 +44,10 @@ void ecu_config_start_counter(void)
 
   time_init_tickbase(&htim2.Instance->CNT, ECU_TICKBASE_MASK);
   time_init_timebase(&htim5.Instance->CNT, ECU_TIMEBASE_MASK);
+}
 
+void ecu_config_start_counter(void)
+{
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_Base_Start(&htim5);
 }

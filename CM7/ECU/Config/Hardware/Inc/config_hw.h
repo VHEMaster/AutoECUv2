@@ -16,6 +16,7 @@
 #define ECU_TIMEBASE_MASK   0x03FFFFFF
 
 void ecu_config_ll_init(void);
+void ecu_config_init_counter(void);
 void ecu_config_start_counter(void);
 void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, pTIM_CallbackTypeDef func_tim_fast_irq_cb);
 

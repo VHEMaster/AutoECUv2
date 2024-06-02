@@ -91,6 +91,8 @@ void middlelayer_init(void)
 {
   ecu_config_ll_init();
 
+  ecu_config_init_counter();
+
   middlelayer_spi_init();
 
   middlelayer_gpio_init();
