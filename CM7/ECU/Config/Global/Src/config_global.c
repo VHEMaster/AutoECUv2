@@ -273,6 +273,26 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
         },
     }, //ECU_CONFIG_SENS_TYPE_TPS
     {
+        .device_type = ECU_SENSOR_TYPE_VSS,
+        .instances_count = ECU_SENSOR_VSS_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_sensors_vss_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_sensors_vss_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_SENS_VSS,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_vss_get_default_config,
+            .data_ptr = &ecu_config_global_engine.sens.vss[0],
+            .data_size = sizeof(ecu_config_global_engine.sens.vss[0]),
+            .versions_count = VSS_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = VSS_CONFIG_VERSION_V1,
+                    .size = sizeof(vss_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_SENS_TYPE_VSS
+    {
         .device_type = ECU_SENSOR_TYPE_APS,
         .instances_count = ECU_SENSOR_APS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_aps_configure,

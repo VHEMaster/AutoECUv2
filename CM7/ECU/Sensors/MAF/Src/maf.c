@@ -280,7 +280,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
       ctx->data.output_value = 0;
       ctx->freq_last_time = 0;
       memset(ctx->input_freq_times, 0, sizeof(ctx->input_freq_times));
-      memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_times));
+      memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }
   } while(0);
 }

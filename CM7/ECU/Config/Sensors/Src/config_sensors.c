@@ -18,6 +18,7 @@
     ECU_SENSOR_MAF_MAX +      \
     ECU_SENSOR_MAP_MAX +      \
     ECU_SENSOR_TPS_MAX +      \
+    ECU_SENSOR_VSS_MAX +      \
     ECU_SENSOR_APS_MAX)
 
 typedef enum {
@@ -53,6 +54,7 @@ static iat_ctx_t ecu_config_iat_ctx[ECU_SENSOR_IAT_MAX] = {0};
 static maf_ctx_t ecu_config_maf_ctx[ECU_SENSOR_MAF_MAX] = {0};
 static map_ctx_t ecu_config_map_ctx[ECU_SENSOR_MAP_MAX] = {0};
 static tps_ctx_t ecu_config_tps_ctx[ECU_SENSOR_TPS_MAX] = {0};
+static vss_ctx_t ecu_config_vss_ctx[ECU_SENSOR_VSS_MAX] = {0};
 static aps_ctx_t ecu_config_aps_ctx[ECU_SENSOR_APS_MAX] = {0};
 
 static ecu_config_sensors_t ecu_config_sensors = {
@@ -105,6 +107,12 @@ static ecu_config_sensors_t ecu_config_sensors = {
             .loop_fast = (ecu_sensor_loop_func_t)tps_loop_fast,
             .instance_max = ECU_SENSOR_TPS_MAX,
         }, //ECU_SENSOR_TYPE_TPS
+        {
+            .loop_main = (ecu_sensor_loop_func_t)vss_loop_main,
+            .loop_slow = (ecu_sensor_loop_func_t)vss_loop_slow,
+            .loop_fast = (ecu_sensor_loop_func_t)vss_loop_fast,
+            .instance_max = ECU_SENSOR_VSS_MAX,
+        }, //ECU_SENSOR_TYPE_VSS
         {
             .loop_main = (ecu_sensor_loop_func_t)aps_loop_main,
             .loop_slow = (ecu_sensor_loop_func_t)aps_loop_slow,
@@ -207,6 +215,11 @@ static ecu_config_sensors_t ecu_config_sensors = {
             .type = ECU_SENSOR_TYPE_TPS,
             .instance = ECU_SENSOR_TPS_2,
             .ctx = &ecu_config_tps_ctx[ECU_SENSOR_TPS_2],
+        },
+        {
+            .type = ECU_SENSOR_TYPE_VSS,
+            .instance = ECU_SENSOR_VSS_1,
+            .ctx = &ecu_config_vss_ctx[ECU_SENSOR_VSS_1],
         },
         {
             .type = ECU_SENSOR_TYPE_APS,
@@ -381,6 +394,11 @@ error_t ecu_sensors_get_map_ctx(ecu_sensor_map_t instance, map_ctx_t **ctx)
 error_t ecu_sensors_get_tps_ctx(ecu_sensor_tps_t instance, tps_ctx_t **ctx)
 {
   return ecu_sensors_get_sensor_ctx(ECU_SENSOR_TYPE_TPS, instance, (void**)ctx);
+}
+
+error_t ecu_sensors_get_vss_ctx(ecu_sensor_vss_t instance, vss_ctx_t **ctx)
+{
+  return ecu_sensors_get_sensor_ctx(ECU_SENSOR_TYPE_VSS, instance, (void**)ctx);
 }
 
 error_t ecu_sensors_get_aps_ctx(ecu_sensor_aps_t instance, aps_ctx_t **ctx)

@@ -16,6 +16,7 @@
 #include "versioned_maf.h"
 #include "versioned_map.h"
 #include "versioned_tps.h"
+#include "versioned_vss.h"
 #include "versioned_aps.h"
 
 #endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_SENSORS_H_ */

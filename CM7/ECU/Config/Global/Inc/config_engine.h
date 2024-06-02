@@ -29,6 +29,7 @@ typedef struct {
     maf_config_t maf[ECU_SENSOR_MAF_MAX];
     map_config_t map[ECU_SENSOR_MAP_MAX];
     tps_config_t tps[ECU_SENSOR_TPS_MAX];
+    vss_config_t vss[ECU_SENSOR_VSS_MAX];
     aps_config_t aps[ECU_SENSOR_APS_MAX];
 }ecu_config_engine_sens_t;
 

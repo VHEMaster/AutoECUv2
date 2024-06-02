@@ -17,6 +17,7 @@
 #include "maf.h"
 #include "map.h"
 #include "tps.h"
+#include "vss.h"
 #include "aps.h"
 
 typedef uint32_t ecu_sensor_instance_t;
@@ -30,6 +31,7 @@ typedef enum {
   ECU_SENSOR_TYPE_MAF,
   ECU_SENSOR_TYPE_MAP,
   ECU_SENSOR_TYPE_TPS,
+  ECU_SENSOR_TYPE_VSS,
   ECU_SENSOR_TYPE_APS,
   ECU_SENSOR_TYPE_MAX
 }ecu_sensor_type_t;
@@ -88,6 +90,11 @@ typedef enum {
 }ecu_sensor_tps_t;
 
 typedef enum {
+  ECU_SENSOR_VSS_1 = 0,
+  ECU_SENSOR_VSS_MAX
+}ecu_sensor_vss_t;
+
+typedef enum {
   ECU_SENSOR_APS_1 = 0,
   ECU_SENSOR_APS_MAX
 }ecu_sensor_aps_t;
@@ -108,6 +115,7 @@ error_t ecu_sensors_get_iat_ctx(ecu_sensor_iat_t instance, iat_ctx_t **ctx);
 error_t ecu_sensors_get_maf_ctx(ecu_sensor_maf_t instance, maf_ctx_t **ctx);
 error_t ecu_sensors_get_map_ctx(ecu_sensor_map_t instance, map_ctx_t **ctx);
 error_t ecu_sensors_get_tps_ctx(ecu_sensor_tps_t instance, tps_ctx_t **ctx);
+error_t ecu_sensors_get_vss_ctx(ecu_sensor_vss_t instance, vss_ctx_t **ctx);
 error_t ecu_sensors_get_aps_ctx(ecu_sensor_aps_t instance, aps_ctx_t **ctx);
 
 #endif /* CONFIG_INC_CONFIG_SENSORS_H_ */

@@ -32,6 +32,7 @@
 #include "config_maf.h"
 #include "config_map.h"
 #include "config_tps.h"
+#include "config_vss.h"
 #include "config_aps.h"
 
 #include "config_etc.h"
@@ -60,6 +61,7 @@ typedef enum {
   ECU_CONFIG_SENS_TYPE_MAF,
   ECU_CONFIG_SENS_TYPE_MAP,
   ECU_CONFIG_SENS_TYPE_TPS,
+  ECU_CONFIG_SENS_TYPE_VSS,
   ECU_CONFIG_SENS_TYPE_APS,
   ECU_CONFIG_SENS_TYPE_ALL,
   ECU_CONFIG_SENS_TYPE_MAX

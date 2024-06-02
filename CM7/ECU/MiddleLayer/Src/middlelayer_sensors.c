@@ -16,6 +16,7 @@
 #include "config_maf.h"
 #include "config_map.h"
 #include "config_tps.h"
+#include "config_vss.h"
 #include "config_aps.h"
 
 #include "compiler.h"
@@ -139,6 +140,18 @@ void middlelayer_sensors_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_sensors_set_sensor_initialized(ECU_SENSOR_TYPE_TPS, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_SENSOR_VSS_MAX; i++) {
+      err = ecu_sensors_get_sensor_ctx(ECU_SENSOR_TYPE_VSS, i, &sensor_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_sensors_vss_init(i, (vss_ctx_t *)sensor_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_sensors_set_sensor_initialized(ECU_SENSOR_TYPE_VSS, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
