@@ -26,6 +26,7 @@ void queuedpulses_loop_fast(void);
 error_t queuedpulses_timer_register(TIM_HandleTypeDef *htim, IRQn_Type irq);
 error_t queuedpulses_output_configure(output_id_t output, output_value_t value_on, output_value_t value_off);
 error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse);
+error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pulse, output_value_t value_on);
 error_t queuedpulses_reset_all(void);
 
 

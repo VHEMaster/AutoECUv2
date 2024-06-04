@@ -22,7 +22,9 @@ typedef struct queuedpulse_entry_tag {
     time_delta_us_t pulse;
     time_us_t time;
     queuedpulse_entry_t *next;
+    queuedpulse_entry_t *out_seq_next;
     uint32_t id;
+    output_value_t value_on;
 }queuedpulse_entry_t;
 
 typedef struct queuedpulse_timer_tag {
@@ -39,6 +41,7 @@ typedef struct queuedpulse_output_tag {
     queuedpulse_timer_t *timer;
     output_value_t value_on;
     output_value_t value_off;
+    output_value_t value_cur;
     output_id_t id;
 }queuedpulse_output_t;
 
