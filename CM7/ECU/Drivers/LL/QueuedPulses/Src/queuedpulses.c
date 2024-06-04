@@ -147,6 +147,7 @@ ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
       entry = entry->next;
       timer->entry_assigned->next = NULL;
       timer->entry_assigned = NULL;
+      timer->output_assigned = NULL;
 
       queuedpulse_ctx.queue.entries_bitmap &= ~(1 << entry_id_to_release);
 
@@ -165,16 +166,14 @@ ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
 
         now = time_get_current_us();
         diff = time_diff(now, entry->time);
-        if(diff >= entry->pulse) {
+        if(diff + 1 >= prd) {
           prd = 0;
           queuedpulses_tim_irq_handler(htim);
-          ExitCritical(prim);
-          return;
-        } else{
+        } else {
           prd -= diff;
+          queuedpulses_internal_tim_enable(timer, prd, psc);
         }
 
-        queuedpulses_internal_tim_enable(timer, prd, psc);
       } else {
         queuedpulse_ctx.timers_bitmap &= ~(1 << timer->id);
       }
@@ -338,10 +337,12 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
           pulse_diff = tim_rel_value;
         }
 
-        if(pulse + pulse_diff >= tim_rel_value) {
-          entry_temp_prev = entry_temp_next;
-        } else {
-          break;
+        if(entry_temp_seq != NULL) {
+          if(pulse + pulse_diff >= tim_rel_value) {
+            entry_temp_prev = entry_temp_next;
+          } else {
+            break;
+          }
         }
 
         entry_temp_next = entry_temp_next->next;

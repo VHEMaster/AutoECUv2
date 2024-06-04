@@ -20,8 +20,8 @@ ITCM_FUNC void queuedpulses_internal_tim_enable(queuedpulse_timer_t *timer, uint
   timer->htim->Instance->ARR = prd - 1;
   timer->htim->Instance->EGR |= 1;
 
-  __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
   __HAL_TIM_CLEAR_FLAG(timer->htim, TIM_FLAG_UPDATE);
+  __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
 
   __HAL_TIM_ENABLE_IT(timer->htim, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE(timer->htim);
