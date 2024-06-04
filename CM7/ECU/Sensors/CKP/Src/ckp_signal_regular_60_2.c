@@ -106,8 +106,10 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
   uint8_t abs_delta_count;
   float delta_mean_prev;
   float period_delta_sum;
+  float delta_float;
   float delta_diff;
   float quotient;
+  float pos_adder = 0;
   bool sync_pos_updated = false;
   bool initial_cur_found = false;
   bool initial_cycle = false;
@@ -204,8 +206,9 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     if(signal_ctx->runtime.rpm_delta_count > 0 && signal_ctx->runtime.rpm_delta_count < CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX) {
       period_delta_sum *= (float)CKP_SIGNAL_REGULAR_60_2_SIGNAL_INDEX_MAX / (float)rpm_delta_count;
     }
-    data.period = period_delta_sum * 0.000001f;
-    data.rpm = 60.0f / data.period;
+    data.period = period_delta_sum;
+    data.us_per_degree_revolution = data.period * 0.00277777778f;
+    data.rpm = 60000000.0f / data.period;
 
     data.validity = MAX(data.validity, CKP_DATA_DETECTED);
     delta_diff = (float)delta - (float)delta_last;
@@ -238,10 +241,11 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
           signal_ctx->runtime.sync_sig_value = (float)signal_ctx->runtime.indexed[sync_index].sync_delta / (float)signal_ctx->runtime.indexed[sync_index ^ 1].sync_delta;
 
           if(signal_ctx->runtime.sync_signal_index == index) {
-            data.current.position += 18.0f - 18.0f / (1.0f + signal_ctx->runtime.sync_sig_value);
+            pos_adder = 18.0f - 18.0f / (1.0f + signal_ctx->runtime.sync_sig_value);
           } else {
-            data.current.position += 18.0f / (1.0f + signal_ctx->runtime.sync_sig_value);
+            pos_adder = 18.0f / (1.0f + signal_ctx->runtime.sync_sig_value);
           }
+          data.current.position += pos_adder;
           sync_pos_updated = true;
           data_updated = true;
         }
@@ -264,6 +268,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       signal_ctx->runtime.signal_index = 0;
       data.current.timestamp = now;
       data.current.position = CKP_SIGNAL_REGULAR_60_2_ZERO_POINT;
+      pos_adder = data.current.position - data.previous.position;
       signal_ctx->runtime.indexed[index].abs_delta_count = abs_delta_count = 0;
       sync_pos_updated = true;
       data_updated = true;
@@ -298,14 +303,14 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       if(!sync_pos_updated) {
         if(signal_ctx->runtime.diff_sig_accept && signal_ctx->runtime.signal_index > 2) {
           if(signal_ctx->runtime.sync_signal_index == index) {
-            data.current.position += 6.0f - 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
+            pos_adder = 6.0f - 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
           } else {
-            data.current.position += 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
+            pos_adder = 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
           }
           sync_pos_updated = true;
           data_updated = true;
         } else if(signal_ctx->runtime.sync_signal_index == index) {
-          data.current.position += 6.0f;
+          pos_adder += 6.0f;
           sync_pos_updated = true;
           data_updated = true;
 
@@ -315,6 +320,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
         } else {
           signal_ctx->runtime.diff_sig_accept = false;
         }
+        data.current.position += pos_adder;
       }
     } else {
       sync_pos_updated = false;
@@ -322,17 +328,19 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
 
     if(sync_pos_updated) {
       data.current.timestamp = now;
-      data.current.valid = true;
-      if(data.current.valid && data.previous.valid) {
+      if(data.previous.valid) {
+        delta_float = time_diff(now, data.previous.timestamp);
+        data.us_per_degree_pulsed = delta_float / pos_adder;
         data.validity = MAX(data.validity, CKP_DATA_VALID);
       }
+      data.current.valid = true;
       data_updated = true;
     }
 
     if(data.validity >= CKP_DATA_VALID) {
       if(data.current.position >= 180.0f) {
         data.current.position -= 360.0f;
-        data.rotates_count++;
+        data.revolutions_count++;
       }
       data.current_position = data.current.position;
     }

@@ -150,12 +150,12 @@ ITCM_FUNC void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_leve
           signal_ctx->runtime.pulse_width = pulse_width;
           data.position = pulse_width * 0.5f + signal_ctx->runtime.pulse_edge_pos[0];
           if(signal_ctx->runtime.is_synchronized) {
-            if(signal_ctx->runtime.is_rotate_index_odd != (ckp_data.rotates_count & 1)) {
+            if(signal_ctx->runtime.is_rotate_index_odd != (ckp_data.revolutions_count & 1)) {
               ctx->diag.bits.extra_signal = true;
               desync_needed = true;
             }
           } else {
-            signal_ctx->runtime.is_rotate_index_odd = ckp_data.rotates_count & 1;
+            signal_ctx->runtime.is_rotate_index_odd = ckp_data.revolutions_count & 1;
             signal_ctx->runtime.is_synchronized = true;
           }
         }
@@ -225,7 +225,6 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
     BREAK_IF(signal_ctx == NULL);
 
     cfg_ctx = &ctx->config.signal_ref_types_config.singlepulse;
-    HAL_GPIO_WritePin(OUTS2_CH9_GPIO_Port, OUTS2_CH9_Pin, GPIO_PIN_SET);
 
     if(data->validity < CKP_DATA_VALID) {
       clean_trigger = true;
@@ -239,7 +238,7 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
         }
       } else if(signal_ctx->runtime.is_synchronized) {
         if(!signal_ctx->runtime.is_found_current_cycle) {
-          if(signal_ctx->runtime.is_rotate_index_odd == (data->rotates_count & 1) &&
+          if(signal_ctx->runtime.is_rotate_index_odd == (data->revolutions_count & 1) &&
               data->current_position > cfg_ctx->pulse_edge_pos_max) {
             if(signal_ctx->runtime.is_ckp_synced) {
               ctx->diag.bits.signal_lost = true;
@@ -247,12 +246,12 @@ ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, 
             }
           }
         } else {
-          if(signal_ctx->runtime.is_rotate_index_odd != (data->rotates_count & 1)) {
+          if(signal_ctx->runtime.is_rotate_index_odd != (data->revolutions_count & 1)) {
             signal_ctx->runtime.is_found_current_cycle = false;
           }
         }
       } else {
-        if(data->rotates_count >= 2 && data->current_position > cfg_ctx->pulse_edge_pos_max) {
+        if(data->revolutions_count >= 2 && data->current_position > cfg_ctx->pulse_edge_pos_max) {
           ctx->diag.bits.no_signal = true;
           clean_trigger = true;
         }

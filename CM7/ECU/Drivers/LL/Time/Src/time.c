@@ -63,15 +63,17 @@ ITCM_FUNC INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
   return retval;
 }
 
-ITCM_FUNC void time_msmt_start(time_msmnt_item_t *item)
+ITCM_FUNC INLINE void time_msmt_start(time_msmnt_item_t *item)
 {
   time_tick_t tick = time_get_current_tick();
 
   item->period = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
+
+  tick = time_get_current_tick();
   item->last_tick = tick;
 }
 
-ITCM_FUNC void time_msmt_stop(time_msmnt_item_t *item)
+ITCM_FUNC INLINE void time_msmt_stop(time_msmnt_item_t *item)
 {
   time_tick_t tick = time_get_current_tick();
   time_float_delta_us_t load_tick = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;

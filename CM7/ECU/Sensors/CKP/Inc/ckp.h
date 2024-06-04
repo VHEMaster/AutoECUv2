@@ -72,8 +72,10 @@ typedef struct ckp_data_tag {
     ckp_data_position_t previous;
     float current_position;
     float period;
+    float us_per_degree_revolution;
+    float us_per_degree_pulsed;
     float rpm;
-    uint32_t rotates_count;
+    uint32_t revolutions_count;
     ckp_data_validity_t validity;
 }ckp_data_t;
 
