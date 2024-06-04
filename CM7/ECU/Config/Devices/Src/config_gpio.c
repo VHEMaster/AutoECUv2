@@ -1203,6 +1203,9 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
   uint32_t tim_prescaler_max;
   float prescaler_flt, period_flt;
   float prescaler_normalize, period_normalize;
+  bool channels_were_active[6];
+  bool channel_was_active;
+  uint32_t ch_temp;
 
   do {
     if(pin >= ECU_OUT_MAX || config == NULL) {
@@ -1274,7 +1277,25 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
     prescaler = CLAMP(prescaler, 1, tim_prescaler_max) - 1;
     period = CLAMP(period, 1, tim_period_max) - 1;
 
+    if(TIM_CHANNEL_STATE_GET(htim, ecu_gpio_setup.outputs[pin].tim_channel) == HAL_TIM_CHANNEL_STATE_BUSY) {
+      channel_was_active = true;
+    } else {
+      channel_was_active = false;
+    }
+
     if(htim->Init.Prescaler != prescaler || htim->Init.Period != period) {
+      for(int i = 0; i < ITEMSOF(channels_were_active); i++) {
+        if(htim->ChannelState[i] == HAL_TIM_CHANNEL_STATE_BUSY) {
+          channels_were_active[i] = true;
+          ch_temp = i * (TIM_CHANNEL_2 - TIM_CHANNEL_1) + TIM_CHANNEL_1;
+          status = HAL_TIM_PWM_Stop(htim, ch_temp);
+          BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+        } else {
+          channels_were_active[i] = false;
+        }
+      }
+      BREAK_IF(err != E_OK);
+
       htim->Init.Prescaler = prescaler;
       htim->Init.Period = period;
       status = HAL_TIM_Base_Init(htim);
@@ -1282,14 +1303,21 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
         err = E_HAL;
         break;
       }
+
+      for(int i = 0; i < ITEMSOF(channels_were_active); i++) {
+        if(channels_were_active[i]) {
+          ch_temp = i * (TIM_CHANNEL_2 - TIM_CHANNEL_1) + TIM_CHANNEL_1;
+          status = HAL_TIM_PWM_Start(htim, ch_temp);
+          BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+        }
+      }
+      BREAK_IF(err != E_OK);
     }
 
-    status = HAL_TIM_PWM_Start(htim, ecu_gpio_setup.outputs[pin].tim_channel);
-    if(status != HAL_OK) {
-      err = E_HAL;
-      break;
+    if(!channel_was_active) {
+      status = HAL_TIM_PWM_Start(htim, ecu_gpio_setup.outputs[pin].tim_channel);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
     }
-
 
   } while(0);
 
