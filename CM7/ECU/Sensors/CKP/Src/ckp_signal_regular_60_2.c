@@ -22,6 +22,8 @@
 
 #define CKP_SIGNAL_REGULAR_60_2_DELTA_COUNT             4
 
+#define CKP_SIGNAL_REGULAR_60_2_USPD_COUNT              8
+
 typedef enum {
   CKP_SIGNAL_REGULAR_60_2_INDEX_0 = 0,
   CKP_SIGNAL_REGULAR_60_2_INDEX_1,
@@ -56,6 +58,11 @@ typedef struct {
     uint8_t rpm_delta_index;
 
     time_us_t rpm_last;
+
+    float uspd_array[CKP_SIGNAL_REGULAR_60_2_USPD_COUNT];
+    float uspd_sum;
+    uint8_t uspd_count;
+    uint8_t uspd_index;
 
     uint8_t sync_signal_index;
     uint8_t signal_index;
@@ -102,12 +109,15 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
   uint8_t delta_index;
   uint8_t abs_delta_index;
   uint8_t rpm_delta_index;
+  uint8_t uspd_index;
   uint8_t rpm_delta_count;
   uint8_t abs_delta_count;
+  uint8_t uspd_count;
   float delta_mean_prev;
   float period_delta_sum;
   float delta_float;
   float delta_diff;
+  float uspd;
   float quotient;
   float pos_adder = 0;
   bool sync_pos_updated = false;
@@ -330,7 +340,26 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       data.current.timestamp = now;
       if(data.previous.valid) {
         delta_float = time_diff(now, data.previous.timestamp);
-        data.us_per_degree_pulsed = delta_float / pos_adder;
+
+        uspd = delta_float / pos_adder;
+        uspd_index = signal_ctx->runtime.uspd_index;
+        uspd_count = signal_ctx->runtime.uspd_count;
+        signal_ctx->runtime.uspd_sum -= signal_ctx->runtime.uspd_array[uspd_index];
+        signal_ctx->runtime.uspd_array[uspd_index] = uspd;
+        signal_ctx->runtime.uspd_sum += uspd;
+
+        if(++uspd_index >= CKP_SIGNAL_REGULAR_60_2_USPD_COUNT) {
+          uspd_index = 0;
+        }
+
+        if(uspd_count < CKP_SIGNAL_REGULAR_60_2_USPD_COUNT) {
+          uspd_count++;
+        }
+
+        data.us_per_degree_pulsed = signal_ctx->runtime.uspd_sum / uspd_count;
+        signal_ctx->runtime.uspd_index = uspd_index;
+        signal_ctx->runtime.uspd_count = uspd_count;
+
         data.validity = MAX(data.validity, CKP_DATA_VALID);
       }
       data.current.valid = true;
