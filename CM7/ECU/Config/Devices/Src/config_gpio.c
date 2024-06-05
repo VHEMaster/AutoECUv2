@@ -1148,40 +1148,25 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
 
     if(type == ECU_GPIO_TYPE_DIRECT) {
       valid = gpio_valid(&ecu_gpio_setup.outputs[pin].pin);
-      if(valid == false) {
-        err = E_NOTSUPPORT;
-        break;
-      }
+      BREAK_IF_ACTION(valid == false, err = E_OK);
 
       gpio_configure_direct_output(&ecu_gpio_setup.outputs[pin].pin, ecu_gpio_setup.outputs[pin].gpio_invert);
 
       err = output_ch_dest_gpio(ecu_gpio_setup.outputs[pin].output_id, &ecu_gpio_setup.outputs[pin].pin, ecu_gpio_setup.outputs[pin].gpio_invert);
-      if(err != E_OK) {
-        break;
-      }
+      BREAK_IF(err != E_OK);
 
     } else if(type == ECU_GPIO_TYPE_PWM) {
       err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
-      if(err != E_OK) {
-        break;
-      }
-      if(valid == false) {
-        err = E_NOTSUPPORT;
-        break;
-      }
+      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(valid == false, err = E_NOTSUPPORT);
 
       gpio_configure_pwm_output(&ecu_gpio_setup.outputs[pin].pin, ecu_gpio_setup.outputs[pin].tim_alternate);
 
       err = ecu_config_gpio_output_pwm_configure(pin, &ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[pin].if_id].pwm_cfg);
-      if(err != E_OK) {
-        break;
-      }
+      BREAK_IF(err != E_OK);
 
       err = output_ch_dest_func(ecu_gpio_setup.outputs[pin].output_id, ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[pin].if_id].cfg.ch_set);
-      if(err != E_OK) {
-        break;
-      }
-
+      BREAK_IF(err != E_OK);
     }
 
     ecu_gpio_setup.outputs[pin].type = type;

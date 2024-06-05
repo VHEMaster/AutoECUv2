@@ -29,20 +29,18 @@ ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
         err = E_OK;
         break;
       case TLE6240_PROCESS_CONDITION:
+        prim = EnterCritical();
         if(ctx->output_updated || time_diff(now, ctx->poll_last) >= ctx->poll_period) {
-          if(ctx->output_updated) {
-            prim = EnterCritical();
-            ctx->output_temp = ctx->output_state;
-            ctx->output_updated = false;
-            ExitCritical(prim);
-          } else {
-            ctx->output_temp = ctx->output_state;
-          }
+          ctx->output_temp = ctx->output_state;
+          ctx->output_updated = false;
+          ExitCritical(prim);
           ctx->process_fsm = TLE6240_PROCESS_WRITE_1_TO_8;
           ctx->ctrl = TLE6240_CTRL_CH1_CH8_OR_WRITE_OR;
           ctx->data = ctx->output_temp & 0xFF;
           err = E_AGAIN;
           continue;
+        } else {
+          ExitCritical(prim);
         }
         break;
       case TLE6240_PROCESS_WRITE_1_TO_8:

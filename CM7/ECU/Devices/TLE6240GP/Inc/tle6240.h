@@ -13,7 +13,7 @@
 #include "time.h"
 #include "spi.h"
 
-#define TLE6240_DEFAULT_POLL_PERIOD_US      (50 * TIME_US_IN_MS)
+#define TLE6240_DEFAULT_POLL_PERIOD_US      (10 * TIME_US_IN_MS)
 #define TLE6240_SPI_MODE                    (SPI_MODE_1)
 #define TLE6240_ECHO_INCREMENT_VALUE        (0xF15A)
 
