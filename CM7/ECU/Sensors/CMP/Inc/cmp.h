@@ -74,6 +74,7 @@ typedef enum {
 typedef struct cmp_data_tag {
     float position;
     cmp_data_validity_t validity;
+    bool sync_at_odd_rev;
 }cmp_data_t;
 
 typedef struct {

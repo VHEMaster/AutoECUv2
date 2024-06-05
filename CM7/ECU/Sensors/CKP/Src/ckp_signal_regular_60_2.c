@@ -369,7 +369,8 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     if(data.validity >= CKP_DATA_VALID) {
       if(data.current.position >= 180.0f) {
         data.current.position -= 360.0f;
-        data.revolutions_count++;
+        data.revs_count++;
+        data.odd_rev = data.revs_count & 1;
       }
       data.current_position = data.current.position;
     }

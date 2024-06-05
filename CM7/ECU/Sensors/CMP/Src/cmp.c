@@ -176,6 +176,9 @@ void cmp_loop_main(cmp_ctx_t *ctx)
 void cmp_loop_slow(cmp_ctx_t *ctx)
 {
   time_us_t now = time_get_current_us();
+  cmp_data_t data;
+  cmp_diag_t diag;
+  uint32_t prim;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -184,6 +187,17 @@ void cmp_loop_slow(cmp_ctx_t *ctx)
         if(ctx->signal_ref_type_ctx.cfg->func_slow_cb != NULL) {
           ctx->signal_ref_type_ctx.cfg->func_slow_cb(ctx, ctx->signal_ref_type_ctx.usrdata);
         }
+
+        prim = EnterCritical();
+        data = ctx->data;
+        diag = ctx->diag;
+        ExitCritical(prim);
+        if(data.validity <= CMP_DATA_DETECTED) {
+          if(ctx->init.signal_update_cb != NULL) {
+            ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &data, &diag);
+          }
+        }
+
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }

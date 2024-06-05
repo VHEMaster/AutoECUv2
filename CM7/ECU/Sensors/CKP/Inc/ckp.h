@@ -75,7 +75,8 @@ typedef struct ckp_data_tag {
     float us_per_degree_revolution;
     float us_per_degree_pulsed;
     float rpm;
-    uint32_t revolutions_count;
+    uint32_t revs_count;
+    bool odd_rev;
     ckp_data_validity_t validity;
 }ckp_data_t;
 
