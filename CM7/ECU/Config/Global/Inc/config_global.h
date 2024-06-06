@@ -35,6 +35,7 @@
 #include "config_vss.h"
 #include "config_aps.h"
 
+#include "config_timing.h"
 #include "config_etc.h"
 
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
@@ -68,7 +69,8 @@ typedef enum {
 }ecu_config_sensor_type_t;
 
 typedef enum {
-  ECU_CONFIG_MODULE_TYPE_ETC = 0,
+  ECU_CONFIG_MODULE_TYPE_TIMING = 0,
+  ECU_CONFIG_MODULE_TYPE_ETC,
   ECU_CONFIG_MODULE_TYPE_ALL,
   ECU_CONFIG_MODULE_TYPE_MAX
 }ecu_config_module_type_t;

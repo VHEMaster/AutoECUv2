@@ -316,6 +316,26 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
 
 static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TYPE_ALL] = {
     {
+        .device_type = ECU_MODULE_TYPE_TIMING,
+        .instances_count = ECU_MODULE_TIMING_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_modules_timing_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_modules_timing_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_MODULE_TIMING,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_modules_timing_get_default_config,
+            .data_ptr = &ecu_config_global_engine.modules.timing[0],
+            .data_size = sizeof(ecu_config_global_engine.modules.timing[0]),
+            .versions_count = TIMING_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = TIMING_CONFIG_VERSION_V1,
+                    .size = sizeof(timing_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_MODULE_TYPE_TIMING
+    {
         .device_type = ECU_MODULE_TYPE_ETC,
         .instances_count = ECU_MODULE_ETC_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_modules_etc_configure,

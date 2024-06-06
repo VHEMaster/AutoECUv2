@@ -19,5 +19,6 @@ error_t ecu_modules_etc_reset(ecu_module_etc_t instance);
 error_t ecu_modules_etc_set_enabled(ecu_module_etc_t instance, bool enabled);
 error_t ecu_modules_etc_set_target_position(ecu_module_etc_t instance, float position);
 error_t ecu_modules_etc_get_data(ecu_module_etc_t instance, etc_data_t *data);
+error_t ecu_modules_etc_get_diag(ecu_module_etc_t instance, etc_diag_t *diag);
 
 #endif /* CONFIG_INC_CONFIG_ETC_H_ */

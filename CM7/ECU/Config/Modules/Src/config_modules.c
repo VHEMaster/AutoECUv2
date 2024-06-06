@@ -12,6 +12,7 @@
 #include "bool.h"
 
 #define ECU_MODULES_MAX (     \
+    ECU_MODULE_TIMING_MAX    +\
     ECU_MODULE_ETC_MAX)
 
 typedef enum {
