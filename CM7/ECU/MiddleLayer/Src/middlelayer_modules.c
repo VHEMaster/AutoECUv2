@@ -7,9 +7,11 @@
 
 #include "middlelayer_modules.h"
 #include "config_modules.h"
+
 #include "config_cylinders.h"
 #include "config_timing.h"
 #include "config_etc.h"
+
 #include "compiler.h"
 
 void middlelayer_modules_loop_main(void)

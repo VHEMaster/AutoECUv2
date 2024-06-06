@@ -36,14 +36,19 @@ typedef struct ecu_modules_timing_ctx_tag {
 }ecu_modules_timing_ctx_t;
 
 static const timing_config_t ecu_modules_timing_config_default = {
+    .crankshaft = {
+        .offset = 0.0f,
+    },
     .camshafts = {
         {
           .enabled = true,
+          .use_for_phased_sync = true,
           .pos_relative = -105.8f,
           .pos_min = -3.0f,
           .pos_max = 3.0f,
         }, //ECU_SENSOR_CMP_1
     },
+    .phased_syncmode = TIMING_CONFIG_PHASEDSYNCMODE_CAMSHAFT,
 };
 
 static ecu_modules_timing_ctx_t ecu_modules_timing_ctx[ECU_MODULE_TIMING_MAX] = {

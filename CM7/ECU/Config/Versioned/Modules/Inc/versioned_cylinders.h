@@ -12,8 +12,6 @@
 #include "bool.h"
 #include <stdint.h>
 
-#include "config_sensors.h"
-
 typedef enum {
   CYLINDERS_CONFIG_VERSION_V1 = 0,
   CYLINDERS_CONFIG_VERSION_MAX

@@ -14,6 +14,8 @@
 #include "time.h"
 #include <stdint.h>
 
+#include "config_sensors.h"
+
 typedef enum {
   TIMING_CRANKSHAFT_MODE_IDLE = 0,
   TIMING_CRANKSHAFT_MODE_DETECTED,
@@ -30,18 +32,30 @@ typedef union {
 }timing_diag_t;
 
 typedef struct {
-    float pos_raw;
+    ckp_data_t sensor_data;
+    ckp_diag_t sensor_diag;
     float pos_phased;
     timing_crankshaft_mode_t mode;
 }timing_data_crankshaft_t;
 
 typedef struct {
-
+    cmp_data_t sensor_data;
+    cmp_diag_t sensor_diag;
+    float pos_absolute;
+    float pos_relative;
+    bool valid;
 }timing_data_camshaft_t;
 
 typedef struct {
+    bool synchronized;
+    bool sync_at_odd_rev;
+    ecu_sensor_cmp_t sync_camshaft_instance;
+    timing_data_camshaft_t instances[ECU_SENSOR_CMP_MAX];
+}timing_data_camshafts_t;
+
+typedef struct {
     timing_data_crankshaft_t crankshaft;
-    timing_data_camshaft_t camshafts[ECU_SENSOR_CMP_MAX];
+    timing_data_camshafts_t camshafts;
 }timing_data_t;
 
 typedef struct {
@@ -65,7 +79,7 @@ error_t timing_configure(timing_ctx_t *ctx, const timing_config_t *config);
 error_t timing_reset(timing_ctx_t *ctx);
 
 void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
-void timing_cmp_signal_update(timing_ctx_t *ctx, cmp_instance_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag);
+void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag);
 
 error_t timing_get_data(timing_ctx_t *ctx, timing_data_t *data);
 error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag);

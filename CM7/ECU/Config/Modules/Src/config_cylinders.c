@@ -26,7 +26,7 @@ static const cylinders_config_t ecu_modules_cylinders_config_default = {
         }, //CYLINDERS_CY_1
         {
             .pos_offset = 180.0f,
-        }, //CYLINDERS_CY_21
+        }, //CYLINDERS_CY_2
         {
             .pos_offset = 540.0f,
         }, //CYLINDERS_CY_3
