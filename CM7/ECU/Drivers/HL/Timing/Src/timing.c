@@ -379,11 +379,9 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
 
           if(phased && !phased_internal) {
             if(data_cur.mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-              if(data_cur.sensor_data.odd_rev == data_cur.sync_phase_at_odd_rev) {
-                if(pos_prev < 0.0f && pos >= 0.0f) {
-                  req_ctx->phased = true;
-                  phased_internal = true;
-                }
+              if(pos > 90.0f) {
+                req_ctx->phased = true;
+                phased_internal = true;
               }
             }
           }
@@ -408,11 +406,11 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
         data_cur.mode = MIN(data_cur.mode, TIMING_CRANKSHAFT_MODE_VALID);
       }
 
-
     } else {
       if(req_ctx != NULL) {
         req_ctx->position_prev = pos;
         req_ctx->position_valid = false;
+        req_ctx->phased = false;
       }
     }
 
