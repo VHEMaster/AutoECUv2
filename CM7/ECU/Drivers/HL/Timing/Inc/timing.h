@@ -16,7 +16,7 @@
 
 #include "config_sensors.h"
 
-typedef union timing_diag_tag timing_diag_t;
+typedef struct timing_diag_tag timing_diag_t;
 typedef struct timing_data_tag timing_data_t;
 
 typedef void (*timing_signal_update_cb_t)(void *usrdata, const timing_data_t *data, const timing_diag_t *diag);
@@ -29,18 +29,32 @@ typedef enum {
   TIMING_CRANKSHAFT_MODE_MAX,
 }timing_crankshaft_mode_t;
 
-typedef union timing_diag_tag {
-    uint32_t data;
-    struct {
+typedef struct timing_diag_tag {
+    union {
+        uint32_t data;
+        struct {
+            bool ckp_failure : 1;
+        }bits;
+    }crankshaft;
 
-    }bits;
+    union {
+        uint32_t data;
+        struct {
+            bool cmp_failure : 1;
+            bool sync_lost : 1;
+            bool sync_bad : 1;
+            bool signal_lost : 1;
+            bool pos_too_early : 1;
+            bool pos_too_late : 1;
+        }bits;
+    }camshafts[ECU_SENSOR_CMP_MAX];
+
 }timing_diag_t;
 
 typedef struct {
     ckp_data_t sensor_data;
     float pos_phased;
     timing_crankshaft_mode_t mode;
-    bool sensor_has_failure;
 }timing_data_crankshaft_t;
 
 typedef struct {
@@ -48,7 +62,6 @@ typedef struct {
     float pos_absolute;
     float pos_relative;
     bool valid;
-    bool sensor_has_failure;
 }timing_data_camshaft_t;
 
 typedef struct {
@@ -64,7 +77,7 @@ typedef struct timing_data_tag {
 }timing_data_t;
 
 typedef struct {
-    ecu_sensor_ckp_t ckp_instances[ECU_SENSOR_CKP_MAX];
+    ecu_sensor_ckp_t ckp_instance;
     ecu_sensor_cmp_t cmp_instances[ECU_SENSOR_CMP_MAX];
     timing_signal_update_cb_t signal_update_cb;
     void *signal_update_usrdata;

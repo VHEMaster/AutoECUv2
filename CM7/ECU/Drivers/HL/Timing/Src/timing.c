@@ -81,7 +81,7 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
     camshafts = &ctx->data.camshafts;
 
     crankshaft->sensor_data = *data;
-    crankshaft->sensor_has_failure = diag->data ? true : false;
+    ctx->diag.crankshaft.bits.ckp_failure = diag->data ? true : false;
 
     position_values[0] = &crankshaft->sensor_data.current.position;
     position_values[1] = &crankshaft->sensor_data.previous.position;
@@ -165,7 +165,7 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
     crankshaft = &ctx->data.crankshaft;
 
     camshaft->sensor_data = *data;
-    camshaft->sensor_has_failure = diag->data ? true : false;
+    ctx->diag.camshafts[cmp_instance].bits.cmp_failure = diag->data ? true : false;
 
     if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       if(camshaft->sensor_data.validity == CMP_DATA_VALID) {
@@ -176,9 +176,9 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
             camshafts->sync_camshaft_instance = cmp_instance;
           } else if(camshafts->sync_at_odd_rev != camshaft->sensor_data.sync_at_odd_rev) {
             if(camshafts->sync_camshaft_instance == cmp_instance) {
-              //TODO: error handling
+              ctx->diag.camshafts[cmp_instance].bits.sync_lost = true;
             } else {
-              //TODO: error handling
+              ctx->diag.camshafts[cmp_instance].bits.sync_bad = true;
             }
           }
         }
@@ -192,13 +192,13 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
           camshaft->pos_relative += 360.0f;
         }
         if(camshaft->pos_relative > camshaft_config->pos_max) {
-          //TODO: error handling
+          ctx->diag.camshafts[cmp_instance].bits.pos_too_late = true;
         } else if(camshaft->pos_relative < camshaft_config->pos_min) {
-          //TODO: error handling
+          ctx->diag.camshafts[cmp_instance].bits.pos_too_early = true;
         }
       } else if(camshaft->sensor_data.validity < CMP_DATA_DETECTED) {
         if(camshafts->synchronized) {
-          //TODO: error handling
+          ctx->diag.camshafts[cmp_instance].bits.signal_lost = true;
         }
       }
     } else {

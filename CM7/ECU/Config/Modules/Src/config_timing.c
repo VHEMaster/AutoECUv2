@@ -37,7 +37,7 @@ typedef struct ecu_modules_timing_ctx_tag {
     timing_config_t config_default;
     timing_init_ctx_t init;
     timing_ctx_t *ctx;
-    ecu_modules_timing_ckp_cb_ctx_t ckp_cb_ctx[ECU_SENSOR_CKP_MAX];
+    ecu_modules_timing_ckp_cb_ctx_t ckp_cb_ctx;
     ecu_modules_timing_cmp_cb_ctx_t cmp_cb_ctx[ECU_SENSOR_CMP_MAX];
     ecu_modules_timing_cb_t signal_update_callbacks[ECU_MODULES_TIMING_CALLBACKS_MAX];
 }ecu_modules_timing_ctx_t;
@@ -61,6 +61,7 @@ static const timing_config_t ecu_modules_timing_config_default = {
 static ecu_modules_timing_ctx_t ecu_modules_timing_ctx[ECU_MODULE_TIMING_MAX] = {
     {
       .init = {
+          .ckp_instance = ECU_SENSOR_CKP_1,
           .signal_update_cb = ecu_modules_timing_signal_update_cb,
           .signal_update_usrdata = &ecu_modules_timing_ctx[0],
       },
@@ -81,14 +82,10 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
     timing_ctx = &ecu_modules_timing_ctx[instance];
     timing_ctx->ctx = ctx;
 
-    for(int i = 0; i < ECU_SENSOR_CKP_MAX; i++) {
-      timing_ctx->init.ckp_instances[i] = ECU_SENSOR_CKP_1 + i;
-      timing_ctx->ckp_cb_ctx[i].ckp_instance = ECU_SENSOR_CKP_1 + i;
-      timing_ctx->ckp_cb_ctx[i].module_ctx = timing_ctx;
+    timing_ctx->ckp_cb_ctx.ckp_instance = timing_ctx->init.ckp_instance;
+    timing_ctx->ckp_cb_ctx.module_ctx = timing_ctx;
 
-      err = ecu_sensors_ckp_register_cb(i, ecu_modules_timing_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx[i]);
-      BREAK_IF(err != E_OK);
-    }
+    err = ecu_sensors_ckp_register_cb(timing_ctx->init.ckp_instance, ecu_modules_timing_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx);
     BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ECU_SENSOR_CMP_MAX; i++) {
