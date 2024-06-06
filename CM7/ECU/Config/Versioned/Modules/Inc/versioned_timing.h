@@ -20,16 +20,20 @@ typedef enum {
 }timing_config_versions_t;
 
 typedef struct {
+    float offset;
+}timing_config_crankshaft_t;
+
+typedef struct {
     bool enabled;
     ecu_sensor_cmp_t cmp_instance;
     float pos_relative;
     float pos_min;
     float pos_max;
-}timing_config_cmp_t;
+}timing_config_camshaft_t;
 
 typedef struct {
-    ecu_sensor_ckp_t ckp_instance;
-    timing_config_cmp_t cmp_config[ECU_SENSOR_CMP_MAX];
+    timing_config_crankshaft_t crankshaft[ECU_SENSOR_CKP_MAX];
+    timing_config_camshaft_t camshafts[ECU_SENSOR_CMP_MAX];
 
     uint32_t align ALIGNED_CACHE;
 }timing_config_v1_t ALIGNED_CACHE;

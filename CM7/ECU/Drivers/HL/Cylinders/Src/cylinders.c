@@ -1,24 +1,24 @@
 /*
- * timing.c
+ * cylinders.c
  *
  *  Created on: Jun 6, 2024
  *      Author: VHEMaster
  */
 
-#include "timing.h"
-#include "timing_internal.h"
+#include "cylinders.h"
+#include "cylinders_internal.h"
 #include "compiler.h"
 #include <string.h>
 
-error_t timing_init(timing_ctx_t *ctx, const timing_init_ctx_t *init_ctx)
+error_t cylinders_init(cylinders_ctx_t *ctx, const cylinders_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
 
-    memset(ctx, 0u, sizeof(timing_ctx_t));
-    memcpy(&ctx->init, init_ctx, sizeof(timing_init_ctx_t));
+    memset(ctx, 0u, sizeof(cylinders_ctx_t));
+    memcpy(&ctx->init, init_ctx, sizeof(cylinders_init_ctx_t));
 
 
     ctx->ready = true;
@@ -28,7 +28,7 @@ error_t timing_init(timing_ctx_t *ctx, const timing_init_ctx_t *init_ctx)
   return err;
 }
 
-error_t timing_configure(timing_ctx_t *ctx, const timing_config_t *config)
+error_t cylinders_configure(cylinders_ctx_t *ctx, const cylinders_config_t *config)
 {
   error_t err = E_OK;
 
@@ -39,7 +39,7 @@ error_t timing_configure(timing_ctx_t *ctx, const timing_config_t *config)
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(timing_config_t));
+      memcpy(&ctx->config, config, sizeof(cylinders_config_t));
     }
 
     ctx->configured = true;
@@ -49,7 +49,7 @@ error_t timing_configure(timing_ctx_t *ctx, const timing_config_t *config)
   return err;
 }
 
-error_t timing_reset(timing_ctx_t *ctx)
+error_t cylinders_reset(cylinders_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -64,45 +64,22 @@ error_t timing_reset(timing_ctx_t *ctx)
   return err;
 }
 
-ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  do {
-    BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
-
-
-
-  } while(0);
-}
-
-ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, cmp_instance_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag)
-{
-  do {
-    BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
-    BREAK_IF(ctx->config.camshafts[cmp_instance].enabled == false);
-
-
-
-  } while(0);
-}
-
-void timing_loop_main(timing_ctx_t *ctx)
+void cylinders_loop_main(cylinders_ctx_t *ctx)
 {
 
 }
 
-void timing_loop_slow(timing_ctx_t *ctx)
+void cylinders_loop_slow(cylinders_ctx_t *ctx)
 {
 
 }
 
-ITCM_FUNC void timing_loop_fast(timing_ctx_t *ctx)
+ITCM_FUNC void cylinders_loop_fast(cylinders_ctx_t *ctx)
 {
 
 }
 
-error_t timing_get_data(timing_ctx_t *ctx, timing_data_t *data)
+error_t cylinders_get_data(cylinders_ctx_t *ctx, cylinders_data_t *data)
 {
   error_t err = E_OK;
 
@@ -118,7 +95,7 @@ error_t timing_get_data(timing_ctx_t *ctx, timing_data_t *data)
   return err;
 }
 
-error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag)
+error_t cylinders_get_diag(cylinders_ctx_t *ctx, cylinders_diag_t *diag)
 {
   error_t err = E_OK;
 

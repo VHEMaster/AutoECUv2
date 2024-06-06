@@ -540,11 +540,19 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_MODULE_CYLINDERS,
+        .section_index = ECU_MODULE_CYLINDERS_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 0,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_MODULE_TIMING,
         .section_index = ECU_MODULE_TIMING_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 8,
-        .sector_index = 0,
+        .sector_index = 1,
         .uses_full_block = false,
     },
     {

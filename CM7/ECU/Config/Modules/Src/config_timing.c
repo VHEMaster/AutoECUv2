@@ -8,24 +8,41 @@
 #include <string.h>
 #include "config_timing.h"
 #include "config_extern.h"
+#include "config_ckp.h"
+#include "config_cmp.h"
 #include "compiler.h"
 
+static void timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
+static void timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
+
+typedef struct ecu_modules_timing_ctx_tag ecu_modules_timing_ctx_t;
+
 typedef struct {
+    ecu_sensor_ckp_t ckp_instance;
+    ecu_modules_timing_ctx_t *module_ctx;
+}ecu_modules_timing_ckp_cb_ctx_t;
+
+typedef struct {
+    ecu_sensor_cmp_t cmp_instance;
+    ecu_modules_timing_ctx_t *module_ctx;
+}ecu_modules_timing_cmp_cb_ctx_t;
+
+typedef struct ecu_modules_timing_ctx_tag {
     timing_config_t config_default;
     timing_init_ctx_t init;
     timing_ctx_t *ctx;
+    ecu_modules_timing_ckp_cb_ctx_t ckp_cb_ctx[ECU_SENSOR_CKP_MAX];
+    ecu_modules_timing_cmp_cb_ctx_t cmp_cb_ctx[ECU_SENSOR_CMP_MAX];
 }ecu_modules_timing_ctx_t;
 
 static const timing_config_t ecu_modules_timing_config_default = {
-    .ckp_instance = ECU_SENSOR_CKP_1,
-    .cmp_config = {
+    .camshafts = {
         {
           .enabled = true,
-          .cmp_instance = ECU_SENSOR_CMP_1,
           .pos_relative = -105.8f,
           .pos_min = -3.0f,
           .pos_max = 3.0f,
-        },  //ECU_SENSOR_CMP_1
+        }, //ECU_SENSOR_CMP_1
     },
 };
 
@@ -48,6 +65,27 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
     timing_ctx->ctx = ctx;
+
+    for(int i = 0; i < ECU_SENSOR_CKP_MAX; i++) {
+      timing_ctx->init.ckp_instances[i] = ECU_SENSOR_CKP_1 + i;
+      timing_ctx->ckp_cb_ctx[i].ckp_instance = ECU_SENSOR_CKP_1 + i;
+      timing_ctx->ckp_cb_ctx[i].module_ctx = timing_ctx;
+
+      err = ecu_sensors_ckp_register_cb(i, timing_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx[i]);
+      BREAK_IF(err != E_OK);
+    }
+    BREAK_IF(err != E_OK);
+
+    for(int i = 0; i < ECU_SENSOR_CMP_MAX; i++) {
+      timing_ctx->init.cmp_instances[i] = ECU_SENSOR_CMP_1 + i;
+      timing_ctx->config_default.camshafts[i].cmp_instance = ECU_SENSOR_CMP_1 + i;
+      timing_ctx->cmp_cb_ctx[i].cmp_instance = ECU_SENSOR_CMP_1 + i;
+      timing_ctx->cmp_cb_ctx[i].module_ctx = timing_ctx;
+
+      err = ecu_sensors_cmp_register_cb(i, timing_cmp_signal_update_cb, &timing_ctx->cmp_cb_ctx[i]);
+      BREAK_IF(err != E_OK);
+    }
+    BREAK_IF(err != E_OK);
 
     err = timing_init(timing_ctx->ctx, &timing_ctx->init);
     BREAK_IF(err != E_OK);
@@ -144,4 +182,39 @@ error_t ecu_modules_timing_get_diag(ecu_module_timing_t instance, timing_diag_t 
   } while(0);
 
   return err;
+}
+
+ITCM_FUNC static void timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
+{
+  ecu_modules_timing_ckp_cb_ctx_t *ckp_cb_ctx = (ecu_modules_timing_ckp_cb_ctx_t *)usrdata;
+  ecu_modules_timing_ctx_t *module_ctx;
+  timing_ctx_t *ctx;
+
+  do {
+    BREAK_IF(ckp_cb_ctx == NULL);
+    module_ctx = ckp_cb_ctx->module_ctx;
+    BREAK_IF(module_ctx == NULL);
+    ctx = module_ctx->ctx;
+    BREAK_IF(ctx == NULL);
+
+    timing_ckp_signal_update(ctx, data, diag);
+  } while(0);
+}
+
+ITCM_FUNC static void timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
+{
+  ecu_modules_timing_cmp_cb_ctx_t *cmp_cb_ctx = (ecu_modules_timing_cmp_cb_ctx_t *)usrdata;
+  ecu_modules_timing_ctx_t *module_ctx;
+  timing_ctx_t *ctx;
+
+  do {
+    BREAK_IF(cmp_cb_ctx == NULL);
+    module_ctx = cmp_cb_ctx->module_ctx;
+    BREAK_IF(module_ctx == NULL);
+    ctx = module_ctx->ctx;
+    BREAK_IF(ctx == NULL);
+
+    timing_cmp_signal_update(ctx, cmp_cb_ctx->cmp_instance, data, diag);
+
+  } while(0);
 }

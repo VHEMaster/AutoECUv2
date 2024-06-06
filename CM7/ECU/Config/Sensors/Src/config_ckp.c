@@ -50,21 +50,6 @@ static ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
     },
 };
 
-ITCM_FUNC static void ecu_sensors_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  ecu_sensors_ckp_ctx_t *ctx = (ecu_sensors_ckp_ctx_t *)usrdata;
-  ecu_sensors_ckp_cb_t *cb;
-
-  for(int i = 0; i < ECU_SENSORS_CKP_CALLBACKS_MAX; i++) {
-    cb = &ctx->signal_update_callbacks[i];
-    if(cb->callback != NULL) {
-      cb->callback(cb->usrdata, data, diag);
-    } else {
-      break;
-    }
-  }
-}
-
 error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -225,3 +210,17 @@ error_t ecu_sensors_ckp_register_cb(ecu_sensor_ckp_t instance, ckp_signal_update
   return err;
 }
 
+ITCM_FUNC static void ecu_sensors_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
+{
+  ecu_sensors_ckp_ctx_t *ctx = (ecu_sensors_ckp_ctx_t *)usrdata;
+  ecu_sensors_ckp_cb_t *cb;
+
+  for(int i = 0; i < ECU_SENSORS_CKP_CALLBACKS_MAX; i++) {
+    cb = &ctx->signal_update_callbacks[i];
+    if(cb->callback != NULL) {
+      cb->callback(cb->usrdata, data, diag);
+    } else {
+      break;
+    }
+  }
+}

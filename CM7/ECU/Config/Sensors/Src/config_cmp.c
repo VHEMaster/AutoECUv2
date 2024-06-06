@@ -63,36 +63,6 @@ static ecu_sensors_cmp_ctx_t ecu_sensors_cmp_ctx[ECU_SENSOR_CMP_MAX] = {
     },
 };
 
-ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_req_t *req, ckp_data_t *data)
-{
-  error_t err = E_OK;
-  ecu_sensors_cmp_ctx_t *cmp_ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
-
-  do {
-    BREAK_IF_ACTION(cmp_ctx == NULL, err = E_PARAM);
-
-    err = ecu_sensors_ckp_calculate_current_position(cmp_ctx->init.ckp_instance_index, req, data);
-
-  } while(0);
-
-  return err;
-}
-
-ITCM_FUNC static void ecu_sensors_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
-{
-  ecu_sensors_cmp_ctx_t *ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
-  ecu_sensors_cmp_cb_t *cb;
-
-  for(int i = 0; i < ECU_SENSORS_CMP_CALLBACKS_MAX; i++) {
-    cb = &ctx->signal_update_callbacks[i];
-    if(cb->callback != NULL) {
-      cb->callback(cb->usrdata, data, diag);
-    } else {
-      break;
-    }
-  }
-}
-
 error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -237,4 +207,34 @@ error_t ecu_sensors_cmp_register_cb(ecu_sensor_cmp_t instance, cmp_signal_update
   } while(0);
 
   return err;
+}
+
+ITCM_FUNC static error_t ecu_sensors_cmp_ckp_update_req_cb(void *usrdata, ckp_req_t *req, ckp_data_t *data)
+{
+  error_t err = E_OK;
+  ecu_sensors_cmp_ctx_t *cmp_ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
+
+  do {
+    BREAK_IF_ACTION(cmp_ctx == NULL, err = E_PARAM);
+
+    err = ecu_sensors_ckp_calculate_current_position(cmp_ctx->init.ckp_instance_index, req, data);
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC static void ecu_sensors_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
+{
+  ecu_sensors_cmp_ctx_t *ctx = (ecu_sensors_cmp_ctx_t *)usrdata;
+  ecu_sensors_cmp_cb_t *cb;
+
+  for(int i = 0; i < ECU_SENSORS_CMP_CALLBACKS_MAX; i++) {
+    cb = &ctx->signal_update_callbacks[i];
+    if(cb->callback != NULL) {
+      cb->callback(cb->usrdata, data, diag);
+    } else {
+      break;
+    }
+  }
 }

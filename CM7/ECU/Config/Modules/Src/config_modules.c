@@ -11,8 +11,9 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_MODULES_MAX (     \
-    ECU_MODULE_TIMING_MAX    +\
+#define ECU_MODULES_MAX (       \
+    ECU_MODULE_CYLINDERS_MAX  + \
+    ECU_MODULE_TIMING_MAX     + \
     ECU_MODULE_ETC_MAX)
 
 typedef enum {
@@ -40,18 +41,42 @@ typedef struct {
     ecu_config_module_instance_t modules[ECU_MODULES_MAX];
 }ecu_config_modules_t;
 
+static cylinders_ctx_t ecu_config_cylinders_ctx[ECU_MODULE_CYLINDERS_MAX] = {0};
+static timing_ctx_t ecu_config_timing_ctx[ECU_MODULE_TIMING_MAX] = {0};
 static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
         {
+            .loop_main = (ecu_module_loop_func_t)cylinders_loop_main,
+            .loop_slow = (ecu_module_loop_func_t)cylinders_loop_slow,
+            .loop_fast = (ecu_module_loop_func_t)cylinders_loop_fast,
+            .instance_max = ECU_MODULE_CYLINDERS_MAX,
+        }, //ECU_MODULE_TYPE_CYLINDERS
+        {
+            .loop_main = (ecu_module_loop_func_t)timing_loop_main,
+            .loop_slow = (ecu_module_loop_func_t)timing_loop_slow,
+            .loop_fast = (ecu_module_loop_func_t)timing_loop_fast,
+            .instance_max = ECU_MODULE_TIMING_MAX,
+        }, //ECU_MODULE_TYPE_ETC
+        {
             .loop_main = (ecu_module_loop_func_t)etc_loop_main,
             .loop_slow = (ecu_module_loop_func_t)etc_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)etc_loop_fast,
             .instance_max = ECU_MODULE_ETC_MAX,
-        }, //ECU_MODULE_TYPE_ETC
+        }, //ECU_MODULE_TYPE_TIMING
     },
     .modules = {
+        {
+            .type = ECU_MODULE_TYPE_CYLINDERS,
+            .instance = ECU_MODULE_CYLINDERS_1,
+            .ctx = &ecu_config_cylinders_ctx[ECU_MODULE_CYLINDERS_1],
+        },
+        {
+            .type = ECU_MODULE_TYPE_TIMING,
+            .instance = ECU_MODULE_TIMING_1,
+            .ctx = &ecu_config_timing_ctx[ECU_MODULE_TIMING_1],
+        },
         {
             .type = ECU_MODULE_TYPE_ETC,
             .instance = ECU_MODULE_ETC_1,
