@@ -221,6 +221,7 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
     data.rpm = 60000000.0f / data.period;
 
     data.validity = MAX(data.validity, CKP_DATA_DETECTED);
+
     delta_diff = (float)delta - (float)delta_last;
     quotient = delta_diff / delta_mean_prev;
 

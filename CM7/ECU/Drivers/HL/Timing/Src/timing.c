@@ -69,7 +69,6 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
   const timing_config_crankshaft_t *crankshaft_config;
   timing_data_crankshaft_t *crankshaft;
   timing_data_camshafts_t *camshafts;
-  bool phased = false;
   float *position_values[2];
   float pos_temp;
 
@@ -82,7 +81,7 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
     camshafts = &ctx->data.camshafts;
 
     crankshaft->sensor_data = *data;
-    crankshaft->sensor_diag = *diag;
+    crankshaft->sensor_has_failure = diag->data ? true : false;
 
     position_values[0] = &crankshaft->sensor_data.current.position;
     position_values[1] = &crankshaft->sensor_data.previous.position;
@@ -102,9 +101,9 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
                 *position_values[i] -= 360.0f;
               }
             }
+          } else {
+            crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
           }
-          crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
-          phased = true;
         } else {
           crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
         }
@@ -113,7 +112,7 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
       for(int i = 0; i < ITEMSOF(position_values); i++) {
         pos_temp = *position_values[i];
         pos_temp += crankshaft_config->offset;
-        if(phased) {
+        if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
           if(pos_temp >= 360.0f) {
             pos_temp -= 720.0f;
           } else if(pos_temp < -360.0f) {
@@ -166,7 +165,8 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
     crankshaft = &ctx->data.crankshaft;
 
     camshaft->sensor_data = *data;
-    camshaft->sensor_diag = *diag;
+    camshaft->sensor_has_failure = diag->data ? true : false;
+
     if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       if(camshaft->sensor_data.validity == CMP_DATA_VALID) {
         if(camshaft_config->use_for_phased_sync) {

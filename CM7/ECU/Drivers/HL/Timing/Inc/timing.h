@@ -33,17 +33,17 @@ typedef union {
 
 typedef struct {
     ckp_data_t sensor_data;
-    ckp_diag_t sensor_diag;
     float pos_phased;
     timing_crankshaft_mode_t mode;
+    bool sensor_has_failure;
 }timing_data_crankshaft_t;
 
 typedef struct {
     cmp_data_t sensor_data;
-    cmp_diag_t sensor_diag;
     float pos_absolute;
     float pos_relative;
     bool valid;
+    bool sensor_has_failure;
 }timing_data_camshaft_t;
 
 typedef struct {

@@ -52,7 +52,7 @@ ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
     }
     time_msmt_stop(&ctx->load_signal_cb);
 
-    if(ctx->data.validity >= CKP_DATA_VALID) {
+    if(ctx->data.validity == CKP_DATA_DETECTED || ctx->data.validity >= CKP_DATA_VALID) {
       time_msmt_start(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
