@@ -12,10 +12,16 @@
 #include "config_cmp.h"
 #include "compiler.h"
 
-static void timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
-static void timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
+static void ecu_modules_timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
+static void ecu_modules_timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag);
+static void ecu_modules_timing_signal_update_cb(void *usrdata, const timing_data_t *data, const timing_diag_t *diag);
 
 typedef struct ecu_modules_timing_ctx_tag ecu_modules_timing_ctx_t;
+
+typedef struct {
+    timing_signal_update_cb_t callback;
+    void *usrdata;
+}ecu_modules_timing_cb_t;
 
 typedef struct {
     ecu_sensor_ckp_t ckp_instance;
@@ -33,6 +39,7 @@ typedef struct ecu_modules_timing_ctx_tag {
     timing_ctx_t *ctx;
     ecu_modules_timing_ckp_cb_ctx_t ckp_cb_ctx[ECU_SENSOR_CKP_MAX];
     ecu_modules_timing_cmp_cb_ctx_t cmp_cb_ctx[ECU_SENSOR_CMP_MAX];
+    ecu_modules_timing_cb_t signal_update_callbacks[ECU_MODULES_TIMING_CALLBACKS_MAX];
 }ecu_modules_timing_ctx_t;
 
 static const timing_config_t ecu_modules_timing_config_default = {
@@ -54,11 +61,14 @@ static const timing_config_t ecu_modules_timing_config_default = {
 static ecu_modules_timing_ctx_t ecu_modules_timing_ctx[ECU_MODULE_TIMING_MAX] = {
     {
       .init = {
-
+          .signal_update_cb = ecu_modules_timing_signal_update_cb,
+          .signal_update_usrdata = &ecu_modules_timing_ctx[0],
       },
       .config_default = ecu_modules_timing_config_default,
     },
 };
+
+
 
 error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
 {
@@ -76,7 +86,7 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
       timing_ctx->ckp_cb_ctx[i].ckp_instance = ECU_SENSOR_CKP_1 + i;
       timing_ctx->ckp_cb_ctx[i].module_ctx = timing_ctx;
 
-      err = ecu_sensors_ckp_register_cb(i, timing_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx[i]);
+      err = ecu_sensors_ckp_register_cb(i, ecu_modules_timing_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx[i]);
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);
@@ -87,7 +97,7 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
       timing_ctx->cmp_cb_ctx[i].cmp_instance = ECU_SENSOR_CMP_1 + i;
       timing_ctx->cmp_cb_ctx[i].module_ctx = timing_ctx;
 
-      err = ecu_sensors_cmp_register_cb(i, timing_cmp_signal_update_cb, &timing_ctx->cmp_cb_ctx[i]);
+      err = ecu_sensors_cmp_register_cb(i, ecu_modules_timing_cmp_signal_update_cb, &timing_ctx->cmp_cb_ctx[i]);
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);
@@ -189,7 +199,38 @@ error_t ecu_modules_timing_get_diag(ecu_module_timing_t instance, timing_diag_t 
   return err;
 }
 
-ITCM_FUNC static void timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
+error_t ecu_modules_timing_register_cb(ecu_module_timing_t instance, timing_signal_update_cb_t callback, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_modules_timing_ctx_t *ckp_ctx;
+  ecu_modules_timing_cb_t *cb;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX || callback == NULL, err = E_PARAM);
+
+    ckp_ctx = &ecu_modules_timing_ctx[instance];
+
+    err = E_OVERFLOW;
+
+    for(int i = 0; i < ECU_MODULES_TIMING_CALLBACKS_MAX; i++) {
+      cb = &ckp_ctx->signal_update_callbacks[i];
+      if(cb->callback == callback || cb->usrdata == usrdata) {
+        err = E_OK;
+        break;
+      } else if(cb->callback == NULL) {
+        cb->callback = callback;
+        cb->usrdata = usrdata;
+        err = E_OK;
+        break;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC static void ecu_modules_timing_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   ecu_modules_timing_ckp_cb_ctx_t *ckp_cb_ctx = (ecu_modules_timing_ckp_cb_ctx_t *)usrdata;
   ecu_modules_timing_ctx_t *module_ctx;
@@ -203,10 +244,11 @@ ITCM_FUNC static void timing_ckp_signal_update_cb(void *usrdata, const ckp_data_
     BREAK_IF(ctx == NULL);
 
     timing_ckp_signal_update(ctx, data, diag);
+
   } while(0);
 }
 
-ITCM_FUNC static void timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
+ITCM_FUNC static void ecu_modules_timing_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
 {
   ecu_modules_timing_cmp_cb_ctx_t *cmp_cb_ctx = (ecu_modules_timing_cmp_cb_ctx_t *)usrdata;
   ecu_modules_timing_ctx_t *module_ctx;
@@ -222,4 +264,19 @@ ITCM_FUNC static void timing_cmp_signal_update_cb(void *usrdata, const cmp_data_
     timing_cmp_signal_update(ctx, cmp_cb_ctx->cmp_instance, data, diag);
 
   } while(0);
+}
+
+ITCM_FUNC static void ecu_modules_timing_signal_update_cb(void *usrdata, const timing_data_t *data, const timing_diag_t *diag)
+{
+  ecu_modules_timing_ctx_t *ctx = (ecu_modules_timing_ctx_t *)usrdata;
+  ecu_modules_timing_cb_t *cb;
+
+  for(int i = 0; i < ECU_MODULES_TIMING_CALLBACKS_MAX; i++) {
+    cb = &ctx->signal_update_callbacks[i];
+    if(cb->callback != NULL) {
+      cb->callback(cb->usrdata, data, diag);
+    } else {
+      break;
+    }
+  }
 }
