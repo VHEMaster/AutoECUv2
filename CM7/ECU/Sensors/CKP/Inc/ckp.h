@@ -50,6 +50,7 @@ typedef union ckp_diag_tag {
         bool signal_missing_pulse : 1;
         bool signal_missing_sync : 1;
         bool signal_missing_second_sync : 1;
+        bool pos_calc_nan : 1;
     }bits;
 }ckp_diag_t;
 
@@ -57,6 +58,7 @@ typedef struct {
     float position;
     time_us_t timestamp;
     bool valid;
+    bool odd_rev;
 }ckp_data_position_t;
 
 typedef enum {

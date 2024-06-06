@@ -34,6 +34,7 @@ typedef struct timing_diag_tag {
         uint32_t data;
         struct {
             bool ckp_failure : 1;
+            bool pos_calc_nan : 1;
         }bits;
     }crankshaft;
 
@@ -55,6 +56,8 @@ typedef struct {
     ckp_data_t sensor_data;
     float pos_phased;
     timing_crankshaft_mode_t mode;
+    bool sync_phase_at_odd_rev;
+    bool valid;
 }timing_data_crankshaft_t;
 
 typedef struct {
@@ -69,12 +72,19 @@ typedef struct {
     bool sync_at_odd_rev;
     ecu_sensor_cmp_t sync_camshaft_instance;
     timing_data_camshaft_t instances[ECU_SENSOR_CMP_MAX];
+    bool valid;
 }timing_data_camshafts_t;
 
 typedef struct timing_data_tag {
     timing_data_crankshaft_t crankshaft;
     timing_data_camshafts_t camshafts;
 }timing_data_t;
+
+typedef struct {
+    bool position_valid;
+    bool phased;
+    float position_prev;
+}timing_req_t;
 
 typedef struct {
     ecu_sensor_ckp_t ckp_instance;
@@ -100,6 +110,9 @@ error_t timing_reset(timing_ctx_t *ctx);
 
 void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
 void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag);
+
+error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data);
+
 
 error_t timing_get_data(timing_ctx_t *ctx, timing_data_t *data);
 error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag);

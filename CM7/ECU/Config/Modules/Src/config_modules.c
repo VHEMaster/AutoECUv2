@@ -217,6 +217,16 @@ error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_in
   return err;
 }
 
+error_t ecu_modules_get_cylinders_ctx(ecu_module_cylinders_t instance, cylinders_ctx_t **ctx)
+{
+  return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_CYLINDERS, instance, (void**)ctx);
+}
+
+error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx)
+{
+  return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_TIMING, instance, (void**)ctx);
+}
+
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx)
 {
   return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_ETC, instance, (void**)ctx);

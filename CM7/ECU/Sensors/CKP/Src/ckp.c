@@ -248,8 +248,9 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
         pos = mult * now + data_cur.previous.position;
       }
 
-      while(pos >= 180.0f)
+      while(pos >= 180.0f) {
         pos -= 360.0f;
+      }
 
       if(req_ctx != NULL) {
         pos_prev = req_ctx->position_prev;
@@ -264,7 +265,10 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
 
     //Check for NaNs
     if(pos != pos) {
+      prim = EnterCritical();
+      ctx->diag.bits.pos_calc_nan = true;
       data->validity = MIN(data->validity, CKP_DATA_SYNCHRONIZED);
+      ExitCritical(prim);
       pos = 0.0f;
     }
 

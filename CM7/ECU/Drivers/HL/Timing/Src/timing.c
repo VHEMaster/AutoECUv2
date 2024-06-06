@@ -69,8 +69,11 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
   const timing_config_crankshaft_t *crankshaft_config;
   timing_data_crankshaft_t *crankshaft;
   timing_data_camshafts_t *camshafts;
+  ckp_data_t ckp_sensor_data;
   float *position_values[2];
+  bool odd_rev[2];
   float pos_temp;
+  uint32_t prim;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -80,28 +83,32 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
     crankshaft_config = &ctx->config.crankshaft;
     camshafts = &ctx->data.camshafts;
 
-    crankshaft->sensor_data = *data;
+    ckp_sensor_data = *data;
     ctx->diag.crankshaft.bits.ckp_failure = diag->data ? true : false;
 
-    position_values[0] = &crankshaft->sensor_data.current.position;
-    position_values[1] = &crankshaft->sensor_data.previous.position;
+    position_values[0] = &ckp_sensor_data.current.position;
+    position_values[1] = &ckp_sensor_data.previous.position;
+    odd_rev[0] = ckp_sensor_data.current.odd_rev;
+    odd_rev[1] = ckp_sensor_data.previous.odd_rev;
 
-    if(crankshaft->sensor_data.validity == CKP_DATA_VALID) {
+
+    if(ckp_sensor_data.validity == CKP_DATA_VALID) {
       if(crankshaft->mode < TIMING_CRANKSHAFT_MODE_VALID) {
         crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
       }
 
       if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
         if(camshafts->synchronized) {
-          if(camshafts->sync_at_odd_rev != crankshaft->sensor_data.odd_rev) {
-            for(int i = 0; i < ITEMSOF(position_values); i++) {
+          for(int i = 0; i < ITEMSOF(position_values); i++) {
+            if(camshafts->sync_at_odd_rev != odd_rev[i]) {
               if(*position_values[i] < 0.0f) {
                 *position_values[i] += 360.0f;
               } else {
                 *position_values[i] -= 360.0f;
               }
             }
-          } else {
+          }
+          if(camshafts->sync_at_odd_rev == ckp_sensor_data.odd_rev) {
             crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
           }
         } else {
@@ -113,34 +120,43 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
         pos_temp = *position_values[i];
         pos_temp += crankshaft_config->offset;
         if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-          if(pos_temp >= 360.0f) {
+          while(pos_temp >= 360.0f) {
             pos_temp -= 720.0f;
-          } else if(pos_temp < -360.0f) {
+          }
+          while(pos_temp < -360.0f) {
             pos_temp += 720.0f;
           }
         } else {
-          if(pos_temp >= 180.0f) {
+          while(pos_temp >= 180.0f) {
             pos_temp -= 360.0f;
-          } else if(pos_temp < -180.0f) {
+          }
+          while(pos_temp < -180.0f) {
             pos_temp += 360.0f;
           }
         }
         *position_values[i] = pos_temp;
       }
 
-      crankshaft->sensor_data.current_position = *position_values[0];
+      ckp_sensor_data.current_position = *position_values[0];
+      crankshaft->valid = true;
     } else {
-      if(crankshaft->sensor_data.validity == CKP_DATA_DETECTED ||
-        crankshaft->sensor_data.validity == CKP_DATA_SYNCHRONIZED) {
+      if(ckp_sensor_data.validity == CKP_DATA_DETECTED ||
+        ckp_sensor_data.validity == CKP_DATA_SYNCHRONIZED) {
         crankshaft->mode = TIMING_CRANKSHAFT_MODE_DETECTED;
+        crankshaft->valid = true;
       } else {
         crankshaft->mode = TIMING_CRANKSHAFT_MODE_IDLE;
+        crankshaft->valid = false;
       }
       memset(camshafts->instances, 0, sizeof(camshafts->instances));
       camshafts->synchronized = false;
     }
 
+    prim = EnterCritical();
+    crankshaft->sensor_data = ckp_sensor_data;
     crankshaft->pos_phased = *position_values[0];
+    ExitCritical(prim);
+
 
   } while(0);
 }
@@ -171,7 +187,9 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
       if(camshaft->sensor_data.validity == CMP_DATA_VALID) {
         if(camshaft_config->use_for_phased_sync) {
           if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID) {
+            camshafts->valid = true;
             camshafts->synchronized = true;
+            crankshaft->sync_phase_at_odd_rev = camshaft->sensor_data.sync_at_odd_rev;
             camshafts->sync_at_odd_rev = camshaft->sensor_data.sync_at_odd_rev;
             camshafts->sync_camshaft_instance = cmp_instance;
           } else if(camshafts->sync_at_odd_rev != camshaft->sensor_data.sync_at_odd_rev) {
@@ -196,6 +214,7 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
         } else if(camshaft->pos_relative < camshaft_config->pos_min) {
           ctx->diag.camshafts[cmp_instance].bits.pos_too_early = true;
         }
+        camshaft->valid = true;
       } else if(camshaft->sensor_data.validity < CMP_DATA_DETECTED) {
         if(camshafts->synchronized) {
           ctx->diag.camshafts[cmp_instance].bits.signal_lost = true;
@@ -204,6 +223,8 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
     } else {
       memset(camshafts->instances, 0, sizeof(camshafts->instances));
       camshafts->synchronized = false;
+      camshafts->valid = false;
+      camshaft->valid = false;
     }
 
   } while(0);
@@ -251,6 +272,156 @@ error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag)
 
     *diag = ctx->diag;
 
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
+{
+  error_t err = E_OK;
+  float pos, pos_prev, mult, time_delta, current, previous;
+  timing_data_crankshaft_t data_cur;
+  time_us_t now;
+  uint32_t prim;
+  float *positions[2];
+  float pos_temp;
+  bool phased_internal = phased;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    prim = EnterCritical();
+    data_cur = ctx->data.crankshaft;
+    ExitCritical(prim);
+
+    now = time_get_current_us();
+
+    positions[0] = &data_cur.sensor_data.current.position;
+    positions[1] = &data_cur.sensor_data.previous.position;
+
+    if(data_cur.mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+      phased_internal = false;
+    } else if(req_ctx != NULL && req_ctx->phased == false) {
+      phased_internal = false;
+    }
+
+    for(int i = 0; i < ITEMSOF(positions); i++) {
+      pos_temp = *positions[i];
+      pos_temp += offset;
+
+      if(phased_internal) {
+        while(pos_temp >= 360.0f) {
+          pos_temp -= 720.0f;
+        }
+        while(pos_temp < -360.0f) {
+          pos_temp += 720.0f;
+        }
+      } else {
+        while(pos_temp >= 180.0f) {
+          pos_temp -= 360.0f;
+        }
+        while(pos_temp < -180.0f) {
+          pos_temp += 360.0f;
+        }
+      }
+      *positions[i] = pos_temp;
+    }
+
+    pos = data_cur.sensor_data.current.position;
+
+    if(data_cur.valid && data_cur.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+
+      if(req_ctx == NULL || req_ctx->position_valid) {
+        if(data_cur.sensor_data.current.timestamp != data_cur.sensor_data.previous.timestamp) {
+          time_delta = time_diff(data_cur.sensor_data.current.timestamp, data_cur.sensor_data.previous.timestamp);
+          now = time_diff(now, data_cur.sensor_data.previous.timestamp);
+
+          current = data_cur.sensor_data.current.position;
+          previous = data_cur.sensor_data.previous.position;
+
+          if(current < previous) {
+            if(phased_internal) {
+              current += 720.0f;
+            } else {
+              current += 360.0f;
+            }
+          }
+
+          pos = current - previous;
+          mult = pos / time_delta;
+          pos = mult * now + previous;
+        }
+
+        if(phased_internal) {
+          while(pos >= 360.0f) {
+            pos -= 720.0f;
+          }
+          while(pos < -360.0f) {
+            pos += 720.0f;
+          }
+        } else {
+          while(pos >= 180.0f) {
+            pos -= 360.0f;
+          }
+          while(pos < -180.0f) {
+            pos += 360.0f;
+          }
+        }
+
+        if(req_ctx != NULL) {
+          pos_prev = req_ctx->position_prev;
+
+          if((pos - pos_prev < 0.0f && pos - pos_prev > -90.0f) || pos - pos_prev > 90.0f) {
+            pos = pos_prev;
+          }
+
+          if(phased && !phased_internal) {
+            if(data_cur.mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+              if(data_cur.sensor_data.odd_rev == data_cur.sync_phase_at_odd_rev) {
+                if(pos_prev < 0.0f && pos >= 0.0f) {
+                  req_ctx->phased = true;
+                  phased_internal = true;
+                }
+              }
+            }
+          }
+        }
+      } else {
+        pos = data_cur.sensor_data.current.position;
+      }
+
+      //Check for NaNs
+      if(pos != pos) {
+        ctx->diag.crankshaft.bits.pos_calc_nan = true;
+        data_cur.valid = false;
+        pos = 0.0f;
+      }
+
+      if(req_ctx != NULL) {
+        req_ctx->position_prev = pos;
+        req_ctx->position_valid = true;
+      }
+
+      if(!phased_internal) {
+        data_cur.mode = MIN(data_cur.mode, TIMING_CRANKSHAFT_MODE_VALID);
+      }
+
+
+    } else {
+      if(req_ctx != NULL) {
+        req_ctx->position_prev = pos;
+        req_ctx->position_valid = false;
+      }
+    }
+
+    data_cur.sensor_data.current_position = pos;
+    data_cur.pos_phased = pos;
+
+    if(data != NULL) {
+      *data = data_cur;
+    }
   } while(0);
 
   return err;
