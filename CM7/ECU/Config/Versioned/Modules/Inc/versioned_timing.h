@@ -44,6 +44,7 @@ typedef struct {
     timing_config_camshaft_t camshafts[ECU_SENSOR_CMP_MAX];
 
     timing_config_phasedsyncmode_t phased_syncmode;
+    bool phased_only;
 
     uint32_t align ALIGNED_CACHE;
 }timing_config_v1_t ALIGNED_CACHE;

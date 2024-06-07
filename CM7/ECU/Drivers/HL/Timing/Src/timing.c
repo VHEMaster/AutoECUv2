@@ -202,25 +202,35 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
       }
 
       ckp_sensor_data.current_position = *position_values[0];
-      crankshaft->valid = true;
+      if(ctx->config.phased_only) {
+        if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+          crankshaft->valid = true;
+        } else {
+          crankshaft->valid = false;
+        }
+      } else {
+        if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+          crankshaft->valid = true;
+        } else {
+          crankshaft->valid = false;
+        }
+      }
     } else {
       if(ckp_sensor_data.validity == CKP_DATA_DETECTED ||
         ckp_sensor_data.validity == CKP_DATA_SYNCHRONIZED) {
         crankshaft->mode = TIMING_CRANKSHAFT_MODE_DETECTED;
-        crankshaft->valid = true;
       } else {
         crankshaft->mode = TIMING_CRANKSHAFT_MODE_IDLE;
-        crankshaft->valid = false;
       }
       memset(camshafts->instances, 0, sizeof(camshafts->instances));
       camshafts->synchronized = false;
+      crankshaft->valid = false;
     }
 
     prim = EnterCritical();
     crankshaft->sensor_data = ckp_sensor_data;
     crankshaft->pos_phased = *position_values[0];
     ExitCritical(prim);
-
 
   } while(0);
 }
@@ -371,7 +381,7 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
 
     if(data_cur.mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
       phased_internal = false;
-    } else if(req_ctx != NULL && req_ctx->phased == false) {
+    } else if(req_ctx != NULL && req_ctx->phased == false && ctx->config.phased_only == false) {
       phased_internal = false;
     }
 
