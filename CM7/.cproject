@@ -85,7 +85,6 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Time/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/QueuedPulses/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Drivers/AnalogInputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9966/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Spi/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/SpiContainer/Inc"/>
@@ -215,7 +214,6 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Time/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/QueuedPulses/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Drivers/AnalogInputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9966/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Spi/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/SpiContainer/Inc"/>
