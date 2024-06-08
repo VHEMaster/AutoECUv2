@@ -9,5 +9,6 @@
 #define CONFIG_VERSIONED_CORE_INC_VERSIONED_CORE_H_
 
 #include "versioned_banks.h"
+#include "versioned_cylinders.h"
 
 #endif /* CONFIG_VERSIONED_CORE_INC_VERSIONED_CORE_H_ */
