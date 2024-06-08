@@ -60,7 +60,7 @@ typedef struct {
     output_func_ch_get_t ch_get;
 }output_if_cfg_t;
 
-void outputs_init(void);
+error_t outputs_init(void);
 void outputs_loop_main(void);
 void outputs_loop_slow(void);
 void outputs_loop_fast(void);

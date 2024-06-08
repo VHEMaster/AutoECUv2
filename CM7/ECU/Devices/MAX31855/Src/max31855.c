@@ -57,11 +57,6 @@ error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave)
   return err;
 }
 
-void max31855_loop_main(max31855_ctx_t *ctx)
-{
-
-}
-
 ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
 {
   time_us_t now;
@@ -90,11 +85,6 @@ ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
       }
     }
   }
-}
-
-void max31855_loop_fast(max31855_ctx_t *ctx)
-{
-
 }
 
 error_t max31855_set_poll_period(max31855_ctx_t *ctx, time_delta_us_t period)

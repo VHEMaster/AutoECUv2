@@ -56,20 +56,6 @@ error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
   return err;
 }
 
-void l9966_loop_main(l9966_ctx_t *ctx)
-{
-  if(ctx->ready) {
-
-  }
-}
-
-void l9966_loop_slow(l9966_ctx_t *ctx)
-{
-  if(ctx->ready) {
-
-  }
-}
-
 ITCM_FUNC void l9966_loop_fast(l9966_ctx_t *ctx)
 {
   error_t err = E_OK;

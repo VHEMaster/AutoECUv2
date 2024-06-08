@@ -49,16 +49,6 @@ ITCM_FUNC error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
   return err;
 }
 
-void l9960_loop_main(l9960_ctx_t *ctx)
-{
-
-}
-
-void l9960_loop_slow(l9960_ctx_t *ctx)
-{
-
-}
-
 ITCM_FUNC void l9960_loop_fast(l9960_ctx_t *ctx)
 {
   error_t err = E_OK;

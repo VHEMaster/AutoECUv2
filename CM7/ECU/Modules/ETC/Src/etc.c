@@ -82,11 +82,6 @@ error_t etc_reset(etc_ctx_t *ctx)
   return err;
 }
 
-void etc_loop_main(etc_ctx_t *ctx)
-{
-
-}
-
 void etc_loop_slow(etc_ctx_t *ctx)
 {
   error_t err = E_OK;

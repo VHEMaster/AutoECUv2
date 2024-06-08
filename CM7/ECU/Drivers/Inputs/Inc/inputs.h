@@ -63,7 +63,7 @@ typedef struct {
     input_func_ch_irq_cb_t ch_irq_cb;
 }input_if_cfg_t;
 
-void inputs_init(void);
+error_t inputs_init(void);
 void inputs_loop_main(void);
 void inputs_loop_slow(void);
 void inputs_loop_fast(void);

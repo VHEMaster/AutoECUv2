@@ -16,21 +16,21 @@ void middlelayer_gpio_loop_main(void)
 {
   inputs_loop_main();
   outputs_loop_main();
-  queuedpulses_loop_main();
+  //queuedpulses_loop_main();
 }
 
 void middlelayer_gpio_loop_slow(void)
 {
   inputs_loop_slow();
   outputs_loop_slow();
-  queuedpulses_loop_slow();
+  //queuedpulses_loop_slow();
 }
 
 ITCM_FUNC void middlelayer_gpio_loop_fast(void)
 {
   inputs_loop_fast();
   outputs_loop_fast();
-  queuedpulses_loop_fast();
+  //queuedpulses_loop_fast();
 }
 
 void middlelayer_gpio_init(void)
@@ -41,6 +41,15 @@ void middlelayer_gpio_init(void)
   (void)err;
 
   do {
+    err = inputs_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    err = outputs_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    err = queuedpulses_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
     err = ecu_config_gpio_exti_init();
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 

@@ -122,11 +122,6 @@ error_t cj125_heater_init(cj125_ctx_t *ctx, const cj125_heater_t *heater_cfg)
   return err;
 }
 
-void cj125_loop_main(cj125_ctx_t *ctx)
-{
-
-}
-
 void cj125_loop_slow(cj125_ctx_t *ctx)
 {
   error_t err = E_OK;

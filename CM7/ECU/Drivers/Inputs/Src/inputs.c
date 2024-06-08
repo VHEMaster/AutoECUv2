@@ -13,9 +13,11 @@
 
 static input_ctx_t input_ctx;
 
-void inputs_init(void)
+error_t inputs_init(void)
 {
   memset(&input_ctx, 0u, sizeof(input_ctx));
+
+  return E_OK;
 }
 
 void inputs_loop_main(void)

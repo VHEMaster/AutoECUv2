@@ -46,13 +46,13 @@ static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
         {
-            .loop_main = (ecu_module_loop_func_t)timing_loop_main,
-            .loop_slow = (ecu_module_loop_func_t)timing_loop_slow,
-            .loop_fast = (ecu_module_loop_func_t)timing_loop_fast,
+            .loop_slow = (ecu_module_loop_func_t)NULL,
+            .loop_main = (ecu_module_loop_func_t)NULL,
+            .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_TIMING_MAX,
         }, //ECU_MODULE_TYPE_ETC
         {
-            .loop_main = (ecu_module_loop_func_t)etc_loop_main,
+            .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_slow = (ecu_module_loop_func_t)etc_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)etc_loop_fast,
             .instance_max = ECU_MODULE_ETC_MAX,

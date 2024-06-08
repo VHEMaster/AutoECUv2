@@ -10,16 +10,6 @@
 #include "compiler.h"
 #include <string.h>
 
-void qspi_loop_main(qspi_ctx_t *ctx)
-{
-
-}
-
-void qspi_loop_slow(qspi_ctx_t *ctx)
-{
-
-}
-
 ITCM_FUNC void qspi_loop_fast(qspi_ctx_t *ctx)
 {
   error_t err = E_OK;

@@ -62,44 +62,44 @@ static ecu_config_devices_t ecu_config_devices = {
             .instance_max = ECU_DEVICE_PULSEDADC_MAX,
         }, //ECU_DEVICE_TYPE_TCS
         {
-            .loop_main = (ecu_device_loop_func_t)max31855_loop_main,
+            .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)max31855_loop_slow,
-            .loop_fast = (ecu_device_loop_func_t)max31855_loop_fast,
+            .loop_fast = (ecu_device_loop_func_t)NULL,
             .instance_max = ECU_DEVICE_TCS_MAX,
         }, //ECU_DEVICE_TYPE_TCS
         {
-            .loop_main = (ecu_device_loop_func_t)l9966_loop_main,
-            .loop_slow = (ecu_device_loop_func_t)l9966_loop_slow,
+            .loop_main = (ecu_device_loop_func_t)NULL,
+            .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)l9966_loop_fast,
             .instance_max = ECU_DEVICE_FLEXIO_MAX,
         }, //ECU_DEVICE_TYPE_FLEXIO
         {
-            .loop_main = (ecu_device_loop_func_t)cj125_loop_main,
+            .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)cj125_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)cj125_loop_fast,
             .instance_max = ECU_DEVICE_WBLS_MAX,
         }, //ECU_DEVICE_TYPE_LAMBDA
         {
-            .loop_main = (ecu_device_loop_func_t)tle4729_loop_main,
+            .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)tle4729_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)tle4729_loop_fast,
             .instance_max = ECU_DEVICE_STEPPER_MAX,
         }, //ECU_DEVICE_TYPE_STEPPER
         {
-            .loop_main = (ecu_device_loop_func_t)tle6240_loop_main,
-            .loop_slow = (ecu_device_loop_func_t)tle6240_loop_slow,
+            .loop_main = (ecu_device_loop_func_t)NULL,
+            .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)tle6240_loop_fast,
             .instance_max = ECU_DEVICE_OUTPUT_MAX,
         }, //ECU_DEVICE_TYPE_OUTPUT
         {
-            .loop_main = (ecu_device_loop_func_t)l9960_loop_main,
-            .loop_slow = (ecu_device_loop_func_t)l9960_loop_slow,
+            .loop_main = (ecu_device_loop_func_t)NULL,
+            .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)l9960_loop_fast,
             .instance_max = ECU_DEVICE_MOTOR_MAX,
         }, //ECU_DEVICE_TYPE_MOTOR
         {
-            .loop_main = (ecu_device_loop_func_t)qspi_loop_main,
-            .loop_slow = (ecu_device_loop_func_t)qspi_loop_slow,
+            .loop_main = (ecu_device_loop_func_t)NULL,
+            .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)qspi_loop_fast,
             .instance_max = ECU_DEVICE_FLASH_MAX,
         }, //ECU_DEVICE_TYPE_FLASH

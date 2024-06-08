@@ -161,10 +161,6 @@ error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx
 
   return err;
 }
-void tle4729_loop_main(tle4729_ctx_t *ctx)
-{
-
-}
 
 void tle4729_loop_slow(tle4729_ctx_t *ctx)
 {

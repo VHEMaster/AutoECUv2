@@ -308,21 +308,6 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
   } while(0);
 }
 
-void timing_loop_main(timing_ctx_t *ctx)
-{
-
-}
-
-void timing_loop_slow(timing_ctx_t *ctx)
-{
-
-}
-
-ITCM_FUNC void timing_loop_fast(timing_ctx_t *ctx)
-{
-
-}
-
 error_t timing_get_data(timing_ctx_t *ctx, timing_data_t *data)
 {
   error_t err = E_OK;

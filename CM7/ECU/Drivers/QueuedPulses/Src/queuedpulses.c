@@ -35,21 +35,6 @@ error_t queuedpulses_init(void)
   return err;
 }
 
-void queuedpulses_loop_main(void)
-{
-
-}
-
-void queuedpulses_loop_slow(void)
-{
-
-}
-
-ITCM_FUNC void queuedpulses_loop_fast(void)
-{
-
-}
-
 error_t queuedpulses_timer_register(TIM_HandleTypeDef *htim, IRQn_Type irq)
 {
   error_t err = E_OK;

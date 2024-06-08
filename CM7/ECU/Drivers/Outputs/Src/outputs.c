@@ -13,9 +13,11 @@
 
 static output_ctx_t output_ctx;
 
-void outputs_init(void)
+error_t outputs_init(void)
 {
   memset(&output_ctx, 0u, sizeof(output_ctx));
+
+  return E_OK;
 }
 
 void outputs_loop_main(void)
