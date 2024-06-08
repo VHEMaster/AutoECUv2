@@ -27,7 +27,7 @@ typedef enum {
   CYLINDERS_CY_7,
   CYLINDERS_CY_8,
   CYLINDERS_CY_MAX,
-}cylinders_config_cylinders_t;
+}cylinders_t;
 
 typedef struct {
     float pos_offset;
