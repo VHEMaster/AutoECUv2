@@ -12,7 +12,6 @@
 #include "bool.h"
 
 #define ECU_MODULES_MAX (       \
-    ECU_MODULE_CYLINDERS_MAX  + \
     ECU_MODULE_TIMING_MAX     + \
     ECU_MODULE_ETC_MAX)
 
@@ -41,18 +40,11 @@ typedef struct {
     ecu_config_module_instance_t modules[ECU_MODULES_MAX];
 }ecu_config_modules_t;
 
-static cylinders_ctx_t ecu_config_cylinders_ctx[ECU_MODULE_CYLINDERS_MAX] = {0};
 static timing_ctx_t ecu_config_timing_ctx[ECU_MODULE_TIMING_MAX] = {0};
 static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
-        {
-            .loop_main = (ecu_module_loop_func_t)cylinders_loop_main,
-            .loop_slow = (ecu_module_loop_func_t)cylinders_loop_slow,
-            .loop_fast = (ecu_module_loop_func_t)cylinders_loop_fast,
-            .instance_max = ECU_MODULE_CYLINDERS_MAX,
-        }, //ECU_MODULE_TYPE_CYLINDERS
         {
             .loop_main = (ecu_module_loop_func_t)timing_loop_main,
             .loop_slow = (ecu_module_loop_func_t)timing_loop_slow,
@@ -67,11 +59,6 @@ static ecu_config_modules_t ecu_config_modules = {
         }, //ECU_MODULE_TYPE_TIMING
     },
     .modules = {
-        {
-            .type = ECU_MODULE_TYPE_CYLINDERS,
-            .instance = ECU_MODULE_CYLINDERS_1,
-            .ctx = &ecu_config_cylinders_ctx[ECU_MODULE_CYLINDERS_1],
-        },
         {
             .type = ECU_MODULE_TYPE_TIMING,
             .instance = ECU_MODULE_TIMING_1,
@@ -215,11 +202,6 @@ error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_in
   }
 
   return err;
-}
-
-error_t ecu_modules_get_cylinders_ctx(ecu_module_cylinders_t instance, cylinders_ctx_t **ctx)
-{
-  return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_CYLINDERS, instance, (void**)ctx);
 }
 
 error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx)

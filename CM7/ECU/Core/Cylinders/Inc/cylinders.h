@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
     cylinders_init_ctx_t init;
-    cylinders_config_t config;
+    ecu_cylinders_config_t config;
     bool ready;
     bool configured;
 
@@ -41,7 +41,7 @@ typedef struct {
 }cylinders_ctx_t;
 
 error_t cylinders_init(cylinders_ctx_t *ctx, const cylinders_init_ctx_t *init_ctx);
-error_t cylinders_configure(cylinders_ctx_t *ctx, const cylinders_config_t *config);
+error_t cylinders_configure(cylinders_ctx_t *ctx, const ecu_cylinders_config_t *config);
 error_t cylinders_reset(cylinders_ctx_t *ctx);
 
 error_t cylinders_get_data(cylinders_ctx_t *ctx, cylinders_data_t *data);

@@ -46,6 +46,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1810874428" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>
@@ -59,7 +60,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Modules/Cylinders/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/Cylinders/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
@@ -69,6 +70,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Software/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/PulsedAdc/Inc"/>
 									<listOptionValue builtIn="false" value="../Math"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
@@ -76,7 +78,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Hardware/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Inputs/Inc"/>
@@ -174,6 +176,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.997834508" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>
@@ -187,7 +190,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Modules/Cylinders/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/Cylinders/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
@@ -197,6 +200,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Software/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/PulsedAdc/Inc"/>
 									<listOptionValue builtIn="false" value="../Math"/>
 									<listOptionValue builtIn="false" value="../ECU/Devices/L9960/Inc"/>
@@ -204,7 +208,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Hardware/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Inputs/Inc"/>

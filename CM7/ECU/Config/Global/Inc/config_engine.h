@@ -34,10 +34,13 @@ typedef struct {
 }ecu_config_engine_sens_t;
 
 typedef struct {
-    timing_config_t cylinders[ECU_MODULE_CYLINDERS_MAX];
     timing_config_t timing[ECU_MODULE_TIMING_MAX];
     etc_config_t etc[ECU_MODULE_ETC_MAX];
 }ecu_config_engine_modules_t;
+
+typedef struct {
+    timing_config_t cylinders[ECU_CORE_COMPONENT_CYLINDERS_MAX];
+}ecu_config_engine_core_components_t;
 
 typedef struct {
     ecu_config_data_identification_t id;
@@ -48,6 +51,7 @@ typedef struct {
     ecu_config_engine_devs_t devs;
     ecu_config_engine_sens_t sens;
     ecu_config_engine_modules_t modules;
+    ecu_config_engine_core_components_t core_components;
     ecu_config_engine_sw_t sw;
 }ecu_config_global_engine_t;
 

@@ -17,18 +17,12 @@
 typedef uint32_t ecu_module_instance_t;
 
 typedef enum {
-  ECU_MODULE_TYPE_CYLINDERS = 0,
-  ECU_MODULE_TYPE_TIMING,
+  ECU_MODULE_TYPE_TIMING = 0,
   ECU_MODULE_TYPE_ETC,
   ECU_MODULE_TYPE_MAX
 }ecu_module_type_t;
 
 typedef void (*ecu_module_loop_func_t)(void *ctx);
-
-typedef enum {
-  ECU_MODULE_CYLINDERS_1 = 0,
-  ECU_MODULE_CYLINDERS_MAX
-}ecu_module_cylinders_t;
 
 typedef enum {
   ECU_MODULE_TIMING_1 = 0,
@@ -49,7 +43,6 @@ void ecu_modules_loop_fast(void);
 error_t ecu_modules_get_module_ctx(ecu_module_type_t type, ecu_module_instance_t instance, void **ctx);
 error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_instance_t instance, bool initialized);
 
-error_t ecu_modules_get_cylinders_ctx(ecu_module_cylinders_t instance, cylinders_ctx_t **ctx);
 error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx);
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx);
 

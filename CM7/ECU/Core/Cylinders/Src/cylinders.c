@@ -27,7 +27,7 @@ error_t cylinders_init(cylinders_ctx_t *ctx, const cylinders_init_ctx_t *init_ct
   return err;
 }
 
-error_t cylinders_configure(cylinders_ctx_t *ctx, const cylinders_config_t *config)
+error_t cylinders_configure(cylinders_ctx_t *ctx, const ecu_cylinders_config_t *config)
 {
   error_t err = E_OK;
 
@@ -38,7 +38,7 @@ error_t cylinders_configure(cylinders_ctx_t *ctx, const cylinders_config_t *conf
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(cylinders_config_t));
+      memcpy(&ctx->config, config, sizeof(ecu_cylinders_config_t));
     }
 
     ctx->configured = true;

@@ -39,19 +39,6 @@ void middlelayer_modules_init(void)
 
   do {
     err = ecu_modules_init();
-    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-    for(int i = 0; i < ECU_MODULE_CYLINDERS_MAX; i++) {
-      err = ecu_modules_get_module_ctx(ECU_MODULE_TYPE_CYLINDERS, i, &module_ctx);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-      err = ecu_modules_cylinders_init(i, (cylinders_ctx_t *)module_ctx);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-      err = ecu_modules_set_module_initialized(ECU_MODULE_TYPE_CYLINDERS, i, true);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-    }
-    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_MODULE_TIMING_MAX; i++) {
       err = ecu_modules_get_module_ctx(ECU_MODULE_TYPE_TIMING, i, &module_ctx);
