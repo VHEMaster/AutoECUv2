@@ -8,9 +8,7 @@
 #ifndef DRIVERS_CRC_INC_CRC_H_
 #define DRIVERS_CRC_INC_CRC_H_
 
-#include "errors.h"
-#include "bool.h"
-#include <stdint.h>
+#include "common.h"
 
 #define CRC_POLY    (0x8005)
 

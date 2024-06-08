@@ -8,7 +8,7 @@
 #ifndef DRIVERS_TLE4729G_INC_TLE4729_H_
 #define DRIVERS_TLE4729G_INC_TLE4729_H_
 
-#include "errors.h"
+#include "common.h"
 #include "time.h"
 #include "gpio.h"
 

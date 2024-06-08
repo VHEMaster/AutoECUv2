@@ -8,11 +8,10 @@
 #ifndef SENSORS_IAT_INC_IAT_H_
 #define SENSORS_IAT_INC_IAT_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_iat.h"
-#include <stdint.h>
 
 typedef union {
     uint32_t data;

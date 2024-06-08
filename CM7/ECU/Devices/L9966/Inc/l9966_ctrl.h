@@ -8,7 +8,7 @@
 #ifndef DEVICES_L9966_INC_L9966_CTRL_H_
 #define DEVICES_L9966_INC_L9966_CTRL_H_
 
-#include <stdint.h>
+#include "common.h"
 
 typedef enum {
   L9966_CTRL_GS_CC_0 = 0x0,

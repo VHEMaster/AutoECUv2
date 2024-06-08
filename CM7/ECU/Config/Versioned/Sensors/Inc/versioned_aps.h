@@ -8,9 +8,8 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_APS_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_APS_H_
 
+#include "common.h"
 #include "config_gpio.h"
-#include "compiler.h"
-#include <stdint.h>
 
 #define APS_CONFIG_SIGNALS_MAX    (2)
 

@@ -8,11 +8,8 @@
 #ifndef DRIVERS_FLASH_QSPI_H
 #define DRIVERS_FLASH_QSPI_H
 
-#include "main.h"
+#include "common.h"
 #include "time.h"
-#include "bool.h"
-#include "errors.h"
-#include "compiler.h"
 
 #define QSPI_STATUS_POLL_INTERVAL     (80 * 5)
 #define QSPI_QUAD_INIT_DELAY_US       (50)

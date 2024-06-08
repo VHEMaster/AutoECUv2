@@ -8,11 +8,10 @@
 #ifndef SENSORS_ECT_INC_ECT_H_
 #define SENSORS_ECT_INC_ECT_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_ect.h"
-#include <stdint.h>
 
 typedef union {
     uint32_t data;

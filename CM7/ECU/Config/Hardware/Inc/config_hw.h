@@ -8,7 +8,7 @@
 #ifndef CONFIG_INC_CONFIG_H_
 #define CONFIG_INC_CONFIG_H_
 
-#include "bool.h"
+#include "common.h"
 #include "config_spi.h"
 #include "config_gpio.h"
 

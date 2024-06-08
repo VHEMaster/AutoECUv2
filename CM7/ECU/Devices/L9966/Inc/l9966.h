@@ -8,11 +8,9 @@
 #ifndef DRIVERS_L9966_INC_L9966_H_
 #define DRIVERS_L9966_INC_L9966_H_
 
-#include "main.h"
-#include "errors.h"
+#include "common.h"
 #include "gpio.h"
 #include "time.h"
-#include "bool.h"
 #include "spi.h"
 
 #include "l9966_reg.h"

@@ -8,9 +8,7 @@
 #ifndef DRIVERS_PULSEDADC_INC_PULSEDADC_H_
 #define DRIVERS_PULSEDADC_INC_PULSEDADC_H_
 
-#include "main.h"
-#include "errors.h"
-#include "bool.h"
+#include "common.h"
 
 typedef enum {
   PULSEDADC_STATUS_IDLE = 0,

@@ -8,9 +8,7 @@
 #ifndef DRIVERS_GPIO_INC_GPIO_H_
 #define DRIVERS_GPIO_INC_GPIO_H_
 
-#include "main.h"
-#include "bool.h"
-#include "errors.h"
+#include "common.h"
 
 typedef struct {
     GPIO_TypeDef *port;

@@ -8,8 +8,7 @@
 #ifndef CONFIG_CORE_INC_CONFIG_CORE_H_
 #define CONFIG_CORE_INC_CONFIG_CORE_H_
 
-
-#include "errors.h"
+#include "common.h"
 #include "cylinders.h"
 #include "timing.h"
 #include "etc.h"

@@ -8,7 +8,7 @@
 #ifndef CONFIG_EXTERN_H_
 #define CONFIG_EXTERN_H_
 
-#include "main.h"
+#include "common.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;

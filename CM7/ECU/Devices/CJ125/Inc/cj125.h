@@ -8,9 +8,8 @@
 #ifndef DRIVERS_CJ125_INC_CJ125_H_
 #define DRIVERS_CJ125_INC_CJ125_H_
 
+#include "common.h"
 #include "gpio.h"
-#include "main.h"
-#include "errors.h"
 #include "spi.h"
 #include "pid.h"
 

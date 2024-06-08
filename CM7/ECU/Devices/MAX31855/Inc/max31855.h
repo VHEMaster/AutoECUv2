@@ -8,7 +8,7 @@
 #ifndef DRIVERS_MAX31855_INC_MAX31855_H_
 #define DRIVERS_MAX31855_INC_MAX31855_H_
 
-#include "errors.h"
+#include "common.h"
 #include "time.h"
 #include "gpio.h"
 

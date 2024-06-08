@@ -8,11 +8,9 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_CKP_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_CKP_H_
 
-#include "config_gpio.h"
+#include "common.h"
 #include "time.h"
-#include "compiler.h"
-#include "bool.h"
-#include <stdint.h>
+#include "config_gpio.h"
 
 typedef enum {
   CKP_CONFIG_VERSION_V1 = 0,

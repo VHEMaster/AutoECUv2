@@ -8,11 +8,10 @@
 #ifndef SENSORS_VSS_INC_VSS_H_
 #define SENSORS_VSS_INC_VSS_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_vss.h"
-#include <stdint.h>
 
 #define VSS_FREQ_ITEMS_COUNT    2
 #define VSS_FREQ_TIMEOUT_US     (500 * TIME_US_IN_MS)

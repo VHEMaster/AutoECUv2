@@ -8,11 +8,9 @@
 #ifndef MODULES_TIMING_INC_TIMING_H_
 #define MODULES_TIMING_INC_TIMING_H_
 
+#include "common.h"
 #include "versioned_timing.h"
-#include "errors.h"
-#include "bool.h"
 #include "time.h"
-#include <stdint.h>
 
 #include "config_sensors.h"
 

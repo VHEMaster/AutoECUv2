@@ -8,7 +8,7 @@
 #ifndef CONFIG_INC_CONFIG_SENSORS_H_
 #define CONFIG_INC_CONFIG_SENSORS_H_
 
-#include "errors.h"
+#include "common.h"
 #include "ckp.h"
 #include "cmp.h"
 #include "ect.h"

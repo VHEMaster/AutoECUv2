@@ -8,7 +8,7 @@
 #ifndef CONFIG_INC_CONFIG_DEVICES_H_
 #define CONFIG_INC_CONFIG_DEVICES_H_
 
-#include "errors.h"
+#include "common.h"
 #include "pulsedadc.h"
 #include "max31855.h"
 #include "l9966.h"

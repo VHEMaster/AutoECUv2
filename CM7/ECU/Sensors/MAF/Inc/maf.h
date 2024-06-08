@@ -8,11 +8,10 @@
 #ifndef SENSORS_MAF_INC_MAF_H_
 #define SENSORS_MAF_INC_MAF_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_maf.h"
-#include <stdint.h>
 
 #define MAF_FREQ_ITEMS_COUNT    2
 #define MAF_FREQ_TIMEOUT_US     (100 * TIME_US_IN_MS)

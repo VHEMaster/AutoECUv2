@@ -8,11 +8,11 @@
 #ifndef CONFIG_FLASH_INC_FLASH_FSM_H_
 #define CONFIG_FLASH_INC_FLASH_FSM_H_
 
+#include "common.h"
 #include "flash.h"
 #include "crc.h"
 #include "config_devices.h"
 #include "flash_memory_layout.h"
-#include "bool.h"
 
 typedef enum {
   FLASH_CMD_NONE = 0,

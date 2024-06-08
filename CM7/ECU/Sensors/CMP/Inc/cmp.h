@@ -8,12 +8,11 @@
 #ifndef SENSORS_CMP_INC_CMP_H_
 #define SENSORS_CMP_INC_CMP_H_
 
+#include "common.h"
 #include "ckp.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_cmp.h"
-#include <stdint.h>
 
 typedef enum {
   CMP_INSTANCE_1 = 0,

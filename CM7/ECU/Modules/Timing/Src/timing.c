@@ -7,8 +7,6 @@
 
 #include "timing.h"
 #include "timing_internal.h"
-#include "compiler.h"
-#include <string.h>
 
 error_t timing_init(timing_ctx_t *ctx, const timing_init_ctx_t *init_ctx)
 {

@@ -8,9 +8,9 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_TPS_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_TPS_H_
 
+#include "common.h"
+#include "time.h"
 #include "config_gpio.h"
-#include "compiler.h"
-#include <stdint.h>
 
 #define TPS_CONFIG_SIGNALS_MAX    (2)
 

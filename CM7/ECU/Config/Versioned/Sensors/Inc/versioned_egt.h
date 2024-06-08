@@ -8,12 +8,10 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_EGT_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_EGT_H_
 
-#include "config_gpio.h"
+#include "common.h"
 #include "time.h"
-#include "compiler.h"
-#include "bool.h"
+#include "config_gpio.h"
 #include "config_devices.h"
-#include <stdint.h>
 
 typedef enum {
   EGT_CONFIG_VERSION_V1 = 0,

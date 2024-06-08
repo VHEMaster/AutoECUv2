@@ -8,11 +8,9 @@
 #ifndef DRIVERS_SPI_INC_SPI_H_
 #define DRIVERS_SPI_INC_SPI_H_
 
-#include "main.h"
-#include "errors.h"
+#include "common.h"
 #include "gpio.h"
 #include "time.h"
-#include "bool.h"
 
 #define SPI_TIMEOUT_DEFAULT_US    (10u * TIME_US_IN_MS)
 #define SPI_DMA_THR_MIN           (8u)

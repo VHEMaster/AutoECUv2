@@ -8,9 +8,7 @@
 #ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_TIMING_H_
 #define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_TIMING_H_
 
-#include "compiler.h"
-#include "bool.h"
-#include <stdint.h>
+#include "common.h"
 
 #include "config_sensors.h"
 

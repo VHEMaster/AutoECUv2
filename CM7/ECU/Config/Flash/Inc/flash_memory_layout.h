@@ -8,10 +8,8 @@
 #ifndef CONFIG_ECU_FLASH_INC_ECU_FLASH_MEMORY_LAYOUT_H_
 #define CONFIG_ECU_FLASH_INC_ECU_FLASH_MEMORY_LAYOUT_H_
 
-#include "errors.h"
-#include <stdint.h>
+#include "common.h"
 #include "flash.h"
-#include "bool.h"
 
 #define ECU_FLASH_DIE_SIZE              0x400000
 #define ECU_FLASH_DIE_SECTOR_SIZE       0x1000

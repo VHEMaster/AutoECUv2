@@ -8,9 +8,7 @@
 #ifndef DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_H_
 #define DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_H_
 
-#include <limits.h>
-#include "main.h"
-#include "bool.h"
+#include "common.h"
 #include "time.h"
 #include "gpio.h"
 #include "outputs.h"

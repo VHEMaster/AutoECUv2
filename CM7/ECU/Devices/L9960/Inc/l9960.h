@@ -8,9 +8,8 @@
 #ifndef DRIVERS_L9960_INC_L9960_H_
 #define DRIVERS_L9960_INC_L9960_H_
 
+#include "common.h"
 #include "gpio.h"
-#include "main.h"
-#include "errors.h"
 #include "time.h"
 #include "spi.h"
 

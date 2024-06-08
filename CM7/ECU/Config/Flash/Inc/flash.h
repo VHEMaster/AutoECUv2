@@ -8,10 +8,7 @@
 #ifndef CONFIG_FLASH_INC_FLASH_H_
 #define CONFIG_FLASH_INC_FLASH_H_
 
-#include "errors.h"
-#include "compiler.h"
-#include "bool.h"
-#include <stdint.h>
+#include "common.h"
 
 #define ECU_FLASH_SECTION_HEADER_LENGTH     (sizeof(flash_section_header_t))
 

@@ -8,8 +8,8 @@
 #ifndef CONFIG_INC_CONFIG_QUEUEDPULSES_H_
 #define CONFIG_INC_CONFIG_QUEUEDPULSES_H_
 
+#include "common.h"
 #include "queuedpulses.h"
-#include "errors.h"
 
 #define ECU_QUEUEDPULSES_TIMERS_MAX   4u
 

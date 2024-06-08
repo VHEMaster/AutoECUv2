@@ -8,8 +8,7 @@
 #ifndef DRIVERS_INPUTS_INC_INPUTS_H_
 #define DRIVERS_INPUTS_INC_INPUTS_H_
 
-#include <stdint.h>
-#include "errors.h"
+#include "common.h"
 #include "gpio.h"
 #include "time.h"
 

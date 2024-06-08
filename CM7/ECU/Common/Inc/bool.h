@@ -8,8 +8,6 @@
 #ifndef COMMON_INC_BOOL_H_
 #define COMMON_INC_BOOL_H_
 
-#include <stdint.h>
-
 typedef enum {
   false = 0,
   true

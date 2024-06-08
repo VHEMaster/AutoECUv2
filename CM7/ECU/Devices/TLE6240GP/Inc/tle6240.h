@@ -8,7 +8,7 @@
 #ifndef DRIVERS_TLE6240GP_INC_TLE6240_H_
 #define DRIVERS_TLE6240GP_INC_TLE6240_H_
 
-#include "errors.h"
+#include "common.h"
 #include "gpio.h"
 #include "time.h"
 #include "spi.h"

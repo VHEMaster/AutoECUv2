@@ -8,10 +8,7 @@
 #ifndef CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_
 #define CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_
 
-#include "bool.h"
-#include "errors.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "common.h"
 
 #include "flash.h"
 #include "config_devices.h"

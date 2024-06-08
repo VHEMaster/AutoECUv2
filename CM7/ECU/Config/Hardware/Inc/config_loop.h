@@ -8,7 +8,7 @@
 #ifndef CONFIG_INC_CONFIG_LOOP_H_
 #define CONFIG_INC_CONFIG_LOOP_H_
 
-#include "errors.h"
+#include "common.h"
 #include "time.h"
 
 typedef void (*ecu_loop_cb_t)(void *usrdata);

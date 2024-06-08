@@ -8,11 +8,10 @@
 #ifndef SENSORS_CKP_INC_CKP_H_
 #define SENSORS_CKP_INC_CKP_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_ckp.h"
-#include <stdint.h>
 
 typedef enum {
   CKP_INSTANCE_1 = 0,

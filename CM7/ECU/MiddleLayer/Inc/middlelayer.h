@@ -8,7 +8,7 @@
 #ifndef MIDDLELAYER_INC_MIDDLELAYER_H_
 #define MIDDLELAYER_INC_MIDDLELAYER_H_
 
-#include "main.h"
+#include "common.h"
 
 void middlelayer_ll_init(void);
 void middlelayer_init(void);

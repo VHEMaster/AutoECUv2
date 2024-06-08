@@ -8,8 +8,7 @@
 #ifndef CONFIG_VERSIONED_SOFTWARE_INC_VERSIONED_ID_H_
 #define CONFIG_VERSIONED_SOFTWARE_INC_VERSIONED_ID_H_
 
-#include "compiler.h"
-#include <stdint.h>
+#include "common.h"
 
 typedef enum {
   ECU_CONFIG_DATA_ID_VERSION_V1 = 0,

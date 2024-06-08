@@ -8,13 +8,11 @@
 #ifndef MODULES_ETC_INC_ETC_H_
 #define MODULES_ETC_INC_ETC_H_
 
+#include "common.h"
 #include "versioned_etc.h"
 #include "config_tps.h"
 #include "config_motor.h"
-#include "errors.h"
-#include "bool.h"
 #include "time.h"
-#include <stdint.h>
 
 #define ETC_TPS_TIMEOUT_US                          (200 * TIME_US_IN_MS)
 #define ETC_TPS_DEFAULT_POSITION_SAMPLES            (8)

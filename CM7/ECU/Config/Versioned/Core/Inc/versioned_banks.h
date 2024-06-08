@@ -8,8 +8,7 @@
 #ifndef CONFIG_VERSIONED_CORE_INC_VERSIONED_BANKS_H_
 #define CONFIG_VERSIONED_CORE_INC_VERSIONED_BANKS_H_
 
-#include "compiler.h"
-#include <stdint.h>
+#include "common.h"
 
 typedef enum {
   ECU_CONFIG_BANKS_VERSION_V1 = 0,

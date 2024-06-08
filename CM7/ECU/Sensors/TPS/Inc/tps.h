@@ -8,11 +8,10 @@
 #ifndef SENSORS_TPS_INC_TPS_H_
 #define SENSORS_TPS_INC_TPS_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_tps.h"
-#include <stdint.h>
 
 typedef union {
     uint32_t data;

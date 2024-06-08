@@ -8,11 +8,10 @@
 #ifndef SENSORS_MAP_INC_MAP_H_
 #define SENSORS_MAP_INC_MAP_H_
 
+#include "common.h"
 #include "inputs.h"
-#include "errors.h"
 #include "time.h"
 #include "versioned_map.h"
-#include <stdint.h>
 
 #define MAP_FREQ_ITEMS_COUNT    2
 #define MAP_FREQ_TIMEOUT_US     (100 * TIME_US_IN_MS)
