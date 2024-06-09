@@ -13,7 +13,6 @@
 #include "middlelayer_devices.h"
 #include "middlelayer_sensors.h"
 #include "middlelayer_modules.h"
-#include "middlelayer_core.h"
 #include "config_loop.h"
 #include "config_global.h"
 #include "core.h"
@@ -38,7 +37,6 @@ static void middlelayer_tim_slow_irq(void *)
   middlelayer_devices_loop_slow();
   middlelayer_sensors_loop_slow();
   middlelayer_modules_loop_slow();
-  middlelayer_core_components_loop_slow();
 
   ecu_loop_slow();
 
@@ -58,7 +56,6 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
   middlelayer_devices_loop_fast();
   middlelayer_sensors_loop_fast();
   middlelayer_modules_loop_fast();
-  middlelayer_core_components_loop_fast();
 
   ecu_loop_fast();
 
@@ -80,7 +77,6 @@ void middlelayer_loop(void)
   middlelayer_devices_loop_main();
   middlelayer_sensors_loop_main();
   middlelayer_modules_loop_main();
-  middlelayer_core_components_loop_main();
 
   ecu_loop_main();
 
@@ -106,8 +102,6 @@ void middlelayer_init(void)
   middlelayer_sensors_init();
 
   middlelayer_modules_init();
-
-  middlelayer_core_components_init();
 
   ecu_config_global_init();
 

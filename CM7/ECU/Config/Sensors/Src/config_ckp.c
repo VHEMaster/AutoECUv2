@@ -56,7 +56,7 @@ error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx)
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX || ctx == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
     ckp_ctx->ctx = ctx;
@@ -80,7 +80,7 @@ error_t ecu_sensors_ckp_get_default_config(ecu_sensor_ckp_t instance, ckp_config
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX || config == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 
@@ -97,7 +97,7 @@ error_t ecu_sensors_ckp_configure(ecu_sensor_ckp_t instance, const ckp_config_t 
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX || config == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 
@@ -114,7 +114,7 @@ error_t ecu_sensors_ckp_reset(ecu_sensor_ckp_t instance)
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 
@@ -131,7 +131,7 @@ error_t ecu_sensors_ckp_get_value(ecu_sensor_ckp_t instance, ckp_data_t *data)
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
@@ -149,7 +149,7 @@ error_t ecu_sensors_ckp_get_diag(ecu_sensor_ckp_t instance, ckp_diag_t *diag)
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
@@ -167,7 +167,7 @@ ITCM_FUNC error_t ecu_sensors_ckp_calculate_current_position(ecu_sensor_ckp_t in
   ecu_sensors_ckp_ctx_t *ckp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
@@ -186,7 +186,7 @@ error_t ecu_sensors_ckp_register_cb(ecu_sensor_ckp_t instance, ckp_signal_update
   ecu_sensors_ckp_cb_t *cb;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_CKP_MAX || callback == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CKP_MAX || callback == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 

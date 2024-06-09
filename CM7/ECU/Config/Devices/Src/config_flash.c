@@ -262,7 +262,7 @@ error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
   HAL_StatusTypeDef status = HAL_OK;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLASH_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLASH_MAX || ctx == NULL, err = E_PARAM);
 
     flash_ctx = &ecu_devices_flash_ctx[instance];
     flash_ctx->ctx = ctx;
@@ -294,7 +294,7 @@ error_t ecu_devices_flash_reset(ecu_device_flash_t instance)
   ecu_devices_flash_ctx_t *flash_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLASH_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLASH_MAX, err = E_PARAM);
 
     flash_ctx = &ecu_devices_flash_ctx[instance];
 

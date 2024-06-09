@@ -10,9 +10,10 @@
 
 
 #include "errors.h"
-#include "cylinders.h"
 #include "timing.h"
 #include "etc.h"
+
+#define ECU_MODULE_NONE     (-1)
 
 typedef uint32_t ecu_module_instance_t;
 

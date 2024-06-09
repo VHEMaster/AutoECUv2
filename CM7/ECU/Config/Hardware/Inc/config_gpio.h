@@ -49,7 +49,8 @@ typedef enum {
 }ecu_gpio_input_if_t;
 
 typedef enum {
-  ECU_OUT_PORT1_PIN1 = 0,
+  ECU_OUT_NONE = -1,
+  ECU_OUT_PORT1_PIN1,
   ECU_OUT_PORT1_PIN2,
   ECU_OUT_PORT1_PIN3,
   ECU_OUT_PORT1_PIN4,
@@ -93,7 +94,8 @@ typedef enum {
 }ecu_gpio_output_pin_t;
 
 typedef enum {
-  ECU_IN_PORT1_PIN1 = 0,
+  ECU_IN_NONE = -1,
+  ECU_IN_PORT1_PIN1,
   ECU_IN_PORT1_PIN2,
   ECU_IN_PORT1_PIN3,
   ECU_IN_PORT1_PIN4,
@@ -173,6 +175,7 @@ error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio);
 error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id);
 error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin);
 error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin);
+error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid);
 
 error_t ecu_config_gpio_input_init(void);
 error_t ecu_config_gpio_input_set_usrdata(ecu_gpio_input_pin_t pin, void *usrdata);
@@ -184,6 +187,7 @@ error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpi
 error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id);
 error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin);
 error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin);
+error_t ecu_config_gpio_input_valid(ecu_gpio_input_pin_t pin, bool *valid);
 
 error_t ecu_config_gpio_exti_init(void);
 error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func, void *usrdata);

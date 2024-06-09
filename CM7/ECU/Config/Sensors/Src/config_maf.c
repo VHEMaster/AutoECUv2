@@ -95,7 +95,7 @@ error_t ecu_sensors_maf_init(ecu_sensor_maf_t instance, maf_ctx_t *ctx)
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX || ctx == NULL, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
     maf_ctx->ctx = ctx;
@@ -119,7 +119,7 @@ error_t ecu_sensors_maf_get_default_config(ecu_sensor_maf_t instance, maf_config
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX || config == NULL, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
 
@@ -136,7 +136,7 @@ error_t ecu_sensors_maf_configure(ecu_sensor_maf_t instance, const maf_config_t 
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX || config == NULL, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
 
@@ -153,7 +153,7 @@ error_t ecu_sensors_maf_reset(ecu_sensor_maf_t instance)
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
 
@@ -170,7 +170,7 @@ error_t ecu_sensors_maf_get_value(ecu_sensor_maf_t instance, maf_data_t *data)
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
@@ -188,7 +188,7 @@ error_t ecu_sensors_maf_get_diag(ecu_sensor_maf_t instance, maf_diag_t *diag)
   ecu_sensors_maf_ctx_t *maf_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAF_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     maf_ctx = &ecu_sensors_maf_ctx[instance];

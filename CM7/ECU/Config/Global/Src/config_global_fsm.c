@@ -420,91 +420,6 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
   return err;
 }
 
-static error_t ecu_config_global_fsm_core_component_cfg(ecu_config_global_runtime_ctx_t *ctx)
-{
-  error_t err = E_OK;
-
-  while(true) {
-    err = E_AGAIN;
-
-    switch(ctx->fsm_core_component_cfg) {
-      case ECU_CONFIG_FSM_CORE_COMPONENT_CFG_CONDITION:
-        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_CORE_COMPONENTS_INIT && ctx->process_result == E_AGAIN) {
-          ctx->core_components_initialized = false;
-          ctx->process_core_component_type = 0;
-          ctx->process_instance = 0;
-          ctx->fsm_core_component_cfg = ECU_CONFIG_FSM_CORE_COMPONENT_CFG_DEFINE;
-          err = E_AGAIN;
-          for(int c = 0; c < ctx->core_components_count; c++) {
-            ctx->core_components[c].reset_errcode = err;
-            ctx->core_components[c].config_errcode = err;
-          }
-          continue;
-        } else {
-          err = E_OK;
-        }
-        break;
-      case ECU_CONFIG_FSM_CORE_COMPONENT_CFG_DEFINE:
-        if(ctx->process_core_component_type >= ctx->core_components_count) {
-          ctx->core_components_initialized = true;
-          ctx->fsm_core_component_cfg = ECU_CONFIG_FSM_CORE_COMPONENT_CFG_CONDITION;
-          err = E_OK;
-          ctx->process_result = err;
-        } else {
-          err = E_AGAIN;
-          if(ctx->process_instance >= ctx->core_components[ctx->process_core_component_type].instances_count) {
-            ctx->process_instance = 0;
-            ctx->process_core_component_type++;
-          } else {
-            ctx->fsm_core_component_cfg = ECU_CONFIG_FSM_CORE_COMPONENT_CFG_RESET;
-          }
-          continue;
-        }
-
-        break;
-      case ECU_CONFIG_FSM_CORE_COMPONENT_CFG_RESET:
-        if(ctx->core_components[ctx->process_core_component_type].reset_func != NULL) {
-          err = ctx->core_components[ctx->process_core_component_type].reset_func(ctx->process_instance);
-        } else {
-          err = E_OK;
-        }
-        if(err != E_AGAIN) {
-          if(ctx->core_components[ctx->process_core_component_type].reset_errcode == E_AGAIN ||
-              ctx->core_components[ctx->process_core_component_type].reset_errcode == E_OK) {
-            ctx->core_components[ctx->process_core_component_type].reset_errcode = err;
-          }
-          err = E_AGAIN;
-          ctx->fsm_core_component_cfg = ECU_CONFIG_FSM_CORE_COMPONENT_CFG_CONFIG;
-          continue;
-        }
-        break;
-      case ECU_CONFIG_FSM_CORE_COMPONENT_CFG_CONFIG:
-        if(ctx->core_components[ctx->process_core_component_type].configure_func != NULL) {
-          err = ctx->core_components[ctx->process_core_component_type].configure_func(ctx->process_instance, ctx->core_components[ctx->process_core_component_type].generic.data_ptr +
-              ctx->core_components[ctx->process_core_component_type].generic.data_size * ctx->process_instance);
-        } else {
-          err = E_OK;
-        }
-        if(err != E_AGAIN) {
-          if(ctx->core_components[ctx->process_core_component_type].config_errcode == E_AGAIN ||
-              ctx->core_components[ctx->process_core_component_type].config_errcode == E_OK) {
-            ctx->core_components[ctx->process_core_component_type].config_errcode = err;
-          }
-          err = E_AGAIN;
-          ctx->fsm_core_component_cfg = ECU_CONFIG_FSM_CORE_COMPONENT_CFG_DEFINE;
-          ctx->process_instance++;
-          continue;
-        }
-        break;
-      default:
-        break;
-    }
-    break;
-  }
-
-  return err;
-}
-
 static void config_global_internal_calculate_index_max(ecu_config_global_runtime_ctx_t *ctx)
 {
   switch(ctx->op_type_index) {
@@ -915,9 +830,6 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
         break;
       case ECU_CONFIG_FSM_PROCESS_MODULE_CFG:
         err = ecu_config_global_fsm_module_cfg(ctx);
-        break;
-      case ECU_CONFIG_FSM_PROCESS_CORE_COMPONENT_CFG:
-        err = ecu_config_global_fsm_core_component_cfg(ctx);
         break;
       case ECU_CONFIG_FSM_PROCESS_OPERATION:
         err = ecu_config_global_fsm_operation(ctx);

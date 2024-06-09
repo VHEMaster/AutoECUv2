@@ -8,7 +8,8 @@
 #ifndef CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_
 #define CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_
 
-#include "versioned_sw.h"
+#include "versioned_calibration.h"
+#include "versioned_runtime.h"
 #include "versioned_devices.h"
 #include "versioned_modules.h"
 
@@ -39,20 +40,22 @@ typedef struct {
 }ecu_config_engine_modules_t;
 
 typedef struct {
-    timing_config_t cylinders[ECU_CORE_COMPONENT_CYLINDERS_MAX];
-}ecu_config_engine_core_components_t;
+    ecu_config_data_identification_t id;
+    ecu_cylinders_config_t cylinders;
+
+}ecu_config_engine_calibration_t;
 
 typedef struct {
-    ecu_config_data_identification_t id;
+    ecu_config_corrections_t corrections;
 
-}ecu_config_engine_sw_t;
+}ecu_config_engine_runtime_t;
 
 typedef struct {
     ecu_config_engine_devs_t devs;
     ecu_config_engine_sens_t sens;
     ecu_config_engine_modules_t modules;
-    ecu_config_engine_core_components_t core_components;
-    ecu_config_engine_sw_t sw;
+    ecu_config_engine_calibration_t calibration;
+    ecu_config_engine_runtime_t runtime;
 }ecu_config_global_engine_t;
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_ */

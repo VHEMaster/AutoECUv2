@@ -84,7 +84,7 @@ error_t ecu_devices_stepper_init(ecu_device_stepper_t instance, tle4729_ctx_t *c
   ecu_devices_stepper_ctx_t *stepper_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_STEPPER_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX || ctx == NULL, err = E_PARAM);
 
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
     stepper_ctx->ctx = ctx;
@@ -114,7 +114,7 @@ error_t ecu_devices_stepper_get_default_config(ecu_device_stepper_t instance, tl
   ecu_devices_stepper_ctx_t *stepper_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_STEPPER_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX || config == NULL, err = E_PARAM);
 
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
 
@@ -131,7 +131,7 @@ error_t ecu_devices_stepper_configure(ecu_device_stepper_t instance, const tle47
   ecu_devices_stepper_ctx_t *stepper_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_STEPPER_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX || config == NULL, err = E_PARAM);
 
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
 
@@ -148,7 +148,7 @@ error_t ecu_devices_stepper_reset(ecu_device_stepper_t instance)
   ecu_devices_stepper_ctx_t *stepper_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
 
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
 

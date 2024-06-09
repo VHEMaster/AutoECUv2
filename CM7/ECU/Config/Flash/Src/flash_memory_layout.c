@@ -563,14 +563,6 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .sector_index = 3,
         .uses_full_block = false,
     },
-    {
-        .section_type = FLASH_SECTION_TYPE_CORE_COMPONENT_CYLINDERS,
-        .section_index = ECU_CORE_COMPONENT_CYLINDERS_1,
-        .section_length = ECU_FLASH_SECTOR_SIZE,
-        .block_index = 16,
-        .sector_index = 0,
-        .uses_full_block = false,
-    },
 };
 
 static uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};

@@ -15,8 +15,8 @@
 
 #include "versioned_devices.h"
 #include "versioned_modules.h"
-#include "versioned_sw.h"
-#include "versioned_core.h"
+#include "versioned_calibration.h"
+#include "versioned_runtime.h"
 #include "config_engine.h"
 
 static ALIGNED_CACHE BUFFER_DMA ecu_config_global_engine_t ecu_config_global_engine = {0};
@@ -358,35 +358,12 @@ static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TY
     }, //ECU_CONFIG_MODULE_TYPE_ETC
 };
 
-static ecu_config_device_ctx_t ecu_config_global_core_component_ctx[ECU_CONFIG_CORE_COMPONENT_TYPE_ALL] = {
-    {
-        .device_type = ECU_CORE_COMPONENT_TYPE_CYLINDERS,
-        .instances_count = ECU_CORE_COMPONENT_CYLINDERS_MAX,
-        .configure_func = (ecu_config_configure_func_t)ecu_core_component_cylinders_configure,
-        .reset_func = (ecu_config_reset_func_t)ecu_core_component_cylinders_reset,
-        .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_CORE_COMPONENT_CYLINDERS,
-            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_core_component_cylinders_get_default_config,
-            .data_ptr = &ecu_config_global_engine.core_components.cylinders[0],
-            .data_size = sizeof(ecu_config_global_engine.core_components.cylinders[0]),
-            .versions_count = CYLINDERS_CONFIG_VERSION_MAX,
-            .versions = {
-                {
-                    .version = CYLINDERS_CONFIG_VERSION_V1,
-                    .size = sizeof(ecu_cylinders_config_v1_t),
-                    .translate_func = NULL,
-                }
-            },
-        },
-    }, //ECU_CONFIG_CORE_COMPONENT_TYPE_CYLINDERS
-};
-
 static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL] = {
     {
         .flash_section_type = FLASH_SECTION_TYPE_ID,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
-        .data_ptr = &ecu_config_global_engine.sw.id,
-        .data_size = sizeof(ecu_config_global_engine.sw.id),
+        .data_ptr = &ecu_config_global_engine.calibration.id,
+        .data_size = sizeof(ecu_config_global_engine.calibration.id),
         .versions_count = ECU_CONFIG_DATA_ID_VERSION_MAX,
         .versions = {
             {
@@ -399,7 +376,20 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
-
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_RUNTIME_CORRECTIONS,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
+        .data_ptr = &ecu_config_global_engine.runtime.corrections,
+        .data_size = sizeof(ecu_config_global_engine.runtime.corrections),
+        .versions_count = CORRECTIONS_CONFIG_VERSION_MAX,
+        .versions = {
+            {
+                .version = CORRECTIONS_CONFIG_VERSION_V1,
+                .size = sizeof(ecu_config_corrections_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS
 };
 
 error_t ecu_config_global_init(void)
@@ -428,9 +418,6 @@ error_t ecu_config_global_init(void)
 
     ctx->modules_count = ITEMSOF(ecu_config_global_module_ctx);
     ctx->modules = ecu_config_global_module_ctx;
-
-    ctx->core_components_count = ITEMSOF(ecu_config_global_core_component_ctx);
-    ctx->core_components = ecu_config_global_core_component_ctx;
 
     ctx->calibrations_count = ITEMSOF(ecu_config_global_calibration_ctx);
     ctx->calibrations = ecu_config_global_calibration_ctx;
@@ -485,23 +472,6 @@ error_t ecu_config_global_init(void)
       }
     }
     BREAK_IF(err != E_OK);
-
-    for(int c = 0; c < ctx->core_components_count; c++) {
-      for(int i = 0; i < ctx->core_components[c].instances_count; i++) {
-        err = flash_mem_layout_get_section_info(&section_info, ctx->core_components[c].generic.flash_section_type, i);
-        BREAK_IF(err != E_OK);
-        BREAK_IF_ACTION(ctx->core_components[c].generic.versions_count == 0, err = E_INVALACT);
-        BREAK_IF_ACTION((ctx->core_components[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
-        BREAK_IF_ACTION(ctx->core_components[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
-
-        if(ctx->core_components[c].generic.get_default_cfg_func != NULL) {
-          err = ctx->core_components[c].generic.get_default_cfg_func(i, ctx->core_components[c].generic.data_ptr + ctx->core_components[c].generic.data_size * i);
-        }
-        BREAK_IF(err != E_OK);
-      }
-    }
-    BREAK_IF(err != E_OK);
-
 
     for(int c = 0; c < ctx->calibrations_count; c++) {
       err = flash_mem_layout_get_section_info(&section_info, ctx->calibrations[c].flash_section_type, 0);
@@ -650,30 +620,6 @@ error_t ecu_config_global_modules_initialize(void)
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
       ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULES_INIT;
-      ctx->process_result = E_AGAIN;
-    } else {
-      if(ctx->process_result != E_AGAIN) {
-        err = ctx->process_result;
-        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
-      }
-    }
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_config_global_core_components_initialize(void)
-{
-  error_t err = E_AGAIN;
-  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
-
-  do {
-    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_CORE_COMPONENTS_INIT, err = E_INVALACT);
-
-    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
-      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_CORE_COMPONENTS_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {

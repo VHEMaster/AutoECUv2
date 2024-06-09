@@ -78,7 +78,7 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX || ctx == NULL, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
     timing_ctx->ctx = ctx;
@@ -116,7 +116,7 @@ error_t ecu_modules_timing_get_default_config(ecu_module_timing_t instance, timi
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX || config == NULL, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
 
@@ -133,7 +133,7 @@ error_t ecu_modules_timing_configure(ecu_module_timing_t instance, const timing_
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX || config == NULL, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
 
@@ -150,7 +150,7 @@ error_t ecu_modules_timing_reset(ecu_module_timing_t instance)
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
 
@@ -167,7 +167,7 @@ error_t ecu_modules_timing_get_data(ecu_module_timing_t instance, timing_data_t 
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
@@ -185,7 +185,7 @@ error_t ecu_modules_timing_get_diag(ecu_module_timing_t instance, timing_diag_t 
   ecu_modules_timing_ctx_t *timing_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     timing_ctx = &ecu_modules_timing_ctx[instance];
@@ -204,7 +204,7 @@ error_t ecu_modules_timing_register_cb(ecu_module_timing_t instance, timing_sign
   ecu_modules_timing_cb_t *cb;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_MODULE_TIMING_MAX || callback == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_TIMING_MAX || callback == NULL, err = E_PARAM);
 
     ckp_ctx = &ecu_modules_timing_ctx[instance];
 

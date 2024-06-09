@@ -18,6 +18,8 @@
 #include "l9960.h"
 #include "qspi.h"
 
+#define ECU_DEVICE_NONE     (-1)
+
 typedef uint32_t ecu_device_instance_t;
 
 typedef enum {

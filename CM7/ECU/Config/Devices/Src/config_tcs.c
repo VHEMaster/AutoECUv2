@@ -31,7 +31,7 @@ error_t ecu_devices_tcs_init(ecu_device_tcs_t instance, max31855_ctx_t *ctx)
   ecu_devices_tcs_ctx_t *tcs_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_TCS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_TCS_MAX || ctx == NULL, err = E_PARAM);
 
     tcs_ctx = &ecu_devices_tcs_ctx[instance];
     tcs_ctx->ctx = ctx;
@@ -53,7 +53,7 @@ error_t ecu_devices_tcs_get_data(ecu_device_tcs_t instance, max31855_data_t *dat
   ecu_devices_tcs_ctx_t *tcs_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_TCS_MAX || data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_TCS_MAX || data == NULL, err = E_PARAM);
 
     tcs_ctx = &ecu_devices_tcs_ctx[instance];
 
@@ -71,7 +71,7 @@ error_t ecu_devices_tcs_get_diag(ecu_device_tcs_t instance, max31855_diag_t *dia
   ecu_devices_tcs_ctx_t *tcs_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_TCS_MAX || diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_TCS_MAX || diag == NULL, err = E_PARAM);
 
     tcs_ctx = &ecu_devices_tcs_ctx[instance];
 

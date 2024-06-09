@@ -20,6 +20,8 @@
 #include "vss.h"
 #include "aps.h"
 
+#define ECU_SENSOR_NONE     (-1)
+
 typedef uint32_t ecu_sensor_instance_t;
 
 typedef enum {

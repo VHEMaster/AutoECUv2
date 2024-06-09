@@ -37,7 +37,7 @@ error_t ecu_devices_output_init(ecu_device_output_t instance, tle6240_ctx_t *ctx
   ecu_devices_output_ctx_t *output_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_OUTPUT_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_OUTPUT_MAX || ctx == NULL, err = E_PARAM);
 
     output_ctx = &ecu_devices_output_ctx[instance];
     output_ctx->ctx = ctx;

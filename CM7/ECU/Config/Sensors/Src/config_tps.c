@@ -76,7 +76,7 @@ error_t ecu_sensors_tps_init(ecu_sensor_tps_t instance, tps_ctx_t *ctx)
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX || ctx == NULL, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
     tps_ctx->ctx = ctx;
@@ -102,7 +102,7 @@ error_t ecu_sensors_tps_get_default_config(ecu_sensor_tps_t instance, tps_config
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX || config == NULL, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
 
@@ -119,7 +119,7 @@ error_t ecu_sensors_tps_configure(ecu_sensor_tps_t instance, const tps_config_t 
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX || config == NULL, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
 
@@ -136,7 +136,7 @@ error_t ecu_sensors_tps_reset(ecu_sensor_tps_t instance)
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
 
@@ -153,7 +153,7 @@ error_t ecu_sensors_tps_get_value(ecu_sensor_tps_t instance, tps_data_t *data)
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
@@ -171,7 +171,7 @@ error_t ecu_sensors_tps_get_diag(ecu_sensor_tps_t instance, tps_diag_t *diag)
   ecu_sensors_tps_ctx_t *tps_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_TPS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     tps_ctx = &ecu_sensors_tps_ctx[instance];

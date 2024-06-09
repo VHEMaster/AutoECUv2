@@ -1141,10 +1141,8 @@ error_t ecu_config_gpio_output_set_mode(ecu_gpio_output_pin_t pin, ecu_gpio_outp
   bool valid = false;
 
   do {
-    if(pin >= ECU_OUT_MAX || type >= ECU_GPIO_TYPE_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(type >= ECU_GPIO_TYPE_MAX, err = E_PARAM);
 
     if(type == ECU_GPIO_TYPE_DIRECT) {
       valid = gpio_valid(&ecu_gpio_setup.outputs[pin].pin);
@@ -1193,10 +1191,8 @@ error_t ecu_config_gpio_output_pwm_configure(ecu_gpio_output_pin_t pin, ecu_gpio
   uint32_t ch_temp;
 
   do {
-    if(pin >= ECU_OUT_MAX || config == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
     err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
     if(err != E_OK) {
@@ -1316,6 +1312,8 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_value(ecu_gpio_output_pin_t pin
   ecu_gpio_output_t *output;
 
   do {
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+
     err = ecu_config_gpio_output_has_pwm_support(pin, &valid);
     if(err != E_OK) {
       break;
@@ -1374,10 +1372,8 @@ error_t ecu_config_gpio_output_has_pwm_support(ecu_gpio_output_pin_t pin, bool *
   TIM_HandleTypeDef *htim;
 
   do {
-    if(pin >= ECU_OUT_MAX || support == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(support == NULL, err = E_PARAM);
 
     htim = ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[pin].if_id].htim;
     if(htim == NULL) {
@@ -1398,6 +1394,8 @@ error_t ecu_config_gpio_input_set_mode(ecu_gpio_input_pin_t pin, ecu_gpio_input_
   bool valid = false;
 
   do {
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
+
     err = ecu_config_gpio_input_has_mode_support(pin, mode, &valid);
     if(err != E_OK) {
       break;
@@ -1464,6 +1462,8 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
   uint32_t tim_channel;
 
   do {
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
+
     input = &ecu_gpio_setup.inputs[pin];
 
     if(input->current_mode == ECU_GPIO_INPUT_TYPE_CAPTURE && input->htim != NULL) {
@@ -1552,10 +1552,9 @@ error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpi
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_IN_MAX || support == NULL || mode >= ECU_GPIO_INPUT_TYPE_MAX || mode == 0) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(support == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(mode == 0 || mode >= ECU_GPIO_INPUT_TYPE_MAX, err = E_PARAM);
 
     if((ecu_gpio_setup.inputs[pin].supported_modes & mode) == mode) {
       *support = true;
@@ -1573,10 +1572,8 @@ error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio)
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_OUT_MAX || gpio == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(gpio == NULL, err = E_PARAM);
 
     *gpio = ecu_gpio_setup.outputs[pin].pin;
 
@@ -1590,10 +1587,8 @@ error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_OUT_MAX || id == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(id == NULL, err = E_PARAM);
 
     *id = ecu_gpio_setup.outputs[pin].output_id;
 
@@ -1607,10 +1602,8 @@ error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id)
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_IN_MAX || id == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(id == NULL, err = E_PARAM);
 
     *id = ecu_gpio_setup.inputs[pin].input_id;
 
@@ -1624,10 +1617,7 @@ error_t ecu_config_gpio_input_set_usrdata(ecu_gpio_input_pin_t pin, void *usrdat
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_IN_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
 
     ecu_gpio_setup.inputs[pin].usrdata = usrdata;
 
@@ -1641,10 +1631,7 @@ error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gp
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_IN_MAX) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
 
     ecu_gpio_setup.inputs[pin].irq_cb = callback;
 
@@ -1658,10 +1645,8 @@ error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
   error_t err = E_OK;
 
   do {
-    if(pin >= ECU_IN_MAX || gpio == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(gpio == NULL, err = E_PARAM);
 
     *gpio = ecu_gpio_setup.inputs[pin].pin;
 
@@ -1718,7 +1703,7 @@ error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
   ecu_gpio_output_t *pin_ctx;
 
   do {
-    BREAK_IF_ACTION(pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
@@ -1743,7 +1728,7 @@ error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
   ecu_gpio_output_t *pin_ctx;
 
   do {
-    BREAK_IF_ACTION(pin >= ECU_OUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
@@ -1761,6 +1746,24 @@ error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
   return err;
 }
 
+error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(valid == NULL, err = E_PARAM);
+
+    if(pin > ECU_OUT_NONE && pin < ECU_OUT_MAX) {
+      *valid = true;
+    } else {
+      *valid = false;
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
 {
   error_t err = E_OK;
@@ -1768,7 +1771,7 @@ error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
   ecu_gpio_input_t *pin_ctx;
 
   do {
-    BREAK_IF_ACTION(pin >= ECU_IN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
@@ -1793,7 +1796,7 @@ error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
   ecu_gpio_input_t *pin_ctx;
 
   do {
-    BREAK_IF_ACTION(pin >= ECU_IN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(pin <= ECU_IN_NONE || pin >= ECU_IN_MAX, err = E_PARAM);
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
@@ -1805,6 +1808,24 @@ error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
       err = E_OK;
     }
     ExitCritical(prim);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_gpio_input_valid(ecu_gpio_input_pin_t pin, bool *valid)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(valid == NULL, err = E_PARAM);
+
+    if(pin > ECU_IN_NONE && pin < ECU_IN_MAX) {
+      *valid = true;
+    } else {
+      *valid = false;
+    }
 
   } while(0);
 
