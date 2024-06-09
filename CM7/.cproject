@@ -63,6 +63,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
@@ -191,6 +192,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>

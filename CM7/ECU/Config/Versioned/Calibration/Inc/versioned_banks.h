@@ -107,6 +107,11 @@ typedef struct {
     ecu_module_etc_t module_etc[ECU_CONFIG_BANKS_ETC_MAX];
     ecu_module_vvt_t module_vvt[ECU_CONFIG_BANKS_VVT_MAX];
 
+}ecu_config_bank_t;
+
+typedef struct {
+    ecu_config_bank_t banks[ECU_BANK_MAX];
+
     uint32_t align ALIGNED_CACHE;
 }ecu_config_banks_v1_t ALIGNED_CACHE;
 

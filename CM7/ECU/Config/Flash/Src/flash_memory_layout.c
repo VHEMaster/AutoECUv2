@@ -595,6 +595,20 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .sector_index = 11,
         .uses_full_block = false,
     },
+    {
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_CYLINDERS,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 0,
+        .sector_index = 16,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_BANKS,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 1,
+        .sector_index = 16,
+        .uses_full_block = false,
+    },
 };
 
 static uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};

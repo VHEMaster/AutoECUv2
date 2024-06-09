@@ -42,7 +42,8 @@ typedef struct {
 
 typedef struct {
     ecu_config_data_identification_t id;
-    ecu_cylinders_config_t cylinders;
+    ecu_config_cylinders_t cylinders;
+    ecu_config_banks_t banks;
 
 }ecu_config_engine_calibration_t;
 

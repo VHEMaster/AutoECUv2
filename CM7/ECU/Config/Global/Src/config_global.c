@@ -381,7 +381,7 @@ static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TY
 static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL] = {
     {
         .flash_section_type = FLASH_SECTION_TYPE_ID,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_id_get_default_config,
         .data_ptr = &ecu_config_global_engine.calibration.id,
         .data_size = sizeof(ecu_config_global_engine.calibration.id),
         .versions_count = ECU_CONFIG_DATA_ID_VERSION_MAX,
@@ -393,6 +393,34 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
             }
         },
     }, //ECU_CONFIG_CALIB_TYPE_ID
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_CYLINDERS,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_cylinders_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.cylinders,
+        .data_size = sizeof(ecu_config_global_engine.calibration.cylinders),
+        .versions_count = ECU_CONFIG_CYLINDERS_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_CYLINDERS_VERSION_V1,
+                .size = sizeof(ecu_config_cylinders_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_CYLINDERS
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_BANKS,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_banks_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.banks,
+        .data_size = sizeof(ecu_config_global_engine.calibration.banks),
+        .versions_count = ECU_CONFIG_BANKS_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_BANKS_VERSION_V1,
+                .size = sizeof(ecu_config_banks_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_BANKS
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
