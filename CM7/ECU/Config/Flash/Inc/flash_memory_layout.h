@@ -45,7 +45,7 @@ typedef enum {
 typedef struct {
     flash_section_type_t section_type;
     flash_section_index_t section_index;
-    uint16_t section_length;
+    uint32_t section_length;
     uint16_t block_index;
     uint16_t sector_index;
     bool uses_full_block;

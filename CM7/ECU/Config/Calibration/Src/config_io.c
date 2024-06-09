@@ -13,56 +13,58 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
 
     .global = {
         .sensor_ckp = {
-            ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CKP_PRIMARY
+            ECU_SENSOR_CKP_1, //ECU_CONFIG_IO_CKP_PRIMARY
         },
         .sensor_vss = {
-            ECU_SENSOR_NONE, //ECU_CONFIG_IO_VSS_PRIMARY
+            ECU_SENSOR_VSS_1, //ECU_CONFIG_IO_VSS_PRIMARY
         },
         .sensor_aps = {
-            ECU_SENSOR_NONE, //ECU_CONFIG_IO_APS_ACCELERATOR
+            ECU_SENSOR_APS_1, //ECU_CONFIG_IO_APS_ACCELERATOR
         },
         .common = {
             .sensor_cmp = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_INTAKE
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_EXHAUST
+                ECU_SENSOR_CMP_1, //ECU_CONFIG_IO_CMP_SOHC
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
             },
             .sensor_ect = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_PRIMARY
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_SECONDARY
+                ECU_SENSOR_ECT_1, //ECU_CONFIG_IO_ECT_PRIMARY
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
             },
             .sensor_egt = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_EGT_PRIMARY
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_EGT_PRIMARY
             },
             .sensor_iat = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_INLET
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_THROTTLE
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_MANIFOLD
+                ECU_SENSOR_IAT_2, //ECU_CONFIG_IO_IAT_INLET
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_THROTTLE
+                ECU_SENSOR_IAT_1, //ECU_CONFIG_IO_IAT_MANIFOLD
             },
             .sensor_maf = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAF_PRIMARY
+                ECU_SENSOR_MAF_1, //ECU_CONFIG_IO_MAF_PRIMARY
             },
             .sensor_map = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_INLET
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_THROTTLE
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_MANIFOLD
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
+                ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
+                ECU_SENSOR_MAP_1, //ECU_CONFIG_IO_MAP_MANIFOLD
             },
             .sensor_tps = {
-                ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_TPS_PRIMARY
+                ECU_SENSOR_TPS_1, //ECU_CONFIG_IO_TPS_PRIMARY
             },
 
             .device_stepper = {
-                ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_STEPPER_IDLEVALVE
+                ECU_DEVICE_STEPPER_1, //ECU_CONFIG_IO_STEPPER_IDLEVALVE
             },
             .device_wbls = {
-                ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_WBLS_PRIMARY
+                ECU_DEVICE_WBLS_1, //ECU_CONFIG_IO_WBLS_PRIMARY
             },
 
             .module_etc = {
-                ECU_MODULE_NONE, //ECU_CONFIG_BANKS_ETC_PRIMARY
+                ECU_MODULE_ETC_1, //ECU_CONFIG_IO_ETC_PRIMARY
             },
             .module_vvt = {
-                ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_INTAKE
-                ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_EXHAUST
+                ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_SOHC
+                ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
+                ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
             },
         },
     },
@@ -71,92 +73,96 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
         {
             .common = {
                 .sensor_cmp = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_INTAKE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_EXHAUST
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_SOHC
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
                 },
                 .sensor_ect = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_PRIMARY
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_SECONDARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
                 },
                 .sensor_egt = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_EGT_PRIMARY
+                    ECU_SENSOR_EGT_1, //ECU_CONFIG_IO_EGT_PRIMARY
                 },
                 .sensor_iat = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_INLET
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_THROTTLE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_MANIFOLD
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_INLET
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_THROTTLE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_MANIFOLD
                 },
                 .sensor_maf = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAF_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAF_PRIMARY
                 },
                 .sensor_map = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_INLET
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_THROTTLE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_MANIFOLD
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_MANIFOLD
                 },
                 .sensor_tps = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_TPS_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_TPS_PRIMARY
                 },
 
                 .device_stepper = {
-                    ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_STEPPER_IDLEVALVE
+                    ECU_DEVICE_NONE, //ECU_CONFIG_IO_STEPPER_IDLEVALVE
                 },
                 .device_wbls = {
-                    ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_WBLS_PRIMARY
+                    ECU_DEVICE_NONE, //ECU_CONFIG_IO_WBLS_PRIMARY
                 },
 
                 .module_etc = {
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_ETC_PRIMARY
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_ETC_PRIMARY
                 },
                 .module_vvt = {
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_INTAKE
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_EXHAUST
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_SOHC
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
                 },
             },
         }, //ECU_BANK_1
         {
             .common = {
                 .sensor_cmp = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_INTAKE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_CMP_EXHAUST
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_SOHC
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
                 },
                 .sensor_ect = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_PRIMARY
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_ECT_SECONDARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
                 },
                 .sensor_egt = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_EGT_PRIMARY
+                    ECU_SENSOR_EGT_2, //ECU_CONFIG_IO_EGT_PRIMARY
                 },
                 .sensor_iat = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_INLET
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_THROTTLE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_IAT_MANIFOLD
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_INLET
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_THROTTLE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_IAT_MANIFOLD
                 },
                 .sensor_maf = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAF_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAF_PRIMARY
                 },
                 .sensor_map = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_INLET
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_THROTTLE
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_MAP_MANIFOLD
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_MANIFOLD
                 },
                 .sensor_tps = {
-                    ECU_SENSOR_NONE, //ECU_CONFIG_BANKS_TPS_PRIMARY
+                    ECU_SENSOR_NONE, //ECU_CONFIG_IO_TPS_PRIMARY
                 },
 
                 .device_stepper = {
-                    ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_STEPPER_IDLEVALVE
+                    ECU_DEVICE_NONE, //ECU_CONFIG_IO_STEPPER_IDLEVALVE
                 },
                 .device_wbls = {
-                    ECU_DEVICE_NONE, //ECU_CONFIG_BANKS_WBLS_PRIMARY
+                    ECU_DEVICE_NONE, //ECU_CONFIG_IO_WBLS_PRIMARY
                 },
 
                 .module_etc = {
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_ETC_PRIMARY
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_ETC_PRIMARY
                 },
                 .module_vvt = {
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_INTAKE
-                    ECU_MODULE_NONE, //ECU_CONFIG_BANKS_VVT_EXHAUST
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_SOHC
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
                 },
             },
         }, //ECU_BANK_2

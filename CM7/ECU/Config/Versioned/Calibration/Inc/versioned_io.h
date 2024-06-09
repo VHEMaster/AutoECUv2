@@ -24,8 +24,9 @@ typedef enum {
 }ecu_config_io_ckp_t;
 
 typedef enum {
-  ECU_CONFIG_IO_CMP_INTAKE = 0,
-  ECU_CONFIG_IO_CMP_EXHAUST,
+  ECU_CONFIG_IO_CMP_SOHC = 0,
+  ECU_CONFIG_IO_CMP_DOHC_INTAKE,
+  ECU_CONFIG_IO_CMP_DOHC_EXHAUST,
   ECU_CONFIG_IO_CMP_MAX
 }ecu_config_io_cmp_t;
 
@@ -90,8 +91,9 @@ typedef enum {
 }ecu_config_io_etc_t;
 
 typedef enum {
-  ECU_CONFIG_IO_VVT_INTAKE = 0,
-  ECU_CONFIG_IO_VVT_EXHAUST,
+  ECU_CONFIG_IO_VVT_SOHC = 0,
+  ECU_CONFIG_IO_VVT_DOHC_INTAKE,
+  ECU_CONFIG_IO_VVT_DOHC_EXHAUST,
   ECU_CONFIG_IO_VVT_MAX
 }ecu_config_io_vvt_t;
 

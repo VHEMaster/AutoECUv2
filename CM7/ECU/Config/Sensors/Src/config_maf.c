@@ -65,13 +65,11 @@ static const maf_config_t ecu_sensors_maf_config_default = {
 };
 
 static const bool ecu_sensors_maf_enabled_default[ECU_SENSOR_MAF_MAX] = {
-    false,
-    false
+    true
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_maf_input_pin_default[ECU_SENSOR_MAF_MAX] = {
-    ECU_IN_PORT1_PIN7,
-    ECU_IN_PORT1_PIN8
+    ECU_IN_PORT1_PIN7
 };
 
 static ecu_sensors_maf_ctx_t ecu_sensors_maf_ctx[ECU_SENSOR_MAF_MAX] = {

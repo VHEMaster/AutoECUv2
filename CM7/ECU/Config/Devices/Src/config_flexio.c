@@ -30,7 +30,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO1
+            }, // FLEXIO1 IO1
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -38,7 +38,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO2
+            }, // FLEXIO1 IO2
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -46,7 +46,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO3
+            }, // FLEXIO1 IO3
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -54,7 +54,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO4
+            }, // FLEXIO1 IO4
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -62,7 +62,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO5
+            }, // FLEXIO1 IO5
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -70,7 +70,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO6
+            }, // FLEXIO1 IO6
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -78,7 +78,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO7
+            }, // FLEXIO1 IO7
+            {
+                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
+                .comparator_threshold = L9966_CFG_CSC_CT_1,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
+                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+            }, // FLEXIO1 IO8
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -86,7 +94,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO8
+            }, // FLEXIO1 IO9
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -94,7 +102,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO9
+            }, // FLEXIO1 IO10
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -102,7 +110,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO10
+            }, // FLEXIO1 IO11
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -110,7 +118,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO11
+            }, // FLEXIO1 IO12
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -118,7 +126,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO12
+            }, // FLEXIO1 IO13
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -126,7 +134,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO13
+            }, // FLEXIO1 IO14
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -134,15 +142,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO14
-            {
-                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
-                .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_4,
-                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO15
+            }, // FLEXIO1 IO15
         },
         .switch_route = {
             .aux_even_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
@@ -162,25 +162,25 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH1,
-            }, //SENT1
+            }, // FLEXIO1 SENT1
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH2,
-            }, //SENT2
+            }, // FLEXIO1 SENT2
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH3,
-            }, //SENT3
+            }, // FLEXIO1 SENT3
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH4,
-            }, //SENT4
+            }, // FLEXIO1 SENT4
         },
         .active_discharge_lsf = {
             .en_chx = L9966_CFG_ADLC_EN_DISABLED,
@@ -220,11 +220,11 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     {
                         .sync_pin_enabled = L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED,
                         .init_pc = L9966_CFG_SQNCR_PC_CMD1,
-                    }, //EU1
+                    }, // FLEXIO1 EU1
                     {
                         .sync_pin_enabled = L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED,
-                        .init_pc = L9966_CFG_SQNCR_PC_ENDLOOP,
-                    }, //EU2
+                        .init_pc = L9966_CFG_SQNCR_PC_CMD8,
+                    }, // FLEXIO1 EU2
                 },
                 .sync_copy_cmd_en = L9966_CFG_SQNCR_CONFIG_SCC_ENABLED,
             },
@@ -236,7 +236,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD1
+                }, // FLEXIO1 CMD1
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD3,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -244,7 +244,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD2
+                }, // FLEXIO1 CMD2
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD4,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -252,7 +252,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD3
+                }, // FLEXIO1 CMD3
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD5,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -260,7 +260,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD4
+                }, // FLEXIO1 CMD4
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD6,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -268,7 +268,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD5
+                }, // FLEXIO1 CMD5
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD7,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -276,15 +276,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD6
-                {
-                    .next_pc = L9966_CFG_SQNCR_PC_CMD8,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
-                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
-                    .lpf = 1.0f,
-                    .v_gain = 1.0f,
-                    .v_offset = 0.0f,
-                }, //CMD7
+                }, // FLEXIO1 CMD6
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD9,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -292,7 +284,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD8
+                }, // FLEXIO1 CMD7
+                {
+                    .next_pc = L9966_CFG_SQNCR_PC_CMD8,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_PU_RR2,
+                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_RESISTANCE,
+                    .lpf = 1.0f,
+                    .v_gain = 1.0f,
+                    .v_offset = 0.0f,
+                }, // FLEXIO1 CMD8
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD10,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -300,7 +300,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD9
+                }, // FLEXIO1 CMD9
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD11,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -308,7 +308,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD10
+                }, // FLEXIO1 CMD10
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD12,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -316,7 +316,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD11
+                }, // FLEXIO1 CMD11
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD13,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -324,7 +324,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD12
+                }, // FLEXIO1 CMD12
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD14,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -332,7 +332,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD13
+                }, // FLEXIO1 CMD13
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD15,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -340,7 +340,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD14
+                }, // FLEXIO1 CMD14
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD1,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -348,7 +348,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD15
+                }, // FLEXIO1 CMD15
             }
         },
         .status = {
@@ -361,7 +361,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
       .rrx_switch_threshold_low = { 22.0f, 1350.0f, 12000.0f },
       .rrx_switch_threshold_high = { 1540.0f, 16200.0f, 250000.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
-      .eu_used = { true, false },
+      .eu_used = { true, true },
     },
     {
       .config_data = {
@@ -373,7 +373,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO1
+            }, // FLEXIO2 IO1
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -381,7 +381,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO2
+            }, // FLEXIO2 IO2
+            {
+                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
+                .comparator_threshold = L9966_CFG_CSC_CT_1,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
+                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+            }, // FLEXIO2 IO3
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -389,15 +397,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO3
-            {
-                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
-                .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_4,
-                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO4
+            }, // FLEXIO2 IO4
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -405,7 +405,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO5
+            }, // FLEXIO2 IO5
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -413,7 +413,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO6
+            }, // FLEXIO2 IO6
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -421,7 +421,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO7
+            }, // FLEXIO2 IO7
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -429,7 +429,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO8
+            }, // FLEXIO2 IO8
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -437,7 +437,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_6,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_TRUE,
-            }, // IO9
+            }, // FLEXIO2 IO9
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -445,7 +445,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO10
+            }, // FLEXIO2 IO10
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -453,7 +453,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO11
+            }, // FLEXIO2 IO11
+            {
+                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
+                .comparator_threshold = L9966_CFG_CSC_CT_1,
+                .current_source_value = L9966_CFG_CSC_CSV_4,
+                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
+                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_0,
+                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
+            }, // FLEXIO2 IO12
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -461,7 +469,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO12
+            }, // FLEXIO2 IO13
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -469,7 +477,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO13
+            }, // FLEXIO2 IO14
             {
                 .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
                 .comparator_threshold = L9966_CFG_CSC_CT_1,
@@ -477,15 +485,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
                 .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
                 .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO14
-            {
-                .control_channel_selection = L9966_CFG_CSC_CSS_FORCE0,
-                .comparator_threshold = L9966_CFG_CSC_CT_1,
-                .current_source_value = L9966_CFG_CSC_CSV_4,
-                .csv_dewetting_phase = L9966_CFG_CSC_CSV_DW_CSV,
-                .pu_pd_sel = L9966_CFG_CSC_PU_PD_SEL_5,
-                .control_channel_invert = L9966_CFG_CSC_CCP_INVERT_FALSE,
-            }, // IO15
+            }, // FLEXIO2 IO15
         },
         .switch_route = {
             .aux_even_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
@@ -505,25 +505,25 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH1,
-            }, //SENT1
+            }, // FLEXIO2 SENT1
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH2,
-            }, //SENT2
+            }, // FLEXIO2 SENT2
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH3,
-            }, //SENT3
+            }, // FLEXIO2 SENT3
             {
                 .analog_filter = L9966_CFG_GTSR_AF_FAST,
                 .digital_bypass = L9966_CFG_GTSR_BP_ON,
                 .pullup = L9966_CFG_GTSR_PU_OFF,
                 .sent_gtm_route = L9966_CFG_GTSR_SGR_CH4,
-            }, //SENT4
+            }, // FLEXIO2 SENT4
         },
         .active_discharge_lsf = {
             .en_chx = L9966_CFG_ADLC_EN_DISABLED,
@@ -563,11 +563,11 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     {
                         .sync_pin_enabled = L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED,
                         .init_pc = L9966_CFG_SQNCR_PC_CMD1,
-                    }, //EU1
+                    }, // FLEXIO2 EU1
                     {
                         .sync_pin_enabled = L9966_CFG_SQNCR_CONFIG_SYNC_DISABLED,
-                        .init_pc = L9966_CFG_SQNCR_PC_ENDLOOP,
-                    }, //EU2
+                        .init_pc = L9966_CFG_SQNCR_PC_CMD3,
+                    }, // FLEXIO2 EU2
                 },
                 .sync_copy_cmd_en = L9966_CFG_SQNCR_CONFIG_SCC_ENABLED,
             },
@@ -579,15 +579,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD1
-                {
-                    .next_pc = L9966_CFG_SQNCR_PC_CMD3,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
-                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
-                    .lpf = 1.0f,
-                    .v_gain = 1.0f,
-                    .v_offset = 0.0f,
-                }, //CMD2
+                }, // FLEXIO2 CMD1
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD4,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -595,7 +587,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD3
+                }, // FLEXIO2 CMD2
+                {
+                    .next_pc = L9966_CFG_SQNCR_PC_CMD12,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_PU_RR2,
+                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_RESISTANCE,
+                    .lpf = 1.0f,
+                    .v_gain = 1.0f,
+                    .v_offset = 0.0f,
+                }, // FLEXIO2 CMD3
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD5,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -603,7 +603,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD4
+                }, // FLEXIO2 CMD4
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD6,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -611,7 +611,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD5
+                }, // FLEXIO2 CMD5
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD7,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -619,7 +619,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD6
+                }, // FLEXIO2 CMD6
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD8,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -627,7 +627,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD7
+                }, // FLEXIO2 CMD7
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD9,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -635,7 +635,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD8
+                }, // FLEXIO2 CMD8
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD10,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -643,7 +643,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD9
+                }, // FLEXIO2 CMD9
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD11,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -651,15 +651,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD10
-                {
-                    .next_pc = L9966_CFG_SQNCR_PC_CMD12,
-                    .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
-                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_VOLTAGE,
-                    .lpf = 1.0f,
-                    .v_gain = 1.0f,
-                    .v_offset = 0.0f,
-                }, //CMD11
+                }, // FLEXIO2 CMD10
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD13,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_5V,
@@ -667,7 +659,15 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 1.0f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD12
+                }, // FLEXIO2 CMD11
+                {
+                    .next_pc = L9966_CFG_SQNCR_PC_CMD3,
+                    .pu_div_sel = L9966_CFG_SQNCR_CMD_PU_RR2,
+                    .r_volt_sel = L9966_CFG_SQNCR_CMD_RVM_RESISTANCE,
+                    .lpf = 1.0f,
+                    .v_gain = 1.0f,
+                    .v_offset = 0.0f,
+                }, // FLEXIO2 CMD12
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD14,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -675,7 +675,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD13
+                }, // FLEXIO2 CMD13
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD15,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -683,7 +683,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD14
+                }, // FLEXIO2 CMD14
                 {
                     .next_pc = L9966_CFG_SQNCR_PC_CMD1,
                     .pu_div_sel = L9966_CFG_SQNCR_CMD_DIV_INTERNAL,
@@ -691,7 +691,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
                     .lpf = 0.05f,
                     .v_gain = 1.0f,
                     .v_offset = 0.0f,
-                }, //CMD15
+                }, // FLEXIO2 CMD15
             }
         },
         .status = {
@@ -704,7 +704,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
       .rrx_switch_threshold_low = { 22.0f, 1350.0f, 12000.0f },
       .rrx_switch_threshold_high = { 1540.0f, 16200.0f, 250000.0f },
       .digital_poll_period = L9966_DEFAULT_DIGITAL_POLL_PERIOD,
-      .eu_used = { true, false },
+      .eu_used = { true, true },
     }
 };
 

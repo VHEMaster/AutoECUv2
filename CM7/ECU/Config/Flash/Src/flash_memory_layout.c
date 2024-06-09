@@ -598,16 +598,23 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
     {
         .section_type = FLASH_SECTION_TYPE_CALIBRATION_IO,
         .section_length = ECU_FLASH_SECTOR_SIZE,
-        .block_index = 0,
-        .sector_index = 16,
+        .block_index = 12,
+        .sector_index = 0,
         .uses_full_block = false,
     },
     {
         .section_type = FLASH_SECTION_TYPE_CALIBRATION_CYLINDERS,
         .section_length = ECU_FLASH_SECTOR_SIZE,
-        .block_index = 1,
-        .sector_index = 16,
+        .block_index = 12,
+        .sector_index = 1,
         .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_RUNTIME_CORRECTIONS,
+        .section_length = ECU_FLASH_BLOCK_SIZE_128K,
+        .block_index = 32,
+        .sector_index = 0,
+        .uses_full_block = true,
     },
 };
 

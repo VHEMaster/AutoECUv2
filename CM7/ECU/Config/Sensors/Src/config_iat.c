@@ -55,10 +55,12 @@ static const iat_config_t ecu_sensors_iat_config_default = {
 
 static const bool ecu_sensors_iat_enabled_default[ECU_SENSOR_IAT_MAX] = {
     true,
+    true,
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_iat_input_pin_default[ECU_SENSOR_IAT_MAX] = {
     ECU_IN_PORT2_PIN12,
+    ECU_IN_PORT1_PIN8
 };
 
 static ecu_sensors_iat_ctx_t ecu_sensors_iat_ctx[ECU_SENSOR_IAT_MAX] = {
