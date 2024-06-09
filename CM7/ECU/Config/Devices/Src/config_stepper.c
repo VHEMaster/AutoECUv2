@@ -158,3 +158,122 @@ error_t ecu_devices_stepper_reset(ecu_device_stepper_t instance)
 
   return err;
 }
+
+error_t ecu_devices_stepper_enable(ecu_device_stepper_t instance, bool enabled)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_enable(stepper_ctx->ctx, enabled);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_set_target(ecu_device_stepper_t instance, int32_t position)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_set_target(stepper_ctx->ctx, position);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_get_target(ecu_device_stepper_t instance, int32_t *position)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_get_target(stepper_ctx->ctx, position);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_set_current(ecu_device_stepper_t instance, int32_t position)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_set_current(stepper_ctx->ctx, position);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_get_current(ecu_device_stepper_t instance, int32_t *position)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_get_current(stepper_ctx->ctx, position);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_pos_reset(ecu_device_stepper_t instance, int32_t position)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_pos_reset(stepper_ctx->ctx, position);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_stepper_is_failure(ecu_device_stepper_t instance, bool *failure)
+{
+  error_t err = E_OK;
+  ecu_devices_stepper_ctx_t *stepper_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_STEPPER_MAX, err = E_PARAM);
+
+    stepper_ctx = &ecu_devices_stepper_ctx[instance];
+
+    err = tle4729_is_failure(stepper_ctx->ctx, failure);
+
+  } while(0);
+
+  return err;
+}
