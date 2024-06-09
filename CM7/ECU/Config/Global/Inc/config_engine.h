@@ -42,8 +42,8 @@ typedef struct {
 
 typedef struct {
     ecu_config_data_identification_t id;
+    ecu_config_io_t io;
     ecu_config_cylinders_t cylinders;
-    ecu_config_banks_t banks;
 
 }ecu_config_engine_calibration_t;
 
@@ -59,5 +59,9 @@ typedef struct {
     ecu_config_engine_calibration_t calibration;
     ecu_config_engine_runtime_t runtime;
 }ecu_config_global_engine_t;
+
+error_t ecu_config_global_get_global_engine_config(const ecu_config_global_engine_t **config);
+error_t ecu_config_global_get_engine_calibration_config(const ecu_config_engine_calibration_t **config);
+error_t ecu_config_global_get_engine_runtime_config(ecu_config_engine_runtime_t **config);
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_ */

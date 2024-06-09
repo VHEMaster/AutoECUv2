@@ -9,7 +9,7 @@
 #define CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_CALIBRATION_H_
 
 #include "versioned_id.h"
-#include "versioned_banks.h"
+#include "versioned_io.h"
 #include "versioned_cylinders.h"
 
 #endif /* CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_CALIBRATION_H_ */

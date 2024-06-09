@@ -38,8 +38,10 @@
 #include "config_vvt.h"
 
 #include "config_id.h"
+#include "config_io.h"
 #include "config_cylinders.h"
-#include "config_banks.h"
+
+#include "config_engine.h"
 
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 
@@ -87,8 +89,8 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_CALIB_TYPE_ID,
+  ECU_CONFIG_CALIB_TYPE_IO,
   ECU_CONFIG_CALIB_TYPE_CYLINDERS,
-  ECU_CONFIG_CALIB_TYPE_BANKS,
   ECU_CONFIG_CALIB_TYPE_ALL,
   ECU_CONFIG_CALIB_TYPE_MAX
 }ecu_config_calibration_type_t;
@@ -291,6 +293,7 @@ error_t ecu_config_global_init(void);
 void ecu_config_global_loop_main(void);
 void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
+
 error_t ecu_config_global_components_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
 error_t ecu_config_global_modules_initialize(void);
