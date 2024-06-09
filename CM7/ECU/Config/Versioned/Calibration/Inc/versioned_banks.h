@@ -10,6 +10,8 @@
 
 #include "common.h"
 #include "config_sensors.h"
+#include "config_devices.h"
+#include "config_modules.h"
 
 typedef enum {
   ECU_CONFIG_BANKS_VERSION_V1 = 0,
@@ -68,6 +70,16 @@ typedef enum {
 }ecu_config_banks_aps_t;
 
 typedef enum {
+  ECU_CONFIG_BANKS_STEPPER_IDLEVALVE = 0,
+  ECU_CONFIG_BANKS_STEPPER_MAX
+}ecu_config_banks_stepper_t;
+
+typedef enum {
+  ECU_CONFIG_BANKS_WBLS_PRIMARY = 0,
+  ECU_CONFIG_BANKS_WBLS_MAX
+}ecu_config_banks_wbls_t;
+
+typedef enum {
   ECU_CONFIG_BANKS_ETC_PRIMARY = 0,
   ECU_CONFIG_BANKS_ETC_MAX
 }ecu_config_banks_etc_t;
@@ -82,6 +94,9 @@ typedef struct {
     ecu_sensor_vss_t sensor_tps[ECU_CONFIG_BANKS_TPS_MAX];
     ecu_sensor_vss_t sensor_vss[ECU_CONFIG_BANKS_VSS_MAX];
     ecu_sensor_aps_t sensor_aps[ECU_CONFIG_BANKS_APS_MAX];
+
+    ecu_device_stepper_t device_stepper[ECU_CONFIG_BANKS_STEPPER_MAX];
+    ecu_device_wbls_t device_wbls[ECU_CONFIG_BANKS_WBLS_MAX];
 
     ecu_module_etc_t module_etc[ECU_CONFIG_BANKS_ETC_MAX];
 
