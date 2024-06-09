@@ -14,8 +14,6 @@
 #include "config_sensors.h"
 #include "config_devices.h"
 
-#define ETC_CONFIG_SIGNALS_MAX    (2)
-
 typedef enum {
   ETC_CONFIG_VERSION_V1 = 0,
   ETC_CONFIG_VERSION_MAX

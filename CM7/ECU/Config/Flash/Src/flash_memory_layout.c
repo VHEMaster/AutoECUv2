@@ -563,6 +563,38 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .sector_index = 3,
         .uses_full_block = false,
     },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_VVT,
+        .section_index = ECU_MODULE_VVT_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 8,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_VVT,
+        .section_index = ECU_MODULE_VVT_2,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 9,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_VVT,
+        .section_index = ECU_MODULE_VVT_3,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 10,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_MODULE_VVT,
+        .section_index = ECU_MODULE_VVT_4,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 8,
+        .sector_index = 11,
+        .uses_full_block = false,
+    },
 };
 
 static uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};

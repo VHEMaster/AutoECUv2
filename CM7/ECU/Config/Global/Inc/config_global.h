@@ -34,6 +34,7 @@
 
 #include "config_timing.h"
 #include "config_etc.h"
+#include "config_vvt.h"
 
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 
@@ -68,6 +69,7 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_MODULE_TYPE_TIMING = 0,
   ECU_CONFIG_MODULE_TYPE_ETC,
+  ECU_CONFIG_MODULE_TYPE_VVT,
   ECU_CONFIG_MODULE_TYPE_ALL,
   ECU_CONFIG_MODULE_TYPE_MAX
 }ecu_config_module_type_t;

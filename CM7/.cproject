@@ -59,6 +59,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
@@ -186,6 +187,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>

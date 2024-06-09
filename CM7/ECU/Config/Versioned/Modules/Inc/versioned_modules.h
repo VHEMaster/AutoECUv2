@@ -10,5 +10,6 @@
 
 #include "versioned_timing.h"
 #include "versioned_etc.h"
+#include "versioned_vvt.h"
 
 #endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_MODULES_H_ */

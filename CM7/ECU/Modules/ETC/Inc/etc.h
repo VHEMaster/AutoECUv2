@@ -35,10 +35,10 @@ typedef union {
         bool tps_error : 1;
         bool motor_error : 1;
         bool position_reach_failure : 1;
-        bool pwr_undervoltage;
-        bool pwr_overvoltage;
-        bool hwsc_failed;
-        bool diagoff_failed;
+        bool pwr_undervoltage : 1;
+        bool pwr_overvoltage : 1;
+        bool hwsc_failed : 1;
+        bool diagoff_failed : 1;
     }bits;
 }etc_diag_t;
 

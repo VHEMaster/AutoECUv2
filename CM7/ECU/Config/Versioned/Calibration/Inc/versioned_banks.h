@@ -84,6 +84,12 @@ typedef enum {
   ECU_CONFIG_BANKS_ETC_MAX
 }ecu_config_banks_etc_t;
 
+typedef enum {
+  ECU_CONFIG_BANKS_VVT_INTAKE = 0,
+  ECU_CONFIG_BANKS_VVT_EXHAUST,
+  ECU_CONFIG_BANKS_VVT_MAX
+}ecu_config_banks_vvt_t;
+
 typedef struct {
     ecu_sensor_cmp_t sensor_cmp[ECU_CONFIG_BANKS_CMP_MAX];
     ecu_sensor_ect_t sensor_ect[ECU_CONFIG_BANKS_ECT_MAX];
@@ -99,6 +105,7 @@ typedef struct {
     ecu_device_wbls_t device_wbls[ECU_CONFIG_BANKS_WBLS_MAX];
 
     ecu_module_etc_t module_etc[ECU_CONFIG_BANKS_ETC_MAX];
+    ecu_module_vvt_t module_vvt[ECU_CONFIG_BANKS_VVT_MAX];
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_banks_v1_t ALIGNED_CACHE;

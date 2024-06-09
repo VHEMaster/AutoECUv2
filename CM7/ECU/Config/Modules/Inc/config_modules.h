@@ -12,6 +12,7 @@
 #include "errors.h"
 #include "timing.h"
 #include "etc.h"
+#include "vvt.h"
 
 #define ECU_MODULE_NONE     (-1)
 
@@ -20,6 +21,7 @@ typedef uint32_t ecu_module_instance_t;
 typedef enum {
   ECU_MODULE_TYPE_TIMING = 0,
   ECU_MODULE_TYPE_ETC,
+  ECU_MODULE_TYPE_VVT,
   ECU_MODULE_TYPE_MAX
 }ecu_module_type_t;
 
@@ -36,6 +38,14 @@ typedef enum {
   ECU_MODULE_ETC_MAX
 }ecu_module_etc_t;
 
+typedef enum {
+  ECU_MODULE_VVT_1 = 0,
+  ECU_MODULE_VVT_2,
+  ECU_MODULE_VVT_3,
+  ECU_MODULE_VVT_4,
+  ECU_MODULE_VVT_MAX
+}ecu_module_vvt_t;
+
 error_t ecu_modules_init(void);
 void ecu_modules_loop_main(void);
 void ecu_modules_loop_slow(void);
@@ -46,5 +56,6 @@ error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_in
 
 error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx);
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx);
+error_t ecu_modules_get_vvt_ctx(ecu_module_vvt_t instance, vvt_ctx_t **ctx);
 
 #endif /* CONFIG_MODULES_INC_CONFIG_MODULES_H_ */

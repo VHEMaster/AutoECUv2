@@ -10,6 +10,7 @@
 
 #include "config_timing.h"
 #include "config_etc.h"
+#include "config_vvt.h"
 
 #include "compiler.h"
 
@@ -59,6 +60,18 @@ void middlelayer_modules_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_modules_set_module_initialized(ECU_MODULE_TYPE_ETC, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_MODULE_VVT_MAX; i++) {
+      err = ecu_modules_get_module_ctx(ECU_MODULE_TYPE_VVT, i, &module_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_modules_vvt_init(i, (vvt_ctx_t *)module_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_modules_set_module_initialized(ECU_MODULE_TYPE_VVT, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

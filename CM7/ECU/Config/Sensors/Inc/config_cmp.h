@@ -11,7 +11,7 @@
 #include "config_sensors.h"
 #include "cmp.h"
 
-#define ECU_SENSORS_CMP_CALLBACKS_MAX   8
+#define ECU_SENSORS_CMP_CALLBACKS_MAX   16
 
 error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx);
 error_t ecu_sensors_cmp_get_default_config(ecu_sensor_cmp_t instance, cmp_config_t *config);

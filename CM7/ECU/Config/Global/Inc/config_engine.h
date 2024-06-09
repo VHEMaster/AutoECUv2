@@ -37,6 +37,7 @@ typedef struct {
 typedef struct {
     timing_config_t timing[ECU_MODULE_TIMING_MAX];
     etc_config_t etc[ECU_MODULE_ETC_MAX];
+    vvt_config_t vvt[ECU_MODULE_VVT_MAX];
 }ecu_config_engine_modules_t;
 
 typedef struct {
