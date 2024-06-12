@@ -98,6 +98,11 @@ typedef enum {
 }ecu_config_io_vvt_t;
 
 typedef struct {
+
+
+}ecu_config_io_misc_t;
+
+typedef struct {
     ecu_sensor_cmp_t sensor_cmp[ECU_CONFIG_IO_CMP_MAX];
     ecu_sensor_ect_t sensor_ect[ECU_CONFIG_IO_ECT_MAX];
     ecu_sensor_ect_t sensor_egt[ECU_CONFIG_IO_EGT_MAX];
@@ -128,8 +133,12 @@ typedef struct {
 }ecu_config_io_bank_t;
 
 typedef struct {
+    ecu_config_io_misc_t misc;
+
     ecu_config_io_global_t global;
     ecu_config_io_bank_t banks[ECU_BANK_MAX];
+
+
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_io_v1_t ALIGNED_CACHE;

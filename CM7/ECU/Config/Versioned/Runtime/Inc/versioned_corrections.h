@@ -16,15 +16,15 @@ typedef enum {
 }ecu_config_corrections_versions_t;
 
 typedef struct {
-
+    uint32_t dummy;
 }ecu_config_corrections_global_t;
 
 typedef struct {
-
+    uint32_t dummy;
 }ecu_config_corrections_bank_t;
 
 typedef struct {
-
+    uint32_t dummy;
 }ecu_config_corrections_cylinder_t;
 
 typedef struct {

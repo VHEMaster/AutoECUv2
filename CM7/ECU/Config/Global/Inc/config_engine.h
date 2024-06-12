@@ -60,6 +60,10 @@ typedef struct {
     ecu_config_engine_runtime_t runtime;
 }ecu_config_global_engine_t;
 
+typedef struct {
+    ecu_config_engine_runtime_t runtime;
+}ecu_config_global_engine_double_t;
+
 error_t ecu_config_global_get_global_engine_config(const ecu_config_global_engine_t **config);
 error_t ecu_config_global_get_engine_calibration_config(const ecu_config_engine_calibration_t **config);
 error_t ecu_config_global_get_engine_runtime_config(ecu_config_engine_runtime_t **config);

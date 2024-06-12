@@ -16,45 +16,29 @@ static const ecu_config_cylinders_t ecu_calibration_cylinders_config_default = {
             .bank = ECU_BANK_1,
             .pos_offset = 360.0f,
 
-            .ignition_advance_offset = 0.0f,
-            .injection_phase_offset = 0.0f,
-            .injection_pulse_gain = 0.0f,
-
-            .out_ignition = ECU_OUT_IGN1,
-            .out_ignition = ECU_OUT_PORT1_PIN9,
+            .out_ignition = { ECU_OUT_IGN1, ECU_OUT_NONE },
+            .out_ignition = { ECU_OUT_PORT1_PIN9, ECU_OUT_NONE },
         }, //CYLINDERS_CY_1
         {
             .bank = ECU_BANK_2,
             .pos_offset = 180.0f,
 
-            .ignition_advance_offset = 0.0f,
-            .injection_phase_offset = 0.0f,
-            .injection_pulse_gain = 0.0f,
-
-            .out_ignition = ECU_OUT_IGN2,
-            .out_ignition = ECU_OUT_PORT1_PIN10,
+            .out_ignition = { ECU_OUT_IGN2, ECU_OUT_NONE },
+            .out_ignition = { ECU_OUT_PORT1_PIN10, ECU_OUT_NONE },
         }, //CYLINDERS_CY_2
         {
             .bank = ECU_BANK_2,
             .pos_offset = 540.0f,
 
-            .ignition_advance_offset = 0.0f,
-            .injection_phase_offset = 0.0f,
-            .injection_pulse_gain = 0.0f,
-
-            .out_ignition = ECU_OUT_IGN3,
-            .out_ignition = ECU_OUT_PORT1_PIN11,
+            .out_ignition = { ECU_OUT_IGN3, ECU_OUT_NONE },
+            .out_ignition = { ECU_OUT_PORT1_PIN11, ECU_OUT_NONE },
         }, //CYLINDERS_CY_3
         {
             .bank = ECU_BANK_1,
             .pos_offset = 0.0f,
 
-            .ignition_advance_offset = 0.0f,
-            .injection_phase_offset = 0.0f,
-            .injection_pulse_gain = 0.0f,
-
-            .out_ignition = ECU_OUT_IGN4,
-            .out_ignition = ECU_OUT_PORT1_PIN12,
+            .out_ignition = { ECU_OUT_IGN4, ECU_OUT_NONE },
+            .out_ignition = { ECU_OUT_PORT1_PIN12, ECU_OUT_NONE },
         }, //CYLINDERS_CY_4
     },
 };
