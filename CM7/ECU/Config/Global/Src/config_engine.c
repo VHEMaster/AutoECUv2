@@ -9,6 +9,7 @@
 #include "config_engine.h"
 
 ALIGNED_CACHE BUFFER_DMA ecu_config_global_engine_t ecu_config_global_engine = {0};
+ALIGNED_CACHE BUFFER_DMA ecu_config_global_engine_double_t ecu_config_global_engine_double = {0};
 
 error_t ecu_config_global_get_global_engine_config(const ecu_config_global_engine_t **config)
 {

@@ -133,6 +133,7 @@ typedef struct {
     flash_section_type_t flash_section_type;
     ecu_config_get_default_cfg_func_t get_default_cfg_func;
     void *data_ptr;
+    void *double_data_ptr;
     uint32_t data_size;
     uint32_t versions_count;
     ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
@@ -144,7 +145,13 @@ typedef struct {
     uint16_t version_current;
     const ecu_config_item_version_t *versions;
     void *data_ptr;
+    void *final_data_ptr;
     uint32_t data_size;
+    uint32_t data_dma_datasize;
+    uint32_t data_dma_limit;
+    uint32_t data_dma_length;
+    uint32_t data_dma_left;
+    uint32_t data_dma_pos;
 }ecu_op_req_ctx_t;
 
 typedef struct {
@@ -203,6 +210,8 @@ typedef enum {
   ECU_CONFIG_FSM_OPERATION_CONDITION = 0,
   ECU_CONFIG_FSM_OPERATION_LOCK,
   ECU_CONFIG_FSM_OPERATION_DEFINE,
+  ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ,
+  ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL,
   ECU_CONFIG_FSM_OPERATION_REQUEST,
   ECU_CONFIG_FSM_OPERATION_TRANSLATE_ACQUIRE,
   ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK,
@@ -254,6 +263,9 @@ typedef struct {
     bool sensors_initialized;
     bool modules_initialized;
     bool core_components_initialized;
+
+    DMA_HandleTypeDef *hdma;
+    error_t dma_errode;
 
     ecu_config_op_t op_request;
     error_t op_req_errcode_internal;

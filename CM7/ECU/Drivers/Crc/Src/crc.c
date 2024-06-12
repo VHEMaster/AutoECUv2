@@ -38,6 +38,15 @@ static void crc_dma_clpt_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
+static void crc_dma_err_cb(DMA_HandleTypeDef *hdma)
+{
+  crc_ctx_t *ctx = &crc_ctx;
+
+  if(ctx->hdma == hdma) {
+    ctx->dma_errcode = E_IO;
+  }
+}
+
 error_t crc_init(void)
 {
   crc_ctx_t *ctx = &crc_ctx;
@@ -73,6 +82,8 @@ error_t crc_init(void)
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, crc_dma_clpt_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ERROR_CB_ID, crc_dma_err_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     err = ecu_loop_register_fast((ecu_loop_cb_t)crc_loop_fast, ctx, 0);

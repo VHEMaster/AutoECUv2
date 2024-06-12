@@ -10,6 +10,7 @@
 #include "crc.h"
 #include "flash.h"
 #include "flash_memory_layout.h"
+#include "config_extern.h"
 #include "config_global.h"
 #include "config_global_fsm.h"
 
@@ -20,6 +21,7 @@
 #include "config_engine.h"
 
 extern ecu_config_global_engine_t ecu_config_global_engine;
+extern ecu_config_global_engine_double_t ecu_config_global_engine_double;
 
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 
@@ -428,6 +430,7 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
         .flash_section_type = FLASH_SECTION_TYPE_RUNTIME_CORRECTIONS,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
         .data_ptr = &ecu_config_global_engine.runtime.corrections,
+        .double_data_ptr = &ecu_config_global_engine_double.runtime.corrections,
         .data_size = sizeof(ecu_config_global_engine.runtime.corrections),
         .versions_count = CORRECTIONS_CONFIG_VERSION_MAX,
         .versions = {
@@ -440,9 +443,28 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
     }, //ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS
 };
 
+static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
+{
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  if(ctx->hdma == hdma) {
+    ctx->dma_errode = E_OK;
+  }
+}
+
+static void ecu_config_dma_err_cb(DMA_HandleTypeDef *hdma)
+{
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  if(ctx->hdma == hdma) {
+    ctx->dma_errode = E_IO;
+  }
+}
+
 error_t ecu_config_global_init(void)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
   const flash_mem_layout_section_info_t *section_info;
 
@@ -550,6 +572,21 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     ctx->op_req_type = ECU_CONFIG_TYPE_MAX;
+
+    ctx->hdma = &hdma_memtomem_dma2_stream2;
+    ctx->hdma->Init.Request = DMA_REQUEST_MEM2MEM;
+    ctx->hdma->Init.Direction = DMA_MEMORY_TO_MEMORY;
+    ctx->hdma->Init.PeriphInc = DMA_PINC_ENABLE;
+    ctx->hdma->Init.MemInc = DMA_MINC_ENABLE;
+    ctx->hdma->Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    ctx->hdma->Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    status = HAL_DMA_Init(ctx->hdma);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, ecu_config_dma_clpt_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ERROR_CB_ID, ecu_config_dma_err_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     ctx->global_ready = true;
   } while(0);

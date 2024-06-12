@@ -471,6 +471,7 @@ static void config_global_internal_calculate_instance_max(ecu_config_global_runt
 static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status;
   const ecu_config_generic_ctx_t *req_ctx;
   uint32_t addr;
 
@@ -581,6 +582,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                 ctx->op_req_ctx.versions = req_ctx->versions;
                 ctx->op_version = ctx->op_req_ctx.version_current;
                 ctx->op_req_ctx.data_ptr = req_ctx->data_ptr;
+                ctx->op_req_ctx.final_data_ptr = req_ctx->double_data_ptr;
                 ctx->op_req_ctx.data_size = req_ctx->data_size;
 
                 ctx->op_req_ctx.data_ptr += req_ctx->data_size * ctx->op_instance;
@@ -591,16 +593,77 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                 continue;
               }
 
-              ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+              if(ctx->op_request == ECU_CONFIG_OP_WRITE) {
+                if(ctx->op_req_ctx.final_data_ptr == NULL) {
+                  ctx->op_req_ctx.final_data_ptr = ctx->op_req_ctx.data_ptr;
+                  ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+                } else {
+                  ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ;
+                  switch(ctx->hdma->Init.MemDataAlignment) {
+                    default:
+                    case DMA_MDATAALIGN_BYTE:
+                      ctx->op_req_ctx.data_dma_datasize = sizeof(uint8_t);
+                      break;
+                    case DMA_MDATAALIGN_HALFWORD:
+                      ctx->op_req_ctx.data_dma_datasize = sizeof(uint16_t);
+                      break;
+                    case DMA_MDATAALIGN_WORD:
+                      ctx->op_req_ctx.data_dma_datasize = sizeof(uint32_t);
+                      break;
+                  }
+                  ctx->op_req_ctx.data_dma_limit = 0x10000 * ctx->op_req_ctx.data_dma_datasize - 0x1000;
+                  ctx->op_req_ctx.data_dma_left = req_ctx->data_size;
+                  ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_left;
+                  ctx->op_req_ctx.data_dma_pos = 0;
+                  if(ctx->op_req_ctx.data_dma_length > ctx->op_req_ctx.data_dma_limit) {
+                    ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_limit;
+                  }
+                }
+              } else {
+                ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+              }
             }
           }
         }
         continue;
+      case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ:
+        ctx->dma_errode = E_AGAIN;
+        CacheClean((const void *)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
+        CacheClean((const void *)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
+        status = HAL_DMA_Start_IT(ctx->hdma, (uint32_t)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos,
+            (uint32_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
+            ctx->op_req_ctx.data_dma_length / ctx->op_req_ctx.data_dma_datasize);
+        if(status == HAL_OK) {
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL:
+        err = ctx->dma_errode;
+        if(err == E_OK) {
+          CacheInvalidate((const void *)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
+
+          ctx->op_req_ctx.data_dma_left -= ctx->op_req_ctx.data_dma_length;
+          ctx->op_req_ctx.data_dma_pos += ctx->op_req_ctx.data_dma_length;
+          ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_left;
+          if(ctx->op_req_ctx.data_dma_length > ctx->op_req_ctx.data_dma_limit) {
+            ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_limit;
+          } else if(ctx->op_req_ctx.data_dma_length == 0) {
+            ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+          } else {
+            ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ;
+          }
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+        }
+        break;
       case ECU_CONFIG_FSM_OPERATION_REQUEST:
         if(ctx->op_request == ECU_CONFIG_OP_READ) {
           err = flash_section_read(ctx->op_req_ctx.flash_section_type, ctx->op_instance, &ctx->op_version, ctx->op_req_ctx.data_ptr, ctx->op_req_ctx.data_size);
         } else if(ctx->op_request == ECU_CONFIG_OP_WRITE) {
-          err = flash_section_write(ctx->op_req_ctx.flash_section_type, ctx->op_instance, ctx->op_version, ctx->op_req_ctx.data_ptr, ctx->op_req_ctx.data_size);
+          err = flash_section_write(ctx->op_req_ctx.flash_section_type, ctx->op_instance, ctx->op_version, ctx->op_req_ctx.final_data_ptr, ctx->op_req_ctx.data_size);
         } else {
           err = E_INVALACT;
         }
