@@ -28,7 +28,9 @@ error_t tle6240_init(tle6240_ctx_t *ctx, const tle6240_init_ctx_t *init_ctx)
     memset(ctx, 0u, sizeof(tle6240_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(tle6240_init_ctx_t));
     ctx->init.spi_slave->usrdata = ctx;
-    ctx->poll_period = TLE6240_DEFAULT_POLL_PERIOD_US;
+    ctx->poll_period_slow = TLE6240_DEFAULT_SLOW_POLL_PERIOD_US;
+    ctx->poll_period_fast = TLE6240_DEFAULT_FAST_POLL_PERIOD_US;
+    ctx->poll_fast_to_slow = TLE6240_DEFAULT_FAST_TO_SLOW_SLEW_US;
     ctx->process_fsm = TLE6240_PROCESS_RESET;
 
     for(int i = 0; i < ITEMSOF(ctx->init.input_pins); i++) {
@@ -137,21 +139,6 @@ error_t tle6240_diagnostics(tle6240_ctx_t *ctx, tle6240_diag_t *diag)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     memcpy(diag, &ctx->diag, sizeof(tle6240_diag_t));
-
-  } while(0);
-
-  return err;
-}
-
-error_t tle6240_set_poll_period(tle6240_ctx_t *ctx, time_delta_us_t period)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-
-    ctx->poll_period = period;
 
   } while(0);
 

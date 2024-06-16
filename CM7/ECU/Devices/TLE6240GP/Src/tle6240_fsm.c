@@ -14,6 +14,7 @@ ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
   error_t err;
   time_us_t now;
   uint32_t prim;
+  time_delta_us_t poll_period;
 
   while(true) {
     err = E_OK;
@@ -30,7 +31,17 @@ ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
         break;
       case TLE6240_PROCESS_CONDITION:
         prim = EnterCritical();
-        if(ctx->output_updated || time_diff(now, ctx->poll_last) >= ctx->poll_period) {
+        if(ctx->poll_slow && !ctx->output_updated) {
+          poll_period = ctx->poll_period_slow;
+        } else {
+          poll_period = ctx->poll_period_fast;
+        }
+
+        if(ctx->output_updated || time_diff(now, ctx->poll_last) >= poll_period) {
+          if(ctx->output_updated) {
+            ctx->poll_slow = false;
+            ctx->change_last = now;
+          }
           ctx->output_temp = ctx->output_state;
           ctx->output_updated = false;
           ExitCritical(prim);
@@ -95,7 +106,9 @@ ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
           ctx->diag.comm_status = err;
           ctx->poll_last = now;
           ctx->process_fsm = TLE6240_PROCESS_CONDITION;
-
+          if(!ctx->poll_slow && time_diff(now, ctx->change_last) >= ctx->poll_fast_to_slow) {
+            ctx->poll_slow = true;
+          }
         } else if(err != E_AGAIN) {
           ctx->process_fsm = TLE6240_PROCESS_RESET;
           ctx->diag.comm_status = E_IO;

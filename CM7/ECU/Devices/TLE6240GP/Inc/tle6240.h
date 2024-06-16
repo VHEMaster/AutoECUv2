@@ -13,7 +13,10 @@
 #include "time.h"
 #include "spi.h"
 
-#define TLE6240_DEFAULT_POLL_PERIOD_US      (10 * TIME_US_IN_MS)
+#define TLE6240_DEFAULT_SLOW_POLL_PERIOD_US     (10 * TIME_US_IN_MS)
+#define TLE6240_DEFAULT_FAST_POLL_PERIOD_US     (1 * TIME_US_IN_MS)
+#define TLE6240_DEFAULT_FAST_TO_SLOW_SLEW_US    (5 * TIME_US_IN_MS)
+
 #define TLE6240_SPI_MODE                    (SPI_MODE_1)
 #define TLE6240_ECHO_INCREMENT_VALUE        (0xF15A)
 
@@ -88,8 +91,12 @@ typedef struct {
     uint16_t output_temp;
     uint16_t output_state;
     bool output_updated;
-    time_delta_us_t poll_period;
+    time_delta_us_t poll_period_slow;
+    time_delta_us_t poll_period_fast;
+    time_delta_us_t poll_fast_to_slow;
     time_us_t poll_last;
+    time_us_t change_last;
+    bool poll_slow;
     bool spi_busy;
     bool ready;
     uint16_t echo_value;
@@ -112,7 +119,6 @@ error_t tle6240_write_all(tle6240_ctx_t *ctx, uint16_t value);
 
 error_t tle6240_update(tle6240_ctx_t *ctx);
 error_t tle6240_diagnostics(tle6240_ctx_t *ctx, tle6240_diag_t *diag);
-error_t tle6240_set_poll_period(tle6240_ctx_t *ctx, time_delta_us_t period);
 
 error_t tle6240_ch_write(tle6240_ctx_t *ctx, uint8_t channel, bool value);
 error_t tle6240_ch_read(tle6240_ctx_t *ctx, uint8_t channel, bool *value);
