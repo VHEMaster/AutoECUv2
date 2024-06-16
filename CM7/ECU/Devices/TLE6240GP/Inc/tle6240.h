@@ -99,6 +99,7 @@ typedef struct {
     bool poll_slow;
     bool spi_busy;
     bool ready;
+    bool half_initial_first;
     uint16_t echo_value;
 
     uint8_t ctrl;
