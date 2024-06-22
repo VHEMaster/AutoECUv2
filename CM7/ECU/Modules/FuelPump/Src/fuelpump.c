@@ -146,6 +146,7 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
   bool input_bool;
   time_us_t now;
   bool ignition_trig;
+  bool init_trig;
   time_us_t ckp_last_time;
   time_delta_us_t control_timeout;
 
@@ -157,10 +158,13 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
       ignition_trig = ctx->data.ignition_on;
       ignition_trig |= ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON;
 
+      init_trig = ignition_trig;
+      init_trig |= ctx->config.trigger_source != FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT;
+
       while(true) {
         switch(ctx->fsm_state) {
           case FUELPUMP_FSM_INIT:
-            if(ignition_trig) {
+            if(init_trig) {
               ctx->fsm_state_time = now;
               ctx->fsm_state = FUELPUMP_FSM_STARTUP;
               continue;
@@ -169,7 +173,7 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
             }
             break;
           case FUELPUMP_FSM_STARTUP:
-            if(ignition_trig) {
+            if(init_trig) {
               ctx->data.working = true;
               if(time_diff(now, ctx->fsm_state_time) >= ctx->config.prepumping_time) {
                 ctx->fsm_state = FUELPUMP_FSM_PROCESS;
@@ -187,6 +191,7 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
             } else if(ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT) {
               if(ctx->data.ignition_on == false) {
                 ctx->data.working = false;
+                ctx->fsm_state = FUELPUMP_FSM_INIT;
               } else if(ctx->data.ckp_triggered) {
                 ctx->data.working = true;
               } else if(ctx->data.working) {
