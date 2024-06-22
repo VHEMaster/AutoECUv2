@@ -212,7 +212,7 @@ error_t ecu_modules_timing_register_cb(ecu_module_timing_t instance, timing_sign
 
     for(int i = 0; i < ECU_MODULES_TIMING_CALLBACKS_MAX; i++) {
       cb = &ckp_ctx->signal_update_callbacks[i];
-      if(cb->callback == callback || cb->usrdata == usrdata) {
+      if(cb->callback == callback && cb->usrdata == usrdata) {
         err = E_OK;
         break;
       } else if(cb->callback == NULL) {

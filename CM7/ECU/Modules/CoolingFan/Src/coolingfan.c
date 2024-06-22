@@ -153,6 +153,7 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
       ckp_last_time = ctx->ckp_last_time;
       now = time_get_current_us();
 
+      ctx->data.working = false;
       if(ctx->data.emergency_trigger && ctx->data.ignition_on) {
         ctx->data.working = true;
       }
@@ -169,6 +170,8 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
             ctx->data.working = true;
           }
         }
+      } else {
+        ctx->ckp_work_accept = false;
       }
 
       if(ctx->force_pin_locked) {

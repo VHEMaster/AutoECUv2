@@ -194,7 +194,7 @@ error_t ecu_sensors_ckp_register_cb(ecu_sensor_ckp_t instance, ckp_signal_update
 
     for(int i = 0; i < ECU_SENSORS_CKP_CALLBACKS_MAX; i++) {
       cb = &ckp_ctx->signal_update_callbacks[i];
-      if(cb->callback == callback || cb->usrdata == usrdata) {
+      if(cb->callback == callback && cb->usrdata == usrdata) {
         err = E_OK;
         break;
       } else if(cb->callback == NULL) {

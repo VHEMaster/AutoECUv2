@@ -193,7 +193,7 @@ error_t ecu_sensors_cmp_register_cb(ecu_sensor_cmp_t instance, cmp_signal_update
 
     for(int i = 0; i < ECU_SENSORS_CMP_CALLBACKS_MAX; i++) {
       cb = &cmp_ctx->signal_update_callbacks[i];
-      if(cb->callback == callback || cb->usrdata == usrdata) {
+      if(cb->callback == callback && cb->usrdata == usrdata) {
         err = E_OK;
         break;
       } else if(cb->callback == NULL) {
