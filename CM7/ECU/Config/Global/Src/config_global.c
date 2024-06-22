@@ -378,6 +378,46 @@ static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TY
             },
         },
     }, //ECU_CONFIG_MODULE_TYPE_VVT
+    {
+        .device_type = ECU_MODULE_TYPE_FUELPUMP,
+        .instances_count = ECU_MODULE_FUELPUMP_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_modules_fuelpump_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_modules_fuelpump_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_MODULE_FUELPUMP,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_modules_fuelpump_get_default_config,
+            .data_ptr = &ecu_config_global_engine.modules.fuelpump[0],
+            .data_size = sizeof(ecu_config_global_engine.modules.fuelpump[0]),
+            .versions_count = FUELPUMP_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = FUELPUMP_CONFIG_VERSION_V1,
+                    .size = sizeof(fuelpump_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_MODULE_TYPE_FUELPUMP
+    {
+        .device_type = ECU_MODULE_TYPE_COOLINGFAN,
+        .instances_count = ECU_MODULE_COOLINGFAN_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_modules_coolingfan_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_modules_coolingfan_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_MODULE_COOLINGFAN,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_modules_coolingfan_get_default_config,
+            .data_ptr = &ecu_config_global_engine.modules.coolingfan[0],
+            .data_size = sizeof(ecu_config_global_engine.modules.coolingfan[0]),
+            .versions_count = COOLINGFAN_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = COOLINGFAN_CONFIG_VERSION_V1,
+                    .size = sizeof(coolingfan_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_MODULE_TYPE_COOLINGFAN
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL] = {

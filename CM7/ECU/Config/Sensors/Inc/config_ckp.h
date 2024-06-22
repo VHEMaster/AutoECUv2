@@ -11,7 +11,7 @@
 #include "config_sensors.h"
 #include "ckp.h"
 
-#define ECU_SENSORS_CKP_CALLBACKS_MAX   8
+#define ECU_SENSORS_CKP_CALLBACKS_MAX   16
 
 error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx);
 error_t ecu_sensors_ckp_get_default_config(ecu_sensor_ckp_t instance, ckp_config_t *config);

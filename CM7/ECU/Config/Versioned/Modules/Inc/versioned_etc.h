@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_ETC_H_
-#define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_ETC_H_
+#ifndef CONFIG_VERSIONED_MODULES_INC_VERSIONED_ETC_H_
+#define CONFIG_VERSIONED_MODULES_INC_VERSIONED_ETC_H_
 
 #include "common.h"
 
@@ -37,4 +37,4 @@ typedef struct {
 
 typedef etc_config_v1_t etc_config_t;
 
-#endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_ETC_H_ */
+#endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_ETC_H_ */

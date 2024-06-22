@@ -13,8 +13,10 @@
 
 #define ECU_MODULES_MAX (       \
     ECU_MODULE_TIMING_MAX     + \
-    ECU_MODULE_ETC_MAX     + \
-    ECU_MODULE_VVT_MAX)
+    ECU_MODULE_ETC_MAX      + \
+    ECU_MODULE_VVT_MAX      + \
+    ECU_MODULE_FUELPUMP_MAX + \
+    ECU_MODULE_COOLINGFAN_MAX)
 
 typedef enum {
   ECU_MODULE_LOOP_TYPE_MAIN = 0,
@@ -44,6 +46,8 @@ typedef struct {
 static timing_ctx_t ecu_config_timing_ctx[ECU_MODULE_TIMING_MAX] = {0};
 static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX] = {0};
+static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {0};
+static coolingfan_ctx_t ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {0};
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
@@ -65,6 +69,18 @@ static ecu_config_modules_t ecu_config_modules = {
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_VVT_MAX,
         }, //ECU_MODULE_TYPE_VVT
+        {
+            .loop_main = (ecu_module_loop_func_t)NULL,
+            .loop_slow = (ecu_module_loop_func_t)fuelpump_loop_slow,
+            .loop_fast = (ecu_module_loop_func_t)NULL,
+            .instance_max = ECU_MODULE_FUELPUMP_MAX,
+        }, //ECU_MODULE_TYPE_FUELPUMP
+        {
+            .loop_main = (ecu_module_loop_func_t)NULL,
+            .loop_slow = (ecu_module_loop_func_t)coolingfan_loop_slow,
+            .loop_fast = (ecu_module_loop_func_t)NULL,
+            .instance_max = ECU_MODULE_COOLINGFAN_MAX,
+        }, //ECU_MODULE_TYPE_COOLINGFAN
     },
     .modules = {
         {
@@ -101,6 +117,26 @@ static ecu_config_modules_t ecu_config_modules = {
             .type = ECU_MODULE_TYPE_VVT,
             .instance = ECU_MODULE_VVT_4,
             .ctx = &ecu_config_vvt_ctx[ECU_MODULE_VVT_4],
+        },
+        {
+            .type = ECU_MODULE_TYPE_FUELPUMP,
+            .instance = ECU_MODULE_FUELPUMP_1,
+            .ctx = &ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_1],
+        },
+        {
+            .type = ECU_MODULE_TYPE_FUELPUMP,
+            .instance = ECU_MODULE_FUELPUMP_2,
+            .ctx = &ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_2],
+        },
+        {
+            .type = ECU_MODULE_TYPE_COOLINGFAN,
+            .instance = ECU_MODULE_COOLINGFAN_1,
+            .ctx = &ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_1],
+        },
+        {
+            .type = ECU_MODULE_TYPE_COOLINGFAN,
+            .instance = ECU_MODULE_COOLINGFAN_2,
+            .ctx = &ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_2],
         },
     },
 };
@@ -245,4 +281,9 @@ error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx)
 error_t ecu_modules_get_vvt_ctx(ecu_module_vvt_t instance, vvt_ctx_t **ctx)
 {
   return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_VVT, instance, (void**)ctx);
+}
+
+error_t ecu_modules_get_fuelpump_ctx(ecu_module_fuelpump_t instance, fuelpump_ctx_t **ctx)
+{
+  return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_FUELPUMP, instance, (void**)ctx);
 }

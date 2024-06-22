@@ -38,6 +38,8 @@ typedef struct {
     timing_config_t timing[ECU_MODULE_TIMING_MAX];
     etc_config_t etc[ECU_MODULE_ETC_MAX];
     vvt_config_t vvt[ECU_MODULE_VVT_MAX];
+    fuelpump_config_t fuelpump[ECU_MODULE_FUELPUMP_MAX];
+    coolingfan_config_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
 }ecu_config_engine_modules_t;
 
 typedef struct {

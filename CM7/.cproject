@@ -61,6 +61,8 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/FuelPump/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
@@ -79,6 +81,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/ParamSet/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Inputs/Inc"/>
@@ -190,6 +193,8 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/FuelPump/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
@@ -208,6 +213,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/ParamSet/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/MiddleLayer/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Outputs/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Inputs/Inc"/>

@@ -8,7 +8,7 @@
 #ifndef CORE_INC_CORE_H_
 #define CORE_INC_CORE_H_
 
-#include "main.h"
+#include "common.h"
 #include "config_engine.h"
 #include "config_timing.h"
 

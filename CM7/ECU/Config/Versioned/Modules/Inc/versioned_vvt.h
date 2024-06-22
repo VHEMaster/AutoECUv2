@@ -5,8 +5,8 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_SENSORS_INC_VERSIONED_VVT_H_
-#define CONFIG_VERSIONED_SENSORS_INC_VERSIONED_VVT_H_
+#ifndef CONFIG_VERSIONED_MODULES_INC_VERSIONED_VVT_H_
+#define CONFIG_VERSIONED_MODULES_INC_VERSIONED_VVT_H_
 
 #include "common.h"
 
@@ -40,4 +40,4 @@ typedef struct {
 
 typedef vvt_config_v1_t vvt_config_t;
 
-#endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_VVT_H_ */
+#endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_VVT_H_ */

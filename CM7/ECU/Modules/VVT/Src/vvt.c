@@ -104,6 +104,8 @@ void vvt_loop_slow(vvt_ctx_t *ctx)
   if(ctx->ready) {
     if(ctx->configured) {
       (void)err;
+
+      // TODO: implement
     }
   }
 }
@@ -114,6 +116,8 @@ ITCM_FUNC void vvt_cmp_signal_update(vvt_ctx_t *ctx, const cmp_data_t *data, con
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
+
+    // TODO: implement
 
   } while(0);
 }
