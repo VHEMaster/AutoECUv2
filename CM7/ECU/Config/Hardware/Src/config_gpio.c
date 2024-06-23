@@ -470,19 +470,19 @@ static ecu_config_gpio_t ecu_gpio_setup = {
         }, //ECU_IN_PORT1_PIN15
         {
             .if_id = ECU_IN_IF_FLEXIO1,
-            .input_ch_id = 12,
+            .input_ch_id = 15,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT1_V12V
         {
             .if_id = ECU_IN_IF_FLEXIO1,
-            .input_ch_id = 13,
+            .input_ch_id = 16,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT1_VREF
         {
             .if_id = ECU_IN_IF_FLEXIO1,
-            .input_ch_id = 14,
+            .input_ch_id = 17,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT1_VIGN
@@ -579,19 +579,19 @@ static ecu_config_gpio_t ecu_gpio_setup = {
         }, //ECU_IN_PORT2_PIN15
         {
             .if_id = ECU_IN_IF_FLEXIO2,
-            .input_ch_id = 12,
+            .input_ch_id = 15,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT2_V12V
         {
             .if_id = ECU_IN_IF_FLEXIO2,
-            .input_ch_id = 13,
+            .input_ch_id = 16,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT2_VREF
         {
             .if_id = ECU_IN_IF_FLEXIO2,
-            .input_ch_id = 14,
+            .input_ch_id = 17,
             .pin = { .port = NULL, .pin = 0 },
             .supported_modes = ECU_GPIO_INPUT_TYPE_ANALOG,
         }, //ECU_IN_PORT2_VIGN
@@ -806,6 +806,7 @@ static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_c
   l9966_ctx_t *ctx = NULL;
   float l9966_output_value = 0;
   l9966_ctrl_dig_inputs_t l9966_digital_value = 0;
+  input_ch_id_t input_ch_id;
 
   do {
     BREAK_IF_ACTION(value == NULL, err = E_PARAM);
@@ -828,14 +829,19 @@ static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_c
     BREAK_IF(err != E_OK);
     BREAK_IF_ACTION(ctx == NULL, err = E_FAULT);
 
+    input_ch_id = channel->input_ch_id;
+
     switch(ecu_gpio_setup.inputs_if[interface_id].channels[channel_id]->current_mode) {
       case ECU_GPIO_INPUT_TYPE_ANALOG:
-        err = l9966_get_sqncr_output(ctx, channel->input_ch_id, &l9966_output_value);
+        if(input_ch_id >= L9966_CHANNELS) {
+          input_ch_id -= 3;
+        }
+        err = l9966_get_sqncr_output(ctx, input_ch_id, &l9966_output_value);
         *value = roundf(l9966_output_value * INPUTS_ANALOG_MULTIPLIER);
         break;
       case ECU_GPIO_INPUT_TYPE_DIGITAL:
         err = l9966_get_inputs(ctx, &l9966_digital_value);
-        *value = (l9966_digital_value >> channel->input_ch_id) & 1;
+        *value = (l9966_digital_value >> input_ch_id) & 1;
         break;
       default:
         err = E_NOTSUPPORT;
