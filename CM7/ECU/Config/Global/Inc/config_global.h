@@ -309,7 +309,8 @@ void ecu_config_global_loop_main(void);
 void ecu_config_global_loop_slow(void);
 void ecu_config_global_loop_fast(void);
 
-error_t ecu_config_global_components_initialize(void);
+error_t ecu_config_global_flash_initialize(void);
+error_t ecu_config_global_devices_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
 error_t ecu_config_global_modules_initialize(void);
 
