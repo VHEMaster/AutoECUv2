@@ -12,11 +12,26 @@
 #include "config_engine.h"
 #include "config_timing.h"
 
+typedef enum {
+  ECU_CORE_INIT_FSM_INITIAL = 0,
+  ECU_CORE_INIT_FSM_INIT_FLASH,
+  ECU_CORE_INIT_FSM_READ_FLASH,
+  ECU_CORE_INIT_FSM_INIT_DEVS,
+  ECU_CORE_INIT_FSM_INIT_SENS,
+  ECU_CORE_INIT_FSM_INIT_MODULES,
+  ECU_CORE_INIT_FSM_COMPLETED,
+
+}ecu_core_init_fsm_t;
+
 typedef struct {
     const ecu_config_global_engine_t *engine_config;
     const ecu_config_engine_calibration_t *calibration;
     ecu_config_engine_runtime_t *runtime_config;
 
+    bool core_init_request;
+    error_t core_init_errcode;
+
+    ecu_core_init_fsm_t fsm_core_init;
 }ecu_core_ctx_t;
 
 void core_init(void);
