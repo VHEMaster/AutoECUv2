@@ -12,6 +12,7 @@
 
 #include "config_gpio.h"
 #include "config_sensors.h"
+#include "config_modules_types.h"
 
 typedef enum {
   FUELPUMP_CONFIG_VERSION_V1 = 0,
@@ -40,6 +41,7 @@ typedef struct {
     fuelpump_config_trigger_t trigger_source;
 
     ecu_sensor_ckp_t sensor_ckp;
+    ecu_module_ignition_t module_ignition;
     fuelpump_config_ckp_trigger_t ckp_trigger;
 
     ecu_gpio_output_pin_t output_drive_pin;

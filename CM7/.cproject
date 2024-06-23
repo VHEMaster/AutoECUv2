@@ -46,6 +46,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1810874428" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/Ignition/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>
@@ -178,6 +179,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.997834508" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/Ignition/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>

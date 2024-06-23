@@ -38,6 +38,7 @@
 #include "config_vvt.h"
 #include "config_fuelpump.h"
 #include "config_coolingfan.h"
+#include "config_ignition.h"
 
 #include "config_id.h"
 #include "config_io.h"
@@ -81,6 +82,7 @@ typedef enum {
   ECU_CONFIG_MODULE_TYPE_VVT,
   ECU_CONFIG_MODULE_TYPE_FUELPUMP,
   ECU_CONFIG_MODULE_TYPE_COOLINGFAN,
+  ECU_CONFIG_MODULE_TYPE_IGNITION,
   ECU_CONFIG_MODULE_TYPE_ALL,
   ECU_CONFIG_MODULE_TYPE_MAX
 }ecu_config_module_type_t;

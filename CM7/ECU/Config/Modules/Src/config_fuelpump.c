@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "config_fuelpump.h"
+#include "config_ignition.h"
 #include "config_ckp.h"
 #include "config_extern.h"
 #include "compiler.h"
@@ -18,10 +19,12 @@ typedef struct {
 }ecu_modules_fuelpump_ctx_t;
 
 static void ecu_modules_fuelpump_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
+static void ecu_modules_fuelpump_ignition_signal_update_cb(void *usrdata, bool ignition_active);
 
 static const fuelpump_config_t ecu_modules_fuelpump_config_default = {
     .trigger_source = FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT,
     .sensor_ckp = ECU_SENSOR_CKP_1,
+    .module_ignition = ECU_MODULE_IGNITION_1,
     .ckp_trigger = FUELPUMP_CONFIG_CKP_TRIGGER_DETECTED,
 
     .control_voltage_threshold_off = 1.0f,
@@ -118,6 +121,9 @@ error_t ecu_modules_fuelpump_configure(ecu_module_fuelpump_t instance, const fue
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
     err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_fuelpump_ckp_signal_update_cb, fuelpump_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_ignition_register_cb(config->module_ignition, ecu_modules_fuelpump_ignition_signal_update_cb, fuelpump_ctx);
     BREAK_IF(err != E_OK);
 
     err = fuelpump_configure(fuelpump_ctx->ctx, config);
@@ -242,6 +248,21 @@ ITCM_FUNC static void ecu_modules_fuelpump_ckp_signal_update_cb(void *usrdata, c
     BREAK_IF(ctx == NULL);
 
     fuelpump_ckp_signal_update(ctx, data, diag);
+
+  } while(0);
+}
+
+ITCM_FUNC static void ecu_modules_fuelpump_ignition_signal_update_cb(void *usrdata, bool ignition_active)
+{
+  ecu_modules_fuelpump_ctx_t *module_ctx = (ecu_modules_fuelpump_ctx_t *)usrdata;
+  fuelpump_ctx_t *ctx;
+
+  do {
+    BREAK_IF(module_ctx == NULL);
+    ctx = module_ctx->ctx;
+    BREAK_IF(ctx == NULL);
+
+    fuelpump_ignition_update(ctx, ignition_active);
 
   } while(0);
 }
