@@ -21,6 +21,28 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
         .sensor_aps = {
             ECU_SENSOR_APS_1, //ECU_CONFIG_IO_APS_ACCELERATOR
         },
+        .sensor_ots = {
+            ECU_SENSOR_NONE, //ECU_CONFIG_IO_OTS_PRIMARY
+            ECU_SENSOR_NONE, //ECU_CONFIG_IO_OTS_SECONDARY
+        },
+        .sensor_ops = {
+            ECU_SENSOR_NONE, //ECU_CONFIG_IO_OPS_PRIMARY
+            ECU_SENSOR_NONE, //ECU_CONFIG_IO_OPS_SECONDARY
+        },
+
+        .module_fuelpump = {
+            ECU_MODULE_FUELPUMP_1, //ECU_CONFIG_IO_FUELPUMP_PRIMARY
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_FUELPUMP_SECONDARY
+        },
+        .module_coolingfan = {
+            ECU_MODULE_COOLINGFAN_1, //ECU_CONFIG_IO_COOLINGFAN_ONOFF_PRIMARY
+            ECU_MODULE_COOLINGFAN_2, //ECU_CONFIG_IO_COOLINGFAN_ONOFF_SECONDARY
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_COOLINGFAN_VARIABLE_PRIMARY
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_COOLINGFAN_VARIABLE_SECONDARY
+        },
+        .module_ignpower = {
+            ECU_MODULE_IGNPOWER_1, //ECU_CONFIG_IO_IGNPOWER_PRIMARY
+        },
         .common = {
             .sensor_cmp = {
                 ECU_SENSOR_CMP_1, //ECU_CONFIG_IO_CMP_SOHC
