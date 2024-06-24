@@ -368,7 +368,7 @@ error_t fuelpump_manual_set(fuelpump_ctx_t *ctx, bool manual_enabled)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
-    ctx->data.manual_enabled = true;
+    ctx->data.manual_enabled = manual_enabled;
 
   } while(0);
 

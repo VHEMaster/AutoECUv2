@@ -17,7 +17,8 @@
     ECU_MODULE_VVT_MAX        + \
     ECU_MODULE_FUELPUMP_MAX   + \
     ECU_MODULE_COOLINGFAN_MAX + \
-    ECU_MODULE_IGNPOWER_MAX)
+    ECU_MODULE_IGNPOWER_MAX   + \
+    ECU_MODULE_INDICATION_MAX)
 
 typedef enum {
   ECU_MODULE_LOOP_TYPE_MAIN = 0,
@@ -50,6 +51,7 @@ static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX] = {0};
 static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {0};
 static coolingfan_ctx_t ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {0};
 static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {0};
+static indication_ctx_t ecu_config_indication_ctx[ECU_MODULE_INDICATION_MAX] = {0};
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
@@ -89,6 +91,12 @@ static ecu_config_modules_t ecu_config_modules = {
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_IGNPOWER_MAX,
         }, //ECU_MODULE_TYPE_IGNPOWER
+        {
+            .loop_main = (ecu_module_loop_func_t)NULL,
+            .loop_slow = (ecu_module_loop_func_t)indication_loop_slow,
+            .loop_fast = (ecu_module_loop_func_t)NULL,
+            .instance_max = ECU_MODULE_INDICATION_MAX,
+        }, //ECU_MODULE_TYPE_INDICATION
     },
     .modules = {
         {
@@ -150,6 +158,36 @@ static ecu_config_modules_t ecu_config_modules = {
             .type = ECU_MODULE_TYPE_IGNPOWER,
             .instance = ECU_MODULE_IGNPOWER_1,
             .ctx = &ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_1],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_1,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_1],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_2,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_2],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_3,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_3],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_4,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_4],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_5,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_5],
+        },
+        {
+            .type = ECU_MODULE_TYPE_INDICATION,
+            .instance = ECU_MODULE_INDICATION_6,
+            .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_6],
         },
     },
 };

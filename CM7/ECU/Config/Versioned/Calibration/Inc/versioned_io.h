@@ -128,6 +128,16 @@ typedef enum {
   ECU_CONFIG_IO_IGNPOWER_MAX
 }ecu_config_io_ignpower_t;
 
+typedef enum {
+  ECU_CONFIG_IO_INDICATION_CHECKENGINE = 0,
+  ECU_CONFIG_IO_INDICATION_SHIFT_GREEN,
+  ECU_CONFIG_IO_INDICATION_SHIFT_RED,
+  ECU_CONFIG_IO_INDICATION_CUTOFF,
+  ECU_CONFIG_IO_INDICATION_RSVD1,
+  ECU_CONFIG_IO_INDICATION_RSVD2,
+  ECU_CONFIG_IO_INDICATION_MAX
+}ecu_config_io_indication_t;
+
 typedef struct {
 
 
@@ -160,6 +170,7 @@ typedef struct {
     ecu_config_io_fuelpump_t module_fuelpump[ECU_CONFIG_IO_FUELPUMP_MAX];
     ecu_config_io_coolingfan_t module_coolingfan[ECU_CONFIG_IO_COOLINGFAN_MAX];
     ecu_config_io_ignpower_t module_ignpower[ECU_CONFIG_IO_IGNPOWER_MAX];
+    ecu_config_io_indication_t module_indication[ECU_CONFIG_IO_INDICATION_MAX];
 
     ecu_config_io_common_t common;
 

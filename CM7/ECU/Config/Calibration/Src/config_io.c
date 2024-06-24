@@ -43,6 +43,14 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
         .module_ignpower = {
             ECU_MODULE_IGNPOWER_1, //ECU_CONFIG_IO_IGNPOWER_PRIMARY
         },
+        .module_indication = {
+            ECU_MODULE_INDICATION_1, //ECU_CONFIG_IO_INDICATION_CHECKENGINE
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_INDICATION_SHIFT_GREEN
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_INDICATION_SHIFT_RED
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_INDICATION_CUTOFF
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_INDICATION_RSVD1
+            ECU_MODULE_NONE, //ECU_CONFIG_IO_INDICATION_RSVD2
+        },
         .common = {
             .sensor_cmp = {
                 ECU_SENSOR_CMP_1, //ECU_CONFIG_IO_CMP_SOHC

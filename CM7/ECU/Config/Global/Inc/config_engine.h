@@ -43,6 +43,7 @@ typedef struct {
     fuelpump_config_t fuelpump[ECU_MODULE_FUELPUMP_MAX];
     coolingfan_config_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
     ignpower_config_t ignpower[ECU_MODULE_IGNPOWER_MAX];
+    indication_config_t indication[ECU_MODULE_INDICATION_MAX];
 }ecu_config_engine_modules_t;
 
 typedef struct {

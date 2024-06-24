@@ -16,6 +16,7 @@
 #include "fuelpump.h"
 #include "coolingfan.h"
 #include "ignpower.h"
+#include "indication.h"
 #include "config_modules_types.h"
 
 typedef void (*ecu_module_loop_func_t)(void *ctx);
@@ -34,5 +35,6 @@ error_t ecu_modules_get_vvt_ctx(ecu_module_vvt_t instance, vvt_ctx_t **ctx);
 error_t ecu_modules_get_fuelpump_ctx(ecu_module_fuelpump_t instance, fuelpump_ctx_t **ctx);
 error_t ecu_modules_get_coolingfan_ctx(ecu_module_coolingfan_t instance, coolingfan_ctx_t **ctx);
 error_t ecu_modules_get_ignpower_ctx(ecu_module_ignpower_t instance, ignpower_ctx_t **ctx);
+error_t ecu_modules_get_indication_ctx(ecu_module_indication_t instance, indication_ctx_t **ctx);
 
 #endif /* CONFIG_MODULES_INC_CONFIG_MODULES_H_ */
