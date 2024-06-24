@@ -18,6 +18,9 @@ error_t ecu_modules_ignition_get_default_config(ecu_module_ignition_t instance, 
 error_t ecu_modules_ignition_configure(ecu_module_ignition_t instance, const ignition_config_t *config);
 error_t ecu_modules_ignition_reset(ecu_module_ignition_t instance);
 
+error_t ecu_modules_ignition_get_data(ecu_module_ignition_t instance, ignition_data_t *data);
+error_t ecu_modules_ignition_get_diag(ecu_module_ignition_t instance, ignition_diag_t *diag);
+
 error_t ecu_modules_ignition_is_active(ecu_module_ignition_t instance, bool *ignition_active);
 
 error_t ecu_modules_ignition_register_cb(ecu_module_ignition_t instance, ignition_signal_update_cb_t callback, void *usrdata);
