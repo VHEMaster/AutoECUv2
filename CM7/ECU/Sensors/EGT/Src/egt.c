@@ -77,11 +77,6 @@ error_t egt_reset(egt_ctx_t *ctx)
   return err;
 }
 
-void egt_loop_main(egt_ctx_t *ctx)
-{
-
-}
-
 void egt_loop_slow(egt_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -126,11 +121,6 @@ void egt_loop_slow(egt_ctx_t *ctx)
       memset(&ctx->data, 0, sizeof(ctx->data));
     }
   } while(0);
-}
-
-ITCM_FUNC void egt_loop_fast(egt_ctx_t *ctx)
-{
-
 }
 
 error_t egt_get_value(egt_ctx_t *ctx, egt_data_t *data)

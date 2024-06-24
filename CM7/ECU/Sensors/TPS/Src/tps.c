@@ -106,11 +106,6 @@ error_t tps_reset(tps_ctx_t *ctx)
   return err;
 }
 
-void tps_loop_main(tps_ctx_t *ctx)
-{
-
-}
-
 void tps_loop_slow(tps_ctx_t *ctx)
 {
   time_us_t now = time_get_current_us();
@@ -220,11 +215,6 @@ void tps_loop_slow(tps_ctx_t *ctx)
       ctx->data.position = 0;
     }
   } while(0);
-}
-
-ITCM_FUNC void tps_loop_fast(tps_ctx_t *ctx)
-{
-
 }
 
 error_t tps_get_value(tps_ctx_t *ctx, tps_data_t *data)

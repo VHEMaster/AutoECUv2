@@ -76,63 +76,63 @@ static ecu_config_sensors_t ecu_config_sensors = {
             .instance_max = ECU_SENSOR_CMP_MAX,
         }, //ECU_SENSOR_TYPE_CMP
         {
-            .loop_main = (ecu_sensor_loop_func_t)ect_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ect_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)ect_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_ECT_MAX,
         }, //ECU_SENSOR_TYPE_ECT
         {
-            .loop_main = (ecu_sensor_loop_func_t)egt_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)egt_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)egt_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_EGT_MAX,
         }, //ECU_SENSOR_TYPE_EGT
         {
-            .loop_main = (ecu_sensor_loop_func_t)iat_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)iat_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)iat_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_IAT_MAX,
         }, //ECU_SENSOR_TYPE_IAT
         {
-            .loop_main = (ecu_sensor_loop_func_t)maf_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)maf_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)maf_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_MAF_MAX,
         }, //ECU_SENSOR_TYPE_MAF
         {
-            .loop_main = (ecu_sensor_loop_func_t)map_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)map_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)map_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_MAP_MAX,
         }, //ECU_SENSOR_TYPE_MAP
         {
-            .loop_main = (ecu_sensor_loop_func_t)tps_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)tps_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)tps_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_TPS_MAX,
         }, //ECU_SENSOR_TYPE_TPS
         {
-            .loop_main = (ecu_sensor_loop_func_t)vss_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)vss_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)vss_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_VSS_MAX,
         }, //ECU_SENSOR_TYPE_VSS
         {
-            .loop_main = (ecu_sensor_loop_func_t)aps_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)aps_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)aps_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_APS_MAX,
         }, //ECU_SENSOR_TYPE_APS
         {
-            .loop_main = (ecu_sensor_loop_func_t)ots_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ots_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)ots_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_OTS_MAX,
         }, //ECU_SENSOR_TYPE_OTS
         {
-            .loop_main = (ecu_sensor_loop_func_t)ops_loop_main,
+            .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ops_loop_slow,
-            .loop_fast = (ecu_sensor_loop_func_t)ops_loop_fast,
+            .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_OPS_MAX,
         }, //ECU_SENSOR_TYPE_OPS
     },

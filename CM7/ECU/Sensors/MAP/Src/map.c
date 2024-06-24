@@ -170,11 +170,6 @@ error_t map_reset(map_ctx_t *ctx)
   return err;
 }
 
-void map_loop_main(map_ctx_t *ctx)
-{
-
-}
-
 void map_loop_slow(map_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -290,11 +285,6 @@ void map_loop_slow(map_ctx_t *ctx)
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }
   } while(0);
-}
-
-ITCM_FUNC void map_loop_fast(map_ctx_t *ctx)
-{
-
 }
 
 error_t map_get_value(map_ctx_t *ctx, map_data_t *data)

@@ -105,11 +105,6 @@ error_t iat_reset(iat_ctx_t *ctx)
   return err;
 }
 
-void iat_loop_main(iat_ctx_t *ctx)
-{
-
-}
-
 void iat_loop_slow(iat_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -208,11 +203,6 @@ void iat_loop_slow(iat_ctx_t *ctx)
       ctx->data.temperature = 0;
     }
   } while(0);
-}
-
-ITCM_FUNC void iat_loop_fast(iat_ctx_t *ctx)
-{
-
 }
 
 error_t iat_get_value(iat_ctx_t *ctx, iat_data_t *data)

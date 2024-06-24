@@ -103,11 +103,6 @@ error_t ops_reset(ops_ctx_t *ctx)
   return err;
 }
 
-void ops_loop_main(ops_ctx_t *ctx)
-{
-
-}
-
 void ops_loop_slow(ops_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -199,11 +194,6 @@ void ops_loop_slow(ops_ctx_t *ctx)
       ctx->data.pressure = 0;
     }
   } while(0);
-}
-
-ITCM_FUNC void ops_loop_fast(ops_ctx_t *ctx)
-{
-
 }
 
 error_t ops_get_value(ops_ctx_t *ctx, ops_data_t *data)

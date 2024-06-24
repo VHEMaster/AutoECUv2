@@ -106,11 +106,6 @@ error_t aps_reset(aps_ctx_t *ctx)
   return err;
 }
 
-void aps_loop_main(aps_ctx_t *ctx)
-{
-
-}
-
 void aps_loop_slow(aps_ctx_t *ctx)
 {
   time_us_t now = time_get_current_us();
@@ -220,11 +215,6 @@ void aps_loop_slow(aps_ctx_t *ctx)
       ctx->data.position = 0;
     }
   } while(0);
-}
-
-ITCM_FUNC void aps_loop_fast(aps_ctx_t *ctx)
-{
-
 }
 
 error_t aps_get_value(aps_ctx_t *ctx, aps_data_t *data)

@@ -158,11 +158,6 @@ error_t vss_reset(vss_ctx_t *ctx)
   return err;
 }
 
-void vss_loop_main(vss_ctx_t *ctx)
-{
-
-}
-
 void vss_loop_slow(vss_ctx_t *ctx)
 {
   time_us_t last_time;
@@ -218,11 +213,6 @@ void vss_loop_slow(vss_ctx_t *ctx)
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }
   } while(0);
-}
-
-ITCM_FUNC void vss_loop_fast(vss_ctx_t *ctx)
-{
-
 }
 
 error_t vss_get_value(vss_ctx_t *ctx, vss_data_t *data)

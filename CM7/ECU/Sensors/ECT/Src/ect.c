@@ -105,11 +105,6 @@ error_t ect_reset(ect_ctx_t *ctx)
   return err;
 }
 
-void ect_loop_main(ect_ctx_t *ctx)
-{
-
-}
-
 void ect_loop_slow(ect_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -208,11 +203,6 @@ void ect_loop_slow(ect_ctx_t *ctx)
       ctx->data.temperature = 0;
     }
   } while(0);
-}
-
-ITCM_FUNC void ect_loop_fast(ect_ctx_t *ctx)
-{
-
 }
 
 error_t ect_get_value(ect_ctx_t *ctx, ect_data_t *data)

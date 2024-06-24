@@ -170,11 +170,6 @@ error_t maf_reset(maf_ctx_t *ctx)
   return err;
 }
 
-void maf_loop_main(maf_ctx_t *ctx)
-{
-
-}
-
 void maf_loop_slow(maf_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -290,11 +285,6 @@ void maf_loop_slow(maf_ctx_t *ctx)
       memset(ctx->input_freq_values, 0, sizeof(ctx->input_freq_values));
     }
   } while(0);
-}
-
-ITCM_FUNC void maf_loop_fast(maf_ctx_t *ctx)
-{
-
 }
 
 error_t maf_get_value(maf_ctx_t *ctx, maf_data_t *data)
