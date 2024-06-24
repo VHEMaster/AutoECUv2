@@ -32,6 +32,8 @@ typedef struct {
     tps_config_t tps[ECU_SENSOR_TPS_MAX];
     vss_config_t vss[ECU_SENSOR_VSS_MAX];
     aps_config_t aps[ECU_SENSOR_APS_MAX];
+    ots_config_t ots[ECU_SENSOR_OTS_MAX];
+    ops_config_t ops[ECU_SENSOR_OPS_MAX];
 }ecu_config_engine_sens_t;
 
 typedef struct {

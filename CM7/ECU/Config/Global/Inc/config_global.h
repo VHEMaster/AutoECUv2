@@ -32,6 +32,8 @@
 #include "config_tps.h"
 #include "config_vss.h"
 #include "config_aps.h"
+#include "config_ops.h"
+#include "config_ots.h"
 
 #include "config_timing.h"
 #include "config_etc.h"
@@ -72,6 +74,8 @@ typedef enum {
   ECU_CONFIG_SENS_TYPE_TPS,
   ECU_CONFIG_SENS_TYPE_VSS,
   ECU_CONFIG_SENS_TYPE_APS,
+  ECU_CONFIG_SENS_TYPE_OTS,
+  ECU_CONFIG_SENS_TYPE_OPS,
   ECU_CONFIG_SENS_TYPE_ALL,
   ECU_CONFIG_SENS_TYPE_MAX
 }ecu_config_sensor_type_t;

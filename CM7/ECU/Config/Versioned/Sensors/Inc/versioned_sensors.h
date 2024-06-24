@@ -18,5 +18,7 @@
 #include "versioned_tps.h"
 #include "versioned_vss.h"
 #include "versioned_aps.h"
+#include "versioned_ots.h"
+#include "versioned_ops.h"
 
 #endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_SENSORS_H_ */

@@ -19,6 +19,8 @@
 #include "tps.h"
 #include "vss.h"
 #include "aps.h"
+#include "ots.h"
+#include "ops.h"
 
 #define ECU_SENSOR_NONE     (-1)
 
@@ -35,6 +37,8 @@ typedef enum {
   ECU_SENSOR_TYPE_TPS,
   ECU_SENSOR_TYPE_VSS,
   ECU_SENSOR_TYPE_APS,
+  ECU_SENSOR_TYPE_OTS,
+  ECU_SENSOR_TYPE_OPS,
   ECU_SENSOR_TYPE_MAX
 }ecu_sensor_type_t;
 
@@ -101,6 +105,18 @@ typedef enum {
   ECU_SENSOR_APS_MAX
 }ecu_sensor_aps_t;
 
+typedef enum {
+  ECU_SENSOR_OTS_1 = 0,
+  ECU_SENSOR_OTS_2,
+  ECU_SENSOR_OTS_MAX
+}ecu_sensor_ots_t;
+
+typedef enum {
+  ECU_SENSOR_OPS_1 = 0,
+  ECU_SENSOR_OPS_2,
+  ECU_SENSOR_OPS_MAX
+}ecu_sensor_ops_t;
+
 error_t ecu_sensors_init(void);
 void ecu_sensors_loop_main(void);
 void ecu_sensors_loop_slow(void);
@@ -119,5 +135,7 @@ error_t ecu_sensors_get_map_ctx(ecu_sensor_map_t instance, map_ctx_t **ctx);
 error_t ecu_sensors_get_tps_ctx(ecu_sensor_tps_t instance, tps_ctx_t **ctx);
 error_t ecu_sensors_get_vss_ctx(ecu_sensor_vss_t instance, vss_ctx_t **ctx);
 error_t ecu_sensors_get_aps_ctx(ecu_sensor_aps_t instance, aps_ctx_t **ctx);
+error_t ecu_sensors_get_ots_ctx(ecu_sensor_ots_t instance, ots_ctx_t **ctx);
+error_t ecu_sensors_get_ops_ctx(ecu_sensor_ops_t instance, ops_ctx_t **ctx);
 
 #endif /* CONFIG_INC_CONFIG_SENSORS_H_ */
