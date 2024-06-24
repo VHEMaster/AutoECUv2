@@ -17,7 +17,7 @@
     ECU_MODULE_VVT_MAX        + \
     ECU_MODULE_FUELPUMP_MAX   + \
     ECU_MODULE_COOLINGFAN_MAX + \
-    ECU_MODULE_IGNITION_MAX)
+    ECU_MODULE_IGNPOWER_MAX)
 
 typedef enum {
   ECU_MODULE_LOOP_TYPE_MAIN = 0,
@@ -49,7 +49,7 @@ static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX] = {0};
 static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {0};
 static coolingfan_ctx_t ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {0};
-static ignition_ctx_t ecu_config_ignition_ctx[ECU_MODULE_IGNITION_MAX] = {0};
+static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {0};
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
@@ -85,10 +85,10 @@ static ecu_config_modules_t ecu_config_modules = {
         }, //ECU_MODULE_TYPE_COOLINGFAN
         {
             .loop_main = (ecu_module_loop_func_t)NULL,
-            .loop_slow = (ecu_module_loop_func_t)ignition_loop_slow,
+            .loop_slow = (ecu_module_loop_func_t)ignpower_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)NULL,
-            .instance_max = ECU_MODULE_IGNITION_MAX,
-        }, //ECU_MODULE_TYPE_IGNITION
+            .instance_max = ECU_MODULE_IGNPOWER_MAX,
+        }, //ECU_MODULE_TYPE_IGNPOWER
     },
     .modules = {
         {
@@ -147,9 +147,9 @@ static ecu_config_modules_t ecu_config_modules = {
             .ctx = &ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_2],
         },
         {
-            .type = ECU_MODULE_TYPE_IGNITION,
-            .instance = ECU_MODULE_IGNITION_1,
-            .ctx = &ecu_config_ignition_ctx[ECU_MODULE_IGNITION_1],
+            .type = ECU_MODULE_TYPE_IGNPOWER,
+            .instance = ECU_MODULE_IGNPOWER_1,
+            .ctx = &ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_1],
         },
     },
 };

@@ -154,12 +154,12 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
       now = time_get_current_us();
 
       ctx->data.working = false;
-      if(ctx->data.emergency_trigger && ctx->data.ignition_on) {
+      if(ctx->data.emergency_trigger && ctx->data.ignpower_on) {
         ctx->data.working = true;
       }
 
       if(ctx->data.activate_trigger) {
-        if(ctx->data.ckp_triggered && ctx->data.ignition_on) {
+        if(ctx->data.ckp_triggered && ctx->data.ignpower_on) {
           ctx->data.working = true;
           ctx->ckp_work_accept = true;
         } else if(ctx->ckp_work_accept) {
@@ -189,7 +189,7 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
         }
       }
 
-      if(ctx->data.ignition_on && ctx->data.ckp_detected &&
+      if(ctx->data.ignpower_on && ctx->data.ckp_detected &&
           ctx->ckp_rpm > 0.0f && ctx->ckp_rpm < ctx->config.crankshaft_rpm_min) {
         ctx->data.working = false;
       }
@@ -293,14 +293,14 @@ ITCM_FUNC void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_dat
   } while(0);
 }
 
-void coolingfan_ignition_update(coolingfan_ctx_t *ctx, bool ignition_on)
+void coolingfan_ignpower_update(coolingfan_ctx_t *ctx, bool ignpower_on)
 {
 
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
 
-    ctx->data.ignition_on = ignition_on;
+    ctx->data.ignpower_on = ignpower_on;
 
   } while(0);
 }

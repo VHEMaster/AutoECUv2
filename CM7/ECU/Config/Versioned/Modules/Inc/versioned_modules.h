@@ -13,6 +13,6 @@
 #include "versioned_vvt.h"
 #include "versioned_fuelpump.h"
 #include "versioned_coolingfan.h"
-#include "versioned_ignition.h"
+#include "versioned_ignpower.h"
 
 #endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_MODULES_H_ */

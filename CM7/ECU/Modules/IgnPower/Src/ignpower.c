@@ -1,23 +1,23 @@
 /*
- * ignition.c
+ * ignpower.c
  *
  *  Created on: Jun 21, 2024
  *      Author: VHEMaster
  */
 
-#include "ignition.h"
+#include "ignpower.h"
 #include "compiler.h"
 #include <string.h>
 
-error_t ignition_init(ignition_ctx_t *ctx, const ignition_init_ctx_t *init_ctx)
+error_t ignpower_init(ignpower_ctx_t *ctx, const ignpower_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
 
-    memset(ctx, 0u, sizeof(ignition_ctx_t));
-    memcpy(&ctx->init, init_ctx, sizeof(ignition_init_ctx_t));
+    memset(ctx, 0u, sizeof(ignpower_ctx_t));
+    memcpy(&ctx->init, init_ctx, sizeof(ignpower_init_ctx_t));
 
     ctx->ready = true;
 
@@ -26,7 +26,7 @@ error_t ignition_init(ignition_ctx_t *ctx, const ignition_init_ctx_t *init_ctx)
   return err;
 }
 
-error_t ignition_configure(ignition_ctx_t *ctx, const ignition_config_t *config)
+error_t ignpower_configure(ignpower_ctx_t *ctx, const ignpower_config_t *config)
 {
   error_t err = E_OK;
   time_us_t now;
@@ -37,14 +37,14 @@ error_t ignition_configure(ignition_ctx_t *ctx, const ignition_config_t *config)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     if(ctx->configured != false) {
-      err = ignition_reset(ctx);
+      err = ignpower_reset(ctx);
       BREAK_IF(err != E_OK);
     }
 
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(ignition_config_t));
+      memcpy(&ctx->config, config, sizeof(ignpower_config_t));
     }
 
     if(ctx->config.enabled == true) {
@@ -91,13 +91,13 @@ error_t ignition_configure(ignition_ctx_t *ctx, const ignition_config_t *config)
   } while(0);
 
   if(err != E_OK) {
-    (void)ignition_reset(ctx);
+    (void)ignpower_reset(ctx);
   }
 
   return err;
 }
 
-error_t ignition_reset(ignition_ctx_t *ctx)
+error_t ignpower_reset(ignpower_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -121,7 +121,7 @@ error_t ignition_reset(ignition_ctx_t *ctx)
   return err;
 }
 
-void ignition_loop_slow(ignition_ctx_t *ctx)
+void ignpower_loop_slow(ignpower_ctx_t *ctx)
 {
   time_delta_us_t time_debounce;
   input_value_t input_value;
@@ -133,7 +133,7 @@ void ignition_loop_slow(ignition_ctx_t *ctx)
     if(ctx->configured) {
       now = time_get_current_us();
 
-      input_bool = ctx->data.ignition_active;
+      input_bool = ctx->data.ignpower_active;
       err = input_get_value(ctx->input_signal_pin, &input_value, NULL);
       if(err == E_OK) {
         input_bool = input_value ? true : false;
@@ -142,7 +142,7 @@ void ignition_loop_slow(ignition_ctx_t *ctx)
         ctx->diag.bits.input_signal_error = true;
       }
 
-      if(input_bool != ctx->data.ignition_active) {
+      if(input_bool != ctx->data.ignpower_active) {
         if(input_bool) {
           time_debounce = ctx->config.input_debounce_off_to_on;
         } else {
@@ -150,17 +150,17 @@ void ignition_loop_slow(ignition_ctx_t *ctx)
         }
 
         if(time_diff(now, ctx->status_time) >= time_debounce) {
-          ctx->data.ignition_active = input_bool;
+          ctx->data.ignpower_active = input_bool;
           ctx->status_time = now;
           if(ctx->init.signal_update_cb) {
-            ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, ctx->data.ignition_active);
+            ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, ctx->data.ignpower_active);
           }
         }
       } else {
         ctx->status_time = now;
       }
 
-      if(ctx->data.ignition_active) {
+      if(ctx->data.ignpower_active) {
         ctx->output_time = now;
         ctx->min_delay_elapsed = false;
       } else if(!ctx->min_delay_elapsed) {
@@ -201,7 +201,7 @@ void ignition_loop_slow(ignition_ctx_t *ctx)
         ctx->data.crankshaft_trigger = false;
       }
 
-      if(ctx->data.ignition_active || !ctx->min_delay_elapsed ||
+      if(ctx->data.ignpower_active || !ctx->min_delay_elapsed ||
           ctx->data.components_trigger || !ctx->min_operation_elapsed ||
           ctx->data.crankshaft_trigger || !ctx->min_crankshaft_elapsed) {
         ctx->data.output_active = true;
@@ -226,7 +226,7 @@ void ignition_loop_slow(ignition_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC void ignition_ckp_signal_update(ignition_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
+ITCM_FUNC void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   do {
     BREAK_IF(ctx == NULL);
@@ -241,23 +241,23 @@ ITCM_FUNC void ignition_ckp_signal_update(ignition_ctx_t *ctx, const ckp_data_t 
   } while(0);
 }
 
-error_t ignition_is_active(ignition_ctx_t *ctx, bool *ignition_active)
+error_t ignpower_is_active(ignpower_ctx_t *ctx, bool *ignpower_active)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ignition_active == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ignpower_active == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    *ignition_active = ctx->data.ignition_active;
+    *ignpower_active = ctx->data.ignpower_active;
 
   } while(0);
 
   return err;
 }
 
-error_t ignition_get_data(ignition_ctx_t *ctx, ignition_data_t *data)
+error_t ignpower_get_data(ignpower_ctx_t *ctx, ignpower_data_t *data)
 {
   error_t err = E_OK;
 
@@ -273,7 +273,7 @@ error_t ignition_get_data(ignition_ctx_t *ctx, ignition_data_t *data)
   return err;
 }
 
-error_t ignition_get_diag(ignition_ctx_t *ctx, ignition_diag_t *diag)
+error_t ignpower_get_diag(ignpower_ctx_t *ctx, ignpower_diag_t *diag)
 {
   error_t err = E_OK;
 

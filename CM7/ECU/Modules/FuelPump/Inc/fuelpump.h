@@ -33,7 +33,7 @@ typedef struct {
     bool force_engaged;
     bool force_enabled;
 
-    bool ignition_on;
+    bool ignpower_on;
     bool trigger_on;
     bool ckp_triggered;
 }fuelpump_data_t;
@@ -84,7 +84,7 @@ error_t fuelpump_configure(fuelpump_ctx_t *ctx, const fuelpump_config_t *config)
 error_t fuelpump_reset(fuelpump_ctx_t *ctx);
 
 void fuelpump_ckp_signal_update(fuelpump_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
-void fuelpump_ignition_update(fuelpump_ctx_t *ctx, bool ignition_on);
+void fuelpump_ignpower_update(fuelpump_ctx_t *ctx, bool ignpower_on);
 
 error_t fuelpump_get_data(fuelpump_ctx_t *ctx, fuelpump_data_t *data);
 error_t fuelpump_get_diag(fuelpump_ctx_t *ctx, fuelpump_diag_t *diag);

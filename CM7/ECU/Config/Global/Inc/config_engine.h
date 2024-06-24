@@ -40,7 +40,7 @@ typedef struct {
     vvt_config_t vvt[ECU_MODULE_VVT_MAX];
     fuelpump_config_t fuelpump[ECU_MODULE_FUELPUMP_MAX];
     coolingfan_config_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
-    ignition_config_t ignition[ECU_MODULE_IGNITION_MAX];
+    ignpower_config_t ignpower[ECU_MODULE_IGNPOWER_MAX];
 }ecu_config_engine_modules_t;
 
 typedef struct {

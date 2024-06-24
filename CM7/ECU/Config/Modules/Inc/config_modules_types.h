@@ -20,7 +20,7 @@ typedef enum {
   ECU_MODULE_TYPE_VVT,
   ECU_MODULE_TYPE_FUELPUMP,
   ECU_MODULE_TYPE_COOLINGFAN,
-  ECU_MODULE_TYPE_IGNITION,
+  ECU_MODULE_TYPE_IGNPOWER,
   ECU_MODULE_TYPE_MAX
 }ecu_module_type_t;
 
@@ -56,8 +56,8 @@ typedef enum {
 }ecu_module_coolingfan_t;
 
 typedef enum {
-  ECU_MODULE_IGNITION_1 = 0,
-  ECU_MODULE_IGNITION_MAX
-}ecu_module_ignition_t;
+  ECU_MODULE_IGNPOWER_1 = 0,
+  ECU_MODULE_IGNPOWER_MAX
+}ecu_module_ignpower_t;
 
 #endif /* CONFIG_MODULES_INC_CONFIG_MODULES_TYPES_H_ */

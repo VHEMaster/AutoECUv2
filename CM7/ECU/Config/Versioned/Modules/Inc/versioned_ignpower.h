@@ -1,21 +1,21 @@
 /*
- * versioned_ignition.h
+ * versioned_ignpower.h
  *
  *  Created on: Jun 23, 2024
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNITION_H_
-#define CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNITION_H_
+#ifndef CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNPOWER_H_
+#define CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNPOWER_H_
 
 #include "common.h"
 #include "config_gpio.h"
 #include "config_sensors.h"
 
 typedef enum {
-  IGNITION_CONFIG_VERSION_V1 = 0,
-  IGNITION_CONFIG_VERSION_MAX
-}ignition_config_versions_t;
+  IGNPOWER_CONFIG_VERSION_V1 = 0,
+  IGNPOWER_CONFIG_VERSION_MAX
+}ignpower_config_versions_t;
 
 typedef struct {
     bool enabled;
@@ -39,8 +39,8 @@ typedef struct {
     bool output_gpio_inverted;
 
     uint32_t align ALIGNED_CACHE;
-}ignition_config_v1_t ALIGNED_CACHE;
+}ignpower_config_v1_t ALIGNED_CACHE;
 
-typedef ignition_config_v1_t ignition_config_t;
+typedef ignpower_config_v1_t ignpower_config_t;
 
-#endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNITION_H_ */
+#endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_IGNPOWER_H_ */

@@ -145,7 +145,7 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
   input_value_t input_value;
   bool input_bool;
   time_us_t now;
-  bool ignition_trig;
+  bool ignpower_trig;
   bool init_trig;
   time_us_t ckp_last_time;
   time_delta_us_t control_timeout;
@@ -155,10 +155,10 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
       ckp_last_time = ctx->ckp_last_time;
       now = time_get_current_us();
 
-      ignition_trig = ctx->data.ignition_on;
-      ignition_trig |= ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON;
+      ignpower_trig = ctx->data.ignpower_on;
+      ignpower_trig |= ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON;
 
-      init_trig = ignition_trig;
+      init_trig = ignpower_trig;
       init_trig |= ctx->config.trigger_source != FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT;
 
       while(true) {
@@ -186,10 +186,10 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
             break;
           case FUELPUMP_FSM_PROCESS:
             if(ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON ||
-                ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_IGNITION) {
-              ctx->data.working = ignition_trig;
+                ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_IGNPOWER) {
+              ctx->data.working = ignpower_trig;
             } else if(ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT) {
-              if(ctx->data.ignition_on == false) {
+              if(ctx->data.ignpower_on == false) {
                 ctx->data.working = false;
                 ctx->fsm_state = FUELPUMP_FSM_INIT;
               } else if(ctx->data.ckp_triggered) {
@@ -316,14 +316,14 @@ ITCM_FUNC void fuelpump_ckp_signal_update(fuelpump_ctx_t *ctx, const ckp_data_t 
   } while(0);
 }
 
-void fuelpump_ignition_update(fuelpump_ctx_t *ctx, bool ignition_on)
+void fuelpump_ignpower_update(fuelpump_ctx_t *ctx, bool ignpower_on)
 {
 
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
 
-    ctx->data.ignition_on = ignition_on;
+    ctx->data.ignpower_on = ignpower_on;
 
   } while(0);
 }

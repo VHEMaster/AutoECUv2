@@ -21,7 +21,7 @@ typedef enum {
 
 typedef enum {
   FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON = 0,
-  FUELPUMP_CONFIG_TRIGGER_IGNITION,
+  FUELPUMP_CONFIG_TRIGGER_IGNPOWER,
   FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT,
   FUELPUMP_CONFIG_TRIGGER_GPIO_INPUT,
   FUELPUMP_CONFIG_TRIGGER_MANUAL,
@@ -41,7 +41,7 @@ typedef struct {
     fuelpump_config_trigger_t trigger_source;
 
     ecu_sensor_ckp_t sensor_ckp;
-    ecu_module_ignition_t module_ignition;
+    ecu_module_ignpower_t module_ignpower;
     fuelpump_config_ckp_trigger_t ckp_trigger;
 
     ecu_gpio_output_pin_t output_drive_pin;

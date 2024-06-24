@@ -29,7 +29,7 @@ typedef struct {
     bool enabled;
 
     ecu_sensor_ckp_t sensor_ckp;
-    ecu_module_ignition_t module_ignition;
+    ecu_module_ignpower_t module_ignpower;
     coolingfan_config_ckp_trigger_t ckp_trigger;
 
     ecu_gpio_output_pin_t output_drive_pin;

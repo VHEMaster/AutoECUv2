@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include "config_coolingfan.h"
-#include "config_ignition.h"
+#include "config_ignpower.h"
 #include "config_ckp.h"
 #include "config_extern.h"
 #include "compiler.h"
@@ -19,11 +19,11 @@ typedef struct {
 }ecu_modules_coolingfan_ctx_t;
 
 static void ecu_modules_coolingfan_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
-static void ecu_modules_coolingfan_ignition_signal_update_cb(void *usrdata, bool ignition_active);
+static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active);
 
 static const coolingfan_config_t ecu_modules_coolingfan_config_default = {
     .sensor_ckp = ECU_SENSOR_CKP_1,
-    .module_ignition = ECU_MODULE_IGNITION_1,
+    .module_ignpower = ECU_MODULE_IGNPOWER_1,
     .ckp_trigger = COOLINGFAN_CONFIG_CKP_TRIGGER_DETECTED,
 
     .allow_force_when_stopped = false,
@@ -127,7 +127,7 @@ error_t ecu_modules_coolingfan_configure(ecu_module_coolingfan_t instance, const
     err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_coolingfan_ckp_signal_update_cb, coolingfan_ctx);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_ignition_register_cb(config->module_ignition, ecu_modules_coolingfan_ignition_signal_update_cb, coolingfan_ctx);
+    err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_coolingfan_ignpower_signal_update_cb, coolingfan_ctx);
     BREAK_IF(err != E_OK);
 
     err = coolingfan_configure(coolingfan_ctx->ctx, config);
@@ -273,7 +273,7 @@ ITCM_FUNC static void ecu_modules_coolingfan_ckp_signal_update_cb(void *usrdata,
   } while(0);
 }
 
-ITCM_FUNC static void ecu_modules_coolingfan_ignition_signal_update_cb(void *usrdata, bool ignition_active)
+ITCM_FUNC static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active)
 {
   ecu_modules_coolingfan_ctx_t *module_ctx = (ecu_modules_coolingfan_ctx_t *)usrdata;
   coolingfan_ctx_t *ctx;
@@ -283,7 +283,7 @@ ITCM_FUNC static void ecu_modules_coolingfan_ignition_signal_update_cb(void *usr
     ctx = module_ctx->ctx;
     BREAK_IF(ctx == NULL);
 
-    coolingfan_ignition_update(ctx, ignition_active);
+    coolingfan_ignpower_update(ctx, ignpower_active);
 
   } while(0);
 }

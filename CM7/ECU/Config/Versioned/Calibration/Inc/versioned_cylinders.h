@@ -17,9 +17,9 @@ typedef enum {
 }ecu_config_cylinders_versions_t;
 
 typedef enum {
-  ECU_CONFIG_CYLINDER_IGNITION_PIN_PRIMARY = 0,
-  ECU_CONFIG_CYLINDER_IGNITION_PIN_SECONDARY,
-  ECU_CONFIG_CYLINDER_IGNITION_PIN_MAX,
+  ECU_CONFIG_CYLINDER_IGNPOWER_PIN_PRIMARY = 0,
+  ECU_CONFIG_CYLINDER_IGNPOWER_PIN_SECONDARY,
+  ECU_CONFIG_CYLINDER_IGNPOWER_PIN_MAX,
 }ecu_config_cylinder_iGNITION_pin_t;
 
 typedef enum {
@@ -32,7 +32,7 @@ typedef struct {
     ecu_bank_t bank;
     float pos_offset;
 
-    ecu_gpio_output_pin_t out_ignition[ECU_CONFIG_CYLINDER_IGNITION_PIN_MAX];
+    ecu_gpio_output_pin_t out_ignition[ECU_CONFIG_CYLINDER_IGNPOWER_PIN_MAX];
     ecu_gpio_output_pin_t out_injection[ECU_CONFIG_CYLINDER_INJECTION_PIN_MAX];
 }ecu_config_cylinder_t;
 
