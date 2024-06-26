@@ -21,14 +21,24 @@ typedef union {
     }bits;
 }indication_diag_t;
 
+typedef enum {
+  INDICATION_ENABLED_OFF = 0,
+  INDICATION_ENABLED_ON,
+  INDICATION_ENABLED_PERIODIC,
+}indication_enabled_t;
+
 typedef struct {
     bool enabled;
     bool indication_set;
 
     bool manual_engaged;
-    bool manual_enabled;
+    indication_enabled_t manual_enabled;
     bool force_engaged;
     bool force_enabled;
+
+    time_delta_us_t periodic_on_time;
+    time_delta_us_t periodic_off_time;
+    bool periodic_status;
 
     bool ignpower_on;
     bool ckp_triggered;
@@ -53,6 +63,7 @@ typedef struct {
     float ckp_rpm;
 
     output_id_t output_pin;
+    time_us_t periodic_last;
 
 }indication_ctx_t;
 

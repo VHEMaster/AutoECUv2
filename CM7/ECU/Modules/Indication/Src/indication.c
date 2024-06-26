@@ -30,6 +30,7 @@ error_t indication_configure(indication_ctx_t *ctx, const indication_config_t *c
 {
   error_t err = E_OK;
   bool valid;
+  time_us_t now;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
@@ -62,6 +63,8 @@ error_t indication_configure(indication_ctx_t *ctx, const indication_config_t *c
         BREAK_IF(err != E_OK);
       }
 
+      now = time_get_current_us();
+      ctx->periodic_last = now;
       ctx->configured = true;
     }
 
@@ -96,9 +99,13 @@ error_t indication_reset(indication_ctx_t *ctx)
 void indication_loop_slow(indication_ctx_t *ctx)
 {
   error_t err = E_OK;
+  time_us_t now;
+  time_delta_us_t periodic_time;
 
   if(ctx->ready) {
     if(ctx->configured) {
+      now = time_get_current_us();
+
       if(ctx->config.trigger_source == INDICATION_CONFIG_TRIGGER_CRANKSHAFT && ctx->data.ckp_triggered) {
         ctx->data.indication_set = true;
       } else {
@@ -106,7 +113,27 @@ void indication_loop_slow(indication_ctx_t *ctx)
       }
 
       if(ctx->data.manual_engaged) {
-        ctx->data.indication_set = ctx->data.manual_enabled;
+        if(ctx->data.manual_enabled == INDICATION_ENABLED_ON) {
+          ctx->data.indication_set = true;
+          ctx->data.periodic_status = true;
+          ctx->periodic_last = now;
+        } else if(ctx->data.manual_enabled == INDICATION_ENABLED_PERIODIC) {
+          if(ctx->data.periodic_status) {
+            periodic_time = ctx->data.periodic_on_time;
+          } else {
+            periodic_time = ctx->data.periodic_off_time;
+          }
+          if(time_diff(now, ctx->periodic_last) >= periodic_time) {
+            ctx->periodic_last = now;
+            ctx->data.periodic_status ^= true;
+          }
+          ctx->data.indication_set = ctx->data.periodic_status;
+        } else {
+          ctx->data.indication_set = false;
+          ctx->data.periodic_status = false;
+          ctx->data.periodic_status = true;
+          ctx->periodic_last = now;
+        }
       }
 
       if(ctx->data.force_engaged) {
@@ -223,7 +250,25 @@ error_t indication_manual_set(indication_ctx_t *ctx, bool manual_enabled)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
     ctx->data.manual_engaged = true;
-    ctx->data.manual_enabled = manual_enabled;
+    ctx->data.manual_enabled = manual_enabled ? INDICATION_ENABLED_ON : INDICATION_ENABLED_OFF;
+
+  } while(0);
+
+  return err;
+}
+
+error_t indication_manual_set_periodic(indication_ctx_t *ctx, time_delta_us_t time_on, time_delta_us_t time_off)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.manual_engaged = true;
+    ctx->data.manual_enabled = INDICATION_ENABLED_PERIODIC;
+    ctx->data.periodic_on_time = time_on;
+    ctx->data.periodic_off_time = time_off;
 
   } while(0);
 
