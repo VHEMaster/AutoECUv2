@@ -107,9 +107,9 @@ void indication_loop_slow(indication_ctx_t *ctx)
       now = time_now_us();
 
       if(ctx->config.trigger_source == INDICATION_CONFIG_TRIGGER_CRANKSHAFT && ctx->data.ckp_triggered) {
-        ctx->data.indication_set = true;
-      } else {
         ctx->data.indication_set = false;
+      } else {
+        ctx->data.indication_set = true;
       }
 
       if(ctx->data.manual_engaged) {
@@ -130,7 +130,6 @@ void indication_loop_slow(indication_ctx_t *ctx)
           ctx->data.indication_set = ctx->data.periodic_status;
         } else {
           ctx->data.indication_set = false;
-          ctx->data.periodic_status = false;
           ctx->data.periodic_status = true;
           ctx->periodic_last = now;
         }
