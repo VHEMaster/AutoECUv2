@@ -62,7 +62,7 @@ ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
   time_us_t now;
   error_t err = E_OK;
 
-  now = time_get_current_us();
+  now = time_now_us();
 
   if(ctx->ready == true) {
     if(ctx->comm_busy == false) {

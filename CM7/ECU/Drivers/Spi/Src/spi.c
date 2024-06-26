@@ -413,7 +413,7 @@ ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *tran
       spi->poll_period = poll_period;
       spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
       spi->err_callback = spi_private_error_cb;
-      spi->time_poll_begin = time_get_current_us();
+      spi->time_poll_begin = time_now_us();
       spi->time_poll_timeout = timeout;
 
       err = spi_private_transmit(spi_slave, transmit, tx_bytes);
@@ -441,7 +441,7 @@ ITCM_FUNC error_t spi_sync(spi_slave_t *spi_slave)
       spi_private_slave_reset(spi_slave);
     } else {
       time_transaction = spi->time_transaction;
-      now = time_get_current_us();
+      now = time_now_us();
       if(spi->poll_scheduled == false) {
         if(time_diff(now, time_transaction) >= spi->cfg.timeout) {
           err = E_TIMEOUT;

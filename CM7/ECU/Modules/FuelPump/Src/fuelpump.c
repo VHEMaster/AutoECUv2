@@ -153,7 +153,7 @@ void fuelpump_loop_slow(fuelpump_ctx_t *ctx)
   if(ctx->ready) {
     if(ctx->configured) {
       ckp_last_time = ctx->ckp_last_time;
-      now = time_get_current_us();
+      now = time_now_us();
 
       ignpower_trig = ctx->data.ignpower_on;
       ignpower_trig |= ctx->config.trigger_source == FUELPUMP_CONFIG_TRIGGER_ALWAYS_ON;
@@ -297,7 +297,7 @@ ITCM_FUNC void fuelpump_ckp_signal_update(fuelpump_ctx_t *ctx, const ckp_data_t 
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
 
-    now = time_get_current_us();
+    now = time_now_us();
 
     if(data->validity < CKP_DATA_DETECTED) {
       ctx->data.ckp_triggered = false;

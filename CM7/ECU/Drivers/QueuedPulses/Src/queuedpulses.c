@@ -149,7 +149,7 @@ ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
         psc = timer->prescaler_default;
         prd = entry->pulse;
 
-        now = time_get_current_us();
+        now = time_now_us();
         diff = time_diff(now, entry->time);
         if(diff + 1 >= prd) {
           prd = 0;
@@ -208,7 +208,7 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
 
     out = &queuedpulse_ctx.outputs[output];
 
-    now = time_get_current_us();
+    now = time_now_us();
     prim = EnterCritical();
 
     BREAK_IF_ACTION(queuedpulse_ctx.queue.entries_bitmap == QUEUEDPULSE_ENTRIES_BITMAP_MAX, (ExitCritical(prim), err = E_OVERFLOW));
@@ -267,7 +267,7 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
         out->value_cur = value_on;
       }
       entry->pulse = pulse;
-      entry->time = time_get_current_us();
+      entry->time = time_now_us();
       entry->timer = timer;
       entry->out_seq_next = NULL;
       entry->output_assigned = out;
@@ -345,7 +345,7 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
         entry_temp_seq->out_seq_next = entry;
       }
 
-      entry->time = time_get_current_us();
+      entry->time = time_now_us();
       entry->timer = timer;
       entry->output_assigned = out;
       entry->value_on = value_on;

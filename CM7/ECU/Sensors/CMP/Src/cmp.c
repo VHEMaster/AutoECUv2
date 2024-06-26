@@ -175,7 +175,7 @@ void cmp_loop_main(cmp_ctx_t *ctx)
 
 void cmp_loop_slow(cmp_ctx_t *ctx)
 {
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   cmp_data_t data;
   cmp_diag_t diag;
   uint32_t prim;

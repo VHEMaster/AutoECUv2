@@ -13,7 +13,7 @@ ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polli
   input_if_ctx_t *interface;
   input_ch_ctx_t *ch;
   time_delta_us_t deltatime;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   input_ch_poll_ctx_t *poll = NULL;
 
   if(polling_mode < INPUT_POLLING_MODE_MAX) {
@@ -62,7 +62,7 @@ ITCM_FUNC error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling
   error_t err = E_OK;
 
   val_ret = ch->value;
-  now = time_get_current_us();
+  now = time_now_us();
 
   if(ch->polling_mode == polling_mode) {
     if(ch->source == INPUT_SOURCE_GPIO) {

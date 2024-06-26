@@ -23,7 +23,7 @@ ITCM_FUNC static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->reset_fsm_state) {
       case L9966_RESET_CONDITION:
@@ -166,7 +166,7 @@ ITCM_FUNC static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
     switch(ctx->check_status_fsm_state) {
       case L9966_CHECK_STATUS_CONDITION:
         if(ctx->initialized) {
-          now = time_get_current_us();
+          now = time_now_us();
           if(ctx->status_valid == false || time_diff(now, ctx->status_check_last) >= L9966_STATUS_POLL_PERIOD) {
             ctx->check_status_fsm_state = L9966_CHECK_STATUS_SPI_REQ;
             err = E_AGAIN;
@@ -177,7 +177,7 @@ ITCM_FUNC static error_t l9966_fsm_check_status(l9966_ctx_t *ctx)
       case L9966_CHECK_STATUS_SPI_REQ:
         err = l9966_reg_read(ctx, L9966_REG_GEN_STATUS, &status.data);
         if(err == E_OK) {
-          now = time_get_current_us();
+          now = time_now_us();
           ctx->status_check_last = now;
           ctx->status.config_check = status.bits.CONFIG_CHECK;
           ctx->status.calib_sel = status.bits.CALIB_SEL;
@@ -214,7 +214,7 @@ ITCM_FUNC static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
     switch(ctx->read_dig_in_fsm_state) {
       case L9966_READ_DIG_IN_CONDITION:
         if(ctx->initialized && ctx->configured) {
-          now = time_get_current_us();
+          now = time_now_us();
           if(ctx->digital_inputs_valid == false || time_diff(now, ctx->read_dig_in_last) >= ctx->config.digital_poll_period) {
             ctx->read_dig_in_fsm_state = L9966_READ_DIG_IN_SPI_REQ;
             err = E_AGAIN;
@@ -225,7 +225,7 @@ ITCM_FUNC static error_t l9966_fsm_read_dig_in(l9966_ctx_t *ctx)
       case L9966_READ_DIG_IN_SPI_REQ:
         err = l9966_reg_read(ctx, L9966_REG_DIN_IN_STAT, &status.data);
         if(err == E_OK) {
-          now = time_get_current_us();
+          now = time_now_us();
           ctx->read_dig_in_last = now;
           ctx->digital_inputs = status.bits.DIN_INx;
           ctx->digital_inputs_valid = true;
@@ -316,7 +316,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                 ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_SPI_COPY_REQ;
               }
             }
-            now = time_get_current_us();
+            now = time_now_us();
             if(time_diff(now, ctx->sqncr_result_poll_last) >= L9966_SQNCR_RESULT_POLL_PERIOD) {
               ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_SPI_COPY_REQ;
             }
@@ -337,7 +337,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
         copy_cplt = false;
         if(ctx->config.config_data.sequencer_config.control.sync_copy_cmd_en) {
           err = E_AGAIN;
-          now = time_get_current_us();
+          now = time_now_us();
           if(time_diff(now, ctx->sync_timestamp) >= L9966_SYNC_WAIT_US) {
             if(gpio_valid(&ctx->init.sync_pin)) {
               gpio_reset(&ctx->init.sync_pin);
@@ -347,7 +347,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
         } else {
           err = l9966_reg_read(ctx, L9966_REG_SQNCR_RSLT_COPY_CMD, &status.data);
           if(err == E_OK) {
-            now = time_get_current_us();
+            now = time_now_us();
             copy_cplt = true;
           }
         }
@@ -362,7 +362,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
       case L9966_READ_SQNCR_SPI_READ_REQ:
         err = l9966_burst_reg_read(ctx, L9966_REG_SQNCR_RESULT_x, ctx->fsm_rx_burst_payload, L9966_CHANNELS);
         if(err == E_OK) {
-          now = time_get_current_us();
+          now = time_now_us();
 
           ctx->sqncr_diff = time_diff(now, ctx->sqncr_last);
           ctx->sqncr_last = now;

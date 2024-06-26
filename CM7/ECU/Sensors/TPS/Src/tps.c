@@ -108,7 +108,7 @@ error_t tps_reset(tps_ctx_t *ctx)
 
 void tps_loop_slow(tps_ctx_t *ctx)
 {
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   error_t err = E_OK;
   input_value_t input_analog_value;
   time_delta_us_t time_delta;

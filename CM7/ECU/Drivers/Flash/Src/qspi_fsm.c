@@ -17,7 +17,7 @@ ITCM_FUNC static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
     cmd_async_errcode = ctx->cmd_async_errcode;
 
     switch(ctx->fsm_io) {
@@ -219,7 +219,7 @@ ITCM_FUNC static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 
   while(true) {
     err = E_OK;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->fsm_init) {
       case QSPI_FSM_INIT_CONDITION:

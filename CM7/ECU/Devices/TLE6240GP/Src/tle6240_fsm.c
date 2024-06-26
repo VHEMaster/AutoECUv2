@@ -19,7 +19,7 @@ ITCM_FUNC error_t tle6240_fsm(tle6240_ctx_t *ctx)
 
   while(true) {
     err = E_OK;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->process_fsm) {
       case TLE6240_PROCESS_RESET:

@@ -18,7 +18,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
 
   while(true) {
     time_voltage_last = ctx->voltages_timestamp;
-    now = time_get_current_us();
+    now = time_now_us();
     time_delta = time_diff(now, time_voltage_last);
     math_pid_set_koffs(&ctx->heater_pid, &ctx->config.heater_pid_koffs);
 

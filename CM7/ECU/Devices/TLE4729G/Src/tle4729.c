@@ -191,7 +191,7 @@ ITCM_FUNC  void tle4729_loop_fast(tle4729_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    now = time_get_current_us();
+    now = time_now_us();
 
     if(ctx->enabled) {
       if(ctx->moving == false) {

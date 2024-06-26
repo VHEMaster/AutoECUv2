@@ -64,7 +64,7 @@ output_if_id_t output_if_register(const output_if_cfg_t *cfg, void *usrdata)
     }
     interface->usrdata = usrdata;
 
-    now = time_get_current_us();
+    now = time_now_us();
     interface->time_main_last = now;
     interface->time_slow_last = now;
     interface->time_fast_last = now;
@@ -360,7 +360,7 @@ ITCM_FUNC error_t output_set_periodic(output_id_t channel_id, bool once, output_
       ch->periodic_value_off = value_off;
       ch->periodic_time_on = time_on;
       ch->periodic_time_off = time_off;
-      now = time_get_current_us();
+      now = time_now_us();
       err = outputs_internal_set_value(ch, ch->periodic_value_on);
 
       ch->periodic_time = now;
@@ -386,7 +386,7 @@ ITCM_FUNC error_t output_reset_periodic(output_id_t channel_id, output_value_t v
     }
     ch = &output_ctx.chs[channel_id];
 
-    now = time_get_current_us();
+    now = time_now_us();
     ch->periodic_mode = OUTPUT_PERIODIC_IDLE;
     ch->periodic_time = now;
     ch->periodic_value_on = value;

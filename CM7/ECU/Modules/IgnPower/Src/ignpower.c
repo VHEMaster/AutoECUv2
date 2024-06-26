@@ -79,7 +79,7 @@ error_t ignpower_configure(ignpower_ctx_t *ctx, const ignpower_config_t *config)
         BREAK_IF(err != E_OK);
       }
 
-      now = time_get_current_us();
+      now = time_now_us();
       ctx->status_time = now;
       ctx->output_time = now;
       ctx->operating_time = now;
@@ -131,7 +131,7 @@ void ignpower_loop_slow(ignpower_ctx_t *ctx)
 
   if(ctx->ready) {
     if(ctx->configured) {
-      now = time_get_current_us();
+      now = time_now_us();
 
       input_bool = ctx->data.ignpower_active;
       err = input_get_value(ctx->input_signal_pin, &input_value, NULL);

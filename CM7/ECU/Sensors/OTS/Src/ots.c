@@ -112,7 +112,7 @@ void ots_loop_slow(ots_ctx_t *ctx)
   sMathInterpolateInput interpolate_input = {0};
   const ots_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
   float value_div_step, value, value_old, allowed_rate, value_diff;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   time_delta_us_t time_delta;
   bool data_valid = false;
 

@@ -22,7 +22,7 @@ ITCM_FUNC static error_t l9960_fsm_check_status(l9960_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->status_fsm_state) {
       case L9960_STATUS_CONDITION:
@@ -165,7 +165,7 @@ ITCM_FUNC static error_t l9960_fsm_reset(l9960_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->reset_fsm_state) {
       case L9960_RESET_CONDITION:
@@ -308,7 +308,7 @@ ITCM_FUNC static error_t l9960_fsm_diagoff(l9960_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->diagoff_fsm_state) {
       case L9960_DIAGOFF_CONDITION:
@@ -450,7 +450,7 @@ ITCM_FUNC static error_t l9960_fsm_hwsc(l9960_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->hwsc_fsm_state) {
       case L9960_HWSC_CONDITION:

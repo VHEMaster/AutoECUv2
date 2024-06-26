@@ -113,12 +113,12 @@ ITCM_FUNC void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_
       spi_private_txrx_full_cplt_cb(spi_slave, errorcode);
     } else {
       poll_begin_time = spi->time_poll_begin;
-      now = time_get_current_us();
+      now = time_now_us();
       if(time_diff(now, poll_begin_time) <= spi->time_poll_timeout) {
         if(spi->poll_period == 0u) {
           spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_bytes);
         } else {
-          spi->poll_startpoint = time_get_current_us();
+          spi->poll_startpoint = time_now_us();
           spi->poll_scheduled = true;
         }
       } else {
@@ -138,7 +138,7 @@ ITCM_FUNC INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, co
   spi_t *spi = spi_slave->spi;
 
   spi->state = SPI_STATE_WAIT_TXRX;
-  spi->time_transaction = time_get_current_us();
+  spi->time_transaction = time_now_us();
 
   gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
@@ -173,7 +173,7 @@ ITCM_FUNC INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void
   spi_t *spi = spi_slave->spi;
 
   spi->state = SPI_STATE_WAIT_TX;
-  spi->time_transaction = time_get_current_us();
+  spi->time_transaction = time_now_us();
 
   gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
@@ -208,7 +208,7 @@ ITCM_FUNC INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data,
   spi_t *spi = spi_slave->spi;
 
   spi->state = SPI_STATE_WAIT_RX;
-  spi->time_transaction = time_get_current_us();
+  spi->time_transaction = time_now_us();
 
   gpio_reset(&spi_slave->nss_pin);
   if(spi->cfg.use_dma && size >= spi->cfg.dma_usage_threshold) {
@@ -242,7 +242,7 @@ ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
 
   if(spi->busy == true && spi->poll_scheduled == true) {
     poll_timestamp = spi->poll_startpoint;
-    now = time_get_current_us();
+    now = time_now_us();
     if(time_diff(now, poll_timestamp) >= spi->poll_period) {
       spi->time_transaction = now;
       spi->poll_scheduled = false;

@@ -60,7 +60,7 @@ input_if_id_t input_if_register(const input_if_cfg_t *cfg, void *usrdata)
     interface->func_ch_irq_cb = cfg->ch_irq_cb;
     interface->usrdata = usrdata;
 
-    now = time_get_current_us();
+    now = time_now_us();
     interface->time_main_last = now;
     interface->time_slow_last = now;
     interface->time_fast_last = now;
@@ -313,7 +313,7 @@ error_t input_ch_source_direct(input_id_t channel_id, input_value_t initial_valu
       break;
     }
 
-    now = time_get_current_us();
+    now = time_now_us();
 
     ch = &input_ctx.chs[channel_id];
     ch->source = INPUT_SOURCE_DIRECT;
@@ -339,7 +339,7 @@ ITCM_FUNC error_t input_get_value(input_id_t channel_id, input_value_t *value, t
       break;
     }
     ch = &input_ctx.chs[channel_id];
-    now = time_get_current_us();
+    now = time_now_us();
 
     err = inputs_internal_channel_poll(ch, INPUT_POLLING_MODE_DIRECT);
 
@@ -349,7 +349,7 @@ ITCM_FUNC error_t input_get_value(input_id_t channel_id, input_value_t *value, t
 
     if(time != NULL) {
       valtime = ch->value_change_time;
-      now = time_get_current_us();
+      now = time_now_us();
       *time = time_diff(now, valtime);
     }
   } while(0);
@@ -377,7 +377,7 @@ ITCM_FUNC error_t input_set_value(input_id_t channel_id, input_value_t value, bo
       break;
     }
 
-    now = time_get_current_us();
+    now = time_now_us();
     if(ch->debounce_time) {
       ch->val_direct = value;
     } else {

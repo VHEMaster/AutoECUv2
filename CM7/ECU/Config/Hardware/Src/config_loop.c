@@ -41,7 +41,7 @@ ITCM_FUNC static void ecu_loop_execute(ecu_loop_callbacks_t *callbacks)
     item = &callbacks->items[i];
 
     if(item->func) {
-      now = time_get_current_us();
+      now = time_now_us();
       if(item->period == 0 || time_diff(now, item->last) >= item->period) {
         item->last = now;
         item->func(item->usrdata);
@@ -55,7 +55,7 @@ static error_t ecu_loop_register(ecu_loop_callbacks_t *callbacks, ecu_loop_cb_t 
   error_t err = E_OK;
   uint32_t new_index;
   bool found = false;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
 
   do {
     BREAK_IF_ACTION(callbacks->count >= ECU_LOOP_MAX_CALLBACKS, err = E_OVERFLOW);

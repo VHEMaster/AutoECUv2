@@ -357,7 +357,7 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
     data_cur = ctx->data.crankshaft;
     ExitCritical(prim);
 
-    now = time_get_current_us();
+    now = time_now_us();
 
     positions[0] = &data_cur.sensor_data.current.position;
     positions[1] = &data_cur.sensor_data.previous.position;

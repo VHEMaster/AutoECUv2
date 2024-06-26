@@ -174,7 +174,7 @@ void ckp_loop_main(ckp_ctx_t *ctx)
 
 void ckp_loop_slow(ckp_ctx_t *ctx)
 {
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   ckp_data_t data;
   ckp_diag_t diag;
   uint32_t prim;
@@ -229,7 +229,7 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
   data_cur = ctx->data;
   ExitCritical(prim);
 
-  now = time_get_current_us();
+  now = time_now_us();
 
   pos = data_cur.current.position;
 

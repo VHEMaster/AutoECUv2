@@ -13,7 +13,7 @@ ITCM_FUNC void outputs_internal_loop(output_ctx_t *ctx, output_polling_mode_t po
   output_if_ctx_t *interface;
   output_ch_ctx_t *ch;
   time_delta_us_t deltatime;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   output_ch_poll_ctx_t *poll = NULL;
 
   if(polling_mode < OUTPUT_POLLING_MODE_MAX) {
@@ -65,7 +65,7 @@ ITCM_FUNC error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_poll
   if(ch->periodic_polling_mode == polling_mode) {
     if(ch->periodic_mode != OUTPUT_PERIODIC_IDLE) {
       valtime = ch->periodic_time;
-      now = time_get_current_us();
+      now = time_now_us();
       diff = time_diff(now, valtime);
 
       if(ch->periodic_mode == OUTPUT_PERIODIC_ONCE_ON || ch->periodic_mode == OUTPUT_PERIODIC_ACTIVE_ON) {
@@ -77,7 +77,7 @@ ITCM_FUNC error_t outputs_internal_channel_poll(output_ch_ctx_t *ch, output_poll
       }
 
       if(diff >= cmp_time) {
-        now = time_get_current_us();
+        now = time_now_us();
         ch->periodic_time = now;
         if(ch->periodic_mode == OUTPUT_PERIODIC_ONCE_ON) {
           ch->periodic_mode = OUTPUT_PERIODIC_ONCE_OFF;

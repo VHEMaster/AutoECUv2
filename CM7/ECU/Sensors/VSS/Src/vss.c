@@ -30,7 +30,7 @@ error_t vss_init(vss_ctx_t *ctx, const vss_init_ctx_t *init_ctx)
 static void vss_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   vss_ctx_t *ctx = (vss_ctx_t *)usrdata;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   time_delta_us_t delta;
   float freq;
   uint8_t index, freq_cnt;
@@ -169,7 +169,7 @@ void vss_loop_slow(vss_ctx_t *ctx)
     BREAK_IF(ctx == NULL);
 
     last_time = ctx->freq_last_time;
-    now = time_get_current_us();
+    now = time_now_us();
 
     if(ctx->configured == true) {
       if(ctx->started == true) {

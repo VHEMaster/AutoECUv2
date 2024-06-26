@@ -27,12 +27,12 @@ void time_init_tickbase(volatile time_tick_t *tickbase, time_us_t mask)
   g_tick_mask = mask;
 }
 
-ITCM_FUNC INLINE time_us_t time_get_current_us(void)
+ITCM_FUNC INLINE time_us_t time_now_us(void)
 {
   return *g_time_timebase;
 }
 
-ITCM_FUNC INLINE time_tick_t time_get_current_tick(void)
+ITCM_FUNC INLINE time_tick_t time_now_tick(void)
 {
   return *g_time_tickbase;
 }
@@ -65,17 +65,17 @@ ITCM_FUNC INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
 
 ITCM_FUNC INLINE void time_msmt_start(time_msmnt_item_t *item)
 {
-  time_tick_t tick = time_get_current_tick();
+  time_tick_t tick = time_now_tick();
 
   item->period = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
 
-  tick = time_get_current_tick();
+  tick = time_now_tick();
   item->last_tick = tick;
 }
 
 ITCM_FUNC INLINE void time_msmt_stop(time_msmnt_item_t *item)
 {
-  time_tick_t tick = time_get_current_tick();
+  time_tick_t tick = time_now_tick();
   time_float_delta_us_t load_tick = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
 
   if(item->load_max < load_tick || item->load_max == 0) {

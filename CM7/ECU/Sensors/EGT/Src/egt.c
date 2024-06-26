@@ -80,7 +80,7 @@ error_t egt_reset(egt_ctx_t *ctx)
 void egt_loop_slow(egt_ctx_t *ctx)
 {
   error_t err = E_OK;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   bool data_valid = false;
 
   do {

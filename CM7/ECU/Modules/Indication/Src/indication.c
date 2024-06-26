@@ -63,7 +63,7 @@ error_t indication_configure(indication_ctx_t *ctx, const indication_config_t *c
         BREAK_IF(err != E_OK);
       }
 
-      now = time_get_current_us();
+      now = time_now_us();
       ctx->periodic_last = now;
       ctx->configured = true;
     }
@@ -104,7 +104,7 @@ void indication_loop_slow(indication_ctx_t *ctx)
 
   if(ctx->ready) {
     if(ctx->configured) {
-      now = time_get_current_us();
+      now = time_now_us();
 
       if(ctx->config.trigger_source == INDICATION_CONFIG_TRIGGER_CRANKSHAFT && ctx->data.ckp_triggered) {
         ctx->data.indication_set = true;

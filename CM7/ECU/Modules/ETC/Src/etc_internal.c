@@ -25,7 +25,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
     enabled = ctx->data.enabled;
 
-    now = time_get_current_us();
+    now = time_now_us();
     time_delta = time_diff(now, ctx->process_time);
     ctx->process_time = now;
 

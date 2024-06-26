@@ -30,7 +30,7 @@ error_t map_init(map_ctx_t *ctx, const map_init_ctx_t *init_ctx)
 static void map_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   map_ctx_t *ctx = (map_ctx_t *)usrdata;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   time_delta_us_t delta;
   float freq;
   uint8_t index;
@@ -179,7 +179,7 @@ void map_loop_slow(map_ctx_t *ctx)
   sMathInterpolateInput interpolate_input = {0};
   const map_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
   time_us_t last_time = ctx->freq_last_time;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   float input_value;
   bool data_valid = false;
 

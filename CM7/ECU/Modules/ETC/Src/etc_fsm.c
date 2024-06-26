@@ -15,7 +15,7 @@ error_t etc_fsm(etc_ctx_t *ctx)
   time_us_t now;
 
   while(true) {
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->fsm_process) {
       case ETC_FSM_CONDITION:

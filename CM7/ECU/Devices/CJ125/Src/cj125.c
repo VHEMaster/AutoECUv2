@@ -269,7 +269,7 @@ error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages
     ctx->data.ua_voltage = voltages->ua;
     ctx->voltages_updated = true;
 
-    now = time_get_current_us();
+    now = time_now_us();
     ctx->voltages_timestamp = now;
 
   } while(0);

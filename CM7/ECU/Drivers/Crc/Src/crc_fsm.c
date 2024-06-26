@@ -15,7 +15,7 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
   time_us_t now;
 
   while(true) {
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->fsm_process) {
       case CRC_FSM_CONDITION:

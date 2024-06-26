@@ -22,7 +22,7 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->reset_fsm) {
       case CJ125_RESET_CONDITION:
@@ -229,7 +229,7 @@ ITCM_FUNC static error_t cj125_fsm_diag(cj125_ctx_t *ctx)
 
   while(true) {
     err = E_AGAIN;
-    now = time_get_current_us();
+    now = time_now_us();
 
     switch(ctx->diag_fsm) {
       case CJ125_DIAG_CONDITION:

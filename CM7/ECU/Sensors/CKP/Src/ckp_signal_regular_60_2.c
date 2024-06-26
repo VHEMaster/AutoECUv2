@@ -99,7 +99,7 @@ error_t ckp_signal_regular_60_2_init(ckp_ctx_t *ctx, ckp_instance_t instance_ind
 ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata)
 {
   ckp_signal_regular_60_2_ctx_t *signal_ctx = (ckp_signal_regular_60_2_ctx_t *)usrdata;
-  time_us_t now = time_get_current_us();
+  time_us_t now = time_now_us();
   time_us_t time_last;
   time_delta_us_t delta, delta_last;
   time_delta_us_t rpm_delta;
@@ -427,7 +427,7 @@ void ckp_signal_regular_60_2_loop_slow(ckp_ctx_t *ctx, void *usrdata)
   for(int i = 0; i < CKP_SIGNAL_REGULAR_60_2_INDEX_MAX; i++) {
     time_last = signal_ctx->runtime.indexed[i].time_last;
     if(time_last != 0) {
-      now = time_get_current_us();
+      now = time_now_us();
       delta = time_diff(now, time_last);
 
       if(signal_ctx->runtime.rpm_delta_count > 16) {
