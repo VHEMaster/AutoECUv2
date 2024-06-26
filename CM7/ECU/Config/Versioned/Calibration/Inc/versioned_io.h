@@ -110,6 +110,11 @@ typedef enum {
 }ecu_config_io_vvt_t;
 
 typedef enum {
+  ECU_CONFIG_IO_WGCV_PRIMARY = 0,
+  ECU_CONFIG_IO_WGCV_MAX
+}ecu_config_io_wgcv_t;
+
+typedef enum {
   ECU_CONFIG_IO_FUELPUMP_PRIMARY = 0,
   ECU_CONFIG_IO_FUELPUMP_SECONDARY,
   ECU_CONFIG_IO_FUELPUMP_MAX
@@ -157,6 +162,7 @@ typedef struct {
 
     ecu_config_io_etc_t module_etc[ECU_CONFIG_IO_ETC_MAX];
     ecu_config_io_vvt_t module_vvt[ECU_CONFIG_IO_VVT_MAX];
+    ecu_config_io_wgcv_t module_wgcv[ECU_CONFIG_IO_WGCV_MAX];
 
 }ecu_config_io_common_t;
 

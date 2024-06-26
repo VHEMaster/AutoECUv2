@@ -50,6 +50,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/OPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/IgnPower/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Indication/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/WGCV/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>
@@ -186,6 +187,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Sensors/OPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/IgnPower/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/Indication/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Modules/WGCV/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Sensors/MAP/Inc"/>

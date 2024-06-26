@@ -96,6 +96,9 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                 ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
                 ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
             },
+            .module_wgcv = {
+                ECU_MODULE_NONE, //ECU_CONFIG_IO_WGCV_PRIMARY
+            },
         },
     },
 
@@ -146,6 +149,9 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                     ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
                     ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
                 },
+                .module_wgcv = {
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_WGCV_PRIMARY
+                },
             },
         }, //ECU_BANK_1
         {
@@ -193,6 +199,9 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                     ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_SOHC
                     ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_INTAKE
                     ECU_MODULE_NONE, //ECU_CONFIG_IO_VVT_DOHC_EXHAUST
+                },
+                .module_wgcv = {
+                    ECU_MODULE_NONE, //ECU_CONFIG_IO_WGCV_PRIMARY
                 },
             },
         }, //ECU_BANK_2

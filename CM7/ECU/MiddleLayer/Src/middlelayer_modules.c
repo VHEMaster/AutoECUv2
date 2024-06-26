@@ -15,6 +15,7 @@
 #include "config_coolingfan.h"
 #include "config_ignpower.h"
 #include "config_indication.h"
+#include "config_wgcv.h"
 
 #include "compiler.h"
 
@@ -124,6 +125,18 @@ void middlelayer_modules_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_modules_set_module_initialized(ECU_MODULE_TYPE_INDICATION, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_MODULE_WGCV_MAX; i++) {
+      err = ecu_modules_get_module_ctx(ECU_MODULE_TYPE_WGCV, i, &module_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_modules_wgcv_init(i, (wgcv_ctx_t *)module_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_modules_set_module_initialized(ECU_MODULE_TYPE_WGCV, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

@@ -22,6 +22,7 @@ typedef enum {
   ECU_MODULE_TYPE_COOLINGFAN,
   ECU_MODULE_TYPE_IGNPOWER,
   ECU_MODULE_TYPE_INDICATION,
+  ECU_MODULE_TYPE_WGCV,
   ECU_MODULE_TYPE_MAX
 }ecu_module_type_t;
 
@@ -70,5 +71,11 @@ typedef enum {
   ECU_MODULE_INDICATION_6,
   ECU_MODULE_INDICATION_MAX
 }ecu_module_indication_t;
+
+typedef enum {
+  ECU_MODULE_WGCV_1 = 0,
+  ECU_MODULE_WGCV_2,
+  ECU_MODULE_WGCV_MAX
+}ecu_module_wgcv_t;
 
 #endif /* CONFIG_MODULES_INC_CONFIG_MODULES_TYPES_H_ */

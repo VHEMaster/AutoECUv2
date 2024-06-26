@@ -15,5 +15,6 @@
 #include "versioned_coolingfan.h"
 #include "versioned_ignpower.h"
 #include "versioned_indication.h"
+#include "versioned_wgcv.h"
 
 #endif /* CONFIG_VERSIONED_MODULES_INC_VERSIONED_MODULES_H_ */

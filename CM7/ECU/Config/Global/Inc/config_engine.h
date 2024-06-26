@@ -44,6 +44,7 @@ typedef struct {
     coolingfan_config_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
     ignpower_config_t ignpower[ECU_MODULE_IGNPOWER_MAX];
     indication_config_t indication[ECU_MODULE_INDICATION_MAX];
+    wgcv_config_t wgcv[ECU_MODULE_WGCV_MAX];
 }ecu_config_engine_modules_t;
 
 typedef struct {
