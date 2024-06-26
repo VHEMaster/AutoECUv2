@@ -7,6 +7,7 @@
 
 #include "wgcv.h"
 #include "compiler.h"
+#include "interpolation.h"
 #include <string.h>
 
 error_t wgcv_init(wgcv_ctx_t *ctx, const wgcv_init_ctx_t *init_ctx)
@@ -100,12 +101,67 @@ error_t wgcv_reset(wgcv_ctx_t *ctx)
 void wgcv_loop_slow(wgcv_ctx_t *ctx)
 {
   error_t err = E_OK;
+  sMathInterpolateInput interpolate_input_min = {0};
+  sMathInterpolateInput interpolate_input_max = {0};
+  input_value_t input_analog_value;
+  float input_dutycycle;
+  float output_dutycycle;
+  float power_voltage;
+  float dutycycle_min;
+  float dutycycle_max;
 
   if(ctx->ready) {
     if(ctx->configured) {
-      (void)err;
 
-      // TODO: implement
+      (void)input_get_value(ctx->power_voltage_pin, &input_analog_value, NULL);
+      power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
+      ctx->power_voltage = power_voltage;
+
+      input_dutycycle = ctx->data.input_dutycycle;
+
+      if(ctx->data.force_input_engaged) {
+        input_dutycycle = ctx->data.force_input_dutycycle;
+      } else {
+        ctx->data.force_input_dutycycle = input_dutycycle;
+      }
+
+      interpolate_input_min = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_closed.input, ctx->config.voltage_to_pwm_dutycycle.full_closed.items);
+      interpolate_input_max = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_open.input, ctx->config.voltage_to_pwm_dutycycle.full_open.items);
+
+      dutycycle_min = math_interpolate_1d(interpolate_input_min, ctx->config.voltage_to_pwm_dutycycle.full_closed.output);
+      dutycycle_max = math_interpolate_1d(interpolate_input_max, ctx->config.voltage_to_pwm_dutycycle.full_open.output);
+
+      if(input_dutycycle <= ctx->config.input_dutycycle_min) {
+        output_dutycycle = ctx->config.pwm_dutycycle_min;
+      } else if(input_dutycycle >= ctx->config.input_dutycycle_max) {
+        output_dutycycle = ctx->config.pwm_dutycycle_max;
+      } else {
+        output_dutycycle = input_dutycycle;
+        output_dutycycle *= dutycycle_max - dutycycle_min;
+        output_dutycycle += dutycycle_min;
+        output_dutycycle = CLAMP(output_dutycycle, dutycycle_min, dutycycle_max);
+      }
+
+      if(ctx->data.force_pwm_engaged) {
+        output_dutycycle = ctx->data.force_pwm_dutycycle;
+      } else {
+        ctx->data.force_pwm_dutycycle = output_dutycycle;
+      }
+
+      ctx->data.pwm_dutycycle = output_dutycycle;
+
+      if(ctx->pwm_dutycycle_prev != output_dutycycle) {
+        if(ctx->pwm_pin_locked) {
+          err = ecu_config_gpio_output_pwm_set_dutycycle(ctx->config.output_pwm_pin, output_dutycycle);
+          if(err == E_OK) {
+            ctx->pwm_dutycycle_prev = output_dutycycle;
+          } else {
+            ctx->diag.bits.output_drive_error = true;
+          }
+        } else {
+          ctx->pwm_dutycycle_prev = output_dutycycle;
+        }
+      }
     }
   }
 }
@@ -166,6 +222,68 @@ error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
     ctx->data.input_dutycycle = dutycycle;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_force_input_reset(wgcv_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.force_input_engaged = false;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_force_input_set(wgcv_ctx_t *ctx, float dutycycle)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.force_input_engaged = true;
+    ctx->data.force_input_dutycycle = dutycycle;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_force_pwm_reset(wgcv_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.force_pwm_engaged = false;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_force_pwm_set(wgcv_ctx_t *ctx, float dutycycle)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.force_pwm_engaged = true;
+    ctx->data.force_pwm_dutycycle = dutycycle;
 
   } while(0);
 

@@ -196,6 +196,8 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
 
       if(ctx->data.force_engaged) {
         ctx->data.working = ctx->data.force_enabled;
+      } else {
+        ctx->data.force_enabled = ctx->data.working;
       }
 
       if(ctx->working_prev != ctx->data.working) {
@@ -376,7 +378,6 @@ error_t coolingfan_force_reset(coolingfan_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
     ctx->data.force_engaged = false;
-    ctx->data.force_enabled = false;
 
   } while(0);
 

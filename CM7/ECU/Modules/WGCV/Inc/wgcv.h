@@ -18,7 +18,7 @@
 typedef union {
     uint32_t data;
     struct {
-
+        bool output_drive_error : 1;
     }bits;
 }wgcv_diag_t;
 
@@ -26,6 +26,10 @@ typedef struct {
     bool enabled;
     float pwm_dutycycle;
     float input_dutycycle;
+    bool force_input_engaged;
+    float force_input_dutycycle;
+    bool force_pwm_engaged;
+    float force_pwm_dutycycle;
 }wgcv_data_t;
 
 typedef struct {
@@ -41,6 +45,9 @@ typedef struct {
 
     wgcv_diag_t diag;
     wgcv_data_t data;
+
+    float pwm_dutycycle_prev;
+    float power_voltage;
 
     math_pid_ctx_t pid_position;
     math_pid_ctx_t pid_speed;
@@ -61,6 +68,12 @@ error_t wgcv_get_diag(wgcv_ctx_t *ctx, wgcv_diag_t *diag);
 
 error_t wgcv_set_enabled(wgcv_ctx_t *ctx, bool enabled);
 error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle);
+
+error_t wgcv_force_input_reset(wgcv_ctx_t *ctx);
+error_t wgcv_force_input_set(wgcv_ctx_t *ctx, float dutycycle);
+error_t wgcv_force_pwm_reset(wgcv_ctx_t *ctx);
+error_t wgcv_force_pwm_set(wgcv_ctx_t *ctx, float dutycycle);
+
 
 void wgcv_loop_main(wgcv_ctx_t *ctx);
 void wgcv_loop_slow(wgcv_ctx_t *ctx);

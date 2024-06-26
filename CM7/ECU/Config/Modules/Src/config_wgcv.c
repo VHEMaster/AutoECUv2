@@ -25,22 +25,22 @@ static const wgcv_config_t ecu_modules_wgcv_config_default = {
             .items = 10,
             .input = {
                 6.0f, 8.0f, 10.0f, 11.0f, 12.0f,
-                13.0f, 14.0f, 16.0f, 15.0f, 18.0f,
+                13.0f, 14.0f, 15.0f, 16.0f, 18.0f,
             },
             .output = {
-                0.60f, 0.60f, 0.60f, 0.60f, 0.60f,
-                0.60f, 0.60f, 0.60f, 0.60f, 0.60f,
+                0.98f, 0.79f, 0.52f, 0.45f, 0.41f,
+                0.36f, 0.32f, 0.30f, 0.29f, 0.23f,
             },
         },
         .full_open = {
             .items = 10,
             .input = {
                 6.0f, 8.0f, 10.0f, 11.0f, 12.0f,
-                13.0f, 14.0f, 16.0f, 15.0f, 18.0f,
+                13.0f, 14.0f, 15.0f, 16.0f, 18.0f,
             },
             .output = {
-                0.80f, 0.80f, 0.80f, 0.80f, 0.80f,
-                0.80f, 0.80f, 0.80f, 0.80f, 0.80f,
+                0.99f, 0.88f, 0.86f, 0.84f, 0.84f,
+                0.83f, 0.83f, 0.82f, 0.81f, 0.80f,
             },
         },
     },
@@ -77,7 +77,7 @@ static ecu_modules_wgcv_ctx_t ecu_modules_wgcv_ctx[ECU_MODULE_WGCV_MAX] = {
 };
 
 static const bool ecu_sensors_wgcv_enabled_default[ECU_MODULE_WGCV_MAX] = {
-    false,
+    true,
     false,
 };
 
@@ -190,6 +190,74 @@ error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycyc
 
 
     err = wgcv_set_dutycycle(wgcv_ctx->ctx, dutycycle);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_force_input_reset(ecu_module_wgcv_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+    err = wgcv_force_input_reset(wgcv_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_force_input_set(ecu_module_wgcv_t instance, float dutycycle)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+    err = wgcv_force_input_set(wgcv_ctx->ctx, dutycycle);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_force_pwm_reset(ecu_module_wgcv_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+    err = wgcv_force_pwm_reset(wgcv_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_force_pwm_set(ecu_module_wgcv_t instance, float dutycycle)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+    err = wgcv_force_pwm_set(wgcv_ctx->ctx, dutycycle);
 
   } while(0);
 

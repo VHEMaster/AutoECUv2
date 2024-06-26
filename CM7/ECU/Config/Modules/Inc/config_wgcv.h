@@ -21,4 +21,9 @@ error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycyc
 error_t ecu_modules_wgcv_get_data(ecu_module_wgcv_t instance, wgcv_data_t *data);
 error_t ecu_modules_wgcv_get_diag(ecu_module_wgcv_t instance, wgcv_diag_t *diag);
 
+error_t ecu_modules_wgcv_force_input_reset(ecu_module_wgcv_t instance);
+error_t ecu_modules_wgcv_force_input_set(ecu_module_wgcv_t instance, float dutycycle);
+error_t ecu_modules_wgcv_force_pwm_reset(ecu_module_wgcv_t instance);
+error_t ecu_modules_wgcv_force_pwm_set(ecu_module_wgcv_t instance, float dutycycle);
+
 #endif /* CONFIG_INC_CONFIG_WGCV_H_ */
