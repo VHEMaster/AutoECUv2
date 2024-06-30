@@ -46,7 +46,7 @@ typedef struct {
     float input_dutycycle_min;
     float input_dutycycle_max;
 
-    math_pid_koffs_t pid_position;
+    math_pid_koffs_t pid_boost;
     math_pid_koffs_t pid_speed;
 
     uint32_t align ALIGNED_CACHE;

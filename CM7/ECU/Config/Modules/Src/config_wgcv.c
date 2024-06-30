@@ -51,7 +51,7 @@ static const wgcv_config_t ecu_modules_wgcv_config_default = {
     .input_dutycycle_min = 0.05f,
     .input_dutycycle_max = 0.95f,
 
-    .pid_position = {
+    .pid_boost = {
         .Kp = 0.0,
         .Ki = 0.0,
         .Kd = 0.0,
@@ -190,6 +190,42 @@ error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycyc
 
 
     err = wgcv_set_dutycycle(wgcv_ctx->ctx, dutycycle);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_set_actual_boost(ecu_module_wgcv_t instance, float actual_boost)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+
+    err = wgcv_set_actual_boost(wgcv_ctx->ctx, actual_boost);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_wgcv_set_target_boost(ecu_module_wgcv_t instance, float target_boost)
+{
+  error_t err = E_OK;
+  ecu_modules_wgcv_ctx_t *wgcv_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+
+    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
+
+
+    err = wgcv_set_target_boost(wgcv_ctx->ctx, target_boost);
 
   } while(0);
 

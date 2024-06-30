@@ -14,6 +14,7 @@
 #include "time.h"
 
 #define ECU_WGCV_PWM_PERIOD    (250)
+#define ECU_WGCV_BOOST_UPDATE_TIMEOUT_US    (100 * TIME_US_IN_MS)
 
 typedef union {
     uint32_t data;
@@ -26,10 +27,14 @@ typedef struct {
     bool enabled;
     float pwm_dutycycle;
     float input_dutycycle;
+    float pid_dutycycle;
     bool force_input_engaged;
     float force_input_dutycycle;
     bool force_pwm_engaged;
     float force_pwm_dutycycle;
+
+    float target_boost;
+    float actual_boost;
 }wgcv_data_t;
 
 typedef struct {
@@ -49,11 +54,20 @@ typedef struct {
     float pwm_dutycycle_prev;
     float power_voltage;
 
-    math_pid_ctx_t pid_position;
+    bool actual_boost_updated;
+
+    math_pid_ctx_t pid_boost;
     math_pid_ctx_t pid_speed;
+
+    float boost_current;
+    float boost_prev;
+    float current_speed;
+    float target_speed;
 
     input_id_t power_voltage_pin;
     output_id_t output_pwm_pin;
+    time_us_t process_time;
+    time_us_t boost_update_last;
 
 }wgcv_ctx_t;
 
@@ -69,11 +83,13 @@ error_t wgcv_get_diag(wgcv_ctx_t *ctx, wgcv_diag_t *diag);
 error_t wgcv_set_enabled(wgcv_ctx_t *ctx, bool enabled);
 error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle);
 
+error_t wgcv_set_actual_boost(wgcv_ctx_t *ctx, float actual_boost);
+error_t wgcv_set_target_boost(wgcv_ctx_t *ctx, float target_boost);
+
 error_t wgcv_force_input_reset(wgcv_ctx_t *ctx);
 error_t wgcv_force_input_set(wgcv_ctx_t *ctx, float dutycycle);
 error_t wgcv_force_pwm_reset(wgcv_ctx_t *ctx);
 error_t wgcv_force_pwm_set(wgcv_ctx_t *ctx, float dutycycle);
-
 
 void wgcv_loop_main(wgcv_ctx_t *ctx);
 void wgcv_loop_slow(wgcv_ctx_t *ctx);

@@ -17,6 +17,8 @@ error_t ecu_modules_wgcv_configure(ecu_module_wgcv_t instance, const wgcv_config
 error_t ecu_modules_wgcv_reset(ecu_module_wgcv_t instance);
 
 error_t ecu_modules_wgcv_set_enabled(ecu_module_wgcv_t instance, bool enabled);
+error_t ecu_modules_wgcv_set_actual_boost(ecu_module_wgcv_t instance, float actual_boost);
+error_t ecu_modules_wgcv_set_target_boost(ecu_module_wgcv_t instance, float target_boost);
 error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycycle);
 error_t ecu_modules_wgcv_get_data(ecu_module_wgcv_t instance, wgcv_data_t *data);
 error_t ecu_modules_wgcv_get_diag(ecu_module_wgcv_t instance, wgcv_diag_t *diag);

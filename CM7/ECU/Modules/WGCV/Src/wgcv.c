@@ -20,7 +20,7 @@ error_t wgcv_init(wgcv_ctx_t *ctx, const wgcv_init_ctx_t *init_ctx)
     memset(ctx, 0u, sizeof(wgcv_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(wgcv_init_ctx_t));
 
-    math_pid_init(&ctx->pid_position);
+    math_pid_init(&ctx->pid_boost);
     math_pid_init(&ctx->pid_speed);
 
     ctx->ready = true;
@@ -34,6 +34,7 @@ error_t wgcv_configure(wgcv_ctx_t *ctx, const wgcv_config_t *config)
 {
   error_t err = E_OK;
   ecu_gpio_output_if_pwm_cfg_t pwm_config;
+  time_us_t now;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
@@ -51,6 +52,8 @@ error_t wgcv_configure(wgcv_ctx_t *ctx, const wgcv_config_t *config)
     }
 
     if(ctx->config.enabled == true) {
+      now = time_now_us();
+
       err = ecu_config_gpio_input_get_id(ctx->config.power_voltage_pin, &ctx->power_voltage_pin);
       BREAK_IF(err != E_OK);
 
@@ -67,6 +70,7 @@ error_t wgcv_configure(wgcv_ctx_t *ctx, const wgcv_config_t *config)
       err = ecu_config_gpio_output_pwm_configure(ctx->config.output_pwm_pin, &pwm_config);
       BREAK_IF(err != E_OK);
 
+      ctx->process_time = now;
       ctx->configured = true;
     }
 
@@ -101,17 +105,27 @@ error_t wgcv_reset(wgcv_ctx_t *ctx)
 void wgcv_loop_slow(wgcv_ctx_t *ctx)
 {
   error_t err = E_OK;
+  time_us_t now;
   sMathInterpolateInput interpolate_input_min = {0};
   sMathInterpolateInput interpolate_input_max = {0};
   input_value_t input_analog_value;
   float input_dutycycle;
+  float pid_dutycycle;
   float output_dutycycle;
   float power_voltage;
   float dutycycle_min;
   float dutycycle_max;
+  bool pid_reset = false;
+  time_delta_us_t time_delta;
+
+  float pid_speed;
+  float pid_current;
 
   if(ctx->ready) {
     if(ctx->configured) {
+      now = time_now_us();
+      time_delta = time_diff(now, ctx->process_time);
+      ctx->process_time = now;
 
       (void)input_get_value(ctx->power_voltage_pin, &input_analog_value, NULL);
       power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
@@ -124,6 +138,40 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
       } else {
         ctx->data.force_input_dutycycle = input_dutycycle;
       }
+
+      if(ctx->actual_boost_updated) {
+        ctx->actual_boost_updated = false;
+        ctx->boost_update_last = now;
+        math_pid_set_koffs(&ctx->pid_boost, &ctx->config.pid_boost);
+        math_pid_set_koffs(&ctx->pid_speed, &ctx->config.pid_speed);
+
+        ctx->boost_prev = ctx->boost_current;
+        ctx->boost_current = ctx->data.actual_boost;
+        ctx->current_speed = (ctx->boost_current - ctx->boost_prev) / ((float)time_delta * 0.000001f);
+
+        if(ctx->data.target_boost > 0.0f) {
+          math_pid_set_target(&ctx->pid_boost, ctx->data.target_boost);
+          pid_speed = math_pid_update(&ctx->pid_boost, ctx->boost_current, now);
+
+          math_pid_set_target(&ctx->pid_speed, pid_speed);
+          pid_current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
+
+          pid_current = CLAMP(pid_current, -1.0f, 1.0f);
+        } else {
+          pid_current = 0.0f;
+          pid_reset = true;
+        }
+        ctx->data.pid_dutycycle = pid_current;
+      } else if(time_diff(now, ctx->boost_update_last) >= ECU_WGCV_BOOST_UPDATE_TIMEOUT_US) {
+        ctx->boost_update_last = now;
+        ctx->data.pid_dutycycle = 0.0f;
+        pid_current = 0.0f;
+        pid_reset = true;
+      }
+
+      pid_dutycycle = ctx->data.pid_dutycycle;
+
+      input_dutycycle += pid_dutycycle;
 
       interpolate_input_min = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_closed.input, ctx->config.voltage_to_pwm_dutycycle.full_closed.items);
       interpolate_input_max = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_open.input, ctx->config.voltage_to_pwm_dutycycle.full_open.items);
@@ -144,6 +192,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
 
       if(ctx->data.force_pwm_engaged) {
         output_dutycycle = ctx->data.force_pwm_dutycycle;
+        pid_reset = true;
       } else {
         ctx->data.force_pwm_dutycycle = output_dutycycle;
       }
@@ -161,6 +210,11 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
         } else {
           ctx->pwm_dutycycle_prev = output_dutycycle;
         }
+      }
+
+      if(pid_reset) {
+        math_pid_reset(&ctx->pid_boost, now);
+        math_pid_reset(&ctx->pid_speed, now);
       }
     }
   }
@@ -222,6 +276,37 @@ error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
     ctx->data.input_dutycycle = dutycycle;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_set_actual_boost(wgcv_ctx_t *ctx, float actual_boost)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.actual_boost = MAX(actual_boost, 0.0f);
+    ctx->actual_boost_updated = true;
+
+  } while(0);
+
+  return err;
+}
+
+error_t wgcv_set_target_boost(wgcv_ctx_t *ctx, float target_boost)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+
+    ctx->data.target_boost = MAX(target_boost, 0.0f);
 
   } while(0);
 
