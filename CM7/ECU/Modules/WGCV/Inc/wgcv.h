@@ -11,6 +11,7 @@
 #include "common.h"
 #include "versioned_wgcv.h"
 #include "config_gpio.h"
+#include "config_map.h"
 #include "time.h"
 
 #define ECU_WGCV_PWM_PERIOD    (250)
@@ -20,6 +21,9 @@ typedef union {
     uint32_t data;
     struct {
         bool output_drive_error : 1;
+        bool map_handle_error : 1;
+        bool map_diag_error : 1;
+        bool map_poll_error : 1;
     }bits;
 }wgcv_diag_t;
 
@@ -50,6 +54,9 @@ typedef struct {
 
     wgcv_diag_t diag;
     wgcv_data_t data;
+
+    map_data_t map_data;
+    map_diag_t map_diag;
 
     float pwm_dutycycle_prev;
     float power_voltage;
@@ -83,7 +90,6 @@ error_t wgcv_get_diag(wgcv_ctx_t *ctx, wgcv_diag_t *diag);
 error_t wgcv_set_enabled(wgcv_ctx_t *ctx, bool enabled);
 error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle);
 
-error_t wgcv_set_actual_boost(wgcv_ctx_t *ctx, float actual_boost);
 error_t wgcv_set_target_boost(wgcv_ctx_t *ctx, float target_boost);
 
 error_t wgcv_force_input_reset(wgcv_ctx_t *ctx);

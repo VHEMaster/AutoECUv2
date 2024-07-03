@@ -116,6 +116,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
   float dutycycle_min;
   float dutycycle_max;
   bool pid_reset = false;
+  bool sens_map_reset = false;
   time_delta_us_t time_delta;
 
   float pid_speed;
@@ -139,32 +140,61 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
         ctx->data.force_input_dutycycle = input_dutycycle;
       }
 
-      if(ctx->actual_boost_updated) {
-        ctx->actual_boost_updated = false;
-        ctx->boost_update_last = now;
-        math_pid_set_koffs(&ctx->pid_boost, &ctx->config.pid_boost);
-        math_pid_set_koffs(&ctx->pid_speed, &ctx->config.pid_speed);
-
-        ctx->boost_prev = ctx->boost_current;
-        ctx->boost_current = ctx->data.actual_boost;
-        ctx->current_speed = (ctx->boost_current - ctx->boost_prev) / ((float)time_delta * 0.000001f);
-
-        if(ctx->data.target_boost > 0.0f) {
-          math_pid_set_target(&ctx->pid_boost, ctx->data.target_boost);
-          pid_speed = math_pid_update(&ctx->pid_boost, ctx->boost_current, now);
-
-          math_pid_set_target(&ctx->pid_speed, pid_speed);
-          pid_current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
-
-          pid_current = CLAMP(pid_current, -1.0f, 1.0f);
-        } else {
-          pid_current = 0.0f;
-          pid_reset = true;
+      if(ctx->config.sensor_map > ECU_SENSOR_NONE) {
+        err = ecu_sensors_map_get_value(ctx->config.sensor_map, &ctx->map_data);
+        if(err != E_OK && err != E_AGAIN) {
+          ctx->diag.bits.map_handle_error = true;
+        } else if(err == E_OK) {
+          ctx->data.actual_boost = ctx->map_data.manifold_air_pressure - ctx->config.sensor_map_atmospheric_pressure;
+          ctx->actual_boost_updated = true;
         }
-        ctx->data.pid_dutycycle = pid_current;
-      } else if(time_diff(now, ctx->boost_update_last) >= ECU_WGCV_BOOST_UPDATE_TIMEOUT_US) {
+
+        err = ecu_sensors_map_get_diag(ctx->config.sensor_map, &ctx->map_diag);
+        if(err != E_OK && err != E_AGAIN) {
+          ctx->diag.bits.map_handle_error = true;
+        }
+
+        if(ctx->map_diag.data != 0) {
+          ctx->diag.bits.map_diag_error = true;
+        } else {
+          ctx->diag.bits.map_diag_error = false;
+        }
+
+        if(ctx->actual_boost_updated) {
+          ctx->actual_boost_updated = false;
+          ctx->boost_update_last = now;
+          math_pid_set_koffs(&ctx->pid_boost, &ctx->config.pid_boost);
+          math_pid_set_koffs(&ctx->pid_speed, &ctx->config.pid_speed);
+
+          ctx->boost_prev = ctx->boost_current;
+          ctx->boost_current = ctx->data.actual_boost;
+          ctx->current_speed = (ctx->boost_current - ctx->boost_prev) / ((float)time_delta * 0.000001f);
+
+          if(ctx->data.target_boost > 0.0f) {
+            math_pid_set_target(&ctx->pid_boost, ctx->data.target_boost);
+            pid_speed = math_pid_update(&ctx->pid_boost, ctx->boost_current, now);
+
+            math_pid_set_target(&ctx->pid_speed, pid_speed);
+            pid_current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
+
+            pid_current = CLAMP(pid_current, -1.0f, 1.0f);
+          } else {
+            pid_current = 0.0f;
+            pid_reset = true;
+          }
+          ctx->data.pid_dutycycle = pid_current;
+        } else if(time_diff(now, ctx->boost_update_last) >= ECU_WGCV_BOOST_UPDATE_TIMEOUT_US) {
+          ctx->diag.bits.map_poll_error = true;
+          sens_map_reset = true;
+        }
+      } else {
+        sens_map_reset = true;
+      }
+
+      if(sens_map_reset) {
         ctx->boost_update_last = now;
         ctx->data.pid_dutycycle = 0.0f;
+        ctx->data.actual_boost = 0.0f;
         pid_current = 0.0f;
         pid_reset = true;
       }
@@ -276,22 +306,6 @@ error_t wgcv_set_dutycycle(wgcv_ctx_t *ctx, float dutycycle)
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
 
     ctx->data.input_dutycycle = dutycycle;
-
-  } while(0);
-
-  return err;
-}
-
-error_t wgcv_set_actual_boost(wgcv_ctx_t *ctx, float actual_boost)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
-
-    ctx->data.actual_boost = MAX(actual_boost, 0.0f);
-    ctx->actual_boost_updated = true;
 
   } while(0);
 

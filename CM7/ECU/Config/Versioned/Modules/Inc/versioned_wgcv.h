@@ -36,8 +36,11 @@ typedef struct {
 typedef struct {
     bool enabled;
     ecu_gpio_input_pin_t power_voltage_pin;
+    ecu_sensor_map_t sensor_map;
     ecu_gpio_output_pin_t output_pwm_pin;
     uint16_t pwm_freq;
+
+    float sensor_map_atmospheric_pressure;
 
     wgcv_config_voltage_to_dutycycle_t voltage_to_pwm_dutycycle;
     float pwm_dutycycle_min;

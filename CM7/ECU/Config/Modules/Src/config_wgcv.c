@@ -45,6 +45,8 @@ static const wgcv_config_t ecu_modules_wgcv_config_default = {
         },
     },
 
+    .sensor_map_atmospheric_pressure = 1.0f,
+
     .pwm_dutycycle_min = 0.05f,
     .pwm_dutycycle_max = 0.98f,
 
@@ -86,6 +88,11 @@ static const ecu_gpio_output_pin_t ecu_sensors_wgcv_output_pwm_pin_default[ECU_M
     ECU_OUT_PORT1_PIN2,
 };
 
+static const ecu_sensor_map_t ecu_sensors_wgcv_sensor_map_default[ECU_MODULE_WGCV_MAX] = {
+    ECU_SENSOR_MAP_1,
+    ECU_SENSOR_MAP_2,
+};
+
 error_t ecu_modules_wgcv_init(ecu_module_wgcv_t instance, wgcv_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -98,6 +105,7 @@ error_t ecu_modules_wgcv_init(ecu_module_wgcv_t instance, wgcv_ctx_t *ctx)
     wgcv_ctx->ctx = ctx;
 
     wgcv_ctx->config_default.enabled = ecu_sensors_wgcv_enabled_default[instance];
+    wgcv_ctx->config_default.sensor_map = ecu_sensors_wgcv_sensor_map_default[instance];
     wgcv_ctx->config_default.output_pwm_pin = ecu_sensors_wgcv_output_pwm_pin_default[instance];
 
     err = wgcv_init(wgcv_ctx->ctx, &wgcv_ctx->init);
@@ -190,24 +198,6 @@ error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycyc
 
 
     err = wgcv_set_dutycycle(wgcv_ctx->ctx, dutycycle);
-
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_modules_wgcv_set_actual_boost(ecu_module_wgcv_t instance, float actual_boost)
-{
-  error_t err = E_OK;
-  ecu_modules_wgcv_ctx_t *wgcv_ctx;
-
-  do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
-
-    wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
-
-
-    err = wgcv_set_actual_boost(wgcv_ctx->ctx, actual_boost);
 
   } while(0);
 
