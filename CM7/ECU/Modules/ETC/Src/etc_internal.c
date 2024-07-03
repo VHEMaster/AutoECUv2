@@ -30,10 +30,14 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     ctx->process_time = now;
 
     err = ecu_sensors_tps_get_value(ctx->config.sensor_tps, &ctx->tps_data);
-    BREAK_IF(err != E_OK);
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.tps_handle_error = true;
+    }
 
     err = ecu_sensors_tps_get_diag(ctx->config.device_motor, &ctx->tps_diag);
-    BREAK_IF(err != E_OK);
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.tps_handle_error = true;
+    }
 
     ctx->position_prev = ctx->position_current;
     ctx->position_current = ctx->tps_data.position_unfiltered;
@@ -53,17 +57,23 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
     if(ctx->tps_diag.data != 0) {
       enabled = false;
-      ctx->diag.bits.tps_error = true;
+      ctx->diag.bits.tps_diag_error = true;
     } else {
-      ctx->diag.bits.tps_error = false;
+      ctx->diag.bits.tps_diag_error = false;
     }
 
     err = ecu_devices_motor_set_enabled(ctx->config.device_motor, enabled);
-    BREAK_IF(err != E_OK);
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.motor_handle_error = true;
+    }
     err = ecu_devices_motor_set_frequency(ctx->config.device_motor, ctx->config.pwm_freq);
-    BREAK_IF(err != E_OK);
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.motor_handle_error = true;
+    }
     err = ecu_devices_motor_get_diag(ctx->config.device_motor, &ctx->motor_diag);
-    BREAK_IF(err != E_OK);
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.motor_handle_error = true;
+    }
 
     l9960_status_openload_t motor_openload = ctx->motor_diag.bits.ol;
     ctx->motor_diag.bits.ol = 0;
@@ -100,7 +110,6 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->pos_reach_time = now;
       dutycycle = 0.0f;
     } else {
-
       math_pid_set_target(&ctx->pid_position, target);
       speed = math_pid_update(&ctx->pid_position, ctx->position_current, now);
 
@@ -137,10 +146,9 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     }
 
     err = ecu_devices_motor_set_dutycycle(ctx->config.device_motor, dutycycle);
-    BREAK_IF(err != E_OK);
-
-
-
+    if(err != E_OK && err != E_AGAIN) {
+      ctx->diag.bits.motor_pwm_error = true;
+    }
 
   } while(0);
 

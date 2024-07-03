@@ -32,7 +32,10 @@ typedef enum {
 typedef union {
     uint32_t data;
     struct {
-        bool tps_error : 1;
+        bool tps_handle_error : 1;
+        bool tps_diag_error : 1;
+        bool motor_handle_error : 1;
+        bool motor_pwm_error : 1;
         bool motor_error : 1;
         bool position_reach_failure : 1;
         bool pwr_undervoltage : 1;
