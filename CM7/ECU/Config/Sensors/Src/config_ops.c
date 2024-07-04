@@ -19,22 +19,20 @@ typedef struct {
 static const ops_config_t ecu_sensors_ops_config_default = {
     .signal_resistance_to_value = {
         .table = {
-            .items = 24,
+            .items = 12,
             .input = {
-                0, 3, 4, 5,
-                6, 7, 8, 9,
-                10, 11, 12, 13,
-                14, 15, 16, 17,
+                0.0f, 3.0f, 19.7f, 36.4f,
+                53.1f, 69.8f, 86.5f, 103.2f,
+                119.9f, 136.6f, 153.3f, 160.0f,
             },
             .output = {
-                0, 0, 50, 100,
-                150, 200, 250, 300,
-                350, 400, 450, 500,
-                550, 600, 650, 700,
+                0, 0, 1, 2,
+                3, 4, 5, 6,
+                7, 8, 9, 10,
             },
         },
-        .input_low = 2,
-        .input_high = 25,
+        .input_low = 1.5f,
+        .input_high = 200,
     },
     .slew_rate = 10.0f,
     .boot_time = 100 * TIME_US_IN_MS,
