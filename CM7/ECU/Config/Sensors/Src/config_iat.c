@@ -16,6 +16,39 @@ typedef struct {
     iat_ctx_t *ctx;
 }ecu_sensors_iat_ctx_t;
 
+/* Parameters for sensor Valeo 96646125 :
+    .signal_resistance_to_value = {
+        .table = {
+            .items = 28,
+            .input = {
+                317, 407, 529, 698,
+                934, 1270, 1760, 2490,
+                2980, 3590, 4350, 5300,
+                6510, 8040, 10000, 12500,
+                15800, 20200, 25900, 33600,
+                44000, 58200, 77900, 105000,
+                144000, 200000, 282000, 402000
+            },
+            .output = {
+                130, 120, 110, 100,
+                90, 80, 70, 60,
+                55, 50, 45, 40,
+                35, 30, 25, 20,
+                15, 10, 5, 0,
+                -5, -10, -15, -20,
+                -25, -30, -35, -40
+            },
+        },
+        .input_low = 250,
+        .input_high = 450000,
+    },
+    .signal_resistance_calculated = {
+        .calibration_resistance = 10000,
+        .calibration_temperature = 25,
+        .thermistor_beta = 3950,
+    },
+ */
+
 static const iat_config_t ecu_sensors_iat_config_default = {
     .signal_resistance_to_value = {
         .table = {
