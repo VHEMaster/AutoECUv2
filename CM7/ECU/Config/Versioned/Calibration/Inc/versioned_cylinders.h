@@ -31,9 +31,6 @@ typedef enum {
 typedef struct {
     ecu_bank_t bank;
     float pos_offset;
-
-    ecu_gpio_output_pin_t out_ignition[ECU_CONFIG_CYLINDER_IGNPOWER_PIN_MAX];
-    ecu_gpio_output_pin_t out_injection[ECU_CONFIG_CYLINDER_INJECTION_PIN_MAX];
 }ecu_config_cylinder_t;
 
 typedef struct {

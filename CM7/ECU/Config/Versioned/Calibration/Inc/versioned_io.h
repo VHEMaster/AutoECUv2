@@ -143,6 +143,11 @@ typedef enum {
   ECU_CONFIG_IO_INDICATION_MAX
 }ecu_config_io_indication_t;
 
+typedef enum {
+  ECU_CONFIG_IO_TIMING_PRIMARY = 0,
+  ECU_CONFIG_IO_TIMING_MAX
+}ecu_config_io_timing_t;
+
 typedef struct {
 
 
@@ -177,6 +182,7 @@ typedef struct {
     ecu_config_io_coolingfan_t module_coolingfan[ECU_CONFIG_IO_COOLINGFAN_MAX];
     ecu_config_io_ignpower_t module_ignpower[ECU_CONFIG_IO_IGNPOWER_MAX];
     ecu_config_io_indication_t module_indication[ECU_CONFIG_IO_INDICATION_MAX];
+    ecu_config_io_timing_t module_timing[ECU_CONFIG_IO_TIMING_MAX];
 
     ecu_config_io_common_t common;
 
@@ -187,10 +193,14 @@ typedef struct {
 }ecu_config_io_bank_t;
 
 typedef struct {
-    ecu_config_io_misc_t misc;
-
     ecu_config_io_global_t global;
     ecu_config_io_bank_t banks[ECU_BANK_MAX];
+}ecu_config_io_banked_t;
+
+typedef struct {
+    ecu_config_io_misc_t misc;
+
+    ecu_config_io_banked_t banked;
 
 
 

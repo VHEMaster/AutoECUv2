@@ -563,6 +563,34 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
             }
         },
     }, //ECU_CONFIG_CALIB_TYPE_CYLINDERS
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_INJECTION,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_injection_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.injection,
+        .data_size = sizeof(ecu_config_global_engine.calibration.injection),
+        .versions_count = ECU_CONFIG_INJECTION_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_INJECTION_VERSION_V1,
+                .size = sizeof(ecu_config_injection_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_INJECTION
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_IGNITION,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_ignition_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.ignition,
+        .data_size = sizeof(ecu_config_global_engine.calibration.ignition),
+        .versions_count = ECU_CONFIG_IGNITION_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_IGNITION_VERSION_V1,
+                .size = sizeof(ecu_config_ignition_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_IGNITION
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {

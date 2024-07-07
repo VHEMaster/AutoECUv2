@@ -746,6 +746,20 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_INJECTION,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 12,
+        .sector_index = 2,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_IGNITION,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 12,
+        .sector_index = 3,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_RUNTIME_CORRECTIONS,
         .section_length = ECU_FLASH_BLOCK_SIZE_128K,
         .block_index = 32,
