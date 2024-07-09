@@ -65,6 +65,17 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                     .phase_add = 0.0f,
                 }, //ECU_CYLINDER_4
             },
+            /* Turbo 0280158235
+            .voltage_to_performance_dynamic = {
+                .items = 8,
+                .input = {
+                    0.0f, 6.0f, 8.0f, 10.0f, 12.0f, 14.0f, 16.0f, 25.0f
+                },
+                .output = {
+                    8000, 3440, 1740, 1140, 800, 540, 300, 30
+                },
+            },
+            */
             .voltage_to_performance_dynamic = {
                 .items = 8,
                 .input = {
