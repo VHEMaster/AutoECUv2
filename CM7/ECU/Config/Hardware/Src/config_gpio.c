@@ -1588,7 +1588,7 @@ error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio)
   return err;
 }
 
-error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id)
+ITCM_FUNC error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id)
 {
   error_t err = E_OK;
 
@@ -1597,6 +1597,22 @@ error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id
     BREAK_IF_ACTION(id == NULL, err = E_PARAM);
 
     *id = ecu_gpio_setup.outputs[pin].output_id;
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t ecu_config_gpio_output_write(ecu_gpio_output_pin_t pin, output_value_t value)
+{
+  error_t err = E_OK;
+  output_id_t id;
+
+  do {
+    BREAK_IF_ACTION(pin <= ECU_OUT_NONE || pin >= ECU_OUT_MAX, err = E_PARAM);
+
+    id = ecu_gpio_setup.outputs[pin].output_id;
+    err = output_set_value(id, value);
 
   } while(0);
 
@@ -1646,7 +1662,7 @@ error_t ecu_config_gpio_input_register_callback(ecu_gpio_input_pin_t pin, ecu_gp
   return err;
 }
 
-error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
+ITCM_FUNC error_t ecu_config_gpio_input_get_pin(ecu_gpio_input_pin_t pin, gpio_t *gpio)
 {
   error_t err = E_OK;
 
@@ -1702,7 +1718,7 @@ error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func
   return err;
 }
 
-error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
+ITCM_FUNC error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -1727,7 +1743,7 @@ error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
   return err;
 }
 
-error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
+ITCM_FUNC error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -1752,7 +1768,7 @@ error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
   return err;
 }
 
-error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid)
+ITCM_FUNC error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid)
 {
   error_t err = E_OK;
 
@@ -1770,7 +1786,7 @@ error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid)
   return err;
 }
 
-error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
+ITCM_FUNC error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -1795,7 +1811,7 @@ error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
   return err;
 }
 
-error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
+ITCM_FUNC error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -1820,7 +1836,7 @@ error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
   return err;
 }
 
-error_t ecu_config_gpio_input_valid(ecu_gpio_input_pin_t pin, bool *valid)
+ITCM_FUNC error_t ecu_config_gpio_input_valid(ecu_gpio_input_pin_t pin, bool *valid)
 {
   error_t err = E_OK;
 

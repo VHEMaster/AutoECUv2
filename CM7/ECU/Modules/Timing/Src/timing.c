@@ -6,7 +6,6 @@
  */
 
 #include "timing.h"
-#include "timing_internal.h"
 
 error_t timing_init(timing_ctx_t *ctx, const timing_init_ctx_t *init_ctx)
 {
@@ -66,27 +65,27 @@ ITCM_FUNC INLINE void timing_position_clamp(float input, bool phased, float *out
 {
   float out_value = input;
 
-  if(output == NULL) {
-    return;
-  }
+  do {
+    BREAK_IF(output == NULL);
 
-  if(phased) {
-    while(out_value >= 360.0f) {
-      out_value -= 720.0f;
+    if(phased) {
+      while(out_value >= 360.0f) {
+        out_value -= 720.0f;
+      }
+      while(out_value < -360.0f) {
+        out_value += 720.0f;
+      }
+    } else {
+      while(out_value >= 180.0f) {
+        out_value -= 360.0f;
+      }
+      while(out_value < -180.0f) {
+        out_value += 360.0f;
+      }
     }
-    while(out_value < -360.0f) {
-      out_value += 720.0f;
-    }
-  } else {
-    while(out_value >= 180.0f) {
-      out_value -= 360.0f;
-    }
-    while(out_value < -180.0f) {
-      out_value += 360.0f;
-    }
-  }
 
-  *output = out_value;
+    *output = out_value;
+  } while(0);
 }
 
 ITCM_FUNC error_t timing_roughtest_set(timing_ctx_t *ctx, bool synchronized, bool sync_at_odd_rev)
@@ -338,7 +337,7 @@ error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag)
   return err;
 }
 
-ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
+ITCM_FUNC static error_t timing_calculate_position_ex(timing_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
 {
   error_t err = E_OK;
   float pos, pos_prev, mult, time_delta, current, previous;
@@ -357,7 +356,9 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
     data_cur = ctx->data.crankshaft;
     ExitCritical(prim);
 
-    now = time_now_us();
+    if(time_recalc) {
+      now = time_now_us();
+    }
 
     positions[0] = &data_cur.sensor_data.current.position;
     positions[1] = &data_cur.sensor_data.previous.position;
@@ -368,12 +369,14 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
       phased_internal = false;
     }
 
-    for(int i = 0; i < ITEMSOF(positions); i++) {
-      pos_temp = *positions[i];
-      pos_temp += offset;
-      timing_position_clamp(pos_temp, phased_internal, &pos_temp);
+    if(offset != 0.0f) {
+      for(int i = 0; i < ITEMSOF(positions); i++) {
+        pos_temp = *positions[i];
+        pos_temp += offset;
+        timing_position_clamp(pos_temp, phased_internal, &pos_temp);
 
-      *positions[i] = pos_temp;
+        *positions[i] = pos_temp;
+      }
     }
 
     pos = data_cur.sensor_data.current.position;
@@ -381,27 +384,29 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
     if(data_cur.valid && data_cur.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
 
       if(req_ctx == NULL || req_ctx->position_valid) {
-        if(data_cur.sensor_data.current.timestamp != data_cur.sensor_data.previous.timestamp) {
-          time_delta = time_diff(data_cur.sensor_data.current.timestamp, data_cur.sensor_data.previous.timestamp);
-          now = time_diff(now, data_cur.sensor_data.previous.timestamp);
+        if(time_recalc) {
+          if(data_cur.sensor_data.current.timestamp != data_cur.sensor_data.previous.timestamp) {
+            time_delta = time_diff(data_cur.sensor_data.current.timestamp, data_cur.sensor_data.previous.timestamp);
+            now = time_diff(now, data_cur.sensor_data.previous.timestamp);
 
-          current = data_cur.sensor_data.current.position;
-          previous = data_cur.sensor_data.previous.position;
+            current = data_cur.sensor_data.current.position;
+            previous = data_cur.sensor_data.previous.position;
 
-          if(current < previous) {
-            if(phased_internal) {
-              current += 720.0f;
-            } else {
-              current += 360.0f;
+            if(current < previous) {
+              if(phased_internal) {
+                current += 720.0f;
+              } else {
+                current += 360.0f;
+              }
             }
+
+            pos = current - previous;
+            mult = pos / time_delta;
+            pos = mult * now + previous;
           }
 
-          pos = current - previous;
-          mult = pos / time_delta;
-          pos = mult * now + previous;
+          timing_position_clamp(pos, phased_internal, &pos);
         }
-
-        timing_position_clamp(pos, phased_internal, &pos);
 
         if(req_ctx != NULL) {
           pos_prev = req_ctx->position_prev;
@@ -425,12 +430,14 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
 
               timing_position_clamp(pos, false, &pos);
 
-              for(int i = 0; i < ITEMSOF(positions); i++) {
-                pos_temp = *positions[i];
-                pos_temp += offset;
+              if(offset != 0.0f) {
+                for(int i = 0; i < ITEMSOF(positions); i++) {
+                  pos_temp = *positions[i];
+                  pos_temp += offset;
 
-                timing_position_clamp(pos_temp, false, &pos_temp);
-                *positions[i] = pos_temp;
+                  timing_position_clamp(pos_temp, false, &pos_temp);
+                  *positions[i] = pos_temp;
+                }
               }
             }
           }
@@ -474,4 +481,14 @@ ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float off
   } while(0);
 
   return err;
+}
+
+INLINE ITCM_FUNC error_t timing_calculate_offset_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
+{
+  return timing_calculate_position_ex(ctx, offset, false, phased, req_ctx, data);
+}
+
+INLINE ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
+{
+  return timing_calculate_position_ex(ctx, offset, true, phased, req_ctx, data);
 }

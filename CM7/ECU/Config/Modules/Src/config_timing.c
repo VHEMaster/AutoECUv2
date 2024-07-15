@@ -243,6 +243,10 @@ ITCM_FUNC static void ecu_modules_timing_ckp_signal_update_cb(void *usrdata, con
 
     timing_ckp_signal_update(ctx, data, diag);
 
+    if(ctx->init.signal_update_cb) {
+      ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &ctx->data, &ctx->diag);
+    }
+
   } while(0);
 }
 

@@ -118,6 +118,7 @@ void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *data, const c
 void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag);
 
 error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data);
+error_t timing_calculate_offset_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data);
 
 void timing_position_clamp(float input, bool phased, float *output);
 

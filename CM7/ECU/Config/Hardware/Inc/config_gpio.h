@@ -176,6 +176,7 @@ error_t ecu_config_gpio_output_get_id(ecu_gpio_output_pin_t pin, output_id_t *id
 error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin);
 error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin);
 error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *valid);
+error_t ecu_config_gpio_output_write(ecu_gpio_output_pin_t pin, output_value_t value);
 
 error_t ecu_config_gpio_input_init(void);
 error_t ecu_config_gpio_input_set_usrdata(ecu_gpio_input_pin_t pin, void *usrdata);
