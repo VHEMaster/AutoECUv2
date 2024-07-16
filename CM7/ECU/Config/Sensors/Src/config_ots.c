@@ -18,37 +18,18 @@ typedef struct {
 
 static const ots_config_t ecu_sensors_ots_config_default = {
     .signal_resistance_to_value = {
-        .table = {
-            .items = 24,
-            .input = {
-                80, 102, 133, 177,
-                241, 332, 467, 667,
-                973, 1188, 1459, 2238,
-                2796, 3520, 4450, 5670,
-                7280, 9420, 12300, 16180,
-                21450, 28680, 52700, 100700
-            },
-            .output = {
-                128, 120, 110, 100,
-                90, 80, 70, 60,
-                50, 45, 40, 30,
-                25, 20, 15, 10,
-                5, 0, -5, -10,
-                -15, -20, -30, -40
-            },
-        },
-        .input_low = 60,
-        .input_high = 130000,
+        .input_low = 10,
+        .input_high = 21000,
     },
     .signal_resistance_calculated = {
-        .calibration_resistance = 2796,
-        .calibration_temperature = 25,
-        .thermistor_beta = 4100,
+        .calibration_resistance = 597,
+        .calibration_temperature = 25.0f,
+        .thermistor_beta = 4200,
     },
     .slew_rate = 10.0f,
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_mode = OTS_SIGNAL_MODE_RESISTANCE,
-    .calc_mode = OTS_CALC_MODE_TABLE_REF_VALUE,
+    .calc_mode = OTS_CALC_MODE_RESISTANCE_CALCULATED,
 };
 
 static const bool ecu_sensors_ots_enabled_default[ECU_SENSOR_OTS_MAX] = {
