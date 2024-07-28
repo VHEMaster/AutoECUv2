@@ -19,6 +19,7 @@ typedef enum {
 typedef struct {
     ecu_bank_t bank;
     float pos_offset;
+    ecu_cylinder_t cy_opposed;
 }ecu_config_cylinder_t;
 
 typedef struct {

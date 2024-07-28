@@ -45,11 +45,13 @@ typedef struct {
 
 void time_init_timebase(volatile time_us_t *timebase, time_us_t mask);
 time_us_t time_now_us(void);
+time_us_t time_mask_us(void);
 time_delta_us_t time_diff(time_us_t a, time_us_t b);
 
 void time_init_tickbase(volatile time_tick_t *tickbase, time_tick_t mask);
 time_tick_t time_now_tick(void);
 time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b);
+time_tick_t time_tick_mask(void);
 
 
 void time_msmt_start(time_msmnt_item_t *item);

@@ -35,6 +35,12 @@ typedef enum {
   ECU_CONFIG_IGNITION_GROUP_MODE_MAX,
 }ecu_config_ignition_group_mode_t;
 
+typedef enum {
+  ECU_CONFIG_IGNITION_USPD_SOURCE_PER_SENSOR_PULSE = 0,
+  ECU_CONFIG_IGNITION_USPD_SOURCE_PER_REVOLUTION,
+  ECU_CONFIG_IGNITION_USPD_SOURCE_MAX,
+}ecu_config_ignition_uspd_source_t;
+
 typedef struct {
     uint32_t items;
     float input[IGNITION_RELATION_ITEMS_MAX];
@@ -61,6 +67,8 @@ typedef struct {
 }ecu_config_ignition_group_setup_t;
 
 typedef struct {
+    float signal_prepare_advance;
+    ecu_config_ignition_uspd_source_t uspd_source;
     ecu_gpio_input_pin_t power_voltage_pin;
     ecu_config_ignition_group_setup_t groups[ECU_CONFIG_IGNITION_GROUP_MAX];
 

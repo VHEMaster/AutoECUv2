@@ -23,11 +23,59 @@ typedef enum {
 
 }ecu_core_init_fsm_t;
 
+typedef enum {
+  ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_NONE = 0,
+  ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL,
+  ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR,
+  ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX,
+}ecu_core_runtime_cylinder_sequentialed_type_t;
+
 typedef struct {
+    bool initialized;
+    bool scheduled;
+    bool ignited;
+
+    float position;
+    float advance;
+    float degrees_per_cycle;
+    float degrees_before_ignite;
+}ecu_core_runtime_group_cylinder_ignition_ctx_t;
+
+typedef struct {
+
+}ecu_core_runtime_group_cylinder_injection_ctx_t;
+
+typedef struct {
+    bool initialized;
+    bool distributor;
+    ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
+
+    float saturation_time_table;
+    float saturation_rpm_mult_table;
+
+    float saturation_time;
+
+    ecu_core_runtime_group_cylinder_ignition_ctx_t cylinders[ECU_CYLINDER_MAX];
+
+}ecu_core_runtime_global_ignition_group_ctx_t;
+
+typedef struct {
+
+    ecu_core_runtime_group_cylinder_injection_ctx_t cylinders[ECU_CYLINDER_MAX];
+}ecu_core_runtime_global_injection_group_ctx_t;
+
+typedef struct {
+    float power_voltage;
+    float signal_prepare_advance;
+    float ignition_advance;
+    ecu_core_runtime_global_ignition_group_ctx_t groups[ECU_CONFIG_IGNITION_GROUP_MAX];
 
 }ecu_core_runtime_global_ignition_ctx_t;
 
+
 typedef struct {
+    float power_voltage;
+    ecu_core_runtime_global_injection_group_ctx_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];
 
 }ecu_core_runtime_global_injection_ctx_t;
 
@@ -39,28 +87,12 @@ typedef struct {
 }ecu_core_runtime_global_ctx_t;
 
 typedef struct {
-
-}ecu_core_runtime_cylinder_ignition_ctx_t;
-
-typedef struct {
-
-}ecu_core_runtime_cylinder_injection_ctx_t;
-
-typedef enum {
-  ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL = 0,
-  ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR,
-  ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX,
-}ecu_core_runtime_cylinder_sequentialed_type_t;
-
-typedef struct {
     timing_req_t timing_req;
     timing_data_crankshaft_t crankshaft_data;
 }ecu_core_runtime_cylinder_sequentialed_t;
 
 typedef struct {
     ecu_core_runtime_cylinder_sequentialed_t sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX];
-    ecu_core_runtime_cylinder_ignition_ctx_t ignition;
-    ecu_core_runtime_cylinder_injection_ctx_t injection;
 
 }ecu_core_runtime_cylinder_ctx_t;
 

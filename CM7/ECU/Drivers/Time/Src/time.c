@@ -12,8 +12,8 @@
 volatile time_us_t *g_time_timebase = NULL;
 time_us_t g_time_mask = UINT_MAX;
 
-volatile time_us_t *g_time_tickbase = NULL;
-time_us_t g_tick_mask = UINT_MAX;
+volatile time_tick_t *g_time_tickbase = NULL;
+time_tick_t g_tick_mask = UINT_MAX;
 
 void time_init_timebase(volatile time_tick_t *timebase, time_us_t mask)
 {
@@ -32,9 +32,19 @@ ITCM_FUNC INLINE time_us_t time_now_us(void)
   return *g_time_timebase;
 }
 
+ITCM_FUNC INLINE time_us_t time_mask_us(void)
+{
+  return g_time_mask;
+}
+
 ITCM_FUNC INLINE time_tick_t time_now_tick(void)
 {
   return *g_time_tickbase;
+}
+
+ITCM_FUNC INLINE time_tick_t time_tick_mask(void)
+{
+  return g_tick_mask;
 }
 
 ITCM_FUNC INLINE time_delta_us_t time_diff(time_us_t a, time_us_t b)

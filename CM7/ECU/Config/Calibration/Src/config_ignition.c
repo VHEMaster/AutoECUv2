@@ -10,6 +10,9 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
+    .signal_prepare_advance = 16.0f,
+    .uspd_source = ECU_CONFIG_IGNITION_USPD_SOURCE_PER_SENSOR_PULSE,
+
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .groups = {
         {
