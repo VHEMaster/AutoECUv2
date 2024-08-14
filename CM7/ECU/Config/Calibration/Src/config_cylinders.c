@@ -19,12 +19,12 @@ static const ecu_config_cylinders_t ecu_calibration_cylinders_config_default = {
         }, //CYLINDERS_CY_1
         {
             .bank = ECU_BANK_2,
-            .pos_offset = 180.0f,
+            .pos_offset = 540.0f,
             .cy_opposed = ECU_CYLINDER_3,
         }, //CYLINDERS_CY_2
         {
             .bank = ECU_BANK_2,
-            .pos_offset = 540.0f,
+            .pos_offset = 180.0f,
             .cy_opposed = ECU_CYLINDER_2,
         }, //CYLINDERS_CY_3
         {
