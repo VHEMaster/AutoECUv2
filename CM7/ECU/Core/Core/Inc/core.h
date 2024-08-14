@@ -54,6 +54,7 @@ typedef struct {
     float saturation_rpm_mult_table;
 
     float saturation_time;
+    float advance;
 
     ecu_core_runtime_group_cylinder_ignition_ctx_t cylinders[ECU_CYLINDER_MAX];
 

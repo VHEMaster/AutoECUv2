@@ -148,7 +148,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .aux_even_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
             .aux_odd_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
             .sent_digital_filter_chx = L9966_CFG_SR_DF_EN_1US_CH1 | L9966_CFG_SR_DF_EN_1US_CH2 | L9966_CFG_SR_DF_EN_1US_CH3 | L9966_CFG_SR_DF_EN_1US_CH4,
-            .aox_channel_src = L9966_CFG_SR_AOX_CH_SRC_5,
+            .aox_channel_src = L9966_CFG_SR_AOX_CH_SRC_HIZ,
             .rsent_enabled_chx = L9966_CFG_SR_RSENT_DISABLED,
         },
         .dwt_volt_src_lsf_ctrl = {
@@ -491,7 +491,7 @@ static const l9966_config_t ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_
             .aux_even_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
             .aux_odd_channel = L9966_CFG_SR_AUX_EVENODD_CH_VRS,
             .sent_digital_filter_chx = L9966_CFG_SR_DF_EN_1US_CH1 | L9966_CFG_SR_DF_EN_1US_CH2 | L9966_CFG_SR_DF_EN_1US_CH3 | L9966_CFG_SR_DF_EN_1US_CH4,
-            .aox_channel_src = L9966_CFG_SR_AOX_CH_SRC_9,
+            .aox_channel_src = L9966_CFG_SR_AOX_CH_SRC_HIZ,
             .rsent_enabled_chx = L9966_CFG_SR_RSENT_DISABLED,
         },
         .dwt_volt_src_lsf_ctrl = {

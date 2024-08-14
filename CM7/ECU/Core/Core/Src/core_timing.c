@@ -64,6 +64,8 @@ ITCM_FUNC static error_t core_timing_ignition_schedule(ecu_core_ctx_t *ctx, ecu_
   return ret;
 }
 
+#include <math.h>
+
 ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 {
   error_t err;
@@ -108,6 +110,8 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   time_us_t time_to_saturate;
   time_us_t time_to_ignite;
 
+  //DEBUG_IGN_ADVANCE = sinf(time_now_us() * 0.000001f * 6.2831853f * 50) * 60.0f - 15.0f;
+
   do {
     err = ecu_config_gpio_input_get_id(ctx->calibration->ignition.power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
@@ -141,6 +145,7 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
         runtime_gr->saturation_time = saturation_time;
 
         ignition_advance_gr = ignition_advance + group_config->advance_add;
+        runtime_gr->advance = ignition_advance_gr;
 
         us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
         us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
@@ -190,6 +195,9 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
         }
 
         //TODO: IMPLEMENT THE DISTRIBUTOR
+        if(distributor) {
+          needtoclear = true;
+        }
 
         if(!needtoclear) {
           for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
