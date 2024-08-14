@@ -29,6 +29,10 @@
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
 #define BUFFER_DMA                __attribute__((section(".dmabss")))
 #define ITCM_FUNC                 __attribute__((section(".itcm_func")))
+#define OPTIMIZE(flag)            __attribute__((optimize(flag)))
+#define OPTIMIZE_FAST             OPTIMIZE("Ofast")
+#define OPTIMIZE_SIZE             OPTIMIZE("Os")
+#define OPTIMIZE_DEBUG            OPTIMIZE("Og")
 #define IS_DEBUGGER_ATTACHED()    ((DBGMCU->CR & 0x07) > 0)
 #define BREAKPOINT(x)             __BKPT((x))
 #define PARITY_ODD_CHECK(value)   __builtin_parity((value))
@@ -37,6 +41,7 @@
 #define BREAK_IF(condition)                             { if((condition)) { break; } }
 #define RETURN_IF_ACTION(condition, errcode, action)    { if((condition)) { {action;} return (errcode); } }
 #define RETURN_IF(condition, errcode)                   { if((condition)) { return (errcode); } }
+
 
 #if __CORTEX_M == (7)
 STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)

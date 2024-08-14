@@ -65,9 +65,9 @@ typedef struct {
     ecu_config_injection_group_cylinder_setup_t cylinders[ECU_CYLINDER_MAX];
 
     ecu_config_injection_relation_t voltage_to_performance_dynamic;
+    float performance_static;
 
     float performance_fuel_pressure;
-    float performance_static;
 
     float phase_add;
     float phase_slew_rate;

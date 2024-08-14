@@ -75,6 +75,7 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                     8000, 3440, 1740, 1140, 800, 540, 300, 30
                 },
             },
+            .performance_static = 731.0f,
             */
             .voltage_to_performance_dynamic = {
                 .items = 8,
@@ -85,9 +86,9 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                     5000, 3000, 2180, 1670, 1180, 910, 630, 30
                 },
             },
+            .performance_static = 523.0f,
 
             .performance_fuel_pressure = 3.0f,
-            .performance_static = 523.0f,
 
             .phase_add = 0.0f,
             .phase_slew_rate = 6.0f,
