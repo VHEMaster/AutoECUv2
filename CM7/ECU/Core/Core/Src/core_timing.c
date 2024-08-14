@@ -97,6 +97,9 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 
   float position_cy;
   float ignition_advance_gr;
+  float ignition_advance_gr_requested;
+  float ignition_advance_gr_accept_vs_requested;
+  float ignition_advance_gr_adder;
   float ignition_advance_cy;
   float ignition_advance_cy_add;
   float signal_prepare_advance_gr;
@@ -106,6 +109,9 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   float degrees_before_prepare;
   float degrees_before_ignite_cur;
   float degrees_before_ignite_prev;
+
+  float crankshaft_period;
+  float crankshaft_signal_delta;
 
   time_us_t time_to_saturate;
   time_us_t time_to_ignite;
@@ -123,7 +129,10 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     }
 
     crankshaft_mode = ctx->timing_data.crankshaft.mode;
+    crankshaft_period = ctx->timing_data.crankshaft.sensor_data.period;
     signal_prepare_advance = ctx->calibration->ignition.signal_prepare_advance;
+    crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
+        ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
 
     ctx->runtime.global.ignition.ignition_advance = ignition_advance;
     ctx->runtime.global.ignition.signal_prepare_advance = signal_prepare_advance;
@@ -132,7 +141,6 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
       group_config = &ctx->calibration->ignition.groups[gr];
       runtime_gr = &ctx->runtime.global.ignition.groups[gr];
       if(group_config->enabled) {
-        runtime_gr->initialized = true;
         ip_input = math_interpolate_input(power_voltage, group_config->voltage_to_saturation_time.input, group_config->voltage_to_saturation_time.items);
         saturation_time_table = math_interpolate_1d(ip_input, group_config->voltage_to_saturation_time.output);
         runtime_gr->saturation_time_table = saturation_time_table;
@@ -144,11 +152,36 @@ ITCM_FUNC static void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
         saturation_time = saturation_time_table * saturation_rpm_mult_table;
         runtime_gr->saturation_time = saturation_time;
 
-        ignition_advance_gr = ignition_advance + group_config->advance_add;
-        runtime_gr->advance = ignition_advance_gr;
+        ignition_advance_gr_requested = ignition_advance + group_config->advance_add;
+        runtime_gr->advance_requested = ignition_advance_gr_requested;
 
         us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
         us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
+
+        if(runtime_gr->initialized) {
+          ignition_advance_gr = runtime_gr->advance;
+          ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested - ignition_advance_gr;
+          if(ignition_advance_gr_accept_vs_requested > 0.0f) {
+            ignition_advance_gr_adder = group_config->advance_slew_rate_earlier;
+          } else if(ignition_advance_gr_accept_vs_requested < 0.0f) {
+            ignition_advance_gr_adder = -group_config->advance_slew_rate_later;
+          } else {
+            ignition_advance_gr_adder = 0.0f;
+          }
+          ignition_advance_gr_adder *= crankshaft_signal_delta / crankshaft_period;
+
+          if((ignition_advance_gr_accept_vs_requested > 0.0f && ignition_advance_gr_adder > ignition_advance_gr_accept_vs_requested) ||
+              (ignition_advance_gr_accept_vs_requested < 0.0f && ignition_advance_gr_adder < ignition_advance_gr_accept_vs_requested)) {
+            ignition_advance_gr_adder = ignition_advance_gr_accept_vs_requested;
+          }
+          ignition_advance_gr += ignition_advance_gr_adder;
+        } else {
+          ignition_advance_gr = ignition_advance_gr_requested;
+        }
+
+        runtime_gr->advance = ignition_advance_gr;
+
+        runtime_gr->initialized = true;
 
         switch(ctx->calibration->ignition.uspd_source) {
           default:

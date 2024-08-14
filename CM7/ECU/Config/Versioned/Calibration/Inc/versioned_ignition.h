@@ -60,6 +60,8 @@ typedef struct {
     ecu_config_ignition_group_cylinder_setup_t cylinders[ECU_CYLINDER_MAX];
 
     float advance_add;
+    float advance_slew_rate_earlier;
+    float advance_slew_rate_later;
     ecu_config_ignition_relation_t voltage_to_saturation_time;
     ecu_config_ignition_relation_t rpm_to_saturation_mult;
     float distributor_dutycycle;

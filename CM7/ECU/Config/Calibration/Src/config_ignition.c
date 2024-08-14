@@ -41,6 +41,8 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_earlier = 50.0f,
+            .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {
                 .items = 8,
                 .input = {
@@ -89,6 +91,8 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_earlier = 50.0f,
+            .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {
                 .items = 8,
                 .input = {
@@ -137,6 +141,8 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_earlier = 50.0f,
+            .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {
                 .items = 8,
                 .input = {
