@@ -187,7 +187,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
                   sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR) {
                 if(cy_opposite > cy && !group_config->cylinders[cy_opposite].disabled) {
                   ignition_advance_cy_add = MIN(ignition_advance_cy_add, group_config->cylinders[cy_opposite].advance_add);
-                } else {
+                } else if(group_config->cylinders[cy_opposite].output_pin == group_config->cylinders[cy].output_pin) {
                   if(runtime_cy->initialized) {
                     memset(runtime_cy, 0, sizeof(*runtime_cy));
                   }

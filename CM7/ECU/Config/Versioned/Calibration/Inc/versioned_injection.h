@@ -40,6 +40,12 @@ typedef enum {
   ECU_CONFIG_INJECTION_GROUP_MODE_MAX,
 }ecu_config_injection_group_mode_t;
 
+typedef enum {
+  ECU_CONFIG_INJECTION_USPD_SOURCE_PER_SENSOR_PULSE = 0,
+  ECU_CONFIG_INJECTION_USPD_SOURCE_PER_REVOLUTION,
+  ECU_CONFIG_INJECTION_USPD_SOURCE_MAX,
+}ecu_config_injection_uspd_source_t;
+
 typedef struct {
     uint32_t items;
     float input[INJECTION_RELATION_ITEMS_MAX];
@@ -67,6 +73,11 @@ typedef struct {
     ecu_config_injection_relation_t voltage_to_performance_dynamic;
     float performance_static;
 
+    float performance_static_semiseq_mul;
+    float performance_static_semiseq_add;
+    float performance_static_seq_mul;
+    float performance_static_seq_add;
+
     float performance_fuel_pressure;
 
     float phase_add;
@@ -75,6 +86,8 @@ typedef struct {
 }ecu_config_injection_group_setup_t;
 
 typedef struct {
+    float signal_prepare_advance;
+    ecu_config_injection_uspd_source_t uspd_source;
     ecu_gpio_input_pin_t power_voltage_pin;
     ecu_config_injection_group_setup_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];
 

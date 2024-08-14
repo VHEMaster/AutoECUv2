@@ -42,7 +42,17 @@ typedef struct {
 }ecu_core_runtime_group_cylinder_ignition_ctx_t;
 
 typedef struct {
+    bool initialized;
+    bool scheduled;
+    bool injected;
 
+    float position;
+    float phase;
+    float time_lag;
+    float time_inject;
+    float time_pulse;
+    float degrees_per_cycle;
+    float degrees_before_inject;
 }ecu_core_runtime_group_cylinder_injection_ctx_t;
 
 typedef struct {
@@ -62,6 +72,13 @@ typedef struct {
 }ecu_core_runtime_global_ignition_group_ctx_t;
 
 typedef struct {
+    bool initialized;
+    ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
+
+    float lag_time;
+    float phase;
+    float phase_requested;
+    float time_inject;
 
     ecu_core_runtime_group_cylinder_injection_ctx_t cylinders[ECU_CYLINDER_MAX];
 }ecu_core_runtime_global_injection_group_ctx_t;
@@ -77,6 +94,8 @@ typedef struct {
 
 typedef struct {
     float power_voltage;
+    float signal_prepare_advance;
+    float injection_phase;
     ecu_core_runtime_global_injection_group_ctx_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];
 
 }ecu_core_runtime_global_injection_ctx_t;

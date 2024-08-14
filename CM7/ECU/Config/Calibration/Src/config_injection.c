@@ -10,6 +10,8 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_injection_t ecu_calibration_injection_config_default = {
+    .signal_prepare_advance = 16.0f,
+    .uspd_source = ECU_CONFIG_INJECTION_USPD_SOURCE_PER_REVOLUTION,
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .groups = {
         {
@@ -88,10 +90,17 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
             },
             .performance_static = 523.0f,
 
+            .performance_static_semiseq_mul = 1.0f,
+            .performance_static_semiseq_add = 0.0f,
+
+            .performance_static_seq_mul = 1.0f,
+            .performance_static_seq_add = 0.0f,
+
             .performance_fuel_pressure = 3.0f,
 
             .phase_add = 0.0f,
-            .phase_slew_rate = 6.0f,
+            .phase_slew_rate = 24.0f,
+            .phase_mode = ECU_CONFIG_INJECTION_GROUP_PHASE_MODE_ENDING,
 
         }, //ECU_CONFIG_INJECTION_GROUP_PRIMARY
     },
