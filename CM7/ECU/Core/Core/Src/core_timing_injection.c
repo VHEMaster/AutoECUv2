@@ -209,7 +209,6 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 injection_time_cy *= 0.5f;
               }
 
-
               pulse_time_cy = lag_time_cy + injection_time_cy;
 
               runtime_cy->position = position_cy;
