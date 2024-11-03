@@ -17,7 +17,7 @@ typedef enum {
   OPS_CONFIG_VERSION_MAX
 }ops_config_versions_t;
 
-#define OPS_RELATION_ITEMS_MAX    16
+#define OPS_RELATION_ITEMS_MAX    20
 #define OPS_RELATION_ITEMS_MIN    4
 
 typedef enum {
