@@ -52,6 +52,18 @@ typedef enum {
   ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_MAX,
 }ecu_config_injection_dutycycle_limit_mode_t;
 
+typedef enum {
+  ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC = 0,
+  ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_G,
+  ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_MAX,
+}ecu_config_injection_perf_units_t;
+
+typedef enum {
+  ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE = 0,
+  ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP,
+  ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_MAX
+}ecu_config_injection_perf_press_source_t;
+
 typedef struct {
     uint32_t items;
     float input[INJECTION_RELATION_ITEMS_MAX];
@@ -84,6 +96,11 @@ typedef struct {
     float performance_static_seq_mul;
     float performance_static_seq_add;
 
+    ecu_config_injection_perf_units_t performance_fuel_mass_units;
+    float performance_fuel_mass_per_cc;
+
+    ecu_config_injection_perf_press_source_t performance_fuel_pressure_source;
+    ecu_sensor_map_t performance_fuel_pressure_map;
     float performance_fuel_pressure;
 
     float phase_add;

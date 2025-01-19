@@ -45,6 +45,7 @@ typedef struct {
     bool initialized;
     bool scheduled;
     bool injected;
+    bool dutycycle_limit_flag;
 
     float phase;
     float time_lag;

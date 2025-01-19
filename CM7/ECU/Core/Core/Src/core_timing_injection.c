@@ -5,19 +5,22 @@
  *      Author: VHEMaster
  */
 
+#include <math_fast.h>
 #include "core_timing_common.h"
 #include "config_hw.h"
 #include "common.h"
 #include "interpolation.h"
+#include "config_map.h"
 
 volatile float DEBUG_INJ_PHASE = 280;
-volatile float DEBUG_INJ_PULSE = 1500;
+volatile float DEBUG_INJ_MASS = 200; //mg
 
 ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 {
   error_t err;
   float injection_phase = DEBUG_INJ_PHASE;
-  float injection_time = DEBUG_INJ_PULSE;
+  float injection_mass = DEBUG_INJ_MASS;
+
   timing_crankshaft_mode_t crankshaft_mode;
   ecu_config_injection_group_mode_t group_mode;
   timing_data_crankshaft_t *crankshaft_data;
@@ -42,8 +45,13 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float lag_time_gr;
   float lag_time_cy;
   float pulse_time_cy;
+  float injection_flow_us_gr;
+  float injection_mass_us_gr;
   float injection_time_gr;
   float degrees_per_cycle;
+  float performance_initial_us_gr;
+  float performance_mult_gr;
+  float ramp_pressure_gr;
 
   float position_cy;
   float injection_phase_gr;
@@ -76,6 +84,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
   time_us_t time_to_activate;
   time_us_t time_to_inject;
+
+  map_data_t map_data;
 
   do {
     err = ecu_config_gpio_input_get_id(ctx->calibration->injection.power_voltage_pin, &power_voltage_pin);
@@ -135,7 +145,33 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           injection_phase_gr = injection_phase_gr_requested;
         }
 
-        injection_time_gr = injection_time;
+
+        performance_mult_gr = 1.0f;
+        ramp_pressure_gr = group_config->performance_fuel_pressure;
+        if(group_config->performance_fuel_pressure_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+          err = ecu_sensors_map_get_value(group_config->performance_fuel_pressure_map, &map_data);
+          if(err == E_OK) {
+            if(map_data.valid) {
+              ramp_pressure_gr = group_config->performance_fuel_pressure + map_data.manifold_air_pressure - 0.986923f;
+              performance_mult_gr = fast_rsqrt(group_config->performance_fuel_pressure / ramp_pressure_gr);
+            }
+          } else {
+            // TODO: error flag
+          }
+        }
+
+        performance_initial_us_gr = group_config->performance_static;
+        performance_initial_us_gr *= 1.6666667e-8;
+        performance_initial_us_gr *= performance_mult_gr;
+
+        if(group_config->performance_fuel_mass_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {
+          injection_flow_us_gr = performance_initial_us_gr;
+          injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
+        } else {
+          injection_mass_us_gr = performance_initial_us_gr;
+          injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
+        }
+        injection_time_gr = injection_mass * injection_mass_us_gr;
 
         runtime_gr->phase = injection_phase_gr;
         runtime_gr->time_inject = injection_time_gr;
@@ -270,20 +306,25 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                     runtime_cy->phase = injection_phase_cy;
                     runtime_cy->time_lag = lag_time_cy;
                     runtime_cy->time_inject = injection_time_cy;
-                    runtime_cy->time_pulse = pulse_time_cy;
-                    runtime_cy->dutycycle = dutycycle_cy;
 
                     if(dutycycle_cy > group_config->dutycycle_warning) {
                       // TODO: warning!
                     }
                     if(dutycycle_cy > group_config->dutycycle_limit) {
+                      runtime_cy->dutycycle_limit_flag = true;
                       // TODO: Limit warning!
                       if(group_config->dutycycle_limit_mode == ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF) {
                         pulse_time_cy = 0;
                       } else if(group_config->dutycycle_limit_mode == ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP) {
                         pulse_time_cy = dutycycle_period * group_config->dutycycle_limit;
                       }
+                    } else {
+                      runtime_cy->dutycycle_limit_flag = false;
                     }
+
+                    runtime_cy->time_pulse = pulse_time_cy;
+                    runtime_cy->dutycycle = dutycycle_cy;
+
                     if(pulse_time_cy) {
                       time_to_activate = crankshaft_data->sensor_data.current.timestamp +
                           (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
