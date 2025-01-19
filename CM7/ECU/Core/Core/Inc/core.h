@@ -46,13 +46,13 @@ typedef struct {
     bool scheduled;
     bool injected;
 
-    float position;
     float phase;
     float time_lag;
     float time_inject;
     float time_pulse;
     float degrees_per_cycle;
     float degrees_before_inject;
+    float dutycycle;
 }ecu_core_runtime_group_cylinder_injection_ctx_t;
 
 typedef struct {
@@ -79,6 +79,8 @@ typedef struct {
     float phase;
     float phase_requested;
     float time_inject;
+    float dutycycle_max;
+    float dutycycle_mean;
 
     ecu_core_runtime_group_cylinder_injection_ctx_t cylinders[ECU_CYLINDER_MAX];
 }ecu_core_runtime_global_injection_group_ctx_t;

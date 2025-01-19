@@ -114,6 +114,10 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                 },
             },
 
+            .dutycycle_warning = 0.8f,
+            .dutycycle_limit = 0.9f,
+            .dutycycle_limit_mode = ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF,
+
         }, //ECU_CONFIG_INJECTION_GROUP_PRIMARY
     },
 };

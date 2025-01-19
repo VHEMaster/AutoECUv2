@@ -46,6 +46,12 @@ typedef enum {
   ECU_CONFIG_INJECTION_USPD_SOURCE_MAX,
 }ecu_config_injection_uspd_source_t;
 
+typedef enum {
+  ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF = 0,
+  ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP,
+  ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_MAX,
+}ecu_config_injection_dutycycle_limit_mode_t;
+
 typedef struct {
     uint32_t items;
     float input[INJECTION_RELATION_ITEMS_MAX];
@@ -84,6 +90,10 @@ typedef struct {
     float phase_slew_rate;
     ecu_config_injection_group_phase_mode_t phase_mode;
     ecu_config_injection_relation_t rpm_to_phase_add;
+
+    float dutycycle_warning;
+    float dutycycle_limit;
+    ecu_config_injection_dutycycle_limit_mode_t dutycycle_limit_mode;
 }ecu_config_injection_group_setup_t;
 
 typedef struct {

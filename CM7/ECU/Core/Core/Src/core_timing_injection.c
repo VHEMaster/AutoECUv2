@@ -68,6 +68,12 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float crankshaft_signal_delta;
   float phase_slew_rate;
 
+  float dutycycle_cy;
+  float dutycycle_gr_max;
+  float dutycycle_gr_mean;
+  uint32_t dutycycle_gr_count;
+  float dutycycle_period;
+
   time_us_t time_to_activate;
   time_us_t time_to_inject;
 
@@ -170,8 +176,11 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           runtime_gr->sequentialed_mode = sequentialed_mode;
           needtoclear = true;
         }
-
         if(!needtoclear) {
+          dutycycle_gr_max = 0;
+          dutycycle_gr_mean = 0;
+          dutycycle_gr_count = 0;
+
           for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
             cy_config = &group_config->cylinders[cy];
             runtime_cy = &runtime_gr->cylinders[cy];
@@ -203,6 +212,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
               injection_time_cy = injection_time_gr;
               injection_time_cy *= cy_config->performance_static_mul;
+              dutycycle_period = ctx->timing_data.crankshaft.sensor_data.period;
 
               if(sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL) {
                 injection_time_cy *= group_config->performance_static_seq_mul;
@@ -213,15 +223,17 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 injection_time_cy += group_config->performance_static_semiseq_add;
                 injection_time_cy += cy_config->performance_static_add;
                 injection_time_cy *= 0.5f;
+                dutycycle_period *= 0.5f;
               }
 
               pulse_time_cy = lag_time_cy + injection_time_cy;
+              dutycycle_cy = pulse_time_cy / dutycycle_period;
 
-              runtime_cy->position = position_cy;
-              runtime_cy->phase = injection_phase_cy;
-              runtime_cy->time_lag = lag_time_cy;
-              runtime_cy->time_inject = injection_time_cy;
-              runtime_cy->time_pulse = pulse_time_cy;
+              if(dutycycle_cy > dutycycle_gr_max) {
+                dutycycle_gr_max = dutycycle_cy;
+              }
+              dutycycle_gr_mean += dutycycle_cy;
+              dutycycle_gr_count++;
 
               if(sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL) {
                 degrees_per_cycle = 720.0f;
@@ -255,13 +267,32 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 if(!runtime_cy->scheduled && !runtime_cy->injected) {
                   degrees_before_prepare = degrees_before_inject_cur - signal_prepare_advance_cy;
                   if(degrees_before_prepare < 0.0f) {
-                    time_to_activate = crankshaft_data->sensor_data.current.timestamp +
-                        (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
-                    time_to_inject = time_to_activate + pulse_time_cy;
+                    runtime_cy->phase = injection_phase_cy;
+                    runtime_cy->time_lag = lag_time_cy;
+                    runtime_cy->time_inject = injection_time_cy;
+                    runtime_cy->time_pulse = pulse_time_cy;
+                    runtime_cy->dutycycle = dutycycle_cy;
 
-                    err = core_timing_pulse_schedule(ctx, cy_config->output_pin,
-                        time_to_activate, time_to_inject);
-                    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                    if(dutycycle_cy > group_config->dutycycle_warning) {
+                      // TODO: warning!
+                    }
+                    if(dutycycle_cy > group_config->dutycycle_limit) {
+                      // TODO: Limit warning!
+                      if(group_config->dutycycle_limit_mode == ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF) {
+                        pulse_time_cy = 0;
+                      } else if(group_config->dutycycle_limit_mode == ECU_CONFIG_INJECTION_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP) {
+                        pulse_time_cy = dutycycle_period * group_config->dutycycle_limit;
+                      }
+                    }
+                    if(pulse_time_cy) {
+                      time_to_activate = crankshaft_data->sensor_data.current.timestamp +
+                          (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
+                      time_to_inject = time_to_activate + pulse_time_cy;
+
+                      err = core_timing_pulse_schedule(ctx, cy_config->output_pin,
+                          time_to_activate, time_to_inject);
+                      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                    }
 
                     runtime_cy->scheduled = true;
                   }
@@ -294,6 +325,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               }
             }
           }
+          runtime_gr->dutycycle_mean = dutycycle_gr_mean / dutycycle_gr_count;
+          runtime_gr->dutycycle_max = dutycycle_gr_max;
         } else {
           for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
             runtime_cy = &runtime_gr->cylinders[cy];
