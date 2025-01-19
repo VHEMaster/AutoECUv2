@@ -50,6 +50,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float injection_phase_gr_requested;
   float injection_phase_gr_accept_vs_requested;
   float injection_phase_gr_adder;
+  float injection_phase_gr_add_rpm;
   float injection_phase_cy;
   float injection_phase_cy_add;
 
@@ -65,6 +66,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
   float crankshaft_period;
   float crankshaft_signal_delta;
+  float phase_slew_rate;
 
   time_us_t time_to_activate;
   time_us_t time_to_inject;
@@ -96,7 +98,10 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
         lag_time_gr = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
         runtime_gr->lag_time = lag_time_gr;
 
-        injection_phase_gr_requested = injection_phase + group_config->phase_add;
+        ip_input = math_interpolate_input(power_voltage, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
+        injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
+
+        injection_phase_gr_requested = injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
         runtime_gr->phase_requested = injection_phase_gr_requested;
 
         us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
@@ -105,10 +110,11 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
         if(runtime_gr->initialized) {
           injection_phase_gr = runtime_gr->phase;
           injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr;
+          phase_slew_rate = group_config->phase_slew_rate;
           if(injection_phase_gr_accept_vs_requested > 0.0f) {
-            injection_phase_gr_adder = group_config->phase_slew_rate;
+            injection_phase_gr_adder = phase_slew_rate;
           } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
-            injection_phase_gr_adder = -group_config->phase_slew_rate;
+            injection_phase_gr_adder = -phase_slew_rate;
           } else {
             injection_phase_gr_adder = 0.0f;
           }

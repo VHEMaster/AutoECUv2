@@ -83,6 +83,7 @@ typedef struct {
     float phase_add;
     float phase_slew_rate;
     ecu_config_injection_group_phase_mode_t phase_mode;
+    ecu_config_injection_relation_t rpm_to_phase_add;
 }ecu_config_injection_group_setup_t;
 
 typedef struct {

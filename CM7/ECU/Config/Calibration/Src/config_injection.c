@@ -102,6 +102,18 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
             .phase_slew_rate = 24.0f,
             .phase_mode = ECU_CONFIG_INJECTION_GROUP_PHASE_MODE_ENDING,
 
+            .rpm_to_phase_add = {
+                .items = 16,
+                .input = {
+                    600, 740, 870, 1050, 1250, 1490, 1800, 2150,
+                    2560, 3040, 3590, 4310, 5100, 6060, 7190, 8500
+                },
+                .output = {
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0
+                },
+            },
+
         }, //ECU_CONFIG_INJECTION_GROUP_PRIMARY
     },
 };
