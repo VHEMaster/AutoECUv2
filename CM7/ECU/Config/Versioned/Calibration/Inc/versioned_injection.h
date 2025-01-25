@@ -22,7 +22,6 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_INJECTION_GROUP_PRIMARY = 0,
-  ECU_CONFIG_INJECTION_GROUP_SECONDARY,
   ECU_CONFIG_INJECTION_GROUP_MAX,
 }ecu_config_injection_group_t;
 

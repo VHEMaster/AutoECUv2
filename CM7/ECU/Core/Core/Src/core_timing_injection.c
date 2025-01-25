@@ -114,8 +114,11 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
         lag_time_gr = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
         runtime_gr->lag_time = lag_time_gr;
 
-        ip_input = math_interpolate_input(power_voltage, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
-        injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
+        injection_phase_gr_add_rpm = 0;
+        if(group_config->rpm_to_phase_add.items > 0) {
+          ip_input = math_interpolate_input(power_voltage, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
+          injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
+        }
 
         injection_phase_gr_requested = injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
         runtime_gr->phase_requested = injection_phase_gr_requested;
@@ -366,7 +369,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               }
             }
           }
-          runtime_gr->dutycycle_mean = dutycycle_gr_mean / dutycycle_gr_count;
+          dutycycle_gr_mean /= dutycycle_gr_count;
+          runtime_gr->dutycycle_mean = dutycycle_gr_mean;
           runtime_gr->dutycycle_max = dutycycle_gr_max;
         } else {
           for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
