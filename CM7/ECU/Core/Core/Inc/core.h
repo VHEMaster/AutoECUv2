@@ -87,9 +87,10 @@ typedef struct {
 }ecu_core_runtime_global_injection_group_ctx_t;
 
 typedef struct {
+    float input_ignition_advance;
+
     float power_voltage;
     float signal_prepare_advance;
-    float ignition_advance;
     ecu_core_runtime_global_ignition_group_ctx_t groups[ECU_CONFIG_IGNITION_GROUP_MAX];
 
     uint32_t process_update_trigger_counter;
@@ -98,9 +99,11 @@ typedef struct {
 
 
 typedef struct {
+    float input_injection_phase;
+    float input_injection_mass;
+
     float power_voltage;
     float signal_prepare_advance;
-    float injection_phase;
     ecu_core_runtime_global_injection_group_ctx_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];
 
     uint32_t process_update_trigger_counter;
@@ -111,6 +114,8 @@ typedef struct {
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
     ecu_core_runtime_global_injection_ctx_t injection;
+
+
 
 }ecu_core_runtime_global_ctx_t;
 

@@ -12,14 +12,9 @@
 #include "interpolation.h"
 #include "config_map.h"
 
-volatile float DEBUG_INJ_PHASE = 280;
-volatile float DEBUG_INJ_MASS = 32; //mg
-
 ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 {
   error_t err;
-  float injection_phase = DEBUG_INJ_PHASE;
-  float injection_mass = DEBUG_INJ_MASS;
 
   timing_crankshaft_mode_t crankshaft_mode;
   ecu_config_injection_group_mode_t group_mode;
@@ -41,6 +36,9 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_core_runtime_global_injection_group_ctx_t *runtime_gr;
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
   ecu_cylinder_t cy_opposite;
+
+  float input_injection_phase;
+  float input_injection_mass;
 
   float lag_time_gr;
   float lag_time_cy;
@@ -108,7 +106,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
         ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
 
-    ctx->runtime.global.injection.injection_phase = injection_phase;
+    input_injection_phase = ctx->runtime.global.injection.input_injection_phase;
+    input_injection_mass = ctx->runtime.global.injection.input_injection_mass;
     ctx->runtime.global.injection.signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
@@ -138,7 +137,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
           }
 
-          injection_phase_gr_requested = injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
+          injection_phase_gr_requested = input_injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
           runtime_gr->phase_requested = injection_phase_gr_requested;
 
           us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
@@ -193,7 +192,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
           }
 
-          injection_mass_gr = injection_mass;
+          injection_mass_gr = input_injection_mass;
 
           if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
             injection_mass_gr -= group_config->inject_mass_reduction;

@@ -10,18 +10,16 @@
 #include "common.h"
 #include "interpolation.h"
 
-volatile float DEBUG_IGN_ADVANCE = 0.0f;
-
 ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 {
   error_t err;
-  float ignition_advance = DEBUG_IGN_ADVANCE;
   timing_crankshaft_mode_t crankshaft_mode;
   ecu_config_ignition_group_mode_t group_mode;
   timing_data_crankshaft_t *crankshaft_data;
   input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
+  float input_ignition_advance;
 
   ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
   bool distributor;
@@ -82,7 +80,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
         ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
 
-    ctx->runtime.global.ignition.ignition_advance = ignition_advance;
+    input_ignition_advance = ctx->runtime.global.ignition.input_ignition_advance;
     ctx->runtime.global.ignition.signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
@@ -115,7 +113,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
           saturation_time = saturation_time_table * saturation_rpm_mult_table;
           runtime_gr->saturation_time = saturation_time;
 
-          ignition_advance_gr_requested = ignition_advance + group_config->advance_add;
+          ignition_advance_gr_requested = input_ignition_advance + group_config->advance_add;
           runtime_gr->advance_requested = ignition_advance_gr_requested;
 
           us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;

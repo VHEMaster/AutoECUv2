@@ -11,6 +11,11 @@
 #include "config_hw.h"
 #include "common.h"
 
+
+volatile float DEBUG_INJ_PHASE = 280;
+volatile float DEBUG_INJ_MASS = 32; //mg
+volatile float DEBUG_IGN_ADVANCE = 0.0f;
+
 ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *data, const timing_diag_t *diag)
 {
   ecu_core_ctx_t *ctx = (ecu_core_ctx_t *)usrdata;
@@ -23,12 +28,14 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
   ecu_config_injection_group_mode_t group_mode_inj;
   bool semisequential_needed = false;
   bool sequential_needed = false;
-
   bool ignition_update_trigger = false;
   bool injection_update_trigger = false;
-
   uint32_t process_update_trigger_counter = ctx->process_update_trigger_counter;
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
+
+  runtime->global.injection.input_injection_phase = DEBUG_INJ_PHASE;
+  runtime->global.injection.input_injection_mass = DEBUG_INJ_MASS;
+  runtime->global.ignition.input_ignition_advance = DEBUG_IGN_ADVANCE;
 
   do {
 
