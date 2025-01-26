@@ -21,9 +21,23 @@ typedef enum {
 }ecu_config_injection_versions_t;
 
 typedef enum {
+  ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_ALWAYS = 0,
+  ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_1OF2_1ST,
+  ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_1OF2_2ND,
+  ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_MAX,
+}ecu_config_injection_process_update_trigger_t;
+
+typedef enum {
   ECU_CONFIG_INJECTION_GROUP_PRIMARY = 0,
   ECU_CONFIG_INJECTION_GROUP_MAX,
 }ecu_config_injection_group_t;
+
+typedef enum {
+  ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS = 0,
+  ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_1ST,
+  ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_2ND,
+  ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_MAX,
+}ecu_config_injection_group_process_update_trigger_t;
 
 typedef enum {
   ECU_CONFIG_INJECTION_GROUP_PHASE_MODE_BEGINNING = 0,
@@ -84,6 +98,7 @@ typedef struct {
 
 typedef struct {
     bool enabled;
+    ecu_config_injection_group_process_update_trigger_t process_update_trigger;
     ecu_config_injection_group_mode_t mode;
     ecu_config_injection_group_cylinder_setup_t cylinders[ECU_CYLINDER_MAX];
 
@@ -116,6 +131,7 @@ typedef struct {
 
 typedef struct {
     float signal_prepare_advance;
+    ecu_config_injection_process_update_trigger_t process_update_trigger;
     ecu_config_injection_uspd_source_t uspd_source;
     ecu_gpio_input_pin_t power_voltage_pin;
     ecu_config_injection_group_setup_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];

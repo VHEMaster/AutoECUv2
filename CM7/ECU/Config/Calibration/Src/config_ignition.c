@@ -11,12 +11,14 @@
 
 static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
     .signal_prepare_advance = 16.0f,
+    .process_update_trigger = ECU_CONFIG_IGNITION_PROCESS_UPDATE_TRIGGER_1OF2_2ND,
     .uspd_source = ECU_CONFIG_IGNITION_USPD_SOURCE_PER_REVOLUTION,
 
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .groups = {
         {
             .enabled = true,
+            .process_update_trigger = ECU_CONFIG_IGNITION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS,
             .mode = ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_ONLY,
             .cylinders = {
                 {
@@ -67,6 +69,7 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
         }, //ECU_CONFIG_IGNITION_GROUP_PRIMARY
         {
             .enabled = true,
+            .process_update_trigger = ECU_CONFIG_IGNITION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS,
             .mode = ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY,
             .cylinders = {
                 {
@@ -117,6 +120,7 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
         }, //ECU_CONFIG_IGNITION_GROUP_SECONDARY
         {
             .enabled = true,
+            .process_update_trigger = ECU_CONFIG_IGNITION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS,
             .mode = ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY,
             .cylinders = {
                 {

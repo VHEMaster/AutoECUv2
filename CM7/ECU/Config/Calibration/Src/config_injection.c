@@ -11,11 +11,13 @@
 
 static const ecu_config_injection_t ecu_calibration_injection_config_default = {
     .signal_prepare_advance = 16.0f,
+    .process_update_trigger = ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_1OF2_1ST,
     .uspd_source = ECU_CONFIG_INJECTION_USPD_SOURCE_PER_REVOLUTION,
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .groups = {
         {
             .enabled = true,
+            .process_update_trigger = ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS,
             .mode = ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL,
             .cylinders = {
                 {

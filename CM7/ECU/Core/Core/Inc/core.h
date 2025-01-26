@@ -92,6 +92,8 @@ typedef struct {
     float ignition_advance;
     ecu_core_runtime_global_ignition_group_ctx_t groups[ECU_CONFIG_IGNITION_GROUP_MAX];
 
+    uint32_t process_update_trigger_counter;
+
 }ecu_core_runtime_global_ignition_ctx_t;
 
 
@@ -100,6 +102,8 @@ typedef struct {
     float signal_prepare_advance;
     float injection_phase;
     ecu_core_runtime_global_injection_group_ctx_t groups[ECU_CONFIG_INJECTION_GROUP_MAX];
+
+    uint32_t process_update_trigger_counter;
 
 }ecu_core_runtime_global_injection_ctx_t;
 
@@ -142,6 +146,7 @@ typedef struct {
     timing_diag_t timing_diag;
 
     ecu_core_runtime_ctx_t runtime;
+    uint32_t process_update_trigger_counter;
 }ecu_core_ctx_t;
 
 void core_init(void);
