@@ -104,7 +104,7 @@ typedef struct {
 }ecu_core_runtime_global_injection_ctx_t;
 
 typedef struct {
-    ecu_cylinder_t cylinders_count;
+    uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
     ecu_core_runtime_global_injection_ctx_t injection;
 

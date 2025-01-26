@@ -47,6 +47,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float pulse_time_cy;
   float injection_flow_us_gr;
   float injection_mass_us_gr;
+  float injection_mass_gr;
   float injection_time_gr;
   float degrees_per_cycle;
   float performance_initial_us_gr;
@@ -174,7 +175,19 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           injection_mass_us_gr = performance_initial_us_gr;
           injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
         }
-        injection_time_gr = injection_mass / injection_mass_us_gr;
+
+        injection_mass_gr = injection_mass;
+
+        if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
+          injection_mass_gr -= group_config->inject_mass_reduction;
+          injection_time_gr = injection_mass_gr / injection_mass_us_gr;
+        } else {
+          injection_time_gr = 0.0f;
+        }
+
+        if(injection_time_gr < 0.0f) {
+          injection_time_gr = 0.0f;
+        }
 
         runtime_gr->phase = injection_phase_gr;
         runtime_gr->time_inject = injection_time_gr;
@@ -253,20 +266,27 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               injection_time_cy *= cy_config->performance_static_mul;
               dutycycle_period = ctx->timing_data.crankshaft.sensor_data.period;
 
-              if(sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL) {
-                injection_time_cy *= group_config->performance_static_seq_mul;
-                injection_time_cy += group_config->performance_static_seq_add;
-                injection_time_cy += cy_config->performance_static_add;
-              } else {
-                injection_time_cy *= group_config->performance_static_semiseq_mul;
-                injection_time_cy += group_config->performance_static_semiseq_add;
-                injection_time_cy += cy_config->performance_static_add;
-                injection_time_cy *= 0.5f;
-                dutycycle_period *= 0.5f;
+              if(injection_time_cy > 0.0f) {
+                if(sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL) {
+                  injection_time_cy *= group_config->performance_static_seq_mul;
+                  injection_time_cy += group_config->performance_static_seq_add;
+                  injection_time_cy += cy_config->performance_static_add;
+                  dutycycle_period *= 2.0f;
+                } else {
+                  injection_time_cy *= group_config->performance_static_semiseq_mul;
+                  injection_time_cy += group_config->performance_static_semiseq_add;
+                  injection_time_cy += cy_config->performance_static_add;
+                  injection_time_cy *= 0.5f;
+                }
               }
 
-              pulse_time_cy = lag_time_cy + injection_time_cy;
-              dutycycle_cy = pulse_time_cy / dutycycle_period;
+              if(injection_time_cy > 0.0f) {
+                pulse_time_cy = lag_time_cy + injection_time_cy;
+                dutycycle_cy = pulse_time_cy / dutycycle_period;
+              } else {
+                pulse_time_cy = 0.0f;
+                dutycycle_cy = 0.0f;
+              }
 
               if(dutycycle_cy > dutycycle_gr_max) {
                 dutycycle_gr_max = dutycycle_cy;

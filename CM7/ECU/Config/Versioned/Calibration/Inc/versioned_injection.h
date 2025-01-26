@@ -107,6 +107,8 @@ typedef struct {
     ecu_config_injection_group_phase_mode_t phase_mode;
     ecu_config_injection_relation_t rpm_to_phase_add;
 
+    float inject_mass_low_threshold;
+    float inject_mass_reduction;
     float dutycycle_warning;
     float dutycycle_limit;
     ecu_config_injection_dutycycle_limit_mode_t dutycycle_limit_mode;
