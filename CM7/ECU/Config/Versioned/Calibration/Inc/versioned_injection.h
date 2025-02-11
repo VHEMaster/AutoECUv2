@@ -110,7 +110,7 @@ typedef struct {
     float performance_static_seq_mul;
     float performance_static_seq_add;
 
-    ecu_config_injection_perf_units_t performance_fuel_mass_units;
+    ecu_config_injection_perf_units_t performance_static_units;
     float performance_fuel_mass_per_cc;
 
     ecu_config_injection_perf_press_source_t performance_fuel_pressure_source;

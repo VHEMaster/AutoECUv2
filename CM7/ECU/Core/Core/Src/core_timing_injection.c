@@ -184,7 +184,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           performance_initial_us_gr *= 1.6666667e-5;
           performance_initial_us_gr *= performance_mult_gr;
 
-          if(group_config->performance_fuel_mass_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {
+          if(group_config->performance_static_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {
             injection_flow_us_gr = performance_initial_us_gr;
             injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
           } else {

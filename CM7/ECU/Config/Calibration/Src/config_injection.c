@@ -91,6 +91,7 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                 },
             },
             .performance_static = 523.0f,
+            .performance_static_units = ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC,
 
             .performance_static_semiseq_mul = 1.0f,
             .performance_static_semiseq_add = 0.0f,
@@ -98,7 +99,6 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
             .performance_static_seq_mul = 1.0f,
             .performance_static_seq_add = 0.0f,
 
-            .performance_fuel_mass_units = ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC,
             .performance_fuel_mass_per_cc = 750.0f,
 
             .performance_fuel_pressure_source = ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE,
