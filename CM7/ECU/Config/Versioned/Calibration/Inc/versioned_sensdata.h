@@ -9,6 +9,7 @@
 #define CONFIG_VERSIONED_CALIBRATION_INC_VERSIONED_SENSDATA_H_
 
 #include "common.h"
+#include "versioned_tables.h"
 
 typedef enum {
   ECU_CONFIG_SENSDATA_VERSION_V1 = 0,
@@ -49,8 +50,7 @@ typedef struct {
 }ecu_config_sensdata_relation_input_select_t;
 
 typedef struct {
-    uint8_t items;
-    float input[SENSDATA_RELATION_INPUT_VARIANTED_ITEMS_MAX];
+    ecu_config_tables_table_index_t table_index;
 }ecu_config_sensdata_relation_input_varianted_item_t;
 
 typedef struct {

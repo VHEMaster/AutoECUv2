@@ -49,6 +49,8 @@
 #include "config_cylinders.h"
 #include "config_injection.h"
 #include "config_ignition.h"
+#include "config_sensdata.h"
+#include "config_tables.h"
 
 #include "config_engine.h"
 
@@ -109,6 +111,8 @@ typedef enum {
   ECU_CONFIG_CALIB_TYPE_CYLINDERS,
   ECU_CONFIG_CALIB_TYPE_INJECTION,
   ECU_CONFIG_CALIB_TYPE_IGNITION,
+  ECU_CONFIG_CALIB_TYPE_SENSDATA,
+  ECU_CONFIG_CALIB_TYPE_TABLES,
   ECU_CONFIG_CALIB_TYPE_ALL,
   ECU_CONFIG_CALIB_TYPE_MAX
 }ecu_config_calibration_type_t;

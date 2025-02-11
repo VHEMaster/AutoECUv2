@@ -591,6 +591,34 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
             }
         },
     }, //ECU_CONFIG_CALIB_TYPE_IGNITION
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_SENSDATA,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_sensdata_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.sensdata,
+        .data_size = sizeof(ecu_config_global_engine.calibration.sensdata),
+        .versions_count = ECU_CONFIG_SENSDATA_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_SENSDATA_VERSION_V1,
+                .size = sizeof(ecu_config_sensdata_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_SENSDATA
+    {
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_TABLES,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_tables_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.tables,
+        .data_size = sizeof(ecu_config_global_engine.calibration.tables),
+        .versions_count = ECU_CONFIG_TABLES_VERSION_MAX,
+        .versions = {
+            {
+                .version = ECU_CONFIG_TABLES_VERSION_V1,
+                .size = sizeof(ecu_config_tables_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_CALIB_TYPE_TABLES
 };
 
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
