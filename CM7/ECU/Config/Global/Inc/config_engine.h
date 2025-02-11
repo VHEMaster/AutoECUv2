@@ -53,6 +53,8 @@ typedef struct {
     ecu_config_cylinders_t cylinders;
     ecu_config_injection_t injection;
     ecu_config_ignition_t ignition;
+    ecu_config_sensdata_t sensdata;
+    ecu_config_tables_t tables;
 
 }ecu_config_engine_calibration_t;
 

@@ -5,13 +5,15 @@
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_CALIBRATION_H_
-#define CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_CALIBRATION_H_
+#ifndef CONFIG_VERSIONED_CALIBRATION_INC_VERSIONED_CALIBRATION_H_
+#define CONFIG_VERSIONED_CALIBRATION_INC_VERSIONED_CALIBRATION_H_
 
 #include "versioned_id.h"
 #include "versioned_io.h"
 #include "versioned_cylinders.h"
 #include "versioned_injection.h"
 #include "versioned_ignition.h"
+#include "versioned_sensdata.h"
+#include "versioned_tables.h"
 
-#endif /* CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_CALIBRATION_H_ */
+#endif /* CONFIG_VERSIONED_CALIBRATION_INC_VERSIONED_CALIBRATION_H_ */
