@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
     uint8_t variations;
-    ecu_config_sensdata_relation_input_varianted_item_t variant[SENSDATA_RELATION_INPUT_VARIANTED_ITEM_MAX];
+    ecu_config_sensdata_relation_input_varianted_item_t variants[SENSDATA_RELATION_INPUT_VARIANTED_ITEM_MAX];
 }ecu_config_sensdata_relation_input_varianted_t;
 
 typedef struct {
