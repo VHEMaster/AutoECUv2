@@ -760,7 +760,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_CALIBRATION_SENSDATA,
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_CALCDATA,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 12,
         .sector_index = 4,

@@ -10,6 +10,4 @@
 
 #include "common.h"
 
-typedef uint32_t ecu_calibration_instance_t;
-
 #endif /* CONFIG_MODULES_INC_CONFIG_CALIBRATION_H_ */

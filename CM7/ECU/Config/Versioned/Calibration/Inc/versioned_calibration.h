@@ -13,7 +13,7 @@
 #include "versioned_cylinders.h"
 #include "versioned_injection.h"
 #include "versioned_ignition.h"
-#include "versioned_sensdata.h"
+#include "versioned_calcdata.h"
 #include "versioned_tables.h"
 
 #endif /* CONFIG_VERSIONED_CALIBRATION_INC_VERSIONED_CALIBRATION_H_ */

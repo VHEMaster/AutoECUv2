@@ -20,4 +20,6 @@
 
 #include "errors.h"
 
+typedef uint32_t ecu_calibration_instance_t;
+
 #endif /* COMMON_INC_COMMON_H_ */

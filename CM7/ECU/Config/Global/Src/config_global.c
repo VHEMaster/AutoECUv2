@@ -592,19 +592,19 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
         },
     }, //ECU_CONFIG_CALIB_TYPE_IGNITION
     {
-        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_SENSDATA,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_sensdata_get_default_config,
-        .data_ptr = &ecu_config_global_engine.calibration.sensdata,
-        .data_size = sizeof(ecu_config_global_engine.calibration.sensdata),
-        .versions_count = ECU_CONFIG_SENSDATA_VERSION_MAX,
+        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_CALCDATA,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_calcdata_get_default_config,
+        .data_ptr = &ecu_config_global_engine.calibration.calcdata,
+        .data_size = sizeof(ecu_config_global_engine.calibration.calcdata),
+        .versions_count = ECU_CONFIG_CALCDATA_VERSION_MAX,
         .versions = {
             {
-                .version = ECU_CONFIG_SENSDATA_VERSION_V1,
-                .size = sizeof(ecu_config_sensdata_v1_t),
+                .version = ECU_CONFIG_CALCDATA_VERSION_V1,
+                .size = sizeof(ecu_config_calcdata_v1_t),
                 .translate_func = NULL,
             }
         },
-    }, //ECU_CONFIG_CALIB_TYPE_SENSDATA
+    }, //ECU_CONFIG_CALIB_TYPE_CALCDATA
     {
         .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_TABLES,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_tables_get_default_config,
