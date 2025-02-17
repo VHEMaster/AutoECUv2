@@ -131,7 +131,16 @@ typedef struct {
 
 typedef struct {
 
+}ecu_core_runtime_banked_bank_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_bank_ctx_t banks[ECU_BANK_MAX];
+}ecu_core_runtime_banked_ctx_t;
+
+typedef struct {
+
     ecu_core_runtime_global_ctx_t global;
+    ecu_core_runtime_banked_ctx_t banked;
     ecu_core_runtime_cylinder_ctx_t cylinders[ECU_CYLINDER_MAX];
 
 }ecu_core_runtime_ctx_t;
@@ -141,6 +150,7 @@ typedef struct {
     const ecu_config_engine_calibration_t *calibration;
     ecu_config_engine_runtime_t *runtime_config;
 
+    bool initialized;
     bool core_init_request;
     error_t core_init_errcode;
 

@@ -7,6 +7,7 @@
 
 #include "core.h"
 #include "core_timing.h"
+#include "core_calcdata.h"
 #include "core_init_fsm.h"
 #include "common.h"
 
@@ -52,6 +53,10 @@ void core_loop_slow(void)
   ecu_core_ctx_t *ctx = &ecu_core_ctx;
 
   core_init_fsm(ctx);
+
+  if(ctx->initialized) {
+    core_calcdata_loop_slow(ctx);
+  }
 }
 
 ITCM_FUNC void core_loop_fast(void)

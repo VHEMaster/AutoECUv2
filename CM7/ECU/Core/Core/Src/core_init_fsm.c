@@ -16,6 +16,7 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
     switch(ctx->fsm_core_init) {
       case ECU_CORE_INIT_FSM_INITIAL:
         if(ctx->core_init_request == true && ctx->core_init_errcode == E_AGAIN) {
+          ctx->initialized = false;
           ctx->fsm_core_init++;
           continue;
         }
@@ -74,6 +75,7 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
         err = E_OK;
         ctx->core_init_errcode = err;
         ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
+        ctx->initialized = true;
         break;
       default:
         break;
