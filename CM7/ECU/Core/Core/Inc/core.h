@@ -111,11 +111,20 @@ typedef struct {
 }ecu_core_runtime_global_injection_ctx_t;
 
 typedef struct {
+    float value;
+    bool valid;
+}ecu_core_runtime_global_parameters_item_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_item_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
+}ecu_core_runtime_global_parameters_ctx_t;
+
+typedef struct {
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
     ecu_core_runtime_global_injection_ctx_t injection;
 
-
+    ecu_core_runtime_global_parameters_ctx_t parameters;
 
 }ecu_core_runtime_global_ctx_t;
 

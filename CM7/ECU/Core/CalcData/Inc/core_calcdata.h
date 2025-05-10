@@ -10,6 +10,28 @@
 
 #include "core.h"
 
+typedef enum {
+  CALCDATA_CALC_TYPE_GLOBAL = 0,
+  CALCDATA_CALC_TYPE_BANKED,
+  CALCDATA_CALC_TYPE_MAX
+}ecu_core_calcdata_calc_type_t;
+
+typedef struct {
+    ecu_core_calcdata_calc_type_t type;
+    ecu_bank_t bank;
+}ecu_core_calcdata_calc_type_ctx_t;
+
+typedef void (*ecu_core_calcdata_sensor_calc_func_t)(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_global_parameters_item_ctx_t *result);
+;
+typedef struct {
+    ecu_core_calcdata_sensor_calc_func_t func;
+    void *userdata;
+}ecu_core_calcdata_sensors_ctx_t;
+
+typedef struct {
+    ecu_core_calcdata_sensors_ctx_t sensors[ECU_SENSOR_TYPE_MAX];
+}ecu_core_calcdata_ctx_t;
+
 void core_calcdata_loop_slow(ecu_core_ctx_t *ctx);
 
 #endif /* CORE_CALCDATA_INC_CORE_CALCDATA_H_ */

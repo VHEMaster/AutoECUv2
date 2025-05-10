@@ -118,6 +118,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
   float pos_max = -FLT_MAX;
   bool signal_failed;
   uint8_t signals_ok;
+  bool data_valid = false;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -131,6 +132,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
       }
 
       if(ctx->started == true) {
+        data_valid = true;
         ctx->signal_poll_time = now;
 
         for(int i = 0; i < ctx->config.signals_used_count; i++) {
@@ -145,12 +147,14 @@ void tps_loop_slow(tps_ctx_t *ctx)
             if(i == 0) ctx->diag.bits.signal1_level_high = true;
             else if(i == 1) ctx->diag.bits.signal2_level_high = true;
             signal_failed = true;
+            data_valid = false;
           }
 
           if(ctx->data.voltages[i] < signal_cfg->voltage_low_thr) {
             if(i == 0) ctx->diag.bits.signal1_level_low = true;
             else if(i == 1) ctx->diag.bits.signal2_level_low = true;
             signal_failed = true;
+            data_valid = false;
           }
 
           pos_raw = ctx->data.voltages[i] - signal_cfg->voltage_pos_min;
@@ -184,6 +188,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
           imbalance = pos_max - pos_min;
           if(imbalance > ctx->config.signals_position_imbalance_max) {
             ctx->diag.bits.signals_imbalance = true;
+            data_valid = false;
           }
         }
         ctx->data.position_imbalance = imbalance;
@@ -202,7 +207,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
 
         ctx->data.position = pos;
         ctx->poll_delta = time_delta;
-        ctx->data.valid = true;
+        ctx->data.valid = data_valid;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }

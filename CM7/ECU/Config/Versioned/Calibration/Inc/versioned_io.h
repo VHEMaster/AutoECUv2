@@ -149,6 +149,11 @@ typedef enum {
 }ecu_config_io_timing_t;
 
 typedef struct {
+    ecu_sensor_instance_t sensors[ECU_SENSOR_TYPE_MAX];
+    ecu_module_instance_t modules[ECU_MODULE_TYPE_MAX];
+}ecu_config_io_maxs_t;
+
+typedef struct {
 
 
 }ecu_config_io_misc_t;
@@ -198,6 +203,7 @@ typedef struct {
 }ecu_config_io_banked_t;
 
 typedef struct {
+    ecu_config_io_maxs_t maxs;
     ecu_config_io_misc_t misc;
 
     ecu_config_io_banked_t banked;
