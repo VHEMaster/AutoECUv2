@@ -71,6 +71,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float degrees_before_inject_cur;
   float degrees_before_inject_prev;
 
+  float crankshaft_rpm;
   float crankshaft_period;
   float crankshaft_signal_delta;
   float phase_slew_rate;
@@ -101,6 +102,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     }
 
     crankshaft_mode = ctx->timing_data.crankshaft.mode;
+    crankshaft_rpm = ctx->timing_data.crankshaft.sensor_data.rpm;
     crankshaft_period = ctx->timing_data.crankshaft.sensor_data.period;
     signal_prepare_advance = ctx->calibration->injection.signal_prepare_advance;
     crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
@@ -133,8 +135,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
           injection_phase_gr_add_rpm = 0;
           if(group_config->rpm_to_phase_add.items > 0) {
-            ip_input = math_interpolate_input(power_voltage, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
-            injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
+            ip_input = math_interpolate_input(crankshaft_rpm, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
+            injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->rpm_to_phase_add.output);
           }
 
           injection_phase_gr_requested = input_injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
