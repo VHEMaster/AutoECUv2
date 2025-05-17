@@ -34,6 +34,8 @@ typedef struct {
 
     bool components_operating;
     bool crankshaft_operating;
+
+    bool components_operating_signal;
 }ignpower_data_t;
 
 typedef struct {
@@ -77,6 +79,9 @@ error_t ignpower_is_active(ignpower_ctx_t *ctx, bool *ignpower_active);
 
 error_t ignpower_get_data(ignpower_ctx_t *ctx, ignpower_data_t *data);
 error_t ignpower_get_diag(ignpower_ctx_t *ctx, ignpower_diag_t *diag);
+
+void ignpower_components_trigger_operating_signal(ignpower_ctx_t *ctx);
+void ignpower_components_set_operating(ignpower_ctx_t *ctx, bool components_operating);
 
 void ignpower_loop_main(ignpower_ctx_t *ctx);
 void ignpower_loop_slow(ignpower_ctx_t *ctx);

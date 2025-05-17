@@ -19,6 +19,7 @@
 #include "qspi.h"
 
 #define ECU_DEVICE_NONE     (-1)
+#define ECU_DEVICE_INSTANCE_MAX (2)
 
 typedef uint32_t ecu_device_instance_t;
 

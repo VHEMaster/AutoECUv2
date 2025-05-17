@@ -170,7 +170,8 @@ void ignpower_loop_slow(ignpower_ctx_t *ctx)
       }
 
       if(ctx->config.components_operating_trigger) {
-        ctx->data.components_trigger = ctx->data.components_operating;
+        ctx->data.components_trigger = ctx->data.components_operating | ctx->data.components_operating_signal;
+        ctx->data.components_operating_signal = false;
         if(ctx->data.components_trigger) {
           ctx->operating_time = now;
           ctx->min_operation_elapsed = false;
@@ -237,6 +238,29 @@ ITCM_FUNC void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t 
     } else if(data->validity >= CKP_DATA_SYNCHRONIZED) {
       ctx->data.crankshaft_operating = true;
     }
+
+  } while(0);
+}
+
+ITCM_FUNC void ignpower_components_trigger_operating_signal(ignpower_ctx_t *ctx)
+{
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
+
+    ctx->data.components_operating_signal = true;
+
+  } while(0);
+}
+
+void ignpower_components_set_operating(ignpower_ctx_t *ctx, bool components_operating)
+
+{
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
+
+    ctx->data.components_operating = components_operating;
 
   } while(0);
 }

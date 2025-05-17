@@ -177,6 +177,39 @@ error_t ecu_modules_ignpower_get_diag(ecu_module_ignpower_t instance, ignpower_d
   return err;
 }
 
+
+error_t ecu_modules_ignpower_trigger_operating_signal(ecu_module_ignpower_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_ignpower_ctx_t *ignpower_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
+
+    ignpower_components_trigger_operating_signal(ignpower_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_ignpower_set_operating(ecu_module_ignpower_t instance, bool components_operating)
+{
+  error_t err = E_OK;
+  ecu_modules_ignpower_ctx_t *ignpower_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
+
+    ignpower_components_set_operating(ignpower_ctx->ctx, components_operating);
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_modules_ignpower_is_active(ecu_module_ignpower_t instance, bool *ignpower_active)
 {
   error_t err = E_OK;

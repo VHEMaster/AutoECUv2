@@ -21,6 +21,9 @@ error_t ecu_modules_ignpower_reset(ecu_module_ignpower_t instance);
 error_t ecu_modules_ignpower_get_data(ecu_module_ignpower_t instance, ignpower_data_t *data);
 error_t ecu_modules_ignpower_get_diag(ecu_module_ignpower_t instance, ignpower_diag_t *diag);
 
+error_t ecu_modules_ignpower_trigger_operating_signal(ecu_module_ignpower_t instance);
+error_t ecu_modules_ignpower_set_operating(ecu_module_ignpower_t instance, bool components_operating);
+
 error_t ecu_modules_ignpower_is_active(ecu_module_ignpower_t instance, bool *ignpower_active);
 
 error_t ecu_modules_ignpower_register_cb(ecu_module_ignpower_t instance, ignpower_signal_update_cb_t callback, void *usrdata);

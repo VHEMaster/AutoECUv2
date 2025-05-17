@@ -10,32 +10,6 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_io_t ecu_calibration_io_config_default = {
-    .maxs = {
-        .sensors = {
-            ECU_SENSOR_CKP_MAX,
-            ECU_SENSOR_CMP_MAX,
-            ECU_SENSOR_ECT_MAX,
-            ECU_SENSOR_EGT_MAX,
-            ECU_SENSOR_IAT_MAX,
-            ECU_SENSOR_MAF_MAX,
-            ECU_SENSOR_MAP_MAX,
-            ECU_SENSOR_TPS_MAX,
-            ECU_SENSOR_VSS_MAX,
-            ECU_SENSOR_APS_MAX,
-            ECU_SENSOR_OTS_MAX,
-            ECU_SENSOR_OPS_MAX,
-        },
-        .modules = {
-            ECU_MODULE_FUELPUMP_MAX,
-            ECU_MODULE_COOLINGFAN_MAX,
-            ECU_MODULE_IGNPOWER_MAX,
-            ECU_MODULE_INDICATION_MAX,
-            ECU_MODULE_TIMING_MAX,
-            ECU_MODULE_ETC_MAX,
-            ECU_MODULE_VVT_MAX,
-            ECU_MODULE_WGCV_MAX,
-        },
-    },
     .banked = {
       .global = {
           .sensor_ckp = {

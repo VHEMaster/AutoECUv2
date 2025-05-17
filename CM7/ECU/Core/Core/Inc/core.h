@@ -111,12 +111,75 @@ typedef struct {
 }ecu_core_runtime_global_injection_ctx_t;
 
 typedef struct {
-    float value;
-    bool valid;
-}ecu_core_runtime_global_parameters_item_ctx_t;
+
+    bool read_valid;
+}ecu_core_runtime_global_parameters_device_wbls_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_item_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
+
+    bool read_valid;
+}ecu_core_runtime_global_parameters_device_stepper_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_device_wbls_ctx_t wbls[ECU_DEVICE_WBLS_MAX];
+    ecu_core_runtime_global_parameters_device_stepper_ctx_t stepper[ECU_DEVICE_STEPPER_MAX];
+}ecu_core_runtime_global_parameters_devices_ctx_t;
+
+typedef struct {
+    float value;
+    bool read_valid;
+}ecu_core_runtime_global_parameters_sensor_value_ctx_t;
+
+typedef struct {
+
+    bool read_valid;
+}ecu_core_runtime_global_parameters_module_timing_ctx_t;
+
+typedef struct {
+
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_etc_ctx_t;
+
+typedef struct {
+
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_vvt_ctx_t;
+
+typedef struct {
+
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_coolingfan_ctx_t;
+
+typedef struct {
+
+    bool read_valid;
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_ignpower_ctx_t;
+
+typedef struct {
+
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_indication_ctx_t;
+
+typedef struct {
+
+    bool write_valid;
+}ecu_core_runtime_global_parameters_module_wgcv_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_module_timing_ctx_t timing[ECU_MODULE_TIMING_MAX];
+    ecu_core_runtime_global_parameters_module_etc_ctx_t etc[ECU_MODULE_ETC_MAX];
+    ecu_core_runtime_global_parameters_module_vvt_ctx_t vvt[ECU_MODULE_VVT_MAX];
+    ecu_core_runtime_global_parameters_module_coolingfan_ctx_t coolingfan[ECU_MODULE_VVT_MAX];
+    ecu_core_runtime_global_parameters_module_ignpower_ctx_t ignpower[ECU_MODULE_IGNPOWER_MAX];
+    ecu_core_runtime_global_parameters_module_indication_ctx_t indication[ECU_MODULE_IGNPOWER_MAX];
+    ecu_core_runtime_global_parameters_module_wgcv_ctx_t wgcv[ECU_MODULE_WGCV_MAX];
+}ecu_core_runtime_global_parameters_modules_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_sensor_value_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
+    ecu_core_runtime_global_parameters_devices_ctx_t devices;
+    ecu_core_runtime_global_parameters_modules_ctx_t modules;
 }ecu_core_runtime_global_parameters_ctx_t;
 
 typedef struct {
