@@ -52,6 +52,10 @@ typedef struct {
     float pushpull_resistance;
     cj125_af_t ampfactor;
 
+    bool lambda_temperature_correction;
+    float temperature_correction_value;
+    float temperature_reference;
+
     bool reg_enscun;
     bool reg_set_dia_q;
 

@@ -156,6 +156,7 @@ typedef struct {
     float lambda_ref_voltage;
     float lambda_radj;
     float lambda_current;
+    float lambda_current_tc;
 
     float heater_voltage;
     float heater_dutycycle;

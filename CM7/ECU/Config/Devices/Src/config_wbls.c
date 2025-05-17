@@ -63,6 +63,11 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .ampfactor = CJ125_AF_17,
     .pump_ref_current = CJ125_CONFIG_PRC_OFF,
 
+    // LSU ADV: disable or change to 1% per 100°C
+    .lambda_temperature_correction = true,
+    .temperature_correction_value = 0.0004f,
+    .temperature_reference = 780.0f,
+
     .reg_enscun = true,
     .reg_set_dia_q = false,
 
