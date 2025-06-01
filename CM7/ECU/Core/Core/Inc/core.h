@@ -123,9 +123,28 @@ typedef struct {
 }ecu_core_runtime_global_injection_ctx_t;
 
 typedef struct {
+    bool ready;
+    bool measuring_start;
+    bool measuring_end;
+    time_us_t time_start;
+    time_us_t time_tdc;
+    time_us_t time_end;
+
+    float rough_value;
+}ecu_core_runtime_group_cylinder_rough_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
+
+    ecu_core_runtime_group_cylinder_rough_ctx_t cylinders[ECU_CYLINDER_MAX];
+
+}ecu_core_runtime_global_rough_ctx_t;
+
+typedef struct {
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
     ecu_core_runtime_global_injection_ctx_t injection;
+    ecu_core_runtime_global_rough_ctx_t rough;
 
     ecu_core_runtime_global_parameters_ctx_t parameters;
     ecu_core_runtime_global_parameters_ctx_t parameters_simulated;
@@ -136,6 +155,10 @@ typedef struct {
     timing_req_t timing_req;
     timing_data_crankshaft_t crankshaft_data;
 }ecu_core_runtime_cylinder_sequentialed_t;
+
+typedef struct {
+    float rough_value;
+}ecu_core_runtime_cylinder_rough_t;
 
 typedef struct {
     ecu_core_runtime_cylinder_sequentialed_t sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX];

@@ -33,6 +33,7 @@ static const ecu_config_cylinders_t ecu_calibration_cylinders_config_default = {
             .cy_opposed = ECU_CYLINDER_1,
         }, //CYLINDERS_CY_4
     },
+    .rough_measure_range = 90.0f,
 };
 
 error_t ecu_calibration_cylinders_get_default_config(ecu_calibration_instance_t instance, ecu_config_cylinders_t *config)

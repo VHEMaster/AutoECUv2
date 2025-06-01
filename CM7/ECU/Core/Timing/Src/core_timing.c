@@ -7,6 +7,7 @@
 
 #include "core_timing_ignition.h"
 #include "core_timing_injection.h"
+#include "core_timing_rough.h"
 #include "core_timing.h"
 #include "config_hw.h"
 #include "common.h"
@@ -25,6 +26,7 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
   bool sequential_needed = false;
   bool ignition_update_trigger = false;
   bool injection_update_trigger = false;
+  bool rough_update_trigger = false;
   uint32_t process_update_trigger_counter = ctx->process_update_trigger_counter;
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
 
@@ -40,74 +42,6 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
       ecu_config_set_ignition_enabled(true);
       runtime->global.cylinders_count = ctx->calibration->cylinders.cylinders_count;
 
-      for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
-        if(!semisequential_needed || !sequential_needed) {
-          if(ctx->calibration->ignition.groups[gr].enabled) {
-            group_mode_ign = ctx->calibration->ignition.groups[gr].mode;
-            if(!semisequential_needed) {
-              if(group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_DISTRIBUTOR ||
-                  group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY ||
-                  group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-                semisequential_needed = true;
-              }
-            }
-            if(!sequential_needed) {
-              if(group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_ONLY ||
-                  group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-                sequential_needed = true;
-              }
-            }
-          }
-        } else {
-          break;
-        }
-      }
-
-      for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
-        if(!semisequential_needed || !sequential_needed) {
-          if(ctx->calibration->injection.groups[gr].enabled) {
-            group_mode_inj = ctx->calibration->injection.groups[gr].mode;
-            if(!semisequential_needed) {
-              if(group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_MONO ||
-                  group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEMISEQUENTIAL_ONLY ||
-                  group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-                semisequential_needed = true;
-              }
-            }
-            if(!sequential_needed) {
-              if(group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_ONLY ||
-                  group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-                sequential_needed = true;
-              }
-            }
-          }
-        } else {
-          break;
-        }
-      }
-
-      for(ecu_cylinder_t cy = 0; cy < runtime->global.cylinders_count; cy++) {
-        pos_offset = ctx->calibration->cylinders.cylinders[cy].pos_offset;
-
-        if(sequential_needed) {
-          sequentialed = &runtime->cylinders[cy].sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL];
-          err = timing_calculate_offset_position(timing_ctx,
-              pos_offset, true,
-              &sequentialed->timing_req,
-              &sequentialed->crankshaft_data);
-          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-        }
-
-        if(semisequential_needed) {
-          sequentialed = &runtime->cylinders[cy].sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR];
-          err = timing_calculate_offset_position(timing_ctx,
-              pos_offset, false,
-              &sequentialed->timing_req,
-              &sequentialed->crankshaft_data);
-          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-        }
-      }
-
       if(ctx->calibration->ignition.process_update_trigger == ECU_CONFIG_IGNITION_PROCESS_UPDATE_TRIGGER_ALWAYS) {
         ignition_update_trigger = true;
       } else if(ctx->calibration->ignition.process_update_trigger == ECU_CONFIG_IGNITION_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
@@ -122,6 +56,87 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
         injection_update_trigger = !process_update_trigger_counter_1of2;
       } else if(ctx->calibration->injection.process_update_trigger == ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
         injection_update_trigger = process_update_trigger_counter_1of2;
+      }
+
+      if(ctx->calibration->cylinders.rough_measure_range != 0.0f) {
+        rough_update_trigger = true;
+        sequential_needed = true;
+      }
+
+      if(ignition_update_trigger) {
+        for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
+          if(!semisequential_needed || !sequential_needed) {
+            if(ctx->calibration->ignition.groups[gr].enabled) {
+              group_mode_ign = ctx->calibration->ignition.groups[gr].mode;
+              if(!semisequential_needed) {
+                if(group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_DISTRIBUTOR ||
+                    group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY ||
+                    group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                  semisequential_needed = true;
+                }
+              }
+              if(!sequential_needed) {
+                if(group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_ONLY ||
+                    group_mode_ign == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                  sequential_needed = true;
+                }
+              }
+            }
+          } else {
+            break;
+          }
+        }
+      }
+
+      if(injection_update_trigger) {
+        for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
+          if(!semisequential_needed || !sequential_needed) {
+            if(ctx->calibration->injection.groups[gr].enabled) {
+              group_mode_inj = ctx->calibration->injection.groups[gr].mode;
+              if(!semisequential_needed) {
+                if(group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_MONO ||
+                    group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEMISEQUENTIAL_ONLY ||
+                    group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                  semisequential_needed = true;
+                }
+              }
+              if(!sequential_needed) {
+                if(group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_ONLY ||
+                    group_mode_inj == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                  sequential_needed = true;
+                }
+              }
+            }
+          } else {
+            break;
+          }
+        }
+      }
+
+      if(sequential_needed) {
+        for(ecu_cylinder_t cy = 0; cy < runtime->global.cylinders_count; cy++) {
+          pos_offset = ctx->calibration->cylinders.cylinders[cy].pos_offset;
+
+          sequentialed = &runtime->cylinders[cy].sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL];
+          err = timing_calculate_offset_position(timing_ctx,
+              pos_offset, true,
+              &sequentialed->timing_req,
+              &sequentialed->crankshaft_data);
+          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+        }
+      }
+
+      if(semisequential_needed) {
+        for(ecu_cylinder_t cy = 0; cy < runtime->global.cylinders_count; cy++) {
+          pos_offset = ctx->calibration->cylinders.cylinders[cy].pos_offset;
+
+          sequentialed = &runtime->cylinders[cy].sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR];
+          err = timing_calculate_offset_position(timing_ctx,
+              pos_offset, false,
+              &sequentialed->timing_req,
+              &sequentialed->crankshaft_data);
+          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+        }
       }
     } else {
       ecu_config_set_ignition_enabled(false);
@@ -146,6 +161,7 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
 
       ignition_update_trigger = true;
       injection_update_trigger = true;
+      rough_update_trigger = true;
     }
 
     if(ignition_update_trigger) {
@@ -153,6 +169,9 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
     }
     if(injection_update_trigger) {
       core_timing_signal_update_injection(ctx);
+    }
+    if(rough_update_trigger) {
+      core_timing_signal_update_rough(ctx);
     }
   } while(0);
 

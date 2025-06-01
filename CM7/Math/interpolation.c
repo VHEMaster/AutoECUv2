@@ -218,3 +218,18 @@ float math_interpolate_1d_offset(sMathInterpolateInput input, const float *table
 
   return result;
 }
+
+INLINE float math_interpolate(float input_left, float input_mid, float input_right, float base_left, float base_right)
+{
+  float result;
+  float mult;
+
+  if(input_right == input_left) {
+    result = (base_left + base_right) * 0.5f;
+  } else {
+    mult = (input_mid - input_left) / (input_right - input_left);
+    result = (base_right - base_left) * mult + base_left;
+  }
+
+  return result;
+}

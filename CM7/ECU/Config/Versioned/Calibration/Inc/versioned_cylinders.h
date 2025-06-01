@@ -26,6 +26,8 @@ typedef struct {
     uint8_t cylinders_count;
     ecu_config_cylinder_t cylinders[ECU_CYLINDER_MAX];
 
+    float rough_measure_range;
+
     uint32_t align ALIGNED_CACHE;
 }ecu_config_cylinders_v1_t ALIGNED_CACHE;
 
