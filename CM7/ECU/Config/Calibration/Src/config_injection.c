@@ -121,6 +121,19 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
                 },
             },
 
+            .enrichment_late_phase_mode = ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_ENDING,
+            .enrichment_late_phase = {
+                .items = 16,
+                .input = {
+                    600, 740, 870, 1050, 1250, 1490, 1800, 2150,
+                    2560, 3040, 3590, 4310, 5100, 6060, 7190, 8500
+                },
+                .output = {
+                    540, 540, 540, 540, 540, 540, 540, 540,
+                    540, 540, 540, 540, 540, 540, 540, 540
+                },
+            },
+
             .inject_mass_low_threshold = 0.0f,
             .inject_mass_reduction = 0.0f,
             .dutycycle_warning = 0.8f,

@@ -46,6 +46,13 @@ typedef enum {
 }ecu_config_injection_group_phase_mode_t;
 
 typedef enum {
+  ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_DISABLED = 0,
+  ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_BEGINNING,
+  ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_ENDING,
+  ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_MAX,
+}ecu_config_injection_group_late_phase_mode_t;
+
+typedef enum {
   ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_ONLY = 0,
   ECU_CONFIG_INJECTION_GROUP_MODE_SEMISEQUENTIAL_ONLY,
   ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL,
@@ -121,6 +128,9 @@ typedef struct {
     float phase_slew_rate;
     ecu_config_injection_group_phase_mode_t phase_mode;
     ecu_config_injection_relation_t rpm_to_phase_add;
+
+    ecu_config_injection_group_late_phase_mode_t enrichment_late_phase_mode;
+    ecu_config_injection_relation_t enrichment_late_phase;
 
     float inject_mass_low_threshold;
     float inject_mass_reduction;

@@ -84,12 +84,18 @@ typedef struct {
     float time_inject;
     float dutycycle_max;
     float dutycycle_mean;
+    float enrichment_late_phase;
 
     ecu_core_runtime_group_cylinder_injection_ctx_t cylinders[ECU_CYLINDER_MAX];
 }ecu_core_runtime_global_injection_group_ctx_t;
 
 typedef struct {
-    float input_ignition_advance;
+    bool valid;
+    float ignition_advance;
+}ecu_core_runtime_global_ignition_input_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_ignition_input_ctx_t input;
 
     float power_voltage;
     float signal_prepare_advance;
@@ -99,10 +105,14 @@ typedef struct {
 
 }ecu_core_runtime_global_ignition_ctx_t;
 
+typedef struct {
+    bool valid;
+    float injection_phase;
+    float injection_mass;
+}ecu_core_runtime_global_injection_input_ctx_t;
 
 typedef struct {
-    float input_injection_phase;
-    float input_injection_mass;
+    ecu_core_runtime_global_injection_input_ctx_t input;
 
     float power_voltage;
     float signal_prepare_advance;

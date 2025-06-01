@@ -161,9 +161,48 @@ typedef struct {
 }ecu_core_runtime_global_parameters_modules_ctx_t;
 
 typedef struct {
+    struct {
+        struct {
+            float saturation_time;
+            float advance;
+        }groups[ECU_CONFIG_IGNITION_GROUP_MAX];
+    }read;
+    struct {
+        float ignition_advance;
+    }write;
+    bool read_valid;
+    bool write_valid;
+}ecu_core_runtime_global_parameters_timing_ignition_ctx_t;
+
+typedef struct {
+    struct {
+        struct {
+            float phase;
+            float lag_time;
+            float time_inject;
+            float dutycycle_max;
+            float dutycycle_mean;
+            float enrichment_late_phase;
+        }groups[ECU_CONFIG_INJECTION_GROUP_MAX];
+    }read;
+    struct {
+        float injection_phase;
+        float injection_mass;
+    }write;
+    bool read_valid;
+    bool write_valid;
+}ecu_core_runtime_global_parameters_timing_injection_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_timing_ignition_ctx_t ignition;
+    ecu_core_runtime_global_parameters_timing_injection_ctx_t injection;
+}ecu_core_runtime_global_parameters_timings_ctx_t;
+
+typedef struct {
     ecu_core_runtime_global_parameters_sensor_value_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
     ecu_core_runtime_global_parameters_devices_ctx_t devices;
     ecu_core_runtime_global_parameters_modules_ctx_t modules;
+    ecu_core_runtime_global_parameters_timings_ctx_t timings;
 }ecu_core_runtime_global_parameters_ctx_t;
 
 #endif /* CORE_CORE_INC_CORE_RUNTIME_PARAMETERS_H_ */

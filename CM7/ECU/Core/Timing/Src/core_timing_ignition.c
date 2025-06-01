@@ -19,7 +19,6 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
-  float input_ignition_advance;
 
   ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
   bool distributor;
@@ -29,6 +28,9 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 
   sMathInterpolateInput ip_input;
   const ecu_config_ignition_group_setup_t *group_config;
+
+  float input_ignition_advance;
+  bool input_valid;
 
   float signal_prepare_advance;
   ecu_core_runtime_global_ignition_group_ctx_t *runtime_gr;
@@ -80,13 +82,14 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
         ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
 
-    input_ignition_advance = ctx->runtime.global.ignition.input_ignition_advance;
+    input_valid = ctx->runtime.global.ignition.input.valid;
+    input_ignition_advance = ctx->runtime.global.ignition.input.ignition_advance;
     ctx->runtime.global.ignition.signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
       group_config = &ctx->calibration->ignition.groups[gr];
       runtime_gr = &ctx->runtime.global.ignition.groups[gr];
-      if(group_config->enabled) {
+      if(group_config->enabled && input_valid) {
         process_update_trigger_counter_gr = ctx->runtime.global.ignition.process_update_trigger_counter;
         process_update_trigger_counter_gr_1of3 = process_update_trigger_counter_gr % 3;
 

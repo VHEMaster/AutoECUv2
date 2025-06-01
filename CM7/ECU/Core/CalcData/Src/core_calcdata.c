@@ -11,18 +11,16 @@
 #include "core_calcdata_sensors.h"
 #include "core_calcdata_devices.h"
 #include "core_calcdata_modules.h"
-
-static ecu_core_calcdata_ctx_t ecu_core_calcdata_ctx = {
-
-};
+#include "core_calcdata_timings.h"
 
 void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
 {
   core_calcdata_sensors_read(ctx);
   core_calcdata_devices_read(ctx);
   core_calcdata_modules_read(ctx);
-
+  core_calcdata_timings_read(ctx);
 
   core_calcdata_devices_write(ctx);
   core_calcdata_modules_write(ctx);
+  core_calcdata_timings_write(ctx);
 }

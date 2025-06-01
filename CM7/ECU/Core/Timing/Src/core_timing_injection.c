@@ -37,6 +37,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
   ecu_cylinder_t cy_opposite;
 
+  bool input_valid;
   float input_injection_phase;
   float input_injection_mass;
 
@@ -51,6 +52,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float performance_initial_us_gr;
   float performance_mult_gr;
   float ramp_pressure_gr;
+  float enrichment_late_phase_gr;
 
   float position_cy;
   float injection_phase_gr;
@@ -108,14 +110,15 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
         ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
 
-    input_injection_phase = ctx->runtime.global.injection.input_injection_phase;
-    input_injection_mass = ctx->runtime.global.injection.input_injection_mass;
+    input_valid = ctx->runtime.global.injection.input.valid;
+    input_injection_phase = ctx->runtime.global.injection.input.injection_phase;
+    input_injection_mass = ctx->runtime.global.injection.input.injection_mass;
     ctx->runtime.global.injection.signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
       group_config = &ctx->calibration->injection.groups[gr];
       runtime_gr = &ctx->runtime.global.injection.groups[gr];
-      if(group_config->enabled) {
+      if(group_config->enabled && input_valid) {
         process_update_trigger_counter_gr = ctx->runtime.global.injection.process_update_trigger_counter;
         process_update_trigger_counter_gr_1of2 = process_update_trigger_counter_gr & 1;
 
@@ -133,14 +136,24 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           lag_time_gr = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
           runtime_gr->lag_time = lag_time_gr;
 
-          injection_phase_gr_add_rpm = 0;
           if(group_config->rpm_to_phase_add.items > 0) {
             ip_input = math_interpolate_input(crankshaft_rpm, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
             injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->rpm_to_phase_add.output);
+          } else {
+            injection_phase_gr_add_rpm = 0;
+          }
+
+          // TODO: IMPLEMENT THAT FEATURE
+          if(group_config->enrichment_late_phase_mode > ECU_CONFIG_INJECTION_GROUP_LATE_PHASE_MODE_DISABLED) {
+            ip_input = math_interpolate_input(crankshaft_rpm, group_config->enrichment_late_phase.input, group_config->enrichment_late_phase.items);
+            enrichment_late_phase_gr = math_interpolate_1d(ip_input, group_config->rpm_to_phase_add.output);
+          } else {
+            enrichment_late_phase_gr = 0;
           }
 
           injection_phase_gr_requested = input_injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
           runtime_gr->phase_requested = injection_phase_gr_requested;
+          runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
 
           us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
