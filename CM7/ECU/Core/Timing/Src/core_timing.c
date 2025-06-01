@@ -123,13 +123,6 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
       } else if(ctx->calibration->injection.process_update_trigger == ECU_CONFIG_INJECTION_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
         injection_update_trigger = process_update_trigger_counter_1of2;
       }
-
-      if(ignition_update_trigger) {
-        core_timing_signal_update_ignition(ctx);
-      }
-      if(injection_update_trigger) {
-        core_timing_signal_update_injection(ctx);
-      }
     } else {
       ecu_config_set_ignition_enabled(false);
 
@@ -151,7 +144,15 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
         }
       }
 
-      memset(runtime, 0, sizeof(ecu_core_runtime_ctx_t));
+      ignition_update_trigger = true;
+      injection_update_trigger = true;
+    }
+
+    if(ignition_update_trigger) {
+      core_timing_signal_update_ignition(ctx);
+    }
+    if(injection_update_trigger) {
+      core_timing_signal_update_injection(ctx);
     }
   } while(0);
 

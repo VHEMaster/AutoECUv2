@@ -158,7 +158,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
 
-          if(runtime_gr->initialized) {
+          if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
             injection_phase_gr = runtime_gr->phase;
             injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr;
             phase_slew_rate = group_config->phase_slew_rate;
@@ -179,7 +179,6 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           } else {
             injection_phase_gr = injection_phase_gr_requested;
           }
-
 
           performance_mult_gr = 1.0f;
           ramp_pressure_gr = group_config->performance_fuel_pressure;
@@ -239,17 +238,21 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
 
           group_mode = group_config->mode;
-          if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
-              group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
-            sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-          } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
-              group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_ONLY) {
-            sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
-          } else if(group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-            if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-              sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
-            } else {
+          if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
+                group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
               sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+            } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
+                group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_ONLY) {
+              sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
+            } else if(group_mode == ECU_CONFIG_INJECTION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+              if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+                sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
+              } else {
+                sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+              }
+            } else {
+              needtoclear = true;
             }
           } else {
             needtoclear = true;
@@ -259,10 +262,12 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             runtime_gr->sequentialed_mode = sequentialed_mode;
             needtoclear = true;
           }
+
+          dutycycle_gr_max = 0;
+          dutycycle_gr_mean = 0;
+          dutycycle_gr_count = 0;
+
           if(!needtoclear) {
-            dutycycle_gr_max = 0;
-            dutycycle_gr_mean = 0;
-            dutycycle_gr_count = 0;
 
             for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
               cy_config = &group_config->cylinders[cy];
@@ -420,16 +425,20 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 }
               }
             }
+          } else {
+            for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
+              runtime_cy = &runtime_gr->cylinders[cy];
+              memset(runtime_cy, 0, sizeof(*runtime_cy));
+            }
+          }
+
+          if(dutycycle_gr_count > 0) {
             dutycycle_gr_mean /= dutycycle_gr_count;
-            runtime_gr->dutycycle_mean = dutycycle_gr_mean;
-            runtime_gr->dutycycle_max = dutycycle_gr_max;
           }
+          runtime_gr->dutycycle_mean = dutycycle_gr_mean;
+          runtime_gr->dutycycle_max = dutycycle_gr_max;
+
           ctx->runtime.global.injection.process_update_trigger_counter = process_update_trigger_counter_gr + 1;
-        } else {
-          for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
-            runtime_cy = &runtime_gr->cylinders[cy];
-            memset(runtime_cy, 0, sizeof(*runtime_cy));
-          }
         }
       } else {
         if(runtime_gr->initialized) {

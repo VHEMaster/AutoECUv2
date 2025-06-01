@@ -211,8 +211,11 @@ static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
@@ -222,6 +225,7 @@ static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t
     if(module_ctx->write.set_target) {
       (void)ecu_modules_etc_set_target_position(instance, module_ctx->write.target);
     }
+    module_ctx->write_valid = false;
   }
 }
 
@@ -232,8 +236,11 @@ static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
@@ -246,6 +253,7 @@ static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t
     if(module_ctx->write.set_target_dc) {
       (void)ecu_modules_vvt_set_target_dutycycle(instance, module_ctx->write.target_dc);
     }
+    module_ctx->write_valid = false;
   }
 }
 
@@ -256,8 +264,11 @@ static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_ins
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
@@ -267,6 +278,7 @@ static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_ins
     if(module_ctx->write.set_emergency_trigger) {
       (void)ecu_modules_coolingfan_emergency_trigger(instance, module_ctx->write.emergency_trigger);
     }
+    module_ctx->write_valid = false;
   }
 }
 
@@ -277,8 +289,11 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
@@ -287,6 +302,7 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
     } else if(module_ctx->write.set_trigger) {
       (void)ecu_modules_ignpower_trigger_operating_signal(instance);
     }
+    module_ctx->write_valid = false;
   }
 }
 
@@ -297,14 +313,18 @@ static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_ins
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
     if(module_ctx->write.set_manual_engaged) {
       (void)ecu_modules_indication_manual_set(instance, module_ctx->write.manual_enabled);
     }
+    module_ctx->write_valid = false;
   }
 }
 
@@ -315,8 +335,11 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
 
   if(simulated_ctx->write_valid) {
     module_ctx->write = simulated_ctx->write;
+    module_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = module_ctx->write;
+    if(module_ctx->write_valid) {
+      simulated_ctx->write = module_ctx->write;
+    }
   }
 
   if(module_ctx->write_valid) {
@@ -329,5 +352,6 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
     if(module_ctx->write.set_dc_target) {
       (void)ecu_modules_wgcv_set_dutycycle(instance, module_ctx->write.dc_target);
     }
+    module_ctx->write_valid = false;
   }
 }

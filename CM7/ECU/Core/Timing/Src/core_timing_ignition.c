@@ -122,7 +122,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
           us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
 
-          if(runtime_gr->initialized) {
+          if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
             ignition_advance_gr = runtime_gr->advance;
             ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested - ignition_advance_gr;
             if(ignition_advance_gr_accept_vs_requested > 0.0f) {
@@ -165,20 +165,24 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
           sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
 
           group_mode = group_config->mode;
-          if(group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_DISTRIBUTOR) {
-            distributor = true;
-            sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-          } else if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
-              group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
-            sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-          } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
-              group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_ONLY) {
-            sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
-          } else if(group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-            if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-              sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
-            } else {
+          if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_DISTRIBUTOR) {
+              distributor = true;
               sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+            } else if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
+                group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
+              sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+            } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
+                group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_ONLY) {
+              sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
+            } else if(group_mode == ECU_CONFIG_IGNITION_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+              if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+                sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL;
+              } else {
+                sequentialed_mode = ECU_CORE_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+              }
+            } else {
+              needtoclear = true;
             }
           } else {
             needtoclear = true;

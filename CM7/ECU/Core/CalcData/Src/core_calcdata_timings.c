@@ -108,13 +108,17 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 
   if(simulated_ctx->write_valid) {
     timing_ctx->write = simulated_ctx->write;
+    timing_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = timing_ctx->write;
+    if(timing_ctx->write_valid) {
+      simulated_ctx->write = timing_ctx->write;
+    }
   }
 
   if(timing_ctx->write_valid) {
     dst_ctx->ignition_advance = timing_ctx->write.ignition_advance;
     dst_ctx->valid = true;
+    timing_ctx->write_valid = false;
   }
 }
 
@@ -126,13 +130,17 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 
   if(simulated_ctx->write_valid) {
     timing_ctx->write = simulated_ctx->write;
+    timing_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = timing_ctx->write;
+    if(timing_ctx->write_valid) {
+      simulated_ctx->write = timing_ctx->write;
+    }
   }
 
   if(timing_ctx->write_valid) {
     dst_ctx->injection_phase = timing_ctx->write.injection_phase;
     dst_ctx->injection_mass = timing_ctx->write.injection_mass;
     dst_ctx->valid = true;
+    timing_ctx->write_valid = false;
   }
 }

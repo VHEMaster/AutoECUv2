@@ -124,12 +124,16 @@ static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_
 
   if(simulated_ctx->write_valid) {
     device_ctx->write = simulated_ctx->write;
+    device_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = device_ctx->write;
+    if(device_ctx->write_valid) {
+      simulated_ctx->write = device_ctx->write;
+    }
   }
 
   if(device_ctx->write_valid) {
     (void)ecu_devices_wbls_set_heatup(instance, device_ctx->write.heatup);
+    device_ctx->write_valid = false;
   }
 }
 
@@ -140,8 +144,11 @@ static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instan
 
   if(simulated_ctx->write_valid) {
     device_ctx->write = simulated_ctx->write;
+    device_ctx->write_valid = true;
   } else {
-    simulated_ctx->write = device_ctx->write;
+    if(device_ctx->write_valid) {
+      simulated_ctx->write = device_ctx->write;
+    }
   }
 
   if(device_ctx->write_valid) {
@@ -158,5 +165,6 @@ static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instan
         (void)ecu_devices_stepper_set_current(instance, device_ctx->write.pos_current);
       }
     }
+    device_ctx->write_valid = false;
   }
 }
