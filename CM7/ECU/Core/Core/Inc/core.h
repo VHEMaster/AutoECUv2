@@ -118,6 +118,7 @@ typedef struct {
     ecu_core_runtime_global_injection_ctx_t injection;
 
     ecu_core_runtime_global_parameters_ctx_t parameters;
+    ecu_core_runtime_global_parameters_ctx_t parameters_simulated;
 
 }ecu_core_runtime_global_ctx_t;
 

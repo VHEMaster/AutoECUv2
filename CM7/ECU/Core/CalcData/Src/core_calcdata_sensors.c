@@ -91,6 +91,8 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
   const ecu_core_calcdata_sensor_ctx_t *sensor_ctx;
   ecu_sensor_instance_t instance_max;
   ecu_core_runtime_global_parameters_sensor_value_ctx_t result;
+  ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensor_value_ctx;
+  ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensor_value_simulated_ctx;
 
   for(uint32_t type = 0; type < ECU_SENSOR_TYPE_MAX; type++) {
     sensor_ctx = &ecu_core_calcdata_sensors_ctx.sensors[type];
@@ -100,8 +102,16 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
       for(ecu_sensor_instance_t instance = 0; instance < instance_max; instance++) {
         memset(&result, 0, sizeof(result));
         sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, &result);
+        sensor_value_ctx = &ctx->runtime.global.parameters.sensors[type][instance];
+        sensor_value_simulated_ctx = &ctx->runtime.global.parameters_simulated.sensors[type][instance];
 
-        ctx->runtime.global.parameters.sensors[type][instance] = result;
+        if(sensor_value_simulated_ctx->read_valid) {
+          *sensor_value_ctx = *sensor_value_simulated_ctx;
+        } else {
+          *sensor_value_ctx = result;
+          sensor_value_simulated_ctx->value = result.value;
+
+        }
       }
     } else {
       memset(&ctx->runtime.global.parameters.sensors[type], 0, sizeof(ctx->runtime.global.parameters.sensors[type]));
