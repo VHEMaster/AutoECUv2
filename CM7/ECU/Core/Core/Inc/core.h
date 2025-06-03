@@ -166,20 +166,29 @@ typedef struct {
 }ecu_core_runtime_cylinder_ctx_t;
 
 typedef struct {
-    float value;
-    bool valid;
-}ecu_core_runtime_banked_bank_input_value_ctx_t;
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_aps[ECU_CONFIG_IO_APS_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_ect[ECU_CONFIG_IO_ECT_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_ckp[ECU_CONFIG_IO_CMP_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_ops[ECU_CONFIG_IO_OPS_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_ots[ECU_CONFIG_IO_OTS_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_vss[ECU_CONFIG_IO_VSS_MAX];
+}ecu_core_runtime_banked_global_parameters_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_banked_bank_input_value_ctx_t inputs[CALCDATA_RELATION_INPUT_SOURCE_MAX];
-}ecu_core_runtime_banked_bank_ctx_t;
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_cmp[ECU_CONFIG_IO_CMP_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_egt[ECU_CONFIG_IO_EGT_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_iat[ECU_CONFIG_IO_IAT_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_maf[ECU_CONFIG_IO_MAF_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_map[ECU_CONFIG_IO_MAP_MAX];
+    const ecu_core_runtime_global_parameters_sensor_value_ctx_t *sensors_tps[ECU_CONFIG_IO_TPS_MAX];
+}ecu_core_runtime_banked_bank_parameters_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_banked_bank_ctx_t banks[ECU_BANK_MAX];
+    ecu_core_runtime_banked_global_parameters_ctx_t global;
+    ecu_core_runtime_banked_bank_parameters_ctx_t banks[ECU_BANK_MAX];
 }ecu_core_runtime_banked_ctx_t;
 
 typedef struct {
-
     ecu_core_runtime_global_ctx_t global;
     ecu_core_runtime_banked_ctx_t banked;
     ecu_core_runtime_cylinder_ctx_t cylinders[ECU_CYLINDER_MAX];

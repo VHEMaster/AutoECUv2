@@ -21,6 +21,10 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
           .sensor_aps = {
               ECU_SENSOR_APS_1, //ECU_CONFIG_IO_APS_ACCELERATOR
           },
+          .sensor_ect = {
+              ECU_SENSOR_ECT_1, //ECU_CONFIG_IO_ECT_PRIMARY
+              ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
+          },
           .sensor_ots = {
               ECU_SENSOR_NONE, //ECU_CONFIG_IO_OTS_PRIMARY
           },
@@ -51,10 +55,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                   ECU_SENSOR_CMP_1, //ECU_CONFIG_IO_CMP_SOHC
                   ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
                   ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
-              },
-              .sensor_ect = {
-                  ECU_SENSOR_ECT_1, //ECU_CONFIG_IO_ECT_PRIMARY
-                  ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
               },
               .sensor_egt = {
                   ECU_SENSOR_NONE, //ECU_CONFIG_IO_EGT_PRIMARY
@@ -105,10 +105,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
                   },
-                  .sensor_ect = {
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_PRIMARY
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
-                  },
                   .sensor_egt = {
                       ECU_SENSOR_EGT_1, //ECU_CONFIG_IO_EGT_PRIMARY
                   },
@@ -155,10 +151,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_SOHC
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_INTAKE
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_CMP_DOHC_EXHAUST
-                  },
-                  .sensor_ect = {
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_PRIMARY
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_ECT_SECONDARY
                   },
                   .sensor_egt = {
                       ECU_SENSOR_EGT_2, //ECU_CONFIG_IO_EGT_PRIMARY

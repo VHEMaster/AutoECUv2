@@ -150,12 +150,12 @@ typedef struct {
 
 typedef struct {
     ecu_config_io_cmp_t sensor_cmp[ECU_CONFIG_IO_CMP_MAX];
-    ecu_config_io_ect_t sensor_ect[ECU_CONFIG_IO_ECT_MAX];
     ecu_config_io_ect_t sensor_egt[ECU_CONFIG_IO_EGT_MAX];
     ecu_config_io_iat_t sensor_iat[ECU_CONFIG_IO_IAT_MAX];
     ecu_config_io_maf_t sensor_maf[ECU_CONFIG_IO_MAF_MAX];
     ecu_config_io_map_t sensor_map[ECU_CONFIG_IO_MAP_MAX];
     ecu_config_io_vss_t sensor_tps[ECU_CONFIG_IO_TPS_MAX];
+
 
     ecu_config_io_stepper_t device_stepper[ECU_CONFIG_IO_STEPPER_MAX];
     ecu_config_io_wbls_t device_wbls[ECU_CONFIG_IO_WBLS_MAX];
@@ -168,6 +168,7 @@ typedef struct {
 
 typedef struct {
     ecu_config_io_cmp_t sensor_ckp[ECU_CONFIG_IO_CKP_MAX];
+    ecu_config_io_ect_t sensor_ect[ECU_CONFIG_IO_ECT_MAX];
     ecu_config_io_vss_t sensor_vss[ECU_CONFIG_IO_VSS_MAX];
     ecu_config_io_aps_t sensor_aps[ECU_CONFIG_IO_APS_MAX];
     ecu_config_io_ots_t sensor_ots[ECU_CONFIG_IO_OTS_MAX];
