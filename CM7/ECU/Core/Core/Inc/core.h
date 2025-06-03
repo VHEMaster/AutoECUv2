@@ -67,8 +67,10 @@ typedef struct {
     float saturation_rpm_mult_table;
 
     float saturation_time;
-    float advance;
-    float advance_requested;
+    float advance_mean;
+    float advance_requested_mean;
+    float advance[ECU_BANK_MAX];
+    float advance_requested[ECU_BANK_MAX];
 
     ecu_core_runtime_group_cylinder_ignition_ctx_t cylinders[ECU_CYLINDER_MAX];
 
@@ -81,7 +83,7 @@ typedef struct {
     float lag_time;
     float phase;
     float phase_requested;
-    float time_inject;
+    float time_inject_mean;
     float dutycycle_max;
     float dutycycle_mean;
     float enrichment_late_phase;
@@ -91,7 +93,7 @@ typedef struct {
 
 typedef struct {
     bool valid;
-    float ignition_advance;
+    float ignition_advance_banked[ECU_BANK_MAX];
 }ecu_core_runtime_global_ignition_input_ctx_t;
 
 typedef struct {
@@ -108,7 +110,7 @@ typedef struct {
 typedef struct {
     bool valid;
     float injection_phase;
-    float injection_mass;
+    float injection_mass_banked[ECU_BANK_MAX];
 }ecu_core_runtime_global_injection_input_ctx_t;
 
 typedef struct {
@@ -141,6 +143,7 @@ typedef struct {
 }ecu_core_runtime_global_rough_ctx_t;
 
 typedef struct {
+    uint32_t banks_count;
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
     ecu_core_runtime_global_injection_ctx_t injection;

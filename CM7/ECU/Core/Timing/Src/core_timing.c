@@ -41,6 +41,7 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
     if(ctx->timing_data.crankshaft.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       ecu_config_set_ignition_enabled(true);
       runtime->global.cylinders_count = ctx->calibration->cylinders.cylinders_count;
+      runtime->global.banks_count = ctx->calibration->cylinders.banks_count;
 
       if(ctx->calibration->ignition.process_update_trigger == ECU_CONFIG_IGNITION_PROCESS_UPDATE_TRIGGER_ALWAYS) {
         ignition_update_trigger = true;

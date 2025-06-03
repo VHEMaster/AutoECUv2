@@ -64,7 +64,9 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
   //err = ecu_timings_ignition_get_data(&data);
 
   for(int i = 0; i < ECU_CONFIG_IGNITION_GROUP_MAX; i++) {
-    timing_ctx->read.groups[i].advance = dst_ctx->groups[i].advance;
+    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+      timing_ctx->read.groups[i].advance[b] = dst_ctx->groups[i].advance[b];
+    }
     timing_ctx->read.groups[i].saturation_time = dst_ctx->groups[i].saturation_time;
   }
   timing_ctx->read_valid = true;
@@ -85,7 +87,7 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
   for(int i = 0; i < ECU_CONFIG_INJECTION_GROUP_MAX; i++) {
     timing_ctx->read.groups[i].phase = dst_ctx->groups[i].phase;
     timing_ctx->read.groups[i].lag_time = dst_ctx->groups[i].lag_time;
-    timing_ctx->read.groups[i].time_inject = dst_ctx->groups[i].time_inject;
+    timing_ctx->read.groups[i].time_inject_mean = dst_ctx->groups[i].time_inject_mean;
     timing_ctx->read.groups[i].dutycycle_max = dst_ctx->groups[i].dutycycle_max;
     timing_ctx->read.groups[i].dutycycle_mean = dst_ctx->groups[i].dutycycle_mean;
     timing_ctx->read.groups[i].enrichment_late_phase = dst_ctx->groups[i].enrichment_late_phase;
@@ -116,7 +118,9 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
   }
 
   if(timing_ctx->write_valid) {
-    dst_ctx->ignition_advance = timing_ctx->write.ignition_advance;
+    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+      dst_ctx->ignition_advance_banked[b] = timing_ctx->write.ignition_advance_banked[b];
+    }
     dst_ctx->valid = true;
     timing_ctx->write_valid = false;
   }
@@ -139,7 +143,9 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 
   if(timing_ctx->write_valid) {
     dst_ctx->injection_phase = timing_ctx->write.injection_phase;
-    dst_ctx->injection_mass = timing_ctx->write.injection_mass;
+    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+      dst_ctx->injection_mass_banked[b] = timing_ctx->write.injection_mass_banked[b];
+    }
     dst_ctx->valid = true;
     timing_ctx->write_valid = false;
   }

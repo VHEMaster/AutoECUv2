@@ -10,6 +10,7 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_cylinders_t ecu_calibration_cylinders_config_default = {
+    .banks_count = 2,
     .cylinders_count = 4,
     .cylinders = {
         {

@@ -27,32 +27,32 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   bool needtoclear;
   output_value_t output_value;
   bool output_valid;
+  uint32_t banks_count;
+  uint32_t cylinders_count;
 
   sMathInterpolateInput ip_input;
   const ecu_config_injection_group_setup_t *group_config;
   const ecu_config_injection_group_cylinder_setup_t *cy_config;
+  const ecu_config_io_banked_t *banked_config;
 
   float signal_prepare_advance;
   ecu_core_runtime_global_injection_group_ctx_t *runtime_gr;
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
   ecu_cylinder_t cy_opposite;
+  ecu_config_io_map_t map_type;
+  ecu_sensor_map_t map_instances[ECU_BANK_MAX];
 
   bool input_valid;
   float input_injection_phase;
-  float input_injection_mass;
+  float input_injection_mass_b[ECU_BANK_MAX];
 
   float lag_time_gr;
   float lag_time_cy;
   float pulse_time_cy;
-  float injection_flow_us_gr;
-  float injection_mass_us_gr;
-  float injection_mass_gr;
-  float injection_time_gr;
   float degrees_per_cycle;
-  float performance_initial_us_gr;
-  float performance_mult_gr;
-  float ramp_pressure_gr;
   float enrichment_late_phase_gr;
+  float injection_time_gr_mean;
+
 
   float position_cy;
   float injection_phase_gr;
@@ -87,13 +87,24 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   time_us_t time_to_activate;
   time_us_t time_to_inject;
 
-  map_data_t map_data;
+  map_data_t map_data_b[ECU_BANK_MAX];
+  float ramp_pressure_gr_b[ECU_BANK_MAX];
+  float performance_mult_gr_b[ECU_BANK_MAX];
+  float performance_initial_us_gr_b[ECU_BANK_MAX];
+  float injection_flow_us_gr_b[ECU_BANK_MAX];
+  float injection_mass_us_gr_b[ECU_BANK_MAX];
+  float injection_mass_gr_b[ECU_BANK_MAX];
+  float injection_time_gr_b[ECU_BANK_MAX];
 
   uint32_t process_update_trigger_counter_gr;
   uint8_t process_update_trigger_counter_gr_1of2;
   bool process_update_trigger = false;
 
   do {
+    banks_count = ctx->runtime.global.banks_count;
+    cylinders_count = ctx->runtime.global.cylinders_count;
+    banked_config = &ctx->calibration->io.banked;
+
     err = ecu_config_gpio_input_get_id(ctx->calibration->injection.power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
       (void)input_get_value(power_voltage_pin, &input_analog_value, NULL);
@@ -112,7 +123,10 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
     input_valid = ctx->runtime.global.injection.input.valid;
     input_injection_phase = ctx->runtime.global.injection.input.injection_phase;
-    input_injection_mass = ctx->runtime.global.injection.input.injection_mass;
+
+    for(ecu_bank_t b = 0; b < banks_count; b++) {
+      input_injection_mass_b[b] = ctx->runtime.global.injection.input.injection_mass_banked[b];
+    }
     ctx->runtime.global.injection.signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
@@ -180,47 +194,70 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             injection_phase_gr = injection_phase_gr_requested;
           }
 
-          performance_mult_gr = 1.0f;
-          ramp_pressure_gr = group_config->performance_fuel_pressure;
-          if(group_config->performance_fuel_pressure_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
-            err = ecu_sensors_map_get_value(group_config->performance_fuel_pressure_map, &map_data);
-            if(err == E_OK) {
-              if(map_data.valid) {
-                ramp_pressure_gr = group_config->performance_fuel_pressure + map_data.manifold_air_pressure - 0.986923f;
-                performance_mult_gr = fast_rsqrt(group_config->performance_fuel_pressure / ramp_pressure_gr);
-              }
-            } else {
-              // TODO: error flag
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            performance_mult_gr_b[b] = 1.0f;
+            ramp_pressure_gr_b[b] = group_config->performance_fuel_pressure;
+          }
+          map_type = group_config->performance_fuel_pressure_map_type;
+          map_instances[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type];
+          if(map_instances[ECU_BANK_1] == ECU_SENSOR_NONE) {
+            for(ecu_bank_t b = 0; b < banks_count; b++) {
+              map_instances[b] = banked_config->banks[b].common.sensor_map[map_type];
+            }
+          } else {
+            for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
+              map_instances[b] = map_instances[ECU_BANK_1];
             }
           }
-
-          performance_initial_us_gr = group_config->performance_static;
-          performance_initial_us_gr *= 1.6666667e-5;
-          performance_initial_us_gr *= performance_mult_gr;
-
-          if(group_config->performance_static_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {
-            injection_flow_us_gr = performance_initial_us_gr;
-            injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
-          } else {
-            injection_mass_us_gr = performance_initial_us_gr;
-            injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
+          if(group_config->performance_fuel_pressure_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+            for(ecu_bank_t b = 0; b < banks_count; b++) {
+              if(map_instances[b] > ECU_SENSOR_NONE) {
+                err = ecu_sensors_map_get_value(map_instances[b], &map_data_b[b]);
+                if(err == E_OK) {
+                  if(map_data_b[b].valid) {
+                    ramp_pressure_gr_b[b] = group_config->performance_fuel_pressure + map_data_b[b].manifold_air_pressure - 0.986923f;
+                    performance_mult_gr_b[b] = fast_rsqrt(group_config->performance_fuel_pressure / ramp_pressure_gr_b[b]);
+                  }
+                } else {
+                  // TODO: error flag
+                }
+              } else {
+                // TODO: error flag
+              }
+            }
           }
+          injection_time_gr_mean = 0;
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            performance_initial_us_gr_b[b] = group_config->performance_static;
+            performance_initial_us_gr_b[b] *= 1.6666667e-5;
+            performance_initial_us_gr_b[b] *= performance_mult_gr_b[b];
 
-          injection_mass_gr = input_injection_mass;
+            if(group_config->performance_static_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {
+              injection_flow_us_gr_b[b] = performance_initial_us_gr_b[b];
+              injection_mass_us_gr_b[b] = injection_flow_us_gr_b[b] * group_config->performance_fuel_mass_per_cc * 0.001f;
+            } else {
+              injection_mass_us_gr_b[b] = performance_initial_us_gr_b[b];
+              injection_flow_us_gr_b[b] = injection_mass_us_gr_b[b] / group_config->performance_fuel_mass_per_cc * 0.001f;
+            }
 
-          if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
-            injection_mass_gr -= group_config->inject_mass_reduction;
-            injection_time_gr = injection_mass_gr / injection_mass_us_gr;
-          } else {
-            injection_time_gr = 0.0f;
+            injection_mass_gr_b[b] = input_injection_mass_b[b];
+
+            if(injection_mass_gr_b[b] >= group_config->inject_mass_low_threshold) {
+              injection_mass_gr_b[b] -= group_config->inject_mass_reduction;
+              injection_time_gr_b[b] = injection_mass_gr_b[b] / injection_mass_us_gr_b[b];
+            } else {
+              injection_time_gr_b[b] = 0.0f;
+            }
+
+            if(injection_time_gr_b[b] < 0.0f) {
+              injection_time_gr_b[b] = 0.0f;
+            }
+            injection_time_gr_mean += injection_time_gr_b[b];
           }
+          injection_time_gr_mean /= banks_count;
 
-          if(injection_time_gr < 0.0f) {
-            injection_time_gr = 0.0f;
-          }
-
+          runtime_gr->time_inject_mean = injection_time_gr_mean;
           runtime_gr->phase = injection_phase_gr;
-          runtime_gr->time_inject = injection_time_gr;
 
           runtime_gr->initialized = true;
 
@@ -269,7 +306,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
           if(!needtoclear) {
 
-            for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
+            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
               cy_config = &group_config->cylinders[cy];
               runtime_cy = &runtime_gr->cylinders[cy];
               if(!cy_config->disabled) {
@@ -298,7 +335,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 lag_time_cy *= cy_config->performance_dynamic_mul;
                 lag_time_cy += cy_config->performance_dynamic_add;
 
-                injection_time_cy = injection_time_gr;
+                injection_time_cy = injection_time_gr_b[ctx->calibration->cylinders.cylinders[cy].bank];
                 injection_time_cy *= cy_config->performance_static_mul;
                 dutycycle_period = ctx->timing_data.crankshaft.sensor_data.period;
 
@@ -426,7 +463,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               }
             }
           } else {
-            for(ecu_cylinder_t cy = 0; cy < ctx->runtime.global.cylinders_count; cy++) {
+            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
               runtime_cy = &runtime_gr->cylinders[cy];
               memset(runtime_cy, 0, sizeof(*runtime_cy));
             }

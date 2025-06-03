@@ -164,11 +164,11 @@ typedef struct {
     struct {
         struct {
             float saturation_time;
-            float advance;
+            float advance[ECU_BANK_MAX];
         }groups[ECU_CONFIG_IGNITION_GROUP_MAX];
     }read;
     struct {
-        float ignition_advance;
+        float ignition_advance_banked[ECU_BANK_MAX];
     }write;
     bool read_valid;
     bool write_valid;
@@ -179,7 +179,7 @@ typedef struct {
         struct {
             float phase;
             float lag_time;
-            float time_inject;
+            float time_inject_mean;
             float dutycycle_max;
             float dutycycle_mean;
             float enrichment_late_phase;
@@ -187,7 +187,7 @@ typedef struct {
     }read;
     struct {
         float injection_phase;
-        float injection_mass;
+        float injection_mass_banked[ECU_BANK_MAX];
     }write;
     bool read_valid;
     bool write_valid;

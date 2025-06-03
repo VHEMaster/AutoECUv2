@@ -121,7 +121,7 @@ typedef struct {
     float performance_fuel_mass_per_cc;
 
     ecu_config_injection_perf_press_source_t performance_fuel_pressure_source;
-    ecu_sensor_map_t performance_fuel_pressure_map;
+    ecu_config_io_map_t performance_fuel_pressure_map_type;
     float performance_fuel_pressure;
 
     float phase_add;
