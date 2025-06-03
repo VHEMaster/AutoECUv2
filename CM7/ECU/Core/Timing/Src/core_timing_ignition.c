@@ -29,12 +29,15 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   bool output_valid;
 
   sMathInterpolateInput ip_input;
+  const ecu_config_ignition_t *config;
   const ecu_config_ignition_group_setup_t *group_config;
+  const timing_data_crankshaft_t *crankshaft;
 
   float input_ignition_advance_b[ECU_BANK_MAX];
   bool input_valid;
 
   float signal_prepare_advance;
+  ecu_core_runtime_global_ignition_ctx_t *runtime;
   ecu_core_runtime_global_ignition_group_ctx_t *runtime_gr;
   ecu_core_runtime_group_cylinder_ignition_ctx_t *runtime_cy;
   ecu_cylinder_t cy_opposite;
@@ -73,33 +76,36 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   do {
     banks_count = ctx->runtime.global.banks_count;
     cylinders_count = ctx->runtime.global.cylinders_count;
+    config = &ctx->calibration->ignition;
+    runtime = &ctx->runtime.global.ignition;
+    crankshaft = &ctx->timing_data.crankshaft;
 
-    err = ecu_config_gpio_input_get_id(ctx->calibration->ignition.power_voltage_pin, &power_voltage_pin);
+    err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
       (void)input_get_value(power_voltage_pin, &input_analog_value, NULL);
       power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
-      ctx->runtime.global.ignition.power_voltage = power_voltage;
+      runtime->power_voltage = power_voltage;
     } else {
-      power_voltage = ctx->runtime.global.ignition.power_voltage;
+      power_voltage = runtime->power_voltage;
     }
 
-    crankshaft_mode = ctx->timing_data.crankshaft.mode;
-    crankshaft_period = ctx->timing_data.crankshaft.sensor_data.period;
-    signal_prepare_advance = ctx->calibration->ignition.signal_prepare_advance;
-    crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
-        ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
+    crankshaft_mode = crankshaft->mode;
+    crankshaft_period = crankshaft->sensor_data.period;
+    signal_prepare_advance = config->signal_prepare_advance;
+    crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
+        crankshaft->sensor_data.previous.timestamp);
 
-    input_valid = ctx->runtime.global.ignition.input.valid;
+    input_valid = runtime->input.valid;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
-      input_ignition_advance_b[b] = ctx->runtime.global.ignition.input.ignition_advance_banked[b];
+      input_ignition_advance_b[b] = runtime->input.ignition_advance_banked[b];
     }
-    ctx->runtime.global.ignition.signal_prepare_advance = signal_prepare_advance;
+    runtime->signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
-      group_config = &ctx->calibration->ignition.groups[gr];
-      runtime_gr = &ctx->runtime.global.ignition.groups[gr];
+      group_config = &config->groups[gr];
+      runtime_gr = &runtime->groups[gr];
       if(group_config->enabled && input_valid) {
-        process_update_trigger_counter_gr = ctx->runtime.global.ignition.process_update_trigger_counter;
+        process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
         process_update_trigger_counter_gr_1of3 = process_update_trigger_counter_gr % 3;
 
         if(group_config->process_update_trigger == ECU_CONFIG_IGNITION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
@@ -118,7 +124,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
           saturation_time_table = math_interpolate_1d(ip_input, group_config->voltage_to_saturation_time.output);
           runtime_gr->saturation_time_table = saturation_time_table;
 
-          ip_input = math_interpolate_input(ctx->timing_data.crankshaft.sensor_data.rpm, group_config->rpm_to_saturation_mult.input, group_config->rpm_to_saturation_mult.items);
+          ip_input = math_interpolate_input(crankshaft->sensor_data.rpm, group_config->rpm_to_saturation_mult.input, group_config->rpm_to_saturation_mult.items);
           saturation_rpm_mult_table = math_interpolate_1d(ip_input, group_config->rpm_to_saturation_mult.output);
           runtime_gr->saturation_rpm_mult_table = saturation_rpm_mult_table;
 
@@ -134,8 +140,8 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
           ignition_advance_gr_requested_mean /= banks_count;
           runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
 
-          us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
-          us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
+          us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
+          us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
@@ -164,7 +170,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 
           runtime_gr->initialized = true;
 
-          switch(ctx->calibration->ignition.uspd_source) {
+          switch(config->uspd_source) {
             default:
             case ECU_CONFIG_IGNITION_USPD_SOURCE_PER_SENSOR_PULSE:
               us_per_degree = us_per_degree_pulsed;
@@ -312,7 +318,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
             }
           }
         }
-        ctx->runtime.global.ignition.process_update_trigger_counter = process_update_trigger_counter_gr + 1;
+        runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
       } else {
         if(runtime_gr->initialized) {
           memset(runtime_gr, 0, sizeof(*runtime_gr));

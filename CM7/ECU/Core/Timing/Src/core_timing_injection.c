@@ -31,11 +31,14 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   uint32_t cylinders_count;
 
   sMathInterpolateInput ip_input;
+  const ecu_config_injection_t *config;
   const ecu_config_injection_group_setup_t *group_config;
   const ecu_config_injection_group_cylinder_setup_t *cy_config;
   const ecu_config_io_banked_t *banked_config;
+  const timing_data_crankshaft_t *crankshaft;
 
   float signal_prepare_advance;
+  ecu_core_runtime_global_injection_ctx_t *runtime;
   ecu_core_runtime_global_injection_group_ctx_t *runtime_gr;
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
   ecu_cylinder_t cy_opposite;
@@ -104,36 +107,39 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     banks_count = ctx->runtime.global.banks_count;
     cylinders_count = ctx->runtime.global.cylinders_count;
     banked_config = &ctx->calibration->io.banked;
+    config = &ctx->calibration->injection;
+    runtime = &ctx->runtime.global.injection;
+    crankshaft = &ctx->timing_data.crankshaft;
 
-    err = ecu_config_gpio_input_get_id(ctx->calibration->injection.power_voltage_pin, &power_voltage_pin);
+    err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
       (void)input_get_value(power_voltage_pin, &input_analog_value, NULL);
       power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
-      ctx->runtime.global.injection.power_voltage = power_voltage;
+      runtime->power_voltage = power_voltage;
     } else {
-      power_voltage = ctx->runtime.global.injection.power_voltage;
+      power_voltage = runtime->power_voltage;
     }
 
-    crankshaft_mode = ctx->timing_data.crankshaft.mode;
-    crankshaft_rpm = ctx->timing_data.crankshaft.sensor_data.rpm;
-    crankshaft_period = ctx->timing_data.crankshaft.sensor_data.period;
-    signal_prepare_advance = ctx->calibration->injection.signal_prepare_advance;
-    crankshaft_signal_delta = time_diff(ctx->timing_data.crankshaft.sensor_data.current.timestamp,
-        ctx->timing_data.crankshaft.sensor_data.previous.timestamp);
+    crankshaft_mode = crankshaft->mode;
+    crankshaft_rpm = crankshaft->sensor_data.rpm;
+    crankshaft_period = crankshaft->sensor_data.period;
+    signal_prepare_advance = config->signal_prepare_advance;
+    crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
+        crankshaft->sensor_data.previous.timestamp);
 
-    input_valid = ctx->runtime.global.injection.input.valid;
-    input_injection_phase = ctx->runtime.global.injection.input.injection_phase;
+    input_valid = runtime->input.valid;
+    input_injection_phase = runtime->input.injection_phase;
 
     for(ecu_bank_t b = 0; b < banks_count; b++) {
-      input_injection_mass_b[b] = ctx->runtime.global.injection.input.injection_mass_banked[b];
+      input_injection_mass_b[b] = runtime->input.injection_mass_banked[b];
     }
-    ctx->runtime.global.injection.signal_prepare_advance = signal_prepare_advance;
+    runtime->signal_prepare_advance = signal_prepare_advance;
 
     for(ecu_config_injection_group_t gr = 0; gr < ECU_CONFIG_INJECTION_GROUP_MAX; gr++) {
-      group_config = &ctx->calibration->injection.groups[gr];
-      runtime_gr = &ctx->runtime.global.injection.groups[gr];
+      group_config = &config->groups[gr];
+      runtime_gr = &runtime->groups[gr];
       if(group_config->enabled && input_valid) {
-        process_update_trigger_counter_gr = ctx->runtime.global.injection.process_update_trigger_counter;
+        process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
         process_update_trigger_counter_gr_1of2 = process_update_trigger_counter_gr & 1;
 
         if(group_config->process_update_trigger == ECU_CONFIG_INJECTION_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
@@ -169,8 +175,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           runtime_gr->phase_requested = injection_phase_gr_requested;
           runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
 
-          us_per_degree_pulsed = ctx->timing_data.crankshaft.sensor_data.us_per_degree_pulsed;
-          us_per_degree_revolution = ctx->timing_data.crankshaft.sensor_data.us_per_degree_revolution;
+          us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
+          us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
           if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
             injection_phase_gr = runtime_gr->phase;
@@ -261,7 +267,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
           runtime_gr->initialized = true;
 
-          switch(ctx->calibration->injection.uspd_source) {
+          switch(config->uspd_source) {
             default:
             case ECU_CONFIG_INJECTION_USPD_SOURCE_PER_SENSOR_PULSE:
               us_per_degree = us_per_degree_pulsed;
@@ -337,7 +343,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
                 injection_time_cy = injection_time_gr_b[ctx->calibration->cylinders.cylinders[cy].bank];
                 injection_time_cy *= cy_config->performance_static_mul;
-                dutycycle_period = ctx->timing_data.crankshaft.sensor_data.period;
+                dutycycle_period = crankshaft->sensor_data.period;
 
                 if(injection_time_cy > 0.0f) {
                   if(sequentialed_mode == ECU_CORE_RUNTIME_CYLINDER_SEQUENTIAL) {
@@ -475,7 +481,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           runtime_gr->dutycycle_mean = dutycycle_gr_mean;
           runtime_gr->dutycycle_max = dutycycle_gr_max;
 
-          ctx->runtime.global.injection.process_update_trigger_counter = process_update_trigger_counter_gr + 1;
+          runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
         }
       } else {
         if(runtime_gr->initialized) {
