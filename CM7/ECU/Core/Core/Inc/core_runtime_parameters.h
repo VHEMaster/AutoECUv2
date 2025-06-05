@@ -154,9 +154,9 @@ typedef struct {
     ecu_core_runtime_global_parameters_module_timing_ctx_t timing[ECU_MODULE_TIMING_MAX];
     ecu_core_runtime_global_parameters_module_etc_ctx_t etc[ECU_MODULE_ETC_MAX];
     ecu_core_runtime_global_parameters_module_vvt_ctx_t vvt[ECU_MODULE_VVT_MAX];
-    ecu_core_runtime_global_parameters_module_coolingfan_ctx_t coolingfan[ECU_MODULE_VVT_MAX];
+    ecu_core_runtime_global_parameters_module_coolingfan_ctx_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
     ecu_core_runtime_global_parameters_module_ignpower_ctx_t ignpower[ECU_MODULE_IGNPOWER_MAX];
-    ecu_core_runtime_global_parameters_module_indication_ctx_t indication[ECU_MODULE_IGNPOWER_MAX];
+    ecu_core_runtime_global_parameters_module_indication_ctx_t indication[ECU_MODULE_INDICATION_MAX];
     ecu_core_runtime_global_parameters_module_wgcv_ctx_t wgcv[ECU_MODULE_WGCV_MAX];
 }ecu_core_runtime_global_parameters_modules_ctx_t;
 

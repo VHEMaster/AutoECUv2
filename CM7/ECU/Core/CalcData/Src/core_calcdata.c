@@ -21,7 +21,7 @@ void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
   core_calcdata_modules_read(ctx);
   core_calcdata_timings_read(ctx);
 
-  core_calcdata_banked_apply_sensors(ctx);
+  core_calcdata_banked_apply(ctx);
 
   core_calcdata_devices_write(ctx);
   core_calcdata_modules_write(ctx);
