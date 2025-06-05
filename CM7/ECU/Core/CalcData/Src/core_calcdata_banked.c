@@ -52,7 +52,7 @@ void core_calcdata_banked_apply(ecu_core_ctx_t *ctx)
   core_calcdata_banked_apply_modules(ctx);
 }
 
-static void core_calcdata_banked_apply_sensors(ecu_core_ctx_t *ctx)
+STATIC_INLINE void core_calcdata_banked_apply_sensors(ecu_core_ctx_t *ctx)
 {
   CORE_CALCDATA_BANKED_APPLY_GLOBAL(SENSOR, sensor, APS, aps);
   CORE_CALCDATA_BANKED_APPLY_GLOBAL(SENSOR, sensor, CKP, ckp);
@@ -69,13 +69,13 @@ static void core_calcdata_banked_apply_sensors(ecu_core_ctx_t *ctx)
   CORE_CALCDATA_BANKED_APPLY_BANKED(SENSOR, sensor, TPS, tps);
 }
 
-static void core_calcdata_banked_apply_devices(ecu_core_ctx_t *ctx)
+STATIC_INLINE void core_calcdata_banked_apply_devices(ecu_core_ctx_t *ctx)
 {
   CORE_CALCDATA_BANKED_APPLY_BANKED(DEVICE, device, STEPPER, stepper);
   CORE_CALCDATA_BANKED_APPLY_BANKED(DEVICE, device, WBLS, wbls);
 }
 
-static void core_calcdata_banked_apply_modules(ecu_core_ctx_t *ctx)
+STATIC_INLINE void core_calcdata_banked_apply_modules(ecu_core_ctx_t *ctx)
 {
   CORE_CALCDATA_BANKED_APPLY_GLOBAL(MODULE, module, COOLINGFAN, coolingfan);
   CORE_CALCDATA_BANKED_APPLY_GLOBAL(MODULE, module, IGNPOWER, ignpower);
