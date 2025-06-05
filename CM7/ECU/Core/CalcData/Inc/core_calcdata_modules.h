@@ -8,7 +8,7 @@
 #ifndef CORE_CALCDATA_INC_CORE_CALCDATA_MODULES_H_
 #define CORE_CALCDATA_INC_CORE_CALCDATA_MODULES_H_
 
-#include "core.h"
+#include "core_calcdata.h"
 
 void core_calcdata_modules_read(ecu_core_ctx_t *ctx);
 void core_calcdata_modules_write(ecu_core_ctx_t *ctx);

@@ -8,7 +8,7 @@
 #ifndef CORE_CALCDATA_INC_CORE_CALCDATA_SENSORS_H_
 #define CORE_CALCDATA_INC_CORE_CALCDATA_SENSORS_H_
 
-#include "core.h"
+#include "core_calcdata.h"
 
 void core_calcdata_sensors_read(ecu_core_ctx_t *ctx);
 

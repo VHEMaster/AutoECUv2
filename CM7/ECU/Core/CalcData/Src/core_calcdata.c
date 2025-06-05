@@ -13,6 +13,7 @@
 #include "core_calcdata_modules.h"
 #include "core_calcdata_timings.h"
 #include "core_calcdata_banked.h"
+#include "core_calcdata_inputs.h"
 
 static void calcdata_inputs_read(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
@@ -22,6 +23,7 @@ void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
   calcdata_inputs_read(ctx);
 
   core_calcdata_banked_apply(ctx);
+  core_calcdata_inputs_calculate(ctx);
 
   calcdata_inputs_write(ctx);
 }

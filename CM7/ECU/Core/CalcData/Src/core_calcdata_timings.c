@@ -5,7 +5,7 @@
  *      Author: VHEMaster
  */
 
-#include "core_calcdata.h"
+#include "core_calcdata_timings.h"
 #include "config_global.h"
 
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata);

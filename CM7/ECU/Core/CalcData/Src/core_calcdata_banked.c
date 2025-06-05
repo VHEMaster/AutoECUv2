@@ -5,7 +5,7 @@
  *      Author: VHEMaster
  */
 
-#include "core_calcdata.h"
+#include "core_calcdata_banked.h"
 #include "config_global.h"
 
 #define CORE_CALCDATA_GET_SENSOR_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance) &ctx->runtime.global.parameters.typelower##s[ECU_##TYPEUPPER##_TYPE_##INSTUPPER][instance]
