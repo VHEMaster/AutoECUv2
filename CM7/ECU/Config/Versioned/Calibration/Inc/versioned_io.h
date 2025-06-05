@@ -13,6 +13,8 @@
 #include "config_devices.h"
 #include "config_modules.h"
 
+typedef uint32_t ecu_config_io_instance_t;
+
 typedef enum {
   ECU_CONFIG_IO_VERSION_V1 = 0,
   ECU_CONFIG_IO_VERSION_MAX

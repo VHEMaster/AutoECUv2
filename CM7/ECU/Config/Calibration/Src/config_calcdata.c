@@ -21,7 +21,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_1D_32_0,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_APS
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS
         {
             .variations = 2,
             .variants = {
@@ -32,18 +32,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_1D_32_1,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP
-        {
-            .variations = 0,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_NONE,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_NONE,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CMP
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP
         {
             .variations = 1,
             .variants = {
@@ -54,51 +43,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_ECT
-        {
-            .variations = 1,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_3,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_NONE,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_EGT
-        {
-            .variations = 1,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_4,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_NONE,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_IAT
-        {
-            .variations = 2,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_5,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_32_2,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_MAF
-        {
-            .variations = 2,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_6,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_32_3,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_MAP
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT
         {
             .variations = 1,
             .variants = {
@@ -109,7 +54,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_OPS
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OPS
         {
             .variations = 1,
             .variants = {
@@ -120,18 +65,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_OTS
-        {
-            .variations = 2,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_9,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_32_4,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_TPS
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OTS
         {
             .variations = 1,
             .variants = {
@@ -142,7 +76,62 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_VSS
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_VSS
+        {
+            .variations = 0,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN
+        {
+            .variations = 0,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX
+        {
+            .variations = 1,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_3,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT
+        {
+            .variations = 2,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_5,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_32_2,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF
+        {
+            .variations = 2,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_9,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_32_4,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS
         {
             .variations = 2,
             .variants = {
@@ -176,6 +165,28 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_ENGINE_LOAD
+        {
+            .variations = 1,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_4,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD
+        {
+            .variations = 2,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_6,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_32_3,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD
     },
     .output_data = {
         {
@@ -186,11 +197,11 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_0,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_MAP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                     },
@@ -200,11 +211,11 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_1,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_TPS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                     },
@@ -219,7 +230,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_2,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
@@ -241,7 +252,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_0,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
@@ -263,7 +274,7 @@ static const ecu_config_calcdata_t ecu_calcdata_config_default = {
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_1,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {

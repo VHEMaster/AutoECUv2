@@ -16,9 +16,9 @@
   for(ecu_##typelower##_##instlower##_t i = 0; i < ECU_##TYPEUPPER##_##INSTUPPER##_MAX; i++) { \
     ecu_##typelower##_instance_t instance = ctx->engine_config->calibration.io.banked.global.typelower##_##instlower[i]; \
     if(instance != ECU_##TYPEUPPER##_NONE) { \
-      ctx->runtime.banked.global.typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+      ctx->runtime.banked.raw.global.typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
     } else { \
-      ctx->runtime.banked.global.typelower##s_##instlower[i] = NULL; \
+      ctx->runtime.banked.raw.global.typelower##s_##instlower[i] = NULL; \
     } \
   }
 
@@ -29,14 +29,14 @@
       for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) { \
         instance = ctx->engine_config->calibration.io.banked.banks[b].common.typelower##_##instlower[i]; \
         if(instance != ECU_##TYPEUPPER##_NONE) { \
-          ctx->runtime.banked.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+          ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
         } else { \
-          ctx->runtime.banked.banks[b].typelower##s_##instlower[i] = NULL; \
+          ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = NULL; \
         } \
       } \
     } else { \
       for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) { \
-        ctx->runtime.banked.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+        ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
       } \
     } \
   }

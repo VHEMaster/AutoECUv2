@@ -46,6 +46,24 @@ typedef struct {
 typedef struct {
     ecu_core_runtime_banked_global_parameters_ctx_t global;
     ecu_core_runtime_banked_bank_parameters_ctx_t banks[ECU_BANK_MAX];
+}ecu_core_runtime_banked_raw_ctx_t;
+
+typedef struct {
+    float value;
+    bool valid;
+}ecu_core_runtime_banked_source_bank_input_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_source_bank_input_ctx_t inputs[CALCDATA_RELATION_INPUT_SOURCE_MAX];
+}ecu_core_runtime_banked_source_bank_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_source_bank_ctx_t banks[ECU_BANK_MAX];
+}ecu_core_runtime_banked_source_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_raw_ctx_t raw;
+    ecu_core_runtime_banked_source_ctx_t source;
 }ecu_core_runtime_banked_ctx_t;
 
 #endif /* CORE_CORE_INC_CORE_RUNTIME_BANKED_H_ */

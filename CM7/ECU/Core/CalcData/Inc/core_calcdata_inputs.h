@@ -10,6 +10,6 @@
 
 #include "core_calcdata.h"
 
-void core_calcdata_inputs_calculate(ecu_core_ctx_t *ctx);
+void core_calcdata_inputs_process(ecu_core_ctx_t *ctx);
 
 #endif /* CORE_CALCDATA_INC_CORE_CALCDATA_INPUTS_H_ */

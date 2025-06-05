@@ -18,14 +18,20 @@
 static void calcdata_inputs_read(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
 
+time_msmnt_item_t time_calcdata = {0};
+
 void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
 {
+  time_msmt_start(&time_calcdata);
+
   calcdata_inputs_read(ctx);
 
   core_calcdata_banked_apply(ctx);
-  core_calcdata_inputs_calculate(ctx);
+  core_calcdata_inputs_process(ctx);
 
   calcdata_inputs_write(ctx);
+
+  time_msmt_stop(&time_calcdata);
 }
 
 STATIC_INLINE void calcdata_inputs_read(ecu_core_ctx_t *ctx)
