@@ -1,11 +1,11 @@
 /*
- * core_calcdata_devices.c
+ *calcdata_devices.c
  *
  *  Created on: May 17, 2025
  *      Author: VHEMaster
  */
 
-#include "core_calcdata_devices.h"
+#include "calcdata_devices.h"
 #include "config_global.h"
 
 static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);

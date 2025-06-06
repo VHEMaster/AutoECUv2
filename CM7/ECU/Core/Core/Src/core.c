@@ -7,7 +7,7 @@
 
 #include "core.h"
 #include "core_timing.h"
-#include "core_calcdata.h"
+#include "calcdata.h"
 #include "core_init_fsm.h"
 #include "common.h"
 

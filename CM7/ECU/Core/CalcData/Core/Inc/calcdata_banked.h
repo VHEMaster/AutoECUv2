@@ -8,7 +8,7 @@
 #ifndef CORE_CALCDATA_INC_CORE_CALCDATA_BANKED_H_
 #define CORE_CALCDATA_INC_CORE_CALCDATA_BANKED_H_
 
-#include "core_calcdata.h"
+#include "calcdata.h"
 
 void core_calcdata_banked_apply(ecu_core_ctx_t *ctx);
 

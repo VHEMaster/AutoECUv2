@@ -1,11 +1,11 @@
 /*
- * core_calcdata_sensors.c
+ * calcdata_sensors.c
  *
  *  Created on: May 17, 2025
  *      Author: VHEMaster
  */
 
-#include "core_calcdata_sensors.h"
+#include "calcdata_sensors.h"
 #include "config_global.h"
 
 static void calcdata_sensor_read_aps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_global_parameters_sensor_value_ctx_t *result);

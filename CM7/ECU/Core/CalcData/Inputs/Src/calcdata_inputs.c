@@ -5,7 +5,7 @@
  *      Author: VHEMaster
  */
 
-#include "core_calcdata_inputs.h"
+#include "calcdata_inputs.h"
 #include "config_global.h"
 
 static void core_calcdata_inputs_process_sensors_global(ecu_core_ctx_t *ctx, ecu_bank_t bank);

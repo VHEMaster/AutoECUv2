@@ -1,11 +1,11 @@
 /*
- * core_calcdata_timings.c
+ * calcdata_timings.c
  *
  *  Created on: May 17, 2025
  *      Author: VHEMaster
  */
 
-#include "core_calcdata_timings.h"
+#include "calcdata_timings.h"
 #include "config_global.h"
 
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata);

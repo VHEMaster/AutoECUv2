@@ -1,11 +1,11 @@
 /*
- * core_calcdata_modules.c
+ * calcdata_modules.c
  *
  *  Created on: May 17, 2025
  *      Author: VHEMaster
  */
 
-#include "core_calcdata_modules.h"
+#include "calcdata_modules.h"
 #include "config_global.h"
 
 static void calcdata_module_read_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
