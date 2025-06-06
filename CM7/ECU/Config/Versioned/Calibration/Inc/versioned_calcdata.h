@@ -75,6 +75,7 @@ typedef enum {
   CALCDATA_OUTPUT_IGNITION_ADVANCE,
   CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO,
   CALCDATA_OUTPUT_INJECTION_PHASE,
+  CALCDATA_OUTPUT_IAT_ALPHA_BLENDING,
 
   CALCDATA_OUTPUT_MAX,
 }ecu_config_calcdata_output_data_index_t;
@@ -129,8 +130,17 @@ typedef struct {
 }ecu_config_calcdata_output_data_varianted_items_t;
 
 typedef struct {
+
+}ecu_config_calcdata_misc_iat_t;
+
+typedef struct {
+    ecu_config_calcdata_misc_iat_t iat_model;
+}ecu_config_calcdata_misc_t;
+
+typedef struct {
     ecu_config_calcdata_relation_input_varianted_items_t relation_sources;
     ecu_config_calcdata_output_data_varianted_items_t output_data;
+    ecu_config_calcdata_misc_t misc;
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_calcdata_v1_t ALIGNED_CACHE;
