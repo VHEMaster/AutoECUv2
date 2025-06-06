@@ -51,11 +51,11 @@ typedef enum {
   CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_COUNT = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_LAST - CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_FIRST,
 
   CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_LAST,
-  CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING = CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST,
+  CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD = CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST,
+  CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD,
+  CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_ENGINE_LOAD,
-  CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD,
-  CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_LAST,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_COUNT = CALCDATA_RELATION_INPUT_SOURCE_CALC_LAST - CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST,
 
@@ -121,8 +121,16 @@ typedef struct {
 }ecu_config_calcdata_output_data_varianted_item_t;
 
 typedef struct {
-    ecu_config_calcdata_relation_input_varianted_item_t relation_sources[CALCDATA_RELATION_INPUT_SOURCE_MAX];
-    ecu_config_calcdata_output_data_varianted_item_t output_data[CALCDATA_OUTPUT_MAX];
+    ecu_config_calcdata_relation_input_varianted_item_t items[CALCDATA_RELATION_INPUT_SOURCE_MAX];
+}ecu_config_calcdata_relation_input_varianted_items_t;
+
+typedef struct {
+    ecu_config_calcdata_output_data_varianted_item_t items[CALCDATA_OUTPUT_MAX];
+}ecu_config_calcdata_output_data_varianted_items_t;
+
+typedef struct {
+    ecu_config_calcdata_relation_input_varianted_items_t relation_sources;
+    ecu_config_calcdata_output_data_varianted_items_t output_data;
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_calcdata_v1_t ALIGNED_CACHE;

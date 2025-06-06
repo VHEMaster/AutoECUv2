@@ -70,7 +70,8 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Misc/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/CalcData/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
@@ -209,7 +210,8 @@
 									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/Misc/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/CalcData/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
