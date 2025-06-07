@@ -118,6 +118,36 @@ static const uint32_t table_sizes[ECU_CONFIG_TABLE_MAX] = {
     8, 8, 8, 8, 8, 8, 8, 8,
 };
 
+error_t core_calcdata_proc_input_interp_invalidate(ecu_core_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+      for(ecu_config_calcdata_relation_input_source_index_t i = 0; i < CALCDATA_RELATION_INPUT_SOURCE_MAX; i++) {
+        ctx->runtime.banked.source.banks[b].inputs[i].interpolation.valid = false;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t core_calcdata_proc_output_invalidate(ecu_core_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+      for(ecu_config_calcdata_output_data_index_t o = 0; o < CALCDATA_OUTPUT_MAX; o++) {
+        ctx->runtime.banked.source.banks[b].outputs[o].valid = false;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
 error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
     ecu_config_calcdata_output_data_index_t output_data_index,
     ecu_config_calcdata_output_varianted_index_t variant,
@@ -128,16 +158,16 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
   const uint32_t banks_count = ctx->runtime.global.banks_count;
   const ecu_config_calcdata_output_data_item_t *output_data_item;
   const ecu_config_calcdata_output_data_varianted_item_t *output_data_item_base;
-  const ecu_core_runtime_value_ctx_t *source_values_x[ECU_BANK_MAX];
-  const ecu_core_runtime_value_ctx_t *source_values_y[ECU_BANK_MAX];
   const ecu_config_calcdata_relation_input_varianted_item_t *input_data_item_base_x;
   const ecu_config_calcdata_relation_input_varianted_item_t *input_data_item_base_y;
   const ecu_config_calcdata_relation_input_item_t *input_data_item_x;
   const ecu_config_calcdata_relation_input_item_t *input_data_item_y;
   const ecu_config_calcdata_relation_input_select_t *source_x, *source_y;
   const float *source_data_x, *source_data_y, *dest_data;
+
+  ecu_core_runtime_banked_source_bank_input_ctx_t *source_values_x[ECU_BANK_MAX];
+  ecu_core_runtime_banked_source_bank_input_ctx_t *source_values_y[ECU_BANK_MAX];
   uint32_t source_data_size_x, source_data_size_y;
-  sMathInterpolateInput interp_x, interp_y;
   uint32_t dest_data_size;
   bool banks_equal = true;
 
@@ -181,11 +211,15 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
           }
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
-            if(source_values_x[b]->valid) {
-              interp_x = math_interpolate_input(source_values_x[b]->value, source_data_x, source_data_size_x);
-              output_value[b].value = math_interpolate_1d(interp_x, dest_data);
+            if(source_values_x[b]->value.valid) {
+              if(!source_values_x[b]->interpolation.valid) {
+                source_values_x[b]->interpolation.ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
+                source_values_x[b]->value.valid = true;
+              }
+              output_value[b].value = math_interpolate_1d(source_values_x[b]->interpolation.ctx, dest_data);
               output_value[b].valid = true;
             } else {
+              source_values_x[b]->interpolation.valid = false;
               output_value[b].value = output_data_item_base->data_failsafe.value;
               output_value[b].valid = false;
             }
@@ -225,13 +259,23 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
           }
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
-            if(source_values_x[b]->valid && source_values_y[b]->valid) {
-              interp_x = math_interpolate_input(source_values_x[b]->value, source_data_x, source_data_size_x);
-              interp_y = math_interpolate_input(source_values_y[b]->value, source_data_y, source_data_size_y);
-              output_value[b].value = math_interpolate_2d(interp_x, interp_y,
+            if(source_values_x[b]->value.valid && source_values_y[b]->value.valid) {
+              if(!source_values_x[b]->interpolation.valid) {
+                source_values_x[b]->interpolation.ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
+                source_values_x[b]->interpolation.valid = true;
+              }
+
+              if(!source_values_y[b]->interpolation.valid) {
+                source_values_y[b]->interpolation.ctx = math_interpolate_input(source_values_y[b]->value.value, source_data_y, source_data_size_y);
+                source_values_y[b]->interpolation.valid = true;
+              }
+              output_value[b].value = math_interpolate_2d(
+                  source_values_x[b]->interpolation.ctx, source_values_y[b]->interpolation.ctx,
                   source_data_size_x, (const float (*)[source_data_size_x])dest_data);
               output_value[b].valid = true;
             } else {
+              source_values_x[b]->interpolation.valid = false;
+              source_values_y[b]->interpolation.valid = false;
               output_value[b].value = output_data_item_base->data_failsafe.value;
               output_value[b].valid = false;
             }

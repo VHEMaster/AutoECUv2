@@ -15,6 +15,8 @@
 #include "calcdata_banked.h"
 #include "calcdata_inputs.h"
 
+#include "calcdata_simulation.h"
+
 static void calcdata_prepare(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_read(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
@@ -23,6 +25,8 @@ time_msmnt_item_t time_calcdata = {0};
 
 void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
 {
+  core_calcdata_simulation(ctx);
+
   time_msmt_start(&time_calcdata);
 
   calcdata_prepare(ctx);

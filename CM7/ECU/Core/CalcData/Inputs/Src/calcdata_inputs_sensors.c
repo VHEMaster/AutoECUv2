@@ -61,7 +61,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS;
 
   src = ctx->runtime.banked.raw.global.sensors_aps[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -81,7 +81,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP;
 
   src = ctx->runtime.banked.raw.global.sensors_ckp[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -101,7 +101,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
   ecu_config_io_instance_t instances_count = ECU_CONFIG_IO_ECT_MAX;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT;
 
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   memset(&dest_value, 0, sizeof(dest_value));
   value_count = 0;
 
@@ -131,7 +131,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OPS;
 
   src = ctx->runtime.banked.raw.global.sensors_ops[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -151,7 +151,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OTS;
 
   src = ctx->runtime.banked.raw.global.sensors_ots[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -171,7 +171,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_VSS;
 
   src = ctx->runtime.banked.raw.global.sensors_vss[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -198,14 +198,14 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
   if(src != NULL) {
     for(dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN;
         dest_index <= CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX; dest_index++) {
-      dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+      dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
       dest_value.valid = src->read_valid;
       dest_value.value = src->value;
       *dest_ptr = dest_value;
     }
   } else {
     dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN;
-    dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+    dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
     instance = ECU_CONFIG_IO_CMP_DOHC_INTAKE;
     src = src_array[instance];
     if(src != NULL) {
@@ -217,7 +217,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     *dest_ptr = dest_value;
 
     dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX;
-    dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+    dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
     instance = ECU_CONFIG_IO_CMP_DOHC_EXHAUST;
     src = src_array[instance];
     if(src != NULL) {
@@ -241,7 +241,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT;
 
   src = ctx->runtime.banked.raw.banks[bank].sensors_egt[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -261,7 +261,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF;
 
   src = ctx->runtime.banked.raw.banks[bank].sensors_maf[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;
@@ -281,7 +281,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS;
 
   src = ctx->runtime.banked.raw.banks[bank].sensors_tps[instance];
-  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index];
+  dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     dest_value.valid = src->read_valid;
     dest_value.value = src->value;

@@ -10,6 +10,8 @@
 
 #include "calcdata.h"
 
+error_t core_calcdata_proc_input_interp_invalidate(ecu_core_ctx_t *ctx);
+error_t core_calcdata_proc_output_invalidate(ecu_core_ctx_t *ctx);
 
 error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
     ecu_config_calcdata_output_data_index_t output_data_index,
