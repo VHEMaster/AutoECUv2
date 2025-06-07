@@ -31,7 +31,6 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
 
   do {
-
     err = ecu_modules_get_timing_ctx(ctx->calibration->io.banked.global.module_timing[ECU_CONFIG_IO_TIMING_PRIMARY], &timing_ctx);
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
@@ -40,8 +39,6 @@ ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *
 
     if(ctx->timing_data.crankshaft.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       ecu_config_set_ignition_enabled(true);
-      runtime->global.cylinders_count = ctx->calibration->cylinders.cylinders_count;
-      runtime->global.banks_count = ctx->calibration->cylinders.banks_count;
 
       if(ctx->calibration->ignition.process_update_trigger == ECU_CONFIG_IGNITION_PROCESS_UPDATE_TRIGGER_ALWAYS) {
         ignition_update_trigger = true;

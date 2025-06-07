@@ -54,8 +54,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked(ecu_core_ctx_t *c
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_APS_ACCELERATOR;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS;
@@ -74,8 +74,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_CKP_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP;
@@ -94,8 +94,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
   uint32_t value_count;
 
   ecu_config_io_instance_t instances_count = ECU_CONFIG_IO_ECT_MAX;
@@ -124,8 +124,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_OPS_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OPS;
@@ -144,8 +144,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_OTS_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OTS;
@@ -164,8 +164,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_VSS_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_VSS;
@@ -185,8 +185,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t **src_array;
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
   ecu_config_calcdata_relation_input_source_index_t dest_index;
 
   ecu_config_io_instance_t instance;
@@ -234,8 +234,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_EGT_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT;
@@ -254,8 +254,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_MAF_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF;
@@ -274,8 +274,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
-  ecu_core_runtime_banked_source_bank_input_ctx_t *dest_ptr;
-  ecu_core_runtime_banked_source_bank_input_ctx_t dest_value;
+  ecu_core_runtime_value_ctx_t *dest_ptr;
+  ecu_core_runtime_value_ctx_t dest_value;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_TPS_PRIMARY;
   ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS;

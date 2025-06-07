@@ -64,7 +64,7 @@ typedef enum {
 
 typedef enum {
   CALCDATA_OUTPUT_TYPE_NONE = -1,
-  CALCDATA_OUTPUT_TYPE_STATIC,
+  CALCDATA_OUTPUT_TYPE_FAILSAFE,
   CALCDATA_OUTPUT_TYPE_1D,
   CALCDATA_OUTPUT_TYPE_2D,
   CALCDATA_OUTPUT_TYPE_MAX,
@@ -111,12 +111,12 @@ typedef struct {
 
 typedef struct {
     ecu_config_calcdata_output_data_type_t type;
-    ecu_config_calcdata_output_data_item_static_t data_static;
     ecu_config_calcdata_output_data_item_1d_t data_1d;
     ecu_config_calcdata_output_data_item_2d_t data_2d;
 }ecu_config_calcdata_output_data_item_t;
 
 typedef struct {
+    ecu_config_calcdata_output_data_item_static_t data_failsafe;
     uint8_t variations;
     ecu_config_calcdata_output_data_item_t variants[CALCDATA_OUTPUT_VARIANTED_ITEM_MAX];
 }ecu_config_calcdata_output_data_varianted_item_t;

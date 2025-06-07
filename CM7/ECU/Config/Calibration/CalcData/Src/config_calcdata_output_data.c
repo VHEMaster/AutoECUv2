@@ -12,6 +12,7 @@
 static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data = {
     .items = {
         {
+            .data_failsafe = { .value = 0.0f },
             .variations = 2,
             .variants = {
                 {
@@ -45,6 +46,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_RELATIVE_FILLING
         {
+            .data_failsafe = { .value = 10.0f },
             .variations = 1,
             .variants = {
                 {
@@ -67,6 +69,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_IGNITION_ADVANCE
         {
+            .data_failsafe = { .value = 12.0f },
             .variations = 1,
             .variants = {
                 {
@@ -89,6 +92,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO
         {
+            .data_failsafe = { .value = 360.0f },
             .variations = 1,
             .variants = {
                 {
@@ -111,6 +115,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_INJECTION_PHASE
         {
+            .data_failsafe = { .value = 1.0f },
             .variations = 2,
             .variants = {
                 {

@@ -51,10 +51,11 @@ typedef struct {
 typedef struct {
     float value;
     bool valid;
-}ecu_core_runtime_banked_source_bank_input_ctx_t;
+}ecu_core_runtime_value_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_banked_source_bank_input_ctx_t inputs[CALCDATA_RELATION_INPUT_SOURCE_MAX];
+    ecu_core_runtime_value_ctx_t inputs[CALCDATA_RELATION_INPUT_SOURCE_MAX];
+    ecu_core_runtime_value_ctx_t outputs[CALCDATA_OUTPUT_MAX];
 }ecu_core_runtime_banked_source_bank_ctx_t;
 
 typedef struct {

@@ -33,6 +33,7 @@
 #define OPTIMIZE_FAST             OPTIMIZE("Ofast")
 #define OPTIMIZE_SIZE             OPTIMIZE("Os")
 #define OPTIMIZE_DEBUG            OPTIMIZE("Og")
+#define OPTIMIZE_NONE             OPTIMIZE("O0")
 #define IS_DEBUGGER_ATTACHED()    ((DBGMCU->CR & 0x07) > 0)
 #define BREAKPOINT(x)             __BKPT((x))
 #define PARITY_ODD_CHECK(value)   __builtin_parity((value))
