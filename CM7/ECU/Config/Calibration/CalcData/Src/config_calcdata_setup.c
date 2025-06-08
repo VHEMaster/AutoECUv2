@@ -18,11 +18,11 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
                     .filters = {
                         {
                             .volume = 1.0f,
-                            .low_pass = 0.9f,
+                            .low_pass = 0.10f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_1
                         {
                             .volume = 0.0f,
-                            .low_pass = 1.0f,
+                            .low_pass = 1.00f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_2
                     },
                 },
@@ -32,12 +32,12 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
                     .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
                     .filters = {
                         {
-                            .volume = 0.9f,
-                            .low_pass = 0.9f,
+                            .volume = 0.7f,
+                            .low_pass = 0.10f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_1
                         {
-                            .volume = 0.1f,
-                            .low_pass = 0.5f,
+                            .volume = 0.3f,
+                            .low_pass = 0.05f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_2
                     },
                 },
@@ -47,12 +47,12 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
                     .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
                     .filters = {
                         {
-                            .volume = 0.2f,
-                            .low_pass = 0.9f,
+                            .volume = 0.3f,
+                            .low_pass = 0.10f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_1
                         {
-                            .volume = 0.9f,
-                            .low_pass = 0.1f,
+                            .volume = 0.7f,
+                            .low_pass = 0.02f,
                         }, //CALCDATA_IAT_ALPHA_BLENDING_FILTER_2
                     },
                 },
