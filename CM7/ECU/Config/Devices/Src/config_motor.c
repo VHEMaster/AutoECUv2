@@ -81,7 +81,7 @@ error_t ecu_devices_motor_init(ecu_device_motor_t instance, l9960_ctx_t *ctx)
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX || ctx == NULL, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
     motor_ctx->ctx = ctx;
@@ -109,7 +109,7 @@ error_t ecu_devices_motor_get_default_config(ecu_device_motor_t instance, l9960_
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -150,7 +150,7 @@ error_t ecu_devices_motor_configure(ecu_device_motor_t instance, const l9960_con
   HAL_StatusTypeDef status;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX || config == NULL, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -204,7 +204,7 @@ error_t ecu_devices_motor_reconfigure(ecu_device_motor_t instance)
   //TODO: this is workaround function because L9960, for some reason, resets the config after HWSC/DIAGOFF
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -221,7 +221,7 @@ error_t ecu_devices_motor_reset(ecu_device_motor_t instance)
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -244,7 +244,7 @@ error_t ecu_devices_motor_hwsc(ecu_device_motor_t instance)
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -261,7 +261,7 @@ error_t ecu_devices_motor_diagoff(ecu_device_motor_t instance)
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -278,7 +278,7 @@ error_t ecu_devices_motor_get_diag(ecu_device_motor_t instance, l9960_diag_t *di
   ecu_devices_motor_ctx_t *motor_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
@@ -297,7 +297,7 @@ error_t ecu_devices_motor_set_enabled(ecu_device_motor_t instance, bool enabled)
   HAL_StatusTypeDef status;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -329,7 +329,7 @@ error_t ecu_devices_motor_set_dutycycle(ecu_device_motor_t instance, float dutyc
   uint32_t arr, ccr;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 
@@ -357,7 +357,7 @@ error_t ecu_devices_motor_set_frequency(ecu_device_motor_t instance, float frequ
   uint32_t base_freq, arr, psc;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_MOTOR_MAX, err = E_PARAM);
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
 

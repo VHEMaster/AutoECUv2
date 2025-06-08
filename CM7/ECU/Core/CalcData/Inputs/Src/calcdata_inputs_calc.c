@@ -10,7 +10,7 @@
 
 #include "calcdata_proc.h"
 
-static void calcdata_inputs_calc_iat(ecu_core_ctx_t *ctx);
+static void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx);
 
 time_msmnt_item_t timing_iat;
 
@@ -18,14 +18,14 @@ void core_calcdata_inputs_calc_process(ecu_core_ctx_t *ctx)
 {
   uint32_t prim = EnterCritical();
   time_msmt_start(&timing_iat);
-  calcdata_inputs_calc_iat(ctx);
+  calcdata_inputs_calc_iat_manifold(ctx);
   time_msmt_stop(&timing_iat);
   ExitCritical(prim);
 
 
 }
 
-STATIC_INLINE void calcdata_inputs_calc_iat(ecu_core_ctx_t *ctx)
+STATIC_INLINE void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
 {
   const uint32_t banks_count = ctx->runtime.global.banks_count;
   ecu_core_runtime_value_ctx_t output_value[ECU_BANK_MAX];

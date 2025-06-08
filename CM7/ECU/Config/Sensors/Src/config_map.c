@@ -70,7 +70,7 @@ error_t ecu_sensors_map_init(ecu_sensor_map_t instance, map_ctx_t *ctx)
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX || ctx == NULL, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];
     map_ctx->ctx = ctx;
@@ -94,7 +94,7 @@ error_t ecu_sensors_map_get_default_config(ecu_sensor_map_t instance, map_config
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX || config == NULL, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];
 
@@ -111,7 +111,7 @@ error_t ecu_sensors_map_configure(ecu_sensor_map_t instance, const map_config_t 
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX || config == NULL, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];
 
@@ -128,7 +128,7 @@ error_t ecu_sensors_map_reset(ecu_sensor_map_t instance)
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];
 
@@ -145,7 +145,7 @@ error_t ecu_sensors_map_get_value(ecu_sensor_map_t instance, map_data_t *data)
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];
@@ -163,7 +163,7 @@ error_t ecu_sensors_map_get_diag(ecu_sensor_map_t instance, map_diag_t *diag)
   ecu_sensors_map_ctx_t *map_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_MAP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     map_ctx = &ecu_sensors_map_ctx[instance];

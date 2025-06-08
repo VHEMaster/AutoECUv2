@@ -70,7 +70,7 @@ error_t ecu_modules_etc_init(ecu_module_etc_t instance, etc_ctx_t *ctx)
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX || ctx == NULL, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
     etc_ctx->ctx = ctx;
@@ -95,7 +95,7 @@ error_t ecu_modules_etc_get_default_config(ecu_module_etc_t instance, etc_config
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX || config == NULL, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
@@ -112,7 +112,7 @@ error_t ecu_modules_etc_configure(ecu_module_etc_t instance, const etc_config_t 
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX || config == NULL, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
@@ -129,7 +129,7 @@ error_t ecu_modules_etc_reset(ecu_module_etc_t instance)
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
@@ -146,7 +146,7 @@ error_t ecu_modules_etc_set_enabled(ecu_module_etc_t instance, bool enabled)
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
@@ -163,7 +163,7 @@ error_t ecu_modules_etc_set_target_position(ecu_module_etc_t instance, float pos
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
@@ -180,7 +180,7 @@ error_t ecu_modules_etc_get_data(ecu_module_etc_t instance, etc_data_t *data)
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];
@@ -198,7 +198,7 @@ error_t ecu_modules_etc_get_diag(ecu_module_etc_t instance, etc_diag_t *diag)
   ecu_modules_etc_ctx_t *etc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     etc_ctx = &ecu_modules_etc_ctx[instance];

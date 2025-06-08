@@ -741,7 +741,7 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
   ecu_devices_flexio_ctx_t *flexio_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLEXIO_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX || ctx == NULL, err = E_PARAM);
 
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
     flexio_ctx->ctx = ctx;
@@ -768,7 +768,7 @@ error_t ecu_devices_flexio_get_default_config(ecu_device_flexio_t instance, l996
   ecu_devices_flexio_ctx_t *flexio_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
 
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
 
@@ -785,7 +785,7 @@ error_t ecu_devices_flexio_configure(ecu_device_flexio_t instance, const l9966_c
   ecu_devices_flexio_ctx_t *flexio_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX || config == NULL, err = E_PARAM);
 
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
 
@@ -802,7 +802,7 @@ error_t ecu_devices_flexio_reset(ecu_device_flexio_t instance)
   ecu_devices_flexio_ctx_t *flexio_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_FLEXIO_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_FLEXIO_MAX, err = E_PARAM);
 
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
 

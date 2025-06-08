@@ -206,7 +206,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           }
           map_type = group_config->performance_fuel_pressure_map_type;
           map_instances[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type];
-          if(map_instances[ECU_BANK_1] == ECU_SENSOR_NONE) {
+          if(map_instances[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
             for(ecu_bank_t b = 0; b < banks_count; b++) {
               map_instances[b] = banked_config->banks[b].common.sensor_map[map_type];
             }
@@ -217,7 +217,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           }
           if(group_config->performance_fuel_pressure_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
             for(ecu_bank_t b = 0; b < banks_count; b++) {
-              if(map_instances[b] > ECU_SENSOR_NONE) {
+              if(map_instances[b] < ECU_SENSOR_MAP_MAX) {
                 err = ecu_sensors_map_get_value(map_instances[b], &map_data_b[b]);
                 if(err == E_OK) {
                   if(map_data_b[b].valid) {

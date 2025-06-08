@@ -85,7 +85,7 @@ error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX || ctx == NULL, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
     indication_ctx->ctx = ctx;
@@ -109,7 +109,7 @@ error_t ecu_modules_indication_get_default_config(ecu_module_indication_t instan
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX || config == NULL, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -126,7 +126,7 @@ error_t ecu_modules_indication_configure(ecu_module_indication_t instance, const
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX || config == NULL, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -149,7 +149,7 @@ error_t ecu_modules_indication_reset(ecu_module_indication_t instance)
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -166,7 +166,7 @@ error_t ecu_modules_indication_manual_reset(ecu_module_indication_t instance)
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -183,7 +183,7 @@ error_t ecu_modules_indication_manual_set(ecu_module_indication_t instance, bool
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -200,7 +200,7 @@ error_t ecu_modules_indication_force_reset(ecu_module_indication_t instance)
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -217,7 +217,7 @@ error_t ecu_modules_indication_force_set(ecu_module_indication_t instance, bool 
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
@@ -234,7 +234,7 @@ error_t ecu_modules_indication_get_data(ecu_module_indication_t instance, indica
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
@@ -252,7 +252,7 @@ error_t ecu_modules_indication_get_diag(ecu_module_indication_t instance, indica
   ecu_modules_indication_ctx_t *indication_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_INDICATION_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     indication_ctx = &ecu_modules_indication_ctx[instance];

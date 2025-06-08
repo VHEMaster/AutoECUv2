@@ -69,7 +69,7 @@ error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || ctx == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
     cmp_ctx->ctx = ctx;
@@ -97,7 +97,7 @@ error_t ecu_sensors_cmp_get_default_config(ecu_sensor_cmp_t instance, cmp_config
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || config == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 
@@ -114,7 +114,7 @@ error_t ecu_sensors_cmp_configure(ecu_sensor_cmp_t instance, const cmp_config_t 
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || config == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 
@@ -131,7 +131,7 @@ error_t ecu_sensors_cmp_reset(ecu_sensor_cmp_t instance)
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 
@@ -148,7 +148,7 @@ error_t ecu_sensors_cmp_get_value(ecu_sensor_cmp_t instance, cmp_data_t *data)
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
@@ -166,7 +166,7 @@ error_t ecu_sensors_cmp_get_diag(ecu_sensor_cmp_t instance, cmp_diag_t *diag)
   ecu_sensors_cmp_ctx_t *cmp_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
@@ -185,7 +185,7 @@ error_t ecu_sensors_cmp_register_cb(ecu_sensor_cmp_t instance, cmp_signal_update
   ecu_sensors_cmp_cb_t *cb;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_CMP_MAX || callback == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || callback == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 

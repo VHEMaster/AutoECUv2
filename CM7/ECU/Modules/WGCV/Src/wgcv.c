@@ -140,7 +140,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
         ctx->data.force_input_dutycycle = input_dutycycle;
       }
 
-      if(ctx->config.sensor_map > ECU_SENSOR_NONE) {
+      if(ctx->config.sensor_map < ECU_SENSOR_MAP_MAX) {
         err = ecu_sensors_map_get_value(ctx->config.sensor_map, &ctx->map_data);
         if(err != E_OK && err != E_AGAIN) {
           ctx->diag.bits.map_handle_error = true;

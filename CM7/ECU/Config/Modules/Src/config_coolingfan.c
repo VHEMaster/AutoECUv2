@@ -77,7 +77,7 @@ error_t ecu_modules_coolingfan_init(ecu_module_coolingfan_t instance, coolingfan
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX || ctx == NULL, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
     coolingfan_ctx->ctx = ctx;
@@ -103,7 +103,7 @@ error_t ecu_modules_coolingfan_get_default_config(ecu_module_coolingfan_t instan
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX || config == NULL, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -120,7 +120,7 @@ error_t ecu_modules_coolingfan_configure(ecu_module_coolingfan_t instance, const
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX || config == NULL, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -143,7 +143,7 @@ error_t ecu_modules_coolingfan_reset(ecu_module_coolingfan_t instance)
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -160,7 +160,7 @@ error_t ecu_modules_coolingfan_activate_trigger(ecu_module_coolingfan_t instance
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -177,7 +177,7 @@ error_t ecu_modules_coolingfan_emergency_trigger(ecu_module_coolingfan_t instanc
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -194,7 +194,7 @@ error_t ecu_modules_coolingfan_force_reset(ecu_module_coolingfan_t instance)
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -211,7 +211,7 @@ error_t ecu_modules_coolingfan_force_set(ecu_module_coolingfan_t instance, bool 
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
@@ -228,7 +228,7 @@ error_t ecu_modules_coolingfan_get_data(ecu_module_coolingfan_t instance, coolin
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
@@ -246,7 +246,7 @@ error_t ecu_modules_coolingfan_get_diag(ecu_module_coolingfan_t instance, coolin
   ecu_modules_coolingfan_ctx_t *coolingfan_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_COOLINGFAN_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];

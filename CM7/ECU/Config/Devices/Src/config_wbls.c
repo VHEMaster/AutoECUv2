@@ -161,7 +161,7 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || ctx == NULL, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
     wbls_ctx->ctx = ctx;
@@ -223,7 +223,7 @@ error_t ecu_devices_wbls_get_default_config(ecu_device_wbls_t instance, cj125_co
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
@@ -240,7 +240,7 @@ error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_confi
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
@@ -257,7 +257,7 @@ error_t ecu_devices_wbls_reset(ecu_device_wbls_t instance)
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
@@ -274,7 +274,7 @@ error_t ecu_devices_wbls_set_heatup(ecu_device_wbls_t instance, cj125_heatup_typ
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
@@ -292,7 +292,7 @@ error_t ecu_devices_wbls_get_data(ecu_device_wbls_t instance, cj125_data_t *data
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX || data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || data == NULL, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
@@ -310,7 +310,7 @@ error_t ecu_devices_wbls_get_diag(ecu_device_wbls_t instance, cj125_diag_t *diag
   ecu_devices_wbls_ctx_t *wbls_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_WBLS_MAX || diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || diag == NULL, err = E_PARAM);
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 

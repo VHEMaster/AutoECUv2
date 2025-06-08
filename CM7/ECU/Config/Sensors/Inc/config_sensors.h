@@ -22,7 +22,7 @@
 #include "ots.h"
 #include "ops.h"
 
-#define ECU_SENSOR_NONE     (-1)
+#define ECU_SENSOR_NONE     (255)
 #define ECU_SENSOR_INSTANCE_MAX (4)
 
 typedef uint32_t ecu_sensor_instance_t;

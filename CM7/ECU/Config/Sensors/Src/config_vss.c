@@ -45,7 +45,7 @@ error_t ecu_sensors_vss_init(ecu_sensor_vss_t instance, vss_ctx_t *ctx)
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX || ctx == NULL, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
     vss_ctx->ctx = ctx;
@@ -69,7 +69,7 @@ error_t ecu_sensors_vss_get_default_config(ecu_sensor_vss_t instance, vss_config
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX || config == NULL, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
 
@@ -86,7 +86,7 @@ error_t ecu_sensors_vss_configure(ecu_sensor_vss_t instance, const vss_config_t 
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX || config == NULL, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
 
@@ -103,7 +103,7 @@ error_t ecu_sensors_vss_reset(ecu_sensor_vss_t instance)
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
 
@@ -120,7 +120,7 @@ error_t ecu_sensors_vss_get_value(ecu_sensor_vss_t instance, vss_data_t *data)
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
@@ -138,7 +138,7 @@ error_t ecu_sensors_vss_get_diag(ecu_sensor_vss_t instance, vss_diag_t *diag)
   ecu_sensors_vss_ctx_t *vss_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_VSS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     vss_ctx = &ecu_sensors_vss_ctx[instance];

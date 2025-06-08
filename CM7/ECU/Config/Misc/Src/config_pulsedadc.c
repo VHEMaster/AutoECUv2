@@ -74,7 +74,7 @@ error_t ecu_devices_pulsedadc_init(ecu_device_pulsedadc_t instance, pulsedadc_ct
   ecu_devices_pulsedadc_ctx_t *pulsedadc_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_DEVICE_NONE || instance >= ECU_DEVICE_PULSEDADC_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_PULSEDADC_MAX || ctx == NULL, err = E_PARAM);
 
     pulsedadc_ctx = &ecu_devices_pulsedadc_ctx[instance];
     pulsedadc_ctx->ctx = ctx;

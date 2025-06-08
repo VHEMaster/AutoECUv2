@@ -68,7 +68,7 @@ error_t ecu_modules_ignpower_init(ecu_module_ignpower_t instance, ignpower_ctx_t
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX || ctx == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
     ignpower_ctx->ctx = ctx;
@@ -93,7 +93,7 @@ error_t ecu_modules_ignpower_get_default_config(ecu_module_ignpower_t instance, 
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX || config == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
@@ -110,7 +110,7 @@ error_t ecu_modules_ignpower_configure(ecu_module_ignpower_t instance, const ign
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX || config == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
@@ -130,7 +130,7 @@ error_t ecu_modules_ignpower_reset(ecu_module_ignpower_t instance)
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
@@ -147,7 +147,7 @@ error_t ecu_modules_ignpower_get_data(ecu_module_ignpower_t instance, ignpower_d
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
@@ -165,7 +165,7 @@ error_t ecu_modules_ignpower_get_diag(ecu_module_ignpower_t instance, ignpower_d
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
@@ -184,7 +184,7 @@ error_t ecu_modules_ignpower_trigger_operating_signal(ecu_module_ignpower_t inst
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
     ignpower_components_trigger_operating_signal(ignpower_ctx->ctx);
@@ -200,7 +200,7 @@ error_t ecu_modules_ignpower_set_operating(ecu_module_ignpower_t instance, bool 
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
     ignpower_components_set_operating(ignpower_ctx->ctx, components_operating);
@@ -216,7 +216,7 @@ error_t ecu_modules_ignpower_is_active(ecu_module_ignpower_t instance, bool *ign
   ecu_modules_ignpower_ctx_t *ignpower_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ignpower_active == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
@@ -235,7 +235,7 @@ error_t ecu_modules_ignpower_register_cb(ecu_module_ignpower_t instance, ignpowe
   ecu_modules_ignpower_cb_t *cb;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_IGNPOWER_MAX || callback == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX || callback == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 

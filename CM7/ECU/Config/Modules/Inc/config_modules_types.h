@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-#define ECU_MODULE_NONE         (-1)
+#define ECU_MODULE_NONE         (255)
 #define ECU_MODULE_INSTANCE_MAX (6)
 
 typedef uint32_t ecu_module_instance_t;

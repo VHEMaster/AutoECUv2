@@ -73,7 +73,7 @@ error_t ecu_sensors_ops_init(ecu_sensor_ops_t instance, ops_ctx_t *ctx)
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX || ctx == NULL, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];
     ops_ctx->ctx = ctx;
@@ -97,7 +97,7 @@ error_t ecu_sensors_ops_get_default_config(ecu_sensor_ops_t instance, ops_config
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX || config == NULL, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];
 
@@ -114,7 +114,7 @@ error_t ecu_sensors_ops_configure(ecu_sensor_ops_t instance, const ops_config_t 
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX || config == NULL, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];
 
@@ -131,7 +131,7 @@ error_t ecu_sensors_ops_reset(ecu_sensor_ops_t instance)
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];
 
@@ -148,7 +148,7 @@ error_t ecu_sensors_ops_get_value(ecu_sensor_ops_t instance, ops_data_t *data)
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];
@@ -166,7 +166,7 @@ error_t ecu_sensors_ops_get_diag(ecu_sensor_ops_t instance, ops_diag_t *diag)
   ecu_sensors_ops_ctx_t *ops_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_SENSOR_NONE || instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_SENSOR_OPS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     ops_ctx = &ecu_sensors_ops_ctx[instance];

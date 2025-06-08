@@ -99,7 +99,7 @@ error_t ecu_modules_wgcv_init(ecu_module_wgcv_t instance, wgcv_ctx_t *ctx)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX || ctx == NULL, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
     wgcv_ctx->ctx = ctx;
@@ -124,7 +124,7 @@ error_t ecu_modules_wgcv_get_default_config(ecu_module_wgcv_t instance, wgcv_con
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX || config == NULL, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -141,7 +141,7 @@ error_t ecu_modules_wgcv_configure(ecu_module_wgcv_t instance, const wgcv_config
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX || config == NULL, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -158,7 +158,7 @@ error_t ecu_modules_wgcv_reset(ecu_module_wgcv_t instance)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -175,7 +175,7 @@ error_t ecu_modules_wgcv_set_enabled(ecu_module_wgcv_t instance, bool enabled)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -192,7 +192,7 @@ error_t ecu_modules_wgcv_set_dutycycle(ecu_module_wgcv_t instance, float dutycyc
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -210,7 +210,7 @@ error_t ecu_modules_wgcv_set_target_boost(ecu_module_wgcv_t instance, float targ
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -228,7 +228,7 @@ error_t ecu_modules_wgcv_force_input_reset(ecu_module_wgcv_t instance)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -245,7 +245,7 @@ error_t ecu_modules_wgcv_force_input_set(ecu_module_wgcv_t instance, float dutyc
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -262,7 +262,7 @@ error_t ecu_modules_wgcv_force_pwm_reset(ecu_module_wgcv_t instance)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -279,7 +279,7 @@ error_t ecu_modules_wgcv_force_pwm_set(ecu_module_wgcv_t instance, float dutycyc
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
@@ -296,7 +296,7 @@ error_t ecu_modules_wgcv_get_data(ecu_module_wgcv_t instance, wgcv_data_t *data)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
@@ -314,7 +314,7 @@ error_t ecu_modules_wgcv_get_diag(ecu_module_wgcv_t instance, wgcv_diag_t *diag)
   ecu_modules_wgcv_ctx_t *wgcv_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_WGCV_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];

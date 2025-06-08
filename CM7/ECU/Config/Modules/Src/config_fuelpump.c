@@ -73,7 +73,7 @@ error_t ecu_modules_fuelpump_init(ecu_module_fuelpump_t instance, fuelpump_ctx_t
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX || ctx == NULL, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
     fuelpump_ctx->ctx = ctx;
@@ -99,7 +99,7 @@ error_t ecu_modules_fuelpump_get_default_config(ecu_module_fuelpump_t instance, 
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX || config == NULL, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -116,7 +116,7 @@ error_t ecu_modules_fuelpump_configure(ecu_module_fuelpump_t instance, const fue
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX || config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX || config == NULL, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -139,7 +139,7 @@ error_t ecu_modules_fuelpump_reset(ecu_module_fuelpump_t instance)
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -156,7 +156,7 @@ error_t ecu_modules_fuelpump_manual_set(ecu_module_fuelpump_t instance, bool man
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -173,7 +173,7 @@ error_t ecu_modules_fuelpump_force_reset(ecu_module_fuelpump_t instance)
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -190,7 +190,7 @@ error_t ecu_modules_fuelpump_force_set(ecu_module_fuelpump_t instance, bool forc
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
@@ -207,7 +207,7 @@ error_t ecu_modules_fuelpump_get_data(ecu_module_fuelpump_t instance, fuelpump_d
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
@@ -225,7 +225,7 @@ error_t ecu_modules_fuelpump_get_diag(ecu_module_fuelpump_t instance, fuelpump_d
   ecu_modules_fuelpump_ctx_t *fuelpump_ctx;
 
   do {
-    BREAK_IF_ACTION(instance <= ECU_MODULE_NONE || instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_MODULE_FUELPUMP_MAX, err = E_PARAM);
     BREAK_IF_ACTION(diag == NULL, err = E_PARAM);
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
