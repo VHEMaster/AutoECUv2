@@ -140,9 +140,85 @@ error_t core_calcdata_proc_output_invalidate(ecu_core_ctx_t *ctx)
   do {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       for(ecu_config_calcdata_output_data_index_t o = 0; o < CALCDATA_OUTPUT_MAX; o++) {
-        ctx->runtime.banked.source.banks[b].outputs[o].valid = false;
+        for(ecu_config_calcdata_output_varianted_index_t v = 0; v < CALCDATA_OUTPUT_VARIANTED_ITEM_MAX; v++) {
+          ctx->runtime.banked.source.banks[b].outputs[o].variants[v].valid = false;
+        }
       }
     }
+  } while(0);
+
+  return err;
+}
+
+error_t core_calcdata_proc_set_input(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_relation_input_source_index_t input_data_index,
+    const ecu_core_runtime_value_ctx_t *value)
+{
+  error_t err = E_OK;
+
+  const uint32_t banks_count = ctx->runtime.global.banks_count;
+  ecu_core_runtime_banked_source_bank_input_ctx_t *input_data_item;
+
+  do {
+    BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
+
+    for(ecu_bank_t b = bank >= ECU_BANK_MAX ? 0 : bank; b < banks_count; b++) {
+
+      input_data_item = &ctx->runtime.banked.source.banks[b].inputs[input_data_index];
+      if(value != NULL) {
+        input_data_item->value.value = value->value;
+        input_data_item->value.valid = value->valid;
+      } else {
+        input_data_item->value.valid = false;
+      }
+
+      BREAK_IF(bank < ECU_BANK_MAX);
+    }
+  } while(0);
+
+  return err;
+}
+
+INLINE error_t core_calcdata_proc_get_input(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_relation_input_source_index_t input_data_index,
+    ecu_core_runtime_value_ctx_t *value)
+{
+  error_t err = E_OK;
+
+  ecu_core_runtime_banked_source_bank_input_ctx_t *input_data_item;
+
+  do {
+    BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index];
+
+    memcpy(value, &input_data_item->value, sizeof(*value));
+
+  } while(0);
+
+  return err;
+}
+
+INLINE error_t core_calcdata_proc_get_output(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_output_data_index_t output_data_index,
+    ecu_config_calcdata_output_varianted_index_t variant,
+    ecu_core_runtime_value_ctx_t *value)
+{
+  error_t err = E_OK;
+
+  ecu_core_runtime_value_ctx_t *output_data_value;
+
+  do {
+    BREAK_IF_ACTION(output_data_index >= CALCDATA_OUTPUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    output_data_value = &ctx->runtime.banked.source.banks[bank].outputs[output_data_index].variants[variant];
+
+    memcpy(value, output_data_value, sizeof(*value));
+
   } while(0);
 
   return err;
@@ -177,14 +253,16 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
   do {
     BREAK_IF_ACTION(output_data_index >= CALCDATA_OUTPUT_MAX, err = E_PARAM);
 
-    for(ecu_bank_t b = 0; b < banks_count; b++) {
-      dests[b] = &ctx->runtime.banked.source.banks[b].outputs[output_data_index];
-    }
 
     output_data_item_base = &ctx->calibration->calcdata.output_data.items[output_data_index];
     for(ecu_config_calcdata_output_varianted_index_t v =
         variant >= CALCDATA_OUTPUT_VARIANTED_ITEM_MAX ? 0 : variant;
         v < output_data_item_base->variations; v++) {
+
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        dests[b] = &ctx->runtime.banked.source.banks[b].outputs[output_data_index].variants[v];
+      }
+
       output_data_item = &output_data_item_base->variants[v];
 
       if(output_data_item->type == CALCDATA_OUTPUT_TYPE_FAILSAFE) {
@@ -252,8 +330,8 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
             source_values_x[b] = &ctx->runtime.banked.source.banks[b].inputs[source_x->source];
             source_values_y[b] = &ctx->runtime.banked.source.banks[b].inputs[source_y->source];
 
-            if(banks_equal && b && memcmp(source_values_x[0], source_values_x[b], sizeof(**source_values_x)) != 0 &&
-                memcmp(source_values_y[0], source_values_y[b], sizeof(**source_values_y)) != 0) {
+            if(banks_equal && b && (memcmp(source_values_x[0], source_values_x[b], sizeof(**source_values_x)) != 0 ||
+                memcmp(source_values_y[0], source_values_y[b], sizeof(**source_values_y)) != 0)) {
               banks_equal = false;
             }
           }

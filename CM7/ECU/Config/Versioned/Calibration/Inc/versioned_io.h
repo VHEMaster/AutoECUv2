@@ -44,9 +44,9 @@ typedef enum {
 }ecu_config_io_egt_t;
 
 typedef enum {
-  ECU_CONFIG_IO_IAT_INLET = 0,
+  ECU_CONFIG_IO_IAT_MANIFOLD = 0,
   ECU_CONFIG_IO_IAT_THROTTLE,
-  ECU_CONFIG_IO_IAT_MANIFOLD,
+  ECU_CONFIG_IO_IAT_INLET,
   ECU_CONFIG_IO_IAT_MAX
 }ecu_config_io_iat_t;
 
@@ -56,9 +56,9 @@ typedef enum {
 }ecu_config_io_maf_t;
 
 typedef enum {
-  ECU_CONFIG_IO_MAP_INLET = 0,
+  ECU_CONFIG_IO_MAP_MANIFOLD = 0,
   ECU_CONFIG_IO_MAP_THROTTLE,
-  ECU_CONFIG_IO_MAP_MANIFOLD,
+  ECU_CONFIG_IO_MAP_INLET,
   ECU_CONFIG_IO_MAP_MAX
 }ecu_config_io_map_t;
 

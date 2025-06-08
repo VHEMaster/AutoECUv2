@@ -53,7 +53,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked(ecu_core_ctx_t *c
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -63,7 +63,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_aps[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -73,7 +73,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -83,7 +83,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_ckp[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -93,7 +93,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ckp(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
   uint32_t value_count;
@@ -108,7 +108,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
   for(ecu_config_io_ect_t instance = 0; instance < instances_count; instance++) {
     src = ctx->runtime.banked.raw.global.sensors_ect[instance];
     if(src != NULL) {
-      if(src->read_valid) {
+      if(src->valid) {
         dest_value.valid = true;
         dest_value.value += src->value;
         value_count++;
@@ -123,7 +123,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -133,7 +133,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_ops[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -143,7 +143,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -153,7 +153,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_ots[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -163,7 +163,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -173,7 +173,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_vss[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -183,8 +183,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t **src_array;
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t **src_array;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
   ecu_config_calcdata_relation_input_source_index_t dest_index;
@@ -199,7 +199,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     for(dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN;
         dest_index <= CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX; dest_index++) {
       dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
-      dest_value.valid = src->read_valid;
+      dest_value.valid = src->valid;
       dest_value.value = src->value;
       *dest_ptr = dest_value;
     }
@@ -209,7 +209,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     instance = ECU_CONFIG_IO_CMP_DOHC_INTAKE;
     src = src_array[instance];
     if(src != NULL) {
-      dest_value.valid = src->read_valid;
+      dest_value.valid = src->valid;
       dest_value.value = src->value;
     } else {
       memset(&dest_value, 0, sizeof(dest_value));
@@ -221,7 +221,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     instance = ECU_CONFIG_IO_CMP_DOHC_EXHAUST;
     src = src_array[instance];
     if(src != NULL) {
-      dest_value.valid = src->read_valid;
+      dest_value.valid = src->valid;
       dest_value.value = src->value;
     } else {
       memset(&dest_value, 0, sizeof(dest_value));
@@ -233,7 +233,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -243,7 +243,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_
   src = ctx->runtime.banked.raw.banks[bank].sensors_egt[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -253,7 +253,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -263,7 +263,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
   src = ctx->runtime.banked.raw.banks[bank].sensors_maf[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));
@@ -273,7 +273,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
 
 STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
-  const ecu_core_runtime_global_parameters_sensor_value_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src;
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_core_runtime_value_ctx_t dest_value;
 
@@ -283,7 +283,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_
   src = ctx->runtime.banked.raw.banks[bank].sensors_tps[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    dest_value.valid = src->read_valid;
+    dest_value.valid = src->valid;
     dest_value.value = src->value;
   } else {
     memset(&dest_value, 0, sizeof(dest_value));

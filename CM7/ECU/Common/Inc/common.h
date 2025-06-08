@@ -22,4 +22,9 @@
 
 typedef uint32_t ecu_calibration_instance_t;
 
+typedef struct {
+    float value;
+    bool valid;
+}ecu_core_runtime_value_ctx_t;
+
 #endif /* COMMON_INC_COMMON_H_ */

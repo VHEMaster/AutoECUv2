@@ -80,6 +80,12 @@ typedef enum {
   CALCDATA_OUTPUT_MAX,
 }ecu_config_calcdata_output_data_index_t;
 
+typedef enum {
+  CALCDATA_IAT_ALPHA_BLENDING_FILTER_1 = 0,
+  CALCDATA_IAT_ALPHA_BLENDING_FILTER_2,
+  CALCDATA_IAT_ALPHA_BLENDING_FILTER_MAX
+}ecu_config_calcdata_setup_iat_sensor_alpha_blending_filter_number_t;
+
 typedef struct {
     ecu_config_calcdata_relation_input_source_index_t source;
     ecu_config_calcdata_relation_input_varianted_index_t variant;
@@ -130,17 +136,31 @@ typedef struct {
 }ecu_config_calcdata_output_data_varianted_items_t;
 
 typedef struct {
-
-}ecu_config_calcdata_misc_iat_t;
+    float volume;
+    float low_pass;
+}ecu_config_calcdata_setup_iat_sensor_alpha_blending_filter_t;
 
 typedef struct {
-    ecu_config_calcdata_misc_iat_t iat_model;
-}ecu_config_calcdata_misc_t;
+    ecu_config_calcdata_output_varianted_index_t calc_variant;
+    ecu_config_calcdata_setup_iat_sensor_alpha_blending_filter_t filters[CALCDATA_IAT_ALPHA_BLENDING_FILTER_MAX];
+}ecu_config_calcdata_setup_iat_sensor_alpha_blending_t;
+
+typedef struct {
+    ecu_config_calcdata_setup_iat_sensor_alpha_blending_t alpha_blending;
+}ecu_config_calcdata_setup_iat_sensor_t;
+
+typedef struct {
+    ecu_config_calcdata_setup_iat_sensor_t sensors[ECU_CONFIG_IO_IAT_MAX];
+}ecu_config_calcdata_setup_iat_t;
+
+typedef struct {
+    ecu_config_calcdata_setup_iat_t iat_model;
+}ecu_config_calcdata_setup_t;
 
 typedef struct {
     ecu_config_calcdata_relation_input_varianted_items_t relation_sources;
     ecu_config_calcdata_output_data_varianted_items_t output_data;
-    ecu_config_calcdata_misc_t misc;
+    ecu_config_calcdata_setup_t setup;
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_calcdata_v1_t ALIGNED_CACHE;

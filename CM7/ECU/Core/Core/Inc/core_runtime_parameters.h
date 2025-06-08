@@ -51,11 +51,6 @@ typedef struct {
 }ecu_core_runtime_global_parameters_devices_ctx_t;
 
 typedef struct {
-    float value;
-    bool read_valid;
-}ecu_core_runtime_global_parameters_sensor_value_ctx_t;
-
-typedef struct {
     struct {
         timing_crankshaft_mode_t mode;
         float period;
@@ -199,7 +194,7 @@ typedef struct {
 }ecu_core_runtime_global_parameters_timings_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_sensor_value_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
+    ecu_core_runtime_value_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
     ecu_core_runtime_global_parameters_devices_ctx_t devices;
     ecu_core_runtime_global_parameters_modules_ctx_t modules;
     ecu_core_runtime_global_parameters_timings_ctx_t timings;

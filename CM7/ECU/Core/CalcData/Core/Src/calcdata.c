@@ -13,11 +13,16 @@
 #include "calcdata_modules.h"
 #include "calcdata_timings.h"
 #include "calcdata_banked.h"
-#include "calcdata_inputs.h"
 
+#include "calcdata_inputs.h"
+#include "calcdata_outputs.h"
+
+#include "calcdata_proc.h"
 #include "calcdata_simulation.h"
 
 static void calcdata_prepare(ecu_core_ctx_t *ctx);
+static void calcdata_invalidate(ecu_core_ctx_t *ctx);
+static void calcdata_process(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_read(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
 
@@ -30,10 +35,13 @@ void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
   time_msmt_start(&time_calcdata);
 
   calcdata_prepare(ctx);
+  calcdata_invalidate(ctx);
+
   calcdata_inputs_read(ctx);
 
   core_calcdata_banked_apply(ctx);
-  core_calcdata_inputs_process(ctx);
+
+  calcdata_process(ctx);
 
   calcdata_inputs_write(ctx);
 
@@ -44,6 +52,20 @@ STATIC_INLINE void calcdata_prepare(ecu_core_ctx_t *ctx)
 {
   ctx->runtime.global.cylinders_count = ctx->calibration->cylinders.cylinders_count;
   ctx->runtime.global.banks_count = ctx->calibration->cylinders.banks_count;
+}
+
+STATIC_INLINE void calcdata_invalidate(ecu_core_ctx_t *ctx)
+{
+  core_calcdata_proc_input_interp_invalidate(ctx);
+  core_calcdata_proc_output_invalidate(ctx);
+}
+
+STATIC_INLINE void calcdata_process(ecu_core_ctx_t *ctx)
+{
+  core_calcdata_inputs_process(ctx, CORE_CALCDATA_INPUTS_STAGE_1);
+  core_calcdata_outputs_process(ctx, CORE_CALCDATA_OUTPUTS_STAGE_1);
+
+  core_calcdata_inputs_process(ctx, CORE_CALCDATA_INPUTS_STAGE_2);
 }
 
 STATIC_INLINE void calcdata_inputs_read(ecu_core_ctx_t *ctx)
