@@ -12,16 +12,9 @@
 
 static void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx);
 
-time_msmnt_item_t timing_iat;
-
-void core_calcdata_inputs_calc_process(ecu_core_ctx_t *ctx)
+ITCM_FUNC void core_calcdata_inputs_calc_process(ecu_core_ctx_t *ctx)
 {
-  uint32_t prim = EnterCritical();
-  time_msmt_start(&timing_iat);
   calcdata_inputs_calc_iat_manifold(ctx);
-  time_msmt_stop(&timing_iat);
-  ExitCritical(prim);
-
 
 }
 
@@ -47,15 +40,10 @@ STATIC_INLINE void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   for(ecu_bank_t b = 0; b < banks_count; b++) {
     ect_value[b] = &ctx->runtime.banked.source.banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT].value;
     data_iat[b] = &ctx->runtime.banked.source.banks[b].data_iat;
-    iat_config[b] = NULL;
 
-    for(iat_type[b] = 0; iat_type[b] < ECU_CONFIG_IO_IAT_MAX; iat_type[b]++) {
-      iat_value[b] = ctx->runtime.banked.raw.banks[b].sensors_iat[iat_type[b]];
-      if(iat_value[b] != NULL && iat_value[b]->valid) {
-        iat_config[b] = &iat_config_base->sensors[iat_type[b]];
-        break;
-      }
-    }
+    iat_type[b] = data_iat[b]->active_type;
+    iat_value[b] = ctx->runtime.banked.raw.banks[b].sensors_iat[iat_type[b]];
+    iat_config[b] = &iat_config_base->sensors[iat_type[b]];
   }
 
   for(ecu_bank_t b = 0; b < banks_count; b++) {

@@ -24,7 +24,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -34,7 +34,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                     .data_1d = {
                         .table_index = ECU_CONFIG_TABLE_1D_16_13,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -54,7 +54,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                     },
@@ -74,7 +74,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                     },
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_OUTPUT_RELATIVE_FILLING
+        }, //CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY
         {
             .data_failsafe = { .value = 10.0f },
             .variations = 1,
@@ -88,7 +88,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                     },
@@ -111,7 +111,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -134,7 +134,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },

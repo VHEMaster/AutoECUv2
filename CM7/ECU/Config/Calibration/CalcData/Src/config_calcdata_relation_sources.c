@@ -111,6 +111,17 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT
         {
+            .variations = 1,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_4,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_IAT
+        {
             .variations = 2,
             .variants = {
                 {
@@ -121,6 +132,17 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF
+        {
+            .variations = 2,
+            .variants = {
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_6,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_32_3,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP
         {
             .variations = 2,
             .variants = {
@@ -153,7 +175,7 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                     .table_index = ECU_CONFIG_TABLE_1D_32_3,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MAP_MANIFOLD
+        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MANIFOLD_AIR_PRESSURE
         {
             .variations = 2,
             .variants = {
@@ -164,7 +186,7 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                     .table_index = ECU_CONFIG_TABLE_1D_32_5,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_FILLING
+        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE
         {
             .variations = 2,
             .variants = {

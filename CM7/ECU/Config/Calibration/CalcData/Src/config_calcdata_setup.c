@@ -10,11 +10,15 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_calcdata_setup_t cfg_setup = {
+    .ect_model = {
+        .calc_model = CALCDATA_ECT_CALC_MODEL_MAXIMAL,
+        .rms_min = -20.0f,
+    },
     .iat_model = {
         .sensors = {
             {
                 .alpha_blending = {
-                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
                     .filters = {
                         {
                             .volume = 1.0f,
@@ -29,7 +33,7 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
             }, //ECU_CONFIG_IO_IAT_MANIFOLD
             {
                 .alpha_blending = {
-                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
                     .filters = {
                         {
                             .volume = 0.7f,
@@ -44,7 +48,7 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
             }, //ECU_CONFIG_IO_IAT_THROTTLE
             {
                 .alpha_blending = {
-                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+                    .calc_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
                     .filters = {
                         {
                             .volume = 0.3f,
@@ -58,6 +62,22 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
                 },
             }, //ECU_CONFIG_IO_IAT_INLET
         },
+    },
+    .air_calc_model = {
+        {
+            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_MAP,
+            .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
+        }, //CALCDATA_AIR_CALC_MODEL_INDEX_1
+        {
+            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_TPS,
+            .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+        }, //CALCDATA_AIR_CALC_MODEL_INDEX_2
+        {
+            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
+        }, //CALCDATA_AIR_CALC_MODEL_INDEX_3
+        {
+            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
+        }, //CALCDATA_AIR_CALC_MODEL_INDEX_4
     },
 };
 

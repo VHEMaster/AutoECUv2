@@ -222,7 +222,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 if(err == E_OK) {
                   if(map_data_b[b].valid) {
                     ramp_pressure_gr_b[b] = group_config->performance_fuel_pressure + map_data_b[b].manifold_air_pressure - 0.986923f;
-                    performance_mult_gr_b[b] = fast_rsqrt(group_config->performance_fuel_pressure / ramp_pressure_gr_b[b]);
+                    performance_mult_gr_b[b] = fast_sqrt(ramp_pressure_gr_b[b] / group_config->performance_fuel_pressure);
                   }
                 } else {
                   // TODO: error flag
@@ -235,7 +235,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           injection_time_gr_mean = 0;
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             performance_initial_us_gr_b[b] = group_config->performance_static;
-            performance_initial_us_gr_b[b] *= 1.6666667e-5;
+            performance_initial_us_gr_b[b] *= 1.6666667e-5f;
             performance_initial_us_gr_b[b] *= performance_mult_gr_b[b];
 
             if(group_config->performance_static_units == ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC) {

@@ -58,7 +58,6 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_IO_MAP_MANIFOLD = 0,
   ECU_CONFIG_IO_MAP_THROTTLE,
-  ECU_CONFIG_IO_MAP_INLET,
   ECU_CONFIG_IO_MAP_MAX
 }ecu_config_io_map_t;
 
@@ -151,36 +150,36 @@ typedef struct {
 }ecu_config_io_misc_t;
 
 typedef struct {
-    ecu_config_io_cmp_t sensor_cmp[ECU_CONFIG_IO_CMP_MAX];
-    ecu_config_io_ect_t sensor_egt[ECU_CONFIG_IO_EGT_MAX];
-    ecu_config_io_iat_t sensor_iat[ECU_CONFIG_IO_IAT_MAX];
-    ecu_config_io_maf_t sensor_maf[ECU_CONFIG_IO_MAF_MAX];
-    ecu_config_io_map_t sensor_map[ECU_CONFIG_IO_MAP_MAX];
-    ecu_config_io_vss_t sensor_tps[ECU_CONFIG_IO_TPS_MAX];
+    ecu_sensor_cmp_t sensor_cmp[ECU_CONFIG_IO_CMP_MAX];
+    ecu_sensor_ect_t sensor_egt[ECU_CONFIG_IO_EGT_MAX];
+    ecu_sensor_iat_t sensor_iat[ECU_CONFIG_IO_IAT_MAX];
+    ecu_sensor_maf_t sensor_maf[ECU_CONFIG_IO_MAF_MAX];
+    ecu_sensor_map_t sensor_map[ECU_CONFIG_IO_MAP_MAX];
+    ecu_sensor_vss_t sensor_tps[ECU_CONFIG_IO_TPS_MAX];
 
 
-    ecu_config_io_stepper_t device_stepper[ECU_CONFIG_IO_STEPPER_MAX];
-    ecu_config_io_wbls_t device_wbls[ECU_CONFIG_IO_WBLS_MAX];
+    ecu_device_stepper_t device_stepper[ECU_CONFIG_IO_STEPPER_MAX];
+    ecu_device_wbls_t device_wbls[ECU_CONFIG_IO_WBLS_MAX];
 
-    ecu_config_io_etc_t module_etc[ECU_CONFIG_IO_ETC_MAX];
-    ecu_config_io_vvt_t module_vvt[ECU_CONFIG_IO_VVT_MAX];
-    ecu_config_io_wgcv_t module_wgcv[ECU_CONFIG_IO_WGCV_MAX];
+    ecu_module_etc_t module_etc[ECU_CONFIG_IO_ETC_MAX];
+    ecu_module_vvt_t module_vvt[ECU_CONFIG_IO_VVT_MAX];
+    ecu_module_wgcv_t module_wgcv[ECU_CONFIG_IO_WGCV_MAX];
 
 }ecu_config_io_common_t;
 
 typedef struct {
-    ecu_config_io_cmp_t sensor_ckp[ECU_CONFIG_IO_CKP_MAX];
-    ecu_config_io_ect_t sensor_ect[ECU_CONFIG_IO_ECT_MAX];
-    ecu_config_io_vss_t sensor_vss[ECU_CONFIG_IO_VSS_MAX];
-    ecu_config_io_aps_t sensor_aps[ECU_CONFIG_IO_APS_MAX];
-    ecu_config_io_ots_t sensor_ots[ECU_CONFIG_IO_OTS_MAX];
-    ecu_config_io_ops_t sensor_ops[ECU_CONFIG_IO_OPS_MAX];
+    ecu_sensor_cmp_t sensor_ckp[ECU_CONFIG_IO_CKP_MAX];
+    ecu_sensor_ect_t sensor_ect[ECU_CONFIG_IO_ECT_MAX];
+    ecu_sensor_vss_t sensor_vss[ECU_CONFIG_IO_VSS_MAX];
+    ecu_sensor_aps_t sensor_aps[ECU_CONFIG_IO_APS_MAX];
+    ecu_sensor_ots_t sensor_ots[ECU_CONFIG_IO_OTS_MAX];
+    ecu_sensor_ops_t sensor_ops[ECU_CONFIG_IO_OPS_MAX];
 
-    ecu_config_io_fuelpump_t module_fuelpump[ECU_CONFIG_IO_FUELPUMP_MAX];
-    ecu_config_io_coolingfan_t module_coolingfan[ECU_CONFIG_IO_COOLINGFAN_MAX];
-    ecu_config_io_ignpower_t module_ignpower[ECU_CONFIG_IO_IGNPOWER_MAX];
-    ecu_config_io_indication_t module_indication[ECU_CONFIG_IO_INDICATION_MAX];
-    ecu_config_io_timing_t module_timing[ECU_CONFIG_IO_TIMING_MAX];
+    ecu_module_fuelpump_t module_fuelpump[ECU_CONFIG_IO_FUELPUMP_MAX];
+    ecu_module_coolingfan_t module_coolingfan[ECU_CONFIG_IO_COOLINGFAN_MAX];
+    ecu_module_ignpower_t module_ignpower[ECU_CONFIG_IO_IGNPOWER_MAX];
+    ecu_module_indication_t module_indication[ECU_CONFIG_IO_INDICATION_MAX];
+    ecu_module_timing_t module_timing[ECU_CONFIG_IO_TIMING_MAX];
 
     ecu_config_io_common_t common;
 

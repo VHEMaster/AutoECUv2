@@ -70,7 +70,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
               .sensor_map = {
                   ECU_SENSOR_MAP_1, //ECU_CONFIG_IO_MAP_MANIFOLD
                   ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
-                  ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
               },
               .sensor_tps = {
                   ECU_SENSOR_TPS_1, //ECU_CONFIG_IO_TPS_PRIMARY
@@ -119,7 +118,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                   .sensor_map = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_MANIFOLD
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
                   },
                   .sensor_tps = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_TPS_PRIMARY
@@ -166,7 +164,6 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
                   .sensor_map = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_MANIFOLD
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_THROTTLE
-                      ECU_SENSOR_NONE, //ECU_CONFIG_IO_MAP_INLET
                   },
                   .sensor_tps = {
                       ECU_SENSOR_NONE, //ECU_CONFIG_IO_TPS_PRIMARY

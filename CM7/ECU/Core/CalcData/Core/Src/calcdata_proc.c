@@ -163,13 +163,15 @@ error_t core_calcdata_proc_set_input(ecu_core_ctx_t *ctx, ecu_bank_t bank,
     BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
 
     for(ecu_bank_t b = bank >= ECU_BANK_MAX ? 0 : bank; b < banks_count; b++) {
-
       input_data_item = &ctx->runtime.banked.source.banks[b].inputs[input_data_index];
       if(value != NULL) {
-        input_data_item->value.value = value->value;
-        input_data_item->value.valid = value->valid;
+        if(memcmp(&input_data_item->value, value, sizeof(*value)) != 0) {
+          memcpy(&input_data_item->value, value, sizeof(*value));
+          input_data_item->interpolation.valid = false;
+        }
       } else {
         input_data_item->value.valid = false;
+        input_data_item->interpolation.valid = false;
       }
 
       BREAK_IF(bank < ECU_BANK_MAX);

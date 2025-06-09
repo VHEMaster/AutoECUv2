@@ -72,6 +72,8 @@ typedef struct {
 typedef struct {
     bool blending_valid;
     ecu_core_runtime_banked_source_bank_iat_blending_ctx_t blending[CALCDATA_IAT_ALPHA_BLENDING_FILTER_MAX];
+    ecu_config_io_iat_t active_type;
+
 }ecu_core_runtime_banked_source_bank_iat_ctx_t;
 
 typedef struct {
