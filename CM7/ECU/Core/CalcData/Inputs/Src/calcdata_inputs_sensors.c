@@ -311,7 +311,8 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
   src = ctx->runtime.banked.raw.banks[bank].sensors_maf[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    memcpy(dest_ptr, src, sizeof(*dest_ptr));
+    dest_ptr->value = src->value / banks_per_maf;
+    dest_ptr->valid = src->valid;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }

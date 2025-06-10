@@ -77,10 +77,17 @@ typedef struct {
 }ecu_core_runtime_banked_source_bank_iat_ctx_t;
 
 typedef struct {
+    ecu_config_calcdata_setup_air_calc_model_index_t active_index;
+    ecu_config_calcdata_setup_air_calc_model_source_type_t active_model;
+
+}ecu_core_runtime_banked_source_bank_air_calc_ctx_t;
+
+typedef struct {
     ecu_core_runtime_banked_source_bank_input_ctx_t inputs[CALCDATA_RELATION_INPUT_SOURCE_MAX];
     ecu_core_runtime_banked_source_bank_output_ctx_t outputs[CALCDATA_OUTPUT_MAX];
 
     ecu_core_runtime_banked_source_bank_iat_ctx_t data_iat;
+    ecu_core_runtime_banked_source_bank_air_calc_ctx_t data_air_calc;
 }ecu_core_runtime_banked_source_bank_ctx_t;
 
 typedef struct {

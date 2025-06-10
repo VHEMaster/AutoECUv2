@@ -25,6 +25,7 @@ typedef struct {
 typedef struct {
     uint8_t banks_count;
     uint8_t cylinders_count;
+    float engine_displacement;
     ecu_config_cylinder_t cylinders[ECU_CYLINDER_MAX];
 
     float rough_measure_range;

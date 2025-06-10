@@ -9,27 +9,22 @@
 #include "config_global.h"
 
 #include "calcdata_proc.h"
+#include "math_misc.h"
 
-static void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx);
-
-ITCM_FUNC void core_calcdata_inputs_calc_process(ecu_core_ctx_t *ctx)
-{
-  calcdata_inputs_calc_iat_manifold(ctx);
-
-}
-
-STATIC_INLINE void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
+void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
 {
   const uint32_t banks_count = ctx->runtime.global.banks_count;
   ecu_core_runtime_value_ctx_t output_value;
-  ecu_core_runtime_value_ctx_t iat_alpha_blending;
+  const ecu_core_runtime_value_ctx_t *iat_alpha_blending;
 
+  const ecu_core_runtime_banked_source_bank_ctx_t *bank_ctx;
   ecu_core_runtime_banked_source_bank_iat_ctx_t *data_iat[ECU_BANK_MAX];
   const ecu_config_calcdata_setup_iat_t *iat_config_base;
   const ecu_config_calcdata_setup_iat_sensor_t *iat_config[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *ect_value[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *iat_value[ECU_BANK_MAX];
   ecu_config_io_iat_t iat_type[ECU_BANK_MAX];
+  ecu_config_calcdata_output_varianted_index_t calc_variant;
   const ckp_data_t *crankshaft;
   float blending, blending_volume_sum, lpf_value;
   bool data_iat_valid;
@@ -49,10 +44,13 @@ STATIC_INLINE void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   for(ecu_bank_t b = 0; b < banks_count; b++) {
     data_iat_valid = false;
     if(iat_config[b] != NULL) {
-      (void)core_calcdata_proc_get_output(ctx, b, CALCDATA_OUTPUT_IAT_ALPHA_BLENDING,
-          iat_config[b]->alpha_blending.calc_variant, &iat_alpha_blending);
-      if(iat_alpha_blending.valid && ect_value[b]->valid && crankshaft->validity >= CKP_DATA_VALID) {
-        blending = CLAMP(iat_alpha_blending.value, 0.0f, 1.0f);
+
+      bank_ctx = &ctx->runtime.banked.source.banks[b];
+      calc_variant = iat_config[b]->alpha_blending.calc_variant;
+      iat_alpha_blending = &bank_ctx->outputs[CALCDATA_OUTPUT_IAT_ALPHA_BLENDING].variants[calc_variant];
+
+      if(iat_alpha_blending->valid && ect_value[b]->valid && crankshaft->validity >= CKP_DATA_VALID) {
+        blending = CLAMP(iat_alpha_blending->value, 0.0f, 1.0f);
         data_iat_valid = true;
         blending_volume_sum = 0;
         for(ecu_config_calcdata_setup_iat_sensor_alpha_blending_filter_number_t f = 0;
@@ -105,5 +103,126 @@ STATIC_INLINE void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
     (void)core_calcdata_proc_set_input(ctx, b,
         CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD, &output_value);
   }
+}
 
+void calcdata_inputs_calc_cycle_charge(ecu_core_ctx_t *ctx)
+{
+  const uint32_t banks_count = ctx->runtime.global.banks_count;
+  const uint32_t cylinders_count = ctx->runtime.global.cylinders_count;
+  const ecu_core_runtime_banked_source_bank_ctx_t *bank_ctx;
+  const ecu_config_calcdata_setup_air_calc_model_source_t *source_ptr;
+  const ecu_config_calcdata_setup_air_calc_model_t *air_calc_model;
+  const ecu_config_cylinders_t *cy_config;
+  ecu_core_runtime_banked_source_bank_air_calc_ctx_t *air_calc_ctx;
+  const ecu_core_runtime_value_ctx_t *iat_value;
+  const ecu_core_runtime_value_ctx_t *input_value;
+  ecu_core_runtime_value_ctx_t output_value;
+  float air_density_curr;
+  float air_density_norm;
+  float cy_displacement_cc;
+
+  cy_config = &ctx->calibration->cylinders;
+  cy_displacement_cc = cy_config->engine_displacement / cylinders_count;
+
+  for(ecu_bank_t b = 0; b < banks_count; b++) {
+    memset(&output_value, 0, sizeof(output_value));
+
+    for(ecu_config_calcdata_setup_air_calc_model_index_t i = 0;
+        i < CALCDATA_AIR_CALC_MODEL_INDEX_MAX; i++) {
+
+      air_calc_model = &ctx->calibration->calcdata.setup.air_calc_model;
+      source_ptr = &air_calc_model->sources[i];
+      air_calc_ctx = &ctx->runtime.banked.source.banks[b].data_air_calc;
+
+      if(source_ptr->model != CALCDATA_AIR_CALC_MODEL_SOURCE_NONE &&
+          source_ptr->model < CALCDATA_AIR_CALC_MODEL_SOURCE_MAX) {
+
+        bank_ctx = &ctx->runtime.banked.source.banks[b];
+        iat_value = &bank_ctx->inputs[CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD].value;
+        input_value = &bank_ctx->outputs[CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY].variants[source_ptr->ve_out_variant];
+
+        air_density_norm = math_calc_air_density_mgcc(air_calc_model->normal_conditions.air_temperature,
+            air_calc_model->normal_conditions.absolute_pressure);
+        if(iat_value->valid) {
+          air_density_curr = math_calc_air_density_mgcc(iat_value->value,
+              air_calc_model->normal_conditions.absolute_pressure);
+        } else {
+          air_density_curr = air_density_norm;
+        }
+
+        if(input_value->valid) {
+          switch(source_ptr->model) {
+            case CALCDATA_AIR_CALC_MODEL_SOURCE_MAP:
+            case CALCDATA_AIR_CALC_MODEL_SOURCE_TPS:
+              output_value.value = input_value->value * air_density_curr * cy_displacement_cc;
+              output_value.valid = true;
+
+              air_calc_ctx->active_index = i;
+              air_calc_ctx->active_model = source_ptr->model;
+              break;
+            case CALCDATA_AIR_CALC_MODEL_SOURCE_MAF:
+              output_value.value = input_value->value * air_density_norm * cy_displacement_cc;
+              output_value.valid = true;
+
+              air_calc_ctx->active_index = i;
+              air_calc_ctx->active_model = source_ptr->model;
+              break;
+            default:
+              continue;
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    if(!output_value.valid) {
+      air_calc_ctx->active_index = CALCDATA_AIR_CALC_MODEL_INDEX_MAX;
+      air_calc_ctx->active_model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE;
+    }
+
+    (void)core_calcdata_proc_set_input(ctx, b,
+        CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE, &output_value);
+  }
+}
+
+void calcdata_inputs_calc_mass_air_flow(ecu_core_ctx_t *ctx)
+{
+  const uint32_t cylinders_count = ctx->runtime.global.cylinders_count;
+  const uint32_t banks_count = ctx->runtime.global.banks_count;
+  ecu_core_runtime_value_ctx_t output_value;
+  const ecu_core_runtime_value_ctx_t *input_ckp_rpm;
+  const ecu_core_runtime_value_ctx_t *input_cycle_charge;
+  const ecu_core_runtime_banked_source_bank_input_ctx_t *inputs;
+  uint32_t cylinders_per_bank;
+
+  for(ecu_bank_t b = 0; b < banks_count; b++) {
+    memset(&output_value, 0, sizeof(output_value));
+
+    cylinders_per_bank = 0;
+    for(uint32_t c = 0; c < cylinders_count; c++) {
+      if(ctx->calibration->cylinders.cylinders[c].bank == b) {
+        cylinders_per_bank++;
+      }
+    }
+
+    inputs = ctx->runtime.banked.source.banks[b].inputs;
+
+    input_ckp_rpm = &inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP].value;
+    input_cycle_charge = &inputs[CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE].value;
+
+    if(input_ckp_rpm->valid && input_cycle_charge->valid) {
+      output_value.value = input_cycle_charge->value;
+      output_value.value *= input_ckp_rpm->value * 0.5f;
+      output_value.value *= cylinders_per_bank;
+      output_value.value *= 0.00006f;
+      output_value.valid = true;
+    } else {
+      memset(&output_value, 0, sizeof(output_value));
+    }
+
+    (void)core_calcdata_proc_set_input(ctx, b,
+        CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW, &output_value);
+  }
 }

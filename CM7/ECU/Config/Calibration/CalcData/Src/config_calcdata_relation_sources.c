@@ -169,17 +169,6 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
             .variations = 2,
             .variants = {
                 {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_6,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_32_3,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MANIFOLD_AIR_PRESSURE
-        {
-            .variations = 2,
-            .variants = {
-                {
                     .table_index = ECU_CONFIG_TABLE_1D_16_11,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
                 {
@@ -198,17 +187,6 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW
-        {
-            .variations = 1,
-            .variants = {
-                {
-                    .table_index = ECU_CONFIG_TABLE_1D_16_12,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1
-                {
-                    .table_index = ECU_CONFIG_TABLE_NONE,
-                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
-            },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_ENGINE_LOAD
     }
 };
 

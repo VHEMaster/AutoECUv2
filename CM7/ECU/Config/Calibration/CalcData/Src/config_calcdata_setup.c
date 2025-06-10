@@ -64,20 +64,26 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
         },
     },
     .air_calc_model = {
-        {
-            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_MAP,
-            .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
-        }, //CALCDATA_AIR_CALC_MODEL_INDEX_1
-        {
-            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_TPS,
-            .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
-        }, //CALCDATA_AIR_CALC_MODEL_INDEX_2
-        {
-            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
-        }, //CALCDATA_AIR_CALC_MODEL_INDEX_3
-        {
-            .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
-        }, //CALCDATA_AIR_CALC_MODEL_INDEX_4
+        .normal_conditions = {
+            .air_temperature = 20.0f,
+            .absolute_pressure = 101325.0f,
+        },
+        .sources = {
+            {
+                .model = CALCDATA_AIR_CALC_MODEL_SOURCE_MAP,
+                .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
+            }, //CALCDATA_AIR_CALC_MODEL_INDEX_1
+            {
+                .model = CALCDATA_AIR_CALC_MODEL_SOURCE_TPS,
+                .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+            }, //CALCDATA_AIR_CALC_MODEL_INDEX_2
+            {
+                .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
+            }, //CALCDATA_AIR_CALC_MODEL_INDEX_3
+            {
+                .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,
+            }, //CALCDATA_AIR_CALC_MODEL_INDEX_4
+        },
     },
 };
 

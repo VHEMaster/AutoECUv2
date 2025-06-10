@@ -54,10 +54,8 @@ typedef enum {
 
   CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_LAST,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD = CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST,
-  CALCDATA_RELATION_INPUT_SOURCE_CALC_MANIFOLD_AIR_PRESSURE,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW,
-  CALCDATA_RELATION_INPUT_SOURCE_CALC_ENGINE_LOAD,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_LAST,
   CALCDATA_RELATION_INPUT_SOURCE_CALC_COUNT = CALCDATA_RELATION_INPUT_SOURCE_CALC_LAST - CALCDATA_RELATION_INPUT_SOURCE_CALC_FIRST,
 
@@ -102,7 +100,7 @@ typedef enum {
   CALCDATA_AIR_CALC_MODEL_SOURCE_TPS,
   CALCDATA_AIR_CALC_MODEL_SOURCE_MAF,
   CALCDATA_AIR_CALC_MODEL_SOURCE_MAX
-}ecu_config_calcdata_setup_air_calc_model_source_t;
+}ecu_config_calcdata_setup_air_calc_model_source_type_t;
 
 typedef enum {
   CALCDATA_ECT_CALC_MODEL_MEAN = 0,
@@ -184,14 +182,24 @@ typedef struct {
 }ecu_config_calcdata_setup_ect_t;
 
 typedef struct {
-    ecu_config_calcdata_setup_air_calc_model_source_t model;
+    ecu_config_calcdata_setup_air_calc_model_source_type_t model;
     ecu_config_calcdata_output_varianted_index_t ve_out_variant;
+}ecu_config_calcdata_setup_air_calc_model_source_t;
+
+typedef struct {
+    float air_temperature;
+    float absolute_pressure;
+}ecu_config_calcdata_setup_air_calc_model_air_conditions_t;
+
+typedef struct {
+    ecu_config_calcdata_setup_air_calc_model_air_conditions_t normal_conditions;
+    ecu_config_calcdata_setup_air_calc_model_source_t sources[CALCDATA_AIR_CALC_MODEL_INDEX_MAX];
 }ecu_config_calcdata_setup_air_calc_model_t;
 
 typedef struct {
     ecu_config_calcdata_setup_iat_t iat_model;
     ecu_config_calcdata_setup_ect_t ect_model;
-    ecu_config_calcdata_setup_air_calc_model_t air_calc_model[CALCDATA_AIR_CALC_MODEL_INDEX_MAX];
+    ecu_config_calcdata_setup_air_calc_model_t air_calc_model;
 }ecu_config_calcdata_setup_t;
 
 typedef struct {

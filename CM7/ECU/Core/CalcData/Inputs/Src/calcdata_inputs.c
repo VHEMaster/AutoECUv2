@@ -18,7 +18,11 @@ void core_calcdata_inputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_inputs_
       core_calcdata_inputs_sensors_process(ctx);
       break;
     case CORE_CALCDATA_INPUTS_STAGE_2:
-      core_calcdata_inputs_calc_process(ctx);
+      calcdata_inputs_calc_iat_manifold(ctx);
+      break;
+    case CORE_CALCDATA_INPUTS_STAGE_3:
+      calcdata_inputs_calc_cycle_charge(ctx);
+      calcdata_inputs_calc_mass_air_flow(ctx);
       break;
     default:
       break;

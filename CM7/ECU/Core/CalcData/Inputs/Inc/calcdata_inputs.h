@@ -13,6 +13,7 @@
 typedef enum {
   CORE_CALCDATA_INPUTS_STAGE_1 = 0,
   CORE_CALCDATA_INPUTS_STAGE_2,
+  CORE_CALCDATA_INPUTS_STAGE_3,
   CORE_CALCDATA_INPUTS_STAGE_MAX,
 }ecu_core_calcdata_inputs_stage_t;
 

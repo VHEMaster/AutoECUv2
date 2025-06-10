@@ -32,7 +32,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
-                        .table_index = ECU_CONFIG_TABLE_1D_16_13,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_12,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
