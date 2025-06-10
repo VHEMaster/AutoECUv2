@@ -57,7 +57,7 @@ typedef struct {
 
 typedef struct {
     ecu_core_runtime_value_ctx_t value;
-    ecu_core_runtime_interpolation_ctx_t interpolation;
+    ecu_core_runtime_interpolation_ctx_t interpolation[CALCDATA_RELATION_INPUT_VARIANTED_ITEM_MAX];
 }ecu_core_runtime_banked_source_bank_input_ctx_t;
 
 typedef struct {

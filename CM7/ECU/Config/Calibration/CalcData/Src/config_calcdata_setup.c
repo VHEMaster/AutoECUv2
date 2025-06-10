@@ -66,7 +66,7 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
     .air_calc_model = {
         .normal_conditions = {
             .air_temperature = 20.0f,
-            .absolute_pressure = 101325.0f,
+            .absolute_pressure = 1.01325f,
         },
         .sources = {
             {

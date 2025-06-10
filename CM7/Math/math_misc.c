@@ -76,7 +76,7 @@ INLINE int math_binary_search(const float *array, int start_index, int end_index
 
 INLINE float math_calc_air_density_mgcc(float temperature, float pressure)
 {
-  const float R = 287.052874f;
+  const float R = 0.00287052874f;
 
   temperature += 273.15f;
   return pressure / (R * temperature);

@@ -125,7 +125,9 @@ error_t core_calcdata_proc_input_interp_invalidate(ecu_core_ctx_t *ctx)
   do {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       for(ecu_config_calcdata_relation_input_source_index_t i = 0; i < CALCDATA_RELATION_INPUT_SOURCE_MAX; i++) {
-        ctx->runtime.banked.source.banks[b].inputs[i].interpolation.valid = false;
+        for(ecu_config_calcdata_relation_input_varianted_index_t v = 0; v < CALCDATA_RELATION_INPUT_VARIANTED_ITEM_MAX; v++) {
+          ctx->runtime.banked.source.banks[b].inputs[i].interpolation[v].valid = false;
+        }
       }
     }
   } while(0);
@@ -167,11 +169,17 @@ error_t core_calcdata_proc_set_input(ecu_core_ctx_t *ctx, ecu_bank_t bank,
       if(value != NULL) {
         if(memcmp(&input_data_item->value, value, sizeof(*value)) != 0) {
           memcpy(&input_data_item->value, value, sizeof(*value));
-          input_data_item->interpolation.valid = false;
+          for(ecu_config_calcdata_relation_input_varianted_index_t v = 0;
+              v < CALCDATA_RELATION_INPUT_VARIANTED_ITEM_MAX; v++) {
+            input_data_item->interpolation[v].valid = false;
+          }
         }
       } else {
         input_data_item->value.valid = false;
-        input_data_item->interpolation.valid = false;
+        for(ecu_config_calcdata_relation_input_varianted_index_t v = 0;
+            v < CALCDATA_RELATION_INPUT_VARIANTED_ITEM_MAX; v++) {
+          input_data_item->interpolation[v].valid = false;
+        }
       }
 
       BREAK_IF(bank < ECU_BANK_MAX);
@@ -245,6 +253,8 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
 
   ecu_core_runtime_banked_source_bank_input_ctx_t *source_values_x[ECU_BANK_MAX];
   ecu_core_runtime_banked_source_bank_input_ctx_t *source_values_y[ECU_BANK_MAX];
+  ecu_core_runtime_interpolation_ctx_t *source_interp_x[ECU_BANK_MAX];
+  ecu_core_runtime_interpolation_ctx_t *source_interp_y[ECU_BANK_MAX];
   uint32_t source_data_size_x, source_data_size_y;
   uint32_t dest_data_size;
   bool banks_equal = true;
@@ -284,6 +294,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
         if(source_data_size_x == dest_data_size) {
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             source_values_x[b] = &ctx->runtime.banked.source.banks[b].inputs[source_x->source];
+            source_interp_x[b] = &source_values_x[b]->interpolation[source_x->variant];
 
             if(banks_equal && b && memcmp(source_values_x[0], source_values_x[b], sizeof(**source_values_x)) != 0) {
               banks_equal = false;
@@ -292,14 +303,14 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             if(source_values_x[b]->value.valid) {
-              if(!source_values_x[b]->interpolation.valid) {
-                source_values_x[b]->interpolation.ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
+              if(!source_interp_x[b]->valid) {
+                source_interp_x[b]->ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
                 source_values_x[b]->value.valid = true;
               }
-              output_value[b].value = math_interpolate_1d(source_values_x[b]->interpolation.ctx, dest_data);
+              output_value[b].value = math_interpolate_1d(source_interp_x[b]->ctx, dest_data);
               output_value[b].valid = true;
             } else {
-              source_values_x[b]->interpolation.valid = false;
+              source_interp_x[b]->valid = false;
               output_value[b].value = output_data_item_base->data_failsafe.value;
               output_value[b].valid = false;
             }
@@ -331,6 +342,8 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             source_values_x[b] = &ctx->runtime.banked.source.banks[b].inputs[source_x->source];
             source_values_y[b] = &ctx->runtime.banked.source.banks[b].inputs[source_y->source];
+            source_interp_x[b] = &source_values_x[b]->interpolation[source_x->variant];
+            source_interp_y[b] = &source_values_y[b]->interpolation[source_y->variant];
 
             if(banks_equal && b && (memcmp(source_values_x[0], source_values_x[b], sizeof(**source_values_x)) != 0 ||
                 memcmp(source_values_y[0], source_values_y[b], sizeof(**source_values_y)) != 0)) {
@@ -340,22 +353,22 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             if(source_values_x[b]->value.valid && source_values_y[b]->value.valid) {
-              if(!source_values_x[b]->interpolation.valid) {
-                source_values_x[b]->interpolation.ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
-                source_values_x[b]->interpolation.valid = true;
+              if(!source_interp_x[b]->valid) {
+                source_interp_x[b]->ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
+                source_interp_x[b]->valid = true;
               }
 
-              if(!source_values_y[b]->interpolation.valid) {
-                source_values_y[b]->interpolation.ctx = math_interpolate_input(source_values_y[b]->value.value, source_data_y, source_data_size_y);
-                source_values_y[b]->interpolation.valid = true;
+              if(!source_interp_y[b]->valid) {
+                source_interp_y[b]->ctx = math_interpolate_input(source_values_y[b]->value.value, source_data_y, source_data_size_y);
+                source_interp_y[b]->valid = true;
               }
               output_value[b].value = math_interpolate_2d(
-                  source_values_x[b]->interpolation.ctx, source_values_y[b]->interpolation.ctx,
+                  source_interp_x[b]->ctx, source_interp_y[b]->ctx,
                   source_data_size_x, (const float (*)[source_data_size_x])dest_data);
               output_value[b].valid = true;
             } else {
-              source_values_x[b]->interpolation.valid = false;
-              source_values_y[b]->interpolation.valid = false;
+              source_interp_x[b]->valid = false;
+              source_interp_y[b]->valid = false;
               output_value[b].value = output_data_item_base->data_failsafe.value;
               output_value[b].valid = false;
             }
