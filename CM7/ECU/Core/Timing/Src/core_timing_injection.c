@@ -41,9 +41,11 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_core_runtime_global_injection_ctx_t *runtime;
   ecu_core_runtime_global_injection_group_ctx_t *runtime_gr;
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
+  ecu_core_runtime_cylinder_ignition_acceptance_ctx_t *ignition_acceptance;
   ecu_cylinder_t cy_opposite;
   ecu_config_io_map_t map_type;
   ecu_sensor_map_t map_instances[ECU_BANK_MAX];
+  ecu_bank_t bank_cy;
 
   bool input_valid, input_allowed;
   float input_injection_phase;
@@ -102,6 +104,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   uint32_t process_update_trigger_counter_gr;
   uint8_t process_update_trigger_counter_gr_1of2;
   bool process_update_trigger = false;
+  bool slew_adder_valid;
 
   do {
     banks_count = ctx->runtime.global.banks_count;
@@ -183,6 +186,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
+          slew_adder_valid = false;
           if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
             injection_phase_gr = runtime_gr->phase;
             injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr;
@@ -196,10 +200,16 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             }
             injection_phase_gr_adder *= crankshaft_signal_delta / crankshaft_period;
 
-            if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
-                (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
-              injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+            if(injection_phase_gr_adder == injection_phase_gr_adder) {
+              if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
+                  (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
+                injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+              }
+              slew_adder_valid = true;
             }
+          }
+
+          if(slew_adder_valid) {
             injection_phase_gr += injection_phase_gr_adder;
           } else {
             injection_phase_gr = injection_phase_gr_requested;
@@ -337,6 +347,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                   }
                 }
 
+                ignition_acceptance = &ctx->runtime.cylinders[cy].ignition_acceptance;
                 injection_phase_cy = injection_phase_gr + injection_phase_cy_add;
                 crankshaft_data = &ctx->runtime.cylinders[cy].sequentialed[sequentialed_mode].crankshaft_data;
                 position_cy = crankshaft_data->sensor_data.current_position;
@@ -346,7 +357,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 lag_time_cy *= cy_config->performance_dynamic_mul;
                 lag_time_cy += cy_config->performance_dynamic_add;
 
-                injection_time_cy = injection_time_gr_b[ctx->calibration->cylinders.cylinders[cy].bank];
+                bank_cy = ctx->calibration->cylinders.cylinders[cy].bank;
+                injection_time_cy = injection_time_gr_b[bank_cy];
                 injection_time_cy *= cy_config->performance_static_mul;
                 dutycycle_period = crankshaft->sensor_data.period;
 
@@ -443,6 +455,9 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                       }
 
                       runtime_cy->scheduled = true;
+
+                      ignition_acceptance->ignition_advance = ctx->runtime.global.ignition.input.ignition_advance_banked[bank_cy];
+                      ignition_acceptance->valid = true;
                     }
                   } else {
                     if(degrees_before_inject_prev - degrees_before_inject_cur < -90.0f) {

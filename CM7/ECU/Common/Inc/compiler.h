@@ -36,7 +36,7 @@
 #define OPTIMIZE_DEBUG            OPTIMIZE("Og")
 #define OPTIMIZE_NONE             OPTIMIZE("O0")
 #define IS_DEBUGGER_ATTACHED()    ((DBGMCU->CR & 0x07) > 0)
-#define BREAKPOINT(x)             __BKPT((x))
+#define BREAKPOINT(x)             { if(IS_DEBUGGER_ATTACHED()) __BKPT((x)); }
 #define PARITY_ODD_CHECK(value)   __builtin_parity((value))
 
 #define BREAK_IF_ACTION(condition, action)              { if((condition)) { {action;} break; } }

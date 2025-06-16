@@ -22,6 +22,11 @@ typedef enum {
 }ecu_core_runtime_cylinder_sequentialed_type_t;
 
 typedef struct {
+    bool valid;
+    float ignition_advance;
+}ecu_core_runtime_group_cylinder_ignition_acceptance_ctx_t;
+
+typedef struct {
     bool initialized;
     bool scheduled;
     bool ignited;
@@ -30,6 +35,7 @@ typedef struct {
     float advance;
     float degrees_per_cycle;
     float degrees_before_ignite;
+    ecu_core_runtime_group_cylinder_ignition_acceptance_ctx_t ignition_acceptance;
 }ecu_core_runtime_group_cylinder_ignition_ctx_t;
 
 typedef struct {
@@ -48,6 +54,11 @@ typedef struct {
 }ecu_core_runtime_group_cylinder_injection_ctx_t;
 
 typedef struct {
+    bool valid;
+    float ignition_advance;
+}ecu_core_runtime_cylinder_ignition_acceptance_ctx_t;
+
+typedef struct {
     bool initialized;
     bool distributor;
     ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
@@ -58,8 +69,9 @@ typedef struct {
     float saturation_time;
     float advance_mean;
     float advance_requested_mean;
-    float advance[ECU_BANK_MAX];
-    float advance_requested[ECU_BANK_MAX];
+    float advance_cy[ECU_CYLINDER_MAX];
+    float advance_input_cy[ECU_CYLINDER_MAX];
+    float advance_requested_cy[ECU_CYLINDER_MAX];
 
     ecu_core_runtime_group_cylinder_ignition_ctx_t cylinders[ECU_CYLINDER_MAX];
 
@@ -156,6 +168,7 @@ typedef struct {
 
 typedef struct {
     ecu_core_runtime_cylinder_sequentialed_t sequentialed[ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX];
+    ecu_core_runtime_cylinder_ignition_acceptance_ctx_t ignition_acceptance;
 
 }ecu_core_runtime_cylinder_ctx_t;
 

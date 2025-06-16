@@ -15,6 +15,7 @@ static const ecu_config_ignition_t ecu_calibration_ignition_config_default = {
     .uspd_source = ECU_CONFIG_IGNITION_USPD_SOURCE_PER_REVOLUTION,
 
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
+    .use_ignition_acceptance = true,
     .groups = {
         {
             .enabled = true,

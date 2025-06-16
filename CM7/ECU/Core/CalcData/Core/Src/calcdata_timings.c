@@ -64,8 +64,8 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
   //err = ecu_timings_ignition_get_data(&data);
 
   for(int i = 0; i < ECU_CONFIG_IGNITION_GROUP_MAX; i++) {
-    for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
-      timing_ctx->read.groups[i].advance[b] = dst_ctx->groups[i].advance[b];
+    for(ecu_cylinder_t cy = 0; cy < ECU_CYLINDER_MAX; cy++) {
+      timing_ctx->read.groups[i].advance_cy[cy] = dst_ctx->groups[i].advance_cy[cy];
     }
     timing_ctx->read.groups[i].saturation_time = dst_ctx->groups[i].saturation_time;
   }

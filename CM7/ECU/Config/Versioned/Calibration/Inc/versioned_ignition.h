@@ -89,6 +89,7 @@ typedef struct {
     ecu_config_ignition_process_update_trigger_t process_update_trigger;
     ecu_config_ignition_uspd_source_t uspd_source;
     ecu_gpio_input_pin_t power_voltage_pin;
+    bool use_ignition_acceptance;
     ecu_config_ignition_group_setup_t groups[ECU_CONFIG_IGNITION_GROUP_MAX];
 
     uint32_t align ALIGNED_CACHE;

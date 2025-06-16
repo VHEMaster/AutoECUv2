@@ -159,7 +159,7 @@ typedef struct {
     struct {
         struct {
             float saturation_time;
-            float advance[ECU_BANK_MAX];
+            float advance_cy[ECU_CYLINDER_MAX];
         }groups[ECU_CONFIG_IGNITION_GROUP_MAX];
     }read;
     struct {
