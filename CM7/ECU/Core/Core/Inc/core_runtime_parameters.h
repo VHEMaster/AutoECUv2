@@ -163,6 +163,7 @@ typedef struct {
         }groups[ECU_CONFIG_IGNITION_GROUP_MAX];
     }read;
     struct {
+        bool allowed;
         float ignition_advance_banked[ECU_BANK_MAX];
     }write;
     bool read_valid;
@@ -181,6 +182,7 @@ typedef struct {
         }groups[ECU_CONFIG_INJECTION_GROUP_MAX];
     }read;
     struct {
+        bool allowed;
         float injection_phase;
         float injection_mass_banked[ECU_BANK_MAX];
     }write;

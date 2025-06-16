@@ -34,7 +34,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   const timing_data_crankshaft_t *crankshaft;
 
   float input_ignition_advance_b[ECU_BANK_MAX];
-  bool input_valid;
+  bool input_valid, input_allowed;
 
   float signal_prepare_advance;
   ecu_core_runtime_global_ignition_ctx_t *runtime;
@@ -96,6 +96,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
         crankshaft->sensor_data.previous.timestamp);
 
     input_valid = runtime->input.valid;
+    input_allowed = runtime->input.allowed;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
       input_ignition_advance_b[b] = runtime->input.ignition_advance_banked[b];
     }
@@ -276,9 +277,11 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
                           (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
                       time_to_ignite = time_to_saturate + saturation_time;
 
-                      err = core_timing_pulse_schedule(ctx, group_config->cylinders[cy].output_pin,
-                          time_to_saturate, time_to_ignite);
-                      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                      if(input_allowed) {
+                        err = core_timing_pulse_schedule(ctx, group_config->cylinders[cy].output_pin,
+                            time_to_saturate, time_to_ignite);
+                        BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                      }
 
                       runtime_cy->scheduled = true;
                     }

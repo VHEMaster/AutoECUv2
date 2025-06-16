@@ -45,7 +45,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_config_io_map_t map_type;
   ecu_sensor_map_t map_instances[ECU_BANK_MAX];
 
-  bool input_valid;
+  bool input_valid, input_allowed;
   float input_injection_phase;
   float input_injection_mass_b[ECU_BANK_MAX];
 
@@ -128,10 +128,15 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
         crankshaft->sensor_data.previous.timestamp);
 
     input_valid = runtime->input.valid;
+    input_allowed = runtime->input.allowed;
     input_injection_phase = runtime->input.injection_phase;
 
-    for(ecu_bank_t b = 0; b < banks_count; b++) {
-      input_injection_mass_b[b] = runtime->input.injection_mass_banked[b];
+    if(input_allowed) {
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        input_injection_mass_b[b] = runtime->input.injection_mass_banked[b];
+      }
+    } else {
+      memset(input_injection_mass_b, 0, sizeof(input_injection_mass_b));
     }
     runtime->signal_prepare_advance = signal_prepare_advance;
 

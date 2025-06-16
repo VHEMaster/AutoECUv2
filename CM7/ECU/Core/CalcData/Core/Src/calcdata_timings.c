@@ -118,6 +118,7 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
   }
 
   if(timing_ctx->write_valid) {
+    dst_ctx->allowed = timing_ctx->write.allowed;
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       dst_ctx->ignition_advance_banked[b] = timing_ctx->write.ignition_advance_banked[b];
     }
@@ -142,6 +143,7 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
   }
 
   if(timing_ctx->write_valid) {
+    dst_ctx->allowed = timing_ctx->write.allowed;
     dst_ctx->injection_phase = timing_ctx->write.injection_phase;
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       dst_ctx->injection_mass_banked[b] = timing_ctx->write.injection_mass_banked[b];

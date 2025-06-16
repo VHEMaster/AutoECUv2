@@ -82,6 +82,7 @@ typedef struct {
 
 typedef struct {
     bool valid;
+    bool allowed;
     float ignition_advance_banked[ECU_BANK_MAX];
 }ecu_core_runtime_global_ignition_input_ctx_t;
 
@@ -98,6 +99,7 @@ typedef struct {
 
 typedef struct {
     bool valid;
+    bool allowed;
     float injection_phase;
     float injection_mass_banked[ECU_BANK_MAX];
 }ecu_core_runtime_global_injection_input_ctx_t;
