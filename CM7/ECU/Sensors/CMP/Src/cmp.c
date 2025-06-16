@@ -39,6 +39,7 @@ error_t cmp_init(cmp_ctx_t *ctx, const cmp_init_ctx_t *init_ctx)
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;
@@ -218,6 +219,7 @@ ITCM_FUNC void cmp_loop_fast(cmp_ctx_t *ctx)
   }
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void cmp_ckp_signal_update(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;

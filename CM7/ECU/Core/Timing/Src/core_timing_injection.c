@@ -12,6 +12,7 @@
 #include "interpolation.h"
 #include "config_map.h"
 
+OPTIMIZE_FAST
 ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 {
   error_t err;

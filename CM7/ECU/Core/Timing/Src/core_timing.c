@@ -12,6 +12,7 @@
 #include "config_hw.h"
 #include "common.h"
 
+OPTIMIZE_FAST
 ITCM_FUNC void core_timing_signal_update_cb(void *usrdata, const timing_data_t *data, const timing_diag_t *diag)
 {
   ecu_core_ctx_t *ctx = (ecu_core_ctx_t *)usrdata;

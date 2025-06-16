@@ -54,6 +54,7 @@ error_t cmp_signal_singlepulse_init(cmp_ctx_t *ctx, cmp_instance_t instance_inde
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata)
 {
   cmp_signal_singlepulse_ctx_t *signal_ctx = (cmp_signal_singlepulse_ctx_t *)usrdata;
@@ -215,6 +216,7 @@ ITCM_FUNC void cmp_signal_singlepulse_loop_fast(cmp_ctx_t *ctx, void *usrdata)
 
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void cmp_signal_singlepulse_ckp_update(cmp_ctx_t *ctx, void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   cmp_signal_singlepulse_ctx_t *signal_ctx = (cmp_signal_singlepulse_ctx_t *)usrdata;

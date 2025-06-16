@@ -10,6 +10,7 @@
 #include "common.h"
 #include "interpolation.h"
 
+OPTIMIZE_FAST
 ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 {
   error_t err;

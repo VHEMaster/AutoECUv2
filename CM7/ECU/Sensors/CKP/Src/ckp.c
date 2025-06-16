@@ -38,6 +38,7 @@ error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx)
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static void ckp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input_level_t level, void *usrdata)
 {
   ckp_ctx_t *ctx = (ckp_ctx_t *)usrdata;
@@ -217,6 +218,7 @@ ITCM_FUNC void ckp_loop_fast(ckp_ctx_t *ctx)
   }
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_t *req_ctx, ckp_data_t *data)
 {
   error_t err = E_OK;

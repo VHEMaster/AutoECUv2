@@ -61,6 +61,7 @@ error_t timing_reset(timing_ctx_t *ctx)
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC INLINE void timing_position_clamp(float input, bool phased, float *output)
 {
   float out_value = input;
@@ -107,6 +108,7 @@ ITCM_FUNC error_t timing_roughtest_set(timing_ctx_t *ctx, bool synchronized, boo
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   const timing_config_crankshaft_t *crankshaft_config;
@@ -232,6 +234,7 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
   } while(0);
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_instance, const cmp_data_t *data, const cmp_diag_t *diag)
 {
   const timing_config_camshaft_t *camshaft_config;
@@ -337,6 +340,7 @@ error_t timing_get_diag(timing_ctx_t *ctx, timing_diag_t *diag)
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static error_t timing_calculate_position_ex(timing_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
 {
   error_t err = E_OK;
@@ -483,11 +487,13 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_ctx_t *ctx, float o
   return err;
 }
 
+OPTIMIZE_FAST
 INLINE ITCM_FUNC error_t timing_calculate_offset_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
 {
   return timing_calculate_position_ex(ctx, offset, false, phased, req_ctx, data);
 }
 
+OPTIMIZE_FAST
 INLINE ITCM_FUNC error_t timing_calculate_current_position(timing_ctx_t *ctx, float offset, bool phased, timing_req_t *req_ctx, timing_data_crankshaft_t *data)
 {
   return timing_calculate_position_ex(ctx, offset, true, phased, req_ctx, data);

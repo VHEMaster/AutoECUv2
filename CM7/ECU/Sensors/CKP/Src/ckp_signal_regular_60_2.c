@@ -96,6 +96,7 @@ error_t ckp_signal_regular_60_2_init(ckp_ctx_t *ctx, ckp_instance_t instance_ind
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_level_t level, void *usrdata)
 {
   ckp_signal_regular_60_2_ctx_t *signal_ctx = (ckp_signal_regular_60_2_ctx_t *)usrdata;

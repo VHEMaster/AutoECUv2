@@ -12,6 +12,7 @@
 #define CORE_OUTPUT_ACTIVE      1
 #define CORE_OUTPUT_INACTIVE    0
 
+OPTIMIZE_FAST
 ITCM_FUNC error_t core_timing_pulse_schedule(ecu_core_ctx_t *ctx, ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end)
 {
   time_us_t now;
