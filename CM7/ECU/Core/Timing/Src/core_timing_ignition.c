@@ -78,6 +78,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   uint8_t process_update_trigger_counter_gr_1of3;
   bool process_update_trigger = false;
   bool slew_adder_valid;
+  bool runup_flag;
 
   do {
     banks_count = ctx->runtime.global.banks_count;
@@ -85,6 +86,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     config = &ctx->calibration->ignition;
     runtime = &ctx->runtime.global.ignition;
     crankshaft = &ctx->timing_data.crankshaft;
+    runup_flag = ctx->runtime.global.misc.runup_flag;
 
     err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
@@ -184,7 +186,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 
           for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
             slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && runup_flag) {
               ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
               ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested_cy[cy] - ignition_advance_gr_cy[cy];
               if(ignition_advance_gr_accept_vs_requested > 0.0f) {

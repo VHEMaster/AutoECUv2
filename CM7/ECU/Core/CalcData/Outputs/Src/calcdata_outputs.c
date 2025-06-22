@@ -18,6 +18,18 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
     case CORE_CALCDATA_OUTPUTS_STAGE_1:
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IAT_ALPHA_BLENDING, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IAT_DIRECT_INFLUENCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_TPS_INJ_INFLUENCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_2:
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);

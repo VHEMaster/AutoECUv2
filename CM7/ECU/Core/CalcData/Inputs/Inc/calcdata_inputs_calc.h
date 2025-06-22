@@ -11,6 +11,7 @@
 #include "calcdata_inputs.h"
 
 void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx);
+void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx);
 void calcdata_inputs_calc_cycle_charge(ecu_core_ctx_t *ctx);
 void calcdata_inputs_calc_mass_air_flow(ecu_core_ctx_t *ctx);
 

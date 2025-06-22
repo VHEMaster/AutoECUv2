@@ -108,6 +108,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   uint8_t process_update_trigger_counter_gr_1of2;
   bool process_update_trigger = false;
   bool slew_adder_valid;
+  bool runup_flag;
 
   do {
     banks_count = ctx->runtime.global.banks_count;
@@ -116,6 +117,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     config = &ctx->calibration->injection;
     runtime = &ctx->runtime.global.injection;
     crankshaft = &ctx->timing_data.crankshaft;
+    runup_flag = ctx->runtime.global.misc.runup_flag;
 
     err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
@@ -192,7 +194,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             runtime_gr->phase_requested_banked[b] = injection_phase_gr_requested;
 
             slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && runup_flag) {
               injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
               injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
               phase_slew_rate = group_config->phase_slew_rate;

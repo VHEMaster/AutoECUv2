@@ -93,6 +93,11 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
             }, //CALCDATA_AIR_CALC_MODEL_INDEX_4
         },
     },
+    .runup_rpm_threshold_low = 400.0f,
+    .runup_rpm_threshold_high = 600.0f,
+    .startup_large_revs = 4,
+    .startup_large_to_small_trans_revs = 8,
+    .startup_transition_reset = 32,
 };
 
 error_t ecu_calibration_calcdata_setup_get_default_config(ecu_calibration_instance_t instance, ecu_config_calcdata_setup_t *config)

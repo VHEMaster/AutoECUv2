@@ -147,6 +147,17 @@ typedef struct {
 }ecu_core_runtime_global_rough_ctx_t;
 
 typedef struct {
+    bool runup_flag;
+    time_float_s_t runned_time_overall;
+    time_float_s_t running_time_current;
+
+    uint32_t injection_revs_counter;
+    uint32_t injection_startup_revs_counter;
+
+    time_us_t calc_tick_last;
+}ecu_core_runtime_global_misc_ctx_t;
+
+typedef struct {
     uint32_t banks_count;
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
@@ -155,6 +166,8 @@ typedef struct {
 
     ecu_core_runtime_global_parameters_ctx_t parameters;
     ecu_core_runtime_global_parameters_ctx_t parameters_simulated;
+
+    ecu_core_runtime_global_misc_ctx_t misc;
 
 }ecu_core_runtime_global_ctx_t;
 

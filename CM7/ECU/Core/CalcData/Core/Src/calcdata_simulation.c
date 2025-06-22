@@ -22,7 +22,7 @@ void core_calcdata_simulation(ecu_core_ctx_t *ctx)
     value->value = 25.0f; value->valid = true;
 
     value = &params->sensors[ECU_SENSOR_TYPE_ECT][ECU_SENSOR_ECT_1];
-    value->value = 90.0f; value->valid = true;
+    value->value = 20.0f; value->valid = true;
 
     value = &params->sensors[ECU_SENSOR_TYPE_MAF][ECU_SENSOR_MAF_1];
     value->value = 250.0f; value->valid = true;

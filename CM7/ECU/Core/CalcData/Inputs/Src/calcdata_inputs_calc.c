@@ -11,6 +11,43 @@
 #include "calcdata_proc.h"
 #include "math_misc.h"
 
+void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
+{
+  time_us_t now = time_now_us();
+  time_us_t time_delta = time_diff(now, ctx->runtime.global.misc.calc_tick_last);
+  time_float_s_t runned_time_overall = ctx->runtime.global.misc.runned_time_overall;
+  time_float_s_t running_time_current = ctx->runtime.global.misc.running_time_current;
+
+  const ckp_data_t *ckp_data = &ctx->timing_data.crankshaft.sensor_data;
+  float runup_rpm_th_l = ctx->calibration->calcdata.setup.runup_rpm_threshold_low;
+  float runup_rpm_th_h = ctx->calibration->calcdata.setup.runup_rpm_threshold_high;
+  bool *runup_flag_ptr = &ctx->runtime.global.misc.runup_flag;
+  bool runup_flag = *runup_flag_ptr;
+
+  if(ckp_data->validity >= CKP_DATA_VALID) {
+    if(ckp_data->rpm > runup_rpm_th_h) {
+      runup_flag = true;
+    } else if(ckp_data->rpm < runup_rpm_th_l) {
+      runup_flag = false;
+    }
+  } else {
+    runup_flag = false;
+  }
+
+  if(runup_flag) {
+    running_time_current += time_delta * TIME_S_IN_US;
+    runned_time_overall += time_delta * TIME_S_IN_US;
+  } else {
+    running_time_current = 0.0f;
+  }
+
+  ctx->runtime.global.misc.runned_time_overall = runned_time_overall;
+  ctx->runtime.global.misc.running_time_current = running_time_current;
+  ctx->runtime.global.misc.calc_tick_last = now;
+
+  *runup_flag_ptr = runup_flag;
+}
+
 void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
 {
   const uint32_t banks_count = ctx->runtime.global.banks_count;
@@ -74,8 +111,8 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
               f < CALCDATA_IAT_ALPHA_BLENDING_FILTER_MAX; f++) {
             lpf_value = iat_config[b]->alpha_blending.filters[f].low_pass;
             lpf_value *= 1000.0f / crankshaft->period;
-            data_iat[b]->blending[f].filtered = BLEND(data_iat[b]->blending[f].unfiltered,
-                data_iat[b]->blending[f].filtered, lpf_value);
+            data_iat[b]->blending[f].filtered = BLEND(data_iat[b]->blending[f].filtered,
+                data_iat[b]->blending[f].unfiltered, lpf_value);
           }
 
           blending = 0.0f;
@@ -90,7 +127,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
           }
         }
 
-        output_value.value = BLEND(iat_value[b]->value, ect_value[b]->value, blending);
+        output_value.value = BLEND(ect_value[b]->value, iat_value[b]->value, blending);
         output_value.valid = true;
       } else {
         memcpy(&output_value, iat_value[b], sizeof(output_value));

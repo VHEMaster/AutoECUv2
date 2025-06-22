@@ -78,6 +78,18 @@ typedef enum {
   CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO,
   CALCDATA_OUTPUT_INJECTION_PHASE,
 
+  CALCDATA_OUTPUT_STARTUP_IGNITION_ADVANCE,
+  CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE,
+  CALCDATA_OUTPUT_STARTUP_TPS_INJ_INFLUENCE,
+  CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE,
+  CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE,
+  CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION,
+  CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION,
+  CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR,
+  CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME,
+  CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME,
+  CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR,
+
   CALCDATA_OUTPUT_MAX,
 }ecu_config_calcdata_output_data_index_t;
 
@@ -214,6 +226,11 @@ typedef struct {
     ecu_config_calcdata_setup_iat_t iat_model;
     ecu_config_calcdata_setup_ect_t ect_model;
     ecu_config_calcdata_setup_air_calc_model_t air_calc_model;
+    float runup_rpm_threshold_low;
+    float runup_rpm_threshold_high;
+    float startup_large_revs;
+    float startup_large_to_small_trans_revs;
+    float startup_transition_reset;
 }ecu_config_calcdata_setup_t;
 
 typedef struct {

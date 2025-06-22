@@ -19,6 +19,7 @@ void core_calcdata_inputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_inputs_
       break;
     case CORE_CALCDATA_INPUTS_STAGE_2:
       calcdata_inputs_calc_iat_manifold(ctx);
+      calcdata_inputs_calc_runup_flag(ctx);
       break;
     case CORE_CALCDATA_INPUTS_STAGE_3:
       calcdata_inputs_calc_cycle_charge(ctx);

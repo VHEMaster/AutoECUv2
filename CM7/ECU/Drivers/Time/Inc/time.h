@@ -16,6 +16,10 @@
 #define TIME_MS_IN_S    (1000u)
 #define TIME_US_IN_S    (TIME_US_IN_MS * TIME_MS_IN_S)
 
+#define TIME_S_IN_US    (1.0f / TIME_US_IN_S)
+#define TIME_S_IN_MS    (1.0f / TIME_MS_IN_S)
+#define TIME_MS_IN_US   (1.0f / TIME_US_IN_MS)
+
 #define TIME_US_IN_TICK (0.0125f)
 
 typedef uint32_t time_tick_t;
