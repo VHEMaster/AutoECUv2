@@ -39,7 +39,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_ckp_input_pin_default[ECU_SENSOR_C
 };
 
 
-static ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
+static RAM_SECTION ecu_sensors_ckp_ctx_t ecu_sensors_ckp_ctx[ECU_SENSOR_CKP_MAX] = {
     {
       .init = {
           .instance_index = CKP_INSTANCE_1,

@@ -30,7 +30,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_vss_input_pin_default[ECU_SENSOR_V
     ECU_IN_PORT2_SENT1,
 };
 
-static ecu_sensors_vss_ctx_t ecu_sensors_vss_ctx[ECU_SENSOR_VSS_MAX] = {
+static RAM_SECTION ecu_sensors_vss_ctx_t ecu_sensors_vss_ctx[ECU_SENSOR_VSS_MAX] = {
     {
       .init = {
 

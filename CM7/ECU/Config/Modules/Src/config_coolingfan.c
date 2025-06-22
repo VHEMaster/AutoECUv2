@@ -36,7 +36,7 @@ static const coolingfan_config_t ecu_modules_coolingfan_config_default = {
     .crankshaft_timeout = 5000 * TIME_US_IN_MS,
 };
 
-static ecu_modules_coolingfan_ctx_t ecu_modules_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {
+static RAM_SECTION ecu_modules_coolingfan_ctx_t ecu_modules_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {
     {
       .init = {
 

@@ -55,7 +55,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_aps_input_pin_default[ECU_SENSOR_A
     { ECU_IN_PORT1_PIN11, ECU_IN_PORT1_PIN12 },
 };
 
-static ecu_sensors_aps_ctx_t ecu_sensors_aps_ctx[ECU_SENSOR_APS_MAX] = {
+static RAM_SECTION ecu_sensors_aps_ctx_t ecu_sensors_aps_ctx[ECU_SENSOR_APS_MAX] = {
     {
       .init = {
 

@@ -16,7 +16,7 @@ typedef struct {
     wgcv_ctx_t *ctx;
 }ecu_modules_wgcv_ctx_t;
 
-static const wgcv_config_t ecu_modules_wgcv_config_default = {
+static RAM_SECTION const wgcv_config_t ecu_modules_wgcv_config_default = {
     .power_voltage_pin = ECU_IN_PORT1_VIGN,
     .pwm_freq = 100,
 

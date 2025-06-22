@@ -45,6 +45,19 @@ defined in linker script */
 .word  _ebss
 /* stack used for SystemInit_ExtMemCtl; always internal RAM used */
 
+/* start address for the initialization values of the .ramdata section.
+defined in linker script */
+.word  _siramdata
+/* start address for the .ramdata section. defined in linker script */
+.word  _sramdata
+/* end address for the .ramdata section. defined in linker script */
+.word  _eramdata
+/* start address for the .rambss section. defined in linker script */
+.word  _srambss
+/* end address for the .rambss section. defined in linker script */
+.word  _erambss
+/* stack used for SystemInit_ExtMemCtl; always internal RAM used */
+
 /**
  * @brief  This is the code that gets called when the processor first
  *          starts execution following a reset event. Only the absolutely
@@ -81,6 +94,23 @@ LoopCopyDataInit:
   bcc CopyDataInit
 
 /* Copy the data segment initializers from flash to SRAM */
+  ldr r0, =_sramdata
+  ldr r1, =_eramdata
+  ldr r2, =_siramdata
+  movs r3, #0
+  b LoopCopyRamDataInit
+
+CopyRamDataInit:
+  ldr r4, [r2, r3]
+  str r4, [r0, r3]
+  adds r3, r3, #4
+
+LoopCopyRamDataInit:
+  adds r4, r0, r3
+  cmp r4, r1
+  bcc CopyRamDataInit
+
+/* Copy the data segment initializers from flash to SRAM */
   ldr r0, =_sitcm_func
   ldr r1, =_eitcm_func
   ldr r2, =_siitcm_func
@@ -110,6 +140,20 @@ FillZerobss:
 LoopFillZerobss:
   cmp r2, r4
   bcc FillZerobss
+
+/* Zero fill the bss segment. */
+  ldr r2, =_srambss
+  ldr r4, =_erambss
+  movs r3, #0
+  b LoopFillZeroRamBss
+
+FillZeroRamBss:
+  str  r3, [r2]
+  adds r2, r2, #4
+
+LoopFillZeroRamBss:
+  cmp r2, r4
+  bcc FillZeroRamBss
 
 /* Call static constructors */
     bl __libc_init_array

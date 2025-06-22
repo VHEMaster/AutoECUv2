@@ -32,7 +32,7 @@ static const ecu_device_tcs_t ecu_sensors_egt_tcs_default[ECU_SENSOR_EGT_MAX] = 
     ECU_DEVICE_TCS_2,
 };
 
-static ecu_sensors_egt_ctx_t ecu_sensors_egt_ctx[ECU_SENSOR_EGT_MAX] = {
+static RAM_SECTION ecu_sensors_egt_ctx_t ecu_sensors_egt_ctx[ECU_SENSOR_EGT_MAX] = {
     {
       .init = {
 

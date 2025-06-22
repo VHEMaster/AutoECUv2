@@ -37,7 +37,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_map_input_pin_default[ECU_SENSOR_M
     ECU_IN_PORT2_PIN10,
 };
 
-static ecu_sensors_map_ctx_t ecu_sensors_map_ctx[ECU_SENSOR_MAP_MAX] = {
+static RAM_SECTION ecu_sensors_map_ctx_t ecu_sensors_map_ctx[ECU_SENSOR_MAP_MAX] = {
     {
       .init = {
 

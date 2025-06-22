@@ -38,13 +38,20 @@ typedef struct {
     ecu_module_type_t type;
     ecu_module_instance_t instance;
     void *ctx;
-    bool initialized;
 }ecu_config_module_instance_t;
+
+typedef struct {
+    bool initialized;
+}ecu_config_module_instance_runtime_t;
 
 typedef struct {
     ecu_config_module_if_instance_t interfaces[ECU_MODULE_TYPE_MAX];
     ecu_config_module_instance_t modules[ECU_MODULES_MAX];
 }ecu_config_modules_t;
+
+typedef struct {
+    ecu_config_module_instance_runtime_t modules[ECU_MODULES_MAX];
+}ecu_config_modules_runtime_t;
 
 static timing_ctx_t ecu_config_timing_ctx[ECU_MODULE_TIMING_MAX] = {0};
 static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
@@ -55,7 +62,9 @@ static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {0};
 static indication_ctx_t ecu_config_indication_ctx[ECU_MODULE_INDICATION_MAX] = {0};
 static wgcv_ctx_t ecu_config_wgcv_ctx[ECU_MODULE_WGCV_MAX] = {0};
 
-static ecu_config_modules_t ecu_config_modules = {
+static RAM_SECTION ecu_config_modules_runtime_t ecu_config_modules_runtime = {0};
+
+static const ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
         {
             .loop_slow = (ecu_module_loop_func_t)NULL,
@@ -213,12 +222,14 @@ static ecu_config_modules_t ecu_config_modules = {
 error_t ecu_modules_init(void)
 {
   error_t err = E_OK;
-  ecu_config_module_if_instance_t *interface;
-  ecu_config_module_instance_t *module;
+  const ecu_config_module_if_instance_t *interface;
+  const ecu_config_module_instance_t *module;
+  ecu_config_module_instance_runtime_t *module_runtime;
 
   for(int i = 0; i < ITEMSOF(ecu_config_modules.modules); i++) {
     module = &ecu_config_modules.modules[i];
-    module->initialized = false;
+    module_runtime = &ecu_config_modules_runtime.modules[i];
+    module_runtime->initialized = false;
 
     BREAK_IF_ACTION(module->type >= ECU_MODULE_TYPE_MAX, err = E_FAULT);
     BREAK_IF_ACTION(module->ctx == NULL, err = E_FAULT);
@@ -232,15 +243,17 @@ error_t ecu_modules_init(void)
 
 ITCM_FUNC static void ecu_modules_loop(ecu_config_module_loop_type_t loop_type)
 {
-  ecu_config_module_if_instance_t *interface;
-  ecu_config_module_instance_t *module;
+  const ecu_config_module_if_instance_t *interface;
+  const ecu_config_module_instance_t *module;
+  ecu_config_module_instance_runtime_t *module_runtime;
   ecu_module_type_t if_type;
 
   switch(loop_type) {
     case ECU_MODULE_LOOP_TYPE_FAST:
       for(int i = 0; i < ITEMSOF(ecu_config_modules.modules); i++) {
         module = &ecu_config_modules.modules[i];
-        if(module->initialized == true) {
+        module_runtime = &ecu_config_modules_runtime.modules[i];
+        if(module_runtime->initialized == true) {
           if_type = module->type;
           if(if_type < ECU_MODULE_TYPE_MAX) {
             interface = &ecu_config_modules.interfaces[if_type];
@@ -254,7 +267,8 @@ ITCM_FUNC static void ecu_modules_loop(ecu_config_module_loop_type_t loop_type)
     case ECU_MODULE_LOOP_TYPE_SLOW:
       for(int i = 0; i < ITEMSOF(ecu_config_modules.modules); i++) {
         module = &ecu_config_modules.modules[i];
-        if(module->initialized == true) {
+        module_runtime = &ecu_config_modules_runtime.modules[i];
+        if(module_runtime->initialized == true) {
           if_type = module->type;
           if(if_type < ECU_MODULE_TYPE_MAX) {
             interface = &ecu_config_modules.interfaces[if_type];
@@ -268,7 +282,8 @@ ITCM_FUNC static void ecu_modules_loop(ecu_config_module_loop_type_t loop_type)
     case ECU_MODULE_LOOP_TYPE_MAIN:
       for(int i = 0; i < ITEMSOF(ecu_config_modules.modules); i++) {
         module = &ecu_config_modules.modules[i];
-        if(module->initialized == true) {
+        module_runtime = &ecu_config_modules_runtime.modules[i];
+        if(module_runtime->initialized == true) {
           if_type = module->type;
           if(if_type < ECU_MODULE_TYPE_MAX) {
             interface = &ecu_config_modules.interfaces[if_type];
@@ -302,7 +317,7 @@ ITCM_FUNC void ecu_modules_loop_fast(void)
 error_t ecu_modules_get_module_ctx(ecu_module_type_t type, ecu_module_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
-  ecu_config_module_instance_t *module;
+  const ecu_config_module_instance_t *module;
 
   if(ctx == NULL) {
     err = E_PARAM;
@@ -323,12 +338,14 @@ error_t ecu_modules_get_module_ctx(ecu_module_type_t type, ecu_module_instance_t
 error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_instance_t instance, bool initialized)
 {
   error_t err = E_FAULT;
-  ecu_config_module_instance_t *module;
+  const ecu_config_module_instance_t *module;
+  ecu_config_module_instance_runtime_t *module_runtime;
 
   for(int i = 0; i < ITEMSOF(ecu_config_modules.modules); i++) {
     module = &ecu_config_modules.modules[i];
+    module_runtime = &ecu_config_modules_runtime.modules[i];
     if(module->type == type && module->instance == instance) {
-      module->initialized = initialized;
+      module_runtime->initialized = initialized;
       err = E_OK;
       break;
     }

@@ -96,7 +96,7 @@ static const ecu_gpio_input_pin_t ecu_sensors_iat_input_pin_default[ECU_SENSOR_I
     ECU_IN_PORT1_PIN8
 };
 
-static ecu_sensors_iat_ctx_t ecu_sensors_iat_ctx[ECU_SENSOR_IAT_MAX] = {
+static RAM_SECTION ecu_sensors_iat_ctx_t ecu_sensors_iat_ctx[ECU_SENSOR_IAT_MAX] = {
     {
       .init = {
 

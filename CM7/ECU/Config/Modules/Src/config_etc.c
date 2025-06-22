@@ -34,7 +34,7 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .motor_reach_timeout = 200 * TIME_US_IN_MS,
 };
 
-static ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
+static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
     {
       .init = {
 

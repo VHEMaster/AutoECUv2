@@ -40,7 +40,7 @@ static const ignpower_config_t ecu_modules_ignpower_config_default = {
     .output_gpio_inverted = false,
 };
 
-static ecu_modules_ignpower_ctx_t ecu_modules_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {
+static RAM_SECTION ecu_modules_ignpower_ctx_t ecu_modules_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {
     {
       .init = {
           .signal_update_cb = ecu_modules_ignpower_signal_update_cb,

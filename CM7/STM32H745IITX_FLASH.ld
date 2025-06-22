@@ -193,17 +193,26 @@ SECTIONS
     __bss_end__ = _ebss;
   } >DTCMRAM
 
-  /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
-  ._user_heap_stack :
+  /* User_heap section, used to check that there is enough "RAM" Ram  type memory left */
+  ._user_heap :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
     . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM_D1
 
+  /* User_stack section, used to check that there is enough "RAM" Ram  type memory left */
+  ._user_stack :
+  {
+    . = ALIGN(8);
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
+    . = . + _Min_Stack_Size;
+    . = ALIGN(8);
+  } >DTCMRAM
+  
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .dmabss :
@@ -218,6 +227,38 @@ SECTIONS
     _edmabss = .;         /* define a global symbol at dmabss end */
     __dmabss_end__ = _edmabss;
   } >RAM_D1
+
+  /* Uninitialized data section into "RAM" Ram type memory */
+  . = ALIGN(4);
+  .rambss :
+  {
+    /* This is used by the startup in order to initialize the .rambss section */
+    _srambss = .;         /* define a global symbol at rambss start */
+    __rambss_start__ = _srambss;
+    *(.rambss)
+    *(.rambss*)
+
+    . = ALIGN(4);
+    _erambss = .;         /* define a global symbol at rambss end */
+    __rambss_end__ = _erambss;
+  } >RAM_D1
+
+  /* Used by the startup to initialize data */
+  _siramdata = LOADADDR(.ramdata);
+
+  /* Initialized data sections into "RAM" Ram type memory */
+  .ramdata :
+  {
+    . = ALIGN(4);
+    _sramdata = .;        /* create a global symbol at data start */
+    *(.ramdata)           /* .data sections */
+    *(.ramdata*)          /* .data* sections */
+    *(.RamDataFunc)        /* .RamFunc sections */
+    *(.RamDataFunc*)       /* .RamFunc* sections */
+
+    . = ALIGN(4);
+    _eramdata = .;        /* define a global symbol at data end */
+  } >RAM_D1 AT> FLASH
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :
