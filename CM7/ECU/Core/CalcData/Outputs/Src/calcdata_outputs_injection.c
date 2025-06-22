@@ -20,6 +20,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   float startup_large_to_small_trans_revs = ctx->calibration->calcdata.setup.startup_large_to_small_trans_revs;
   float startup_transition_reset = ctx->calibration->calcdata.setup.startup_transition_reset;
   float startup_revs_counter = ctx->runtime.global.misc.injection_startup_revs_counter;
+  uint32_t ckp_revs_count = ctx->timing_data.crankshaft.sensor_data.revs_count;
 
   const ecu_core_runtime_banked_source_bank_ctx_t *runtime_banked;
 
@@ -54,12 +55,14 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   if(!turning_flag) {
     revs_delta = 0;
     startup_revs_counter = 0;
-    ctx->runtime.global.misc.injection_revs_counter = ctx->timing_data.crankshaft.sensor_data.revs_count;
+    ctx->runtime.global.misc.injection_revs_counter = ckp_revs_count;
   } else {
-    revs_delta = ctx->timing_data.crankshaft.sensor_data.revs_count - ctx->runtime.global.misc.injection_revs_counter;
-    startup_revs_counter += revs_delta;
-    if(runup_flag) {
+    revs_delta = ckp_revs_count - ctx->runtime.global.misc.injection_revs_counter;
+    ctx->runtime.global.misc.injection_revs_counter = ckp_revs_count;
+    if(!runup_flag) {
       startup_revs_counter = 0;
+    } else {
+      startup_revs_counter += revs_delta;
     }
   }
 
@@ -80,7 +83,18 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
     runup_inj_cold_corr = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR].variants[output_variant];
     runup_inj_cold_time = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME].variants[output_variant];
 
-    output_inj_mass_start = runup_inj_large_charge->value;
+    if(startup_revs_counter < startup_large_revs) {
+      output_inj_mass_start = runup_inj_large_charge->value;
+    } else if(startup_revs_counter >= startup_transition_reset) {
+      output_inj_mass_start = runup_inj_large_charge->value;
+      startup_revs_counter = 0;
+    } else if(startup_revs_counter >= startup_large_revs + startup_large_to_small_trans_revs) {
+      output_inj_mass_start = runup_inj_small_charge->value;
+    } else {
+      time_blending = (startup_revs_counter - startup_large_revs) / startup_large_to_small_trans_revs;
+      time_blending = CLAMP(time_blending, 0.0f, 1.0f);
+      output_inj_mass_start = BLEND(runup_inj_large_charge->value, runup_inj_small_charge->value, time_blending);
+    }
 
     if(runup_flag) {
       if(input_cycle_charge->valid /* && input_inj_phase->valid && input_inj_afr->valid */) {
