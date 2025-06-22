@@ -49,7 +49,7 @@ typedef struct {
     bool ready;
     bool configured;
 
-    bool output_pin_locked;
+    bool output_pin_locked[COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX];
     bool control_pin_locked;
     bool force_pin_locked;
 
@@ -65,7 +65,7 @@ typedef struct {
     coolingfan_data_t data;
     float ckp_rpm;
 
-    output_id_t output_drive_pin;
+    output_id_t output_drive_pin[COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX];
     input_id_t input_control_pin;
     input_id_t input_force_pin;
 

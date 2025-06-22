@@ -25,6 +25,12 @@ typedef enum {
   COOLINGFAN_CONFIG_CKP_TRIGGER_MAX,
 }coolingfan_config_ckp_trigger_t;
 
+typedef enum {
+  COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_PRIMARY = 0,
+  COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_SECONDARY,
+  COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX
+}coolingfan_config_drive_pin_type_t;
+
 typedef struct {
     bool enabled;
 
@@ -32,7 +38,7 @@ typedef struct {
     ecu_module_ignpower_t module_ignpower;
     coolingfan_config_ckp_trigger_t ckp_trigger;
 
-    ecu_gpio_output_pin_t output_drive_pin;
+    ecu_gpio_output_pin_t output_drive_pin[COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX];
     ecu_gpio_input_pin_t input_control_pin;
     ecu_gpio_input_pin_t input_force_pin;
     bool force_gpio_inverted;

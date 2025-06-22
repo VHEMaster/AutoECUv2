@@ -56,9 +56,9 @@ static const bool ecu_sensors_coolingfan_enabled_default[ECU_MODULE_COOLINGFAN_M
     true,
 };
 
-static const ecu_gpio_output_pin_t ecu_sensors_coolingfan_output_drive_pin_default[ECU_MODULE_COOLINGFAN_MAX] = {
-    ECU_OUT_PORT1_PIN13,
-    ECU_OUT_PORT1_PIN14,
+static const ecu_gpio_output_pin_t ecu_sensors_coolingfan_output_drive_pin_default[ECU_MODULE_COOLINGFAN_MAX][COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX] = {
+    { ECU_OUT_PORT1_PIN13, ECU_OUT_NONE, },
+    { ECU_OUT_PORT1_PIN14, ECU_OUT_NONE, },
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_coolingfan_input_control_pin_default[ECU_MODULE_COOLINGFAN_MAX] = {
@@ -83,7 +83,9 @@ error_t ecu_modules_coolingfan_init(ecu_module_coolingfan_t instance, coolingfan
     coolingfan_ctx->ctx = ctx;
 
     coolingfan_ctx->config_default.enabled = ecu_sensors_coolingfan_enabled_default[instance];
-    coolingfan_ctx->config_default.output_drive_pin = ecu_sensors_coolingfan_output_drive_pin_default[instance];
+    for(coolingfan_config_drive_pin_type_t i = 0; i < COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX; i++) {
+      coolingfan_ctx->config_default.output_drive_pin[i] = ecu_sensors_coolingfan_output_drive_pin_default[instance][i];
+    }
     coolingfan_ctx->config_default.input_control_pin = ecu_sensors_coolingfan_input_control_pin_default[instance];
     coolingfan_ctx->config_default.input_force_pin = ecu_sensors_coolingfan_input_force_pin_default[instance];
 

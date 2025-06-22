@@ -47,21 +47,22 @@ error_t coolingfan_configure(coolingfan_ctx_t *ctx, const coolingfan_config_t *c
     }
 
     if(ctx->config.enabled == true) {
-      err = ecu_config_gpio_output_valid(ctx->config.output_drive_pin, &valid);
-      BREAK_IF(err != E_OK);
-
-      if(valid) {
-        err = ecu_config_gpio_output_lock(ctx->config.output_drive_pin);
-        BREAK_IF(err != E_OK);
-        ctx->output_pin_locked = true;
-
-        err = ecu_config_gpio_output_set_mode(ctx->config.output_drive_pin, ECU_GPIO_TYPE_DIRECT);
+      for(coolingfan_config_drive_pin_type_t i = 0; i < COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX; i++) {
+        err = ecu_config_gpio_output_valid(ctx->config.output_drive_pin[i], &valid);
         BREAK_IF(err != E_OK);
 
-        err = ecu_config_gpio_output_get_id(ctx->config.output_drive_pin, &ctx->output_drive_pin);
-        BREAK_IF(err != E_OK);
+        if(valid) {
+          err = ecu_config_gpio_output_lock(ctx->config.output_drive_pin[i]);
+          BREAK_IF(err != E_OK);
+          ctx->output_pin_locked[i] = true;
+
+          err = ecu_config_gpio_output_set_mode(ctx->config.output_drive_pin[i], ECU_GPIO_TYPE_DIRECT);
+          BREAK_IF(err != E_OK);
+
+          err = ecu_config_gpio_output_get_id(ctx->config.output_drive_pin[i], &ctx->output_drive_pin[i]);
+          BREAK_IF(err != E_OK);
+        }
       }
-
       err = ecu_config_gpio_input_valid(ctx->config.input_control_pin, &valid);
       BREAK_IF(err != E_OK);
 
@@ -118,9 +119,11 @@ error_t coolingfan_reset(coolingfan_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ctx->output_pin_locked != false) {
-      (void)ecu_config_gpio_output_unlock(ctx->config.output_drive_pin);
-      ctx->output_pin_locked = false;
+    for(coolingfan_config_drive_pin_type_t i = 0; i < COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX; i++) {
+      if(ctx->output_pin_locked[i] != false) {
+        (void)ecu_config_gpio_output_unlock(ctx->config.output_drive_pin[i]);
+        ctx->output_pin_locked[i] = false;
+      }
     }
 
     if(ctx->control_pin_locked != false) {
@@ -201,15 +204,17 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
       }
 
       if(ctx->working_prev != ctx->data.working) {
-        if(ctx->output_pin_locked) {
-          err = output_set_value(ctx->output_drive_pin, ctx->data.working);
-          if(err == E_OK) {
-            ctx->working_prev = ctx->data.working;
+        for(coolingfan_config_drive_pin_type_t i = 0; i < COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX; i++) {
+          if(ctx->output_pin_locked[i]) {
+            err = output_set_value(ctx->output_drive_pin[i], ctx->data.working);
+            if(err == E_OK) {
+              ctx->working_prev = ctx->data.working;
+            } else {
+              ctx->diag.bits.output_drive_error = true;
+            }
           } else {
-            ctx->diag.bits.output_drive_error = true;
+            ctx->working_prev = ctx->data.working;
           }
-        } else {
-          ctx->working_prev = ctx->data.working;
         }
         ctx->control_time = now;
         ctx->control_working_valid = false;
