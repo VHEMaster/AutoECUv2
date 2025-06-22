@@ -72,10 +72,18 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
             {
                 .model = CALCDATA_AIR_CALC_MODEL_SOURCE_MAP,
                 .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
+                .iat_influence = {
+                    .direct_type = CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_TABLE,
+                    .direct_table_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
+                },
             }, //CALCDATA_AIR_CALC_MODEL_INDEX_1
             {
                 .model = CALCDATA_AIR_CALC_MODEL_SOURCE_TPS,
                 .ve_out_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V2,
+                .iat_influence = {
+                    .direct_type = CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_TABLE,
+                    .direct_table_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1,
+                },
             }, //CALCDATA_AIR_CALC_MODEL_INDEX_2
             {
                 .model = CALCDATA_AIR_CALC_MODEL_SOURCE_NONE,

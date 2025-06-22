@@ -72,6 +72,7 @@ typedef enum {
 
 typedef enum {
   CALCDATA_OUTPUT_IAT_ALPHA_BLENDING = 0,
+  CALCDATA_OUTPUT_IAT_DIRECT_INFLUENCE,
   CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY,
   CALCDATA_OUTPUT_IGNITION_ADVANCE,
   CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO,
@@ -108,6 +109,13 @@ typedef enum {
   CALCDATA_ECT_CALC_MODEL_RMS,
   CALCDATA_ECT_CALC_MODEL_MAX
 }ecu_config_calcdata_setup_ect_calc_model_t;
+
+typedef enum {
+  CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_NONE = 0,
+  CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_RECALC,
+  CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_TABLE,
+  CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_MAX,
+}ecu_config_calcdata_setup_air_calc_model_iat_direct_influence_source_t;
 
 typedef struct {
     ecu_config_calcdata_relation_input_source_index_t source;
@@ -182,6 +190,12 @@ typedef struct {
 }ecu_config_calcdata_setup_ect_t;
 
 typedef struct {
+    ecu_config_calcdata_setup_air_calc_model_iat_direct_influence_source_t direct_type;
+    ecu_config_calcdata_output_varianted_index_t direct_table_variant;
+}ecu_config_calcdata_setup_air_calc_model_iat_influence_t;
+
+typedef struct {
+    ecu_config_calcdata_setup_air_calc_model_iat_influence_t iat_influence;
     ecu_config_calcdata_setup_air_calc_model_source_type_t model;
     ecu_config_calcdata_output_varianted_index_t ve_out_variant;
 }ecu_config_calcdata_setup_air_calc_model_source_t;

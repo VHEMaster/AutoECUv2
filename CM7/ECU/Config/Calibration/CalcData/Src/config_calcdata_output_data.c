@@ -42,6 +42,25 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_IAT_ALPHA_BLENDING
         {
+            .data_failsafe = { .value = 1.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_13,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IAT_DIRECT_INFLUENCE
+        {
             .data_failsafe = { .value = 0.0f },
             .variations = 2,
             .variants = {

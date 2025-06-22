@@ -116,8 +116,9 @@ void calcdata_inputs_calc_cycle_charge(ecu_core_ctx_t *ctx)
   ecu_core_runtime_banked_source_bank_air_calc_ctx_t *air_calc_ctx;
   const ecu_core_runtime_value_ctx_t *iat_value;
   const ecu_core_runtime_value_ctx_t *input_value;
+  const ecu_core_runtime_value_ctx_t *iat_influence;
   ecu_core_runtime_value_ctx_t output_value;
-  float air_density_curr;
+  float air_density;
   float air_density_norm;
   float cy_displacement_cc;
 
@@ -143,25 +144,35 @@ void calcdata_inputs_calc_cycle_charge(ecu_core_ctx_t *ctx)
 
         air_density_norm = math_calc_air_density_mgcc(air_calc_model->normal_conditions.air_temperature,
             air_calc_model->normal_conditions.absolute_pressure);
-        if(iat_value->valid) {
-          air_density_curr = math_calc_air_density_mgcc(iat_value->value,
-              air_calc_model->normal_conditions.absolute_pressure);
-        } else {
-          air_density_curr = air_density_norm;
+
+        switch(source_ptr->iat_influence.direct_type) {
+          case CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_RECALC:
+            if(iat_value->valid) {
+              air_density = math_calc_air_density_mgcc(iat_value->value,
+                  air_calc_model->normal_conditions.absolute_pressure);
+            } else {
+              air_density = air_density_norm;
+            }
+            break;
+          case CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_TABLE:
+            air_density = air_density_norm;
+            iat_influence = &bank_ctx->outputs[CALCDATA_OUTPUT_IAT_DIRECT_INFLUENCE].variants[source_ptr->iat_influence.direct_table_variant];
+            if(iat_influence->valid) {
+              air_density *= iat_influence->value;
+            }
+            break;
+          case CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_NONE:
+          default:
+            air_density = air_density_norm;
+            break;
         }
 
         if(input_value->valid) {
           switch(source_ptr->model) {
             case CALCDATA_AIR_CALC_MODEL_SOURCE_MAP:
             case CALCDATA_AIR_CALC_MODEL_SOURCE_TPS:
-              output_value.value = input_value->value * air_density_curr * cy_displacement_cc;
-              output_value.valid = true;
-
-              air_calc_ctx->active_index = i;
-              air_calc_ctx->active_model = source_ptr->model;
-              break;
             case CALCDATA_AIR_CALC_MODEL_SOURCE_MAF:
-              output_value.value = input_value->value * air_density_norm * cy_displacement_cc;
+              output_value.value = input_value->value * air_density * cy_displacement_cc;
               output_value.valid = true;
 
               air_calc_ctx->active_index = i;
