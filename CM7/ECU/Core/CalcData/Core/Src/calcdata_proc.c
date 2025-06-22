@@ -383,29 +383,30 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
         }
 
       }
+
+      if(banks_equal) {
+        for(ecu_bank_t b = 1; b < banks_count; b++) {
+          if(dests[b]) {
+            *dests[b] = output_value[0];
+          }
+        }
+      }
+
+      if(banks_output != NULL) {
+        if(banks_equal) {
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            banks_output[b] = output_value[0];
+          }
+        } else {
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            banks_output[b] = output_value[b];
+          }
+        }
+      }
+
       BREAK_IF(variant < CALCDATA_OUTPUT_VARIANTED_ITEM_MAX);
     }
   } while(0);
-
-  if(banks_equal) {
-    for(ecu_bank_t b = 1; b < banks_count; b++) {
-      if(dests[b]) {
-        *dests[b] = output_value[0];
-      }
-    }
-  }
-
-  if(banks_output != NULL) {
-    if(banks_equal) {
-      for(ecu_bank_t b = 0; b < banks_count; b++) {
-        banks_output[b] = output_value[0];
-      }
-    } else {
-      for(ecu_bank_t b = 0; b < banks_count; b++) {
-        banks_output[b] = output_value[b];
-      }
-    }
-  }
 
   return err;
 }

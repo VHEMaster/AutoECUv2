@@ -17,7 +17,7 @@
 typedef struct {
     const ecu_core_runtime_value_ctx_t *sensors_aps[ECU_CONFIG_IO_APS_MAX];
     const ecu_core_runtime_value_ctx_t *sensors_ect[ECU_CONFIG_IO_ECT_MAX];
-    const ecu_core_runtime_value_ctx_t *sensors_ckp[ECU_CONFIG_IO_CMP_MAX];
+    const ecu_core_runtime_value_ctx_t *sensors_ckp[ECU_CONFIG_IO_CKP_MAX];
     const ecu_core_runtime_value_ctx_t *sensors_ops[ECU_CONFIG_IO_OPS_MAX];
     const ecu_core_runtime_value_ctx_t *sensors_ots[ECU_CONFIG_IO_OTS_MAX];
     const ecu_core_runtime_value_ctx_t *sensors_vss[ECU_CONFIG_IO_VSS_MAX];
