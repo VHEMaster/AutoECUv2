@@ -37,7 +37,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 
     if(input_cycle_charge->valid /* && input_inj_phase->valid && input_inj_afr->valid */) {
 
-      value_mass = 0.0f;
+      value_mass = value_cycle_charge / value_afr;
 
       output_ptr->write[bank].allowed = true;
       output_ptr->write[bank].injection_mass = value_mass;
