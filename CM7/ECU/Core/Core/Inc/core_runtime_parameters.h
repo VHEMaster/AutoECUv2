@@ -164,8 +164,8 @@ typedef struct {
     }read;
     struct {
         bool allowed;
-        float ignition_advance_banked[ECU_BANK_MAX];
-    }write;
+        float ignition_advance;
+    }write[ECU_BANK_MAX];
     bool read_valid;
     bool write_valid;
 }ecu_core_runtime_global_parameters_timing_ignition_ctx_t;
@@ -173,7 +173,7 @@ typedef struct {
 typedef struct {
     struct {
         struct {
-            float phase;
+            float phase_mean;
             float lag_time;
             float time_inject_mean;
             float dutycycle_max;
@@ -184,8 +184,8 @@ typedef struct {
     struct {
         bool allowed;
         float injection_phase;
-        float injection_mass_banked[ECU_BANK_MAX];
-    }write;
+        float injection_mass;
+    }write[ECU_BANK_MAX];
     bool read_valid;
     bool write_valid;
 }ecu_core_runtime_global_parameters_timing_injection_ctx_t;

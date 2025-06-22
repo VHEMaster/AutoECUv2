@@ -48,8 +48,9 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_sensor_map_t map_instances[ECU_BANK_MAX];
   ecu_bank_t bank_cy;
 
-  bool input_valid, input_allowed;
-  float input_injection_phase;
+  bool input_valid;
+  bool input_allowed_b[ECU_BANK_MAX];
+  float input_injection_phase_b[ECU_BANK_MAX];
   float input_injection_mass_b[ECU_BANK_MAX];
 
   float lag_time_gr;
@@ -58,10 +59,11 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float degrees_per_cycle;
   float enrichment_late_phase_gr;
   float injection_time_gr_mean;
+  float injection_phase_gr_mean;
 
 
   float position_cy;
-  float injection_phase_gr;
+  float injection_phase_gr_b[ECU_BANK_MAX];
   float injection_phase_gr_requested;
   float injection_phase_gr_accept_vs_requested;
   float injection_phase_gr_adder;
@@ -131,16 +133,19 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
         crankshaft->sensor_data.previous.timestamp);
 
-    input_valid = runtime->input.valid;
-    input_allowed = runtime->input.allowed;
-    input_injection_phase = runtime->input.injection_phase;
+    us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
+    us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
-    if(input_allowed) {
-      for(ecu_bank_t b = 0; b < banks_count; b++) {
-        input_injection_mass_b[b] = runtime->input.injection_mass_banked[b];
+    input_valid = runtime->input_valid;
+    for(ecu_bank_t b = 0; b < banks_count; b++) {
+      input_allowed_b[b] = runtime->input_banked[b].allowed;
+      if(input_allowed_b[b]) {
+        input_injection_phase_b[b] = runtime->input_banked[b].injection_phase;
+        input_injection_mass_b[b] = runtime->input_banked[b].injection_mass;
+      } else {
+        input_injection_phase_b[b] = 360.0f;
+        input_injection_mass_b[b] = 0.0f;
       }
-    } else {
-      memset(input_injection_mass_b, 0, sizeof(input_injection_mass_b));
     }
     runtime->signal_prepare_advance = signal_prepare_advance;
 
@@ -180,41 +185,42 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             enrichment_late_phase_gr = 0;
           }
 
-          injection_phase_gr_requested = input_injection_phase + group_config->phase_add + injection_phase_gr_add_rpm;
-          runtime_gr->phase_requested = injection_phase_gr_requested;
           runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
 
-          us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
-          us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            injection_phase_gr_requested = input_injection_phase_b[b] + group_config->phase_add + injection_phase_gr_add_rpm;
+            runtime_gr->phase_requested_banked[b] = injection_phase_gr_requested;
 
-          slew_adder_valid = false;
-          if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
-            injection_phase_gr = runtime_gr->phase;
-            injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr;
-            phase_slew_rate = group_config->phase_slew_rate;
-            if(injection_phase_gr_accept_vs_requested > 0.0f) {
-              injection_phase_gr_adder = phase_slew_rate;
-            } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
-              injection_phase_gr_adder = -phase_slew_rate;
-            } else {
-              injection_phase_gr_adder = 0.0f;
-            }
-            injection_phase_gr_adder *= crankshaft_signal_delta / crankshaft_period;
-
-            if(injection_phase_gr_adder == injection_phase_gr_adder) {
-              if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
-                  (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
-                injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+            slew_adder_valid = false;
+            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+              injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
+              injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
+              phase_slew_rate = group_config->phase_slew_rate;
+              if(injection_phase_gr_accept_vs_requested > 0.0f) {
+                injection_phase_gr_adder = phase_slew_rate;
+              } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
+                injection_phase_gr_adder = -phase_slew_rate;
+              } else {
+                injection_phase_gr_adder = 0.0f;
               }
-              slew_adder_valid = true;
+              injection_phase_gr_adder *= crankshaft_signal_delta / crankshaft_period;
+
+              if(injection_phase_gr_adder == injection_phase_gr_adder) {
+                if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
+                    (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
+                  injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+                }
+                slew_adder_valid = true;
+              }
+            }
+
+            if(slew_adder_valid) {
+              injection_phase_gr_b[b] += injection_phase_gr_adder;
+            } else {
+              injection_phase_gr_b[b] = injection_phase_gr_requested;
             }
           }
 
-          if(slew_adder_valid) {
-            injection_phase_gr += injection_phase_gr_adder;
-          } else {
-            injection_phase_gr = injection_phase_gr_requested;
-          }
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             performance_mult_gr_b[b] = 1.0f;
@@ -249,6 +255,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             }
           }
           injection_time_gr_mean = 0;
+          injection_phase_gr_mean = 0;
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             performance_initial_us_gr_b[b] = group_config->performance_static;
             performance_initial_us_gr_b[b] *= 1.6666667e-5f;
@@ -275,11 +282,14 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               injection_time_gr_b[b] = 0.0f;
             }
             injection_time_gr_mean += injection_time_gr_b[b];
+            injection_phase_gr_mean += injection_phase_gr_b[b];
+            runtime_gr->phase_banked[b] = injection_phase_gr_b[b];
           }
           injection_time_gr_mean /= banks_count;
+          injection_phase_gr_mean /= banks_count;
 
           runtime_gr->time_inject_mean = injection_time_gr_mean;
-          runtime_gr->phase = injection_phase_gr;
+          runtime_gr->phase_mean = injection_phase_gr_mean;
 
           runtime_gr->initialized = true;
 
@@ -348,8 +358,9 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                   }
                 }
 
+                bank_cy = ctx->calibration->cylinders.cylinders[cy].bank;
                 ignition_acceptance = &ctx->runtime.cylinders[cy].ignition_acceptance;
-                injection_phase_cy = injection_phase_gr + injection_phase_cy_add;
+                injection_phase_cy = injection_phase_gr_b[bank_cy] + injection_phase_cy_add;
                 crankshaft_data = &ctx->runtime.cylinders[cy].sequentialed[sequentialed_mode].crankshaft_data;
                 position_cy = crankshaft_data->sensor_data.current_position;
                 output_valid = false;
@@ -358,7 +369,6 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                 lag_time_cy *= cy_config->performance_dynamic_mul;
                 lag_time_cy += cy_config->performance_dynamic_add;
 
-                bank_cy = ctx->calibration->cylinders.cylinders[cy].bank;
                 injection_time_cy = injection_time_gr_b[bank_cy];
                 injection_time_cy *= cy_config->performance_static_mul;
                 dutycycle_period = crankshaft->sensor_data.period;
@@ -457,7 +467,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
                       runtime_cy->scheduled = true;
 
-                      ignition_acceptance->ignition_advance = ctx->runtime.global.ignition.input.ignition_advance_banked[bank_cy];
+                      ignition_acceptance->ignition_advance = ctx->runtime.global.ignition.input_banked[bank_cy].ignition_advance;
                       ignition_acceptance->valid = true;
                     }
                   } else {

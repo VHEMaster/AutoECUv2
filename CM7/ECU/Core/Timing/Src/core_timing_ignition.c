@@ -20,6 +20,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
+  uint32_t banks_count;
   uint32_t cylinders_count;
 
   ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
@@ -34,7 +35,8 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   const ecu_config_ignition_group_setup_t *group_config;
   const timing_data_crankshaft_t *crankshaft;
 
-  bool input_valid, input_allowed;
+  bool input_valid;
+  bool input_allowed_b[ECU_BANK_MAX];
   bool use_ignition_acceptance;
 
   float signal_prepare_advance;
@@ -78,6 +80,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   bool slew_adder_valid;
 
   do {
+    banks_count = ctx->runtime.global.banks_count;
     cylinders_count = ctx->runtime.global.cylinders_count;
     config = &ctx->calibration->ignition;
     runtime = &ctx->runtime.global.ignition;
@@ -98,8 +101,10 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
         crankshaft->sensor_data.previous.timestamp);
 
-    input_valid = runtime->input.valid;
-    input_allowed = runtime->input.allowed;
+    input_valid = runtime->input_valid;
+    for(ecu_bank_t b = 0; b < banks_count; b++) {
+      input_allowed_b[b]= runtime->input_banked[b].allowed;
+    }
     use_ignition_acceptance = config->use_ignition_acceptance;
     runtime->signal_prepare_advance = signal_prepare_advance;
 
@@ -123,14 +128,14 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
             if(ignition_acceptance_gr_cy->valid) {
               runtime_gr->advance_input_cy[cy] = ignition_acceptance_gr_cy->ignition_advance;
             } else {
-              runtime_gr->advance_input_cy[cy] = runtime->input.ignition_advance_banked[bank_cy];
+              runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance;
             }
           }
         }
       } else {
         for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
           runtime_gr = &runtime->groups[gr];
-          runtime_gr->advance_input_cy[cy] = runtime->input.ignition_advance_banked[bank_cy];
+          runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance;
         }
       }
     }
@@ -266,6 +271,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
 
           if(!needtoclear) {
             for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+              bank_cy = ctx->engine_config->calibration.cylinders.cylinders[cy].bank;
               runtime_cy = &runtime_gr->cylinders[cy];
               ignition_acceptance_gr_cy = &runtime_cy->ignition_acceptance;
               if(!group_config->cylinders[cy].disabled) {
@@ -318,7 +324,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
                           (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
                       time_to_ignite = time_to_saturate + saturation_time;
 
-                      if(input_allowed) {
+                      if(input_allowed_b[bank_cy]) {
                         err = core_timing_pulse_schedule(ctx, group_config->cylinders[cy].output_pin,
                             time_to_saturate, time_to_ignite);
                         BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

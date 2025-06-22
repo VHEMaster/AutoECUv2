@@ -85,7 +85,7 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
   ecu_core_runtime_global_injection_ctx_t *dst_ctx = &ctx->runtime.global.injection;
 
   for(int i = 0; i < ECU_CONFIG_INJECTION_GROUP_MAX; i++) {
-    timing_ctx->read.groups[i].phase = dst_ctx->groups[i].phase;
+    timing_ctx->read.groups[i].phase_mean = dst_ctx->groups[i].phase_mean;
     timing_ctx->read.groups[i].lag_time = dst_ctx->groups[i].lag_time;
     timing_ctx->read.groups[i].time_inject_mean = dst_ctx->groups[i].time_inject_mean;
     timing_ctx->read.groups[i].dutycycle_max = dst_ctx->groups[i].dutycycle_max;
@@ -105,24 +105,25 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.ignition;
   ecu_core_runtime_global_parameters_timing_ignition_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.ignition;
-  ecu_core_runtime_global_ignition_input_ctx_t *dst_ctx = &ctx->runtime.global.ignition.input;
+  ecu_core_runtime_global_ignition_input_ctx_t *dst_ctx;
 
 
   if(simulated_ctx->write_valid) {
-    timing_ctx->write = simulated_ctx->write;
+    memcpy(timing_ctx->write, simulated_ctx->write, sizeof(*timing_ctx->write));
     timing_ctx->write_valid = true;
   } else {
     if(timing_ctx->write_valid) {
-      simulated_ctx->write = timing_ctx->write;
+      memcpy(simulated_ctx->write, timing_ctx->write, sizeof(*simulated_ctx->write));
     }
   }
 
   if(timing_ctx->write_valid) {
-    dst_ctx->allowed = timing_ctx->write.allowed;
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
-      dst_ctx->ignition_advance_banked[b] = timing_ctx->write.ignition_advance_banked[b];
+      dst_ctx = &ctx->runtime.global.ignition.input_banked[b];
+      dst_ctx->allowed = timing_ctx->write[b].allowed;
+      dst_ctx->ignition_advance = timing_ctx->write[b].ignition_advance;
     }
-    dst_ctx->valid = true;
+    ctx->runtime.global.ignition.input_valid = true;
     timing_ctx->write_valid = false;
   }
 }
@@ -131,24 +132,25 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
   ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.injection;
   ecu_core_runtime_global_parameters_timing_injection_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.injection;
-  ecu_core_runtime_global_injection_input_ctx_t *dst_ctx = &ctx->runtime.global.injection.input;
+  ecu_core_runtime_global_injection_input_ctx_t *dst_ctx;
 
   if(simulated_ctx->write_valid) {
-    timing_ctx->write = simulated_ctx->write;
+    memcpy(timing_ctx->write, simulated_ctx->write, sizeof(*timing_ctx->write));
     timing_ctx->write_valid = true;
   } else {
     if(timing_ctx->write_valid) {
-      simulated_ctx->write = timing_ctx->write;
+      memcpy(simulated_ctx->write, timing_ctx->write, sizeof(*simulated_ctx->write));
     }
   }
 
   if(timing_ctx->write_valid) {
-    dst_ctx->allowed = timing_ctx->write.allowed;
-    dst_ctx->injection_phase = timing_ctx->write.injection_phase;
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
-      dst_ctx->injection_mass_banked[b] = timing_ctx->write.injection_mass_banked[b];
+      dst_ctx = &ctx->runtime.global.injection.input_banked[b];
+      dst_ctx->allowed = timing_ctx->write[b].allowed;
+      dst_ctx->injection_mass = timing_ctx->write[b].injection_mass;
+      dst_ctx->injection_phase = timing_ctx->write[b].injection_phase;
     }
-    dst_ctx->valid = true;
+    ctx->runtime.global.injection.input_valid = true;
     timing_ctx->write_valid = false;
   }
 }

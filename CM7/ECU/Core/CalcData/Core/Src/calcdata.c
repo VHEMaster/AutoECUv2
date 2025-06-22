@@ -70,6 +70,8 @@ STATIC_INLINE void calcdata_process(ecu_core_ctx_t *ctx)
 
   core_calcdata_inputs_process(ctx, CORE_CALCDATA_INPUTS_STAGE_3);
   core_calcdata_outputs_process(ctx, CORE_CALCDATA_OUTPUTS_STAGE_3);
+
+  core_calcdata_outputs_process(ctx, CORE_CALCDATA_OUTPUTS_STAGE_4);
 }
 
 STATIC_INLINE void calcdata_inputs_read(ecu_core_ctx_t *ctx)

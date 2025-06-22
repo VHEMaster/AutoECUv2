@@ -81,9 +81,10 @@ typedef struct {
     bool initialized;
     ecu_core_runtime_cylinder_sequentialed_type_t sequentialed_mode;
 
+    float phase_banked[ECU_BANK_MAX];
+    float phase_requested_banked[ECU_BANK_MAX];
+    float phase_mean;
     float lag_time;
-    float phase;
-    float phase_requested;
     float time_inject_mean;
     float dutycycle_max;
     float dutycycle_mean;
@@ -93,13 +94,13 @@ typedef struct {
 }ecu_core_runtime_global_injection_group_ctx_t;
 
 typedef struct {
-    bool valid;
     bool allowed;
-    float ignition_advance_banked[ECU_BANK_MAX];
+    float ignition_advance;
 }ecu_core_runtime_global_ignition_input_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_ignition_input_ctx_t input;
+    bool input_valid;
+    ecu_core_runtime_global_ignition_input_ctx_t input_banked[ECU_BANK_MAX];
 
     float power_voltage;
     float signal_prepare_advance;
@@ -110,14 +111,14 @@ typedef struct {
 }ecu_core_runtime_global_ignition_ctx_t;
 
 typedef struct {
-    bool valid;
     bool allowed;
     float injection_phase;
-    float injection_mass_banked[ECU_BANK_MAX];
+    float injection_mass;
 }ecu_core_runtime_global_injection_input_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_injection_input_ctx_t input;
+    bool input_valid;
+    ecu_core_runtime_global_injection_input_ctx_t input_banked[ECU_BANK_MAX];
 
     float power_voltage;
     float signal_prepare_advance;
