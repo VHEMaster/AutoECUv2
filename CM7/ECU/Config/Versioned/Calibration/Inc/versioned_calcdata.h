@@ -21,6 +21,7 @@ typedef enum {
 typedef enum {
   CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1 = 0,
   CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
+  CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3,
   CALCDATA_RELATION_INPUT_VARIANTED_ITEM_MAX
 }ecu_config_calcdata_relation_input_varianted_index_t;
 
@@ -88,7 +89,15 @@ typedef enum {
   CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR,
   CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME,
   CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME,
+
   CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR,
+
+  CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_L,
+  CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_H,
+  CALCDATA_OUTPUT_IDLE_TARGET_RPM,
+  CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE,
+  CALCDATA_OUTPUT_IDLE_TARGET_MASS_AIR_FLOW,
+  CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE,
 
   CALCDATA_OUTPUT_MAX,
 }ecu_config_calcdata_output_data_index_t;
@@ -128,6 +137,15 @@ typedef enum {
   CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_TABLE,
   CALCDATA_IAT_DIRECT_INFLUENCE_TYPE_MAX,
 }ecu_config_calcdata_setup_air_calc_model_iat_direct_influence_source_t;
+
+typedef enum {
+  CALCDATA_IDLE_POS_FLAG_MODE_NONE = 0,
+  CALCDATA_IDLE_POS_FLAG_MODE_TPS,
+  CALCDATA_IDLE_POS_FLAG_MODE_APS,
+  CALCDATA_IDLE_POS_FLAG_MODE_MAP,
+  CALCDATA_IDLE_POS_FLAG_MODE_MAF,
+  CALCDATA_IDLE_POS_FLAG_MODE_MAX
+}ecu_config_calcdata_setup_idle_pos_flag_mode_t;
 
 typedef struct {
     ecu_config_calcdata_relation_input_source_index_t source;
@@ -223,9 +241,16 @@ typedef struct {
 }ecu_config_calcdata_setup_air_calc_model_t;
 
 typedef struct {
+    ecu_config_calcdata_setup_idle_pos_flag_mode_t pos_flag_mode;
+    float pos_flag_thr_l;
+    float pos_flag_thr_h;
+}ecu_config_calcdata_setup_idle_t;
+
+typedef struct {
     ecu_config_calcdata_setup_iat_t iat_model;
     ecu_config_calcdata_setup_ect_t ect_model;
     ecu_config_calcdata_setup_air_calc_model_t air_calc_model;
+    ecu_config_calcdata_setup_idle_t idle;
     float runup_rpm_threshold_low;
     float runup_rpm_threshold_high;
     float startup_large_revs;

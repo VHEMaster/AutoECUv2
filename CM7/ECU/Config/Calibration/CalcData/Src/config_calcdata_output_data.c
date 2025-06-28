@@ -354,7 +354,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME
         {
-            .data_failsafe = { .value = 1.0f },
+            .data_failsafe = { .value = 0.0f },
             .variations = 1,
             .variants = {
                 {
@@ -372,6 +372,120 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_25,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_L
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_26,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_H
+        {
+            .data_failsafe = { .value = 1000.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_27,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_TARGET_RPM
+        {
+            .data_failsafe = { .value = 10.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_28,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE
+        {
+            .data_failsafe = { .value = 20.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_29,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_TARGET_MASS_AIR_FLOW
+        {
+            .data_failsafe = { .value = 10.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_30,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE
     }
 };
 

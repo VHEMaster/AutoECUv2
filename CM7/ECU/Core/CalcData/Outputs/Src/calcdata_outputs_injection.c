@@ -14,6 +14,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   time_float_s_t runned_time_overall = ctx->runtime.global.misc.runned_time_overall;
   time_float_s_t running_time_current = ctx->runtime.global.misc.running_time_current;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
+  bool idle_flag = ctx->runtime.global.misc.idle_flag;
   bool turning_flag = ctx->timing_data.crankshaft.sensor_data.validity >= CKP_DATA_VALID;
 
   float startup_large_revs = ctx->calibration->calcdata.setup.startup_large_revs;
@@ -33,6 +34,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 
   const ecu_core_runtime_value_ctx_t *runup_inj_small_charge;
   const ecu_core_runtime_value_ctx_t *runup_inj_large_charge;
+  const ecu_core_runtime_value_ctx_t *runup_inj_warmup_idle_corr;
 
   const ecu_core_runtime_value_ctx_t *input_inj_afr;
   const ecu_core_runtime_value_ctx_t *input_cycle_charge;
@@ -83,6 +85,8 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
     runup_inj_cold_corr = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR].variants[output_variant];
     runup_inj_cold_time = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME].variants[output_variant];
 
+    runup_inj_warmup_idle_corr = &runtime_banked->outputs[CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR].variants[output_variant];
+
     if(startup_revs_counter < startup_large_revs) {
       output_inj_mass_start = runup_inj_large_charge->value;
     } else if(startup_revs_counter >= startup_transition_reset) {
@@ -109,6 +113,9 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
       if(time_blending == time_blending && time_blending < 1.0f) {
         cold_inj_coff = runup_inj_cold_corr->value * (1.0f - time_blending);
         output_inj_mass_run *= cold_inj_coff + 1.0f;
+      }
+      if(idle_flag) {
+        output_inj_mass_run *= runup_inj_warmup_idle_corr->value + 1.0f;
       }
 
       time_blending = running_time_current / runup_inj_duration->value;

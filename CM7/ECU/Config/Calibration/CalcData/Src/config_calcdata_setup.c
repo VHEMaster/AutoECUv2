@@ -93,6 +93,11 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
             }, //CALCDATA_AIR_CALC_MODEL_INDEX_4
         },
     },
+    .idle = {
+        .pos_flag_mode = CALCDATA_IDLE_POS_FLAG_MODE_APS,
+        .pos_flag_thr_l = 0.1f,
+        .pos_flag_thr_h = 0.1f,
+    },
     .runup_rpm_threshold_low = 400.0f,
     .runup_rpm_threshold_high = 600.0f,
     .startup_large_revs = 4,

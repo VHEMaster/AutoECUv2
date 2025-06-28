@@ -13,16 +13,39 @@
 
 void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
 {
-  time_us_t now = time_now_us();
-  time_us_t time_delta = time_diff(now, ctx->runtime.global.misc.calc_tick_last);
-  time_float_s_t runned_time_overall = ctx->runtime.global.misc.runned_time_overall;
-  time_float_s_t running_time_current = ctx->runtime.global.misc.running_time_current;
+  const ecu_core_runtime_banked_source_ctx_t *ctx_source = &ctx->runtime.banked.source;
+  const ecu_config_calcdata_t *ctx_cal_calcdata = &ctx->calibration->calcdata;
+  ecu_core_runtime_global_ctx_t *ctx_rt_global = &ctx->runtime.global;
 
+  time_us_t now = time_now_us();
+  time_us_t time_delta = time_diff(now, ctx_rt_global->misc.calc_tick_last);
+  time_float_s_t runned_time_overall = ctx_rt_global->misc.runned_time_overall;
+  time_float_s_t running_time_current = ctx_rt_global->misc.running_time_current;
+
+  const uint32_t banks_count = ctx_rt_global->banks_count;
   const ckp_data_t *ckp_data = &ctx->timing_data.crankshaft.sensor_data;
-  float runup_rpm_th_l = ctx->calibration->calcdata.setup.runup_rpm_threshold_low;
-  float runup_rpm_th_h = ctx->calibration->calcdata.setup.runup_rpm_threshold_high;
-  bool *runup_flag_ptr = &ctx->runtime.global.misc.runup_flag;
+  float runup_rpm_th_l = ctx_cal_calcdata->setup.runup_rpm_threshold_low;
+  float runup_rpm_th_h = ctx_cal_calcdata->setup.runup_rpm_threshold_high;
+  const ecu_core_runtime_value_ctx_t *idle_pos_value[ECU_BANK_MAX];
+  const ecu_core_runtime_value_ctx_t *rpm_thr_flag_l;
+  const ecu_core_runtime_value_ctx_t *rpm_thr_flag_h;
+  const ecu_core_runtime_value_ctx_t *rpm_val;
+
+  bool *rpm_idle_flag_ptr = &ctx_rt_global->misc.rpm_idle_flag;
+  bool *pos_idle_flag_ptr = &ctx_rt_global->misc.pos_idle_flag;
+  bool *runup_flag_ptr = &ctx_rt_global->misc.runup_flag;
+  bool *idle_flag_ptr = &ctx_rt_global->misc.idle_flag;
+  bool *econ_idle_flag_ptr = &ctx_rt_global->misc.econ_idle_flag;
+
+  bool rpm_idle_flag = *rpm_idle_flag_ptr;
+  bool pos_idle_flag = *pos_idle_flag_ptr;
   bool runup_flag = *runup_flag_ptr;
+  bool idle_flag = *idle_flag_ptr;
+  bool econ_idle_flag = *econ_idle_flag_ptr;
+  bool t_pos_idle_flag;
+  bool t_rpm_idle_flag;
+  float pos_idle_flag_cmp_value;
+  float rpm_idle_flag_cmp_value;
 
   if(ckp_data->validity >= CKP_DATA_VALID) {
     if(ckp_data->rpm > runup_rpm_th_h) {
@@ -39,13 +62,110 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
     runned_time_overall += time_delta * TIME_S_IN_US;
   } else {
     running_time_current = 0.0f;
+    idle_flag = false;
+    rpm_idle_flag = false;
+    econ_idle_flag = false;
   }
 
-  ctx->runtime.global.misc.runned_time_overall = runned_time_overall;
-  ctx->runtime.global.misc.running_time_current = running_time_current;
-  ctx->runtime.global.misc.calc_tick_last = now;
+  switch(ctx_cal_calcdata->setup.idle.pos_flag_mode) {
+    case CALCDATA_IDLE_POS_FLAG_MODE_TPS:
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS].value;
+      }
+      break;
+    case CALCDATA_IDLE_POS_FLAG_MODE_APS:
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS].value;
+      }
+      break;
+    case CALCDATA_IDLE_POS_FLAG_MODE_MAP:
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP].value;
+      }
+      break;
+    case CALCDATA_IDLE_POS_FLAG_MODE_MAF:
+      for(ecu_bank_t b = 0; b < banks_count; b++) {
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF].value;
+      }
+      break;
+    case CALCDATA_IDLE_POS_FLAG_MODE_NONE:
+    default:
+      memset(idle_pos_value, 0, sizeof(idle_pos_value));
+      break;
+  }
 
+  t_pos_idle_flag = true;
+  for(ecu_bank_t b = 0; b < banks_count; b++) {
+    if(idle_pos_value[b] != NULL && idle_pos_value[b]->valid) {
+      if(pos_idle_flag) {
+        pos_idle_flag_cmp_value = ctx_cal_calcdata->setup.idle.pos_flag_thr_h;
+      } else {
+        pos_idle_flag_cmp_value = ctx_cal_calcdata->setup.idle.pos_flag_thr_l;
+      }
+      if(idle_pos_value[b]->value > pos_idle_flag_cmp_value) {
+        t_pos_idle_flag = false;
+        break;
+      }
+    } else {
+      t_pos_idle_flag = false;
+      break;
+    }
+  }
+  pos_idle_flag = t_pos_idle_flag;
+
+  t_rpm_idle_flag = true;
+  for(ecu_bank_t b = 0; b < banks_count; b++) {
+    rpm_val = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP].value;
+    rpm_thr_flag_l = NULL;
+    rpm_thr_flag_h = NULL;
+    for(ecu_config_calcdata_output_varianted_index_t v = 0;
+        v < ctx_cal_calcdata->output_data.items[CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_L].variations; v++) {
+      rpm_thr_flag_l = &ctx_source->banks[b].outputs[CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_L].variants[v];
+      if(rpm_thr_flag_l->valid) {
+        break;
+      } else {
+        rpm_thr_flag_l = NULL;
+      }
+    }
+    for(ecu_config_calcdata_output_varianted_index_t v = 0;
+        v < ctx_cal_calcdata->output_data.items[CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_H].variations; v++) {
+      rpm_thr_flag_h = &ctx_source->banks[b].outputs[CALCDATA_OUTPUT_IDLE_RPM_THR_FLAG_H].variants[v];
+      if(rpm_thr_flag_h->valid) {
+        break;
+      } else {
+        rpm_thr_flag_h = NULL;
+      }
+    }
+
+    if(rpm_val->valid == false || rpm_thr_flag_l == NULL || rpm_thr_flag_h == NULL) {
+      t_rpm_idle_flag = false;
+      break;
+    }
+
+    if(rpm_idle_flag) {
+      rpm_idle_flag_cmp_value = rpm_thr_flag_h->value;
+    } else {
+      rpm_idle_flag_cmp_value = rpm_thr_flag_l->value;
+    }
+    if(rpm_val->value > rpm_idle_flag_cmp_value) {
+      t_rpm_idle_flag = false;
+      break;
+    }
+  }
+  rpm_idle_flag = t_rpm_idle_flag;
+
+  idle_flag = runup_flag && pos_idle_flag && rpm_idle_flag;
+  econ_idle_flag = runup_flag && pos_idle_flag && !rpm_idle_flag;
+
+  ctx_rt_global->misc.runned_time_overall = runned_time_overall;
+  ctx_rt_global->misc.running_time_current = running_time_current;
+  ctx_rt_global->misc.calc_tick_last = now;
+
+  *idle_flag_ptr = idle_flag;
   *runup_flag_ptr = runup_flag;
+  *pos_idle_flag_ptr = pos_idle_flag;
+  *rpm_idle_flag_ptr = rpm_idle_flag;
+  *econ_idle_flag_ptr = econ_idle_flag;
 }
 
 void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)

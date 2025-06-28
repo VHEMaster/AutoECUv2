@@ -20,10 +20,13 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_0,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS
         {
-            .variations = 2,
+            .variations = 3,
             .variants = {
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_16_1,
@@ -31,6 +34,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_1,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_1D_16_31,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP
         {
@@ -42,6 +48,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT
         {
@@ -53,6 +62,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OPS
         {
@@ -64,6 +76,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_OTS
         {
@@ -75,6 +90,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_VSS
         {
@@ -86,6 +104,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN
         {
@@ -97,6 +118,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX
         {
@@ -108,6 +132,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT
         {
@@ -119,6 +146,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_IAT
         {
@@ -130,6 +160,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_2,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF
         {
@@ -141,6 +174,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_3,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP
         {
@@ -152,6 +188,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_4,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS
         {
@@ -163,6 +202,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD
         {
@@ -174,6 +216,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_5,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE
         {
@@ -185,6 +230,9 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                 {
                     .table_index = ECU_CONFIG_TABLE_1D_32_2,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2
+                {
+                    .table_index = ECU_CONFIG_TABLE_NONE,
+                }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
         }, //CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW
     }

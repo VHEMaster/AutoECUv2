@@ -148,6 +148,11 @@ typedef struct {
 
 typedef struct {
     bool runup_flag;
+    bool pos_idle_flag;
+    bool rpm_idle_flag;
+    bool econ_idle_flag;
+    bool idle_flag;
+
     time_float_s_t runned_time_overall;
     time_float_s_t running_time_current;
 
