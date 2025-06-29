@@ -8,6 +8,8 @@
 #include "calcdata_outputs_injection.h"
 #include "config_global.h"
 
+#include "calcdata_proc.h"
+
 void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 {
   const uint32_t banks_count = ctx->runtime.global.banks_count;
@@ -40,7 +42,6 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *input_cycle_charge;
 
   ecu_core_runtime_global_parameters_timing_injection_ctx_t *output_ptr;
-  ecu_config_calcdata_output_varianted_index_t output_variant;
 
   float output_inj_phase;
   float output_inj_mass_run;
@@ -69,23 +70,22 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   }
 
   for(ecu_bank_t bank = 0; bank < banks_count; bank++) {
-    output_variant = CALCDATA_OUTPUT_VARIANTED_ITEM_V1;
     runtime_banked = &ctx->runtime.banked.source.banks[bank];
 
     input_cycle_charge = &runtime_banked->inputs[CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE].value;
-    input_inj_afr = &runtime_banked->outputs[CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO].variants[output_variant];
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO, &input_inj_afr);
 
-    input_inj_phase_run = &runtime_banked->outputs[CALCDATA_OUTPUT_INJECTION_PHASE].variants[output_variant];
-    input_inj_phase_start = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE].variants[output_variant];
-    runup_inj_duration = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION].variants[output_variant];
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_INJECTION_PHASE, &input_inj_phase_run);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE, &input_inj_phase_start);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION, &runup_inj_duration);
 
-    runup_inj_small_charge = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE].variants[output_variant];
-    runup_inj_large_charge = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE].variants[output_variant];
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE, &runup_inj_small_charge);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE, &runup_inj_large_charge);
 
-    runup_inj_cold_corr = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR].variants[output_variant];
-    runup_inj_cold_time = &runtime_banked->outputs[CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME].variants[output_variant];
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR, &runup_inj_cold_corr);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME, &runup_inj_cold_time);
 
-    runup_inj_warmup_idle_corr = &runtime_banked->outputs[CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR].variants[output_variant];
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_WARMUP_IDLE_INJ_CORR, &runup_inj_warmup_idle_corr);
 
     if(startup_revs_counter < startup_large_revs) {
       output_inj_mass_start = runup_inj_large_charge->value;

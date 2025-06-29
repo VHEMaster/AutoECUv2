@@ -76,7 +76,7 @@ static const ecu_config_io_t ecu_calibration_io_config_default = {
               },
 
               .device_stepper = {
-                  ECU_DEVICE_STEPPER_1, //ECU_CONFIG_IO_STEPPER_IDLEVALVE
+                  ECU_DEVICE_NONE, //ECU_CONFIG_IO_STEPPER_IDLEVALVE
               },
               .device_wbls = {
                   ECU_DEVICE_WBLS_1, //ECU_CONFIG_IO_WBLS_PRIMARY

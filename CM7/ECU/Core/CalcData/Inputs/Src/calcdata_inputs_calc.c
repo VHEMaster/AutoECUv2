@@ -394,3 +394,34 @@ void calcdata_inputs_calc_mass_air_flow(ecu_core_ctx_t *ctx)
         CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW, &output_value);
   }
 }
+
+void calcdata_inputs_calc_idle_target_rpm_deviation(ecu_core_ctx_t *ctx)
+{
+  const uint32_t banks_count = ctx->runtime.global.banks_count;
+  ecu_core_runtime_value_ctx_t output_value;
+  const ecu_core_runtime_value_ctx_t *input_rpm;
+  const ecu_core_runtime_value_ctx_t *input_idle_target_rpm;
+  float value;
+
+  for(ecu_bank_t b = 0; b < banks_count; b++) {
+    (void)core_calcdata_proc_get_input_ptr(ctx, b, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP, &input_rpm);
+    (void)core_calcdata_proc_get_output_ptr(ctx, b, CALCDATA_OUTPUT_IDLE_TARGET_RPM, &input_idle_target_rpm);
+
+    if(input_idle_target_rpm->valid && input_rpm->valid) {
+      value = input_rpm->value / input_idle_target_rpm->value;
+      if(value == value) {
+        output_value.value = value;
+        output_value.valid = true;
+      } else {
+        output_value.value = 1.0f;
+        output_value.valid = true;
+      }
+    } else {
+      output_value.value = 1.0f;
+      output_value.valid = true;
+    }
+
+    (void)core_calcdata_proc_set_input(ctx, b,
+        CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION, &output_value);
+  }
+}

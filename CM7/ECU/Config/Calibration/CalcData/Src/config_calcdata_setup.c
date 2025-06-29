@@ -94,6 +94,11 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
         },
     },
     .idle = {
+        .regulator_mode = CALCDATA_IDLE_REGULATOR_ETC,
+        .use_reg_pid_rpm = false,
+        .use_reg_pid_maf = true,
+        .use_ign_pid_rpm = true,
+
         .pos_flag_mode = CALCDATA_IDLE_POS_FLAG_MODE_APS,
         .pos_flag_thr_l = 0.1f,
         .pos_flag_thr_h = 0.1f,

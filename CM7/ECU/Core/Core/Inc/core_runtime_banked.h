@@ -95,8 +95,17 @@ typedef struct {
 }ecu_core_runtime_banked_source_ctx_t;
 
 typedef struct {
+
+}ecu_core_runtime_banked_etc_bank_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_etc_bank_ctx_t banks[ECU_BANK_MAX];
+}ecu_core_runtime_banked_etc_ctx_t;
+
+typedef struct {
     ecu_core_runtime_banked_raw_ctx_t raw;
     ecu_core_runtime_banked_source_ctx_t source;
+    ecu_core_runtime_banked_etc_ctx_t etc;
 }ecu_core_runtime_banked_ctx_t;
 
 #endif /* CORE_CORE_INC_CORE_RUNTIME_BANKED_H_ */

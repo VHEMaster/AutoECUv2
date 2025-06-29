@@ -11,6 +11,8 @@
 
 #include "calcdata_outputs_ignition.h"
 #include "calcdata_outputs_injection.h"
+#include "calcdata_outputs_idle.h"
+#include "calcdata_outputs_etc.h"
 
 void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_outputs_stage_t stage)
 {
@@ -38,6 +40,45 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_TARGET_MASS_AIR_FLOW, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+
+      if(ctx->calibration->calcdata.setup.idle.use_reg_pid_rpm) {
+        switch(ctx->calibration->calcdata.setup.idle.regulator_mode) {
+          case CALCDATA_IDLE_REGULATOR_STEPPER:
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_RPM_P, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_RPM_I, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_RPM_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            break;
+          case CALCDATA_IDLE_REGULATOR_ETC:
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_RPM_P, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_RPM_I, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_RPM_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            break;
+          default:
+            break;
+        }
+      }
+      if(ctx->calibration->calcdata.setup.idle.use_reg_pid_maf) {
+        switch(ctx->calibration->calcdata.setup.idle.regulator_mode) {
+          case CALCDATA_IDLE_REGULATOR_STEPPER:
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_MAF_P, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_MAF_I, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_MAF_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            break;
+          case CALCDATA_IDLE_REGULATOR_ETC:
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_MAF_P, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_MAF_I, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_REG_ETC_PID_MAF_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+            break;
+          default:
+            break;
+        }
+      }
+      if(ctx->calibration->calcdata.setup.idle.use_ign_pid_rpm) {
+        (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_IGN_ADV_PID_RPM_P, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+        (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_IGN_ADV_PID_RPM_I, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+        (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_IGN_ADV_PID_RPM_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      }
+
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_2:
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
@@ -46,8 +87,12 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_INJECTION_PHASE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+
+      calcdata_outputs_idle(ctx);
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_4:
+      calcdata_outputs_etc(ctx);
+
       calcdata_outputs_ignition(ctx);
       calcdata_outputs_injection(ctx);
       break;

@@ -14,5 +14,6 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx);
 void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx);
 void calcdata_inputs_calc_cycle_charge(ecu_core_ctx_t *ctx);
 void calcdata_inputs_calc_mass_air_flow(ecu_core_ctx_t *ctx);
+void calcdata_inputs_calc_idle_target_rpm_deviation(ecu_core_ctx_t *ctx);
 
 #endif /* CORE_CALCDATA_INPUTS_INC_CALCDATA_INPUTS_CALC_H_ */

@@ -309,16 +309,39 @@ INLINE error_t core_calcdata_proc_get_input(ecu_core_ctx_t *ctx, ecu_bank_t bank
   return err;
 }
 
-INLINE error_t core_calcdata_proc_get_output(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+INLINE error_t core_calcdata_proc_get_input_ptr(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_relation_input_source_index_t input_data_index,
+    const ecu_core_runtime_value_ctx_t **value)
+{
+  error_t err = E_OK;
+
+  const ecu_core_runtime_banked_source_bank_input_ctx_t *input_data_item;
+
+  do {
+    BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index];
+
+    *value = input_data_item;
+
+  } while(0);
+
+  return err;
+}
+
+INLINE error_t core_calcdata_proc_get_output_varianted(ecu_core_ctx_t *ctx, ecu_bank_t bank,
     ecu_config_calcdata_output_data_index_t output_data_index,
     ecu_config_calcdata_output_varianted_index_t variant,
     ecu_core_runtime_value_ctx_t *value)
 {
   error_t err = E_OK;
 
-  ecu_core_runtime_value_ctx_t *output_data_value;
+  const ecu_core_runtime_value_ctx_t *output_data_value;
 
   do {
+    BREAK_IF_ACTION(variant >= CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, err = E_PARAM);
     BREAK_IF_ACTION(output_data_index >= CALCDATA_OUTPUT_MAX, err = E_PARAM);
     BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
     BREAK_IF_ACTION(value == NULL, err = E_PARAM);
@@ -326,6 +349,67 @@ INLINE error_t core_calcdata_proc_get_output(ecu_core_ctx_t *ctx, ecu_bank_t ban
     output_data_value = &ctx->runtime.banked.source.banks[bank].outputs[output_data_index].variants[variant];
 
     memcpy(value, output_data_value, sizeof(*value));
+
+  } while(0);
+
+  return err;
+}
+
+INLINE error_t core_calcdata_proc_get_output(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_output_data_index_t output_data_index,
+    ecu_core_runtime_value_ctx_t *value)
+{
+  error_t err = E_OK;
+  uint32_t variants;
+  const ecu_core_runtime_value_ctx_t *output_data_value = NULL;
+
+  do {
+    BREAK_IF_ACTION(output_data_index >= CALCDATA_OUTPUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    variants = ctx->calibration->calcdata.output_data.items[output_data_index].variations;
+    for(ecu_config_calcdata_output_varianted_index_t v = 0; v < variants; v++) {
+      output_data_value = &ctx->runtime.banked.source.banks[bank].outputs[output_data_index].variants[v];
+      if(output_data_value->valid) {
+        break;
+      }
+    }
+
+    if(output_data_value != NULL) {
+      memcpy(value, output_data_value, sizeof(*value));
+    } else {
+      value->valid = false;
+      value->value = ctx->calibration->calcdata.output_data.items[output_data_index].data_failsafe.value;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+INLINE error_t core_calcdata_proc_get_output_ptr(ecu_core_ctx_t *ctx, ecu_bank_t bank,
+    ecu_config_calcdata_output_data_index_t output_data_index,
+    const ecu_core_runtime_value_ctx_t **value)
+{
+  error_t err = E_OK;
+  uint32_t variants;
+  const ecu_core_runtime_value_ctx_t *output_data_value = NULL;
+
+  do {
+    BREAK_IF_ACTION(output_data_index >= CALCDATA_OUTPUT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+
+    variants = ctx->calibration->calcdata.output_data.items[output_data_index].variations;
+    for(ecu_config_calcdata_output_varianted_index_t v = 0; v < variants; v++) {
+      output_data_value = &ctx->runtime.banked.source.banks[bank].outputs[output_data_index].variants[v];
+      if(output_data_value->valid) {
+        break;
+      }
+    }
+
+    *value = output_data_value;
 
   } while(0);
 

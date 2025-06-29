@@ -18,6 +18,7 @@ void core_calcdata_inputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_inputs_
       core_calcdata_inputs_sensors_process(ctx);
       break;
     case CORE_CALCDATA_INPUTS_STAGE_2:
+      calcdata_inputs_calc_idle_target_rpm_deviation(ctx);
       calcdata_inputs_calc_iat_manifold(ctx);
       calcdata_inputs_calc_runup_flag(ctx);
       break;
