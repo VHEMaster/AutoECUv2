@@ -111,6 +111,7 @@ typedef struct {
 
     ecu_config_injection_relation_t voltage_to_performance_dynamic;
     float performance_static;
+    float performance_static_fuel_pressure;
 
     float performance_static_semiseq_mul;
     float performance_static_semiseq_add;
@@ -120,9 +121,12 @@ typedef struct {
     ecu_config_injection_perf_units_t performance_static_units;
     float performance_fuel_mass_per_cc;
 
-    ecu_config_injection_perf_press_source_t performance_fuel_pressure_source;
-    ecu_config_io_map_t performance_fuel_pressure_map_type;
-    float performance_fuel_pressure;
+    float performance_fuelramp_nominal_pressure;
+    ecu_config_injection_perf_press_source_t performance_fuel_pressure_manifold_source;
+    ecu_config_io_map_t performance_fuel_pressure_manifold_io_type;
+    ecu_config_injection_perf_press_source_t performance_fuel_pressure_fuelramp_source;
+    ecu_config_io_map_t performance_fuel_pressure_fuelramp_io_type;
+
 
     float phase_add;
     float phase_slew_rate;

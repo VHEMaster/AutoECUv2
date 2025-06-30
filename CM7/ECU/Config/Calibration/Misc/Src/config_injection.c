@@ -92,6 +92,7 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
             },
             .performance_static = 523.0f,
             .performance_static_units = ECU_CONFIG_INJECTION_GROUP_PERF_UNITS_CC,
+            .performance_static_fuel_pressure = 3.0f,
 
             .performance_static_semiseq_mul = 1.0f,
             .performance_static_semiseq_add = 0.0f,
@@ -101,9 +102,12 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
 
             .performance_fuel_mass_per_cc = 750.0f,
 
-            .performance_fuel_pressure_source = ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE,
-            .performance_fuel_pressure_map_type = ECU_CONFIG_IO_MAP_MANIFOLD,
-            .performance_fuel_pressure = 3.0f,
+            .performance_fuelramp_nominal_pressure = 3.0f,
+            .performance_fuel_pressure_manifold_source = ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE,
+            .performance_fuel_pressure_manifold_io_type = ECU_CONFIG_IO_MAP_MANIFOLD,
+            .performance_fuel_pressure_fuelramp_source = ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE,
+            .performance_fuel_pressure_fuelramp_io_type = ECU_CONFIG_IO_MAP_MANIFOLD,
+
 
             .phase_add = 0.0f,
             .phase_slew_rate = 24.0f,

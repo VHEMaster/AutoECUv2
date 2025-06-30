@@ -44,8 +44,10 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_core_runtime_group_cylinder_injection_ctx_t *runtime_cy;
   ecu_core_runtime_cylinder_ignition_acceptance_ctx_t *ignition_acceptance;
   ecu_cylinder_t cy_opposite;
-  ecu_config_io_map_t map_type;
-  ecu_sensor_map_t map_instances[ECU_BANK_MAX];
+  ecu_config_io_map_t map_type_manifold;
+  ecu_config_io_map_t map_type_fuelramp;
+  ecu_sensor_map_t map_instances_manifold[ECU_BANK_MAX];
+  ecu_sensor_map_t map_instances_fuelramp[ECU_BANK_MAX];
   ecu_bank_t bank_cy;
 
   bool input_valid;
@@ -95,7 +97,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   time_us_t time_to_activate;
   time_us_t time_to_inject;
 
-  map_data_t map_data_b[ECU_BANK_MAX];
+  map_data_t map_data_manifold_b[ECU_BANK_MAX];
+  map_data_t map_data_fuelramp_b[ECU_BANK_MAX];
   float ramp_pressure_gr_b[ECU_BANK_MAX];
   float performance_mult_gr_b[ECU_BANK_MAX];
   float performance_initial_us_gr_b[ECU_BANK_MAX];
@@ -225,28 +228,32 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
-            performance_mult_gr_b[b] = 1.0f;
-            ramp_pressure_gr_b[b] = group_config->performance_fuel_pressure;
+            map_data_manifold_b[b].valid = false;
+            map_data_fuelramp_b[b].valid = false;
           }
-          map_type = group_config->performance_fuel_pressure_map_type;
-          map_instances[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type];
-          if(map_instances[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
-            for(ecu_bank_t b = 0; b < banks_count; b++) {
-              map_instances[b] = banked_config->banks[b].common.sensor_map[map_type];
-            }
-          } else {
-            for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
-              map_instances[b] = map_instances[ECU_BANK_1];
-            }
-          }
-          if(group_config->performance_fuel_pressure_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
-            for(ecu_bank_t b = 0; b < banks_count; b++) {
-              if(map_instances[b] < ECU_SENSOR_MAP_MAX) {
-                err = ecu_sensors_map_get_value(map_instances[b], &map_data_b[b]);
+
+          if(group_config->performance_fuel_pressure_manifold_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+            map_type_manifold = group_config->performance_fuel_pressure_manifold_io_type;
+            map_instances_manifold[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_manifold];
+            if(map_instances_manifold[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
+              for(ecu_bank_t b = 0; b < banks_count; b++) {
+                map_instances_manifold[b] = banked_config->banks[b].common.sensor_map[map_type_manifold];
+                if(map_instances_manifold[b] < ECU_SENSOR_MAP_MAX) {
+                  err = ecu_sensors_map_get_value(map_instances_manifold[b], &map_data_manifold_b[b]);
+                  if(err != E_OK) {
+                    // TODO: error flag
+                  }
+                } else {
+                  // TODO: error flag
+                }
+              }
+            } else {
+              if(map_instances_manifold[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
+                err = ecu_sensors_map_get_value(map_instances_manifold[ECU_BANK_1], &map_data_manifold_b[ECU_BANK_1]);
                 if(err == E_OK) {
-                  if(map_data_b[b].valid) {
-                    ramp_pressure_gr_b[b] = group_config->performance_fuel_pressure + map_data_b[b].manifold_air_pressure - 0.986923f;
-                    performance_mult_gr_b[b] = fast_sqrt(ramp_pressure_gr_b[b] / group_config->performance_fuel_pressure);
+                  for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
+                    map_instances_manifold[b] = map_instances_manifold[ECU_BANK_1];
+                    map_data_manifold_b[b] = map_data_manifold_b[ECU_BANK_1];
                   }
                 } else {
                   // TODO: error flag
@@ -256,6 +263,52 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
               }
             }
           }
+
+          if(group_config->performance_fuel_pressure_fuelramp_source == ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+            map_type_fuelramp = group_config->performance_fuel_pressure_fuelramp_io_type;
+            map_instances_fuelramp[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_fuelramp];
+            if(map_instances_fuelramp[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
+              for(ecu_bank_t b = 0; b < banks_count; b++) {
+                map_instances_fuelramp[b] = banked_config->banks[b].common.sensor_map[map_type_fuelramp];
+                if(map_instances_fuelramp[b] < ECU_SENSOR_MAP_MAX) {
+                  err = ecu_sensors_map_get_value(map_instances_fuelramp[b], &map_data_fuelramp_b[b]);
+                  if(err != E_OK) {
+                    // TODO: error flag
+                  }
+                } else {
+                  // TODO: error flag
+                }
+              }
+            } else {
+              if(map_instances_fuelramp[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
+                err = ecu_sensors_map_get_value(map_instances_fuelramp[ECU_BANK_1], &map_data_fuelramp_b[ECU_BANK_1]);
+                if(err == E_OK) {
+                  for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
+                    map_instances_fuelramp[b] = map_instances_fuelramp[ECU_BANK_1];
+                    map_data_fuelramp_b[b] = map_data_fuelramp_b[ECU_BANK_1];
+                  }
+                } else {
+                  // TODO: error flag
+                }
+              } else {
+                // TODO: error flag
+              }
+            }
+          }
+
+          for(ecu_bank_t b = 0; b < banks_count; b++) {
+            ramp_pressure_gr_b[b] = group_config->performance_fuelramp_nominal_pressure;
+
+            if(map_data_manifold_b[b].valid) {
+              ramp_pressure_gr_b[b] -= map_data_manifold_b[b].manifold_air_pressure - 1.0f;
+            }
+            if(map_data_fuelramp_b[b].valid) {
+              ramp_pressure_gr_b[b] += map_data_fuelramp_b[b].manifold_air_pressure - 1.0f;
+            }
+
+            performance_mult_gr_b[b] = fast_sqrt(ramp_pressure_gr_b[b] / group_config->performance_static_fuel_pressure);
+          }
+
           injection_time_gr_mean = 0;
           injection_phase_gr_mean = 0;
           for(ecu_bank_t b = 0; b < banks_count; b++) {
