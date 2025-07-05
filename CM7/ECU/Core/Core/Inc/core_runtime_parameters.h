@@ -179,6 +179,10 @@ typedef struct {
             float dutycycle_max;
             float dutycycle_mean;
             float enrichment_late_phase;
+
+            float injector_input_pressure_mean;
+            float injector_output_pressure_mean;
+            float injector_pressure_diff_mean;
         }groups[ECU_CONFIG_INJECTION_GROUP_MAX];
     }read;
     struct {

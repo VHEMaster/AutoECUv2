@@ -91,6 +91,10 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
     timing_ctx->read.groups[i].dutycycle_max = dst_ctx->groups[i].dutycycle_max;
     timing_ctx->read.groups[i].dutycycle_mean = dst_ctx->groups[i].dutycycle_mean;
     timing_ctx->read.groups[i].enrichment_late_phase = dst_ctx->groups[i].enrichment_late_phase;
+
+    timing_ctx->read.groups[i].injector_input_pressure_mean = dst_ctx->groups[i].injector_input_pressure_mean;
+    timing_ctx->read.groups[i].injector_output_pressure_mean = dst_ctx->groups[i].injector_output_pressure_mean;
+    timing_ctx->read.groups[i].injector_pressure_diff_mean = dst_ctx->groups[i].injector_pressure_diff_mean;
   }
   timing_ctx->read_valid = true;
 

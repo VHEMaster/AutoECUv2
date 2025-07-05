@@ -30,6 +30,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   bool output_valid;
   uint32_t banks_count;
   uint32_t cylinders_count;
+  float banks_count_r;
 
   sMathInterpolateInput ip_input;
   const ecu_config_injection_t *config;
@@ -107,6 +108,13 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   float injection_mass_gr_b[ECU_BANK_MAX];
   float injection_time_gr_b[ECU_BANK_MAX];
 
+  float injector_input_pressure_gr_b[ECU_BANK_MAX];
+  float injector_output_pressure_gr_b[ECU_BANK_MAX];
+  float injector_pressure_diff_gr_b[ECU_BANK_MAX];
+  float injector_input_pressure_gr_mean;
+  float injector_output_pressure_gr_mean;
+  float injector_pressure_diff_gr_mean;
+
   uint32_t process_update_trigger_counter_gr;
   uint8_t process_update_trigger_counter_gr_1of2;
   bool process_update_trigger = false;
@@ -121,6 +129,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     runtime = &ctx->runtime.global.injection;
     crankshaft = &ctx->timing_data.crankshaft;
     runup_flag = ctx->runtime.global.misc.runup_flag;
+
+    banks_count_r = 1.0f / banks_count;
 
     err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
@@ -191,6 +201,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
           }
 
           runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
+
+          //TODO: implement late phase
 
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             injection_phase_gr_requested = input_injection_phase_b[b] + group_config->phase_add + injection_phase_gr_add_rpm;
@@ -296,18 +308,44 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             }
           }
 
+          injector_input_pressure_gr_mean = 0.0f;
+          injector_output_pressure_gr_mean = 0.0f;
+          injector_pressure_diff_gr_mean = 0.0f;
           for(ecu_bank_t b = 0; b < banks_count; b++) {
-            ramp_pressure_gr_b[b] = group_config->performance_fuelramp_nominal_pressure;
+            float temp_val = group_config->performance_fuelramp_nominal_pressure;
+            ramp_pressure_gr_b[b] = temp_val;
+            injector_input_pressure_gr_b[b] = temp_val;
+            injector_output_pressure_gr_b[b] = 0.0f;
 
-            if(map_data_manifold_b[b].valid) {
-              ramp_pressure_gr_b[b] -= map_data_manifold_b[b].manifold_air_pressure - 1.0f;
-            }
             if(map_data_fuelramp_b[b].valid) {
-              ramp_pressure_gr_b[b] += map_data_fuelramp_b[b].manifold_air_pressure - 1.0f;
+              temp_val = map_data_fuelramp_b[b].manifold_air_pressure;
+              ramp_pressure_gr_b[b] += temp_val - 1.0f;
+              injector_input_pressure_gr_b[b] += temp_val;
+            }
+            if(map_data_manifold_b[b].valid) {
+              temp_val = map_data_manifold_b[b].manifold_air_pressure;
+              ramp_pressure_gr_b[b] -= temp_val - 1.0f;
+              injector_output_pressure_gr_b[b] = temp_val;
             }
 
-            performance_mult_gr_b[b] = fast_sqrt(ramp_pressure_gr_b[b] / group_config->performance_static_fuel_pressure);
+            temp_val = ramp_pressure_gr_b[b];
+            performance_mult_gr_b[b] = fast_sqrt(temp_val / group_config->performance_static_fuel_pressure);
+            injector_pressure_diff_gr_b[b] = temp_val;
+
+            injector_input_pressure_gr_mean += injector_input_pressure_gr_b[b];
+            injector_output_pressure_gr_mean += injector_output_pressure_gr_b[b];
+            injector_pressure_diff_gr_mean += injector_pressure_diff_gr_b[b];
+
+            runtime_gr->injector_input_pressure[b] = injector_input_pressure_gr_b[b];
+            runtime_gr->injector_output_pressure[b] = injector_output_pressure_gr_b[b];
+            runtime_gr->injector_pressure_diff[b] = injector_pressure_diff_gr_b[b];
           }
+          injector_input_pressure_gr_mean *= banks_count_r;
+          injector_output_pressure_gr_mean *= banks_count_r;
+          injector_pressure_diff_gr_mean *= banks_count_r;
+          runtime_gr->injector_input_pressure_mean = injector_input_pressure_gr_mean;
+          runtime_gr->injector_output_pressure_mean = injector_output_pressure_gr_mean;
+          runtime_gr->injector_pressure_diff_mean = injector_pressure_diff_gr_mean;
 
           injection_time_gr_mean = 0;
           injection_phase_gr_mean = 0;
@@ -340,9 +378,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
             injection_phase_gr_mean += injection_phase_gr_b[b];
             runtime_gr->phase_banked[b] = injection_phase_gr_b[b];
           }
-          injection_time_gr_mean /= banks_count;
-          injection_phase_gr_mean /= banks_count;
-
+          injection_time_gr_mean *= banks_count_r;
+          injection_phase_gr_mean *= banks_count_r;
           runtime_gr->time_inject_mean = injection_time_gr_mean;
           runtime_gr->phase_mean = injection_phase_gr_mean;
 

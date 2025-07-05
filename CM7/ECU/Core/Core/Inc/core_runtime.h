@@ -90,6 +90,14 @@ typedef struct {
     float dutycycle_mean;
     float enrichment_late_phase;
 
+    float injector_input_pressure[ECU_BANK_MAX];
+    float injector_output_pressure[ECU_BANK_MAX];
+    float injector_pressure_diff[ECU_BANK_MAX];
+
+    float injector_input_pressure_mean;
+    float injector_output_pressure_mean;
+    float injector_pressure_diff_mean;
+
     ecu_core_runtime_group_cylinder_injection_ctx_t cylinders[ECU_CYLINDER_MAX];
 }ecu_core_runtime_global_injection_group_ctx_t;
 
