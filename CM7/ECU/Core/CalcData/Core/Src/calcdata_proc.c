@@ -293,16 +293,16 @@ INLINE error_t core_calcdata_proc_get_input(ecu_core_ctx_t *ctx, ecu_bank_t bank
 {
   error_t err = E_OK;
 
-  ecu_core_runtime_banked_source_bank_input_ctx_t *input_data_item;
+  const ecu_core_runtime_value_ctx_t *input_data_item;
 
   do {
     BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
     BREAK_IF_ACTION(value == NULL, err = E_PARAM);
 
-    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index];
+    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index].value;
 
-    memcpy(value, &input_data_item->value, sizeof(*value));
+    memcpy(value, input_data_item, sizeof(*value));
 
   } while(0);
 
@@ -315,14 +315,14 @@ INLINE error_t core_calcdata_proc_get_input_ptr(ecu_core_ctx_t *ctx, ecu_bank_t 
 {
   error_t err = E_OK;
 
-  const ecu_core_runtime_banked_source_bank_input_ctx_t *input_data_item;
+  const ecu_core_runtime_value_ctx_t *input_data_item;
 
   do {
     BREAK_IF_ACTION(input_data_index >= CALCDATA_RELATION_INPUT_SOURCE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(bank >= ECU_BANK_MAX, err = E_PARAM);
     BREAK_IF_ACTION(value == NULL, err = E_PARAM);
 
-    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index];
+    input_data_item = &ctx->runtime.banked.source.banks[bank].inputs[input_data_index].value;
 
     *value = input_data_item;
 

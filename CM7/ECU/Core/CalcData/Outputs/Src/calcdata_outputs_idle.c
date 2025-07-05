@@ -36,7 +36,7 @@ void calcdata_outputs_idle(ecu_core_ctx_t *ctx)
     (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW, &input_mass_air_flow);
     (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION, &input_idle_target_rpm_deviation);
 
-
+    //TODO: IMPLEMENT
   }
 
 }
