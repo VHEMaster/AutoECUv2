@@ -7,6 +7,7 @@
 
 #include "core.h"
 #include "core_timing.h"
+#include "core_ignpower.h"
 #include "calcdata.h"
 #include "core_init_fsm.h"
 #include "common.h"
@@ -56,6 +57,7 @@ void core_loop_slow(void)
 
   if(ctx->initialized) {
     core_calcdata_loop_slow(ctx);
+    core_ignpower_loop_slow(ctx);
   }
 }
 
