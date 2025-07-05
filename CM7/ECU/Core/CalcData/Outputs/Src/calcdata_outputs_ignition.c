@@ -17,6 +17,11 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *input_value_run;
   const ecu_core_runtime_value_ctx_t *input_value_start;
   const ecu_core_runtime_value_ctx_t *runup_ign_duration;
+
+  const ecu_core_runtime_value_ctx_t *input_rpm;
+  const ecu_core_runtime_value_ctx_t *input_target_rpm;
+  const ecu_core_runtime_value_ctx_t *input_target_ignition_advance;
+
   ecu_core_runtime_value_ctx_t output_value;
   ecu_core_runtime_global_parameters_timing_ignition_ctx_t *output_ptr;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
@@ -30,6 +35,10 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IGNITION_ADVANCE, &input_value_run);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_IGNITION_ADVANCE, &input_value_start);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION, &runup_ign_duration);
+
+    (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP, &input_rpm);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IDLE_TARGET_RPM, &input_target_rpm);
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE, &input_target_ignition_advance);
 
     if(runup_flag) {
       time_blending = running_time_current / runup_ign_duration->value;

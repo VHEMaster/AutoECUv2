@@ -34,6 +34,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *runup_inj_cold_corr;
   const ecu_core_runtime_value_ctx_t *runup_inj_cold_time;
 
+  const ecu_core_runtime_value_ctx_t *runup_pos_inj_influence;
   const ecu_core_runtime_value_ctx_t *runup_inj_small_charge;
   const ecu_core_runtime_value_ctx_t *runup_inj_large_charge;
   const ecu_core_runtime_value_ctx_t *runup_inj_warmup_idle_corr;
@@ -46,6 +47,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   float output_inj_phase;
   float output_inj_mass_run;
   float output_inj_mass_start;
+  float output_inj_mass_start_final;
   float output_inj_mass;
 
   float value_afr, value_cycle_charge;
@@ -79,6 +81,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE, &input_inj_phase_start);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION, &runup_inj_duration);
 
+    (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_POS_INJ_INFLUENCE, &runup_pos_inj_influence);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE, &runup_inj_small_charge);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE, &runup_inj_large_charge);
 
@@ -99,6 +102,13 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
       time_blending = CLAMP(time_blending, 0.0f, 1.0f);
       output_inj_mass_start = BLEND(runup_inj_large_charge->value, runup_inj_small_charge->value, time_blending);
     }
+
+    if(runup_pos_inj_influence->valid) {
+      output_inj_mass_start_final = output_inj_mass_start * runup_pos_inj_influence->value;
+    } else {
+      output_inj_mass_start_final = output_inj_mass_start;
+    }
+
 
     if(runup_flag) {
       if(input_cycle_charge->valid /* && input_inj_phase->valid && input_inj_afr->valid */) {
@@ -128,7 +138,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
       }
     } else {
       output_inj_phase = input_inj_phase_start->value;
-      output_inj_mass = output_inj_mass_start;
+      output_inj_mass = output_inj_mass_start_final;
     }
 
 

@@ -11,7 +11,6 @@
 
 #include "calcdata_outputs_ignition.h"
 #include "calcdata_outputs_injection.h"
-#include "calcdata_outputs_idle.h"
 #include "calcdata_outputs_etc.h"
 
 void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_outputs_stage_t stage)
@@ -23,7 +22,7 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
 
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_INJECTION_PHASE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
-      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_TPS_INJ_INFLUENCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_POS_INJ_INFLUENCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_LARGE_INJ_CHARGE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
@@ -79,6 +78,13 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
         (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_IGN_ADV_PID_RPM_D, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       }
 
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_STOPPED_POS, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_STARTUP_POS, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_IDLE_TARGET_POS, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_RUNNING_POS, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_RUNUP_MOVE_TIME, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_ETC_APS_IGNITION_CTRL, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_2:
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_VOLUMETRIC_EFFICIENCY, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
@@ -87,8 +93,6 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_AIR_TO_FUEL_RATIO, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_INJECTION_PHASE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
-
-      calcdata_outputs_idle(ctx);
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_4:
       calcdata_outputs_etc(ctx);

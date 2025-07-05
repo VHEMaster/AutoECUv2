@@ -210,7 +210,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                     .data_1d = {
                         .table_index = ECU_CONFIG_TABLE_1D_16_16,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -219,7 +219,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                     .type = CALCDATA_OUTPUT_TYPE_NONE,
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
-        }, //CALCDATA_OUTPUT_STARTUP_TPS_INJ_INFLUENCE
+        }, //CALCDATA_OUTPUT_STARTUP_POS_INJ_INFLUENCE
         {
             .data_failsafe = { .value = 130.0f },
             .variations = 1,
@@ -771,6 +771,131 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_OUTPUT_IDLE_IGN_ADV_PID_RPM_D
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_48,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_STOPPED_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_49,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_STARTUP_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_50,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_IDLE_TARGET_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 2,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_51,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_2D,
+                    .data_2d = {
+                        .table_index = ECU_CONFIG_TABLE_2D_16X16_3,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                        .source_y = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_RUNNING_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_52,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_RUNUP_MOVE_TIME
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .table_index = ECU_CONFIG_TABLE_1D_16_53,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_ETC_APS_IGNITION_CTRL
     }
 };
 

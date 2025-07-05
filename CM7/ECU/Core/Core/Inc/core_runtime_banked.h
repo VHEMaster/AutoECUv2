@@ -95,7 +95,8 @@ typedef struct {
 }ecu_core_runtime_banked_source_ctx_t;
 
 typedef struct {
-
+    ecu_core_runtime_value_ctx_t pid_feedback;
+    ecu_core_runtime_value_ctx_t idle_ignition_influence;
 }ecu_core_runtime_banked_etc_bank_ctx_t;
 
 typedef struct {
