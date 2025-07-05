@@ -127,6 +127,10 @@ typedef struct {
     ecu_config_injection_perf_press_source_t performance_fuel_pressure_fuelramp_source;
     ecu_config_io_map_t performance_fuel_pressure_fuelramp_io_type;
 
+    float performance_fuel_pressure_manifold_clamp_min;
+    float performance_fuel_pressure_manifold_clamp_max;
+    float performance_fuel_pressure_fuelramp_clamp_min;
+    float performance_fuel_pressure_fuelramp_clamp_max;
 
     float phase_add;
     float phase_slew_rate;

@@ -108,6 +108,10 @@ static const ecu_config_injection_t ecu_calibration_injection_config_default = {
             .performance_fuel_pressure_fuelramp_source = ECU_CONFIG_INJECTION_GROUP_PERF_PRESSURE_SOURCE_NONE,
             .performance_fuel_pressure_fuelramp_io_type = ECU_CONFIG_IO_MAP_MANIFOLD,
 
+            .performance_fuel_pressure_manifold_clamp_min = 0.0f,
+            .performance_fuel_pressure_manifold_clamp_max = 5.0f,
+            .performance_fuel_pressure_fuelramp_clamp_min = 0.0f,
+            .performance_fuel_pressure_fuelramp_clamp_max = 5.0f,
 
             .phase_add = 0.0f,
             .phase_slew_rate = 24.0f,

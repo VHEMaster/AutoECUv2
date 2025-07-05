@@ -319,11 +319,17 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
             if(map_data_fuelramp_b[b].valid) {
               temp_val = map_data_fuelramp_b[b].manifold_air_pressure;
+              temp_val = CLAMP(temp_val,
+                  group_config->performance_fuel_pressure_fuelramp_clamp_min,
+                  group_config->performance_fuel_pressure_fuelramp_clamp_max);
               ramp_pressure_gr_b[b] += temp_val - 1.0f;
               injector_input_pressure_gr_b[b] += temp_val;
             }
             if(map_data_manifold_b[b].valid) {
-              temp_val = map_data_manifold_b[b].manifold_air_pressure;
+              temp_val = map_data_fuelramp_b[b].manifold_air_pressure;
+              temp_val = CLAMP(temp_val,
+                  group_config->performance_fuel_pressure_manifold_clamp_min,
+                  group_config->performance_fuel_pressure_manifold_clamp_max);
               ramp_pressure_gr_b[b] -= temp_val - 1.0f;
               injector_output_pressure_gr_b[b] = temp_val;
             }
@@ -572,7 +578,6 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
                       runtime_cy->injected = false;
                     }
                   }
-
                 } else {
                   runtime_cy->initialized = true;
                   runtime_cy->scheduled = false;
