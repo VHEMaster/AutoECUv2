@@ -18,6 +18,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_2,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -32,6 +33,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_12,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_MASS_AIR_FLOW,
@@ -48,6 +50,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_13,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IAT_MANIFOLD,
@@ -67,6 +70,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_0,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -81,6 +85,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_1,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -101,6 +106,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_2,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -124,6 +130,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_0,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -147,6 +154,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_2D,
                     .data_2d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_1,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -170,6 +178,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_14,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -189,6 +198,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_15,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -208,6 +218,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_16,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
@@ -227,6 +238,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_17,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -246,6 +258,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_18,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -265,6 +278,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_19,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -284,6 +298,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_20,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -303,6 +318,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_21,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -322,6 +338,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_22,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -341,6 +358,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_23,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -360,6 +378,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_24,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -379,6 +398,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_25,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -398,6 +418,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_26,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -417,6 +438,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_27,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -436,6 +458,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_28,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -455,6 +478,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_29,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -474,6 +498,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = false,
                         .table_index = ECU_CONFIG_TABLE_1D_16_30,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
@@ -493,6 +518,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_33,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -512,6 +538,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_34,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -531,6 +558,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_35,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -550,6 +578,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_36,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -569,6 +598,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_37,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -588,6 +618,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_38,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -607,6 +638,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_39,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -626,6 +658,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_40,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -645,6 +678,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_41,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -664,6 +698,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_42,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -683,6 +718,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_43,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -702,6 +738,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_44,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -721,6 +758,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_45,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -740,6 +778,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_46,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -759,6 +798,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_47,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_CALC_IDLE_TARGET_RPM_DEVIATION,
@@ -778,6 +818,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_48,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
@@ -797,6 +838,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_49,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -816,6 +858,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_50,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -835,6 +878,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_51,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
@@ -865,6 +909,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_52,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
@@ -884,6 +929,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 {
                     .type = CALCDATA_OUTPUT_TYPE_1D,
                     .data_1d = {
+                        .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_53,
                         .source_x = {
                             .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,

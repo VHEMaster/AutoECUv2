@@ -95,18 +95,32 @@ typedef struct {
 }ecu_core_runtime_banked_source_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_value_ctx_t pid_feedback;
-    ecu_core_runtime_value_ctx_t idle_ignition_influence;
+    float pid_rpm_feedback;
+    float pid_maf_feedback;
+    float pid_feedback;
+
+    math_pid_ctx_t pid_rpm;
+    math_pid_ctx_t pid_maf;
 }ecu_core_runtime_banked_etc_bank_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_banked_etc_bank_ctx_t banks[ECU_BANK_MAX];
-}ecu_core_runtime_banked_etc_ctx_t;
+    ecu_core_runtime_value_ctx_t idle_tps_influence;
+    ecu_core_runtime_value_ctx_t idle_aps_influence;
+}ecu_core_runtime_banked_ignition_bank_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_etc_bank_ctx_t etc;
+    ecu_core_runtime_banked_ignition_bank_ctx_t ignition;
+}ecu_core_runtime_banked_misc_bank_ctx_t;
+
+typedef struct {
+    ecu_core_runtime_banked_misc_bank_ctx_t banks[ECU_BANK_MAX];
+}ecu_core_runtime_banked_misc_ctx_t;
 
 typedef struct {
     ecu_core_runtime_banked_raw_ctx_t raw;
     ecu_core_runtime_banked_source_ctx_t source;
-    ecu_core_runtime_banked_etc_ctx_t etc;
+    ecu_core_runtime_banked_misc_ctx_t misc;
 }ecu_core_runtime_banked_ctx_t;
 
 #endif /* CORE_CORE_INC_CORE_RUNTIME_BANKED_H_ */

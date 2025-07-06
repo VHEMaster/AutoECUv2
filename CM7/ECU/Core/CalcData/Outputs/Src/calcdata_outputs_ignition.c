@@ -22,11 +22,15 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *input_target_rpm;
   const ecu_core_runtime_value_ctx_t *input_target_ignition_advance;
 
+  const ecu_core_runtime_value_ctx_t *idle_tps_influence;
+  const ecu_core_runtime_value_ctx_t *idle_aps_influence;
+
   ecu_core_runtime_value_ctx_t output_value;
   ecu_core_runtime_global_parameters_timing_ignition_ctx_t *output_ptr;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
   time_float_s_t running_time_current = ctx->runtime.global.misc.running_time_current;
   float time_blending;
+  float input_run_advance;
 
   output_ptr = &ctx->runtime.global.parameters.timings.ignition;
 
@@ -40,13 +44,17 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IDLE_TARGET_RPM, &input_target_rpm);
     (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE, &input_target_ignition_advance);
 
+    idle_aps_influence = &ctx->runtime.banked.misc.banks[bank].ignition.idle_aps_influence;
+    idle_tps_influence = &ctx->runtime.banked.misc.banks[bank].ignition.idle_tps_influence;
+
     if(runup_flag) {
+      input_run_advance = input_value_run->value;
       time_blending = running_time_current / runup_ign_duration->value;
       if(time_blending == time_blending && time_blending < 1.0f) {
-        output_value.value = BLEND(input_value_start->value, input_value_run->value, time_blending);
+        output_value.value = BLEND(input_value_start->value, input_run_advance, time_blending);
         output_value.valid = true;
       } else {
-        output_value.value = input_value_run->value;
+        output_value.value = input_run_advance;
         output_value.valid = true;
       }
     } else {

@@ -440,6 +440,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
   uint32_t source_data_size_x, source_data_size_y;
   uint32_t dest_data_size;
   bool banks_equal = true;
+  bool limit;
 
   ecu_core_runtime_value_ctx_t *dests[ECU_BANK_MAX];
   ecu_core_runtime_value_ctx_t output_value[ECU_BANK_MAX];
@@ -472,6 +473,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
         source_data_x = (const float *)((uintptr_t)&ctx->calibration->tables + table_pointers[input_data_item_x->table_index]);
         dest_data_size = table_sizes[output_data_item->data_1d.table_index];
         dest_data = (const float *)((uintptr_t)&ctx->calibration->tables + table_pointers[output_data_item->data_1d.table_index]);
+        limit = output_data_item->data_1d.interpolation_limit;
 
         if(source_data_size_x == dest_data_size) {
           for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -489,7 +491,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
                 source_interp_x[b]->ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
                 source_values_x[b]->value.valid = true;
               }
-              output_value[b].value = math_interpolate_1d(source_interp_x[b]->ctx, dest_data);
+              output_value[b].value = math_interpolate_1d_ex(source_interp_x[b]->ctx, dest_data, limit);
               output_value[b].valid = true;
             } else {
               source_interp_x[b]->valid = false;
@@ -519,6 +521,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
         source_data_y = (const float *)((uintptr_t)&ctx->calibration->tables + table_pointers[input_data_item_y->table_index]);
         dest_data_size = table_sizes[output_data_item->data_2d.table_index];
         dest_data = (const float *)((uintptr_t)&ctx->calibration->tables + table_pointers[output_data_item->data_2d.table_index]);
+        limit = output_data_item->data_2d.interpolation_limit;
 
         if(source_data_size_x == dest_data_size && source_data_size_y == dest_data_size) {
           for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -544,9 +547,9 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
                 source_interp_y[b]->ctx = math_interpolate_input(source_values_y[b]->value.value, source_data_y, source_data_size_y);
                 source_interp_y[b]->valid = true;
               }
-              output_value[b].value = math_interpolate_2d(
+              output_value[b].value = math_interpolate_2d_ex(
                   source_interp_x[b]->ctx, source_interp_y[b]->ctx,
-                  source_data_size_x, (const float (*)[source_data_size_x])dest_data);
+                  source_data_size_x, (const float (*)[source_data_size_x])dest_data, limit);
               output_value[b].valid = true;
             } else {
               source_interp_x[b]->valid = false;

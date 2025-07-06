@@ -199,11 +199,13 @@ typedef struct {
 }ecu_config_calcdata_output_data_item_static_t;
 
 typedef struct {
+    bool interpolation_limit;
     ecu_config_tables_table_index_t table_index;
     ecu_config_calcdata_relation_input_select_t source_x;
 }ecu_config_calcdata_output_data_item_1d_t;
 
 typedef struct {
+    bool interpolation_limit;
     ecu_config_tables_table_index_t table_index;
     ecu_config_calcdata_relation_input_select_t source_x;
     ecu_config_calcdata_relation_input_select_t source_y;
@@ -278,6 +280,15 @@ typedef struct {
     bool use_reg_pid_rpm;
     bool use_reg_pid_maf;
     bool use_ign_pid_rpm;
+
+    float reg_pid_rpm_min;
+    float reg_pid_rpm_max;
+    float reg_pid_maf_min;
+    float reg_pid_maf_max;
+    float reg_pid_min;
+    float reg_pid_max;
+    float ign_pid_rpm_min;
+    float ign_pid_rpm_max;
 
     ecu_config_calcdata_setup_idle_pos_flag_mode_t pos_flag_mode;
     float pos_flag_thr_l;

@@ -99,6 +99,15 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
         .use_reg_pid_maf = true,
         .use_ign_pid_rpm = true,
 
+        .reg_pid_rpm_min = -10,
+        .reg_pid_rpm_max = 10,
+        .reg_pid_maf_min = -10,
+        .reg_pid_maf_max = 10,
+        .reg_pid_min = -10,
+        .reg_pid_max = 10,
+        .ign_pid_rpm_min = -10,
+        .ign_pid_rpm_max = 10,
+
         .pos_flag_mode = CALCDATA_IDLE_POS_FLAG_MODE_APS,
         .pos_flag_thr_l = 0.1f,
         .pos_flag_thr_h = 0.1f,
