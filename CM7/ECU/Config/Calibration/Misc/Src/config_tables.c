@@ -1295,7 +1295,7 @@ static const ecu_config_tables_t ecu_tables_config_default = {
             .table = { 1.3f, 1.3f, 1.2f, 1.1f, 0.9f, 0.8f, 0.6f, 0.5f, 0.4f, 0.3f, 0.3f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f, },
         }, //ECU_CONFIG_TABLE_1D_16_19
         {
-            .table = { 1.3f, 1.3f, 1.2f, 1.1f, 0.9f, 0.8f, 0.6f, 0.5f, 0.4f, 0.3f, 0.3f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f, },
+            .table = { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, },
         }, //ECU_CONFIG_TABLE_1D_16_20
         {
             .table = { 0.30f, 0.30f, 0.30f, 0.28f, 0.24f, 0.18f, 0.17f, 0.13f, 0.09f, 0.05f, 0.04f, 0.03f, 0.01f, 0.01f, 0.01f, 0.01f, },
@@ -1397,10 +1397,10 @@ static const ecu_config_tables_t ecu_tables_config_default = {
             .table = { 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, 6.0f, },
         }, //ECU_CONFIG_TABLE_1D_16_53
         {
-            .table = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            .table = { 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f,  },
         }, //ECU_CONFIG_TABLE_1D_16_54
         {
-            .table = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            .table = { 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, },
         }, //ECU_CONFIG_TABLE_1D_16_55
         {
             .table = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },

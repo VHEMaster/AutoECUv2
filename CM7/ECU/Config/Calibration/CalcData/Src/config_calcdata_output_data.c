@@ -312,6 +312,26 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION
         {
+            .data_failsafe = { .value = 0.5f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .interpolation_limit = true,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_55,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_ADVANCE
+        {
             .data_failsafe = { .value = 1.20f },
             .variations = 1,
             .variants = {
@@ -511,6 +531,26 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .interpolation_limit = true,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_54,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_IDLE_TPS_IGNITION_CTRL
         {
             .data_failsafe = { .value = 0.0f },
             .variations = 1,

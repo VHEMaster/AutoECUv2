@@ -88,6 +88,7 @@ typedef enum {
   CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE,
   CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION,
   CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION,
+  CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_ADVANCE,
   CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR,
   CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME,
   CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME,
@@ -100,6 +101,7 @@ typedef enum {
   CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE,
   CALCDATA_OUTPUT_IDLE_TARGET_MASS_AIR_FLOW,
   CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE,
+  CALCDATA_OUTPUT_IDLE_TPS_IGNITION_CTRL,
 
   CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_RPM_P,
   CALCDATA_OUTPUT_IDLE_REG_STEPPER_PID_RPM_I,
@@ -123,6 +125,7 @@ typedef enum {
   CALCDATA_OUTPUT_ETC_RUNNING_POS,
   CALCDATA_OUTPUT_ETC_RUNUP_MOVE_TIME,
   CALCDATA_OUTPUT_ETC_APS_IGNITION_CTRL,
+
 
 
   CALCDATA_OUTPUT_MAX,
@@ -172,6 +175,13 @@ typedef enum {
   CALCDATA_IDLE_POS_FLAG_MODE_MAF,
   CALCDATA_IDLE_POS_FLAG_MODE_MAX
 }ecu_config_calcdata_setup_idle_pos_flag_mode_t;
+
+typedef enum {
+  CALCDATA_IDLE_IGN_CTRL_SRC_NONE = 0,
+  CALCDATA_IDLE_IGN_CTRL_SRC_TPS,
+  CALCDATA_IDLE_IGN_CTRL_SRC_APS,
+  CALCDATA_IDLE_IGN_CTRL_SRC_MAX
+}ecu_config_calcdata_setup_idle_ign_ctrl_src_t;
 
 typedef enum {
   CALCDATA_IDLE_REGULATOR_NONE = 0,
@@ -290,7 +300,9 @@ typedef struct {
     float ign_pid_rpm_min;
     float ign_pid_rpm_max;
 
+    ecu_config_calcdata_setup_idle_ign_ctrl_src_t ignition_ctrl_source;
     ecu_config_calcdata_setup_idle_pos_flag_mode_t pos_flag_mode;
+    bool use_initial_ign_advance;
     float pos_flag_thr_l;
     float pos_flag_thr_h;
 }ecu_config_calcdata_setup_idle_t;

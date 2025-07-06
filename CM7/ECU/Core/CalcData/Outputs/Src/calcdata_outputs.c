@@ -12,6 +12,7 @@
 #include "calcdata_outputs_ignition.h"
 #include "calcdata_outputs_injection.h"
 #include "calcdata_outputs_etc.h"
+#include "calcdata_outputs_tps.h"
 
 void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_outputs_stage_t stage)
 {
@@ -27,6 +28,7 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_SMALL_INJ_CHARGE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_INJ_DURATION, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_DURATION, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_RUNUP_IGN_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_COLD_INJ_CORR, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_COLD_INJ_TIME, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_STARTUP_ECON_BYPASS_TIME, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
@@ -39,6 +41,7 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_TARGET_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_TARGET_MASS_AIR_FLOW, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_INITIAL_IGNITION_ADVANCE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
+      (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_IDLE_TPS_IGNITION_CTRL, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
 
       if(ctx->calibration->calcdata.setup.idle.use_reg_pid_rpm) {
         switch(ctx->calibration->calcdata.setup.idle.regulator_mode) {
@@ -96,6 +99,7 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_4:
       calcdata_outputs_etc(ctx);
+      calcdata_outputs_tps(ctx);
 
       calcdata_outputs_ignition(ctx);
       calcdata_outputs_injection(ctx);

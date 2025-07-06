@@ -141,7 +141,8 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
       etc_pid_feedback = &etc_bank_ctx->pid_feedback;
       pos_startup = etc_etc_startup_pos->value;
 
-      if(input_aps->valid && etc_aps_ignition_ctrl->valid) {
+      if(ctx->calibration->calcdata.setup.idle.ignition_ctrl_source == CALCDATA_IDLE_IGN_CTRL_SRC_APS &&
+          input_aps->valid && etc_aps_ignition_ctrl->valid) {
         value_aps = input_aps->value;
         value_ign_ctrl = etc_aps_ignition_ctrl->value;
         if(value_ign_ctrl > 0.0f && value_aps < value_ign_ctrl) {
@@ -150,8 +151,6 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
           etc_idle_ignition_influence->value = 0.0f;
         }
         etc_idle_ignition_influence->valid = true;
-      } else {
-        memset(etc_idle_ignition_influence, 0, sizeof(*etc_idle_ignition_influence));
       }
 
       runup_transition_moving = false;
@@ -199,7 +198,7 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
 
         math_pid_set_clamp(pid_rpm, setup_idle->reg_pid_rpm_min, setup_idle->reg_pid_rpm_max);
         math_pid_set_koffs(pid_rpm, &pid_rpm_k);
-        if(runup_flag && input_rpm->valid && input_target_rpm->valid) {
+        if(runup_flag && setup_idle->use_reg_pid_rpm && input_rpm->valid && input_target_rpm->valid) {
           math_pid_set_target(pid_rpm, input_target_rpm->value);
           pid_rpm_feedback_pos = math_pid_update(pid_rpm, input_rpm->value, now);
         } else {
@@ -209,7 +208,7 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
 
         math_pid_set_clamp(pid_maf, setup_idle->reg_pid_maf_min, setup_idle->reg_pid_maf_max);
         math_pid_set_koffs(pid_maf, &pid_maf_k);
-        if(runup_flag && input_maf->valid && input_target_maf->valid) {
+        if(runup_flag && setup_idle->use_reg_pid_maf && input_maf->valid && input_target_maf->valid) {
           math_pid_set_target(pid_maf, input_target_maf->value);
           pid_maf_feedback_pos = math_pid_update(pid_maf, input_maf->value, now);
         } else {

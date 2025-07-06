@@ -106,6 +106,7 @@ typedef struct {
 typedef struct {
     ecu_core_runtime_value_ctx_t idle_tps_influence;
     ecu_core_runtime_value_ctx_t idle_aps_influence;
+    math_pid_ctx_t pid_rpm;
 }ecu_core_runtime_banked_ignition_bank_ctx_t;
 
 typedef struct {

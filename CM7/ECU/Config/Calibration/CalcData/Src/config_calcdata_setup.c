@@ -108,7 +108,9 @@ static const ecu_config_calcdata_setup_t cfg_setup = {
         .ign_pid_rpm_min = -10,
         .ign_pid_rpm_max = 10,
 
+        .ignition_ctrl_source = CALCDATA_IDLE_IGN_CTRL_SRC_APS,
         .pos_flag_mode = CALCDATA_IDLE_POS_FLAG_MODE_APS,
+        .use_initial_ign_advance = true,
         .pos_flag_thr_l = 0.1f,
         .pos_flag_thr_h = 0.1f,
     },
