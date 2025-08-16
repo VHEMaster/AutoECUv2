@@ -268,7 +268,7 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
   }
 
   for(ecu_module_etc_t module = 0; module < ECU_MODULE_ETC_MAX; module++) {
-    if(output_etc_pos[module].valid) {
+    if(output_etc_pos[module].valid && output_etc_pos_values_count[module] > 0) {
       err = ecu_modules_etc_set_enabled(module, true);
       if(err != E_OK) {
         //TODO: error flag

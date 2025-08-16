@@ -982,6 +982,66 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                 }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
             },
         }, //CALCDATA_OUTPUT_ETC_APS_IGNITION_CTRL
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .interpolation_limit = true,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_56,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_STEPPER_IDLEVALVE_STARTUP_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .interpolation_limit = true,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_57,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_STEPPER_IDLEVALVE_IDLE_TARGET_POS
+        {
+            .data_failsafe = { .value = 0.0f },
+            .variations = 1,
+            .variants = {
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_1D,
+                    .data_1d = {
+                        .interpolation_limit = true,
+                        .table_index = ECU_CONFIG_TABLE_1D_16_58,
+                        .source_x = {
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
+                        },
+                    },
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V1
+                {
+                    .type = CALCDATA_OUTPUT_TYPE_NONE,
+                }, //CALCDATA_OUTPUT_VARIANTED_ITEM_V2
+            },
+        }, //CALCDATA_OUTPUT_STEPPER_IDLEVALVE_RUNUP_MOVE_TIME
     }
 };
 

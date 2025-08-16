@@ -11,7 +11,7 @@
 #include <math.h>
 #include <string.h>
 
-ITCM_FUNC  STATIC_INLINE void tle4729_set_mode(tle4729_ctx_t *ctx, tle4729_mode_t mode)
+ITCM_FUNC STATIC_INLINE void tle4729_set_mode(tle4729_ctx_t *ctx, tle4729_mode_t mode)
 {
   uint32_t prim;
 
@@ -20,15 +20,15 @@ ITCM_FUNC  STATIC_INLINE void tle4729_set_mode(tle4729_ctx_t *ctx, tle4729_mode_
     ctx->current_mode = mode;
 
     prim = EnterCritical();
-    gpio_write(&ctx->init.i10, mode & 1);
-    gpio_write(&ctx->init.i11, mode & 2);
-    gpio_write(&ctx->init.i20, mode & 1);
-    gpio_write(&ctx->init.i21, mode & 2);
+    gpio_write(&ctx->init.i10, ((mode & 1) > 0));
+    gpio_write(&ctx->init.i11, ((mode & 2) > 0));
+    gpio_write(&ctx->init.i20, ((mode & 1) > 0));
+    gpio_write(&ctx->init.i21, ((mode & 2) > 0));
     ExitCritical(prim);
   }
 }
 
-ITCM_FUNC  STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
+ITCM_FUNC STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
 {
   bool ph1;
   bool ph2;
@@ -58,7 +58,7 @@ ITCM_FUNC  STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC  STATIC_INLINE void tle4729_calculate_next_move(tle4729_ctx_t *ctx)
+ITCM_FUNC STATIC_INLINE void tle4729_calculate_next_move(tle4729_ctx_t *ctx)
 {
   float acceleration_steps = ctx->config.acceleration_steps;
   float r_acceleration_steps = 1.0f / acceleration_steps;
@@ -182,7 +182,7 @@ void tle4729_loop_slow(tle4729_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC  void tle4729_loop_fast(tle4729_ctx_t *ctx)
+ITCM_FUNC void tle4729_loop_fast(tle4729_ctx_t *ctx)
 {
   error_t err = E_OK;
   time_us_t now;

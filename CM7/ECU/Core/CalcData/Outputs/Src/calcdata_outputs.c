@@ -11,6 +11,7 @@
 
 #include "calcdata_outputs_ignition.h"
 #include "calcdata_outputs_injection.h"
+#include "calcdata_outputs_stepper.h"
 #include "calcdata_outputs_etc.h"
 #include "calcdata_outputs_tps.h"
 
@@ -98,6 +99,7 @@ void core_calcdata_outputs_process(ecu_core_ctx_t *ctx, ecu_core_calcdata_output
       (void)core_calcdata_proc_calc_output(ctx, CALCDATA_OUTPUT_INJECTION_PHASE, CALCDATA_OUTPUT_VARIANTED_ITEM_MAX, NULL);
       break;
     case CORE_CALCDATA_OUTPUTS_STAGE_4:
+      calcdata_outputs_stepper(ctx);
       calcdata_outputs_etc(ctx);
       calcdata_outputs_tps(ctx);
 

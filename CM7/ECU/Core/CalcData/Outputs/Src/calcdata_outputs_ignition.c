@@ -143,8 +143,8 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
         } else {
           if(idle_pos_influence != NULL && idle_pos_influence->valid) {
             output_value.value = BLEND(input_run_advance,
-                input_idle_initial_advance,
-                idle_pos_influence->value);
+              input_idle_initial_advance,
+              idle_pos_influence->value);
           } else {
             output_value.value = input_run_advance;
           }

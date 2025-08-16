@@ -101,6 +101,15 @@ typedef struct {
 
     math_pid_ctx_t pid_rpm;
     math_pid_ctx_t pid_maf;
+}ecu_core_runtime_banked_stepper_bank_ctx_t;
+
+typedef struct {
+    float pid_rpm_feedback;
+    float pid_maf_feedback;
+    float pid_feedback;
+
+    math_pid_ctx_t pid_rpm;
+    math_pid_ctx_t pid_maf;
 }ecu_core_runtime_banked_etc_bank_ctx_t;
 
 typedef struct {
@@ -110,6 +119,7 @@ typedef struct {
 }ecu_core_runtime_banked_ignition_bank_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_banked_stepper_bank_ctx_t stepper;
     ecu_core_runtime_banked_etc_bank_ctx_t etc;
     ecu_core_runtime_banked_ignition_bank_ctx_t ignition;
 }ecu_core_runtime_banked_misc_bank_ctx_t;
