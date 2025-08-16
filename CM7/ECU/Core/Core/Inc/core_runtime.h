@@ -171,6 +171,10 @@ typedef struct {
 }ecu_core_runtime_global_misc_ctx_t;
 
 typedef struct {
+
+}ecu_core_runtime_global_powermoding_ctx_t;
+
+typedef struct {
     uint32_t banks_count;
     uint32_t cylinders_count;
     ecu_core_runtime_global_ignition_ctx_t ignition;
@@ -181,6 +185,8 @@ typedef struct {
     ecu_core_runtime_global_parameters_ctx_t parameters_simulated;
 
     ecu_core_runtime_global_misc_ctx_t misc;
+
+    ecu_core_runtime_global_powermoding_ctx_t powermoding;
 
 }ecu_core_runtime_global_ctx_t;
 
