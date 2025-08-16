@@ -88,6 +88,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/IgnPower/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/PowerModing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>
@@ -230,6 +231,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/IgnPower/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Core/PowerModing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>
