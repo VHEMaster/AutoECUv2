@@ -13,6 +13,7 @@
 #include "config_timing.h"
 
 #include "core_runtime.h"
+#include "core_powermoding_types.h"
 
 typedef enum {
   ECU_CORE_INIT_FSM_INITIAL = 0,
@@ -41,6 +42,7 @@ typedef struct {
     timing_diag_t timing_diag;
 
     ecu_core_runtime_ctx_t runtime;
+    ecu_core_powermoding_ctx_t *powermoding;
     uint32_t process_update_trigger_counter;
 }ecu_core_ctx_t;
 

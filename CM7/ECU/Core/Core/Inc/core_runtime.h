@@ -186,8 +186,6 @@ typedef struct {
 
     ecu_core_runtime_global_misc_ctx_t misc;
 
-    ecu_core_runtime_global_powermoding_ctx_t powermoding;
-
 }ecu_core_runtime_global_ctx_t;
 
 typedef struct {
