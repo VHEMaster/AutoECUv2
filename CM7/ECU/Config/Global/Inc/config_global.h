@@ -47,6 +47,7 @@
 
 #include "config_id.h"
 #include "config_io.h"
+#include "config_powermoding.h"
 #include "config_cylinders.h"
 #include "config_injection.h"
 #include "config_ignition.h"
@@ -108,6 +109,7 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_CALIB_TYPE_ID,
   ECU_CONFIG_CALIB_TYPE_IO,
+  ECU_CONFIG_CALIB_TYPE_POWERMODING,
   ECU_CONFIG_CALIB_TYPE_CYLINDERS,
   ECU_CONFIG_CALIB_TYPE_INJECTION,
   ECU_CONFIG_CALIB_TYPE_IGNITION,

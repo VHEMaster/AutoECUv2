@@ -10,6 +10,7 @@
 
 #include "versioned_id.h"
 #include "versioned_io.h"
+#include "versioned_powermoding.h"
 #include "versioned_cylinders.h"
 #include "versioned_injection.h"
 #include "versioned_ignition.h"

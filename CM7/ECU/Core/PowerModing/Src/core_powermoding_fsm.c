@@ -21,12 +21,13 @@ static void powermoding_fsm_mode_running(ecu_core_ctx_t *ctx);
 
 void core_powermoding_fsm(ecu_core_ctx_t *ctx)
 {
-  time_us_t now;
   ecu_core_powermoding_ctx_t *pm_ctx;
+  ecu_core_powermoding_mode_t mode_prev;
 
   pm_ctx = ctx->powermoding;
+  mode_prev = pm_ctx->mode_current;
 
-  switch(pm_ctx->mode_current) {
+  switch(mode_prev) {
     case POWERMODING_MODE_UNDEFINED:
       powermoding_fsm_mode_undefined(ctx);
       break;
@@ -55,10 +56,13 @@ void core_powermoding_fsm(ecu_core_ctx_t *ctx)
       powermoding_fsm_mode_running(ctx);
       break;
     default:
-      now = time_now_us();
       pm_ctx->mode_current = POWERMODING_MODE_UNDEFINED;
-      pm_ctx->mode_switch_timestamp = now;
+      pm_ctx->mode_switch_timestamp = time_now_us();
       break;
+  }
+
+  if(pm_ctx->mode_current != mode_prev) {
+    pm_ctx->mode_switch_timestamp = time_now_us();
   }
 }
 
@@ -71,6 +75,7 @@ static void powermoding_fsm_mode_undefined(ecu_core_ctx_t *ctx)
 
   mode_switch_timestamp = pm_ctx->mode_switch_timestamp;
   now = time_now_us();
+
 
 
 }

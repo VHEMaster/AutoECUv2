@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
     ecu_config_data_identification_t id;
     ecu_config_io_t io;
+    ecu_config_powermoding_t powermoding;
     ecu_config_cylinders_t cylinders;
     ecu_config_injection_t injection;
     ecu_config_ignition_t ignition;

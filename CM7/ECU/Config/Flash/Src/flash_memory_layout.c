@@ -767,6 +767,13 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_CALIBRATION_POWERMODING,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 12,
+        .sector_index = 5,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_CALIBRATION_TABLES,
         .section_length = ECU_FLASH_BLOCK_SIZE_128K,
         .block_index = 16,
@@ -844,6 +851,7 @@ error_t flash_mem_layout_init(void)
               layout->section_type_to_section_layout[index] = s;
             } else {
               err = E_INVALACT;
+              //TODO: DTC here!!!
               break;
             }
           }
