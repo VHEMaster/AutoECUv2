@@ -16,6 +16,7 @@
 #define CKP_SIGNAL_REGULAR_36_2_DELTA_TIMEOUT_MULT      (12)
 
 #define CKP_SIGNAL_REGULAR_36_2_SIGNAL_INDEX_MAX        68
+#define CKP_SIGNAL_REGULAR_36_2_SIGNAL_POS_ADDER        10.0f
 
 #define CKP_SIGNAL_REGULAR_36_2_ABS_INDEX_MAX           12
 
@@ -314,14 +315,14 @@ ITCM_FUNC void ckp_signal_regular_36_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       if(!sync_pos_updated) {
         if(signal_ctx->runtime.diff_sig_accept && signal_ctx->runtime.signal_index > 2) {
           if(signal_ctx->runtime.sync_signal_index == index) {
-            pos_adder = 6.0f - 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
+            pos_adder = CKP_SIGNAL_REGULAR_36_2_SIGNAL_POS_ADDER - CKP_SIGNAL_REGULAR_36_2_SIGNAL_POS_ADDER / (1.0f + signal_ctx->runtime.diff_sig_value);
           } else {
-            pos_adder = 6.0f / (1.0f + signal_ctx->runtime.diff_sig_value);
+            pos_adder = CKP_SIGNAL_REGULAR_36_2_SIGNAL_POS_ADDER / (1.0f + signal_ctx->runtime.diff_sig_value);
           }
           sync_pos_updated = true;
           data_updated = true;
         } else if(signal_ctx->runtime.sync_signal_index == index) {
-          pos_adder += 6.0f;
+          pos_adder += CKP_SIGNAL_REGULAR_36_2_SIGNAL_POS_ADDER;
           sync_pos_updated = true;
           data_updated = true;
 
