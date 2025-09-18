@@ -19,6 +19,13 @@ static const ckp_signal_ref_cfg_t ckp_signal_ref_cfg[CKP_CONFIG_SIGNAL_REF_TYPE_
         .func_slow_cb = ckp_signal_regular_60_2_loop_slow,
         .func_fast_cb = ckp_signal_regular_60_2_loop_fast,
     }, //CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
+    {
+        .func_init_cb = ckp_signal_regular_36_2_init,
+        .func_signal_cb = ckp_signal_regular_36_2_signal,
+        .func_main_cb = ckp_signal_regular_36_2_loop_main,
+        .func_slow_cb = ckp_signal_regular_36_2_loop_slow,
+        .func_fast_cb = ckp_signal_regular_36_2_loop_fast,
+    }, //CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_36_2
 };
 
 error_t ckp_init(ckp_ctx_t *ctx, const ckp_init_ctx_t *init_ctx)

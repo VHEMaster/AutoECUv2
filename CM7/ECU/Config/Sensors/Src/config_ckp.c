@@ -27,6 +27,14 @@ typedef struct {
 static const ckp_config_t ecu_sensors_ckp_config_default = {
     .desync_on_error = true,
     .signal_ref_type = CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2,
+    .signal_type_config = {
+        .regular_60_2 = {
+            .zero_point = -116.0f, //Lada -116°
+        },
+        .regular_36_2 = {
+            .zero_point = -80.0f, //UZ -80°, JZ -60°
+        },
+    },
     .boot_time = 100 * TIME_US_IN_MS,
 };
 

@@ -9,5 +9,6 @@
 #define SENSORS_CKP_INC_CKP_SIGNALS_H_
 
 #include "ckp_signal_regular_60_2.h"
+#include "ckp_signal_regular_36_2.h"
 
 #endif /* SENSORS_CKP_INC_CKP_SIGNALS_H_ */

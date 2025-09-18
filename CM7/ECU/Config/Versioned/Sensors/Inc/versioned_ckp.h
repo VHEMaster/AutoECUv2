@@ -19,8 +19,22 @@ typedef enum {
 
 typedef enum {
   CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2 = 0,
+  CKP_CONFIG_SIGNAL_REF_TYPE_REGULAR_36_2,
   CKP_CONFIG_SIGNAL_REF_TYPE_MAX,
 }ckp_config_signal_ref_type_t;
+
+typedef struct {
+    float zero_point;
+}ckp_config_signal_type_config_regular_60_2_t;
+
+typedef struct {
+    float zero_point;
+}ckp_config_signal_type_config_regular_36_2_t;
+
+typedef struct {
+    ckp_config_signal_type_config_regular_60_2_t regular_60_2;
+    ckp_config_signal_type_config_regular_36_2_t regular_36_2;
+}ckp_config_signal_type_config_t;
 
 typedef struct {
     bool enabled;
@@ -31,6 +45,7 @@ typedef struct {
     ecu_gpio_input_pin_t input_pin;
 
     ckp_config_signal_ref_type_t signal_ref_type;
+    ckp_config_signal_type_config_t signal_type_config;
 
     uint32_t align ALIGNED_CACHE;
 }ckp_config_v1_t ALIGNED_CACHE;
