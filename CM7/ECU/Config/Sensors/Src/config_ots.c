@@ -22,9 +22,16 @@ static const ots_config_t ecu_sensors_ots_config_default = {
         .input_high = 21000,
     },
     .signal_resistance_calculated = {
+        // Moderate quality OTS thermistor
         .calibration_resistance = 597,
         .calibration_temperature = 25.0f,
         .thermistor_beta = 4200,
+        /*
+          // Good one found on AliExpress
+          .calibration_resistance = 61000,
+          .calibration_temperature = 20.0f,
+          .thermistor_beta = 4000,
+        */
     },
     .slew_rate = 10.0f,
     .boot_time = 100 * TIME_US_IN_MS,
