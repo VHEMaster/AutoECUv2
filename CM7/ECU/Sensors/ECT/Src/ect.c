@@ -8,7 +8,7 @@
 #include "ect.h"
 #include "compiler.h"
 #include "interpolation.h"
-#include <math.h>
+#include "math_misc.h"
 #include <string.h>
 
 error_t ect_init(ect_ctx_t *ctx, const ect_init_ctx_t *init_ctx)
@@ -164,12 +164,11 @@ void ect_loop_slow(ect_ctx_t *ctx)
 
             value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == ECT_CALC_MODE_RESISTANCE_CALCULATED) {
-            value = 1.0f / ctx->config.signal_resistance_calculated.thermistor_beta;
-            value *= logf(ctx->data.input_value / ctx->config.signal_resistance_calculated.calibration_resistance);
-            value += 1.0f / (ctx->config.signal_resistance_calculated.calibration_temperature + 273.0f);
-            value = 1.0f / value;
-            value -= 273.0f;
-
+            value = math_calc_ntc_thermistor(
+                ctx->config.signal_resistance_calculated.calibration_temperature,
+                ctx->config.signal_resistance_calculated.calibration_resistance,
+                ctx->config.signal_resistance_calculated.thermistor_beta,
+                ctx->data.input_value);
           } else {
             data_valid = false;
             value = 0;

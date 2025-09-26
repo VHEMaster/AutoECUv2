@@ -81,3 +81,17 @@ INLINE float math_calc_air_density_mgcc(float temperature, float pressure)
   temperature += 273.15f;
   return pressure / (R * temperature);
 }
+
+
+INLINE float math_calc_ntc_thermistor(float calibration_temperature, float calibration_resistance, float beta, float resistance)
+{
+  float value;
+
+  value = 1.0f / beta;
+  value *= logf(resistance / calibration_resistance);
+  value += 1.0f / (calibration_temperature + 273.15f);
+  value = 1.0f / value;
+  value -= 273.15f;
+
+  return value;
+}
