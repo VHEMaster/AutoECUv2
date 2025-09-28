@@ -7,11 +7,10 @@
 
 #include "core_powermoding.h"
 #include "core_powermoding_fsm.h"
+#include "core_powermoding_private.h"
 #include "common.h"
 
 static ecu_core_powermoding_ctx_t powermoding_ctx = {0};
-
-static void powermoding_get_mode_requested(ecu_core_ctx_t *ctx);
 
 error_t core_powermoding_init(ecu_core_ctx_t *ctx)
 {
@@ -27,8 +26,10 @@ error_t core_powermoding_init(ecu_core_ctx_t *ctx)
     ctx->powermoding = pm_ctx;
 
     now = time_now_us();
-    pm_ctx->mode_current = POWERMODING_MODE_UNDEFINED;
+    pm_ctx->mode_current = POWERMODING_MODE_STANDBY;
     pm_ctx->mode_switch_timestamp = now;
+    pm_ctx->turbotimer_passed_time = 0;
+    pm_ctx->turbotimer_requested_time = 0;
 
   } while(0);
 
@@ -105,18 +106,19 @@ error_t core_powermoding_mode_get(ecu_core_ctx_t *ctx, ecu_core_powermoding_mode
   return ret;
 }
 
-STATIC_INLINE void powermoding_get_mode_requested(ecu_core_ctx_t *ctx)
+error_t core_powermoding_turbotimer_set_req_time(ecu_core_ctx_t *ctx, time_delta_us_t time)
 {
+  error_t ret = E_OK;
   ecu_core_powermoding_ctx_t *pm_ctx;
-  ecu_core_powermoding_mode_request_t mode_requested;
 
-  pm_ctx = ctx->powermoding;
+  do {
+    BREAK_IF_ACTION(ctx == NULL, ret = E_PARAM);
 
-  mode_requested = POWERMODING_MODE_REQ_STANDBY;
-  for(ecu_core_powermoding_user_t u = 0; u < POWERMODING_USER_MAX; u++) {
-    if(pm_ctx->modes_requested[u] < POWERMODING_MODE_REQ_MAX && pm_ctx->modes_requested[u] > mode_requested) {
-      mode_requested = pm_ctx->modes_requested[u];
-    }
-  }
-  pm_ctx->mode_requested = mode_requested;
+    pm_ctx = ctx->powermoding;
+
+    pm_ctx->turbotimer_requested_time = time;
+
+  } while(0);
+
+  return ret;
 }

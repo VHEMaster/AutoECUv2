@@ -15,6 +15,10 @@
 typedef enum {
   POWERMODING_USER_RSVD = 0,
 
+  POWERMODING_USER_CAN,
+  POWERMODING_USER_KLINE,
+  POWERMODING_USER_IGNPOWER,
+
   POWERMODING_USER_FLASH,
   POWERMODING_USER_TURBOTIMER,
 
@@ -31,8 +35,7 @@ typedef enum {
 }ecu_core_powermoding_user_t;
 
 typedef enum {
-  POWERMODING_MODE_UNDEFINED = 0,
-  POWERMODING_MODE_STANDBY,
+  POWERMODING_MODE_STANDBY = 0,
   POWERMODING_MODE_SLEEP,
   POWERMODING_MODE_COLDBOOT,
   POWERMODING_MODE_RUNDOWN,
@@ -57,6 +60,9 @@ typedef struct {
     ecu_core_powermoding_mode_t mode_current;
     ecu_core_powermoding_mode_request_t mode_requested;
     ecu_core_powermoding_mode_request_t modes_requested[POWERMODING_USER_MAX];
+
+    time_delta_us_t turbotimer_requested_time;
+    time_delta_us_t turbotimer_passed_time;
 }ecu_core_powermoding_ctx_t;
 
 #endif /* CORE_POWERMODING_INC_POWERMODING_TYPES_H_ */

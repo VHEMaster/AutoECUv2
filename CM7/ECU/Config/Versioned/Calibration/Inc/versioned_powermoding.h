@@ -16,14 +16,9 @@ typedef enum {
   ECU_CONFIG_POWERMODING_VERSION_MAX
 }ecu_config_powermoding_versions_t;
 
-typedef enum {
-  ECU_CONFIG_POWERMODING_MODE_INITIAL_STANDBY = 0,
-  ECU_CONFIG_POWERMODING_MODE_INITIAL_SLEEP,
-  ECU_CONFIG_POWERMODING_MODE_INITIAL_COLDBOOT,
-  ECU_CONFIG_POWERMODING_MODE_INITIAL_MAX
-}ecu_config_powermoding_mode_initial_t;
-
 typedef struct {
+    time_delta_us_t standby_state_phy_accept_time;
+    time_delta_us_t sleep_state_phy_accept_time;
 
     uint32_t align ALIGNED_CACHE;
 }ecu_config_powermoding_v1_t ALIGNED_CACHE;

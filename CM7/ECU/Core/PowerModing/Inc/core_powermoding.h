@@ -17,5 +17,6 @@ void core_powermoding_loop_slow(ecu_core_ctx_t *ctx);
 error_t core_powermoding_user_mode_request(ecu_core_ctx_t *ctx, ecu_core_powermoding_user_t user, ecu_core_powermoding_mode_request_t mode_request);
 error_t core_powermoding_user_mode_reset(ecu_core_ctx_t *ctx, ecu_core_powermoding_user_t user);
 error_t core_powermoding_mode_get(ecu_core_ctx_t *ctx, ecu_core_powermoding_mode_t *mode);
+error_t core_powermoding_turbotimer_set_req_time(ecu_core_ctx_t *ctx, time_delta_us_t time);
 
 #endif /* CORE_POWERMODING_INC_POWERMODING_H_ */
