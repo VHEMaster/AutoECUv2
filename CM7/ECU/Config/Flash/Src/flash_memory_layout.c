@@ -839,19 +839,43 @@ error_t flash_mem_layout_init(void)
           block_index = layout->sections_info[s].block_index;
           if(layout->sections_info[s].section_type == t &&
               layout->sections_info[s].section_index == i) {
-            if(layout->section_type_to_section_layout[index] == 0xFFFF &&
-                layout->section_type_to_addresses[index] == 0xFFFFFFFF &&
-                layout->sections_info[s].sector_index < layout->blocks_info[block_index].sectors_count &&
-                layout->sections_info[s].block_index < layout->blocks &&
-                (layout->sections_info[s].uses_full_block == true || (layout->sector_size * layout->sections_info[s].sector_index + layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size)) &&
-                (layout->sections_info[s].uses_full_block == false || (layout->sections_info[s].sector_index == 0 && layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size))) {
-              address = layout->blocks_addresses[block_index];
-              address += layout->sector_size * layout->sections_info[s].sector_index;
-              layout->section_type_to_addresses[index] = address;
-              layout->section_type_to_section_layout[index] = s;
+            if(layout->section_type_to_section_layout[index] == 0xFFFF && layout->section_type_to_addresses[index] == 0xFFFFFFFF) {
+              if(layout->sections_info[s].sector_index < layout->blocks_info[block_index].sectors_count) {
+                if(layout->sections_info[s].block_index < layout->blocks) {
+                  if(layout->sections_info[s].uses_full_block == true || (layout->sector_size * layout->sections_info[s].sector_index + layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size)) {
+                    if(layout->sections_info[s].uses_full_block == false || (layout->sections_info[s].sector_index == 0 && layout->sections_info[s].section_length <= layout->blocks_info[block_index].block_size)) {
+                      address = layout->blocks_addresses[block_index];
+                      address += layout->sector_size * layout->sections_info[s].sector_index;
+                      layout->section_type_to_addresses[index] = address;
+                      layout->section_type_to_section_layout[index] = s;
+                    } else {
+                      err = E_INVALACT;
+                      // TODO: DTC here!!!
+                      // Full block usage: Block size overflowed or index is non-zero
+                      break;
+                    }
+                  } else {
+                    err = E_INVALACT;
+                    // TODO: DTC here!!!
+                    // Non-full block usage: Block size overflowed
+                    break;
+                  }
+                } else {
+                  err = E_INVALACT;
+                  // TODO: DTC here!!!
+                  // Block index overflow
+                  break;
+                }
+              } else {
+                err = E_INVALACT;
+                // TODO: DTC here!!!
+                // Sector index overflow
+                break;
+              }
             } else {
               err = E_INVALACT;
-              //TODO: DTC here!!!
+              // TODO: DTC here!!!
+              // Section is reused previously
               break;
             }
           }
