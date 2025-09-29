@@ -180,6 +180,7 @@ static void powermoding_fsm_mode_turbotimer(ecu_core_ctx_t *ctx)
 {
   time_us_t now, mode_switch_timestamp;
   ecu_core_powermoding_ctx_t *pm_ctx;
+  bool flag;
 
   pm_ctx = ctx->powermoding;
 
@@ -204,17 +205,29 @@ static void powermoding_fsm_mode_turbotimer(ecu_core_ctx_t *ctx)
       break;
   }
 
+  if(pm_ctx->mode_current == POWERMODING_MODE_IGNITION) {
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_RUNNING);
+    if(flag == true) {
+      pm_ctx->mode_current = POWERMODING_MODE_RUNNING;
+    }
+  }
+
   if(pm_ctx->mode_current == POWERMODING_MODE_TURBOTIMER) {
     if(pm_ctx->turbotimer_passed_time > pm_ctx->turbotimer_requested_time) {
       pm_ctx->mode_current = POWERMODING_MODE_REQ_RUNDOWN;
     }
-    //TODO: RUNNING HANDLING
+
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_RUNNING);
+    if(flag != true) {
+      pm_ctx->mode_current = POWERMODING_MODE_RUNDOWN;
+    }
   }
 }
 
 static void powermoding_fsm_mode_ignition(ecu_core_ctx_t *ctx)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
+  bool flag;
 
   pm_ctx = ctx->powermoding;
 
@@ -231,15 +244,24 @@ static void powermoding_fsm_mode_ignition(ecu_core_ctx_t *ctx)
   }
 
   if(pm_ctx->mode_current == POWERMODING_MODE_IGNITION) {
-    //TODO: IGNITION HANDLING
-    //pm_ctx->mode_current = POWERMODING_MODE_STARTING;
-    //pm_ctx->mode_current = POWERMODING_MODE_RUNNING;
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_RUNNING);
+    if(flag == true) {
+      pm_ctx->mode_current = POWERMODING_MODE_RUNNING;
+    }
+  }
+
+  if(pm_ctx->mode_current == POWERMODING_MODE_IGNITION) {
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_STARTING);
+    if(flag == true) {
+      pm_ctx->mode_current = POWERMODING_MODE_STARTING;
+    }
   }
 }
 
 static void powermoding_fsm_mode_starting(ecu_core_ctx_t *ctx)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
+  bool flag;
 
   pm_ctx = ctx->powermoding;
 
@@ -256,15 +278,24 @@ static void powermoding_fsm_mode_starting(ecu_core_ctx_t *ctx)
   }
 
   if(pm_ctx->mode_current == POWERMODING_MODE_STARTING) {
-    //TODO: STARTING HANDLING
-    //pm_ctx->mode_current = POWERMODING_MODE_IGNITION;
-    //pm_ctx->mode_current = POWERMODING_MODE_RUNNING;
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_RUNNING);
+    if(flag == true) {
+      pm_ctx->mode_current = POWERMODING_MODE_RUNNING;
+    }
+  }
+
+  if(pm_ctx->mode_current == POWERMODING_MODE_STARTING) {
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_STARTING);
+    if(flag != true) {
+      pm_ctx->mode_current = POWERMODING_MODE_IGNITION;
+    }
   }
 }
 
 static void powermoding_fsm_mode_running(ecu_core_ctx_t *ctx)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
+  bool flag;
 
   pm_ctx = ctx->powermoding;
 
@@ -281,7 +312,14 @@ static void powermoding_fsm_mode_running(ecu_core_ctx_t *ctx)
   }
 
   if(pm_ctx->mode_current == POWERMODING_MODE_RUNNING) {
-    //TODO: RUNNING HANDLING
-    //pm_ctx->mode_current = POWERMODING_MODE_IGNITION;
+    flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_RUNNING);
+    if(flag != true) {
+      flag = powermoding_get_state_flag(ctx, POWERMODING_STATE_FLAG_STARTING);
+      if(flag == true) {
+        pm_ctx->mode_current = POWERMODING_MODE_STARTING;
+      } else {
+        pm_ctx->mode_current = POWERMODING_MODE_IGNITION;
+      }
+    }
   }
 }

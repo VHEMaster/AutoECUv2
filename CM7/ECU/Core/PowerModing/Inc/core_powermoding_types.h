@@ -55,6 +55,18 @@ typedef enum {
   POWERMODING_MODE_REQ_MAX
 }ecu_core_powermoding_mode_request_t;
 
+typedef enum {
+  POWERMODING_STATE_FLAG_NONE = 0,
+  POWERMODING_STATE_FLAG_IGNITION = 1,
+  POWERMODING_STATE_FLAG_STARTING = 2,
+  POWERMODING_STATE_FLAG_RUNNING = 4,
+
+  POWERMODING_STATE_FLAG_ALL =
+      POWERMODING_STATE_FLAG_IGNITION |
+      POWERMODING_STATE_FLAG_STARTING |
+      POWERMODING_STATE_FLAG_RUNNING,
+}ecu_core_powermoding_state_flag_t;
+
 typedef struct {
     time_us_t mode_switch_timestamp;
     ecu_core_powermoding_mode_t mode_current;
@@ -63,6 +75,7 @@ typedef struct {
 
     time_delta_us_t turbotimer_requested_time;
     time_delta_us_t turbotimer_passed_time;
+    ecu_core_powermoding_state_flag_t state_flags;
 }ecu_core_powermoding_ctx_t;
 
 #endif /* CORE_POWERMODING_INC_POWERMODING_TYPES_H_ */
