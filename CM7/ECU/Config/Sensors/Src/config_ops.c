@@ -21,9 +21,9 @@ static const ops_config_t ecu_sensors_ops_config_default = {
         .table = {
             .items = 20,
             .input = {
-                0.0f, 3.0f, 6.6f, 12.1f,
-                16.4f, 18.7f, 23.1f, 29.8f,
-                32.1f, 35.2f, 39.9f, 48.3f,
+                0.0f, 3.0f, 4.1f, 7.6f,
+                11.9f, 16.4f, 23.1f, 28.5f,
+                31.7f, 35.2f, 39.9f, 48.3f,
                 56.6f, 65.0, 81.0f, 97.0f,
                 115.0f, 132.0f, 150.0f, 160.0f
             },
@@ -38,9 +38,22 @@ static const ops_config_t ecu_sensors_ops_config_default = {
         .input_low = 1.5f,
         .input_high = 200,
     },
+    .signal_voltage_to_value = {
+        .table = {
+            .items = 4,
+            .input = {
+                0.0f, 0.5f, 2.5f, 4.5f, 5.0f
+            },
+            .output = {
+                0.0f, 0.0f, 5.0f, 10.0f, 10.0f
+            },
+        },
+        .input_low = 0.4f,
+        .input_high = 4.8f,
+    },
     .slew_rate = 10.0f,
     .boot_time = 100 * TIME_US_IN_MS,
-    .signal_mode = OPS_SIGNAL_MODE_RESISTANCE,
+    .signal_mode = OPS_SIGNAL_MODE_VOLTAGE,
     .calc_mode = OPS_CALC_MODE_TABLE_REF_VALUE,
 };
 
