@@ -49,6 +49,33 @@ typedef struct {
     },
  */
 
+/* Parameters for sensor Bosch 0281006059 :
+    .signal_resistance_to_value = {
+        .table = {
+            .items = 20,
+            .input = {
+                57, 71, 89, 113, 144,
+                187, 243, 323, 436, 596,
+                834, 1175, 1707, 2500, 3792,
+                5896, 9397, 15462, 26114, 45313
+            },
+            .output = {
+                150, 140, 130, 120, 110,
+                100, 90, 80, 70, 60,
+                50, 40, 30, 20, 10,
+                0, -10, -20, -30, -40
+            },
+        },
+        .input_low = 40,
+        .input_high = 50000,
+    },
+    .signal_resistance_calculated = {
+        .calibration_resistance = 2500,
+        .calibration_temperature = 20,
+        .thermistor_beta = 3450,
+    },
+ */
+
 static const iat_config_t ecu_sensors_iat_config_default = {
     .signal_resistance_to_value = {
         .table = {
