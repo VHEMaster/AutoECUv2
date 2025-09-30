@@ -16,6 +16,16 @@ typedef struct {
     map_ctx_t *ctx;
 }ecu_sensors_map_ctx_t;
 
+/* Parameters for sensor Bosch 0281006059 :
+    .signal_voltage_to_value = {
+        .input_low = 0.150f,
+        .input_high = 4.800f,
+        .input_step = 5.0f / 256,
+        .gain = 0.8773f,
+        .offset = 0.071f,
+    },
+*/
+
 static const map_config_t ecu_sensors_map_config_default = {
     .signal_voltage_to_value = {
         .input_low = 0.05f,
@@ -31,10 +41,16 @@ static const map_config_t ecu_sensors_map_config_default = {
 
 static const bool ecu_sensors_map_enabled_default[ECU_SENSOR_MAP_MAX] = {
     true,
+    false,
+    false,
+    false,
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_map_input_pin_default[ECU_SENSOR_MAP_MAX] = {
     ECU_IN_PORT2_PIN10,
+    ECU_IN_NONE,
+    ECU_IN_NONE,
+    ECU_IN_NONE,
 };
 
 static RAM_SECTION ecu_sensors_map_ctx_t ecu_sensors_map_ctx[ECU_SENSOR_MAP_MAX] = {
