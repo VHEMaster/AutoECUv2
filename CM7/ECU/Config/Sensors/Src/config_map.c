@@ -26,6 +26,16 @@ typedef struct {
     },
 */
 
+/* Parameters for sensor Bosch 0261230119 :
+    .signal_voltage_to_value = {
+        .input_low = 0.150f,
+        .input_high = 4.900f,
+        .input_step = 5.0f / 256,
+        .gain = 0.659f,
+        .offset = -0.064f,
+    },
+*/
+
 static const map_config_t ecu_sensors_map_config_default = {
     .signal_voltage_to_value = {
         .input_low = 0.05f,
