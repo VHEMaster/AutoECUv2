@@ -17,7 +17,7 @@ typedef struct {
 }ecu_sensors_maf_ctx_t;
 
 static const maf_config_t ecu_sensors_maf_config_default = {
-    .signal_voltage_to_value = {
+    .signal_voltage_to_value = { // Parameters for sensor Siemens VDO 5WK9701 :
         .table = {
             .items = 256,
             .output = {
@@ -65,11 +65,13 @@ static const maf_config_t ecu_sensors_maf_config_default = {
 };
 
 static const bool ecu_sensors_maf_enabled_default[ECU_SENSOR_MAF_MAX] = {
-    true
+    true,
+    false
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_maf_input_pin_default[ECU_SENSOR_MAF_MAX] = {
-    ECU_IN_PORT1_PIN7
+    ECU_IN_PORT1_PIN7,
+    ECU_IN_NONE
 };
 
 static RAM_SECTION ecu_sensors_maf_ctx_t ecu_sensors_maf_ctx[ECU_SENSOR_MAF_MAX] = {
