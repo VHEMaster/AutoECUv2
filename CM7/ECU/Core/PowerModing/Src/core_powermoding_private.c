@@ -39,7 +39,6 @@ void powermoding_get_mode_requested(ecu_core_ctx_t *ctx)
 INLINE bool powermoding_get_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermoding_state_flag_t mask)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
-  ecu_core_powermoding_mode_request_t mode_requested;
   bool retval = false;
 
   pm_ctx = ctx->powermoding;
@@ -54,7 +53,6 @@ INLINE bool powermoding_get_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermoding
 INLINE void powermoding_set_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermoding_state_flag_t mask)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
-  ecu_core_powermoding_mode_request_t mode_requested;
 
   pm_ctx = ctx->powermoding;
 
@@ -64,7 +62,6 @@ INLINE void powermoding_set_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermoding
 INLINE void powermoding_clear_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermoding_state_flag_t mask)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
-  ecu_core_powermoding_mode_request_t mode_requested;
 
   pm_ctx = ctx->powermoding;
 
@@ -74,7 +71,6 @@ INLINE void powermoding_clear_state_flag(ecu_core_ctx_t *ctx, ecu_core_powermodi
 INLINE bool powermoding_is_runup_allowed(ecu_core_ctx_t *ctx)
 {
   ecu_core_powermoding_ctx_t *pm_ctx;
-  ecu_core_powermoding_mode_request_t mode_requested;
   bool retval = false;
 
   pm_ctx = ctx->powermoding;

@@ -1,0 +1,21 @@
+/*
+ * can_types.h
+ *
+ *  Created on: Oct 7, 2025
+ *      Author: VHEMaster
+ */
+
+#ifndef COMMUNICATION_CAN_INC_CAN_TYPES_H_
+#define COMMUNICATION_CAN_INC_CAN_TYPES_H_
+
+#include "common.h"
+
+#define CAN_MESSAGE_PAYLOAD_LEN_MAX   8u
+
+typedef struct {
+    uint32_t id;
+    uint8_t len;
+    uint8_t payload[CAN_MESSAGE_PAYLOAD_LEN_MAX];
+}can_message_t;
+
+#endif /* COMMUNICATION_CAN_INC_CAN_TYPES_H_ */

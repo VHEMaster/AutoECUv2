@@ -8,6 +8,8 @@
 #ifndef COMMON_INC_TYPES_H_
 #define COMMON_INC_TYPES_H_
 
+#define ECU_CAN_MESSAGE_PAYLOAD_LEN   8
+
 typedef enum {
   ECU_BANK_1 = 0,
   ECU_BANK_2,
