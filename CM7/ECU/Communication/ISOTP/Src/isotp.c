@@ -44,7 +44,6 @@ error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame)
 error_t isotp_frame_read_downstream(isotp_ctx_t *ctx, isotp_frame_t *frame)
 {
   error_t err = E_OK;
-  uint32_t read, write;
   isotp_frame_fifo_t *frame_fifo;
 
   do {
