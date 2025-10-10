@@ -224,7 +224,7 @@ static error_t isotp_fsm_rx_fc(isotp_ctx_t *ctx)
       fc->safc = false;
       fc->separation_time = ctx->config.upstream_min_separation_time;
 
-      if(st < 1000) {
+      if(st >= 100 && st < 1000) {
         st = st / 100 + 0xF0;
       } else if(st < 128 * TIME_US_IN_MS) {
         st = st / TIME_US_IN_MS;
@@ -441,8 +441,7 @@ static error_t isotp_fsm_tx_sf_ff(isotp_ctx_t *ctx)
         write = 0;
       }
       frame_fifo->write = write;
-      ctx->state = ISOTP_STATE_IDLE;
-      err = E_AGAIN;
+      ctx->local_error_code = ISOTP_OK;
     } else {
       msglen = ISOTP_FRAME_LEN - 2;
       frame->payload[0] = ISOTP_MESSAGE_TYPE_FF;
@@ -461,6 +460,14 @@ static error_t isotp_fsm_tx_sf_ff(isotp_ctx_t *ctx)
       ctx->state = ISOTP_STATE_TX_WAIT_FC;
     }
   } while(0);
+
+  if(ctx->local_error_code < ISOTP_MAX) {
+    ctx->data_downstream.error_code_counter[ctx->local_error_code]++;
+    ctx->data_downstream.ready = false;
+    ctx->state = ISOTP_STATE_IDLE;
+    ctx->error_code = ctx->local_error_code;
+    err = E_AGAIN;
+  }
 
   return err;
 }
@@ -501,10 +508,11 @@ static error_t isotp_fsm_tx_wait_fc(isotp_ctx_t *ctx)
           bs = frame_rx->payload[1];
           st = frame_rx->payload[2];
 
+          fc->bn = 0;
           fc->bs = bs;
           fc->safc = false;
 
-          if(st <= 0x7F) {
+          if(st > 0x00 && st <= 0x7F) {
             fc->separation_time = st * TIME_US_IN_MS + 100;
           } else if(st >= 0xF1 && st <= 0xF9) {
             fc->separation_time = (st - 0xF0) * 100 + 100;
@@ -588,7 +596,7 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx)
           fs = frame_rx->payload[0] & ISOTP_FLOW_STATUS_MASK;
           if(fs == ISOTP_FLOW_STATUS_OVF) {
             ctx->local_error_code = ISOTP_RX_OVERFLOW;
-          } else {
+          } else if (fs != ISOTP_FLOW_STATUS_CTS) {
             ctx->local_error_code = ISOTP_UNEXPECTED_PDU;
           }
         } else {
@@ -640,8 +648,8 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx)
       } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
         ctx->local_error_code = ISOTP_TIMEOUT_AS;
       }
+      break;
     }
-    ctx->state = ISOTP_STATE_TX_WAIT_FC;
   } while(0);
 
   if(ctx->local_error_code < ISOTP_MAX) {

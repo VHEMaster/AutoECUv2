@@ -96,12 +96,13 @@ typedef struct isotp_ctx_tag {
     isotp_error_code_t error_code;
     isotp_state_t state;
     time_us_t state_time;
+    bool reset_trigger;
 
 
 }isotp_ctx_t;
 
 error_t isotp_init(isotp_ctx_t *ctx, const isotp_config_t *config);
-error_t isotp_loop(isotp_ctx_t *ctx);
+void isotp_loop(isotp_ctx_t *ctx);
 
 error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame);
 error_t isotp_frame_read_downstream(isotp_ctx_t *ctx, isotp_frame_t *frame);

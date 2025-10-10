@@ -18,5 +18,6 @@ bool isotp_frame_has_data(isotp_frame_fifo_t *fifo);
 
 uint32_t isotp_frame_get_items_count(isotp_frame_fifo_t *fifo);
 uint32_t isotp_frame_get_free_space(isotp_frame_fifo_t *fifo);
+void isotp_poll_for_reset(isotp_ctx_t *ctx);
 
 #endif /* COMMUNICATION_ISOTP_INC_ISOTP_PRIVATE_H_ */

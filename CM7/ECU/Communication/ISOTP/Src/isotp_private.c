@@ -28,7 +28,7 @@ INLINE error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const isotp_frame
       err = E_OVERFLOW;
     } else {
       memcpy(&fifo->buffer[cur], frame, sizeof(isotp_frame_t));
-      fifo->write = cur;
+      fifo->write = write;
     }
 
   } while(0);
@@ -143,4 +143,25 @@ INLINE uint32_t isotp_frame_get_free_space(isotp_frame_fifo_t *fifo)
   } while(0);
 
   return ret;
+}
+
+void isotp_poll_for_reset(isotp_ctx_t *ctx)
+{
+  do {
+    BREAK_IF(ctx == NULL);
+
+    if(ctx->reset_trigger) {
+      ctx->data_upstream.ready = false;
+      ctx->data_downstream.ready = false;
+      ctx->frame_fifo_upstream.read = 0;
+      ctx->frame_fifo_upstream.write = 0;
+      ctx->frame_fifo_downstream.read = 0;
+      ctx->frame_fifo_downstream.write = 0;
+      ctx->local_error_code = ISOTP_MAX;
+      ctx->error_code = ISOTP_OK;
+      ctx->state = ISOTP_STATE_IDLE;
+      ctx->reset_trigger = false;
+    }
+
+  } while(0);
 }

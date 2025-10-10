@@ -68,7 +68,7 @@ error_t isotp_data_write_downstream(isotp_ctx_t *ctx, const uint8_t *payload, ui
     BREAK_IF_ACTION(payload == NULL || length == 0, err = E_PARAM);
 
     data = &ctx->data_downstream;
-    BREAK_IF_ACTION(data->ready, err = E_BUSY);
+    BREAK_IF_ACTION(data->ready, err = E_AGAIN);
 
     data->length = length;
     memcpy(data->payload, payload, length);
@@ -90,7 +90,7 @@ error_t isotp_data_read_upstream(isotp_ctx_t *ctx, uint8_t *payload, uint16_t *l
     BREAK_IF_ACTION(payload == NULL || length == NULL, err = E_PARAM);
 
     data = &ctx->data_upstream;
-    BREAK_IF_ACTION(data->ready, err = E_AGAIN);
+    BREAK_IF_ACTION(!data->ready, err = E_AGAIN);
 
     len = data->length;
     BREAK_IF_ACTION(*length < len, err = E_OVERFLOW);
@@ -128,31 +128,20 @@ error_t isotp_reset(isotp_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
-    ctx->data_upstream.ready = false;
-    ctx->data_downstream.ready = false;
-    ctx->frame_fifo_upstream.read = 0;
-    ctx->frame_fifo_upstream.write = 0;
-    ctx->frame_fifo_downstream.read = 0;
-    ctx->frame_fifo_downstream.write = 0;
-    ctx->local_error_code = ISOTP_MAX;
-    ctx->error_code = ISOTP_OK;
-    ctx->state = ISOTP_STATE_IDLE;
+    ctx->reset_trigger = true;
 
   } while(0);
 
   return err;
 }
 
-error_t isotp_loop(isotp_ctx_t *ctx)
+void isotp_loop(isotp_ctx_t *ctx)
 {
-  error_t err = E_OK;
-
   do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF(ctx == NULL);
 
+    isotp_poll_for_reset(ctx);
     isotp_fsm(ctx);
 
   } while(0);
-
-  return err;
 }
