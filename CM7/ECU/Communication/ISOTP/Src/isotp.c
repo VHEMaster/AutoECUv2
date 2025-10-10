@@ -113,6 +113,8 @@ error_t isotp_data_get_error(isotp_ctx_t *ctx, isotp_error_code_t *code)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(code == NULL, err = E_PARAM);
 
+    *code = ctx->error_code;
+
 
   } while(0);
 
@@ -128,12 +130,11 @@ error_t isotp_reset(isotp_ctx_t *ctx)
 
     ctx->data_upstream.ready = false;
     ctx->data_downstream.ready = false;
-    ctx->frame_fifo_upstream.overflow = false;
-    ctx->frame_fifo_downstream.overflow = false;
     ctx->frame_fifo_upstream.read = 0;
     ctx->frame_fifo_upstream.write = 0;
     ctx->frame_fifo_downstream.read = 0;
     ctx->frame_fifo_downstream.write = 0;
+    ctx->local_error_code = ISOTP_MAX;
     ctx->error_code = ISOTP_OK;
     ctx->state = ISOTP_STATE_IDLE;
 

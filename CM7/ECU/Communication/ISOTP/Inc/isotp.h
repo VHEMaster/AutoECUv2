@@ -20,6 +20,7 @@ typedef enum {
   ISOTP_TIMEOUT_AS,
   ISOTP_TIMEOUT_BS,
   ISOTP_TIMEOUT_CR,
+  ISOTP_TIMEOUT_AR,
   ISOTP_WRONG_SN,
   ISOTP_WRONG_DL,
   ISOTP_INVALID_FS,
@@ -36,6 +37,7 @@ typedef enum {
   ISOTP_STATE_RX_SF_FF,
   ISOTP_STATE_RX_FC,
   ISOTP_STATE_RX_CF,
+  ISOTP_STATE_RX_CPLT,
 
   ISOTP_STATE_TX_SF_FF,
   ISOTP_STATE_TX_WAIT_FC,
@@ -60,7 +62,6 @@ typedef struct {
     isotp_frame_t buffer[ISOTP_FRAME_FIFO_LEN];
     uint32_t read;
     uint32_t write;
-    bool overflow;
 }isotp_frame_fifo_t;
 
 typedef struct {

@@ -25,7 +25,6 @@ INLINE error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const isotp_frame
     }
 
     if(write == read) {
-      fifo->overflow = true;
       err = E_OVERFLOW;
     } else {
       memcpy(&fifo->buffer[cur], frame, sizeof(isotp_frame_t));
