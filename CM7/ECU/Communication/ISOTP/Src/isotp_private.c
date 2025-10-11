@@ -134,9 +134,9 @@ INLINE uint32_t isotp_frame_get_free_space(isotp_frame_fifo_t *fifo)
     write = fifo->write;
 
     if(write >= read) {
-      ret = ISOTP_FRAME_FIFO_LEN - write + read;
+      ret = ISOTP_FRAME_FIFO_LEN - write + read - 1;
     } else {
-      ret = read - write;
+      ret = read - write - 1;
     }
 
 

@@ -119,8 +119,10 @@ static error_t isotp_fsm_rx_sf_ff(isotp_ctx_t *ctx)
   uint16_t framelen;
   uint32_t read;
   uint32_t write;
+  time_us_t now;
 
   do {
+    now = time_now_us();
     fc = &ctx->flowcontrol;
     data = &ctx->data_upstream;
     frame_fifo_rx = &ctx->frame_fifo_upstream;
@@ -137,13 +139,32 @@ static error_t isotp_fsm_rx_sf_ff(isotp_ctx_t *ctx)
     if(fcd == ISOTP_MESSAGE_TYPE_SF) {
       datalen = frame_rx->payload[0] & ISOTP_SF_FF_DATALEN_MASK;
       if(datalen <= ISOTP_FRAME_LEN - 1) {
-        memcpy(data->payload, &frame_rx->payload[1], datalen);
-        data->length = datalen;
-        data->ready = true;
+        if(datalen <= ISOTP_PAYLOAD_LEN_MAX) {
+          memcpy(data->payload, &frame_rx->payload[1], datalen);
+          data->length = datalen;
+          data->ready = true;
 
-        ctx->local_error_code = ISOTP_WRONG_DL;
+          ctx->local_error_code = ISOTP_OK;
+        } else {
+          if(isotp_frame_get_free_space(frame_fifo_tx)) {
+            frame_tx->payload[0] = ISOTP_MESSAGE_TYPE_FC;
+            frame_tx->payload[0] |= ISOTP_FLOW_STATUS_OVF;
+            memset(&frame_tx->payload[1], 0x00, 7);
+
+            if(++write >= ISOTP_FRAME_FIFO_LEN) {
+              write = 0;
+            }
+            frame_fifo_tx->write = write;
+          } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
+            ctx->local_error_code = ISOTP_TIMEOUT_AS;
+          } else {
+            break;
+          }
+
+          ctx->local_error_code = ISOTP_RX_OVERFLOW;
+        }
       } else {
-        ctx->local_error_code = ISOTP_OK;
+        ctx->local_error_code = ISOTP_WRONG_DL;
       }
     } else if(fcd == ISOTP_MESSAGE_TYPE_FF) {
       datalen = frame_rx->payload[0] & ISOTP_SF_FF_DATALEN_MASK;
@@ -162,16 +183,22 @@ static error_t isotp_fsm_rx_sf_ff(isotp_ctx_t *ctx)
         err = E_AGAIN;
 
       } else {
-        frame_tx->payload[0] = ISOTP_MESSAGE_TYPE_FC;
-        frame_tx->payload[0] |= ISOTP_FLOW_STATUS_OVF;
-        memset(&frame_tx->payload[1], 0x00, 7);
+        if(isotp_frame_get_free_space(frame_fifo_tx)) {
+          frame_tx->payload[0] = ISOTP_MESSAGE_TYPE_FC;
+          frame_tx->payload[0] |= ISOTP_FLOW_STATUS_OVF;
+          memset(&frame_tx->payload[1], 0x00, 7);
 
-        if(++write >= ISOTP_FRAME_FIFO_LEN) {
-          write = 0;
+          if(++write >= ISOTP_FRAME_FIFO_LEN) {
+            write = 0;
+          }
+          frame_fifo_tx->write = write;
+        } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
+          ctx->local_error_code = ISOTP_TIMEOUT_AS;
+        } else {
+          break;
         }
-        frame_fifo_tx->write = write;
 
-        ctx->local_error_code = ISOTP_WRONG_DL;
+        ctx->local_error_code = ISOTP_RX_OVERFLOW;
 
       }
     } else {
@@ -207,44 +234,50 @@ static error_t isotp_fsm_rx_fc(isotp_ctx_t *ctx)
   uint8_t st;
   uint32_t write;
   uint32_t read;
+  time_us_t now;
 
   do {
+    now = time_now_us();
     frame_fifo_rx = &ctx->frame_fifo_upstream;
     if(!isotp_frame_has_data(frame_fifo_rx)) {
       frame_fifo_tx = &ctx->frame_fifo_downstream;
-      write = frame_fifo_tx->write;
-      frame_tx = &frame_fifo_tx->buffer[write];
-      fc = &ctx->flowcontrol;
+      if(isotp_frame_get_free_space(frame_fifo_tx)) {
+        write = frame_fifo_tx->write;
+        frame_tx = &frame_fifo_tx->buffer[write];
+        fc = &ctx->flowcontrol;
 
-      bs = ctx->config.upstream_block_size;
-      st = ctx->config.upstream_min_separation_time;
+        bs = ctx->config.upstream_block_size;
+        st = ctx->config.upstream_min_separation_time;
 
-      fc->bn = 0;
-      fc->bs = bs;
-      fc->safc = false;
-      fc->separation_time = ctx->config.upstream_min_separation_time;
+        fc->bn = 0;
+        fc->bs = bs;
+        fc->safc = false;
+        fc->separation_time = ctx->config.upstream_min_separation_time;
 
-      if(st >= 100 && st < 1000) {
-        st = st / 100 + 0xF0;
-      } else if(st < 128 * TIME_US_IN_MS) {
-        st = st / TIME_US_IN_MS;
-      } else {
-        st = 0;
+        if(st >= 100 && st < 1000) {
+          st = st / 100 + 0xF0;
+        } else if(st < 128 * TIME_US_IN_MS) {
+          st = st / TIME_US_IN_MS;
+        } else {
+          st = 0;
+        }
+
+        frame_tx->payload[0] = ISOTP_MESSAGE_TYPE_FC;
+        frame_tx->payload[0] |= ISOTP_FLOW_STATUS_CTS;
+        frame_tx->payload[1] = bs;
+        frame_tx->payload[2] = st;
+        memset(&frame_tx->payload[3], 0x00, 5);
+
+        if(++write >= ISOTP_FRAME_FIFO_LEN) {
+          write = 0;
+        }
+        frame_fifo_tx->write = write;
+
+        ctx->state = ISOTP_STATE_RX_CF;
+        err = E_AGAIN;
+      } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
+        ctx->local_error_code = ISOTP_TIMEOUT_AS;
       }
-
-      frame_tx->payload[0] = ISOTP_MESSAGE_TYPE_FC;
-      frame_tx->payload[0] |= ISOTP_FLOW_STATUS_CTS;
-      frame_tx->payload[1] = bs;
-      frame_tx->payload[2] = st;
-      memset(&frame_tx->payload[3], 0x00, 5);
-
-      if(++write >= ISOTP_FRAME_FIFO_LEN) {
-        write = 0;
-      }
-      frame_fifo_tx->write = write;
-
-      ctx->state = ISOTP_STATE_RX_CF;
-      err = E_AGAIN;
     } else {
       read = frame_fifo_rx->read;
       if(++read >= ISOTP_FRAME_FIFO_LEN) {
@@ -389,6 +422,11 @@ static error_t isotp_fsm_rx_cplt(isotp_ctx_t *ctx)
       if(fcd == ISOTP_MESSAGE_TYPE_CF) {
         data->ready = false;
         ctx->local_error_code = ISOTP_UNEXPECTED_PDU;
+
+        if(++read >= ISOTP_FRAME_FIFO_LEN) {
+          read = 0;
+        }
+        frame_fifo_rx->read = read;
       }
     } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
       data->ready = false;
@@ -418,8 +456,10 @@ static error_t isotp_fsm_tx_sf_ff(isotp_ctx_t *ctx)
   uint16_t datalen;
   uint16_t msglen;
   uint32_t write;
+  time_us_t now;
 
   do {
+    now = time_now_us();
     data = &ctx->data_downstream;
     datalen = data->length;
     msglen = data->length;
@@ -430,34 +470,38 @@ static error_t isotp_fsm_tx_sf_ff(isotp_ctx_t *ctx)
 
     fc = &ctx->flowcontrol;
 
-    if(datalen <= ISOTP_FRAME_LEN - 1) {
-      msglen = datalen;
-      frame->payload[0] = ISOTP_MESSAGE_TYPE_SF;
-      frame->payload[0] |= datalen & ~ISOTP_MESSAGE_TYPE_MASK;
-      memcpy(&frame->payload[1], data->payload, msglen);
-      memset(&frame->payload[msglen + 1], 0x00, ISOTP_FRAME_LEN - 1 - msglen);
+    if(isotp_frame_get_free_space(frame_fifo)) {
+      if(datalen <= ISOTP_FRAME_LEN - 1) {
+        msglen = datalen;
+        frame->payload[0] = ISOTP_MESSAGE_TYPE_SF;
+        frame->payload[0] |= datalen & ~ISOTP_MESSAGE_TYPE_MASK;
+        memcpy(&frame->payload[1], data->payload, msglen);
+        memset(&frame->payload[msglen + 1], 0x00, ISOTP_FRAME_LEN - 1 - msglen);
 
-      if(++write >= ISOTP_FRAME_FIFO_LEN) {
-        write = 0;
+        if(++write >= ISOTP_FRAME_FIFO_LEN) {
+          write = 0;
+        }
+        frame_fifo->write = write;
+        ctx->local_error_code = ISOTP_OK;
+      } else {
+        msglen = ISOTP_FRAME_LEN - 2;
+        frame->payload[0] = ISOTP_MESSAGE_TYPE_FF;
+        frame->payload[0] |= (datalen >> 8) & ~ISOTP_MESSAGE_TYPE_MASK;
+        frame->payload[1] = datalen & 0xFF;
+        memcpy(&frame->payload[2], data->payload, msglen);
+        if(++write >= ISOTP_FRAME_FIFO_LEN) {
+          write = 0;
+        }
+        frame_fifo->write = write;
+
+        fc->left = datalen - msglen;
+        fc->pos = msglen;
+        fc->sn = 1;
+
+        ctx->state = ISOTP_STATE_TX_WAIT_FC;
       }
-      frame_fifo->write = write;
-      ctx->local_error_code = ISOTP_OK;
-    } else {
-      msglen = ISOTP_FRAME_LEN - 2;
-      frame->payload[0] = ISOTP_MESSAGE_TYPE_FF;
-      frame->payload[0] |= (datalen >> 8) & ~ISOTP_MESSAGE_TYPE_MASK;
-      frame->payload[1] = datalen & 0xFF;
-      memcpy(&frame->payload[2], data->payload, msglen);
-      if(++write >= ISOTP_FRAME_FIFO_LEN) {
-        write = 0;
-      }
-      frame_fifo->write = write;
-
-      fc->left = datalen - msglen;
-      fc->pos = msglen;
-      fc->sn = 1;
-
-      ctx->state = ISOTP_STATE_TX_WAIT_FC;
+    } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
+      ctx->local_error_code = ISOTP_TIMEOUT_AS;
     }
   } while(0);
 
@@ -491,10 +535,14 @@ static error_t isotp_fsm_tx_wait_fc(isotp_ctx_t *ctx)
     now = time_now_us();
 
     if(isotp_frame_has_data(frame_fifo_rx)) {
+      fc = &ctx->flowcontrol;
       read = frame_fifo_rx->read;
       frame_rx = &frame_fifo_rx->buffer[read];
 
       fcd = frame_rx->payload[0] & ISOTP_MESSAGE_TYPE_MASK;
+      fs = frame_rx->payload[0] & ISOTP_FLOW_STATUS_MASK;
+      bs = frame_rx->payload[1];
+      st = frame_rx->payload[2];
 
       if(++read >= ISOTP_FRAME_FIFO_LEN) {
         read = 0;
@@ -502,12 +550,7 @@ static error_t isotp_fsm_tx_wait_fc(isotp_ctx_t *ctx)
       frame_fifo_rx->read = read;
 
       if(fcd == ISOTP_MESSAGE_TYPE_FC) {
-        fs = frame_rx->payload[0] & ISOTP_FLOW_STATUS_MASK;
         if(fs == ISOTP_FLOW_STATUS_CTS) {
-          fc = &ctx->flowcontrol;
-          bs = frame_rx->payload[1];
-          st = frame_rx->payload[2];
-
           fc->bn = 0;
           fc->bs = bs;
           fc->safc = false;
@@ -531,7 +574,7 @@ static error_t isotp_fsm_tx_wait_fc(isotp_ctx_t *ctx)
           ctx->local_error_code = ISOTP_INVALID_FS;
         }
       } else {
-        ctx->local_error_code = ISOTP_UNEXPECTED_PDU;
+        ctx->data_downstream.error_code_counter[ISOTP_IGNORED_PDU]++;
       }
     } else if(time_diff(now, ctx->state_time) > ctx->config.timeout) {
       ctx->local_error_code = ISOTP_TIMEOUT_BS;
@@ -581,11 +624,18 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx)
     while(true) {
       now = time_now_us();
 
-      if(isotp_frame_has_data(frame_fifo_rx)) {
+      if(fc->left == 0) {
+        ctx->local_error_code = ISOTP_OK;
+        break;
+      } else if(fc->bs != 0 && fc->bn >= fc->bs) {
+        ctx->state = ISOTP_STATE_TX_WAIT_FC;
+        break;
+      } else if(isotp_frame_has_data(frame_fifo_rx)) {
         read = frame_fifo_rx->read;
         frame_rx = &frame_fifo_rx->buffer[read];
 
         fcd = frame_rx->payload[0] & ISOTP_MESSAGE_TYPE_MASK;
+        fs = frame_rx->payload[0] & ISOTP_FLOW_STATUS_MASK;
 
         if(++read >= ISOTP_FRAME_FIFO_LEN) {
           read = 0;
@@ -593,19 +643,18 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx)
         frame_fifo_rx->read = read;
 
         if(fcd == ISOTP_MESSAGE_TYPE_FC) {
-          fs = frame_rx->payload[0] & ISOTP_FLOW_STATUS_MASK;
           if(fs == ISOTP_FLOW_STATUS_OVF) {
-            ctx->local_error_code = ISOTP_RX_OVERFLOW;
-          } else if (fs != ISOTP_FLOW_STATUS_CTS) {
-            ctx->local_error_code = ISOTP_UNEXPECTED_PDU;
+            if(ctx->config.downstream_pass_early_ovf) {
+              ctx->local_error_code = ISOTP_RX_OVERFLOW;
+              break;
+            }
           }
-        } else {
-          ctx->local_error_code = ISOTP_UNEXPECTED_PDU;
         }
-      } else if(fc->left == 0) {
-        ctx->local_error_code = ISOTP_OK;
-        break;
-      } else if(isotp_frame_get_free_space(frame_fifo)) {
+        ctx->data_downstream.error_code_counter[ISOTP_IGNORED_PDU]++;
+        continue;
+      }
+
+      if(isotp_frame_get_free_space(frame_fifo)) {
         if(fc->separation_time == 0 || fc->safc == false || time_diff(now, ctx->state_time) >= fc->separation_time) {
           frame = &frame_fifo->buffer[write];
 
@@ -636,12 +685,7 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx)
           fc->safc = true;
           ctx->state_time = now;
 
-          if(fc->bs != 0 && fc->bn >= fc->bs) {
-            ctx->state = ISOTP_STATE_TX_WAIT_FC;
-            break;
-          } else {
-            continue;
-          }
+          continue;
         } else {
           break;
         }
