@@ -27,6 +27,7 @@ typedef enum {
   ISOTP_RX_OVERFLOW,
   ISOTP_BUFFER_OVERFLOW,
   ISOTP_UNEXPECTED_PDU,
+  ISOTP_IGNORED_PDU,
   ISOTP_STMIN_VIOLATION,
   ISOTP_MAX
 }isotp_error_code_t;
@@ -35,6 +36,7 @@ typedef enum {
   ISOTP_STATE_IDLE = 0,
 
   ISOTP_STATE_RX_SF_FF,
+  ISOTP_STATE_RX_FC_OVF,
   ISOTP_STATE_RX_FC,
   ISOTP_STATE_RX_CF,
   ISOTP_STATE_RX_CPLT,
@@ -47,11 +49,16 @@ typedef enum {
 
 typedef struct isotp_ctx_tag isotp_ctx_t;
 
+typedef void (*isotp_error_callback_t)(isotp_ctx_t *ctx, isotp_error_code_t code, void *userdata);
+
 typedef struct {
     time_us_t timeout;
     uint16_t upstream_block_size;
     time_delta_us_t upstream_min_separation_time;
     time_delta_us_t upstream_separation_time_gap;
+    bool downstream_pass_early_ovf;
+    isotp_error_callback_t error_callback;
+    void *callback_userdata;
 }isotp_config_t;
 
 typedef struct {
@@ -97,7 +104,6 @@ typedef struct isotp_ctx_tag {
     isotp_state_t state;
     time_us_t state_time;
     bool reset_trigger;
-
 
 }isotp_ctx_t;
 
