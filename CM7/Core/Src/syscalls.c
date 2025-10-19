@@ -83,9 +83,12 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
   (void)file;
   int DataIdx;
 
-  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  if((DBGMCU->CR & 0x07) > 0) // Debugger attached
   {
-    __io_putchar(*ptr++);
+    for (DataIdx = 0; DataIdx < len; DataIdx++)
+    {
+      __io_putchar(*ptr++);
+    }
   }
   return len;
 }
