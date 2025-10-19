@@ -165,7 +165,7 @@ ITCM_FUNC INLINE error_t spi_configure_flush(spi_t *spi)
   return spi_configure_flush_config(&spi->cfg);
 }
 
-ITCM_FUNC INLINE error_t spi_configure_flush_config(spi_cfg_t *spi_cfg)
+ITCM_FUNC INLINE error_t spi_configure_flush_config(const spi_cfg_t *spi_cfg)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status;

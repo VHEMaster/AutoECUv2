@@ -12,6 +12,12 @@
 
 #define CAN_MESSAGE_PAYLOAD_LEN_MAX   8u
 
+typedef enum {
+  CAN_FIFO_0 = 0,
+  CAN_FIFO_1,
+  CAN_FIFO_MAX
+}can_fifo_t;
+
 typedef struct {
     uint32_t id;
     uint8_t len;

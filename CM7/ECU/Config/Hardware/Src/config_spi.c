@@ -18,7 +18,7 @@ typedef struct {
   ecu_spi_slave_cfg_t slaves_cfg[ECU_SPI_IFS_SLAVE_MAX];
 }ecu_config_spi_if_t;
 
-static ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
+static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
   {
     .spi_cfg = {
       .datasize = 32,

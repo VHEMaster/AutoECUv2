@@ -88,7 +88,7 @@ static error_t ecu_config_gpio_ch_set(output_if_id_t interface_id, output_ch_id_
 static error_t ecu_config_gpio_spi_ch_set(output_if_id_t interface_id, output_ch_id_t channel_id, output_value_t value, void *usrdata);
 static error_t ecu_config_gpio_flexio_ch_get(input_if_id_t interface_id, input_ch_id_t channel_id, input_value_t *value, void *usrdata);
 
-static ecu_config_gpio_t ecu_gpio_setup = {
+static RAM_SECTION ecu_config_gpio_t ecu_gpio_setup = {
     .outputs_if = {
         {
             .htim = &htim1,

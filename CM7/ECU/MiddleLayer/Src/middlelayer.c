@@ -9,6 +9,7 @@
 #include <config_hw.h>
 #include "middlelayer.h"
 #include "middlelayer_spi.h"
+#include "middlelayer_can.h"
 #include "middlelayer_gpio.h"
 #include "middlelayer_devices.h"
 #include "middlelayer_sensors.h"
@@ -34,6 +35,7 @@ static void middlelayer_tim_slow_irq(void *)
 
   middlelayer_gpio_loop_slow();
   middlelayer_spi_loop_slow();
+  middlelayer_can_loop_slow();
   middlelayer_devices_loop_slow();
   middlelayer_sensors_loop_slow();
   middlelayer_modules_loop_slow();
@@ -53,6 +55,7 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 
   middlelayer_gpio_loop_fast();
   middlelayer_spi_loop_fast();
+  middlelayer_can_loop_fast();
   middlelayer_devices_loop_fast();
   middlelayer_sensors_loop_fast();
   middlelayer_modules_loop_fast();
@@ -74,6 +77,7 @@ void middlelayer_loop(void)
   middlelayer_gpio_loop_main();
 
   middlelayer_spi_loop_main();
+  middlelayer_can_loop_main();
   middlelayer_devices_loop_main();
   middlelayer_sensors_loop_main();
   middlelayer_modules_loop_main();
@@ -94,6 +98,8 @@ void middlelayer_init(void)
   ecu_config_init_counter();
 
   middlelayer_spi_init();
+
+  middlelayer_can_init();
 
   middlelayer_gpio_init();
 
