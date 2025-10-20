@@ -99,7 +99,7 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
     CAN_LBK_NORMAL(ctx);
     ctx->configured = true;
 
-
+    //REMOVEME!!!!
     ctx->txheader.Identifier = 0x7E8;
     ctx->txheader.IdType = FDCAN_STANDARD_ID;
     ctx->txheader.TxFrameType = FDCAN_DATA_FRAME;
@@ -121,6 +121,7 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
     if(status != HAL_OK) {
       printf("TX ERROR\r\n");
     }
+    //REMOVEME!!!!
 
 
   } while(0);
@@ -241,6 +242,7 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
         ctx->message.id |= CAN_MESSAGE_EXTENDED_ID_FLAG;
       }
 
+      //REMOVEME!!!!
       if(ctx->message.payload[1] == 0x01 && ctx->message.payload[2] == 0x00) {
         ctx->txheader.Identifier = 0x7E8;
         ctx->txheader.IdType = FDCAN_STANDARD_ID;
@@ -263,8 +265,8 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
         if(status != HAL_OK) {
           printf("TX ERROR\r\n");
         }
-
       }
+      //REMOVEME!!!!
 
       for(int i = 0; i < CAN_RX_CB_MAX; i++) {
         if(ctx->rx_callbacks[i].enabled) {
@@ -278,7 +280,7 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
         }
       }
     } else {
-      printf("RX BUFFER ERROR");
+      // TODO: DTC here
     }
 
   } while(0);
