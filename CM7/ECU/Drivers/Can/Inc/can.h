@@ -65,18 +65,21 @@ typedef struct can_ctx_tag {
     bool configured;
 
     can_rx_cb_t rx_callbacks[CAN_RX_CB_MAX];
+    FDCAN_RxHeaderTypeDef rxheader;
+    FDCAN_TxHeaderTypeDef txheader;
+    can_message_t message;
 }can_ctx_t;
 
 error_t can_init(can_ctx_t *ctx, const can_cfg_t *config);
 
-void can_loop_main(can_ctx_t *can);
-void can_loop_slow(can_ctx_t *can);
-void can_loop_fast(can_ctx_t *can);
+void can_loop_main(can_ctx_t *ctx);
+void can_loop_slow(can_ctx_t *ctx);
+void can_loop_fast(can_ctx_t *ctx);
 
-void can_rx_fifo0_irq(can_ctx_t *can, uint32_t fifo_its);
-void can_rx_fifo1_irq(can_ctx_t *can, uint32_t fifo_its);
-void can_rx_buffer_irq(can_ctx_t *can);
-void can_error_irq(can_ctx_t *can);
+void can_rx_fifo0_irq(can_ctx_t *ctx, uint32_t fifo_its);
+void can_rx_fifo1_irq(can_ctx_t *ctx, uint32_t fifo_its);
+void can_rx_buffer_irq(can_ctx_t *ctx);
+void can_error_irq(can_ctx_t *ctx);
 
 error_t can_tx(can_ctx_t *ctx, const can_message_t *message);
 error_t can_rx(can_ctx_t *ctx, can_message_t *message);

@@ -11,6 +11,7 @@
 #include "common.h"
 
 #define CAN_MESSAGE_PAYLOAD_LEN_MAX   8u
+#define CAN_MESSAGE_EXTENDED_ID_FLAG  0x80000000u
 
 typedef enum {
   CAN_FIFO_0 = 0,
