@@ -6,6 +6,7 @@
  */
 
 #include "can.h"
+#include "can_private.h"
 
 #define CAN_LBK_NORMAL(ctx) HAL_GPIO_WritePin((ctx)->config.lbk_pin.port, (ctx)->config.lbk_pin.pin, GPIO_PIN_RESET)
 #define CAN_LBK_LOOPBACK(ctx) HAL_GPIO_WritePin((ctx)->config.lbk_pin.port, (ctx)->config.lbk_pin.pin, GPIO_PIN_SET)
@@ -93,36 +94,14 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
         0);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
+    status = HAL_FDCAN_EnableEdgeFiltering(ctx->config.handle);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
     status = HAL_FDCAN_Start(ctx->config.handle);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     CAN_LBK_NORMAL(ctx);
     ctx->configured = true;
-
-    //REMOVEME!!!!
-    ctx->txheader.Identifier = 0x7E8;
-    ctx->txheader.IdType = FDCAN_STANDARD_ID;
-    ctx->txheader.TxFrameType = FDCAN_DATA_FRAME;
-    ctx->txheader.DataLength = FDCAN_DLC_BYTES_8;
-    ctx->txheader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    ctx->txheader.BitRateSwitch = FDCAN_BRS_OFF;
-    ctx->txheader.FDFormat = FDCAN_CLASSIC_CAN;
-    ctx->txheader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-    ctx->txheader.MessageMarker = 0;
-    ctx->message.payload[0] = 0x06;
-    ctx->message.payload[1] = 0x41;
-    ctx->message.payload[2] = 0x00;
-
-    ctx->message.payload[3] = 0xBE;
-    ctx->message.payload[4] = 0x3F;
-    ctx->message.payload[5] = 0xA8;
-    ctx->message.payload[6] = 0x11;
-    status = HAL_FDCAN_AddMessageToTxFifoQ(ctx->config.handle, &ctx->txheader, ctx->message.payload);
-    if(status != HAL_OK) {
-      printf("TX ERROR\r\n");
-    }
-    //REMOVEME!!!!
-
 
   } while(0);
 
@@ -137,6 +116,8 @@ error_t can_tx(can_ctx_t *ctx, const can_message_t *message)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
 
+    err = can_tx_send_msg(ctx, message);
+
   } while(0);
 
   return err;
@@ -145,10 +126,22 @@ error_t can_tx(can_ctx_t *ctx, const can_message_t *message)
 error_t can_rx(can_ctx_t *ctx, can_message_t *message)
 {
   error_t err = E_OK;
+  uint32_t read, write;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
+
+    read = ctx->rxfifo.read;
+    write = ctx->rxfifo.write;
+    BREAK_IF_ACTION(read == write, err = E_AGAIN);
+
+    memcpy(message, &ctx->rxfifo.buffer[read], sizeof(can_message_t));
+
+    if(++read >= CAN_RX_FIFO_SIZE) {
+      read = 0;
+    }
+    ctx->rxfifo.read = read;
 
   } while(0);
 
@@ -158,22 +151,52 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message)
 error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata)
 {
   error_t err = E_OK;
+  can_rx_cb_t *cb;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(func == NULL, err = E_PARAM);
+    BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && msg_id > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
+    BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && msg_id > 0x7FF, err = E_PARAM);
+
+    err = E_OVERFLOW;
+    for(int i = 0; i < CAN_RX_CB_MAX; i++) {
+      cb = &ctx->rx_callbacks[i];
+      if(!cb->enabled) {
+        cb->msg_id = msg_id;
+        cb->func = func;
+        cb->usrdata = usrdata;
+        cb->enabled = true;
+        err = E_OK;
+        break;
+      }
+    }
 
   } while(0);
 
   return err;
 }
 
-error_t can_unregister_rx_callback(can_ctx_t *ctx, uint32_t msg_id)
+error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata)
 {
   error_t err = E_OK;
+  can_err_cb_t *cb;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(func == NULL, err = E_PARAM);
+
+    err = E_OVERFLOW;
+    for(int i = 0; i < CAN_ERR_CB_MAX; i++) {
+      cb = &ctx->err_callbacks[i];
+      if(!cb->enabled) {
+        cb->func = func;
+        cb->usrdata = usrdata;
+        cb->enabled = true;
+        err = E_OK;
+        break;
+      }
+    }
 
   } while(0);
 
@@ -204,83 +227,77 @@ void can_loop_fast(can_ctx_t *ctx)
   } while(0);
 }
 
-#include <stdio.h>
-#include "time.h"
-
 void can_rx_fifo0_irq(can_ctx_t *ctx, uint32_t fifo_its)
 {
+  error_t err;
+  uint32_t fill, fifo;
+
   do {
     BREAK_IF(ctx == NULL);
 
-    printf("RX FIFO 0 IRQ %lu\r\n", fifo_its);
+    fifo = FDCAN_RX_FIFO0;
+    fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->config.handle, fifo);
+    while(fill--) {
+      err = can_rx_get_msg(ctx, fifo);
+      BREAK_IF(err != E_OK);
+    }
 
   } while(0);
 }
 
 void can_rx_fifo1_irq(can_ctx_t *ctx, uint32_t fifo_its)
 {
+  error_t err;
+  uint32_t fill, fifo;
+
   do {
     BREAK_IF(ctx == NULL);
 
-    printf("RX FIFO 1 IRQ %lu\r\n", fifo_its);
+    fifo = FDCAN_RX_FIFO1;
+    fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->config.handle, fifo);
+    while(fill--) {
+      err = can_rx_get_msg(ctx, fifo);
+      BREAK_IF(err != E_OK);
+    }
 
   } while(0);
 }
 
 void can_rx_buffer_irq(can_ctx_t *ctx)
 {
-  HAL_StatusTypeDef status;
+  error_t err;
+  uint32_t buffers_l, buffers_h;
+  uint32_t buffer_index, buffer_index_rel;
+  uint32_t bitmask;
+
   do {
     BREAK_IF(ctx == NULL);
 
+    buffers_l = ctx->config.handle->Instance->NDAT1;
+    buffers_h = ctx->config.handle->Instance->NDAT2;
 
-    status = HAL_FDCAN_GetRxMessage(ctx->config.handle, FDCAN_RX_BUFFER0, &ctx->rxheader, ctx->message.payload);
-    if(status == HAL_OK) {
-      ctx->message.id = ctx->rxheader.Identifier;
-      ctx->message.len = ctx->rxheader.DataLength >> 16u;
-      if(ctx->rxheader.IdType == FDCAN_EXTENDED_ID) {
-        ctx->message.id |= CAN_MESSAGE_EXTENDED_ID_FLAG;
+    while(true) {
+      if(buffers_l) {
+        buffer_index_rel = POSITION_VAL(buffers_l);
+        buffer_index = buffer_index_rel;
+      } else if(buffers_h) {
+        buffer_index_rel = POSITION_VAL(buffers_h);
+        buffer_index = buffer_index_rel + FDCAN_RX_BUFFER32;
+      } else {
+        break;
       }
 
-      //REMOVEME!!!!
-      if(ctx->message.payload[1] == 0x01 && ctx->message.payload[2] == 0x00) {
-        ctx->txheader.Identifier = 0x7E8;
-        ctx->txheader.IdType = FDCAN_STANDARD_ID;
-        ctx->txheader.TxFrameType = FDCAN_DATA_FRAME;
-        ctx->txheader.DataLength = FDCAN_DLC_BYTES_8;
-        ctx->txheader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-        ctx->txheader.BitRateSwitch = FDCAN_BRS_OFF;
-        ctx->txheader.FDFormat = FDCAN_CLASSIC_CAN;
-        ctx->txheader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-        ctx->txheader.MessageMarker = 0;
-        ctx->message.payload[0] = 0x06;
-        ctx->message.payload[1] = 0x41;
-        ctx->message.payload[2] = 0x00;
+      err = can_rx_get_msg(ctx, buffer_index);
+      BREAK_IF(err != E_OK);
 
-        ctx->message.payload[3] = 0xBE;
-        ctx->message.payload[4] = 0x3F;
-        ctx->message.payload[5] = 0xA8;
-        ctx->message.payload[6] = 0x11;
-        status = HAL_FDCAN_AddMessageToTxBuffer(ctx->config.handle, &ctx->txheader, ctx->message.payload, FDCAN_TX_BUFFER0);
-        if(status != HAL_OK) {
-          printf("TX ERROR\r\n");
-        }
+      bitmask = 1 << buffer_index_rel;
+      if(buffers_l) {
+        buffers_l &= ~bitmask;
+        ctx->config.handle->Instance->NDAT1 = bitmask;
+      } else {
+        buffers_h &= ~bitmask;
+        ctx->config.handle->Instance->NDAT2 = bitmask;
       }
-      //REMOVEME!!!!
-
-      for(int i = 0; i < CAN_RX_CB_MAX; i++) {
-        if(ctx->rx_callbacks[i].enabled) {
-          if(ctx->rx_callbacks[i].msg_id == ctx->message.id) {
-            if(ctx->rx_callbacks[i].func != NULL) {
-              ctx->rx_callbacks[i].func(ctx, &ctx->message, ctx->rx_callbacks[i].usrdata);
-            }
-          }
-        } else {
-          break;
-        }
-      }
-    } else {
-      // TODO: DTC here
     }
 
   } while(0);
@@ -288,11 +305,19 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
 
 void can_error_irq(can_ctx_t *ctx)
 {
+  can_err_cb_t *cb;
+
   do {
     BREAK_IF(ctx == NULL);
 
-    printf("ERROR IRQ\r\n");
-
+    for(int i = 0; i < CAN_ERR_CB_MAX; i++) {
+      cb = &ctx->err_callbacks[i];
+      if(cb->enabled) {
+        if(cb->func != NULL) {
+          cb->func(ctx, cb->usrdata);
+        }
+      }
+    }
   } while(0);
 }
 

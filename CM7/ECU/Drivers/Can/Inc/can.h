@@ -13,7 +13,9 @@
 #include "gpio.h"
 
 #define CAN_RX_CB_MAX     (16)
+#define CAN_ERR_CB_MAX    (8)
 #define CAN_RX_FILTER_MAX (16)
+#define CAN_RX_FIFO_SIZE  (64)
 
 #if defined(HAL_FDCAN_MODULE_ENABLED)
 #define CAN_HANDLE_TYPE FDCAN_HandleTypeDef
@@ -27,6 +29,7 @@
 
 typedef struct can_ctx_tag can_ctx_t;
 typedef void (*can_rx_callback_func_t)(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
+typedef void (*can_err_callback_func_t)(can_ctx_t *ctx, void *usrdata);
 
 typedef struct {
     bool reject_remote_std;
@@ -60,14 +63,29 @@ typedef struct {
     void *usrdata;
 }can_rx_cb_t;
 
+typedef struct {
+    bool enabled;
+    can_err_callback_func_t func;
+    void *usrdata;
+}can_err_cb_t;
+
+typedef struct {
+    can_message_t buffer[CAN_RX_FIFO_SIZE];
+    uint32_t read;
+    uint32_t write;
+}can_rxfifo_t;
+
 typedef struct can_ctx_tag {
     can_cfg_t config;
     bool configured;
 
     can_rx_cb_t rx_callbacks[CAN_RX_CB_MAX];
+    can_err_cb_t err_callbacks[CAN_ERR_CB_MAX];
     FDCAN_RxHeaderTypeDef rxheader;
     FDCAN_TxHeaderTypeDef txheader;
-    can_message_t message;
+    can_message_t rxmessage;
+
+    can_rxfifo_t rxfifo;
 }can_ctx_t;
 
 error_t can_init(can_ctx_t *ctx, const can_cfg_t *config);
@@ -85,6 +103,6 @@ error_t can_tx(can_ctx_t *ctx, const can_message_t *message);
 error_t can_rx(can_ctx_t *ctx, can_message_t *message);
 
 error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata);
-error_t can_unregister_rx_callback(can_ctx_t *ctx, uint32_t msg_id);
+error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata);
 
 #endif /* COMMUNICATION_CAN_INC_CAN_H_ */

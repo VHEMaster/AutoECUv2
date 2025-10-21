@@ -39,6 +39,7 @@
 #define IS_DEBUGGER_ATTACHED()    ((DBGMCU->CR & 0x07) > 0)
 #define BREAKPOINT(x)             { if(IS_DEBUGGER_ATTACHED()) __BKPT((x)); }
 #define PARITY_ODD_CHECK(value)   __builtin_parity((value))
+#define POSITION_VAL(VAL)         (__CLZ(__RBIT(VAL)))
 
 #define BREAK_IF_ACTION(condition, action)              { if((condition)) { {action;} break; } }
 #define BREAK_IF(condition)                             { if((condition)) { break; } }
