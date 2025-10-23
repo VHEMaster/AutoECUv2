@@ -6,6 +6,7 @@
  */
 
 #include "core_comm.h"
+#include "isotp.h"
 
 error_t core_comm_init(ecu_core_ctx_t *ctx)
 {

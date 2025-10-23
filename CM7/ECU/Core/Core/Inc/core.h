@@ -13,6 +13,7 @@
 #include "config_timing.h"
 
 #include "core_runtime.h"
+#include "core_comm_types.h"
 #include "core_powermoding_types.h"
 
 typedef enum {
@@ -30,6 +31,7 @@ typedef struct {
     const ecu_config_global_engine_t *engine_config;
     const ecu_config_engine_calibration_t *calibration;
     ecu_config_engine_runtime_t *runtime_config;
+    ecu_core_comm_ctx_t comm;
 
     bool initialized;
     bool core_init_request;

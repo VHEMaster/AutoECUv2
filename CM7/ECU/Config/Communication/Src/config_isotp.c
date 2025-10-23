@@ -1,0 +1,101 @@
+/*
+ * config_isotp.c
+ *
+ *  Created on: Oct 23, 2025
+ *      Author: vhemaster
+ */
+
+#include <string.h>
+#include "config_isotp.h"
+#include "compiler.h"
+
+typedef struct ecu_comm_isotp_ctx_tag ecu_comm_isotp_ctx_t;
+
+typedef struct ecu_comm_isotp_ctx_tag {
+    isotp_config_t config_default;
+    isotp_ctx_t *ctx;
+}ecu_comm_isotp_ctx_t;
+
+static const isotp_config_t ecu_comm_isotp_config_default = {
+    .timeout = 1000 * TIME_US_IN_MS,
+    .upstream_block_size = 20,
+    .upstream_min_separation_time = 0,
+    .upstream_separation_time_gap = 200,
+    .downstream_pass_early_ovf = false,
+};
+
+static ecu_comm_isotp_ctx_t ecu_comm_isotp_ctx[ECU_COMM_ISOTP_MAX] = {
+    {
+      .config_default = ecu_comm_isotp_config_default,
+    },
+};
+
+error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX || ctx == NULL, err = E_PARAM);
+
+    isotp_ctx = &ecu_comm_isotp_ctx[instance];
+    isotp_ctx->ctx = ctx;
+
+    err = isotp_init(isotp_ctx->ctx, &isotp_ctx->config_default);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_isotp_get_default_config(ecu_comm_isotp_t instance, isotp_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX || config == NULL, err = E_PARAM);
+
+    isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+    memcpy(config, &isotp_ctx->config_default, sizeof(isotp_config_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t *config)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX || config == NULL, err = E_PARAM);
+
+    isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+    err = isotp_init(isotp_ctx->ctx, config);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_isotp_reset(ecu_comm_isotp_t instance)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX, err = E_PARAM);
+
+    isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+    err = isotp_reset(isotp_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}

@@ -8,7 +8,6 @@
 #ifndef CONFIG_MODULES_INC_CONFIG_MODULES_H_
 #define CONFIG_MODULES_INC_CONFIG_MODULES_H_
 
-
 #include "errors.h"
 #include "timing.h"
 #include "etc.h"

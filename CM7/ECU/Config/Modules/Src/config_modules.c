@@ -5,8 +5,6 @@
  *      Author: VHEMaster
  */
 
-
-
 #include "config_modules.h"
 #include "compiler.h"
 #include "bool.h"
@@ -71,13 +69,13 @@ static const ecu_config_modules_t ecu_config_modules = {
             .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_TIMING_MAX,
-        }, //ECU_MODULE_TYPE_ETC
+        }, //ECU_MODULE_TYPE_TIMING
         {
             .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_slow = (ecu_module_loop_func_t)etc_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)etc_loop_fast,
             .instance_max = ECU_MODULE_ETC_MAX,
-        }, //ECU_MODULE_TYPE_TIMING
+        }, //ECU_MODULE_TYPE_ETC
         {
             .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_slow = (ecu_module_loop_func_t)vvt_loop_slow,
