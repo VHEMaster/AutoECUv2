@@ -12,6 +12,10 @@
 #include "compiler.h"
 #include "time.h"
 
+#define ECU_CONFIG_HW_SWI_COMM_PERIOD_US    (150)
+
+static void ecu_config_trigger_comm_irq(void);
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   ecu_config_gpio_exti_call(GPIO_Pin);
@@ -52,11 +56,41 @@ void ecu_config_start_counter(void)
   HAL_TIM_Base_Start(&htim5);
 }
 
-void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, pTIM_CallbackTypeDef func_tim_fast_irq_cb)
+void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, void (*func_tim_comm_irq_cb)(void), pTIM_CallbackTypeDef func_tim_fast_irq_cb)
 {
   HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_slow_irq_cb);
   HAL_TIM_RegisterCallback(&htim7, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_fast_irq_cb);
 
+  HAL_EXTI_RegisterCallback(&hexti1, HAL_EXTI_COMMON_CB_ID, func_tim_comm_irq_cb);
+  HAL_EXTI_SetConfigLine(&hexti1, &(EXTI_ConfigTypeDef){
+    .Line = EXTI_LINE_1,
+    .Mode = EXTI_MODE_INTERRUPT,
+    .Trigger = EXTI_TRIGGER_RISING,
+  });
+
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
+
+}
+
+void ecu_config_swi_poll(void)
+{
+  static time_us_t last_poll_time = 0;
+  uint32_t now = time_now_us();
+
+  if(time_diff(now, last_poll_time) >= ECU_CONFIG_HW_SWI_COMM_PERIOD_US) {
+    if(time_diff(now, last_poll_time) >= ECU_CONFIG_HW_SWI_COMM_PERIOD_US * 3) {
+      last_poll_time = now;
+    } else {
+      last_poll_time += ECU_CONFIG_HW_SWI_COMM_PERIOD_US;
+    }
+    ecu_config_trigger_comm_irq();
+  }
+}
+
+STATIC_INLINE void ecu_config_trigger_comm_irq(void)
+{
+  if(hexti1.PendingCallback != NULL) {
+    HAL_EXTI_GenerateSWI(&hexti1);
+  }
 }

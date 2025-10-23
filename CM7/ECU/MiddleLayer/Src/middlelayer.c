@@ -24,6 +24,7 @@
 typedef struct {
     time_msmnt_item_t main;
     time_msmnt_item_t slow;
+    time_msmnt_item_t comm;
     time_msmnt_item_t fast;
 }ml_loop_time_msmt_t;
 
@@ -49,6 +50,15 @@ static void middlelayer_tim_slow_irq(void *)
   time_msmt_stop(&ml_loop_time_msmt.slow);
 }
 
+ITCM_FUNC static void middlelayer_tim_comm_irq(void)
+{
+  time_msmt_start(&ml_loop_time_msmt.comm);
+
+  core_loop_comm();
+
+  time_msmt_stop(&ml_loop_time_msmt.comm);
+}
+
 ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 {
   time_msmt_start(&ml_loop_time_msmt.fast);
@@ -66,7 +76,10 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 
   core_loop_fast();
 
+  ecu_config_swi_poll();
+
   time_msmt_stop(&ml_loop_time_msmt.fast);
+
 }
 
 void middlelayer_loop(void)
@@ -115,6 +128,6 @@ void middlelayer_init(void)
 
   ecu_config_start_counter();
 
-  ecu_config_start_periodic_timers((pTIM_CallbackTypeDef)middlelayer_tim_slow_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
+  ecu_config_start_periodic_timers((pTIM_CallbackTypeDef)middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
 
 }

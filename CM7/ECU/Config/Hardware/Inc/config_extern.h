@@ -62,4 +62,6 @@ extern DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
 extern DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
 extern DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
 
+extern EXTI_HandleTypeDef hexti1;
+
 #endif /* CONFIG_EXTERN_H_ */

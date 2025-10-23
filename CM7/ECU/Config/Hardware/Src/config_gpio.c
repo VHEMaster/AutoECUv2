@@ -126,6 +126,12 @@ static RAM_SECTION ecu_config_gpio_t ecu_gpio_setup = {
             .cfg = { .ch_get = ecu_config_gpio_flexio_ch_get, },
             .usrdata = NULL,
         }, //ECU_IN_IF_FLEXIO2
+        {
+            .usrdata = NULL,
+        }, //ECU_IN_IF_TIM
+        {
+            .usrdata = NULL,
+        }, //ECU_IN_IF_EXTI
     },
     .outputs = {
         {

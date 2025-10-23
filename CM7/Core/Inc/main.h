@@ -261,6 +261,7 @@ void Error_Handler(void);
 #define NVIC_PRIO_TIM4 9
 #define NVIC_PRIO_TIM5 6
 #define NVIC_PRIO_TIM6_SLOW_DAC 9
+#define NVIC_PRIO_EXTI1_COMM 8
 #define NVIC_PRIO_TIM7_FAST 7
 #define NVIC_PRIO_TIM8_CC 4
 #define NVIC_PRIO_TIM8_BRK_TIM12 3

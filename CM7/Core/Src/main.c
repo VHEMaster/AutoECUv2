@@ -95,6 +95,8 @@ DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
 DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
 DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
 DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
+
+EXTI_HandleTypeDef hexti1;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -2274,6 +2276,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI1_IRQn, NVIC_PRIO_EXTI1_COMM, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI4_IRQn, NVIC_PRIO_EXTI_4, 0);
   HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 

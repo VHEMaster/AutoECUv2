@@ -8,6 +8,7 @@
 #include "core.h"
 #include "core_timing.h"
 #include "core_powermoding.h"
+#include "core_comm.h"
 #include "calcdata.h"
 #include "core_init_fsm.h"
 #include "common.h"
@@ -41,6 +42,9 @@ void core_init(void)
     err = core_powermoding_init(ctx);
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
+    err = core_comm_init(ctx);
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
     core_init_request(ctx);
 
   } while(0);
@@ -49,7 +53,20 @@ void core_init(void)
 
 void core_loop_main(void)
 {
+  ecu_core_ctx_t *ctx = &ecu_core_ctx;
 
+  if(ctx->initialized) {
+    core_comm_loop_main(ctx);
+  }
+}
+
+void core_loop_comm(void)
+{
+  ecu_core_ctx_t *ctx = &ecu_core_ctx;
+
+  if(ctx->initialized) {
+    core_comm_loop_comm(ctx);
+  }
 }
 
 void core_loop_slow(void)
@@ -61,6 +78,7 @@ void core_loop_slow(void)
   if(ctx->initialized) {
     core_calcdata_loop_slow(ctx);
     core_powermoding_loop_slow(ctx);
+    core_comm_loop_slow(ctx);
   }
 }
 

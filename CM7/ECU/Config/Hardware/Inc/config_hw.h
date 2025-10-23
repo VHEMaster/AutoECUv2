@@ -18,9 +18,10 @@
 void ecu_config_ll_init(void);
 void ecu_config_init_counter(void);
 void ecu_config_start_counter(void);
-void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, pTIM_CallbackTypeDef func_tim_fast_irq_cb);
+void ecu_config_start_periodic_timers(pTIM_CallbackTypeDef func_tim_slow_irq_cb, void (*func_tim_comm_irq_cb)(void), pTIM_CallbackTypeDef func_tim_fast_irq_cb);
 
 void ecu_config_set_ignition_enabled(bool enabled);
 void ecu_config_iwgd_refresh(void);
+void ecu_config_swi_poll(void);
 
 #endif /* CONFIG_INC_CONFIG_H_ */
