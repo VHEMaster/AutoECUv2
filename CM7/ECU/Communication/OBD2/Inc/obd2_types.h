@@ -5,10 +5,10 @@
  *      Author: VHEMaster
  */
 
-#include "types.h"
-
 #ifndef COMMUNICATION_OBD2_INC_OBD2_TYPES_H_
 #define COMMUNICATION_OBD2_INC_OBD2_TYPES_H_
+
+#include "types.h"
 
 #define OBD2_RESPONSE_NEGATIVE_CODE    0x7F
 #define OBD2_RESPONSE_POSITIVE_OFFSET  0x40
