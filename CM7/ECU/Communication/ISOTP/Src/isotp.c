@@ -9,7 +9,23 @@
 #include "isotp_fsm.h"
 #include "isotp_private.h"
 
-error_t isotp_init(isotp_ctx_t *ctx, const isotp_config_t *config)
+error_t isotp_init(isotp_ctx_t *ctx, const isotp_init_ctx_t *init)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init == NULL, err = E_PARAM);
+
+    memset(ctx, 0u, sizeof(isotp_ctx_t));
+    memcpy(&ctx->init, init, sizeof(isotp_init_ctx_t));
+
+  } while(0);
+
+  return err;
+}
+
+error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config)
 {
   error_t err = E_OK;
 

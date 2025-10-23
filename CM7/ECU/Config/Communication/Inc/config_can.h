@@ -12,7 +12,8 @@
 #include "can.h"
 
 error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx);
-error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_cfg_t *config);
-error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_cfg_t *config);
+error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_config_t *config);
+error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *config);
+error_t ecu_comm_can_reset(ecu_comm_can_t instance);
 
 #endif /* CONFIG_INC_CONFIG_CAN_H_ */

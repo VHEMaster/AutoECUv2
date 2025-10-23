@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "time.h"
+#include "versioned_isotp.h"
 
 #define ISOTP_PAYLOAD_LEN_MAX   4095u
 #define ISOTP_FRAME_FIFO_LEN    16u
@@ -52,14 +53,9 @@ typedef struct isotp_ctx_tag isotp_ctx_t;
 typedef void (*isotp_error_callback_t)(isotp_ctx_t *ctx, isotp_error_code_t code, void *userdata);
 
 typedef struct {
-    time_us_t timeout;
-    uint16_t upstream_block_size;
-    time_delta_us_t upstream_min_separation_time;
-    time_delta_us_t upstream_separation_time_gap;
-    bool downstream_pass_early_ovf;
     isotp_error_callback_t error_callback;
     void *callback_userdata;
-}isotp_config_t;
+}isotp_init_ctx_t;
 
 typedef struct {
     uint8_t payload[ISOTP_FRAME_LEN];
@@ -90,6 +86,7 @@ typedef struct {
 
 typedef struct isotp_ctx_tag {
     isotp_config_t config;
+    isotp_init_ctx_t init;
 
     isotp_frame_fifo_t frame_fifo_downstream;
     isotp_frame_fifo_t frame_fifo_upstream;

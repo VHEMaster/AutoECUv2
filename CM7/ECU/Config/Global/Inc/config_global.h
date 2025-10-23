@@ -16,6 +16,7 @@
 #include "config_sensors.h"
 #include "config_modules.h"
 #include "config_calibration.h"
+#include "config_comm.h"
 
 #include "config_flash.h"
 #include "config_flexio.h"
@@ -52,6 +53,9 @@
 #include "config_injection.h"
 #include "config_ignition.h"
 #include "config_tables.h"
+
+#include "config_can.h"
+#include "config_isotp.h"
 
 #include "config_engine.h"
 
@@ -271,6 +275,7 @@ typedef enum {
   ECU_CONFIG_FSM_PROCESS_CFG_RST,
   ECU_CONFIG_FSM_PROCESS_SENS_CFG,
   ECU_CONFIG_FSM_PROCESS_MODULE_CFG,
+  ECU_CONFIG_FSM_PROCESS_COMM_CFG,
   ECU_CONFIG_FSM_PROCESS_OPERATION,
   ECU_CONFIG_FSM_PROCESS_MAX
 }ecu_config_global_process_fsm_t;
@@ -305,6 +310,7 @@ typedef struct {
     bool flash_initialized;
     bool sensors_initialized;
     bool modules_initialized;
+    bool comm_initialized;
     bool core_components_initialized;
 
     DMA_HandleTypeDef *hdma;
@@ -341,6 +347,7 @@ typedef struct {
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
     ecu_config_device_type_t process_module_type;
+    ecu_config_device_type_t process_comm_type;
     ecu_device_instance_t process_instance;
 }ecu_config_global_runtime_ctx_t;
 

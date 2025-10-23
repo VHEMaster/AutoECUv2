@@ -654,42 +654,46 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
     }, //ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS
 };
 
-static ecu_config_generic_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_ALL] = {
-    .device_type = ECU_COMM_TYPE_CAN,
-    .instances_count = ECU_COMM_CAN_MAX,
-    .configure_func = (ecu_config_configure_func_t)ecu_comm_can_configure,
-    .reset_func = (ecu_config_reset_func_t)ecu_comm_can_reset,
-    .generic = {
-        .flash_section_type = FLASH_SECTION_TYPE_COMM_CAN,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_can_get_default_config,
-        .data_ptr = &ecu_config_global_engine.comm.can[0],
-        .data_size = sizeof(ecu_config_global_engine.comm.can[0]),
-        .versions_count = CAN_CONFIG_VERSION_MAX,
-        .versions = {
-            {
-                .version = ISOTP_CONFIG_VERSION_V1,
-                .size = sizeof(can_config_v1_t),
-                .translate_func = NULL,
-            }
-        },
+static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_ALL] = {
+    {
+      .device_type = ECU_COMM_TYPE_CAN,
+      .instances_count = ECU_COMM_CAN_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_can_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_can_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_CAN,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_can_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.can[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.can[0]),
+          .versions_count = CAN_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = ISOTP_CONFIG_VERSION_V1,
+                  .size = sizeof(can_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      },
     }, //ECU_CONFIG_COMM_TYPE_CAN
-    .device_type = ECU_COMM_TYPE_ISOTP,
-    .instances_count = ECU_COMM_ISOTP_MAX,
-    .configure_func = (ecu_config_configure_func_t)ecu_comm_isotp_configure,
-    .reset_func = (ecu_config_reset_func_t)ecu_comm_isotp_reset,
-    .generic = {
-        .flash_section_type = FLASH_SECTION_TYPE_COMM_ISOTP,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_isotp_get_default_config,
-        .data_ptr = &ecu_config_global_engine.comm.isotp[0],
-        .data_size = sizeof(ecu_config_global_engine.comm.isotp[0]),
-        .versions_count = ISOTP_CONFIG_VERSION_MAX,
-        .versions = {
-            {
-                .version = ISOTP_CONFIG_VERSION_V1,
-                .size = sizeof(isotp_config_v1_t),
-                .translate_func = NULL,
-            }
-        },
+    {
+      .device_type = ECU_COMM_TYPE_ISOTP,
+      .instances_count = ECU_COMM_ISOTP_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_isotp_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_isotp_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_ISOTP,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_isotp_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.isotp[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.isotp[0]),
+          .versions_count = ISOTP_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = ISOTP_CONFIG_VERSION_V1,
+                  .size = sizeof(isotp_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
     }, //ECU_CONFIG_COMM_TYPE_CAN
 };
 
@@ -744,6 +748,9 @@ error_t ecu_config_global_init(void)
 
     ctx->runtimes_count = ITEMSOF(ecu_config_global_runtimes_ctx);
     ctx->runtimes = ecu_config_global_runtimes_ctx;
+
+    ctx->comm_count = ITEMSOF(ecu_config_global_comm_ctx);
+    ctx->comm = ecu_config_global_comm_ctx;
 
     for(int c = 0; c < ctx->devices_count; c++) {
       for(int i = 0; i < ctx->devices[c].instances_count; i++) {

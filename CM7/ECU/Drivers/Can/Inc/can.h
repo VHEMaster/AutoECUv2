@@ -11,10 +11,10 @@
 #include "common.h"
 #include "can_types.h"
 #include "gpio.h"
+#include "versioned_can.h"
 
 #define CAN_RX_CB_MAX     (16)
 #define CAN_ERR_CB_MAX    (8)
-#define CAN_RX_FILTER_MAX (16)
 #define CAN_RX_FIFO_SIZE  (64)
 
 #if defined(HAL_FDCAN_MODULE_ENABLED)
@@ -32,15 +32,6 @@ typedef void (*can_rx_callback_func_t)(can_ctx_t *ctx, const can_message_t *mess
 typedef void (*can_err_callback_func_t)(can_ctx_t *ctx, void *usrdata);
 
 typedef struct {
-    bool reject_remote_std;
-    bool reject_remote_ext;
-    bool reject_non_matching_std;
-    bool reject_non_matching_ext;
-    can_fifo_t non_matching_std_fifo;
-    can_fifo_t non_matching_ext_fifo;
-}can_cfg_global_filter_t;
-
-typedef struct {
     CAN_HANDLE_TYPE *handle;
     gpio_t lbk_pin;
 
@@ -51,12 +42,6 @@ typedef struct {
   pFDCAN_CallbackTypeDef error_cb;
 #endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
 }can_init_ctx_t;
-
-typedef struct {
-    can_baudrate_t baudrate;
-    can_cfg_global_filter_t global_filter;
-    CAN_FILTER_TYPE filter_config[CAN_RX_FILTER_MAX];
-}can_cfg_t;
 
 typedef struct {
     bool enabled;
@@ -78,7 +63,7 @@ typedef struct {
 }can_rxfifo_t;
 
 typedef struct can_ctx_tag {
-    can_cfg_t config;
+    can_config_t config;
     can_init_ctx_t init;
     bool initialized;
     bool configured;
@@ -89,11 +74,14 @@ typedef struct can_ctx_tag {
     FDCAN_TxHeaderTypeDef txheader;
     can_message_t rxmessage;
 
+    CAN_FILTER_TYPE filter;
+
     can_rxfifo_t rxfifo;
 }can_ctx_t;
 
 error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx);
-error_t can_configure(can_ctx_t *ctx, const can_cfg_t *config);
+error_t can_configure(can_ctx_t *ctx, const can_config_t *config);
+error_t can_reset(can_ctx_t *ctx);
 
 void can_loop_main(can_ctx_t *ctx);
 void can_loop_slow(can_ctx_t *ctx);

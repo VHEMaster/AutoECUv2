@@ -523,6 +523,9 @@ static void config_global_internal_calculate_index_max(ecu_config_global_runtime
     case ECU_CONFIG_TYPE_RUNTIME:
       ctx->op_index_max = ctx->runtimes_count;
       break;
+    case ECU_CONFIG_TYPE_COMM:
+      ctx->op_index_max = ctx->comm_count;
+      break;
     default:
       ctx->op_index_max = 0;
       break;
@@ -546,6 +549,9 @@ static void config_global_internal_calculate_instance_max(ecu_config_global_runt
       break;
     case ECU_CONFIG_TYPE_RUNTIME:
       ctx->op_instance_max = 1;
+      break;
+    case ECU_CONFIG_TYPE_COMM:
+      ctx->op_instance_max = ctx->comm[ctx->op_index].instances_count;
       break;
     default:
       ctx->op_instance_max = 0;
@@ -981,6 +987,9 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
         break;
       case ECU_CONFIG_FSM_PROCESS_MODULE_CFG:
         err = ecu_config_global_fsm_module_cfg(ctx);
+        break;
+      case ECU_CONFIG_FSM_PROCESS_COMM_CFG:
+        err = ecu_config_global_fsm_comm_cfg(ctx);
         break;
       case ECU_CONFIG_FSM_PROCESS_OPERATION:
         err = ecu_config_global_fsm_operation(ctx);

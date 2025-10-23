@@ -66,8 +66,8 @@ typedef struct {
 }ecu_config_engine_runtime_t;
 
 typedef struct {
-    ecu_config_can_t can;
-    ecu_config_isotp_t isotp;
+    can_config_t can[ECU_COMM_CAN_MAX];
+    isotp_config_t isotp[ECU_COMM_ISOTP_MAX];
 
 }ecu_config_engine_comm_t;
 

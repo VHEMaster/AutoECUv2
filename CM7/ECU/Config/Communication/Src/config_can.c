@@ -12,12 +12,12 @@
 typedef struct ecu_comm_can_ctx_tag ecu_comm_can_ctx_t;
 
 typedef struct ecu_comm_can_ctx_tag {
-  can_cfg_t config_default;
+  can_config_t config_default;
   can_init_ctx_t init;
   can_ctx_t *ctx;
 }ecu_comm_can_ctx_t;
 
-static const can_cfg_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
+static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
   {
     .baudrate = CAN_BAUDRATE_500KBPS,
     .global_filter = {
@@ -30,12 +30,12 @@ static const can_cfg_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
     },
     .filter_config = {
       {
-        .IdType = FDCAN_STANDARD_ID,
-        .FilterIndex = 0,
-        .FilterType = FDCAN_FILTER_DUAL,
-        .FilterConfig = FDCAN_FILTER_TO_RXFIFO0,
-        .FilterID1 = 0x7DF,
-        .FilterID2 = 0x7E0,
+        .id_type = FDCAN_STANDARD_ID,
+        .filter_type = FDCAN_FILTER_DUAL,
+        .filter_config = FDCAN_FILTER_TO_RXFIFO0,
+        .id1_filter = 0x7DF,
+        .id2_mask = 0x7E0,
+        .rx_buffer_index = 0,
       },
     },
   }, //ECU_CAN_IF_MAIN
@@ -140,7 +140,7 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
   return err;
 }
 
-error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_cfg_t *config)
+error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_config_t *config)
 {
   error_t err = E_OK;
   ecu_comm_can_ctx_t *can_ctx;
@@ -150,14 +150,14 @@ error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_cfg_t *conf
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
-    memcpy(config, &can_ctx->config_default, sizeof(can_cfg_t));
+    memcpy(config, &can_ctx->config_default, sizeof(can_config_t));
 
   } while(0);
 
   return err;
 }
 
-error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_cfg_t *config)
+error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *config)
 {
   error_t err = E_OK;
   ecu_comm_can_ctx_t *can_ctx;
@@ -168,6 +168,23 @@ error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_cfg_t *config)
     can_ctx = &ecu_comm_can_ctx[instance];
 
     err = can_configure(can_ctx->ctx, config);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_can_reset(ecu_comm_can_t instance)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+
+    can_ctx = &ecu_comm_can_ctx[instance];
+
+    err = can_reset(can_ctx->ctx);
 
   } while(0);
 

@@ -34,17 +34,18 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
   return err;
 }
 
-error_t can_configure(can_ctx_t *ctx, const can_cfg_t *config)
+error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status = HAL_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(!ctx->initialized, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->baudrate < CAN_BAUDRATE_MAX, err = E_PARAM);
 
-    memcpy(&ctx->config, config, sizeof(can_cfg_t));
+    memcpy(&ctx->config, config, sizeof(can_config_t));
 
     if(gpio_valid(&ctx->init.lbk_pin)) {
       gpio_set(&ctx->init.lbk_pin); // Loopback mode
@@ -118,8 +119,71 @@ error_t can_configure(can_ctx_t *ctx, const can_cfg_t *config)
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     for(int i = 0; i < CAN_RX_FILTER_MAX; i++) {
-      if(ctx->config.filter_config[i].FilterConfig != FDCAN_FILTER_DISABLE) {
-        status = HAL_FDCAN_ConfigFilter(ctx->init.handle, &ctx->config.filter_config[i]);
+      if(ctx->config.filter_config[i].filter_config != CAN_FILTER_CONFIG_DISABLE) {
+
+        switch(ctx->config.filter_config[i].id_type) {
+          case CAN_FILTER_IDTYPE_STD:
+            ctx->filter.IdType = FDCAN_STANDARD_ID;
+            break;
+          case CAN_FILTER_IDTYPE_EXT:
+            ctx->filter.IdType = FDCAN_EXTENDED_ID;
+            break;
+          default:
+            err = E_PARAM;
+            break;
+        }
+        BREAK_IF(err != E_OK);
+
+        switch(ctx->config.filter_config[i].filter_type) {
+          case CAN_FILTER_TYPE_RANGE:
+            ctx->filter.FilterType = FDCAN_FILTER_RANGE;
+            break;
+          case CAN_FILTER_TYPE_DUAL:
+            ctx->filter.FilterType = FDCAN_FILTER_DUAL;
+            break;
+          case CAN_FILTER_TYPE_MASK:
+            ctx->filter.FilterType = FDCAN_FILTER_MASK;
+            break;
+          default:
+            err = E_PARAM;
+            break;
+        }
+        BREAK_IF(err != E_OK);
+
+        switch(ctx->config.filter_config[i].filter_config) {
+          case CAN_FILTER_CONFIG_TO_RXFIFO0:
+            ctx->filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+            break;
+          case CAN_FILTER_CONFIG_TO_RXFIFO1:
+            ctx->filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
+            break;
+          case CAN_FILTER_CONFIG_REJECT:
+            ctx->filter.FilterConfig = FDCAN_FILTER_REJECT;
+            break;
+          case CAN_FILTER_CONFIG_HP:
+            ctx->filter.FilterConfig = FDCAN_FILTER_HP;
+            break;
+          case CAN_FILTER_CONFIG_TO_RXFIFO0_HP:
+            ctx->filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0_HP;
+            break;
+          case CAN_FILTER_CONFIG_TO_RXFIFO1_HP:
+            ctx->filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO1_HP;
+            break;
+          case CAN_FILTER_CONFIG_TO_RXBUFFER:
+            ctx->filter.FilterConfig = FDCAN_FILTER_TO_RXBUFFER;
+            break;
+          default:
+            err = E_PARAM;
+            break;
+        }
+        BREAK_IF(err != E_OK);
+
+        ctx->filter.FilterIndex = i;
+        ctx->filter.RxBufferIndex = ctx->config.filter_config[i].rx_buffer_index;
+        ctx->filter.FilterID1 = ctx->config.filter_config[i].id1_filter;
+        ctx->filter.FilterID2 = ctx->config.filter_config[i].id2_mask;
+
+        status = HAL_FDCAN_ConfigFilter(ctx->init.handle, &ctx->filter);
         BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
       }
     }
@@ -370,5 +434,19 @@ void can_error_irq(can_ctx_t *ctx)
       }
     }
   } while(0);
+}
+
+error_t can_reset(can_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF(ctx == NULL);
+
+    // TODO: IMPLEMENT
+
+  } while(0);
+
+  return err;
 }
 

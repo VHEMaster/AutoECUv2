@@ -83,6 +83,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Runtime/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/PulsedAdc/Inc"/>
@@ -232,6 +233,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Runtime/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/PulsedAdc/Inc"/>

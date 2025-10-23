@@ -171,8 +171,8 @@ void isotp_call_error_callback(isotp_ctx_t *ctx)
   do {
     BREAK_IF(ctx == NULL);
 
-    if(ctx->error_code != ISOTP_OK && ctx->config.error_callback != NULL) {
-      ctx->config.error_callback(ctx, ctx->error_code, ctx->config.callback_userdata);
+    if(ctx->error_code != ISOTP_OK && ctx->init.error_callback != NULL) {
+      ctx->init.error_callback(ctx, ctx->error_code, ctx->init.callback_userdata);
     }
 
   } while(0);

@@ -11,8 +11,11 @@
 
 typedef struct ecu_comm_isotp_ctx_tag ecu_comm_isotp_ctx_t;
 
+static void ecu_comm_isotp_error_callback(isotp_ctx_t *ctx, isotp_error_code_t code, void *userdata);
+
 typedef struct ecu_comm_isotp_ctx_tag {
     isotp_config_t config_default;
+    isotp_init_ctx_t init;
     isotp_ctx_t *ctx;
 }ecu_comm_isotp_ctx_t;
 
@@ -26,6 +29,10 @@ static const isotp_config_t ecu_comm_isotp_config_default = {
 
 static ecu_comm_isotp_ctx_t ecu_comm_isotp_ctx[ECU_COMM_ISOTP_MAX] = {
     {
+      .init = {
+          .error_callback = ecu_comm_isotp_error_callback,
+          .callback_userdata = NULL,
+      },
       .config_default = ecu_comm_isotp_config_default,
     },
 };
@@ -41,7 +48,9 @@ error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
     isotp_ctx->ctx = ctx;
 
-    err = isotp_init(isotp_ctx->ctx, &isotp_ctx->config_default);
+    isotp_ctx->init.callback_userdata = (void *)isotp_ctx;
+
+    err = isotp_init(isotp_ctx->ctx, &isotp_ctx->init);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -76,7 +85,7 @@ error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
-    err = isotp_init(isotp_ctx->ctx, config);
+    err = isotp_configure(isotp_ctx->ctx, config);
 
   } while(0);
 
@@ -98,4 +107,9 @@ error_t ecu_comm_isotp_reset(ecu_comm_isotp_t instance)
   } while(0);
 
   return err;
+}
+
+static void ecu_comm_isotp_error_callback(isotp_ctx_t *ctx, isotp_error_code_t code, void *userdata)
+{
+  // TODO: IMPLEMENT
 }
