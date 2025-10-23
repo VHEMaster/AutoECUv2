@@ -12,6 +12,7 @@
 #include "versioned_runtime.h"
 #include "versioned_devices.h"
 #include "versioned_modules.h"
+#include "versioned_comm.h"
 
 typedef struct {
     l9966_config_t flexio[ECU_DEVICE_FLEXIO_MAX];
@@ -65,11 +66,18 @@ typedef struct {
 }ecu_config_engine_runtime_t;
 
 typedef struct {
+    ecu_config_can_t can;
+    ecu_config_isotp_t isotp;
+
+}ecu_config_engine_comm_t;
+
+typedef struct {
     ecu_config_engine_devs_t devs;
     ecu_config_engine_sens_t sens;
     ecu_config_engine_modules_t modules;
     ecu_config_engine_calibration_t calibration;
     ecu_config_engine_runtime_t runtime;
+    ecu_config_engine_comm_t comm;
 }ecu_config_global_engine_t;
 
 typedef struct {

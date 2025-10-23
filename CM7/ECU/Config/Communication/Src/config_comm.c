@@ -10,6 +10,7 @@
 #include "bool.h"
 
 #define ECU_COMM_MAX (       \
+    ECU_COMM_CAN_MAX +       \
     ECU_COMM_ISOTP_MAX)
 
 typedef enum {
@@ -44,12 +45,19 @@ typedef struct {
     ecu_config_comm_instance_runtime_t comm[ECU_COMM_MAX];
 }ecu_config_comm_runtime_t;
 
+static RAM_SECTION can_ctx_t ecu_config_can_ctx[ECU_COMM_CAN_MAX] = {0};
 static RAM_SECTION isotp_ctx_t ecu_config_isotp_ctx[ECU_COMM_ISOTP_MAX] = {0};
 
 static RAM_SECTION ecu_config_comm_runtime_t ecu_config_comm_runtime = {0};
 
 static const ecu_config_comm_t ecu_config_comm = {
     .interfaces = {
+        {
+            .loop_slow = (ecu_comm_loop_func_t)can_loop_slow,
+            .loop_main = (ecu_comm_loop_func_t)can_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)can_loop_comm,
+            .instance_max = ECU_COMM_CAN_MAX,
+        }, //ECU_COMM_TYPE_CAN
         {
             .loop_slow = (ecu_comm_loop_func_t)NULL,
             .loop_main = (ecu_comm_loop_func_t)NULL,
@@ -58,6 +66,11 @@ static const ecu_config_comm_t ecu_config_comm = {
         }, //ECU_COMM_TYPE_ISOTP
     },
     .comm = {
+        {
+            .type = ECU_COMM_TYPE_CAN,
+            .instance = ECU_COMM_CAN_1,
+            .ctx = &ecu_config_can_ctx[ECU_COMM_CAN_1],
+        },
         {
             .type = ECU_COMM_TYPE_ISOTP,
             .instance = ECU_COMM_ISOTP_1,

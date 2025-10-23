@@ -44,18 +44,18 @@ typedef struct {
     CAN_HANDLE_TYPE *handle;
     gpio_t lbk_pin;
 
-    can_baudrate_t baudrate;
-
-    can_cfg_global_filter_t global_filter;
-    CAN_FILTER_TYPE filter_config[CAN_RX_FILTER_MAX];
-
-
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
   pFDCAN_RxFifo0CallbackTypeDef rx_fifo0_cb;
   pFDCAN_RxFifo1CallbackTypeDef rx_fifo1_cb;
   pFDCAN_CallbackTypeDef rx_buffer_cb;
   pFDCAN_CallbackTypeDef error_cb;
 #endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
+}can_init_ctx_t;
+
+typedef struct {
+    can_baudrate_t baudrate;
+    can_cfg_global_filter_t global_filter;
+    CAN_FILTER_TYPE filter_config[CAN_RX_FILTER_MAX];
 }can_cfg_t;
 
 typedef struct {
@@ -79,6 +79,8 @@ typedef struct {
 
 typedef struct can_ctx_tag {
     can_cfg_t config;
+    can_init_ctx_t init;
+    bool initialized;
     bool configured;
 
     can_rx_cb_t rx_callbacks[CAN_RX_CB_MAX];
@@ -90,11 +92,12 @@ typedef struct can_ctx_tag {
     can_rxfifo_t rxfifo;
 }can_ctx_t;
 
-error_t can_init(can_ctx_t *ctx, const can_cfg_t *config);
+error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx);
+error_t can_configure(can_ctx_t *ctx, const can_cfg_t *config);
 
 void can_loop_main(can_ctx_t *ctx);
 void can_loop_slow(can_ctx_t *ctx);
-void can_loop_fast(can_ctx_t *ctx);
+void can_loop_comm(can_ctx_t *ctx);
 
 void can_rx_fifo0_irq(can_ctx_t *ctx, uint32_t fifo_its);
 void can_rx_fifo1_irq(can_ctx_t *ctx, uint32_t fifo_its);

@@ -16,6 +16,7 @@
 
 #include "versioned_devices.h"
 #include "versioned_modules.h"
+#include "versioned_comm.h"
 #include "versioned_calibration.h"
 #include "versioned_runtime.h"
 #include "config_engine.h"
@@ -653,6 +654,45 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
     }, //ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS
 };
 
+static ecu_config_generic_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_ALL] = {
+    .device_type = ECU_COMM_TYPE_CAN,
+    .instances_count = ECU_COMM_CAN_MAX,
+    .configure_func = (ecu_config_configure_func_t)ecu_comm_can_configure,
+    .reset_func = (ecu_config_reset_func_t)ecu_comm_can_reset,
+    .generic = {
+        .flash_section_type = FLASH_SECTION_TYPE_COMM_CAN,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_can_get_default_config,
+        .data_ptr = &ecu_config_global_engine.comm.can[0],
+        .data_size = sizeof(ecu_config_global_engine.comm.can[0]),
+        .versions_count = CAN_CONFIG_VERSION_MAX,
+        .versions = {
+            {
+                .version = ISOTP_CONFIG_VERSION_V1,
+                .size = sizeof(can_config_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_COMM_TYPE_CAN
+    .device_type = ECU_COMM_TYPE_ISOTP,
+    .instances_count = ECU_COMM_ISOTP_MAX,
+    .configure_func = (ecu_config_configure_func_t)ecu_comm_isotp_configure,
+    .reset_func = (ecu_config_reset_func_t)ecu_comm_isotp_reset,
+    .generic = {
+        .flash_section_type = FLASH_SECTION_TYPE_COMM_ISOTP,
+        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_isotp_get_default_config,
+        .data_ptr = &ecu_config_global_engine.comm.isotp[0],
+        .data_size = sizeof(ecu_config_global_engine.comm.isotp[0]),
+        .versions_count = ISOTP_CONFIG_VERSION_MAX,
+        .versions = {
+            {
+                .version = ISOTP_CONFIG_VERSION_V1,
+                .size = sizeof(isotp_config_v1_t),
+                .translate_func = NULL,
+            }
+        },
+    }, //ECU_CONFIG_COMM_TYPE_CAN
+};
+
 static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
 {
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
@@ -780,6 +820,23 @@ error_t ecu_config_global_init(void)
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);
+
+    for(int c = 0; c < ctx->comm_count; c++) {
+      for(int i = 0; i < ctx->comm[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->comm[c].generic.flash_section_type, i);
+        BREAK_IF(err != E_OK);
+        BREAK_IF_ACTION(ctx->comm[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->comm[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->comm[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+
+        if(ctx->comm[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->comm[c].generic.get_default_cfg_func(i, ctx->comm[c].generic.data_ptr + ctx->comm[c].generic.data_size * i);
+        }
+        BREAK_IF(err != E_OK);
+      }
+    }
+    BREAK_IF(err != E_OK);
+
 
     ctx->op_req_type = ECU_CONFIG_TYPE_MAX;
 
@@ -915,6 +972,30 @@ error_t ecu_config_global_modules_initialize(void)
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
       ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULES_INIT;
+      ctx->process_result = E_AGAIN;
+    } else {
+      if(ctx->process_result != E_AGAIN) {
+        err = ctx->process_result;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_global_comm_initialize(void)
+{
+  error_t err = E_AGAIN;
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  do {
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_COMM_INIT, err = E_INVALACT);
+
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_COMM_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {

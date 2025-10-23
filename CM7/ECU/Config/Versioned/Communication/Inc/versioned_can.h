@@ -1,0 +1,13 @@
+/*
+ * versioned_can.h
+ *
+ *  Created on: Oct 23, 2025
+ *      Author: VHEMaster
+ */
+
+#ifndef CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_CAN_H_
+#define CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_CAN_H_
+
+
+
+#endif /* CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_CAN_H_ */

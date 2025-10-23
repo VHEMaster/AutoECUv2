@@ -15,7 +15,7 @@ error_t can_rx_get_msg(can_ctx_t *ctx, uint32_t rxindex)
   can_rx_cb_t *cb;
   bool handled = false;
 
-  status = HAL_FDCAN_GetRxMessage(ctx->config.handle, rxindex, &ctx->rxheader, ctx->rxmessage.payload);
+  status = HAL_FDCAN_GetRxMessage(ctx->init.handle, rxindex, &ctx->rxheader, ctx->rxmessage.payload);
   if(status == HAL_OK) {
     ctx->rxmessage.id = ctx->rxheader.Identifier;
     ctx->rxmessage.len = ctx->rxheader.DataLength >> 16u;
@@ -69,7 +69,7 @@ error_t can_tx_send_msg(can_ctx_t *ctx, const can_message_t *message)
   uint32_t message_id;
 
   do {
-    free = HAL_FDCAN_GetTxFifoFreeLevel(ctx->config.handle);
+    free = HAL_FDCAN_GetTxFifoFreeLevel(ctx->init.handle);
     BREAK_IF_ACTION(free == 0, err = E_AGAIN);
 
     message_id = message->id;
@@ -91,7 +91,7 @@ error_t can_tx_send_msg(can_ctx_t *ctx, const can_message_t *message)
     ctx->txheader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     ctx->txheader.MessageMarker = 0;
 
-    status = HAL_FDCAN_AddMessageToTxFifoQ(ctx->config.handle, &ctx->txheader, (uint8_t *)message->payload);
+    status = HAL_FDCAN_AddMessageToTxFifoQ(ctx->init.handle, &ctx->txheader, (uint8_t *)message->payload);
     if(status != HAL_OK) {
       err = E_HAL;
       // TODO: DTC here

@@ -8,6 +8,7 @@
 #include "middlelayer_comm.h"
 #include "config_comm.h"
 
+#include "config_can.h"
 #include "config_isotp.h"
 
 #include "compiler.h"
@@ -37,6 +38,18 @@ void middlelayer_comm_init(void)
 
   do {
     err = ecu_comm_init();
+
+    for(int i = 0; i < ECU_COMM_CAN_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_CAN, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_can_init(i, (can_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_CAN, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_COMM_ISOTP_MAX; i++) {
       err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ISOTP, i, &comm_ctx);

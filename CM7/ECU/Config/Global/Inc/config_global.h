@@ -126,11 +126,19 @@ typedef enum {
 }ecu_config_runtime_type_t;
 
 typedef enum {
+  ECU_CONFIG_COMM_TYPE_CAN,
+  ECU_CONFIG_COMM_TYPE_ISOTP,
+  ECU_CONFIG_COMM_TYPE_ALL,
+  ECU_CONFIG_COMM_TYPE_MAX
+}ecu_config_comm_type_t;
+
+typedef enum {
   ECU_CONFIG_TYPE_DEVICE = 0,
   ECU_CONFIG_TYPE_SENSOR,
   ECU_CONFIG_TYPE_MODULE,
   ECU_CONFIG_TYPE_CALIBRATION,
   ECU_CONFIG_TYPE_RUNTIME,
+  ECU_CONFIG_TYPE_COMM,
   ECU_CONFIG_TYPE_ALL,
   ECU_CONFIG_TYPE_MAX,
 }ecu_config_type_t;
@@ -213,6 +221,14 @@ typedef enum {
 }ecu_config_global_module_cfg_fsm_t;
 
 typedef enum {
+  ECU_CONFIG_FSM_COMM_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_COMM_CFG_DEFINE,
+  ECU_CONFIG_FSM_COMM_CFG_RESET,
+  ECU_CONFIG_FSM_COMM_CFG_CONFIG,
+  ECU_CONFIG_FSM_COMM_CFG_MAX
+}ecu_config_global_comm_cfg_fsm_t;
+
+typedef enum {
   ECU_CONFIG_FSM_FLASH_CONDITION = 0,
   ECU_CONFIG_FSM_FLASH_DEFINE,
   ECU_CONFIG_FSM_FLASH_RESET,
@@ -265,6 +281,7 @@ typedef enum {
   ECU_CONFIG_PROCESS_TYPE_DEVS_INIT,
   ECU_CONFIG_PROCESS_TYPE_SENS_INIT,
   ECU_CONFIG_PROCESS_TYPE_MODULES_INIT,
+  ECU_CONFIG_PROCESS_TYPE_COMM_INIT,
   ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE,
   ECU_CONFIG_PROCESS_TYPE_MAX,
 }ecu_config_global_process_type_t;
@@ -281,6 +298,8 @@ typedef struct {
     ecu_config_generic_ctx_t *calibrations;
     uint32_t runtimes_count;
     ecu_config_generic_ctx_t *runtimes;
+    uint32_t comm_count;
+    ecu_config_device_ctx_t *comm;
     bool global_ready;
     bool devices_initialized;
     bool flash_initialized;
@@ -313,6 +332,7 @@ typedef struct {
     ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
     ecu_config_global_sens_cfg_fsm_t fsm_sens_cfg;
     ecu_config_global_module_cfg_fsm_t fsm_module_cfg;
+    ecu_config_global_comm_cfg_fsm_t fsm_comm_cfg;
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
 
@@ -333,6 +353,7 @@ error_t ecu_config_global_flash_initialize(void);
 error_t ecu_config_global_devices_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
 error_t ecu_config_global_modules_initialize(void);
+error_t ecu_config_global_comm_initialize(void);
 
 error_t ecu_config_global_flash_erase(void);
 

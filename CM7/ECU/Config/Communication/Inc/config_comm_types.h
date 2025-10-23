@@ -16,9 +16,15 @@
 typedef uint32_t ecu_comm_instance_t;
 
 typedef enum {
-  ECU_COMM_TYPE_ISOTP = 0,
+  ECU_COMM_TYPE_CAN = 0,
+  ECU_COMM_TYPE_ISOTP,
   ECU_COMM_TYPE_MAX
 }ecu_comm_type_t;
+
+typedef enum {
+  ECU_COMM_CAN_1 = 0,
+  ECU_COMM_CAN_MAX
+}ecu_comm_can_t;
 
 typedef enum {
   ECU_COMM_ISOTP_1 = 0,

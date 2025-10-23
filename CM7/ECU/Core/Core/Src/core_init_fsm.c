@@ -71,6 +71,16 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
           ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
         }
         break;
+      case ECU_CORE_INIT_FSM_INIT_COMM:
+        err = ecu_config_global_comm_initialize();
+        if(err == E_OK) {
+          ctx->fsm_core_init++;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->core_init_errcode = err;
+          ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
+        }
+        break;
       case ECU_CORE_INIT_FSM_COMPLETED:
         err = E_OK;
         ctx->core_init_errcode = err;

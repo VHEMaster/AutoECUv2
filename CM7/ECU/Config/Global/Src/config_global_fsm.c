@@ -420,6 +420,91 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
   return err;
 }
 
+static error_t ecu_config_global_fsm_comm_cfg(ecu_config_global_runtime_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->fsm_comm_cfg) {
+      case ECU_CONFIG_FSM_COMM_CFG_CONDITION:
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_COMM_INIT && ctx->process_result == E_AGAIN) {
+          ctx->comm_initialized = false;
+          ctx->process_comm_type = 0;
+          ctx->process_instance = 0;
+          ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_DEFINE;
+          err = E_AGAIN;
+          for(int c = 0; c < ctx->comm_count; c++) {
+            ctx->comm[c].reset_errcode = err;
+            ctx->comm[c].config_errcode = err;
+          }
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case ECU_CONFIG_FSM_COMM_CFG_DEFINE:
+        if(ctx->process_comm_type >= ctx->comm_count) {
+          ctx->comm_initialized = true;
+          ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_CONDITION;
+          err = E_OK;
+          ctx->process_result = err;
+        } else {
+          err = E_AGAIN;
+          if(ctx->process_instance >= ctx->comm[ctx->process_comm_type].instances_count) {
+            ctx->process_instance = 0;
+            ctx->process_comm_type++;
+          } else {
+            ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_RESET;
+          }
+          continue;
+        }
+
+        break;
+      case ECU_CONFIG_FSM_COMM_CFG_RESET:
+        if(ctx->comm[ctx->process_comm_type].reset_func != NULL) {
+          err = ctx->comm[ctx->process_comm_type].reset_func(ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->comm[ctx->process_comm_type].reset_errcode == E_AGAIN ||
+              ctx->comm[ctx->process_comm_type].reset_errcode == E_OK) {
+            ctx->comm[ctx->process_comm_type].reset_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_CONFIG;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_COMM_CFG_CONFIG:
+        if(ctx->comm[ctx->process_comm_type].configure_func != NULL) {
+          err = ctx->comm[ctx->process_comm_type].configure_func(ctx->process_instance, ctx->comm[ctx->process_comm_type].generic.data_ptr +
+              ctx->comm[ctx->process_comm_type].generic.data_size * ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->comm[ctx->process_comm_type].config_errcode == E_AGAIN ||
+              ctx->comm[ctx->process_comm_type].config_errcode == E_OK) {
+            ctx->comm[ctx->process_comm_type].config_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_DEFINE;
+          ctx->process_instance++;
+          continue;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
 static void config_global_internal_calculate_index_max(ecu_config_global_runtime_ctx_t *ctx)
 {
   switch(ctx->op_type_index) {
