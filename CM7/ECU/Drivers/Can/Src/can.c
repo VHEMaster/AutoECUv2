@@ -26,7 +26,10 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
     memset(ctx, 0, sizeof(can_ctx_t));
     memcpy(&ctx->config, config, sizeof(can_cfg_t));
 
-    CAN_LBK_LOOPBACK(ctx);
+    if(gpio_valid(&ctx->config.lbk_pin)) {
+      gpio_set(&ctx->config.lbk_pin); // Loopback mode
+    }
+
     status = HAL_FDCAN_Stop(ctx->config.handle);
 
     switch(ctx->config.baudrate) {
@@ -126,7 +129,9 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
     status = HAL_FDCAN_Start(ctx->config.handle);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-    CAN_LBK_NORMAL(ctx);
+    if(gpio_valid(&ctx->config.lbk_pin)) {
+      gpio_reset(&ctx->config.lbk_pin); // Normal mode
+    }
     ctx->configured = true;
 
   } while(0);
