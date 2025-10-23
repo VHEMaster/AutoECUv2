@@ -9,7 +9,10 @@
 #include "config_comm.h"
 
 #include "config_can.h"
+#include "config_kwp.h"
 #include "config_isotp.h"
+#include "config_uds.h"
+#include "config_obd2.h"
 
 #include "compiler.h"
 
@@ -51,6 +54,18 @@ void middlelayer_comm_init(void)
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
+    for(int i = 0; i < ECU_COMM_KWP_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_KWP, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_kwp_init(i, (kwp_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_KWP, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
     for(int i = 0; i < ECU_COMM_ISOTP_MAX; i++) {
       err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ISOTP, i, &comm_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
@@ -59,6 +74,30 @@ void middlelayer_comm_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_ISOTP, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_COMM_UDS_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_UDS, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_uds_init(i, (uds_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_UDS, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_COMM_OBD2_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_OBD2, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_obd2_init(i, (obd2_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_OBD2, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

@@ -8,10 +8,17 @@
 #ifndef COMMUNICATION_OBD2_INC_OBD2_TYPES_H_
 #define COMMUNICATION_OBD2_INC_OBD2_TYPES_H_
 
-#include "types.h"
+#include "common.h"
+#include "time.h"
+#include "versioned_obd2.h"
 
 #define OBD2_RESPONSE_NEGATIVE_CODE    0x7F
 #define OBD2_RESPONSE_POSITIVE_OFFSET  0x40
+
+typedef enum {
+  OBD2_OK = 0,
+  OBD2_MAX
+}obd2_error_code_t;
 
 typedef enum {
   OBD2_SID_START                                = 0x00,
@@ -303,5 +310,23 @@ typedef enum
   OBD2_FUEL_HYBRID_ELECTRIC       = 20,
   OBD2_FUEL_HYDROGEN              = 24
 }obd2_fuel_type_t;
+
+typedef struct obd2_ctx_tag obd2_ctx_t;
+
+typedef void (*obd2_error_callback_t)(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
+
+typedef struct {
+    obd2_error_callback_t error_callback;
+    void *callback_userdata;
+}obd2_init_ctx_t;
+
+typedef struct obd2_ctx_tag {
+    obd2_config_t config;
+    obd2_init_ctx_t init;
+
+    obd2_error_code_t error_code;
+    bool reset_trigger;
+
+}obd2_ctx_t;
 
 #endif /* COMMUNICATION_OBD2_INC_OBD2_TYPES_H_ */

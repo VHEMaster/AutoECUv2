@@ -9,9 +9,12 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_COMM_MAX (       \
-    ECU_COMM_CAN_MAX +       \
-    ECU_COMM_ISOTP_MAX)
+#define ECU_COMM_MAX (      \
+    ECU_COMM_CAN_MAX      + \
+    ECU_COMM_KWP_MAX      + \
+    ECU_COMM_ISOTP_MAX    + \
+    ECU_COMM_UDS_MAX      + \
+    ECU_COMM_OBD2_MAX)
 
 typedef enum {
   ECU_COMM_LOOP_TYPE_MAIN = 0,
@@ -46,7 +49,10 @@ typedef struct {
 }ecu_config_comm_runtime_t;
 
 static RAM_SECTION can_ctx_t ecu_config_can_ctx[ECU_COMM_CAN_MAX] = {0};
+static RAM_SECTION kwp_ctx_t ecu_config_kwp_ctx[ECU_COMM_KWP_MAX] = {0};
 static RAM_SECTION isotp_ctx_t ecu_config_isotp_ctx[ECU_COMM_ISOTP_MAX] = {0};
+static RAM_SECTION uds_ctx_t ecu_config_uds_ctx[ECU_COMM_UDS_MAX] = {0};
+static RAM_SECTION obd2_ctx_t ecu_config_obd2_ctx[ECU_COMM_OBD2_MAX] = {0};
 
 static RAM_SECTION ecu_config_comm_runtime_t ecu_config_comm_runtime = {0};
 
@@ -59,11 +65,29 @@ static const ecu_config_comm_t ecu_config_comm = {
             .instance_max = ECU_COMM_CAN_MAX,
         }, //ECU_COMM_TYPE_CAN
         {
+            .loop_slow = (ecu_comm_loop_func_t)kwp_loop_slow,
+            .loop_main = (ecu_comm_loop_func_t)kwp_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)kwp_loop_comm,
+            .instance_max = ECU_COMM_KWP_MAX,
+        }, //ECU_COMM_TYPE_KWP
+        {
             .loop_slow = (ecu_comm_loop_func_t)NULL,
-            .loop_main = (ecu_comm_loop_func_t)NULL,
+            .loop_main = (ecu_comm_loop_func_t)isotp_loop,
             .loop_comm = (ecu_comm_loop_func_t)NULL,
             .instance_max = ECU_COMM_ISOTP_MAX,
         }, //ECU_COMM_TYPE_ISOTP
+        {
+            .loop_slow = (ecu_comm_loop_func_t)NULL,
+            .loop_main = (ecu_comm_loop_func_t)uds_loop,
+            .loop_comm = (ecu_comm_loop_func_t)NULL,
+            .instance_max = ECU_COMM_UDS_MAX,
+        }, //ECU_COMM_TYPE_UDS
+        {
+            .loop_slow = (ecu_comm_loop_func_t)NULL,
+            .loop_main = (ecu_comm_loop_func_t)obd2_loop,
+            .loop_comm = (ecu_comm_loop_func_t)NULL,
+            .instance_max = ECU_COMM_OBD2_MAX,
+        }, //ECU_COMM_TYPE_OBD2
     },
     .comm = {
         {
@@ -72,9 +96,24 @@ static const ecu_config_comm_t ecu_config_comm = {
             .ctx = &ecu_config_can_ctx[ECU_COMM_CAN_1],
         },
         {
+            .type = ECU_COMM_TYPE_KWP,
+            .instance = ECU_COMM_KWP_1,
+            .ctx = &ecu_config_kwp_ctx[ECU_COMM_KWP_1],
+        },
+        {
             .type = ECU_COMM_TYPE_ISOTP,
             .instance = ECU_COMM_ISOTP_1,
             .ctx = &ecu_config_isotp_ctx[ECU_COMM_ISOTP_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_UDS,
+            .instance = ECU_COMM_UDS_1,
+            .ctx = &ecu_config_uds_ctx[ECU_COMM_UDS_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_OBD2,
+            .instance = ECU_COMM_OBD2_1,
+            .ctx = &ecu_config_obd2_ctx[ECU_COMM_OBD2_1],
         },
     },
 };
@@ -214,7 +253,27 @@ error_t ecu_comm_set_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t 
   return err;
 }
 
+error_t ecu_comm_get_can_ctx(ecu_comm_can_t instance, can_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_CAN, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_kwp_ctx(ecu_comm_kwp_t instance, kwp_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ISOTP, instance, (void**)ctx);
+}
+
 error_t ecu_comm_get_isotp_ctx(ecu_comm_isotp_t instance, isotp_ctx_t **ctx)
 {
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ISOTP, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_uds_ctx(ecu_comm_uds_t instance, uds_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_UDS, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_obd2_ctx(ecu_comm_obd2_t instance, obd2_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_OBD2, instance, (void**)ctx);
 }

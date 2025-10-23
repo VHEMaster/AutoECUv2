@@ -676,6 +676,26 @@ static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_A
       },
     }, //ECU_CONFIG_COMM_TYPE_CAN
     {
+      .device_type = ECU_COMM_TYPE_KWP,
+      .instances_count = ECU_COMM_KWP_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_kwp_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_kwp_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_KWP,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_kwp_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.kwp[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.kwp[0]),
+          .versions_count = KWP_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = KWP_CONFIG_VERSION_V1,
+                  .size = sizeof(kwp_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_KWP
+    {
       .device_type = ECU_COMM_TYPE_ISOTP,
       .instances_count = ECU_COMM_ISOTP_MAX,
       .configure_func = (ecu_config_configure_func_t)ecu_comm_isotp_configure,
@@ -694,7 +714,47 @@ static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_A
               }
           },
       }
-    }, //ECU_CONFIG_COMM_TYPE_CAN
+    }, //ECU_CONFIG_COMM_TYPE_ISOTP
+    {
+      .device_type = ECU_COMM_TYPE_UDS,
+      .instances_count = ECU_COMM_UDS_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_uds_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_uds_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_UDS,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_uds_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.uds[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.uds[0]),
+          .versions_count = UDS_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = UDS_CONFIG_VERSION_V1,
+                  .size = sizeof(uds_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_UDS
+    {
+      .device_type = ECU_COMM_TYPE_OBD2,
+      .instances_count = ECU_COMM_OBD2_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_obd2_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_obd2_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_OBD2,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_obd2_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.obd2[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.obd2[0]),
+          .versions_count = OBD2_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = OBD2_CONFIG_VERSION_V1,
+                  .size = sizeof(obd2_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_OBD2
 };
 
 static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)

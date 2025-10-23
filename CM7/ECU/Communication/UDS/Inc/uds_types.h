@@ -11,6 +11,15 @@
 #define UDS_RESPONSE_NEGATIVE_CODE    0x7F
 #define UDS_RESPONSE_POSITIVE_OFFSET  0x40
 
+#include "common.h"
+#include "time.h"
+#include "versioned_uds.h"
+
+typedef enum {
+  UDS_OK = 0,
+  UDS_MAX
+}uds_error_code_t;
+
 typedef enum {
   UDS_SID_START                               = 0x10,
 
@@ -173,5 +182,23 @@ typedef enum
   UDS_RESPONSE_VENDOR_SPECIFIC_START                        = 0xC0,
   UDS_RESPONSE_VENDOR_SPECIFIC_END                          = 0xFF
 } uds_response_code_t;
+
+typedef struct uds_ctx_tag uds_ctx_t;
+
+typedef void (*uds_error_callback_t)(uds_ctx_t *ctx, uds_error_code_t code, void *userdata);
+
+typedef struct {
+    uds_error_callback_t error_callback;
+    void *callback_userdata;
+}uds_init_ctx_t;
+
+typedef struct uds_ctx_tag {
+    uds_config_t config;
+    uds_init_ctx_t init;
+
+    uds_error_code_t error_code;
+    bool reset_trigger;
+
+}uds_ctx_t;
 
 #endif /* COMMUNICATION_UDS_INC_UDS_TYPES_H_ */

@@ -55,7 +55,10 @@
 #include "config_tables.h"
 
 #include "config_can.h"
+#include "config_kwp.h"
 #include "config_isotp.h"
+#include "config_uds.h"
+#include "config_obd2.h"
 
 #include "config_engine.h"
 
@@ -131,7 +134,10 @@ typedef enum {
 
 typedef enum {
   ECU_CONFIG_COMM_TYPE_CAN,
+  ECU_CONFIG_COMM_TYPE_KWP,
   ECU_CONFIG_COMM_TYPE_ISOTP,
+  ECU_CONFIG_COMM_TYPE_UDS,
+  ECU_CONFIG_COMM_TYPE_OBD2,
   ECU_CONFIG_COMM_TYPE_ALL,
   ECU_CONFIG_COMM_TYPE_MAX
 }ecu_config_comm_type_t;

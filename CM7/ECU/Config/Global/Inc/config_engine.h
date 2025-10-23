@@ -67,7 +67,10 @@ typedef struct {
 
 typedef struct {
     can_config_t can[ECU_COMM_CAN_MAX];
+    isotp_config_t kwp[ECU_COMM_KWP_MAX];
     isotp_config_t isotp[ECU_COMM_ISOTP_MAX];
+    isotp_config_t uds[ECU_COMM_UDS_MAX];
+    isotp_config_t obd2[ECU_COMM_OBD2_MAX];
 
 }ecu_config_engine_comm_t;
 

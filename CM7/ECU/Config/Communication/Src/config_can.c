@@ -38,7 +38,7 @@ static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
         .rx_buffer_index = 0,
       },
     },
-  }, //ECU_CAN_IF_MAIN
+  }, //ECU_CAN_IF_1
 };
 
 static ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
