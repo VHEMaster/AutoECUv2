@@ -44,6 +44,8 @@ typedef struct {
     CAN_HANDLE_TYPE *handle;
     gpio_t lbk_pin;
 
+    can_baudrate_t baudrate;
+
     can_cfg_global_filter_t global_filter;
     CAN_FILTER_TYPE filter_config[CAN_RX_FILTER_MAX];
 

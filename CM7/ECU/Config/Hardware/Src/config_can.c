@@ -22,6 +22,7 @@ static const ecu_config_can_if_t ecu_config_can[ECU_CAN_IF_MAX] = {
     .can_cfg = {
       .handle = &hfdcan1,
       .lbk_pin = { .port = FDCAN1_LBK_GPIO_Port, .pin = FDCAN1_LBK_Pin },
+      .baudrate = CAN_BAUDRATE_500KBPS,
       .global_filter = {
           .reject_remote_std = true,
           .reject_remote_ext = true,

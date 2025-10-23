@@ -21,12 +21,38 @@ error_t can_init(can_ctx_t *ctx, const can_cfg_t *config)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->handle == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(config->baudrate < CAN_BAUDRATE_MAX, err = E_PARAM);
 
     memset(ctx, 0, sizeof(can_ctx_t));
     memcpy(&ctx->config, config, sizeof(can_cfg_t));
 
     CAN_LBK_LOOPBACK(ctx);
     status = HAL_FDCAN_Stop(ctx->config.handle);
+
+    switch(ctx->config.baudrate) {
+      case CAN_BAUDRATE_1MBPS:
+        ctx->config.handle->Init.NominalPrescaler = 8;
+        break;
+      case CAN_BAUDRATE_500KBPS:
+        ctx->config.handle->Init.NominalPrescaler = 16;
+        break;
+      case CAN_BAUDRATE_250KBPS:
+        ctx->config.handle->Init.NominalPrescaler = 32;
+        break;
+      case CAN_BAUDRATE_125KBPS:
+        ctx->config.handle->Init.NominalPrescaler = 64;
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+    ctx->config.handle->Init.NominalTimeSeg1 = 6;
+    ctx->config.handle->Init.NominalTimeSeg2 = 3;
+    ctx->config.handle->Init.DataTimeSeg1 = 6;
+    ctx->config.handle->Init.DataTimeSeg2 = 3;
+    status = HAL_FDCAN_Init(ctx->config.handle);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
 
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
     status = HAL_OK;
