@@ -66,6 +66,7 @@ typedef struct {
 }ecu_config_engine_runtime_t;
 
 typedef struct {
+    router_config_t router[ECU_COMM_ROUTER_MAX];
     can_config_t can[ECU_COMM_CAN_MAX];
     isotp_config_t kwp[ECU_COMM_KWP_MAX];
     isotp_config_t isotp[ECU_COMM_ISOTP_MAX];

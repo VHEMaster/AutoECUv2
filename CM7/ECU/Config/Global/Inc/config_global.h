@@ -54,6 +54,7 @@
 #include "config_ignition.h"
 #include "config_tables.h"
 
+#include "config_router.h"
 #include "config_can.h"
 #include "config_kwp.h"
 #include "config_isotp.h"
@@ -114,7 +115,7 @@ typedef enum {
 }ecu_config_core_component_type_t;
 
 typedef enum {
-  ECU_CONFIG_CALIB_TYPE_ID,
+  ECU_CONFIG_CALIB_TYPE_ID = 0,
   ECU_CONFIG_CALIB_TYPE_IO,
   ECU_CONFIG_CALIB_TYPE_POWERMODING,
   ECU_CONFIG_CALIB_TYPE_CYLINDERS,
@@ -127,12 +128,13 @@ typedef enum {
 }ecu_config_calibration_type_t;
 
 typedef enum {
-  ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS,
+  ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS = 0,
   ECU_CONFIG_RUNTIME_TYPE_ALL,
   ECU_CONFIG_RUNTIME_TYPE_MAX
 }ecu_config_runtime_type_t;
 
 typedef enum {
+  ECU_CONFIG_COMM_TYPE_ROUTER = 0,
   ECU_CONFIG_COMM_TYPE_CAN,
   ECU_CONFIG_COMM_TYPE_KWP,
   ECU_CONFIG_COMM_TYPE_ISOTP,

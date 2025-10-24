@@ -656,6 +656,26 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
 
 static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_ALL] = {
     {
+      .device_type = ECU_COMM_TYPE_ROUTER,
+      .instances_count = ECU_COMM_ROUTER_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_router_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_router_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_ROUTER,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_router_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.router[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.router[0]),
+          .versions_count = ROUTER_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = ROUTER_CONFIG_VERSION_V1,
+                  .size = sizeof(router_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_ROUTER
+    {
       .device_type = ECU_COMM_TYPE_CAN,
       .instances_count = ECU_COMM_CAN_MAX,
       .configure_func = (ecu_config_configure_func_t)ecu_comm_can_configure,

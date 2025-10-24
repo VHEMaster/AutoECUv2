@@ -16,13 +16,19 @@
 typedef uint32_t ecu_comm_instance_t;
 
 typedef enum {
-  ECU_COMM_TYPE_CAN = 0,
+  ECU_COMM_TYPE_ROUTER = 0,
+  ECU_COMM_TYPE_CAN,
   ECU_COMM_TYPE_KWP,
   ECU_COMM_TYPE_ISOTP,
   ECU_COMM_TYPE_UDS,
   ECU_COMM_TYPE_OBD2,
   ECU_COMM_TYPE_MAX
 }ecu_comm_type_t;
+
+typedef enum {
+  ECU_COMM_ROUTER_1 = 0,
+  ECU_COMM_ROUTER_MAX
+}ecu_comm_router_t;
 
 typedef enum {
   ECU_COMM_CAN_1 = 0,

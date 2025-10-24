@@ -732,11 +732,19 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_COMM_ROUTER,
+        .section_index = ECU_COMM_KWP_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 10,
+        .sector_index = 0,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_COMM_CAN,
         .section_index = ECU_COMM_CAN_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
-        .sector_index = 0,
+        .sector_index = 2,
         .uses_full_block = false,
     },
     {
@@ -744,7 +752,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .section_index = ECU_COMM_KWP_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
-        .sector_index = 1,
+        .sector_index = 4,
         .uses_full_block = false,
     },
     {
@@ -752,7 +760,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .section_index = ECU_COMM_ISOTP_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
-        .sector_index = 4,
+        .sector_index = 6,
         .uses_full_block = false,
     },
     {
@@ -760,7 +768,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .section_index = ECU_COMM_UDS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
-        .sector_index = 5,
+        .sector_index = 8,
         .uses_full_block = false,
     },
     {
@@ -768,7 +776,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .section_index = ECU_COMM_OBD2_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
-        .sector_index = 6,
+        .sector_index = 10,
         .uses_full_block = false,
     },
     {

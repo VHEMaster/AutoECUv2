@@ -10,6 +10,7 @@
 #include "bool.h"
 
 #define ECU_COMM_MAX (      \
+    ECU_COMM_ROUTER_MAX   + \
     ECU_COMM_CAN_MAX      + \
     ECU_COMM_KWP_MAX      + \
     ECU_COMM_ISOTP_MAX    + \
@@ -48,6 +49,7 @@ typedef struct {
     ecu_config_comm_instance_runtime_t comm[ECU_COMM_MAX];
 }ecu_config_comm_runtime_t;
 
+static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0};
 static RAM_SECTION can_ctx_t ecu_config_can_ctx[ECU_COMM_CAN_MAX] = {0};
 static RAM_SECTION kwp_ctx_t ecu_config_kwp_ctx[ECU_COMM_KWP_MAX] = {0};
 static RAM_SECTION isotp_ctx_t ecu_config_isotp_ctx[ECU_COMM_ISOTP_MAX] = {0};
@@ -58,6 +60,12 @@ static RAM_SECTION ecu_config_comm_runtime_t ecu_config_comm_runtime = {0};
 
 static const ecu_config_comm_t ecu_config_comm = {
     .interfaces = {
+        {
+            .loop_slow = (ecu_comm_loop_func_t)router_loop_slow,
+            .loop_main = (ecu_comm_loop_func_t)router_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)router_loop_comm,
+            .instance_max = ECU_COMM_ROUTER_MAX,
+        }, //ECU_COMM_TYPE_router
         {
             .loop_slow = (ecu_comm_loop_func_t)can_loop_slow,
             .loop_main = (ecu_comm_loop_func_t)can_loop_main,
@@ -90,6 +98,11 @@ static const ecu_config_comm_t ecu_config_comm = {
         }, //ECU_COMM_TYPE_OBD2
     },
     .comm = {
+        {
+            .type = ECU_COMM_TYPE_ROUTER,
+            .instance = ECU_COMM_ROUTER_1,
+            .ctx = &ecu_config_router_ctx[ECU_COMM_ROUTER_1],
+        },
         {
             .type = ECU_COMM_TYPE_CAN,
             .instance = ECU_COMM_CAN_1,
@@ -251,6 +264,11 @@ error_t ecu_comm_set_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t 
   }
 
   return err;
+}
+
+error_t ecu_comm_get_router_ctx(ecu_comm_router_t instance, router_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ROUTER, instance, (void**)ctx);
 }
 
 error_t ecu_comm_get_can_ctx(ecu_comm_can_t instance, can_ctx_t **ctx)
