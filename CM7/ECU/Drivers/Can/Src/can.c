@@ -27,6 +27,8 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
       gpio_set(&ctx->init.lbk_pin); // Loopback mode
     }
 
+    (void)HAL_FDCAN_Stop(ctx->init.handle);
+
     ctx->initialized = true;
 
   } while(0);
@@ -45,13 +47,15 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->baudrate < CAN_BAUDRATE_MAX, err = E_PARAM);
 
-    memcpy(&ctx->config, config, sizeof(can_config_t));
+    if(&ctx->config != config) {
+      memcpy(&ctx->config, config, sizeof(can_config_t));
+    }
 
     if(gpio_valid(&ctx->init.lbk_pin)) {
       gpio_set(&ctx->init.lbk_pin); // Loopback mode
     }
 
-    status = HAL_FDCAN_Stop(ctx->init.handle);
+    (void)HAL_FDCAN_Stop(ctx->init.handle);
 
     switch(ctx->config.baudrate) {
       case CAN_BAUDRATE_1MBPS:
@@ -450,12 +454,36 @@ void can_error_irq(can_ctx_t *ctx)
 error_t can_reset(can_ctx_t *ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status = HAL_OK;
 
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
 
-    // TODO: IMPLEMENT
+    if(gpio_valid(&ctx->init.lbk_pin)) {
+      gpio_set(&ctx->init.lbk_pin); // Loopback mode
+    }
+
+    (void)HAL_FDCAN_Stop(ctx->init.handle);
+
+    __HAL_FDCAN_CLEAR_FLAG(ctx->init.handle, FDCAN_FLAG_BUS_OFF);
+    __HAL_FDCAN_CLEAR_FLAG(ctx->init.handle, FDCAN_FLAG_ERROR_PASSIVE | FDCAN_FLAG_ERROR_WARNING);
+    __HAL_FDCAN_CLEAR_FLAG(ctx->init.handle, FDCAN_FLAG_RX_FIFO0_NEW_MESSAGE | FDCAN_FLAG_RX_FIFO1_NEW_MESSAGE);
+
+    ctx->init.handle->Instance->TXBCR = ~0;
+    ctx->init.handle->Instance->NDAT1 = ~0;
+    ctx->init.handle->Instance->NDAT2 = ~0;
+
+    status = HAL_FDCAN_Start(ctx->init.handle);
+    if(status != HAL_OK) {
+      err = can_configure(ctx, &ctx->config);
+      ctx->configured = false;
+      break;
+    }
+
+    if(gpio_valid(&ctx->init.lbk_pin)) {
+      gpio_reset(&ctx->init.lbk_pin); // Normal mode
+    }
 
   } while(0);
 
