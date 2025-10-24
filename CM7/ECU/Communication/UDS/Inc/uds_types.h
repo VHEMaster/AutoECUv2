@@ -195,6 +195,8 @@ typedef struct {
 typedef struct uds_ctx_tag {
     uds_config_t config;
     uds_init_ctx_t init;
+    bool initialized;
+    bool configured;
 
     uds_error_code_t error_code;
     bool reset_trigger;

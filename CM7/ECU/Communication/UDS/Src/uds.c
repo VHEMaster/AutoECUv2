@@ -18,6 +18,8 @@ error_t uds_init(uds_ctx_t *ctx, const uds_init_ctx_t *init)
     memset(ctx, 0u, sizeof(uds_ctx_t));
     memcpy(&ctx->init, init, sizeof(uds_init_ctx_t));
 
+    ctx->initialized = true;
+
   } while(0);
 
   return err;
@@ -29,9 +31,12 @@ error_t uds_configure(uds_ctx_t *ctx, const uds_config_t *config)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
     memcpy(&ctx->config, config, sizeof(uds_config_t));
+
+    ctx->configured = true;
 
   } while(0);
 
@@ -44,6 +49,7 @@ error_t uds_data_get_error(uds_ctx_t *ctx, uds_error_code_t *code)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(code == NULL, err = E_PARAM);
 
     *code = ctx->error_code;
@@ -60,6 +66,7 @@ error_t uds_reset(uds_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
 
     ctx->reset_trigger = true;
 
@@ -72,6 +79,7 @@ void uds_loop(uds_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
   } while(0);
 }

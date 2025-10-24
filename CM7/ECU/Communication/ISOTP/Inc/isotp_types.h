@@ -87,6 +87,8 @@ typedef struct {
 typedef struct isotp_ctx_tag {
     isotp_config_t config;
     isotp_init_ctx_t init;
+    bool initialized;
+    bool configured;
 
     isotp_frame_fifo_t frame_fifo_downstream;
     isotp_frame_fifo_t frame_fifo_upstream;

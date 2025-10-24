@@ -323,6 +323,8 @@ typedef struct {
 typedef struct obd2_ctx_tag {
     obd2_config_t config;
     obd2_init_ctx_t init;
+    bool initialized;
+    bool configured;
 
     obd2_error_code_t error_code;
     bool reset_trigger;

@@ -229,6 +229,7 @@ error_t can_tx(can_ctx_t *ctx, const can_message_t *message)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
 
     err = can_tx_send_msg(ctx, message);
@@ -245,6 +246,7 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
 
     read = ctx->rxfifo.read;
@@ -270,6 +272,7 @@ error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callbac
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(func == NULL, err = E_PARAM);
     BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && msg_id > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
     BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && msg_id > 0x7FF, err = E_PARAM);
@@ -299,6 +302,7 @@ error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, 
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(func == NULL, err = E_PARAM);
 
     err = E_OVERFLOW;
@@ -322,6 +326,7 @@ void can_loop_main(can_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
   } while(0);
 }
@@ -330,6 +335,7 @@ void can_loop_slow(can_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
   } while(0);
 }
@@ -338,6 +344,7 @@ void can_loop_comm(can_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
   } while(0);
 }
@@ -349,6 +356,7 @@ void can_rx_fifo0_irq(can_ctx_t *ctx, uint32_t fifo_its)
 
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
     fifo = FDCAN_RX_FIFO0;
     fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->init.handle, fifo);
@@ -367,6 +375,7 @@ void can_rx_fifo1_irq(can_ctx_t *ctx, uint32_t fifo_its)
 
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
     fifo = FDCAN_RX_FIFO1;
     fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->init.handle, fifo);
@@ -387,6 +396,7 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
     buffers_l = ctx->init.handle->Instance->NDAT1;
     buffers_h = ctx->init.handle->Instance->NDAT2;
@@ -424,6 +434,7 @@ void can_error_irq(can_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
     for(int i = 0; i < CAN_ERR_CB_MAX; i++) {
       cb = &ctx->err_callbacks[i];
@@ -442,6 +453,7 @@ error_t can_reset(can_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
 
     // TODO: IMPLEMENT
 

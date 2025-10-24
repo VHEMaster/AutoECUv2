@@ -29,6 +29,8 @@ typedef struct {
 typedef struct kwp_ctx_tag {
     kwp_config_t config;
     kwp_init_ctx_t init;
+    bool initialized;
+    bool configured;
 
     kwp_error_code_t error_code;
     bool reset_trigger;

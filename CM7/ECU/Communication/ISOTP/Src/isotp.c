@@ -20,6 +20,8 @@ error_t isotp_init(isotp_ctx_t *ctx, const isotp_init_ctx_t *init)
     memset(ctx, 0u, sizeof(isotp_ctx_t));
     memcpy(&ctx->init, init, sizeof(isotp_init_ctx_t));
 
+    ctx->initialized = true;
+
   } while(0);
 
   return err;
@@ -31,9 +33,12 @@ error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
     memcpy(&ctx->config, config, sizeof(isotp_config_t));
+
+    ctx->configured = true;
 
   } while(0);
 
@@ -47,6 +52,7 @@ error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
 
     frame_fifo = &ctx->frame_fifo_upstream;
@@ -64,6 +70,7 @@ error_t isotp_frame_read_downstream(isotp_ctx_t *ctx, isotp_frame_t *frame)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
 
     frame_fifo = &ctx->frame_fifo_downstream;
@@ -81,6 +88,7 @@ error_t isotp_data_write_downstream(isotp_ctx_t *ctx, const uint8_t *payload, ui
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(payload == NULL || length == 0, err = E_PARAM);
 
     data = &ctx->data_downstream;
@@ -103,6 +111,7 @@ error_t isotp_data_read_upstream(isotp_ctx_t *ctx, uint8_t *payload, uint16_t *l
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(payload == NULL || length == NULL, err = E_PARAM);
 
     data = &ctx->data_upstream;
@@ -127,6 +136,7 @@ error_t isotp_data_get_error(isotp_ctx_t *ctx, isotp_error_code_t *code)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(code == NULL, err = E_PARAM);
 
     *code = ctx->error_code;
@@ -143,6 +153,7 @@ error_t isotp_reset(isotp_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
 
     ctx->reset_trigger = true;
 
@@ -155,6 +166,7 @@ void isotp_loop(isotp_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
 
     isotp_poll_for_reset(ctx);
     isotp_fsm(ctx);
