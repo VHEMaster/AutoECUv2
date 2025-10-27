@@ -20,6 +20,7 @@ typedef enum {
 typedef struct router_ctx_tag router_ctx_t;
 
 typedef void (*router_error_callback_t)(router_ctx_t *ctx, router_error_code_t code, void *userdata);
+typedef void (*router_signal_rx_callback_t)(router_ctx_t *ctx, const can_message_t *message, void *userdata);
 
 typedef struct {
     router_error_callback_t error_callback;
@@ -34,6 +35,9 @@ typedef struct router_ctx_tag {
 
     router_error_code_t error_code;
     bool reset_trigger;
+
+    router_signal_rx_callback_t signal_rx_callback_func;
+    void *signal_rx_callback_usrdata;
 
 }router_ctx_t;
 

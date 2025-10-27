@@ -18,4 +18,7 @@ void router_loop_comm(router_ctx_t *ctx);
 
 error_t router_reset(router_ctx_t *ctx);
 
+error_t router_signals_set_rx_cb(router_ctx_t *ctx, router_signal_rx_callback_t func, void *usrdata);
+error_t router_signals_transmit(router_ctx_t *ctx, const can_message_t *message);
+
 #endif /* COMMUNICATION_ROUTER_INC_ROUTER_H_ */
