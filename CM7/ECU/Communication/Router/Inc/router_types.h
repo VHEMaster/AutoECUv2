@@ -23,6 +23,7 @@ typedef void (*router_error_callback_t)(router_ctx_t *ctx, router_error_code_t c
 typedef void (*router_signal_rx_callback_t)(router_ctx_t *ctx, const can_message_t *message, void *userdata);
 
 typedef struct {
+    router_signal_rx_callback_t signal_rx_callback;
     router_error_callback_t error_callback;
     void *callback_userdata;
 }router_init_ctx_t;

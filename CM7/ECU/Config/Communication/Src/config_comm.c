@@ -119,6 +119,11 @@ static const ecu_config_comm_t ecu_config_comm = {
             .ctx = &ecu_config_isotp_ctx[ECU_COMM_ISOTP_1],
         },
         {
+            .type = ECU_COMM_TYPE_ISOTP,
+            .instance = ECU_COMM_ISOTP_2,
+            .ctx = &ecu_config_isotp_ctx[ECU_COMM_ISOTP_2],
+        },
+        {
             .type = ECU_COMM_TYPE_UDS,
             .instance = ECU_COMM_UDS_1,
             .ctx = &ecu_config_uds_ctx[ECU_COMM_UDS_1],

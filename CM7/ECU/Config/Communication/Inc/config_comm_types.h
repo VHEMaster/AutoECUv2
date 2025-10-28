@@ -11,7 +11,7 @@
 #include "common.h"
 
 #define ECU_COMM_NONE           (255)
-#define ECU_COMM_INSTANCE_MAX   (1)
+#define ECU_COMM_INSTANCE_MAX   (2)
 
 typedef uint32_t ecu_comm_instance_t;
 
@@ -42,6 +42,7 @@ typedef enum {
 
 typedef enum {
   ECU_COMM_ISOTP_1 = 0,
+  ECU_COMM_ISOTP_2,
   ECU_COMM_ISOTP_MAX
 }ecu_comm_isotp_t;
 
@@ -54,5 +55,13 @@ typedef enum {
   ECU_COMM_OBD2_1 = 0,
   ECU_COMM_OBD2_MAX
 }ecu_comm_obd2_t;
+
+typedef union {
+    uint32_t word;
+    struct {
+      ecu_comm_type_t type : 8;
+      ecu_comm_instance_t instance : 8;
+    }fields;
+}ecu_comm_target_t;
 
 #endif /* CONFIG_COMMUNICATION_INC_CONFIG_COMM_TYPES_H_ */

@@ -8,6 +8,7 @@
 #ifndef COMMUNICATION_ROUTER_INC_ROUTER_H_
 #define COMMUNICATION_ROUTER_INC_ROUTER_H_
 
+#include "can_types.h"
 #include "router_types.h"
 
 error_t router_init(router_ctx_t *ctx, const router_init_ctx_t *init);
@@ -18,7 +19,6 @@ void router_loop_comm(router_ctx_t *ctx);
 
 error_t router_reset(router_ctx_t *ctx);
 
-error_t router_signals_set_rx_cb(router_ctx_t *ctx, router_signal_rx_callback_t func, void *usrdata);
 error_t router_signals_transmit(router_ctx_t *ctx, const can_message_t *message);
 
 #endif /* COMMUNICATION_ROUTER_INC_ROUTER_H_ */

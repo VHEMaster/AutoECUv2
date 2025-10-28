@@ -11,10 +11,26 @@
 
 typedef struct ecu_comm_can_ctx_tag ecu_comm_can_ctx_t;
 
+static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
+static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata);
+
+typedef struct {
+    uint32_t msg_id;
+    ecu_comm_can_t instance;
+    ecu_comm_can_ctx_t *ctx;
+    void *func;
+    void *usrdata;
+}ecu_comm_can_callback_usrdata_t;
+
 typedef struct ecu_comm_can_ctx_tag {
   can_config_t config_default;
   can_init_ctx_t init;
   can_ctx_t *ctx;
+
+  uint32_t rx_callbacks_count;
+  uint32_t err_callbacks_count;
+  ecu_comm_can_callback_usrdata_t rx_callbacks[CAN_RX_CB_MAX];
+  ecu_comm_can_callback_usrdata_t err_callbacks[CAN_ERR_CB_MAX];
 }ecu_comm_can_ctx_t;
 
 static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
@@ -189,4 +205,137 @@ error_t ecu_comm_can_reset(ecu_comm_can_t instance)
   } while(0);
 
   return err;
+}
+
+error_t ecu_comm_can_transmit(ecu_comm_can_t instance, const can_message_t *message)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+
+    can_ctx = &ecu_comm_can_ctx[instance];
+
+    err = can_tx(can_ctx->ctx, message);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+
+    can_ctx = &ecu_comm_can_ctx[instance];
+
+    err = can_rx(can_ctx->ctx, message);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx;
+  ecu_comm_can_callback_usrdata_t *cb;
+  uint32_t cb_count;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+
+    can_ctx = &ecu_comm_can_ctx[instance];
+    cb_count = can_ctx->rx_callbacks_count;
+
+    BREAK_IF_ACTION(cb_count >= CAN_RX_CB_MAX, err = E_OVERFLOW);
+
+    cb = &can_ctx->rx_callbacks[cb_count];
+    cb->msg_id = msg_id;
+    cb->instance = instance;
+    cb->ctx = can_ctx;
+    cb->func = func;
+    cb->usrdata = usrdata;
+
+    err = can_register_rx_callback(can_ctx->ctx, msg_id, ecu_comm_can_rx_callback, cb);
+    if(err == E_OK) {
+      can_ctx->rx_callbacks_count = ++cb_count;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_callback_func_t func, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx;
+  ecu_comm_can_callback_usrdata_t *cb;
+  uint32_t cb_count;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+
+    can_ctx = &ecu_comm_can_ctx[instance];
+    cb_count = can_ctx->err_callbacks_count;
+
+    BREAK_IF_ACTION(cb_count >= CAN_ERR_CB_MAX, err = E_OVERFLOW);
+
+    cb = &can_ctx->err_callbacks[cb_count];
+    cb->instance = instance;
+    cb->ctx = can_ctx;
+    cb->func = func;
+    cb->usrdata = usrdata;
+
+    err = can_register_err_callback(can_ctx->ctx, ecu_comm_can_err_callback, cb);
+    if(err == E_OK) {
+      can_ctx->rx_callbacks_count = ++cb_count;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata)
+{
+  ecu_comm_can_callback_usrdata_t *cb = (ecu_comm_can_callback_usrdata_t *)usrdata;
+  ecu_comm_can_ctx_t *can_ctx;
+  ecu_comm_can_rx_callback_t func;
+
+  do {
+    BREAK_IF(cb == NULL);
+    can_ctx = cb->ctx;
+    BREAK_IF(can_ctx == NULL);
+    BREAK_IF(can_ctx->ctx != ctx);
+    if(cb->func != NULL) {
+      func = (ecu_comm_can_rx_callback_t)cb->func;
+      func(cb->instance, message, cb->usrdata);
+    }
+  } while(0);
+}
+
+static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata)
+{
+  ecu_comm_can_callback_usrdata_t *cb = (ecu_comm_can_callback_usrdata_t *)usrdata;
+  ecu_comm_can_ctx_t *can_ctx;
+  ecu_comm_can_err_callback_t func;
+
+  do {
+    BREAK_IF(cb == NULL);
+    can_ctx = cb->ctx;
+    BREAK_IF(can_ctx == NULL);
+    BREAK_IF(can_ctx->ctx != ctx);
+    if(cb->func != NULL) {
+      func = (ecu_comm_can_err_callback_t)cb->func;
+      func(cb->instance, cb->usrdata);
+    }
+  } while(0);
 }
