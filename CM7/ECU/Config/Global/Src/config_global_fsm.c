@@ -651,6 +651,9 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
               case ECU_CONFIG_TYPE_RUNTIME:
                 req_ctx = &ctx->runtimes[ctx->op_index];
                 break;
+              case ECU_CONFIG_TYPE_COMM:
+                req_ctx = &ctx->comm[ctx->op_index].generic;
+                break;
               default:
                 req_ctx = NULL;
                 break;

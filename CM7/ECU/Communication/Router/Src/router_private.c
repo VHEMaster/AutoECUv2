@@ -7,6 +7,10 @@
 
 #include "config_comm.h"
 #include "router_private.h"
+#include "config_isotp.h"
+
+static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
+static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata);
 
 static void router_handle_diag_pair_can_isotp(router_ctx_t *ctx, router_config_can_isotp_pairs_t pair);
 static void router_handle_diag_pair_isotp_uds(router_ctx_t *ctx, router_config_isotp_uds_pairs_t pair);
@@ -22,22 +26,90 @@ static error_t router_configure_diag_pair_isotp_obd2(router_ctx_t *ctx, router_c
 static error_t router_configure_diag_pair_kwp_obd2(router_ctx_t *ctx, router_config_kwp_obd2_pairs_t pair);
 static error_t router_configure_diag_pairs(router_ctx_t *ctx);
 
-static void router_handle_diag_pair_can_isotp(router_ctx_t *ctx, router_config_can_isotp_pairs_t pair)
+static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata)
 {
   error_t err = E_OK;
   const router_config_can_isotp_pair_t *pair_cfg;
   router_diag_can_isotp_pair_ctx_t *pair_ctx;
 
-  (void)err;
-  (void)pair_cfg;
-  (void)pair_ctx;
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(message == NULL);
+    BREAK_IF(usrdata == NULL);
+
+    pair_ctx = (router_diag_can_isotp_pair_ctx_t *)usrdata;
+    pair_cfg = pair_ctx->pair_config;
+    BREAK_IF(pair_cfg == NULL);
+    BREAK_IF(pair_cfg->upstream_msg_id != message->id);
+
+    err = isotp_frame_write_upstream(pair_ctx->isotp_ctx, (const isotp_frame_t *)message->payload);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+}
+
+static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata)
+{
+  error_t err = E_OK;
+  const router_config_can_isotp_pair_t *pair_cfg;
+  router_diag_can_isotp_pair_ctx_t *pair_ctx;
+
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(usrdata == NULL);
+
+    pair_ctx = (router_diag_can_isotp_pair_ctx_t *)usrdata;
+    pair_cfg = pair_ctx->pair_config;
+    BREAK_IF(pair_cfg == NULL);
+
+    err = isotp_reset(pair_ctx->isotp_ctx);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+}
+
+static void router_handle_diag_pair_can_isotp(router_ctx_t *ctx, router_config_can_isotp_pairs_t pair)
+{
+  error_t err = E_OK;
+  const router_config_can_isotp_pair_t *pair_cfg;
+  router_diag_can_isotp_pair_ctx_t *pair_ctx;
+  isotp_error_code_t isotp_err;
 
   do {
     BREAK_IF(ctx == NULL);
     pair_ctx = &ctx->diag.can_isotp_pairs[pair];
     pair_cfg = &ctx->config.diagnostics.can_isotp_pairs[pair];
 
-    // TODO: IMPLEMENT
+    while(true) {
+      err = ecu_comm_isotp_get_error_flag(pair_cfg->isotp_instance, &isotp_err);
+      if(err == E_OK) {
+        if(isotp_err != ISOTP_OK) {
+          (void)can_reset(pair_ctx->can_ctx);
+          (void)isotp_reset(pair_ctx->isotp_ctx);
+          pair_ctx->message_downstream_pending = false;
+          break;
+        }
+      }
+
+      if(pair_ctx->message_downstream_pending == false) {
+        err = isotp_frame_read_downstream(pair_ctx->isotp_ctx, (isotp_frame_t *)pair_ctx->message_downstream.payload);
+        BREAK_IF(err != E_OK);
+        pair_ctx->message_downstream_pending = true;
+
+        pair_ctx->message_downstream.id = pair_cfg->downstream_msg_id;
+        pair_ctx->message_downstream.len = ISOTP_FRAME_LEN;
+      }
+
+      if(pair_ctx->message_downstream_pending == true) {
+        err = can_tx(pair_ctx->can_ctx, &pair_ctx->message_downstream);
+        if(err != E_OK) {
+          BREAK_IF(err == E_AGAIN);
+          (void)can_reset(pair_ctx->can_ctx);
+          (void)isotp_reset(pair_ctx->isotp_ctx);
+        }
+        pair_ctx->message_downstream_pending = false;
+      }
+    }
 
   } while(0);
 }
@@ -152,9 +224,6 @@ static void router_handle_diag_pairs(router_ctx_t *ctx)
   }
 }
 
-typedef void (*can_rx_callback_func_t)(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
-typedef void (*can_err_callback_func_t)(can_ctx_t *ctx, void *usrdata);
-
 static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_config_can_isotp_pairs_t pair)
 {
   error_t err = E_OK;
@@ -163,10 +232,11 @@ static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_co
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->diag, 0, sizeof(ctx->diag));
 
     pair_cfg = &ctx->config.diagnostics.can_isotp_pairs[pair];
     pair_ctx = &ctx->diag.can_isotp_pairs[pair];
+    memset(pair_ctx, 0, sizeof(*pair_ctx));
+    pair_ctx->pair_config = pair_cfg;
 
     if(pair_cfg->enabled == true) {
       err = ecu_comm_get_can_ctx(pair_cfg->can_instance, &pair_ctx->can_ctx);
@@ -174,7 +244,10 @@ static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_co
       err = ecu_comm_get_isotp_ctx(pair_cfg->isotp_instance, &pair_ctx->isotp_ctx);
       BREAK_IF(err != E_OK);
 
-      err = can_register_rx_callback(pair_ctx->can_ctx, pair_cfg->upstream_msg_id, router_can_isotp_rx_callback, ctx);
+      err = can_register_rx_callback(pair_ctx->can_ctx, pair_cfg->upstream_msg_id, router_can_isotp_rx_callback, pair_ctx);
+      BREAK_IF(err != E_OK);
+      err = can_register_err_callback(pair_ctx->can_ctx, router_can_isotp_err_callback, pair_ctx);
+      BREAK_IF(err != E_OK);
 
       pair_ctx->active = true;
     }
@@ -192,10 +265,11 @@ static error_t router_configure_diag_pair_isotp_uds(router_ctx_t *ctx, router_co
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->diag, 0, sizeof(ctx->diag));
 
     pair_cfg = &ctx->config.diagnostics.isotp_uds_pairs[pair];
     pair_ctx = &ctx->diag.isotp_uds_pairs[pair];
+    memset(pair_ctx, 0, sizeof(*pair_ctx));
+    pair_ctx->pair_config = pair_cfg;
 
     if(pair_cfg->enabled == true) {
       err = ecu_comm_get_isotp_ctx(pair_cfg->isotp_instance, &pair_ctx->isotp_ctx);
@@ -218,10 +292,11 @@ static error_t router_configure_diag_pair_kwp_uds(router_ctx_t *ctx, router_conf
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->diag, 0, sizeof(ctx->diag));
 
     pair_cfg = &ctx->config.diagnostics.kwp_uds_pairs[pair];
     pair_ctx = &ctx->diag.kwp_uds_pairs[pair];
+    memset(pair_ctx, 0, sizeof(*pair_ctx));
+    pair_ctx->pair_config = pair_cfg;
 
     if(pair_cfg->enabled == true) {
       err = ecu_comm_get_kwp_ctx(pair_cfg->kwp_instance, &pair_ctx->kwp_ctx);
@@ -244,10 +319,11 @@ static error_t router_configure_diag_pair_isotp_obd2(router_ctx_t *ctx, router_c
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->diag, 0, sizeof(ctx->diag));
 
     pair_cfg = &ctx->config.diagnostics.isotp_obd2_pairs[pair];
     pair_ctx = &ctx->diag.isotp_obd2_pairs[pair];
+    memset(pair_ctx, 0, sizeof(*pair_ctx));
+    pair_ctx->pair_config = pair_cfg;
 
     if(pair_cfg->enabled == true) {
       err = ecu_comm_get_isotp_ctx(pair_cfg->isotp_instance, &pair_ctx->isotp_ctx);
@@ -270,10 +346,11 @@ static error_t router_configure_diag_pair_kwp_obd2(router_ctx_t *ctx, router_con
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->diag, 0, sizeof(ctx->diag));
 
     pair_cfg = &ctx->config.diagnostics.kwp_obd2_pairs[pair];
     pair_ctx = &ctx->diag.kwp_obd2_pairs[pair];
+    memset(pair_ctx, 0, sizeof(*pair_ctx));
+    pair_ctx->pair_config = pair_cfg;
 
     if(pair_cfg->enabled == true) {
       err = ecu_comm_get_kwp_ctx(pair_cfg->kwp_instance, &pair_ctx->kwp_ctx);

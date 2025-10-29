@@ -137,9 +137,6 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
     can_ctx = &ecu_comm_can_ctx[instance];
     can_ctx->ctx = ctx;
 
-    err = can_init(can_ctx->ctx, &can_ctx->init);
-    BREAK_IF(err != E_OK);
-
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
     switch(instance) {
       case ECU_COMM_CAN_1:
@@ -150,6 +147,9 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
         break;
     }
 #endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
+
+    err = can_init(can_ctx->ctx, &can_ctx->init);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

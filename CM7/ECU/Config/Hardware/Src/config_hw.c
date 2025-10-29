@@ -36,6 +36,8 @@ void ecu_config_ll_init(void)
   __HAL_DBGMCU_FREEZE_TIM7();
   __HAL_DBGMCU_FREEZE_IWDG1();
   __HAL_DBGMCU_FREEZE2_IWDG2();
+
+  __HAL_DBGMCU_FREEZE_FDCAN();
 }
 
 void ecu_config_init_counter(void)

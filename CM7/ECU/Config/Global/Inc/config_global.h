@@ -354,8 +354,8 @@ typedef struct {
     error_t process_result;
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
-    ecu_config_device_type_t process_module_type;
-    ecu_config_device_type_t process_comm_type;
+    ecu_config_module_type_t process_module_type;
+    ecu_config_comm_type_t process_comm_type;
     ecu_device_instance_t process_instance;
 }ecu_config_global_runtime_ctx_t;
 

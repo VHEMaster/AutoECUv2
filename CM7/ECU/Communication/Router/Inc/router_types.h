@@ -39,30 +39,38 @@ typedef struct {
     bool active;
     can_ctx_t *can_ctx;
     isotp_ctx_t *isotp_ctx;
+    const router_config_can_isotp_pair_t *pair_config;
+
+    can_message_t message_downstream;
+    bool message_downstream_pending;
 }router_diag_can_isotp_pair_ctx_t;
 
 typedef struct {
     bool active;
     isotp_ctx_t *isotp_ctx;
     uds_ctx_t *uds_ctx;
+    const router_config_isotp_uds_pair_t *pair_config;
 }router_diag_isotp_uds_pair_ctx_t;
 
 typedef struct {
     bool active;
     kwp_ctx_t *kwp_ctx;
     uds_ctx_t *uds_ctx;
+    const router_config_kwp_uds_pair_t *pair_config;
 }router_diag_kwp_uds_pair_ctx_t;
 
 typedef struct {
     bool active;
     isotp_ctx_t *isotp_ctx;
     obd2_ctx_t *obd2_ctx;
+    const router_config_isotp_obd2_pair_t *pair_config;
 }router_diag_isotp_obd2_pair_ctx_t;
 
 typedef struct {
     bool active;
     kwp_ctx_t *kwp_ctx;
     obd2_ctx_t *obd2_ctx;
+    const router_config_kwp_obd2_pair_t *pair_config;
 }router_diag_kwp_obd2_pair_ctx_t;
 
 

@@ -14,6 +14,7 @@
 error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
+  HAL_StatusTypeDef status = HAL_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -28,6 +29,44 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
     }
 
     (void)HAL_FDCAN_Stop(ctx->init.handle);
+
+#if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
+    status = HAL_OK;
+    if(ctx->init.rx_fifo0_cb != NULL) {
+      status |= HAL_FDCAN_RegisterRxFifo0Callback(ctx->init.handle, ctx->init.rx_fifo0_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(ctx->init.rx_fifo1_cb != NULL) {
+      status |= HAL_FDCAN_RegisterRxFifo1Callback(ctx->init.handle, ctx->init.rx_fifo1_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(ctx->init.rx_buffer_cb != NULL) {
+      status |= HAL_FDCAN_RegisterCallback(ctx->init.handle, HAL_FDCAN_RX_BUFFER_NEW_MSG_CB_ID, ctx->init.rx_buffer_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(ctx->init.error_cb != NULL) {
+      status |= HAL_FDCAN_RegisterCallback(ctx->init.handle, HAL_FDCAN_ERROR_CALLBACK_CB_ID, ctx->init.error_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+
+    ctx->init.handle->Init.NominalTimeSeg1 = 6;
+    ctx->init.handle->Init.NominalTimeSeg2 = 3;
+    ctx->init.handle->Init.DataTimeSeg1 = 6;
+    ctx->init.handle->Init.DataTimeSeg2 = 3;
+
+    if(status != HAL_OK) {
+      err = E_HAL;
+      break;
+    }
+#endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
 
     ctx->initialized = true;
 
@@ -45,7 +84,7 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(!ctx->initialized, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(config->baudrate < CAN_BAUDRATE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->baudrate >= CAN_BAUDRATE_MAX, err = E_PARAM);
 
     memset(ctx->rx_callbacks, 0, sizeof(ctx->rx_callbacks));
     memset(ctx->err_callbacks, 0, sizeof(ctx->err_callbacks));
@@ -77,46 +116,9 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
         err = E_PARAM;
         break;
     }
-    ctx->init.handle->Init.NominalTimeSeg1 = 6;
-    ctx->init.handle->Init.NominalTimeSeg2 = 3;
-    ctx->init.handle->Init.DataTimeSeg1 = 6;
-    ctx->init.handle->Init.DataTimeSeg2 = 3;
+
     status = HAL_FDCAN_Init(ctx->init.handle);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-
-
-#if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
-    status = HAL_OK;
-    if(ctx->init.rx_fifo0_cb != NULL) {
-      status |= HAL_FDCAN_RegisterRxFifo0Callback(ctx->init.handle, ctx->init.rx_fifo0_cb);
-    } else {
-      err = E_PARAM;
-      break;
-    }
-    if(ctx->init.rx_fifo1_cb != NULL) {
-      status |= HAL_FDCAN_RegisterRxFifo1Callback(ctx->init.handle, ctx->init.rx_fifo1_cb);
-    } else {
-      err = E_PARAM;
-      break;
-    }
-    if(ctx->init.rx_buffer_cb != NULL) {
-      status |= HAL_FDCAN_RegisterCallback(ctx->init.handle, HAL_FDCAN_RX_BUFFER_NEW_MSG_CB_ID, ctx->init.rx_buffer_cb);
-    } else {
-      err = E_PARAM;
-      break;
-    }
-    if(ctx->init.error_cb != NULL) {
-      status |= HAL_FDCAN_RegisterCallback(ctx->init.handle, HAL_FDCAN_ERROR_CALLBACK_CB_ID, ctx->init.error_cb);
-    } else {
-      err = E_PARAM;
-      break;
-    }
-
-    if(status != HAL_OK) {
-      err = E_HAL;
-      break;
-    }
-#endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
 
     status = HAL_FDCAN_ConfigGlobalFilter(ctx->init.handle,
         ctx->config.global_filter.reject_non_matching_std ? FDCAN_REJECT : ctx->config.global_filter.reject_non_matching_std,
