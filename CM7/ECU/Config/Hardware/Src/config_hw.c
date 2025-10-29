@@ -12,7 +12,7 @@
 #include "compiler.h"
 #include "time.h"
 
-#define ECU_CONFIG_HW_SWI_COMM_PERIOD_US    (150)
+#define ECU_CONFIG_HW_SWI_COMM_PERIOD_US    (100)
 
 static void ecu_config_trigger_comm_irq(void);
 

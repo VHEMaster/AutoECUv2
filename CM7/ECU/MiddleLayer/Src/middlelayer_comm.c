@@ -8,12 +8,12 @@
 #include "middlelayer_comm.h"
 #include "config_comm.h"
 
-#include "config_router.h"
 #include "config_can.h"
 #include "config_kwp.h"
 #include "config_isotp.h"
 #include "config_uds.h"
 #include "config_obd2.h"
+#include "config_router.h"
 
 #include "compiler.h"
 
@@ -42,18 +42,6 @@ void middlelayer_comm_init(void)
 
   do {
     err = ecu_comm_init();
-
-    for(int i = 0; i < ECU_COMM_ROUTER_MAX; i++) {
-      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ROUTER, i, &comm_ctx);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-      err = ecu_comm_router_init(i, (router_ctx_t *)comm_ctx);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_ROUTER, i, true);
-      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-    }
-    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_COMM_CAN_MAX; i++) {
       err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_CAN, i, &comm_ctx);
@@ -111,6 +99,18 @@ void middlelayer_comm_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_OBD2, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_COMM_ROUTER_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ROUTER, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_router_init(i, (router_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_ROUTER, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

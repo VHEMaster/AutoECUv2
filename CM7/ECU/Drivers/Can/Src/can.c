@@ -47,6 +47,9 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->baudrate < CAN_BAUDRATE_MAX, err = E_PARAM);
 
+    memset(ctx->rx_callbacks, 0, sizeof(ctx->rx_callbacks));
+    memset(ctx->err_callbacks, 0, sizeof(ctx->err_callbacks));
+
     if(&ctx->config != config) {
       memcpy(&ctx->config, config, sizeof(can_config_t));
     }
@@ -291,6 +294,11 @@ error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callbac
         cb->enabled = true;
         err = E_OK;
         break;
+      } else {
+        if(cb->msg_id == msg_id && cb->func == func && cb->usrdata == usrdata) {
+          err = E_EXISTS;
+          break;
+        }
       }
     }
 
@@ -318,6 +326,11 @@ error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, 
         cb->enabled = true;
         err = E_OK;
         break;
+      } else {
+        if(cb->func == func && cb->usrdata == usrdata) {
+          err = E_EXISTS;
+          break;
+        }
       }
     }
 

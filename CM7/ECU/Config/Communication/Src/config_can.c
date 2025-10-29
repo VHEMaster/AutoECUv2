@@ -183,6 +183,11 @@ error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *conf
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+    memset(can_ctx->rx_callbacks, 0, sizeof(can_ctx->rx_callbacks));
+    memset(can_ctx->err_callbacks, 0, sizeof(can_ctx->err_callbacks));
+    can_ctx->rx_callbacks_count = 0;
+    can_ctx->err_callbacks_count = 0;
+
     err = can_configure(can_ctx->ctx, config);
 
   } while(0);

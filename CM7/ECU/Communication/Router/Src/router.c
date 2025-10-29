@@ -6,6 +6,7 @@
  */
 
 #include "router.h"
+#include "router_private.h"
 
 error_t router_init(router_ctx_t *ctx, const router_init_ctx_t *init)
 {
@@ -34,7 +35,14 @@ error_t router_configure(router_ctx_t *ctx, const router_config_t *config)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
+    ctx->configured = false;
     memcpy(&ctx->config, config, sizeof(router_config_t));
+
+    err = router_configure_diag(ctx);
+    BREAK_IF(err != E_OK);
+
+    err = router_configure_signals(ctx);
+    BREAK_IF(err != E_OK);
 
     ctx->configured = true;
 
@@ -90,6 +98,9 @@ void router_loop_comm(router_ctx_t *ctx)
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
 
+    router_handle_diag(ctx);
+    router_handle_signals(ctx);
+
   } while(0);
 }
 
@@ -100,4 +111,17 @@ void router_loop_main(router_ctx_t *ctx)
     BREAK_IF(ctx->configured == false);
 
   } while(0);
+}
+
+error_t router_signal_transmit(router_ctx_t *ctx, const can_message_t *message)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message == NULL, err = E_PARAM);
+
+  } while(0);
+
+  return err;
 }

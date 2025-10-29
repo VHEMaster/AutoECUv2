@@ -12,6 +12,13 @@
 #include "time.h"
 #include "versioned_router.h"
 
+#include "can.h"
+#include "kwp.h"
+#include "isotp.h"
+#include "uds.h"
+#include "obd2.h"
+#include "router.h"
+
 typedef enum {
   ROUTER_OK = 0,
   ROUTER_MAX
@@ -28,11 +35,53 @@ typedef struct {
     void *callback_userdata;
 }router_init_ctx_t;
 
+typedef struct {
+    bool active;
+    can_ctx_t *can_ctx;
+    isotp_ctx_t *isotp_ctx;
+}router_diag_can_isotp_pair_ctx_t;
+
+typedef struct {
+    bool active;
+    isotp_ctx_t *isotp_ctx;
+    uds_ctx_t *uds_ctx;
+}router_diag_isotp_uds_pair_ctx_t;
+
+typedef struct {
+    bool active;
+    kwp_ctx_t *kwp_ctx;
+    uds_ctx_t *uds_ctx;
+}router_diag_kwp_uds_pair_ctx_t;
+
+typedef struct {
+    bool active;
+    isotp_ctx_t *isotp_ctx;
+    obd2_ctx_t *obd2_ctx;
+}router_diag_isotp_obd2_pair_ctx_t;
+
+typedef struct {
+    bool active;
+    kwp_ctx_t *kwp_ctx;
+    obd2_ctx_t *obd2_ctx;
+}router_diag_kwp_obd2_pair_ctx_t;
+
+
+typedef struct {
+    router_diag_can_isotp_pair_ctx_t can_isotp_pairs[ROUTER_CONFIG_CAN_ISOTP_PAIR_MAX];
+    router_diag_isotp_uds_pair_ctx_t isotp_uds_pairs[ROUTER_CONFIG_ISOTP_UDS_PAIR_MAX];
+    router_diag_kwp_uds_pair_ctx_t kwp_uds_pairs[ROUTER_CONFIG_KWP_UDS_PAIR_MAX];
+    router_diag_isotp_obd2_pair_ctx_t isotp_obd2_pairs[ROUTER_CONFIG_ISOTP_OBD2_PAIR_MAX];
+    router_diag_kwp_obd2_pair_ctx_t kwp_obd2_pairs[ROUTER_CONFIG_KWP_OBD2_PAIR_MAX];
+
+}router_diag_ctx_t;
+
 typedef struct router_ctx_tag {
     router_config_t config;
     router_init_ctx_t init;
     bool initialized;
     bool configured;
+
+    router_diag_ctx_t diag;
 
     router_error_code_t error_code;
     bool reset_trigger;
