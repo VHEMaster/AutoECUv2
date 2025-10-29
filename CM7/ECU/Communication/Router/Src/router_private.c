@@ -152,6 +152,9 @@ static void router_handle_diag_pairs(router_ctx_t *ctx)
   }
 }
 
+typedef void (*can_rx_callback_func_t)(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
+typedef void (*can_err_callback_func_t)(can_ctx_t *ctx, void *usrdata);
+
 static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_config_can_isotp_pairs_t pair)
 {
   error_t err = E_OK;
@@ -170,6 +173,9 @@ static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_co
       BREAK_IF(err != E_OK);
       err = ecu_comm_get_isotp_ctx(pair_cfg->isotp_instance, &pair_ctx->isotp_ctx);
       BREAK_IF(err != E_OK);
+
+      err = can_register_rx_callback(pair_ctx->can_ctx, pair_cfg->upstream_msg_id, router_can_isotp_rx_callback, ctx);
+
       pair_ctx->active = true;
     }
 
