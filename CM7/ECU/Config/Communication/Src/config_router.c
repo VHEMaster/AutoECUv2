@@ -31,65 +31,30 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
           },
       },
       .diagnostics = {
-          .can_isotp_pairs = {
+          .can_isotp = {
               {
                   .enabled = true,
                   .can_instance = ECU_COMM_CAN_1,
-                  .isotp_instance = ECU_COMM_ISOTP_1,
+                  .uds_instance = ECU_COMM_UDS_1,
+                  .obd2_instance = ECU_COMM_OBD2_1,
                   .upstream_msg_id = 0x7E0,
                   .downstream_msg_id = 0x7E8,
-              }, //ROUTER_CONFIG_CAN_ISOTP_PAIR_1
+              }, //ECU_COMM_ISOTP_1
               {
                   .enabled = true,
                   .can_instance = ECU_COMM_CAN_1,
-                  .isotp_instance = ECU_COMM_ISOTP_2,
+                  .uds_instance = ECU_COMM_UDS_2,
+                  .obd2_instance = ECU_COMM_OBD2_2,
                   .upstream_msg_id = 0x7DF,
                   .downstream_msg_id = 0x7E8,
-              }, //ROUTER_CONFIG_CAN_ISOTP_PAIR_2
+              }, //ECU_COMM_ISOTP_2
           },
-          .isotp_uds_pairs = {
+          .kwp = {
               {
                   .enabled = true,
-                  .isotp_instance = ECU_COMM_ISOTP_1,
-                  .uds_instance = ECU_COMM_UDS_1,
-              }, //ROUTER_CONFIG_ISOTP_UDS_PAIR_1
-              {
-                  .enabled = true,
-                  .isotp_instance = ECU_COMM_ISOTP_2,
-                  .uds_instance = ECU_COMM_UDS_2,
-              }, //ROUTER_CONFIG_ISOTP_UDS_PAIR_2
-          },
-          .kwp_uds_pairs = {
-              {
-                  .enabled = true,
-                  .kwp_instance = ECU_COMM_KWP_1,
                   .uds_instance = ECU_COMM_UDS_3,
-              }, //ROUTER_CONFIG_KWP_UDS_PAIR_1
-              {
-
-              }, //ROUTER_CONFIG_KWP_UDS_PAIR_2
-          },
-          .isotp_obd2_pairs = {
-              {
-                  .enabled = true,
-                  .isotp_instance = ECU_COMM_ISOTP_1,
-                  .obd2_instance = ECU_COMM_OBD2_1,
-              }, //ROUTER_CONFIG_ISOTP_OBD2_PAIR_1
-              {
-                  .enabled = true,
-                  .isotp_instance = ECU_COMM_ISOTP_2,
-                  .obd2_instance = ECU_COMM_OBD2_2,
-              }, //ROUTER_CONFIG_ISOTP_OBD2_PAIR_2
-          },
-          .kwp_obd2_pairs = {
-              {
-                  .enabled = true,
-                  .kwp_instance = ECU_COMM_KWP_1,
-                  .obd2_instance = ECU_COMM_OBD2_2,
-              }, //ROUTER_CONFIG_KWP_OBD2_PAIR_1
-              {
-
-              }, //ROUTER_CONFIG_KWP_OBD2_PAIR_2
+                  .obd2_instance = ECU_COMM_OBD2_3,
+              }, //ECU_COMM_KWP_1
           },
       },
   }, //ECU_ROUTER_IF_1
