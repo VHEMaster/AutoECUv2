@@ -23,7 +23,8 @@ static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_is
 static error_t router_configure_diag_io_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance);
 static error_t router_configure_diag_io(router_ctx_t *ctx);
 
-static void  router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx);
+static void router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx);
+static void router_reset_can(router_diag_isotp_ctx_t *diag_ctx);
 
 static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata)
 {
@@ -54,13 +55,7 @@ static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata)
 
     diag_ctx = (router_diag_isotp_ctx_t *)usrdata;
 
-    (void)isotp_reset(diag_ctx->isotp_ctx);
-    if(diag_ctx->uds_ctx != NULL) {
-      (void)uds_reset(diag_ctx->uds_ctx);
-    }
-    if(diag_ctx->obd2_ctx != NULL) {
-      (void)obd2_reset(diag_ctx->obd2_ctx);
-    }
+    router_reset_can(diag_ctx);
 
   } while(0);
 }
@@ -82,28 +77,26 @@ static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t 
       if(err == E_OK) {
         if(isotp_err != ISOTP_OK) {
           router_reset_isotp(diag_ctx);
-          diag_ctx->message_downstream_pending = false;
           break;
         }
       }
 
-      if(diag_ctx->message_downstream_pending == false) {
-        err = isotp_frame_read_downstream(diag_ctx->isotp_ctx, (isotp_frame_t *)diag_ctx->message_downstream.payload);
+      if(diag_ctx->runtime.message_downstream_pending == false) {
+        err = isotp_frame_read_downstream(diag_ctx->isotp_ctx, (isotp_frame_t *)diag_ctx->runtime.message_downstream.payload);
         BREAK_IF(err != E_OK);
-        diag_ctx->message_downstream_pending = true;
+        diag_ctx->runtime.message_downstream_pending = true;
 
-        diag_ctx->message_downstream.id = diag_cfg->downstream_msg_id;
-        diag_ctx->message_downstream.len = ISOTP_FRAME_LEN;
+        diag_ctx->runtime.message_downstream.id = diag_cfg->downstream_msg_id;
+        diag_ctx->runtime.message_downstream.len = ISOTP_FRAME_LEN;
       }
 
-      if(diag_ctx->message_downstream_pending == true) {
-        err = can_tx(diag_ctx->can_ctx, &diag_ctx->message_downstream);
+      if(diag_ctx->runtime.message_downstream_pending == true) {
+        err = can_tx(diag_ctx->can_ctx, &diag_ctx->runtime.message_downstream);
         if(err != E_OK) {
           BREAK_IF(err == E_AGAIN);
-          (void)can_reset(diag_ctx->can_ctx);
-          (void)isotp_reset(diag_ctx->isotp_ctx);
+          router_reset_can(diag_ctx);
         }
-        diag_ctx->message_downstream_pending = false;
+        diag_ctx->runtime.message_downstream_pending = false;
       }
     }
 
@@ -144,17 +137,81 @@ static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_
 
     diag_ctx = &ctx->diag.isotp_ctx[instance];
 
-    diag_ctx->data_len = ISOTP_PAYLOAD_LEN_MAX;
-    err = isotp_data_read_upstream(diag_ctx->isotp_ctx, diag_ctx->data, &diag_ctx->data_len);
-    if(err == E_OK) {
-      // TODO: IMPLEMENT
-    } else if(err != E_AGAIN) {
-      router_reset_isotp(&ctx->diag.isotp_ctx[instance]);
+    do {
+      if(diag_ctx->runtime.isotp_upstream_pending == false) {
+        diag_ctx->upstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
+        err = isotp_data_read_upstream(diag_ctx->isotp_ctx, diag_ctx->upstream_data, &diag_ctx->upstream_data_len);
+        if(err == E_OK) {
+          diag_ctx->runtime.isotp_upstream_pending = true;
+        } else if(err != E_AGAIN) {
+          router_reset_isotp(diag_ctx);
+          break;
+        }
+      }
 
-      // TODO: IMPLEMENT
+      if(diag_ctx->runtime.isotp_upstream_pending &&
+          !diag_ctx->runtime.obd2_upstream_pending &&
+          !diag_ctx->runtime.uds_upstream_pending) {
+        diag_ctx->runtime.isotp_upstream_pending = false;
 
-      break;
-    }
+        // TODO: IMPLEMENT
+
+        //diag_ctx->runtime.obd2_upstream_pending = true;
+        //diag_ctx->runtime.uds_upstream_pending = true;
+      }
+
+      if(diag_ctx->runtime.obd2_upstream_pending && diag_ctx->runtime.uds_upstream_pending) {
+        router_reset_isotp(diag_ctx);
+      } else if(diag_ctx->runtime.obd2_upstream_pending) {
+        err = obd2_message_write_upstream(diag_ctx->obd2_ctx, diag_ctx->upstream_data, diag_ctx->upstream_data_len);
+        if(err != E_OK) {
+          BREAK_IF(err == E_AGAIN);
+          router_reset_isotp(diag_ctx);
+          break;
+        }
+        diag_ctx->runtime.obd2_upstream_pending = false;
+      } else if(diag_ctx->runtime.uds_upstream_pending) {
+        err = uds_message_write_upstream(diag_ctx->uds_ctx, diag_ctx->upstream_data, diag_ctx->upstream_data_len);
+        if(err != E_OK) {
+          BREAK_IF(err == E_AGAIN);
+          router_reset_isotp(diag_ctx);
+          break;
+        }
+        diag_ctx->runtime.uds_upstream_pending = false;
+      }
+    } while(0);
+
+    do {
+      if(!diag_ctx->runtime.isotp_downstream_pending) {
+        diag_ctx->downstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
+        err = obd2_message_read_downstream(diag_ctx->obd2_ctx, diag_ctx->downstream_data, &diag_ctx->downstream_data_len);
+        if(err == E_OK) {
+          diag_ctx->runtime.isotp_downstream_pending = true;
+        } else if(err != E_AGAIN) {
+          router_reset_isotp(diag_ctx);
+          break;
+        } else {
+          diag_ctx->downstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
+          err = uds_message_read_downstream(diag_ctx->uds_ctx, diag_ctx->downstream_data, &diag_ctx->downstream_data_len);
+          if(err == E_OK) {
+            diag_ctx->runtime.isotp_downstream_pending = true;
+          } else if(err != E_AGAIN) {
+            router_reset_isotp(diag_ctx);
+            break;
+          }
+        }
+      }
+
+      if(diag_ctx->runtime.isotp_downstream_pending) {
+        err = isotp_data_write_downstream(diag_ctx->isotp_ctx, diag_ctx->downstream_data, diag_ctx->downstream_data_len);
+        if(err == E_OK) {
+          diag_ctx->runtime.isotp_downstream_pending = false;
+        } else if(err != E_AGAIN) {
+          router_reset_isotp(diag_ctx);
+          break;
+        }
+      }
+    } while(0);
 
   } while(0);
 }
@@ -264,9 +321,14 @@ static error_t router_configure_diag_io(router_ctx_t *ctx)
   return err;
 }
 
-static void  router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx)
+static void router_reset_can(router_diag_isotp_ctx_t *diag_ctx)
 {
   (void)can_reset(diag_ctx->can_ctx);
+  router_reset_isotp(diag_ctx);
+}
+
+static void router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx)
+{
   (void)isotp_reset(diag_ctx->isotp_ctx);
 
   if(diag_ctx->uds_ctx != NULL) {
@@ -275,6 +337,7 @@ static void  router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx)
   if(diag_ctx->obd2_ctx != NULL) {
     (void)obd2_reset(diag_ctx->obd2_ctx);
   }
+  memset(&diag_ctx->runtime, 0, sizeof(diag_ctx->runtime));
 }
 
 error_t router_configure_diag(router_ctx_t *ctx)

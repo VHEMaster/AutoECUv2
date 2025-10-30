@@ -16,4 +16,7 @@ void uds_loop(uds_ctx_t *ctx);
 
 error_t uds_reset(uds_ctx_t *ctx);
 
+error_t uds_message_write_upstream(uds_ctx_t *ctx, const uint8_t *payload, uint16_t length);
+error_t uds_message_read_downstream(uds_ctx_t *ctx, uint8_t *payload, uint16_t *length);
+
 #endif /* COMMUNICATION_UDS_INC_UDS_H_ */

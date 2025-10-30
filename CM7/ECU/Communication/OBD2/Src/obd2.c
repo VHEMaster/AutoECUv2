@@ -83,3 +83,35 @@ void obd2_loop(obd2_ctx_t *ctx)
 
   } while(0);
 }
+
+error_t obd2_message_write_upstream(obd2_ctx_t *ctx, const uint8_t *payload, uint16_t length)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(payload == NULL || length == 0, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+
+    // TODO: IMPLEMENT
+
+  } while(0);
+
+  return err;
+}
+
+error_t obd2_message_read_downstream(obd2_ctx_t *ctx, uint8_t *payload, uint16_t *length)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(payload == NULL || length == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+
+    // TODO: IMPLEMENT
+
+  } while(0);
+
+  return err;
+}

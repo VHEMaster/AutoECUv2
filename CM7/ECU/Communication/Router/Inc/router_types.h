@@ -44,11 +44,22 @@ typedef struct {
     uds_ctx_t *uds_ctx;
     obd2_ctx_t *obd2_ctx;
 
-    uint8_t data[ISOTP_PAYLOAD_LEN_MAX];
-    uint16_t data_len;
+    uint8_t upstream_data[ISOTP_PAYLOAD_LEN_MAX];
+    uint16_t upstream_data_len;
 
-    can_message_t message_downstream;
-    bool message_downstream_pending;
+    uint8_t downstream_data[ISOTP_PAYLOAD_LEN_MAX];
+    uint16_t downstream_data_len;
+
+    struct {
+        can_message_t message_downstream;
+        bool message_downstream_pending;
+
+        bool isotp_upstream_pending;
+        bool obd2_upstream_pending;
+        bool uds_upstream_pending;
+
+        bool isotp_downstream_pending;
+    }runtime;
 }router_diag_isotp_ctx_t;
 
 typedef struct {
