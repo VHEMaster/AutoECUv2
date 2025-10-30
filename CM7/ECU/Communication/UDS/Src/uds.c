@@ -102,7 +102,7 @@ error_t uds_message_write_upstream(uds_ctx_t *ctx, const uint8_t *payload, uint1
 
 error_t uds_message_read_downstream(uds_ctx_t *ctx, uint8_t *payload, uint16_t *length)
 {
-  error_t err = E_OK;
+  error_t err = E_AGAIN;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);

@@ -77,7 +77,7 @@ error_t can_tx_send_msg(can_ctx_t *ctx, const can_message_t *message)
     BREAK_IF_ACTION((message_id & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && message_id > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
     BREAK_IF_ACTION((message_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && message_id > 0x7FF, err = E_PARAM);
 
-    ctx->txheader.Identifier = message_id & CAN_MESSAGE_EXTENDED_ID_FLAG;
+    ctx->txheader.Identifier = message_id & ~CAN_MESSAGE_EXTENDED_ID_FLAG;
     if((message_id & CAN_MESSAGE_EXTENDED_ID_FLAG)) {
       ctx->txheader.IdType = FDCAN_EXTENDED_ID;
     } else {

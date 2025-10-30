@@ -12,8 +12,10 @@
 #include "time.h"
 #include "versioned_obd2.h"
 
+#define OBD2_DATA_LENGTH_MAX            255
 #define OBD2_RESPONSE_NEGATIVE_CODE    0x7F
 #define OBD2_RESPONSE_POSITIVE_OFFSET  0x40
+#define OBD2_DOWNSTREAM_TIMEOUT        (1000 * TIME_US_IN_MS)
 
 typedef enum {
   OBD2_OK = 0,
@@ -166,7 +168,9 @@ typedef enum
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7C        = 0x7C,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7D        = 0x7D,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7E        = 0x7E,  // N/A
-  OBD2_PID_01_MANUFACTURER_DEFINED_0x7F        = 0x7F   // N/A
+  OBD2_PID_01_MANUFACTURER_DEFINED_0x7F        = 0x7F,  // N/A
+
+  OBD2_PID_01_MAX
 }obd2_pid_mode_01_t;
 
 typedef enum
@@ -313,6 +317,45 @@ typedef struct obd2_ctx_tag obd2_ctx_t;
 
 typedef void (*obd2_error_callback_t)(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
 
+
+typedef enum
+{
+  OBD2_PID_TYPE_UNDEFINED = 0,
+  OBD2_PID_TYPE_RAW_SINGLE_BYTE,
+  OBD2_PID_TYPE_RAW_SINGLE_WORD,
+  OBD2_PID_TYPE_RAW_SINGLE_DWORD,
+  OBD2_PID_TYPE_RAW_DUAL_BYTES,
+  OBD2_PID_TYPE_RAW_DUAL_WORD,
+  OBD2_PID_TYPE_RAW_QUAD_BYTES,
+  OBD2_PID_TYPE_SINGLE_BYTE,
+  OBD2_PID_TYPE_SINGLE_WORD,
+  OBD2_PID_TYPE_SINGLE_DWORD,
+  OBD2_PID_TYPE_DUAL_BYTES,
+  OBD2_PID_TYPE_DUAL_WORDS,
+  OBD2_PID_TYPE_QUAD_BYTES,
+  OBD2_PID_TYPE_MAX
+}obd2_mode1_pid_type_t;
+
+typedef struct {
+    float gain;
+    float offset;
+}obd2_mode1_setup_gain_offset_t;
+
+typedef struct {
+    obd2_mode1_pid_type_t type;
+    obd2_mode1_setup_gain_offset_t gain_offset[4];
+}obd2_mode1_setup_t;
+
+typedef struct {
+    float flt;
+    uint32_t raw;
+}obd2_mode1_data_value_t;
+
+typedef struct {
+    bool supported;
+    obd2_mode1_data_value_t value[4];
+}obd2_mode1_data_t;
+
 typedef struct {
     obd2_error_callback_t error_callback;
     void *callback_userdata;
@@ -324,8 +367,21 @@ typedef struct obd2_ctx_tag {
     bool initialized;
     bool configured;
 
+    const obd2_mode1_setup_t *mode1_setup;
+    obd2_mode1_data_t mode1_data[OBD2_PID_01_MAX];
+
     obd2_error_code_t error_code;
     bool reset_trigger;
+
+    uint8_t upstream_data[OBD2_DATA_LENGTH_MAX];
+    uint16_t upstream_data_len;
+    bool upstream_available;
+
+    uint8_t downstream_data[OBD2_DATA_LENGTH_MAX];
+    uint16_t downstream_data_len;
+    bool downstream_available;
+
+    time_us_t downstream_time;
 
 }obd2_ctx_t;
 

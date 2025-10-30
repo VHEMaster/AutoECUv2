@@ -11,7 +11,7 @@
 #include "common.h"
 
 #define ECU_COMM_NONE           (255)
-#define ECU_COMM_INSTANCE_MAX   (2)
+#define ECU_COMM_INSTANCE_MAX   (3)
 
 typedef uint32_t ecu_comm_instance_t;
 

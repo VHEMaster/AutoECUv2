@@ -83,7 +83,10 @@ static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t 
 
       if(diag_ctx->runtime.message_downstream_pending == false) {
         err = isotp_frame_read_downstream(diag_ctx->isotp_ctx, (isotp_frame_t *)diag_ctx->runtime.message_downstream.payload);
-        BREAK_IF(err != E_OK);
+        if(err != E_OK) {
+          BREAK_IF(err == E_AGAIN);
+          router_reset_can(diag_ctx);
+        }
         diag_ctx->runtime.message_downstream_pending = true;
 
         diag_ctx->runtime.message_downstream.id = diag_cfg->downstream_msg_id;

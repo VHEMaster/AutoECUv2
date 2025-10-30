@@ -797,10 +797,18 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
     },
     {
         .section_type = FLASH_SECTION_TYPE_COMM_OBD2,
-        .section_index = ECU_COMM_OBD2_1,
+        .section_index = ECU_COMM_OBD2_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 10,
         .sector_index = 11,
+        .uses_full_block = false,
+    },
+    {
+        .section_type = FLASH_SECTION_TYPE_COMM_OBD2,
+        .section_index = ECU_COMM_OBD2_3,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 10,
+        .sector_index = 12,
         .uses_full_block = false,
     },
     {
