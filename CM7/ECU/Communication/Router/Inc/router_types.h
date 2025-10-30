@@ -41,6 +41,8 @@ typedef struct {
     isotp_ctx_t *isotp_ctx;
     const router_config_can_isotp_pair_t *pair_config;
 
+    uds_ctx_t *isotp_link_uds_ctx;
+    obd2_ctx_t *isotp_link_obd2_ctx;
     can_message_t message_downstream;
     bool message_downstream_pending;
 }router_diag_can_isotp_pair_ctx_t;

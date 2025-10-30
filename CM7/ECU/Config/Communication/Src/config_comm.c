@@ -124,9 +124,29 @@ static const ecu_config_comm_t ecu_config_comm = {
             .ctx = &ecu_config_uds_ctx[ECU_COMM_UDS_1],
         },
         {
+            .type = ECU_COMM_TYPE_UDS,
+            .instance = ECU_COMM_UDS_2,
+            .ctx = &ecu_config_uds_ctx[ECU_COMM_UDS_2],
+        },
+        {
+            .type = ECU_COMM_TYPE_UDS,
+            .instance = ECU_COMM_UDS_3,
+            .ctx = &ecu_config_uds_ctx[ECU_COMM_UDS_3],
+        },
+        {
             .type = ECU_COMM_TYPE_OBD2,
             .instance = ECU_COMM_OBD2_1,
             .ctx = &ecu_config_obd2_ctx[ECU_COMM_OBD2_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_OBD2,
+            .instance = ECU_COMM_OBD2_2,
+            .ctx = &ecu_config_obd2_ctx[ECU_COMM_OBD2_2],
+        },
+        {
+            .type = ECU_COMM_TYPE_OBD2,
+            .instance = ECU_COMM_OBD2_3,
+            .ctx = &ecu_config_obd2_ctx[ECU_COMM_OBD2_3],
         },
         {
             .type = ECU_COMM_TYPE_ROUTER,

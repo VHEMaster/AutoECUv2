@@ -50,7 +50,6 @@ static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *me
 
 static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata)
 {
-  error_t err = E_OK;
   const router_config_can_isotp_pair_t *pair_cfg;
   router_diag_can_isotp_pair_ctx_t *pair_ctx;
 
@@ -62,8 +61,13 @@ static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata)
     pair_cfg = pair_ctx->pair_config;
     BREAK_IF(pair_cfg == NULL);
 
-    err = isotp_reset(pair_ctx->isotp_ctx);
-    BREAK_IF(err != E_OK);
+    (void)isotp_reset(pair_ctx->isotp_ctx);
+    if(pair_ctx->isotp_link_uds_ctx != NULL) {
+      (void)uds_reset(pair_ctx->isotp_link_uds_ctx);
+    }
+    if(pair_ctx->isotp_link_obd2_ctx != NULL) {
+      (void)obd2_reset(pair_ctx->isotp_link_obd2_ctx);
+    }
 
   } while(0);
 }
@@ -86,6 +90,14 @@ static void router_handle_diag_pair_can_isotp(router_ctx_t *ctx, router_config_c
         if(isotp_err != ISOTP_OK) {
           (void)can_reset(pair_ctx->can_ctx);
           (void)isotp_reset(pair_ctx->isotp_ctx);
+
+          if(pair_ctx->isotp_link_uds_ctx != NULL) {
+            (void)uds_reset(pair_ctx->isotp_link_uds_ctx);
+          }
+          if(pair_ctx->isotp_link_obd2_ctx != NULL) {
+            (void)obd2_reset(pair_ctx->isotp_link_obd2_ctx);
+          }
+
           pair_ctx->message_downstream_pending = false;
           break;
         }
@@ -242,6 +254,34 @@ static error_t router_configure_diag_pair_can_isotp(router_ctx_t *ctx, router_co
       err = ecu_comm_get_can_ctx(pair_cfg->can_instance, &pair_ctx->can_ctx);
       BREAK_IF(err != E_OK);
       err = ecu_comm_get_isotp_ctx(pair_cfg->isotp_instance, &pair_ctx->isotp_ctx);
+      BREAK_IF(err != E_OK);
+
+      for(router_config_isotp_uds_pairs_t p = 0; p < ROUTER_CONFIG_ISOTP_UDS_PAIR_MAX; p++) {
+        const router_config_isotp_uds_pair_t *uds_pair_cfg = &ctx->config.diagnostics.isotp_uds_pairs[p];
+        if(uds_pair_cfg->enabled == true && uds_pair_cfg->isotp_instance == pair_cfg->isotp_instance) {
+          if(pair_ctx->isotp_link_uds_ctx == NULL) {
+            err = ecu_comm_get_uds_ctx(uds_pair_cfg->uds_instance, &pair_ctx->isotp_link_uds_ctx);
+            BREAK_IF(err != E_OK);
+          } else {
+            err = E_PARAM;
+            break;
+          }
+        }
+      }
+      BREAK_IF(err != E_OK);
+
+      for(router_config_isotp_obd2_pairs_t p = 0; p < ROUTER_CONFIG_ISOTP_OBD2_PAIR_MAX; p++) {
+        const router_config_isotp_obd2_pair_t *obd2_pair_cfg = &ctx->config.diagnostics.isotp_obd2_pairs[p];
+        if(obd2_pair_cfg->enabled == true && obd2_pair_cfg->isotp_instance == pair_cfg->isotp_instance) {
+          if(pair_ctx->isotp_link_obd2_ctx == NULL) {
+            err = ecu_comm_get_obd2_ctx(obd2_pair_cfg->obd2_instance, &pair_ctx->isotp_link_obd2_ctx);
+            BREAK_IF(err != E_OK);
+          } else {
+            err = E_PARAM;
+            break;
+          }
+        }
+      }
       BREAK_IF(err != E_OK);
 
       err = can_register_rx_callback(pair_ctx->can_ctx, pair_cfg->upstream_msg_id, router_can_isotp_rx_callback, pair_ctx);

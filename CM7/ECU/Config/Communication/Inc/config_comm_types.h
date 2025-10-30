@@ -43,11 +43,15 @@ typedef enum {
 
 typedef enum {
   ECU_COMM_UDS_1 = 0,
+  ECU_COMM_UDS_2,
+  ECU_COMM_UDS_3,
   ECU_COMM_UDS_MAX
 }ecu_comm_uds_t;
 
 typedef enum {
   ECU_COMM_OBD2_1 = 0,
+  ECU_COMM_OBD2_2,
+  ECU_COMM_OBD2_3,
   ECU_COMM_OBD2_MAX
 }ecu_comm_obd2_t;
 
