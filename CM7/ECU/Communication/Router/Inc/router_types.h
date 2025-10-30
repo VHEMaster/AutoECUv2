@@ -75,6 +75,27 @@ typedef struct {
     const router_config_kwp_obd2_pair_t *pair_config;
 }router_diag_kwp_obd2_pair_ctx_t;
 
+typedef struct {
+    bool active;
+    router_config_can_isotp_pairs_t pair_can;
+    router_config_isotp_uds_pairs_t pair_uds;
+    router_config_isotp_obd2_pairs_t pair_obd2;
+    isotp_ctx_t *isotp_ctx;
+    uds_ctx_t *uds_ctx;
+    obd2_ctx_t *obd2_ctx;
+
+    uint8_t data[ISOTP_PAYLOAD_LEN_MAX];
+    uint16_t data_len;
+}router_diag_isotp_ctx_t;
+
+typedef struct {
+    bool active;
+    router_config_kwp_uds_pairs_t pair_uds;
+    router_config_kwp_obd2_pairs_t pair_obd2;
+    kwp_ctx_t *kwp_ctx;
+    uds_ctx_t *uds_ctx;
+    obd2_ctx_t *obd2_ctx;
+}router_diag_kwp_ctx_t;
 
 typedef struct {
     router_diag_can_isotp_pair_ctx_t can_isotp_pairs[ROUTER_CONFIG_CAN_ISOTP_PAIR_MAX];
@@ -82,6 +103,9 @@ typedef struct {
     router_diag_kwp_uds_pair_ctx_t kwp_uds_pairs[ROUTER_CONFIG_KWP_UDS_PAIR_MAX];
     router_diag_isotp_obd2_pair_ctx_t isotp_obd2_pairs[ROUTER_CONFIG_ISOTP_OBD2_PAIR_MAX];
     router_diag_kwp_obd2_pair_ctx_t kwp_obd2_pairs[ROUTER_CONFIG_KWP_OBD2_PAIR_MAX];
+
+    router_diag_isotp_ctx_t isotp_ctx[ECU_COMM_ISOTP_MAX];
+    router_diag_kwp_ctx_t kwp_ctx[ECU_COMM_KWP_MAX];
 
 }router_diag_ctx_t;
 
