@@ -154,15 +154,20 @@ static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_
           !diag_ctx->runtime.uds_upstream_pending) {
         diag_ctx->runtime.isotp_upstream_pending = false;
 
-        // TODO: IMPLEMENT
-
-        //diag_ctx->runtime.obd2_upstream_pending = true;
-        //diag_ctx->runtime.uds_upstream_pending = true;
+        if(diag_ctx->upstream_data_len > 0) {
+          if(diag_ctx->obd2_ctx != NULL &&
+              diag_ctx->upstream_data[0] >= OBD2_SID_CURRENT_DATA &&
+              diag_ctx->upstream_data[0] <= OBD2_SID_PERMANENT_DIAGNOSTIC_TROUBLE_CODES) {
+            diag_ctx->runtime.obd2_upstream_pending = true;
+          } else if(diag_ctx->uds_ctx != NULL) {
+            diag_ctx->runtime.uds_upstream_pending = true;
+          }
+        }
       }
 
       if(diag_ctx->runtime.obd2_upstream_pending && diag_ctx->runtime.uds_upstream_pending) {
         router_reset_isotp(diag_ctx);
-      } else if(diag_ctx->runtime.obd2_upstream_pending) {
+      } else if(diag_ctx->runtime.obd2_upstream_pending && diag_ctx->obd2_ctx) {
         err = obd2_message_write_upstream(diag_ctx->obd2_ctx, diag_ctx->upstream_data, diag_ctx->upstream_data_len);
         if(err != E_OK) {
           BREAK_IF(err == E_AGAIN);
@@ -170,7 +175,7 @@ static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_
           break;
         }
         diag_ctx->runtime.obd2_upstream_pending = false;
-      } else if(diag_ctx->runtime.uds_upstream_pending) {
+      } else if(diag_ctx->runtime.uds_upstream_pending && diag_ctx->uds_ctx) {
         err = uds_message_write_upstream(diag_ctx->uds_ctx, diag_ctx->upstream_data, diag_ctx->upstream_data_len);
         if(err != E_OK) {
           BREAK_IF(err == E_AGAIN);
@@ -183,14 +188,19 @@ static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_
 
     do {
       if(!diag_ctx->runtime.isotp_downstream_pending) {
-        diag_ctx->downstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
-        err = obd2_message_read_downstream(diag_ctx->obd2_ctx, diag_ctx->downstream_data, &diag_ctx->downstream_data_len);
-        if(err == E_OK) {
-          diag_ctx->runtime.isotp_downstream_pending = true;
-        } else if(err != E_AGAIN) {
-          router_reset_isotp(diag_ctx);
-          break;
-        } else {
+        if(diag_ctx->obd2_ctx != NULL) {
+          diag_ctx->downstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
+          err = obd2_message_read_downstream(diag_ctx->obd2_ctx, diag_ctx->downstream_data, &diag_ctx->downstream_data_len);
+          if(err == E_OK) {
+            diag_ctx->runtime.isotp_downstream_pending = true;
+          } else if(err != E_AGAIN) {
+            router_reset_isotp(diag_ctx);
+            break;
+          }
+        }
+      }
+      if(!diag_ctx->runtime.isotp_downstream_pending) {
+        if(diag_ctx->uds_ctx != NULL) {
           diag_ctx->downstream_data_len = ISOTP_PAYLOAD_LEN_MAX;
           err = uds_message_read_downstream(diag_ctx->uds_ctx, diag_ctx->downstream_data, &diag_ctx->downstream_data_len);
           if(err == E_OK) {
@@ -241,10 +251,19 @@ static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_is
       err = ecu_comm_get_isotp_ctx(instance, &diag_ctx->isotp_ctx);
       BREAK_IF(err != E_OK);
 
-      err = ecu_comm_get_uds_ctx(diag_cfg->uds_instance, &diag_ctx->uds_ctx);
-      BREAK_IF(err != E_OK);
-      err = ecu_comm_get_obd2_ctx(diag_cfg->obd2_instance, &diag_ctx->obd2_ctx);
-      BREAK_IF(err != E_OK);
+      if(diag_cfg->uds_instance < ECU_COMM_UDS_MAX) {
+        err = ecu_comm_get_uds_ctx(diag_cfg->uds_instance, &diag_ctx->uds_ctx);
+        BREAK_IF(err != E_OK);
+      } else {
+        diag_ctx->uds_ctx = NULL;
+      }
+
+      if(diag_cfg->obd2_instance < ECU_COMM_OBD2_MAX) {
+        err = ecu_comm_get_obd2_ctx(diag_cfg->obd2_instance, &diag_ctx->obd2_ctx);
+        BREAK_IF(err != E_OK);
+      } else {
+        diag_ctx->obd2_ctx = NULL;
+      }
 
       err = can_register_rx_callback(diag_ctx->can_ctx, diag_cfg->upstream_msg_id, router_can_isotp_rx_callback, diag_ctx);
       BREAK_IF(err != E_OK);
@@ -277,10 +296,19 @@ static error_t router_configure_diag_io_kwp(router_ctx_t *ctx, ecu_comm_kwp_t in
       err = ecu_comm_get_kwp_ctx(instance, &diag_ctx->kwp_ctx);
       BREAK_IF(err != E_OK);
 
-      err = ecu_comm_get_uds_ctx(diag_cfg->uds_instance, &diag_ctx->uds_ctx);
-      BREAK_IF(err != E_OK);
-      err = ecu_comm_get_obd2_ctx(diag_cfg->obd2_instance, &diag_ctx->obd2_ctx);
-      BREAK_IF(err != E_OK);
+      if(diag_cfg->uds_instance < ECU_COMM_UDS_MAX) {
+        err = ecu_comm_get_uds_ctx(diag_cfg->uds_instance, &diag_ctx->uds_ctx);
+        BREAK_IF(err != E_OK);
+      } else {
+        diag_ctx->uds_ctx = NULL;
+      }
+
+      if(diag_cfg->obd2_instance < ECU_COMM_OBD2_MAX) {
+        err = ecu_comm_get_obd2_ctx(diag_cfg->obd2_instance, &diag_ctx->obd2_ctx);
+        BREAK_IF(err != E_OK);
+      } else {
+        diag_ctx->obd2_ctx = NULL;
+      }
 
       //err = kwp_register_rx_callback(diag_ctx->kwp_ctx, router_can_kwp_rx_callback, diag_ctx);
       //BREAK_IF(err != E_OK);

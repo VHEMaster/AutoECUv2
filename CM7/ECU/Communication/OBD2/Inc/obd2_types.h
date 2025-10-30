@@ -21,7 +21,6 @@ typedef enum {
 }obd2_error_code_t;
 
 typedef enum {
-  OBD2_SID_START                                = 0x00,
   OBD2_SID_CURRENT_DATA                         = 0x01,
   OBD2_SID_FREEZE_FRAME_DATA                    = 0x02,
   OBD2_SID_DIAGNOSTIC_TROUBLE_CODES             = 0x03,
@@ -31,7 +30,6 @@ typedef enum {
   OBD2_SID_PENDING_DIAGNOSTIC_TROUBLE_CODES     = 0x07,
   OBD2_SID_VEHICLE_INFORMATION                  = 0x09,
   OBD2_SID_PERMANENT_DIAGNOSTIC_TROUBLE_CODES   = 0x0A,
-  OBD2_SID_END                                  = 0x0F
 }obd2_sid_t;
 
 typedef enum
