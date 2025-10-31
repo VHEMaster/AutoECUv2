@@ -43,7 +43,8 @@ typedef struct {
     ecu_comm_can_t can_instance;
     ecu_comm_uds_t uds_instance;
     ecu_comm_obd2_t obd2_instance;
-    uint32_t upstream_msg_id;
+    uint32_t upstream_phy_msg_id;
+    uint32_t upstream_func_msg_id;
     uint32_t downstream_msg_id;
 }router_config_can_isotp_t;
 

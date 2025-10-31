@@ -36,17 +36,13 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
                   .enabled = true,
                   .can_instance = ECU_COMM_CAN_1,
                   .uds_instance = ECU_COMM_UDS_1,
-                  .obd2_instance = ECU_COMM_NONE,
-                  .upstream_msg_id = 0x7E0,
+                  .obd2_instance = ECU_COMM_OBD2_1,
+                  .upstream_phy_msg_id = 0x7E0,
+                  .upstream_func_msg_id = 0x7DF,
                   .downstream_msg_id = 0x7E8,
               }, //ECU_COMM_ISOTP_1
               {
-                  .enabled = true,
-                  .can_instance = ECU_COMM_CAN_1,
-                  .uds_instance = ECU_COMM_NONE,
-                  .obd2_instance = ECU_COMM_OBD2_1,
-                  .upstream_msg_id = 0x7DF,
-                  .downstream_msg_id = 0x7E8,
+
               }, //ECU_COMM_ISOTP_2
           },
           .kwp = {

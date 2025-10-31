@@ -162,8 +162,8 @@ typedef enum
   OBD2_PID_01_MANUFACTURER_DEFINED_0x75        = 0x75,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x76        = 0x76,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x77        = 0x77,  // N/A
-  OBD2_PID_01_EXHAUST_GAS_TEMP_B1              = 0x78,  // PHYS[°C] = ((256*A + B) * 1/10) + 0
-  OBD2_PID_01_EXHAUST_GAS_TEMP_B2              = 0x79,  // PHYS[°C] = AB/10
+  OBD2_PID_01_EXHAUST_GAS_TEMP_B1              = 0x78,  // PHYS[°C] = ((256*A + B) * 1/10) - 40
+  OBD2_PID_01_EXHAUST_GAS_TEMP_B2              = 0x79,  // PHYS[°C] = AB/10 - 40
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7A        = 0x7A,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7B        = 0x7B,  // N/A
   OBD2_PID_01_MANUFACTURER_DEFINED_0x7C        = 0x7C,  // N/A
@@ -336,6 +336,8 @@ typedef enum
   OBD2_PID_TYPE_DUAL_BYTES,
   OBD2_PID_TYPE_DUAL_WORDS,
   OBD2_PID_TYPE_QUAD_BYTES,
+  OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES,
+  OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
   OBD2_PID_TYPE_MAX
 }obd2_mode1_pid_type_t;
 
@@ -356,6 +358,7 @@ typedef struct {
 
 typedef struct {
     bool supported;
+    uint8_t prefix_byte;
     obd2_mode1_data_value_t value[4];
 }obd2_mode1_data_t;
 

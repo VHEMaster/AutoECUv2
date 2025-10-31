@@ -38,7 +38,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 1.0f/200.0f, .offset = 0.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_O2_SENSOR7_V_AND_STFT (0x1A)
   { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 1.0f/200.0f, .offset = 0.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_O2_SENSOR8_V_AND_STFT (0x1B)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_OBD2_STANDARDS_IN_USE (0x1C)
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS (0x1D)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_WORD }, // OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS (0x1D)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_AUX_INPUT_STATUS (0x1E)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_RUNTIME_SINCE_ENGINE_START (0x1F)
 
@@ -132,8 +132,8 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x75 (0x75)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x76 (0x76)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x77 (0x77)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.1f, .offset = 0.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1 (0x78)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.1f, .offset = 0.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B2 (0x79)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS, .gain_offset = { { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1 (0x78)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS, .gain_offset = { { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B2 (0x79)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7A (0x7A)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7B (0x7B)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7C (0x7C)
@@ -180,10 +180,34 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_41_60].supported = true;
     ctx->mode1_data[OBD2_PID_01_AMBIENT_AIR_TEMPERATURE].supported = true;
 
+    ctx->mode1_data[OBD2_PID_01_ENGINE_FUEL_RATE].supported = true;
 
-    ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
+    ctx->mode1_data[OBD2_PID_01_SUPPORTED_61_80].supported = true;
+
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].supported = true;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].prefix_byte = 0x0F;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[0].flt = 450.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[1].flt = 480.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[2].flt = 650.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[3].flt = 800.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].supported = true;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].prefix_byte = 0x0F;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[0].flt = 820.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[1].flt = 860.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[2].flt = 950.0f;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[3].flt = 1050.0f;
+
+    ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS].supported = true;
+    ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS].value[0].raw = 0x0011;
+    ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_2BANKS].supported = true;
+    ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_2BANKS].value[0].raw = 0x11;
+
+    ctx->mode1_data[OBD2_PID_01_O2_S1_EQUIV_RATIO_AND_VOLT].supported = true;
+    ctx->mode1_data[OBD2_PID_01_O2_S5_EQUIV_RATIO_AND_VOLT].supported = true;
 
     uint8_t pid;
+
+    ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
 
     pid = OBD2_PID_09_VIN;
     ctx->mode9_data[pid].supported = true;
@@ -195,9 +219,9 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid - 1].supported = true;
     ctx->mode9_data[pid].count = 2;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"v1.23.45.6";
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"v1.23.45.678";
     ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
-    ctx->mode9_data[pid].value[1] = (const uint8_t *)"v7.89.01.2";
+    ctx->mode9_data[pid].value[1] = (const uint8_t *)"v7.89.01.234";
     ctx->mode9_data[pid].length[1] = strlen((const char *)ctx->mode9_data[pid].value[1]);
 
     pid = OBD2_PID_09_ECU_NAME;

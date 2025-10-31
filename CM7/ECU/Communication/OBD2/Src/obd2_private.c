@@ -21,6 +21,8 @@ static const uint8_t obd2_pid_type_item_length[OBD2_PID_TYPE_MAX] = {
     1, // OBD2_PID_TYPE_DUAL_BYTES
     2, // OBD2_PID_TYPE_DUAL_WORDS
     1, // OBD2_PID_TYPE_QUAD_BYTES
+    1, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
+    2, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
 };
 
 static const uint8_t obd2_pid_type_item_count[OBD2_PID_TYPE_MAX] = {
@@ -37,9 +39,11 @@ static const uint8_t obd2_pid_type_item_count[OBD2_PID_TYPE_MAX] = {
     2, // OBD2_PID_TYPE_DUAL_BYTES
     2, // OBD2_PID_TYPE_DUAL_WORDS
     4, // OBD2_PID_TYPE_QUAD_BYTES
+    4, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
+    4, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
 };
 
-static const uint8_t obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
+static const bool obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
     false, // OBD2_PID_TYPE_UNDEFINED
     false, // OBD2_PID_TYPE_RAW_SINGLE_BYTE
     false, // OBD2_PID_TYPE_RAW_SINGLE_WORD
@@ -53,9 +57,11 @@ static const uint8_t obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
     true, // OBD2_PID_TYPE_DUAL_BYTES
     true, // OBD2_PID_TYPE_DUAL_WORDS
     true, // OBD2_PID_TYPE_QUAD_BYTES
+    true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
+    true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
 };
 
-static const uint8_t obd2_pid_type_item_israw[OBD2_PID_TYPE_MAX] = {
+static const bool obd2_pid_type_item_israw[OBD2_PID_TYPE_MAX] = {
     false, // OBD2_PID_TYPE_UNDEFINED
     true, // OBD2_PID_TYPE_RAW_SINGLE_BYTE
     true, // OBD2_PID_TYPE_RAW_SINGLE_WORD
@@ -69,6 +75,26 @@ static const uint8_t obd2_pid_type_item_israw[OBD2_PID_TYPE_MAX] = {
     false, // OBD2_PID_TYPE_DUAL_BYTES
     false, // OBD2_PID_TYPE_DUAL_WORDS
     false, // OBD2_PID_TYPE_QUAD_BYTES
+    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
+    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
+};
+
+static const bool obd2_pid_type_item_has_prefix[OBD2_PID_TYPE_MAX] = {
+    false, // OBD2_PID_TYPE_UNDEFINED
+    false, // OBD2_PID_TYPE_RAW_SINGLE_BYTE
+    false, // OBD2_PID_TYPE_RAW_SINGLE_WORD
+    false, // OBD2_PID_TYPE_RAW_SINGLE_DWORD
+    false, // OBD2_PID_TYPE_RAW_DUAL_BYTES
+    false, // OBD2_PID_TYPE_RAW_DUAL_WORD
+    false, // OBD2_PID_TYPE_RAW_QUAD_BYTES
+    false, // OBD2_PID_TYPE_SINGLE_BYTE
+    false, // OBD2_PID_TYPE_SINGLE_WORD
+    false, // OBD2_PID_TYPE_SINGLE_DWORD
+    false, // OBD2_PID_TYPE_DUAL_BYTES
+    false, // OBD2_PID_TYPE_DUAL_WORDS
+    false, // OBD2_PID_TYPE_QUAD_BYTES
+    true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
+    true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
 };
 
 static void obd2_sid_current_data(obd2_ctx_t *ctx);
@@ -157,6 +183,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
 
   uint8_t dlen;
   obd2_mode1_pid_type_t dtype;
+  obd2_mode1_data_t *md1;
   float raw;
 
   do {
@@ -164,8 +191,9 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
       pid = ctx->upstream_data[i];
       dtype = ctx->mode1_setup[pid].type;
       dlen = obd2_pid_type_item_length[dtype];
+      md1 = &ctx->mode1_data[pid];
 
-      if(pid < OBD2_PID_01_MAX && ctx->mode1_data[pid].supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
+      if(pid < OBD2_PID_01_MAX && md1->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
         switch(pid) {
           case OBD2_PID_01_SUPPORTED_01_20:
           case OBD2_PID_01_SUPPORTED_21_40:
@@ -187,15 +215,18 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
             break;
           default:
             ctx->downstream_data[ctx->downstream_data_len++] = pid;
+            if(obd2_pid_type_item_has_prefix[dtype]) {
+              ctx->downstream_data[ctx->downstream_data_len++] = md1->prefix_byte;
+            }
             for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
               if(obd2_pid_type_item_isfloat[dtype]) {
-                raw = ctx->mode1_data[pid].value[i].flt;
+                raw = md1->value[i].flt;
                 raw -= ctx->mode1_setup[pid].gain_offset[i].offset;
                 raw /= ctx->mode1_setup[pid].gain_offset[i].gain;
-                ctx->mode1_data[pid].value[i].raw = roundf(raw);
+                md1->value[i].raw = roundf(raw);
               }
 
-              payload = ctx->mode1_data[pid].value[i].raw << (32 - dlen * 8);
+              payload = md1->value[i].raw << (32 - dlen * 8);
               payload = __REV(payload);
               memcpy(&ctx->downstream_data[ctx->downstream_data_len], &payload, dlen);
               ctx->downstream_data_len += dlen;
