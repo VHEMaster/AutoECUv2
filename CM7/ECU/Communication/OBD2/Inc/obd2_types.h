@@ -12,7 +12,8 @@
 #include "time.h"
 #include "versioned_obd2.h"
 
-#define OBD2_DATA_LENGTH_MAX            255
+#define OBD2_DATA_LENGTH_MAX           255
+#define OBD2_ASCII_LENGTH_MAX          64
 #define OBD2_RESPONSE_NEGATIVE_CODE    0x7F
 #define OBD2_RESPONSE_POSITIVE_OFFSET  0x40
 #define OBD2_DOWNSTREAM_TIMEOUT        (1000 * TIME_US_IN_MS)
@@ -211,7 +212,8 @@ typedef enum
   OBD2_PID_09_RESERVED_0x1F                  = 0x1F,  // N/A
 
   OBD2_PID_09_MANUFACTURER_DEFINED_START     = 0x30,  // N/A
-  OBD2_PID_09_MANUFACTURER_DEFINED_END       = 0x7F   // N/A
+  OBD2_PID_09_MANUFACTURER_DEFINED_END       = 0x7F,  // N/A
+  OBD2_PID_09_MAX
 }obd2_pid_mode_09_t;
 
 typedef enum
@@ -222,6 +224,7 @@ typedef enum
   OBD2_RESPONSE_SERVICE_NOT_SUPPORTED                         = 0x11,  // Service not supported
   OBD2_RESPONSE_SUBFUNCTION_NOT_SUPPORTED                     = 0x12,  // Sub-function not supported
   OBD2_RESPONSE_INVALID_MESSAGE_LENGTH_OR_FORMAT              = 0x13,  // Invalid message length or format
+  OBD2_RESPONSE_REQUEST_OUT_OF_RANGE                          = 0x31,  // Parameter or DID out of range
 
   OBD2_RESPONSE_REQUEST_CORRECTLY_RECEIVED_RESPONSE_PENDING   = 0x78,  // ECU accepted request but processing is pending (Response Pending)
 }obd2_response_code_t;
@@ -357,6 +360,13 @@ typedef struct {
 }obd2_mode1_data_t;
 
 typedef struct {
+    bool supported;
+    uint8_t count;
+    uint16_t length[4];
+    const uint8_t *value[4];
+}obd2_mode9_data_t;
+
+typedef struct {
     obd2_error_callback_t error_callback;
     void *callback_userdata;
 }obd2_init_ctx_t;
@@ -369,6 +379,7 @@ typedef struct obd2_ctx_tag {
 
     const obd2_mode1_setup_t *mode1_setup;
     obd2_mode1_data_t mode1_data[OBD2_PID_01_MAX];
+    obd2_mode9_data_t mode9_data[OBD2_PID_09_MAX];
 
     obd2_error_code_t error_code;
     bool reset_trigger;

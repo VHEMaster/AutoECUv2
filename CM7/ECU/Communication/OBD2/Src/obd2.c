@@ -180,6 +180,46 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_41_60].supported = true;
     ctx->mode1_data[OBD2_PID_01_AMBIENT_AIR_TEMPERATURE].supported = true;
 
+
+    ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
+
+    uint8_t pid;
+
+    pid = OBD2_PID_09_VIN;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"VIN0123456789012";
+    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+
+    pid = OBD2_PID_09_CALID;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid - 1].supported = true;
+    ctx->mode9_data[pid].count = 2;
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"v1.23.45.6";
+    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+    ctx->mode9_data[pid].value[1] = (const uint8_t *)"v7.89.01.2";
+    ctx->mode9_data[pid].length[1] = strlen((const char *)ctx->mode9_data[pid].value[1]);
+
+    pid = OBD2_PID_09_ECU_NAME;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"AutoECUv2";
+    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+
+    pid = OBD2_PID_09_HARDWARE_NUMBER;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"HW v1.0.0";
+    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+
+    pid = OBD2_PID_09_VIN_DUPLICATE_FRAME;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (const uint8_t *)"VD10123456789012";
+    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+
+
+
     ctx->initialized = true;
 
   } while(0);

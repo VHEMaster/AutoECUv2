@@ -295,12 +295,85 @@ static void obd2_sid_pending_diagnostic_trouble_codes(obd2_ctx_t *ctx)
 
 static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
 {
+  uint8_t adder;
+  uint32_t payload;
+  uint8_t pid;
+  uint8_t idx;
+  uint8_t dlen;
+
   do {
+    pid = ctx->upstream_data[1];
+    if(ctx->upstream_data_len >= 3) {
+      idx = ctx->upstream_data[2];
+    } else {
+      idx = 1;
+    }
+
+    if(pid < OBD2_PID_09_MAX && ctx->mode9_data[pid].supported) {
+      switch(pid) {
+        case OBD2_PID_09_SUPPORTED_01_20:
+        case OBD2_PID_09_SUPPORTED_21_40:
+          dlen = 4;
+          ctx->downstream_data[ctx->downstream_data_len++] = pid;
+          adder = pid;
+          payload = 0;
+          for(uint8_t p = 0, idx = adder + 1; p < 0x20; p++, idx++) {
+            BREAK_IF(idx >= OBD2_PID_09_MAX);
+            if(ctx->mode9_data[idx].supported) {
+              payload |= 1 << p;
+            }
+          }
+          payload = __RBIT(payload);
+          payload = __REV(payload);
+          memcpy(&ctx->downstream_data[ctx->downstream_data_len], &payload, dlen);
+          ctx->downstream_data_len += dlen;
+          break;
+        case OBD2_PID_09_VIN_MESSAGE_COUNT:
+        case OBD2_PID_09_CALID_MESSAGE_COUNT:
+        case OBD2_PID_09_CVN_MESSAGE_COUNT:
+        case OBD2_PID_09_IUPR_MESSAGE_COUNT:
+          ctx->downstream_data[ctx->downstream_data_len++] = pid;
+          ctx->downstream_data[ctx->downstream_data_len++] = ctx->mode9_data[pid + 1].count;
+          break;
+        case OBD2_PID_09_VIN:
+        case OBD2_PID_09_CALID:
+        case OBD2_PID_09_CVN:
+        case OBD2_PID_09_IUPR_SPARK:
+        case OBD2_PID_09_ECU_NAME:
+        case OBD2_PID_09_HARDWARE_NUMBER:
+        case OBD2_PID_09_VIN_DUPLICATE_FRAME:
+          if(idx - 1u < ctx->mode9_data[pid].count) {
+            ctx->downstream_data[ctx->downstream_data_len++] = pid;
+            ctx->downstream_data[ctx->downstream_data_len++] = idx;
+            dlen = ctx->mode9_data[pid].length[idx - 1u];
+            memcpy(&ctx->downstream_data[ctx->downstream_data_len], ctx->mode9_data[pid].value[idx - 1u], dlen);
+            ctx->downstream_data_len += dlen;
+          } else {
+            ctx->downstream_data_len = 0;
+            ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
+            ctx->downstream_data[ctx->downstream_data_len++] = pid;
+            ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_REQUEST_OUT_OF_RANGE;
+          }
+          break;
+        default:
+          if(ctx->mode9_data[pid].count > 0) {
+            ctx->downstream_data[ctx->downstream_data_len++] = pid;
+            dlen = ctx->mode9_data[pid].length[0];
+            if(dlen > OBD2_DATA_LENGTH_MAX) {
+              dlen = OBD2_DATA_LENGTH_MAX;
+            }
+            memcpy(&ctx->downstream_data[ctx->downstream_data_len], ctx->mode9_data[pid].value[0], dlen);
+            ctx->downstream_data_len += dlen;
+          }
+          break;
+      }
+    }
+
     if(ctx->downstream_data_len <= 1) {
       ctx->downstream_data_len = 0;
       ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
       ctx->downstream_data[ctx->downstream_data_len++] = ctx->upstream_data[0];
-      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_SERVICE_NOT_SUPPORTED;
+      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_SUBFUNCTION_NOT_SUPPORTED;
     }
     ctx->downstream_available = true;
   } while(0);
