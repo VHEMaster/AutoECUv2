@@ -10,7 +10,7 @@
 
 static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_01_20 (0x00)
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_MONITOR_STATUS_SINCE_DTC_CLEAR (0x01)
+  { .type = OBD2_PID_TYPE_RAW_QUAD_BYTES }, // OBD2_PID_01_MONITOR_STATUS_SINCE_DTC_CLEAR (0x01)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_WORD }, // OBD2_PID_01_FREEZE_DTC (0x02)
   { .type = OBD2_PID_TYPE_RAW_DUAL_BYTES }, // OBD2_PID_01_FUEL_SYSTEM_STATUS (0x03)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_CALCULATED_ENGINE_LOAD (0x04)
@@ -76,7 +76,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.1f, .offset = -40.0f } } }, // OBD2_PID_01_CAT_TEMP_B2S2 (0x3F)
 
   { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_41_60 (0x40)
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_MONITOR_STATUS_THIS_DRIVE_CYCLE (0x41)
+  { .type = OBD2_PID_TYPE_RAW_QUAD_BYTES }, // OBD2_PID_01_MONITOR_STATUS_THIS_DRIVE_CYCLE (0x41)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.001f, .offset = 0.0f } } }, // OBD2_PID_01_CONTROL_MODULE_VOLTAGE (0x42)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_ABSOLUTE_LOAD_VALUE (0x43)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f } } }, // OBD2_PID_01_COMMANDED_EQUIV_RATIO (0x44)
@@ -94,7 +94,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_FUEL_TYPE (0x50)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_ETHANOL_FUEL_PERCENT (0x51)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/200.0f, .offset = -8192.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABSOLUTE (0x52)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/4.0f, .offset = -8192.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT (0x53)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.25f, .offset = -8192.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT (0x53)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B1_S1_S3_S5 (0x54)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B1_S1_S3_S5 (0x55)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B2_S1_S3_S5 (0x56)
@@ -108,39 +108,70 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.05f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_FUEL_RATE (0x5E)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_EMISSION_REQUIREMENTS_DESIGN (0x5F)
 
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_61_80 (0x60)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x61 (0x61)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x62 (0x62)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x63 (0x63)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x64 (0x64)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x65 (0x65)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x66 (0x66)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x67 (0x67)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x68 (0x68)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x69 (0x69)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6A (0x6A)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6B (0x6B)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6C (0x6C)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6D (0x6D)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6E (0x6E)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x6F (0x6F)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x70 (0x70)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x71 (0x71)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x72 (0x72)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x73 (0x73)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x74 (0x74)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x75 (0x75)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x76 (0x76)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x77 (0x77)
-  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS, .gain_offset = { { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1 (0x78)
-  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS, .gain_offset = { { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f }, { .gain = 0.1f, .offset = -40.0f } } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B2 (0x79)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7A (0x7A)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7B (0x7B)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7C (0x7C)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7D (0x7D)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7E (0x7E)
-  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_MANUFACTURER_DEFINED_0x7F (0x7F)
+  { .type = OBD2_PID_TYPE_RAW_QUAD_BYTES }, // OBD2_PID_01_SUPPORTED_61_80 (0x60)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -125.0f } } }, // OBD2_PID_01_DRIVERS_DEMAND_TORQUE_PERCENT (0x61)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -125.0f } } }, // OBD2_PID_01_ACTUAL_ENGINE_TORQUE_PERCENT (0x62)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_REFERENCE_TORQUE (0x63)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_ENGINE_PERCENT_TORQUE_DATA (0x64)
+  { .type = OBD2_PID_TYPE_RAW_DUAL_BYTES }, // OBD2_PID_01_AUX_IO_SUPPORTED (0x65)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS,
+    .gain_offset = {
+      { .gain = 1.0f/32.0f, .offset = 0.0f }, // MAF A (g/s) = (256*B + C)/32
+      { .gain = 1.0f/32.0f, .offset = 0.0f }, // MAF B (g/s) = (256*D + E)/32
+    } }, // OBD2_PID_01_MAF_SENSOR_A_B (0x66)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_BYTES,
+    .gain_offset = {
+      { .gain = 1.0f, .offset = -40.0f }, // Coolant T1 = B - 40
+      { .gain = 1.0f, .offset = -40.0f }, // Coolant T2 = C - 40
+    } }, // OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2 (0x67)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_BYTES,
+    .gain_offset = {
+      { .gain = 1.0f, .offset = -40.0f }, // IAT1 = B - 40
+      { .gain = 1.0f, .offset = -40.0f }, // IAT2 = C - 40
+    } }, // OBD2_PID_01_IAT_SENSORS_1_2 (0x68)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_EGR_ACT_CMD_ERR (0x69)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_DIESEL_INTAKE_AIR_FLOW_CTRL (0x6A)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_EGR_TEMPERATURE (0x6B)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_THROTTLE_ACT_CTRL_REL_POS (0x6C)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_FUEL_PRESSURE_CONTROL_SYS (0x6D)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_INJECTION_PRESSURE_CONTROL_SYS (0x6E)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_TURBO_COMPRESSOR_INLET_PRESS (0x6F)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_BOOST_PRESSURE_CONTROL (0x70)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_VGT_CONTROL (0x71)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_WASTEGATE_CONTROL (0x72)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_EXHAUST_PRESSURE (0x73)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_TURBOCHARGER_RPM (0x74)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_TURBOCHARGER_TEMPERATURE_1 (0x75)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_TURBOCHARGER_TEMPERATURE_2 (0x76)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_CACT (0x77)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
+    .gain_offset = {
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+    } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1 (0x78)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
+    .gain_offset = {
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+    } }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B2 (0x79)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_DPF_DIFFERENTIAL_PRESSURE (0x7A)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_DPF (0x7B)
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
+    .gain_offset = {
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+      { .gain = 0.1f, .offset = -40.0f },
+    } }, // OBD2_PID_01_DPF_TEMPERATURE (0x7C)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_NOX_NTE_STATUS (0x7D)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_PM_NTE_STATUS (0x7E)
+  { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_ENGINE_RUNTIME_EXT (0x7F)
 };
+
 
 error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
 {
