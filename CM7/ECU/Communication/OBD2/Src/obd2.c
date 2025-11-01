@@ -124,10 +124,14 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
       { .gain = 1.0f, .offset = -40.0f }, // Coolant T1 = B - 40
       { .gain = 1.0f, .offset = -40.0f }, // Coolant T2 = C - 40
     } }, // OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2 (0x67)
-  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_BYTES,
+  { .type = OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES,
     .gain_offset = {
       { .gain = 1.0f, .offset = -40.0f }, // IAT1 = B - 40
       { .gain = 1.0f, .offset = -40.0f }, // IAT2 = C - 40
+      { .gain = 1.0f, .offset = -40.0f }, // IAT2 = D - 40
+      { .gain = 1.0f, .offset = -40.0f }, // IAT2 = E - 40
+      { .gain = 1.0f, .offset = -40.0f }, // IAT2 = F - 40
+      { .gain = 1.0f, .offset = -40.0f }, // IAT2 = G - 40
     } }, // OBD2_PID_01_IAT_SENSORS_1_2 (0x68)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_EGR_ACT_CMD_ERR (0x69)
   { .type = OBD2_PID_TYPE_UNDEFINED }, // OBD2_PID_01_DIESEL_INTAKE_AIR_FLOW_CTRL (0x6A)
@@ -189,44 +193,82 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_01_20].supported = true;
 
     ctx->mode1_data[OBD2_PID_01_MONITOR_STATUS_SINCE_DTC_CLEAR].supported = true;
-    ctx->mode1_data[OBD2_PID_01_CALCULATED_ENGINE_LOAD].supported = true;
-    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMPERATURE].supported = true;
-    ctx->mode1_data[OBD2_PID_01_ENGINE_RPM].supported = true;
-    ctx->mode1_data[OBD2_PID_01_VEHICLE_SPEED].supported = true;
-    ctx->mode1_data[OBD2_PID_01_INTAKE_AIR_TEMPERATURE].supported = true;
-    ctx->mode1_data[OBD2_PID_01_MAF_AIR_FLOW_RATE].supported = true;
-    ctx->mode1_data[OBD2_PID_01_THROTTLE_POSITION].supported = true;
 
+    ctx->mode1_data[OBD2_PID_01_CALCULATED_ENGINE_LOAD].supported = true;
+    ctx->mode1_data[OBD2_PID_01_CALCULATED_ENGINE_LOAD].value[0].flt = 25.0f;
+
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMPERATURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMPERATURE].value[0].flt = 89.0f;
+
+    ctx->mode1_data[OBD2_PID_01_ENGINE_RPM].supported = true;
+    ctx->mode1_data[OBD2_PID_01_ENGINE_RPM].value[0].flt = 860.0f;
+
+    ctx->mode1_data[OBD2_PID_01_VEHICLE_SPEED].supported = true;
+    ctx->mode1_data[OBD2_PID_01_VEHICLE_SPEED].value[0].flt = 35.4f;
+
+    ctx->mode1_data[OBD2_PID_01_INTAKE_AIR_TEMPERATURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_INTAKE_AIR_TEMPERATURE].value[0].flt = 28.0f;
+
+    ctx->mode1_data[OBD2_PID_01_MAF_AIR_FLOW_RATE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_MAF_AIR_FLOW_RATE].value[0].flt = 24.0f;
+
+    ctx->mode1_data[OBD2_PID_01_THROTTLE_POSITION].supported = true;
+    ctx->mode1_data[OBD2_PID_01_THROTTLE_POSITION].value[0].flt = 20.0f;
 
     ctx->mode1_data[OBD2_PID_01_FUEL_SYSTEM_STATUS].supported = true;
+
     ctx->mode1_data[OBD2_PID_01_FUEL_PRESSURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_FUEL_PRESSURE].value[0].flt = 300.0f;
+
     ctx->mode1_data[OBD2_PID_01_INTAKE_MANIFOLD_PRESSURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_INTAKE_MANIFOLD_PRESSURE].value[0].flt = 35.0f;
+
     ctx->mode1_data[OBD2_PID_01_TIMING_ADVANCE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_TIMING_ADVANCE].value[0].flt = 10.0f;
+
     ctx->mode1_data[OBD2_PID_01_RUNTIME_SINCE_ENGINE_START].supported = true;
 
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_21_40].supported = true;
     ctx->mode1_data[OBD2_PID_01_FUEL_LEVEL_INPUT].supported = true;
+
     ctx->mode1_data[OBD2_PID_01_BAROMETRIC_PRESSURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_BAROMETRIC_PRESSURE].value[0].flt = 101.5f;
 
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_41_60].supported = true;
     ctx->mode1_data[OBD2_PID_01_AMBIENT_AIR_TEMPERATURE].supported = true;
+    ctx->mode1_data[OBD2_PID_01_AMBIENT_AIR_TEMPERATURE].value[0].flt = 23.0f;
 
     ctx->mode1_data[OBD2_PID_01_ENGINE_FUEL_RATE].supported = true;
 
     ctx->mode1_data[OBD2_PID_01_SUPPORTED_61_80].supported = true;
 
     ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].supported = true;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].prefix_byte = 0x0F;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].prefix_byte = 0x01;
     ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[0].flt = 450.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[1].flt = 480.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[2].flt = 650.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B1].value[3].flt = 800.0f;
+
     ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].supported = true;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].prefix_byte = 0x0F;
+    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].prefix_byte = 0x01;
     ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[0].flt = 820.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[1].flt = 860.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[2].flt = 950.0f;
-    ctx->mode1_data[OBD2_PID_01_EXHAUST_GAS_TEMP_B2].value[3].flt = 1050.0f;
+
+    ctx->mode1_data[OBD2_PID_01_MAF_SENSOR_A_B].supported = true;
+    ctx->mode1_data[OBD2_PID_01_MAF_SENSOR_A_B].prefix_byte = 0x03;
+    ctx->mode1_data[OBD2_PID_01_MAF_SENSOR_A_B].value[0].flt = 505.0f;
+    ctx->mode1_data[OBD2_PID_01_MAF_SENSOR_A_B].value[1].flt = 500.0f;
+
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2].supported = true;
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2].prefix_byte = 0x03;
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2].value[0].flt = 92.0f;
+    ctx->mode1_data[OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2].value[1].flt = 94.0f;
+
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].supported = true;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].prefix_byte = 0x03F;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[0].flt = 52.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[1].flt = 58.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[2].flt = 60.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[3].flt = 62.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[4].flt = 64.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[5].flt = 66.0f;
+    ctx->mode1_data[OBD2_PID_01_IAT_SENSORS_1_2].value[6].flt = 68.0f;
 
     ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS].supported = true;
     ctx->mode1_data[OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS].value[0].raw = 0x0011;

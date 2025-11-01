@@ -334,6 +334,7 @@ typedef enum
   OBD2_PID_TYPE_QUAD_BYTES,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_BYTES,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES,
+  OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
   OBD2_PID_TYPE_MAX
@@ -346,7 +347,7 @@ typedef struct {
 
 typedef struct {
     obd2_mode1_pid_type_t type;
-    obd2_mode1_setup_gain_offset_t gain_offset[4];
+    obd2_mode1_setup_gain_offset_t gain_offset[6];
 }obd2_mode1_setup_t;
 
 typedef struct {
@@ -357,7 +358,7 @@ typedef struct {
 typedef struct {
     bool supported;
     uint8_t prefix_byte;
-    obd2_mode1_data_value_t value[4];
+    obd2_mode1_data_value_t value[6];
 }obd2_mode1_data_t;
 
 typedef struct {
