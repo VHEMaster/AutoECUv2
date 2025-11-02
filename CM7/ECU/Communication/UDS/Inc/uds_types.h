@@ -8,8 +8,11 @@
 #ifndef COMMUNICATION_UDS_INC_UDS_TYPES_H_
 #define COMMUNICATION_UDS_INC_UDS_TYPES_H_
 
+#define UDS_DATA_LENGTH_MAX           4095
+#define UDS_ASCII_LENGTH_MAX          64
 #define UDS_RESPONSE_NEGATIVE_CODE    0x7F
 #define UDS_RESPONSE_POSITIVE_OFFSET  0x40
+#define UDS_DOWNSTREAM_TIMEOUT        (1000 * TIME_US_IN_MS)
 
 #include "common.h"
 #include "time.h"
@@ -21,8 +24,6 @@ typedef enum {
 }uds_error_code_t;
 
 typedef enum {
-  UDS_SID_START                               = 0x10,
-
   UDS_SID_DIAGNOSTIC_SESSION_CONTROL          = 0x10,
   UDS_SID_ECU_RESET                           = 0x11,
   UDS_SID_CLEAR_DIAGNOSTIC_INFORMATION        = 0x14,
@@ -53,45 +54,92 @@ typedef enum {
 
   UDS_SID_VENDOR_SPECIFIC_START               = 0xC0,
   UDS_SID_VENDOR_SPECIFIC_END                 = 0xFF,
-
-  UDS_SID_END                                 = 0xFF
 }uds_sid_t;
 
-typedef enum
-{
-  UDS_DID_VENDOR_RESERVED_START                     = 0x1000,
-  UDS_DID_VENDOR_RESERVED_END                       = 0x17FF,
-
+typedef enum {
   UDS_DID_BOOT_SOFTWARE_IDENTIFICATION              = 0xF180,  // Boot software identification
   UDS_DID_APPLICATION_SOFTWARE_IDENTIFICATION       = 0xF181,  // Application software identification
   UDS_DID_APPLICATION_DATA_IDENTIFICATION           = 0xF182,  // Application data (calibration) identification
-  UDS_DID_BOOT_SOFTWARE_FINGERPRINT                 = 0xF183,  // Boot software fingerprint (checksum / signature)
+  UDS_DID_BOOT_SOFTWARE_FINGERPRINT                 = 0xF183,  // Boot software fingerprint
   UDS_DID_APPLICATION_SOFTWARE_FINGERPRINT          = 0xF184,  // Application software fingerprint
-  UDS_DID_APPLICATION_DATA_FINGERPRINT              = 0xF185,  // Application data fingerprint
-  UDS_DID_ACTIVE_DIAGNOSTIC_SESSION                 = 0xF186,  // Active diagnostic session ID
-  UDS_DID_VIN                                       = 0xF187,  // Vehicle Identification Number (VIN)
-  UDS_DID_ECU_SOFTWARE_NUMBER                       = 0xF188,  // Vehicle manufacturer ECU software number
-  UDS_DID_ECU_MANUFACTURING_DATE                    = 0xF189,  // ECU manufacturing date (YYYYMMDD or BCD)
-  UDS_DID_ECU_SERIAL_NUMBER                         = 0xF18A,  // ECU serial number
-  UDS_DID_SPARE_PART_NUMBER                         = 0xF18B,  // Spare part number
-  UDS_DID_SYSTEM_SUPPLIER_IDENTIFIER                = 0xF18C,  // System supplier identifier
-  UDS_DID_ECU_HARDWARE_NUMBER                       = 0xF18D,  // ECU hardware number
-  UDS_DID_SYSTEM_NAME_OR_ENGINE_TYPE                = 0xF18E,  // System name or engine type
-  UDS_DID_ODX_FILE_IDENTIFIER                       = 0xF18F,  // ODX file identifier
+  UDS_DID_APPLICATION_DATA_FINGERPRINT              = 0xF185,  // Application data (calibration) fingerprint
+  UDS_DID_ACTIVE_DIAGNOSTIC_SESSION                 = 0xF186,  // Currently active diagnostic session
+  UDS_DID_VM_SPARE_PART_NUMBER                      = 0xF187,  // Vehicle manufacturer spare part number
+  UDS_DID_VM_ECU_SOFTWARE_NUMBER                    = 0xF188,  // Vehicle manufacturer ECU software number
+  UDS_DID_VM_ECU_SOFTWARE_VERSION_NUMBER            = 0xF189,  // Vehicle manufacturer ECU software version number
+  UDS_DID_SYSTEM_SUPPLIER_IDENTIFIER                = 0xF18A,  // System supplier identifier
+  UDS_DID_ECU_MANUFACTURING_DATE                    = 0xF18B,  // ECU manufacturing date
+  UDS_DID_ECU_SERIAL_NUMBER                         = 0xF18C,  // ECU serial number
+  UDS_DID_SUPPORTED_FUNCTIONAL_UNITS                = 0xF18D,  // Supported functional units
+  UDS_DID_VM_KIT_ASSEMBLY_PART_NUMBER               = 0xF18E,  // Vehicle manufacturer kit/assembly part number
+  UDS_DID_REGULATORY_SOFTWARE_IDENTIFICATION        = 0xF18F,  // Software IDs required by legislation / regulation
+  UDS_DID_VIN                                       = 0xF190,  // Vehicle Identification Number (17 ASCII)
+  UDS_DID_VM_ECU_HARDWARE_NUMBER                    = 0xF191,  // Vehicle manufacturer ECU hardware number
+  UDS_DID_SS_ECU_HARDWARE_NUMBER                    = 0xF192,  // System supplier ECU hardware number
+  UDS_DID_SS_ECU_HARDWARE_VERSION_NUMBER            = 0xF193,  // System supplier ECU hardware version number
+  UDS_DID_SS_ECU_SOFTWARE_NUMBER                    = 0xF194,  // System supplier ECU software number
+  UDS_DID_SS_ECU_SOFTWARE_VERSION_NUMBER            = 0xF195,  // System supplier ECU software version number
+  UDS_DID_EXHAUST_REGULATION_OR_TYPE_APPROVAL_NO    = 0xF196,  // Exhaust regulation / type approval number
+  UDS_DID_SYSTEM_NAME_OR_ENGINE_TYPE                = 0xF197,  // System name or engine type
+  UDS_DID_REPAIR_SHOP_CODE_OR_TESTER_SERIAL         = 0xF198,  // Repair shop code or tester serial number (last reprogramming)
+  UDS_DID_PROGRAMMING_DATE                          = 0xF199,  // Programming date (last time ECU was programmed)
+  UDS_DID_CALIBRATION_REPAIR_SHOP_OR_EQUIP_SERIAL   = 0xF19A,  // Calibration repair shop code / calibration equipment serial
+  UDS_DID_CALIBRATION_DATE                          = 0xF19B,  // Calibration date
+  UDS_DID_CALIBRATION_EQUIPMENT_SOFTWARE_NUMBER     = 0xF19C,  // Calibration equipment software number
+  UDS_DID_ECU_INSTALLATION_DATE                     = 0xF19D,  // ECU installation date
+  UDS_DID_ODX_FILE_IDENTIFIER                       = 0xF19E,  // ODX file identifier
+  UDS_DID_ODX_FILE_VERSION                          = 0xF19F,  // ODX file version
+  UDS_DID_PLAUSIBILITY_CHECK_NUMBER                 = 0xF1A0,  // Plausibility check number
+  UDS_DID_DATA_SET_NUMBER                           = 0xF1A1,  // Data set number
+  UDS_DID_DATA_VERSION_NUMBER                       = 0xF1A2,  // Data version number
+  UDS_DID_SYSTEM_INTEGRATION_LEVEL                  = 0xF1A3,  // System integration level (SIL)
+  UDS_DID_SYSTEM_SUPPLIER_ECU_SW_VERSION_NUMBER     = 0xF1A4,  // System supplier ECU SW version number (extended)
+  UDS_DID_SYSTEM_SUPPLIER_ECU_HW_VERSION_NUMBER     = 0xF1A5,  // System supplier ECU HW version number (extended)
+  UDS_DID_ENGINE_NUMBER                             = 0xF1A6,  // Engine number
+  UDS_DID_VEHICLE_MANUFACTURER_ECU_HW_VERSION_NO    = 0xF1A7,  // Vehicle manufacturer ECU hardware version number
+  UDS_DID_SW_CALIBRATION_IDENTIFICATION             = 0xF1A8,  // SW calibration identification
 
-  UDS_DID_VIN_STANDARD_ALIAS                        = 0xF190,  // Standard VIN alias (alternate DID for VIN)
-  UDS_DID_VEHICLE_MANUFACTURER_SPARE_PART_NUMBER    = 0xF191,  // Vehicle manufacturer spare part number
-  UDS_DID_VEHICLE_MANUFACTURER_ECU_HARDWARE_NUMBER  = 0xF192,  // Vehicle manufacturer ECU hardware number
-  UDS_DID_SYSTEM_SUPPLIER_ECU_HARDWARE_NUMBER       = 0xF193,  // System supplier ECU hardware number
-  UDS_DID_SYSTEM_SUPPLIER_ECU_SOFTWARE_NUMBER       = 0xF194,  // System supplier ECU software number
-  UDS_DID_ECU_PROGRAMMING_DATE                      = 0xF195,  // ECU programming date
-  UDS_DID_CALIBRATION_EQUIPMENT_SOFTWARE_NUMBER     = 0xF196,  // Calibration equipment software number
-  UDS_DID_ECU_REPAIR_SHOP_CODE                      = 0xF197,  // Repair shop or service station code
-  UDS_DID_TESTER_SERIAL_NUMBER                      = 0xF198,  // Tester serial number (traceability)
-  UDS_DID_PROGRAMMING_COUNTER                       = 0xF199,  // Programming attempt counter
+  UDS_DID_ENGINE_RUN_TIME                           = 0xF400,  // (A*256 + B) [s]
+  UDS_DID_ENGINE_LOAD                               = 0xF401,  // A / 2.55 [%]
+  UDS_DID_BATTERY_VOLTAGE                           = 0xF402,  // (A*256 + B) / 1000 [V]
+  UDS_DID_AIR_MASS_FLOW_RATE                        = 0xF403,  // (A*256 + B) / 100 [g/s]
+  UDS_DID_THROTTLE_POSITION                         = 0xF404,  // A / 2.55 [%]
+  UDS_DID_ACCELERATOR_PEDAL_POSITION                = 0xF405,  // A / 2.55 [%] (APP/APS)
+  UDS_DID_ENGINE_SPEED                              = 0xF40A,  // (A*256 + B) / 4 [rpm]
+  UDS_DID_VEHICLE_SPEED                             = 0xF40B,  // A [km/h]
+  UDS_DID_COOLANT_TEMPERATURE                       = 0xF40C,  // A - 40 [°C]
+  UDS_DID_INTAKE_AIR_TEMPERATURE                    = 0xF40D,  // A - 40 [°C]
+  UDS_DID_AMBIENT_AIR_TEMPERATURE                   = 0xF40E,  // A - 40 [°C]
+  UDS_DID_MANIFOLD_ABS_PRESSURE                     = 0xF410,  // A [kPa]
+  UDS_DID_BAROMETRIC_PRESSURE                       = 0xF411,  // A [kPa]
+  UDS_DID_LAMBDA_EQUIVALENCE_RATIO                  = 0xF412,  // (A*256 + B) / 32768 [-]
+  UDS_DID_FUEL_PRESSURE_RAIL                        = 0xF413,  // (A*256 + B) * 10 [kPa]
+  UDS_DID_IGNITION_TIMING_ADVANCE                   = 0xF414,  // A - 64 [°BTDC]
+  UDS_DID_ENGINE_OIL_TEMPERATURE                    = 0xF415,  // A - 40 [°C]
+  UDS_DID_FUEL_LEVEL_INPUT                          = 0xF416,  // A / 2.55 [%]
+  UDS_DID_SHORT_TERM_FUEL_TRIM_BANK1                = 0xF41A,  // (A - 128) / 1.28 [%]
+  UDS_DID_LONG_TERM_FUEL_TRIM_BANK1                 = 0xF41B,  // (A - 128) / 1.28 [%]
+  UDS_DID_SHORT_TERM_FUEL_TRIM_BANK2                = 0xF41C,  // (A - 128) / 1.28 [%]
+  UDS_DID_LONG_TERM_FUEL_TRIM_BANK2                 = 0xF41D,  // (A - 128) / 1.28 [%]
+  UDS_DID_ENGINE_TORQUE_REQUESTED                   = 0xF420,  // Driver torque request [Nm] (format OEM)
+  UDS_DID_ENGINE_TORQUE_ACTUAL                      = 0xF421,  // Actual delivered torque [Nm] (format OEM)
+  UDS_DID_INSTANT_FUEL_RATE                         = 0xF422,  // (A*256 + B) / 100 [g/s]
+  UDS_DID_ENGINE_STARTS_COUNTER                     = 0xF423,  // Count
+  UDS_DID_ODOMETER                                  = 0xF424,  // (A*16777216 + B*65536 + C*256 + D) [km]
+  UDS_DID_ENGINE_OPERATING_STATE                    = 0xF425,  // Bitmask (idle, warm-up, closed-loop, etc.)
+  UDS_DID_CATALYST_TEMPERATURE_B1S1                 = 0xF430,  // (A*256 + B) / 10 [°C]
+  UDS_DID_CATALYST_TEMPERATURE_B1S2                 = 0xF431,  // (A*256 + B) / 10 [°C]
+  UDS_DID_CATALYST_TEMPERATURE_B2S1                 = 0xF432,  // (A*256 + B) / 10 [°C]
+  UDS_DID_CATALYST_TEMPERATURE_B2S2                 = 0xF433,  // (A*256 + B) / 10 [°C]
+  UDS_DID_O2_SENSOR_VOLTAGE_B1S1                    = 0xF440,  // A / 200 [V]          (if narrowband style)
+  UDS_DID_O2_SENSOR_CURRENT_B1S1                    = 0xF441,  // (A*256 + B) / 256 [mA] (if wideband style)
+  UDS_DID_O2_SENSOR_VOLTAGE_B1S2                    = 0xF442,  // ...
+  UDS_DID_O2_SENSOR_CURRENT_B1S2                    = 0xF443,  // ...
+  UDS_DID_O2_SENSOR_VOLTAGE_B2S1                    = 0xF444,  // ...
+  UDS_DID_O2_SENSOR_CURRENT_B2S1                    = 0xF445,  // ...
+  UDS_DID_O2_SENSOR_VOLTAGE_B2S2                    = 0xF446,  // ...
+  UDS_DID_O2_SENSOR_CURRENT_B2S2                    = 0xF447,  // ...
 
-  UDS_DID_RESERVED_START                            = 0xF19A,
-  UDS_DID_RESERVED_END                              = 0xF1FF
 }uds_did_t;
 
 typedef enum
@@ -200,6 +248,16 @@ typedef struct uds_ctx_tag {
 
     uds_error_code_t error_code;
     bool reset_trigger;
+
+    uint8_t upstream_data[UDS_DATA_LENGTH_MAX];
+    uint16_t upstream_data_len;
+    bool upstream_available;
+
+    uint8_t downstream_data[UDS_DATA_LENGTH_MAX];
+    uint16_t downstream_data_len;
+    bool downstream_available;
+
+    time_us_t downstream_time;
 
 }uds_ctx_t;
 

@@ -316,7 +316,6 @@ typedef struct obd2_ctx_tag obd2_ctx_t;
 
 typedef void (*obd2_error_callback_t)(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
 
-
 typedef enum
 {
   OBD2_PID_TYPE_UNDEFINED = 0,
