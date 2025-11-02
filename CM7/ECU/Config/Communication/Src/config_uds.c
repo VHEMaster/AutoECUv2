@@ -31,6 +31,20 @@ static ecu_comm_uds_ctx_t ecu_comm_uds_ctx[ECU_COMM_UDS_MAX] = {
       },
       .config_default = ecu_comm_uds_config_default,
     },
+    {
+      .init = {
+          .error_callback = ecu_comm_uds_error_callback,
+          .callback_userdata = NULL,
+      },
+      .config_default = ecu_comm_uds_config_default,
+    },
+    {
+      .init = {
+          .error_callback = ecu_comm_uds_error_callback,
+          .callback_userdata = NULL,
+      },
+      .config_default = ecu_comm_uds_config_default,
+    },
 };
 
 error_t ecu_comm_uds_init(ecu_comm_uds_t instance, uds_ctx_t *ctx)

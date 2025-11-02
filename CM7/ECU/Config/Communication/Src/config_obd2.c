@@ -31,6 +31,20 @@ static ecu_comm_obd2_ctx_t ecu_comm_obd2_ctx[ECU_COMM_OBD2_MAX] = {
       },
       .config_default = ecu_comm_obd2_config_default,
     },
+    {
+      .init = {
+          .error_callback = ecu_comm_obd2_error_callback,
+          .callback_userdata = NULL,
+      },
+      .config_default = ecu_comm_obd2_config_default,
+    },
+    {
+      .init = {
+          .error_callback = ecu_comm_obd2_error_callback,
+          .callback_userdata = NULL,
+      },
+      .config_default = ecu_comm_obd2_config_default,
+    },
 };
 
 error_t ecu_comm_obd2_init(ecu_comm_obd2_t instance, obd2_ctx_t *ctx)

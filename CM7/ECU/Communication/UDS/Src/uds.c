@@ -8,6 +8,14 @@
 #include "uds.h"
 #include "uds_private.h"
 
+#include "config_comm.h"
+
+static const uds_setup_did_t uds_setup_data_items[] = {
+    { .did = UDS_DID_VIN, .type = UDS_DID_TYPE_STRING, },
+};
+
+static uds_did_value_t uds_data_values[ITEMSOF(uds_setup_data_items)];
+
 error_t uds_init(uds_ctx_t *ctx, const uds_init_ctx_t *init)
 {
   error_t err = E_OK;
@@ -18,6 +26,13 @@ error_t uds_init(uds_ctx_t *ctx, const uds_init_ctx_t *init)
 
     memset(ctx, 0u, sizeof(uds_ctx_t));
     memcpy(&ctx->init, init, sizeof(uds_init_ctx_t));
+
+    ctx->data_items_count = ITEMSOF(uds_setup_data_items);
+    ctx->data_setup = uds_setup_data_items;
+    ctx->data_values = uds_data_values;
+
+    ctx->data_values[0].supported = true;
+    ctx->data_values[0].ascii = "VIN01234567890123";
 
     ctx->initialized = true;
 

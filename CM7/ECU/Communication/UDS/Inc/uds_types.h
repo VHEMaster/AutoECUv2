@@ -8,15 +8,15 @@
 #ifndef COMMUNICATION_UDS_INC_UDS_TYPES_H_
 #define COMMUNICATION_UDS_INC_UDS_TYPES_H_
 
+#include "common.h"
+#include "time.h"
+#include "versioned_uds.h"
+
 #define UDS_DATA_LENGTH_MAX           4095
 #define UDS_ASCII_LENGTH_MAX          64
 #define UDS_RESPONSE_NEGATIVE_CODE    0x7F
 #define UDS_RESPONSE_POSITIVE_OFFSET  0x40
 #define UDS_DOWNSTREAM_TIMEOUT        (1000 * TIME_US_IN_MS)
-
-#include "common.h"
-#include "time.h"
-#include "versioned_uds.h"
 
 typedef enum {
   UDS_OK = 0,
@@ -98,47 +98,6 @@ typedef enum {
   UDS_DID_ENGINE_NUMBER                             = 0xF1A6,  // Engine number
   UDS_DID_VEHICLE_MANUFACTURER_ECU_HW_VERSION_NO    = 0xF1A7,  // Vehicle manufacturer ECU hardware version number
   UDS_DID_SW_CALIBRATION_IDENTIFICATION             = 0xF1A8,  // SW calibration identification
-
-  UDS_DID_ENGINE_RUN_TIME                           = 0xF400,  // (A*256 + B) [s]
-  UDS_DID_ENGINE_LOAD                               = 0xF401,  // A / 2.55 [%]
-  UDS_DID_BATTERY_VOLTAGE                           = 0xF402,  // (A*256 + B) / 1000 [V]
-  UDS_DID_AIR_MASS_FLOW_RATE                        = 0xF403,  // (A*256 + B) / 100 [g/s]
-  UDS_DID_THROTTLE_POSITION                         = 0xF404,  // A / 2.55 [%]
-  UDS_DID_ACCELERATOR_PEDAL_POSITION                = 0xF405,  // A / 2.55 [%] (APP/APS)
-  UDS_DID_ENGINE_SPEED                              = 0xF40A,  // (A*256 + B) / 4 [rpm]
-  UDS_DID_VEHICLE_SPEED                             = 0xF40B,  // A [km/h]
-  UDS_DID_COOLANT_TEMPERATURE                       = 0xF40C,  // A - 40 [°C]
-  UDS_DID_INTAKE_AIR_TEMPERATURE                    = 0xF40D,  // A - 40 [°C]
-  UDS_DID_AMBIENT_AIR_TEMPERATURE                   = 0xF40E,  // A - 40 [°C]
-  UDS_DID_MANIFOLD_ABS_PRESSURE                     = 0xF410,  // A [kPa]
-  UDS_DID_BAROMETRIC_PRESSURE                       = 0xF411,  // A [kPa]
-  UDS_DID_LAMBDA_EQUIVALENCE_RATIO                  = 0xF412,  // (A*256 + B) / 32768 [-]
-  UDS_DID_FUEL_PRESSURE_RAIL                        = 0xF413,  // (A*256 + B) * 10 [kPa]
-  UDS_DID_IGNITION_TIMING_ADVANCE                   = 0xF414,  // A - 64 [°BTDC]
-  UDS_DID_ENGINE_OIL_TEMPERATURE                    = 0xF415,  // A - 40 [°C]
-  UDS_DID_FUEL_LEVEL_INPUT                          = 0xF416,  // A / 2.55 [%]
-  UDS_DID_SHORT_TERM_FUEL_TRIM_BANK1                = 0xF41A,  // (A - 128) / 1.28 [%]
-  UDS_DID_LONG_TERM_FUEL_TRIM_BANK1                 = 0xF41B,  // (A - 128) / 1.28 [%]
-  UDS_DID_SHORT_TERM_FUEL_TRIM_BANK2                = 0xF41C,  // (A - 128) / 1.28 [%]
-  UDS_DID_LONG_TERM_FUEL_TRIM_BANK2                 = 0xF41D,  // (A - 128) / 1.28 [%]
-  UDS_DID_ENGINE_TORQUE_REQUESTED                   = 0xF420,  // Driver torque request [Nm] (format OEM)
-  UDS_DID_ENGINE_TORQUE_ACTUAL                      = 0xF421,  // Actual delivered torque [Nm] (format OEM)
-  UDS_DID_INSTANT_FUEL_RATE                         = 0xF422,  // (A*256 + B) / 100 [g/s]
-  UDS_DID_ENGINE_STARTS_COUNTER                     = 0xF423,  // Count
-  UDS_DID_ODOMETER                                  = 0xF424,  // (A*16777216 + B*65536 + C*256 + D) [km]
-  UDS_DID_ENGINE_OPERATING_STATE                    = 0xF425,  // Bitmask (idle, warm-up, closed-loop, etc.)
-  UDS_DID_CATALYST_TEMPERATURE_B1S1                 = 0xF430,  // (A*256 + B) / 10 [°C]
-  UDS_DID_CATALYST_TEMPERATURE_B1S2                 = 0xF431,  // (A*256 + B) / 10 [°C]
-  UDS_DID_CATALYST_TEMPERATURE_B2S1                 = 0xF432,  // (A*256 + B) / 10 [°C]
-  UDS_DID_CATALYST_TEMPERATURE_B2S2                 = 0xF433,  // (A*256 + B) / 10 [°C]
-  UDS_DID_O2_SENSOR_VOLTAGE_B1S1                    = 0xF440,  // A / 200 [V]          (if narrowband style)
-  UDS_DID_O2_SENSOR_CURRENT_B1S1                    = 0xF441,  // (A*256 + B) / 256 [mA] (if wideband style)
-  UDS_DID_O2_SENSOR_VOLTAGE_B1S2                    = 0xF442,  // ...
-  UDS_DID_O2_SENSOR_CURRENT_B1S2                    = 0xF443,  // ...
-  UDS_DID_O2_SENSOR_VOLTAGE_B2S1                    = 0xF444,  // ...
-  UDS_DID_O2_SENSOR_CURRENT_B2S1                    = 0xF445,  // ...
-  UDS_DID_O2_SENSOR_VOLTAGE_B2S2                    = 0xF446,  // ...
-  UDS_DID_O2_SENSOR_CURRENT_B2S2                    = 0xF447,  // ...
 
 }uds_did_t;
 
@@ -235,6 +194,39 @@ typedef struct uds_ctx_tag uds_ctx_t;
 
 typedef void (*uds_error_callback_t)(uds_ctx_t *ctx, uds_error_code_t code, void *userdata);
 
+typedef enum {
+  UDS_DID_TYPE_UNDEFINED = 0,
+  UDS_DID_TYPE_STRING,
+  UDS_DID_TYPE_FLOAT,
+  UDS_DID_TYPE_DWORD,
+  UDS_DID_TYPE_WORD,
+  UDS_DID_TYPE_BYTE,
+  UDS_DID_TYPE_RAW_DWORD,
+  UDS_DID_TYPE_RAW_WORD,
+  UDS_DID_TYPE_RAW_BYTE,
+  UDS_DID_TYPE_RAW_BOOL,
+  UDS_DID_TYPE_MAX
+}uds_did_type_t;
+
+typedef struct {
+    float gain;
+    float offset;
+}uds_setup_gain_offset_t;
+
+typedef struct {
+    uds_did_t did;
+    uds_did_type_t type;
+    uds_setup_gain_offset_t gain_offset;
+}uds_setup_did_t;
+
+typedef struct {
+    bool supported;
+
+    float flt;
+    uint32_t raw;
+    const char *ascii;
+}uds_did_value_t;
+
 typedef struct {
     uds_error_callback_t error_callback;
     void *callback_userdata;
@@ -248,6 +240,10 @@ typedef struct uds_ctx_tag {
 
     uds_error_code_t error_code;
     bool reset_trigger;
+
+    uint32_t data_items_count;
+    const uds_setup_did_t *data_setup;
+    uds_did_value_t *data_values;
 
     uint8_t upstream_data[UDS_DATA_LENGTH_MAX];
     uint16_t upstream_data_len;
