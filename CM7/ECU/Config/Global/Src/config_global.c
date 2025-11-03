@@ -26,13 +26,13 @@ extern ecu_config_global_engine_double_t ecu_config_global_engine_double;
 
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 
-static ecu_config_device_ctx_t ecu_config_global_flash_ctx = {
+static const ecu_config_device_config_t ecu_config_global_flash_config = {
     .device_type = ECU_DEVICE_TYPE_FLASH,
     .instances_count = ECU_DEVICE_FLASH_MAX,
     .reset_func = (ecu_config_reset_func_t)ecu_devices_flash_reset,
 };
 
-static ecu_config_device_ctx_t ecu_config_global_device_ctx[ECU_CONFIG_DEV_TYPE_ALL] = {
+static const ecu_config_device_config_t ecu_config_global_device_config[ECU_CONFIG_DEV_TYPE_ALL] = {
       {
           .device_type = ECU_DEVICE_TYPE_FLEXIO,
           .instances_count = ECU_DEVICE_FLEXIO_MAX,
@@ -115,14 +115,14 @@ static ecu_config_device_ctx_t ecu_config_global_device_ctx[ECU_CONFIG_DEV_TYPE_
       }, //ECU_CONFIG_COMP_TYPE_WBLS
 };
 
-static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE_ALL] = {
+static const ecu_config_device_config_t ecu_config_global_sensor_config[ECU_CONFIG_SENSOR_TYPE_ALL] = {
     {
         .device_type = ECU_SENSOR_TYPE_CKP,
         .instances_count = ECU_SENSOR_CKP_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_ckp_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_ckp_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_CKP,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_CKP,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_ckp_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.ckp[0],
             .data_size = sizeof(ecu_config_global_engine.sens.ckp[0]),
@@ -135,14 +135,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_CKP
+    }, //ECU_CONFIG_SENSOR_TYPE_CKP
     {
         .device_type = ECU_SENSOR_TYPE_CMP,
         .instances_count = ECU_SENSOR_CMP_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_cmp_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_cmp_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_CMP,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_CMP,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_cmp_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.cmp[0],
             .data_size = sizeof(ecu_config_global_engine.sens.cmp[0]),
@@ -155,14 +155,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_CMP
+    }, //ECU_CONFIG_SENSOR_TYPE_CMP
     {
         .device_type = ECU_SENSOR_TYPE_ECT,
         .instances_count = ECU_SENSOR_ECT_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_ect_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_ect_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_ECT,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_ECT,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_ect_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.ect[0],
             .data_size = sizeof(ecu_config_global_engine.sens.ect[0]),
@@ -175,14 +175,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_ECT
+    }, //ECU_CONFIG_SENSOR_TYPE_ECT
     {
         .device_type = ECU_SENSOR_TYPE_EGT,
         .instances_count = ECU_SENSOR_EGT_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_egt_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_egt_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_EGT,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_EGT,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_egt_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.egt[0],
             .data_size = sizeof(ecu_config_global_engine.sens.egt[0]),
@@ -195,14 +195,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_EGT
+    }, //ECU_CONFIG_SENSOR_TYPE_EGT
     {
         .device_type = ECU_SENSOR_TYPE_IAT,
         .instances_count = ECU_SENSOR_IAT_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_iat_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_iat_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_IAT,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_IAT,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_iat_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.iat[0],
             .data_size = sizeof(ecu_config_global_engine.sens.iat[0]),
@@ -215,14 +215,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_IAT
+    }, //ECU_CONFIG_SENSOR_TYPE_IAT
     {
         .device_type = ECU_SENSOR_TYPE_MAF,
         .instances_count = ECU_SENSOR_MAF_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_maf_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_maf_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_MAF,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_MAF,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_maf_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.maf[0],
             .data_size = sizeof(ecu_config_global_engine.sens.maf[0]),
@@ -235,14 +235,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_MAF
+    }, //ECU_CONFIG_SENSOR_TYPE_MAF
     {
         .device_type = ECU_SENSOR_TYPE_MAP,
         .instances_count = ECU_SENSOR_MAP_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_map_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_map_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_MAP,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_MAP,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_map_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.map[0],
             .data_size = sizeof(ecu_config_global_engine.sens.map[0]),
@@ -255,14 +255,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_MAP
+    }, //ECU_CONFIG_SENSOR_TYPE_MAP
     {
         .device_type = ECU_SENSOR_TYPE_TPS,
         .instances_count = ECU_SENSOR_TPS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_tps_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_tps_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_TPS,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_TPS,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_tps_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.tps[0],
             .data_size = sizeof(ecu_config_global_engine.sens.tps[0]),
@@ -275,14 +275,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_TPS
+    }, //ECU_CONFIG_SENSOR_TYPE_TPS
     {
         .device_type = ECU_SENSOR_TYPE_VSS,
         .instances_count = ECU_SENSOR_VSS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_vss_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_vss_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_VSS,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_VSS,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_vss_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.vss[0],
             .data_size = sizeof(ecu_config_global_engine.sens.vss[0]),
@@ -295,14 +295,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_VSS
+    }, //ECU_CONFIG_SENSOR_TYPE_VSS
     {
         .device_type = ECU_SENSOR_TYPE_APS,
         .instances_count = ECU_SENSOR_APS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_aps_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_aps_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_APS,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_APS,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_aps_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.aps[0],
             .data_size = sizeof(ecu_config_global_engine.sens.aps[0]),
@@ -315,14 +315,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_APS
+    }, //ECU_CONFIG_SENSOR_TYPE_APS
     {
         .device_type = ECU_SENSOR_TYPE_OTS,
         .instances_count = ECU_SENSOR_OTS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_ots_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_ots_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_OTS,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_OTS,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_ots_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.ots[0],
             .data_size = sizeof(ecu_config_global_engine.sens.ots[0]),
@@ -335,14 +335,14 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_OTS
+    }, //ECU_CONFIG_SENSOR_TYPE_OTS
     {
         .device_type = ECU_SENSOR_TYPE_OPS,
         .instances_count = ECU_SENSOR_OPS_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_sensors_ops_configure,
         .reset_func = (ecu_config_reset_func_t)ecu_sensors_ops_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_SENS_OPS,
+            .flash_section_type = FLASH_SECTION_TYPE_SENSOR_OPS,
             .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_sensors_ops_get_default_config,
             .data_ptr = &ecu_config_global_engine.sens.ops[0],
             .data_size = sizeof(ecu_config_global_engine.sens.ops[0]),
@@ -355,10 +355,10 @@ static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENS_TYPE
                 }
             },
         },
-    }, //ECU_CONFIG_SENS_TYPE_OPS
+    }, //ECU_CONFIG_SENSOR_TYPE_OPS
 };
 
-static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TYPE_ALL] = {
+static const ecu_config_device_config_t ecu_config_global_module_config[ECU_CONFIG_MODULE_TYPE_ALL] = {
     {
         .device_type = ECU_MODULE_TYPE_TIMING,
         .instances_count = ECU_MODULE_TIMING_MAX,
@@ -521,7 +521,7 @@ static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TY
     }, //ECU_CONFIG_MODULE_TYPE_WGCV
 };
 
-static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL] = {
+static const ecu_config_generic_config_t ecu_config_global_calibration_config[ECU_CONFIG_CALIB_TYPE_ALL] = {
     {
         .flash_section_type = FLASH_SECTION_TYPE_ID,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_id_get_default_config,
@@ -636,7 +636,7 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
     }, //ECU_CONFIG_CALIB_TYPE_TABLES
 };
 
-static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
+static const ecu_config_generic_config_t ecu_config_global_runtimes_config[ECU_CONFIG_RUNTIME_TYPE_ALL] = {
     {
         .flash_section_type = FLASH_SECTION_TYPE_RUNTIME_CORRECTIONS,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)NULL,
@@ -654,7 +654,7 @@ static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIM
     }, //ECU_CONFIG_RUNTIME_TYPE_CORRECTIONS
 };
 
-static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_ALL] = {
+static const ecu_config_device_config_t ecu_config_global_comms_config[ECU_CONFIG_COMM_TYPE_ALL] = {
     {
       .device_type = ECU_COMM_TYPE_CAN,
       .instances_count = ECU_COMM_CAN_MAX,
@@ -777,6 +777,14 @@ static ecu_config_device_ctx_t ecu_config_global_comm_ctx[ECU_CONFIG_COMM_TYPE_A
     }, //ECU_CONFIG_COMM_TYPE_ROUTER
 };
 
+static ecu_config_device_ctx_t ecu_config_global_flash_ctx;
+static ecu_config_device_ctx_t ecu_config_global_device_ctx[ECU_CONFIG_DEV_TYPE_ALL];
+static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENSOR_TYPE_ALL];
+static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TYPE_ALL];
+static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL];
+static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL];
+static ecu_config_device_ctx_t ecu_config_global_comms_ctx[ECU_CONFIG_COMM_TYPE_ALL];
+
 static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
 {
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
@@ -812,36 +820,44 @@ error_t ecu_config_global_init(void)
     err = flash_init();
     BREAK_IF(err != E_OK);
 
+    ctx->flash_config = &ecu_config_global_flash_config;
     ctx->flash_ctx = &ecu_config_global_flash_ctx;
 
-    ctx->devices_count = ITEMSOF(ecu_config_global_device_ctx);
-    ctx->devices = ecu_config_global_device_ctx;
+    ctx->devices_count = ITEMSOF(ecu_config_global_device_config);
+    ctx->devices_config = ecu_config_global_device_config;
+    ctx->devices_ctx = ecu_config_global_device_ctx;
 
-    ctx->sensors_count = ITEMSOF(ecu_config_global_sensor_ctx);
-    ctx->sensors = ecu_config_global_sensor_ctx;
+    ctx->sensors_count = ITEMSOF(ecu_config_global_sensor_config);
+    ctx->sensors_config = ecu_config_global_sensor_config;
+    ctx->sensors_ctx = ecu_config_global_sensor_ctx;
 
-    ctx->modules_count = ITEMSOF(ecu_config_global_module_ctx);
-    ctx->modules = ecu_config_global_module_ctx;
+    ctx->modules_count = ITEMSOF(ecu_config_global_module_config);
+    ctx->modules_config = ecu_config_global_module_config;
+    ctx->modules_ctx = ecu_config_global_module_ctx;
 
-    ctx->calibrations_count = ITEMSOF(ecu_config_global_calibration_ctx);
-    ctx->calibrations = ecu_config_global_calibration_ctx;
+    ctx->calibrations_count = ITEMSOF(ecu_config_global_calibration_config);
+    ctx->calibrations_config = ecu_config_global_calibration_config;
+    ctx->calibrations_ctx = ecu_config_global_calibration_ctx;
 
-    ctx->runtimes_count = ITEMSOF(ecu_config_global_runtimes_ctx);
-    ctx->runtimes = ecu_config_global_runtimes_ctx;
+    ctx->runtimes_count = ITEMSOF(ecu_config_global_runtimes_config);
+    ctx->runtimes_config = ecu_config_global_runtimes_config;
+    ctx->runtimes_ctx = ecu_config_global_runtimes_ctx;
 
-    ctx->comm_count = ITEMSOF(ecu_config_global_comm_ctx);
-    ctx->comm = ecu_config_global_comm_ctx;
+    ctx->comms_count = ITEMSOF(ecu_config_global_comms_config);
+    ctx->comms_config = ecu_config_global_comms_config;
+    ctx->comms_ctx = ecu_config_global_comms_ctx;
 
     for(int c = 0; c < ctx->devices_count; c++) {
-      for(int i = 0; i < ctx->devices[c].instances_count; i++) {
-        err = flash_mem_layout_get_section_info(&section_info, ctx->devices[c].generic.flash_section_type, i);
+      ctx->devices_ctx[c].config = &ctx->devices_config[c];
+      for(int i = 0; i < ctx->devices_config[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->devices_config[c].generic.flash_section_type, i);
         BREAK_IF(err != E_OK);
-        BREAK_IF_ACTION(ctx->devices[c].generic.versions_count == 0, err = E_INVALACT);
-        BREAK_IF_ACTION((ctx->devices[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
-        BREAK_IF_ACTION(ctx->devices[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->devices_config[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->devices_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->devices_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->devices[c].generic.get_default_cfg_func != NULL) {
-          err = ctx->devices[c].generic.get_default_cfg_func(i, ctx->devices[c].generic.data_ptr + ctx->devices[c].generic.data_size * i);
+        if(ctx->devices_config[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->devices_config[c].generic.get_default_cfg_func(i, ctx->devices_config[c].generic.data_ptr + ctx->devices_config[c].generic.data_size * i);
         }
         BREAK_IF(err != E_OK);
       }
@@ -849,15 +865,16 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->sensors_count; c++) {
-      for(int i = 0; i < ctx->sensors[c].instances_count; i++) {
-        err = flash_mem_layout_get_section_info(&section_info, ctx->sensors[c].generic.flash_section_type, i);
+      ctx->sensors_ctx[c].config = &ctx->sensors_config[c];
+      for(int i = 0; i < ctx->sensors_config[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->sensors_config[c].generic.flash_section_type, i);
         BREAK_IF(err != E_OK);
-        BREAK_IF_ACTION(ctx->sensors[c].generic.versions_count == 0, err = E_INVALACT);
-        BREAK_IF_ACTION((ctx->sensors[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
-        BREAK_IF_ACTION(ctx->sensors[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->sensors_config[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->sensors_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->sensors_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->sensors[c].generic.get_default_cfg_func != NULL) {
-          err = ctx->sensors[c].generic.get_default_cfg_func(i, ctx->sensors[c].generic.data_ptr + ctx->sensors[c].generic.data_size * i);
+        if(ctx->sensors_config[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->sensors_config[c].generic.get_default_cfg_func(i, ctx->sensors_config[c].generic.data_ptr + ctx->sensors_config[c].generic.data_size * i);
         }
         BREAK_IF(err != E_OK);
       }
@@ -865,15 +882,16 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->modules_count; c++) {
-      for(int i = 0; i < ctx->modules[c].instances_count; i++) {
-        err = flash_mem_layout_get_section_info(&section_info, ctx->modules[c].generic.flash_section_type, i);
+      ctx->modules_ctx[c].config = &ctx->modules_config[c];
+      for(int i = 0; i < ctx->modules_config[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->modules_config[c].generic.flash_section_type, i);
         BREAK_IF(err != E_OK);
-        BREAK_IF_ACTION(ctx->modules[c].generic.versions_count == 0, err = E_INVALACT);
-        BREAK_IF_ACTION((ctx->modules[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
-        BREAK_IF_ACTION(ctx->modules[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->modules_config[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->modules_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->modules_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->modules[c].generic.get_default_cfg_func != NULL) {
-          err = ctx->modules[c].generic.get_default_cfg_func(i, ctx->modules[c].generic.data_ptr + ctx->modules[c].generic.data_size * i);
+        if(ctx->modules_config[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->modules_config[c].generic.get_default_cfg_func(i, ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i);
         }
         BREAK_IF(err != E_OK);
       }
@@ -881,43 +899,46 @@ error_t ecu_config_global_init(void)
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->calibrations_count; c++) {
-      err = flash_mem_layout_get_section_info(&section_info, ctx->calibrations[c].flash_section_type, 0);
+      ctx->calibrations_ctx[c].config = &ctx->calibrations_config[c];
+      err = flash_mem_layout_get_section_info(&section_info, ctx->calibrations_config[c].flash_section_type, 0);
       BREAK_IF(err != E_OK);
-      BREAK_IF_ACTION(ctx->calibrations[c].versions_count == 0, err = E_INVALACT);
-      BREAK_IF_ACTION((ctx->calibrations[c].data_size & 0x1F) != 0, err = E_INVALACT);
-      BREAK_IF_ACTION(ctx->calibrations[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+      BREAK_IF_ACTION(ctx->calibrations_config[c].versions_count == 0, err = E_INVALACT);
+      BREAK_IF_ACTION((ctx->calibrations_config[c].data_size & 0x1F) != 0, err = E_INVALACT);
+      BREAK_IF_ACTION(ctx->calibrations_config[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-      if(ctx->calibrations[c].get_default_cfg_func != NULL) {
-        err = ctx->calibrations[c].get_default_cfg_func(0, ctx->calibrations[c].data_ptr);
+      if(ctx->calibrations_config[c].get_default_cfg_func != NULL) {
+        err = ctx->calibrations_config[c].get_default_cfg_func(0, ctx->calibrations_config[c].data_ptr);
       }
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);
 
     for(int c = 0; c < ctx->runtimes_count; c++) {
-      err = flash_mem_layout_get_section_info(&section_info, ctx->runtimes[c].flash_section_type, 0);
+      ctx->runtimes_ctx[c].config = &ctx->runtimes_config[c];
+      err = flash_mem_layout_get_section_info(&section_info, ctx->runtimes_config[c].flash_section_type, 0);
       BREAK_IF(err != E_OK);
-      BREAK_IF_ACTION(ctx->runtimes[c].versions_count == 0, err = E_INVALACT);
-      BREAK_IF_ACTION((ctx->runtimes[c].data_size & 0x1F) != 0, err = E_INVALACT);
-      BREAK_IF_ACTION(ctx->runtimes[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+      BREAK_IF_ACTION(ctx->runtimes_config[c].versions_count == 0, err = E_INVALACT);
+      BREAK_IF_ACTION((ctx->runtimes_config[c].data_size & 0x1F) != 0, err = E_INVALACT);
+      BREAK_IF_ACTION(ctx->runtimes_config[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-      if(ctx->runtimes[c].get_default_cfg_func != NULL) {
-        err = ctx->runtimes[c].get_default_cfg_func(0, ctx->runtimes[c].data_ptr);
+      if(ctx->runtimes_config[c].get_default_cfg_func != NULL) {
+        err = ctx->runtimes_config[c].get_default_cfg_func(0, ctx->runtimes_config[c].data_ptr);
       }
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);
 
-    for(int c = 0; c < ctx->comm_count; c++) {
-      for(int i = 0; i < ctx->comm[c].instances_count; i++) {
-        err = flash_mem_layout_get_section_info(&section_info, ctx->comm[c].generic.flash_section_type, i);
+    for(int c = 0; c < ctx->comms_count; c++) {
+      ctx->comms_ctx[c].config = &ctx->comms_config[c];
+      for(int i = 0; i < ctx->comms_config[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->comms_config[c].generic.flash_section_type, i);
         BREAK_IF(err != E_OK);
-        BREAK_IF_ACTION(ctx->comm[c].generic.versions_count == 0, err = E_INVALACT);
-        BREAK_IF_ACTION((ctx->comm[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
-        BREAK_IF_ACTION(ctx->comm[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->comms_config[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->comms_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->comms_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->comm[c].generic.get_default_cfg_func != NULL) {
-          err = ctx->comm[c].generic.get_default_cfg_func(i, ctx->comm[c].generic.data_ptr + ctx->comm[c].generic.data_size * i);
+        if(ctx->comms_config[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->comms_config[c].generic.get_default_cfg_func(i, ctx->comms_config[c].generic.data_ptr + ctx->comms_config[c].generic.data_size * i);
         }
         BREAK_IF(err != E_OK);
       }
@@ -1007,10 +1028,10 @@ error_t ecu_config_global_devices_initialize(void)
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_DEVS_INIT, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_DEVICE_INIT, err = E_INVALACT);
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
-      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_DEVS_INIT;
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_DEVICE_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
@@ -1031,10 +1052,10 @@ error_t ecu_config_global_sensors_initialize(void)
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_SENS_INIT, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_SENSOR_INIT, err = E_INVALACT);
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
-      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_SENS_INIT;
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_SENSOR_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {
@@ -1055,10 +1076,10 @@ error_t ecu_config_global_modules_initialize(void)
   do {
     BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_MODULES_INIT, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_MODULE_INIT, err = E_INVALACT);
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
-      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULES_INIT;
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULE_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {

@@ -372,7 +372,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_CKP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_CKP,
         .section_index = ECU_SENSOR_CKP_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -380,7 +380,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_CMP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_CMP,
         .section_index = ECU_SENSOR_CMP_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -388,7 +388,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_CMP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_CMP,
         .section_index = ECU_SENSOR_CMP_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -396,7 +396,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_CMP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_CMP,
         .section_index = ECU_SENSOR_CMP_3,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -404,7 +404,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_CMP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_CMP,
         .section_index = ECU_SENSOR_CMP_4,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -412,7 +412,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_ECT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_ECT,
         .section_index = ECU_SENSOR_ECT_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -420,7 +420,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_ECT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_ECT,
         .section_index = ECU_SENSOR_ECT_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -428,7 +428,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_IAT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_IAT,
         .section_index = ECU_SENSOR_IAT_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -436,7 +436,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_IAT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_IAT,
         .section_index = ECU_SENSOR_IAT_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -444,7 +444,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAF,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAF,
         .section_index = ECU_SENSOR_MAF_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -452,7 +452,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAF,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAF,
         .section_index = ECU_SENSOR_MAF_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -460,7 +460,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAP,
         .section_index = ECU_SENSOR_MAP_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -468,7 +468,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAP,
         .section_index = ECU_SENSOR_MAP_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -476,7 +476,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAP,
         .section_index = ECU_SENSOR_MAP_3,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -484,7 +484,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_MAP,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_MAP,
         .section_index = ECU_SENSOR_MAP_4,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 5,
@@ -492,7 +492,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_TPS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_TPS,
         .section_index = ECU_SENSOR_TPS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -500,7 +500,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_TPS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_TPS,
         .section_index = ECU_SENSOR_TPS_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -508,7 +508,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_VSS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_VSS,
         .section_index = ECU_SENSOR_VSS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -516,7 +516,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_APS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_APS,
         .section_index = ECU_SENSOR_APS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -524,7 +524,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_EGT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_EGT,
         .section_index = ECU_SENSOR_EGT_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -532,7 +532,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_EGT,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_EGT,
         .section_index = ECU_SENSOR_EGT_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -540,7 +540,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_OTS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_OTS,
         .section_index = ECU_SENSOR_OTS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -548,7 +548,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_OTS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_OTS,
         .section_index = ECU_SENSOR_OTS_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -556,7 +556,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_OPS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_OPS,
         .section_index = ECU_SENSOR_OPS_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,
@@ -564,7 +564,7 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
-        .section_type = FLASH_SECTION_TYPE_SENS_OPS,
+        .section_type = FLASH_SECTION_TYPE_SENSOR_OPS,
         .section_index = ECU_SENSOR_OPS_2,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 6,

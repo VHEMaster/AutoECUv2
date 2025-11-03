@@ -79,20 +79,20 @@ typedef enum {
 }ecu_config_device_type_t;
 
 typedef enum {
-  ECU_CONFIG_SENS_TYPE_CKP = 0,
-  ECU_CONFIG_SENS_TYPE_CMP,
-  ECU_CONFIG_SENS_TYPE_ECT,
-  ECU_CONFIG_SENS_TYPE_EGT,
-  ECU_CONFIG_SENS_TYPE_IAT,
-  ECU_CONFIG_SENS_TYPE_MAF,
-  ECU_CONFIG_SENS_TYPE_MAP,
-  ECU_CONFIG_SENS_TYPE_TPS,
-  ECU_CONFIG_SENS_TYPE_VSS,
-  ECU_CONFIG_SENS_TYPE_APS,
-  ECU_CONFIG_SENS_TYPE_OTS,
-  ECU_CONFIG_SENS_TYPE_OPS,
-  ECU_CONFIG_SENS_TYPE_ALL,
-  ECU_CONFIG_SENS_TYPE_MAX
+  ECU_CONFIG_SENSOR_TYPE_CKP = 0,
+  ECU_CONFIG_SENSOR_TYPE_CMP,
+  ECU_CONFIG_SENSOR_TYPE_ECT,
+  ECU_CONFIG_SENSOR_TYPE_EGT,
+  ECU_CONFIG_SENSOR_TYPE_IAT,
+  ECU_CONFIG_SENSOR_TYPE_MAF,
+  ECU_CONFIG_SENSOR_TYPE_MAP,
+  ECU_CONFIG_SENSOR_TYPE_TPS,
+  ECU_CONFIG_SENSOR_TYPE_VSS,
+  ECU_CONFIG_SENSOR_TYPE_APS,
+  ECU_CONFIG_SENSOR_TYPE_OTS,
+  ECU_CONFIG_SENSOR_TYPE_OPS,
+  ECU_CONFIG_SENSOR_TYPE_ALL,
+  ECU_CONFIG_SENSOR_TYPE_MAX
 }ecu_config_sensor_type_t;
 
 typedef enum {
@@ -181,7 +181,7 @@ typedef struct {
     uint32_t data_size;
     uint32_t versions_count;
     ecu_config_item_version_t versions[ECU_CONFIG_ITEM_VERSIONS_MAX];
-}ecu_config_generic_ctx_t;
+}ecu_config_generic_config_t;
 
 typedef struct {
     flash_section_type_t flash_section_type;
@@ -203,25 +203,33 @@ typedef struct {
     uint32_t instances_count;
     ecu_config_configure_func_t configure_func;
     ecu_config_reset_func_t reset_func;
-    ecu_config_generic_ctx_t generic;
+    ecu_config_generic_config_t generic;
+}ecu_config_device_config_t;
+
+typedef struct {
+    const ecu_config_generic_config_t *config;
+}ecu_config_generic_ctx_t;
+
+typedef struct {
+    const ecu_config_device_config_t *config;
     error_t reset_errcode;
     error_t config_errcode;
 }ecu_config_device_ctx_t;
 
 typedef enum {
-  ECU_CONFIG_FSM_RST_CFG_CONDITION = 0,
-  ECU_CONFIG_FSM_RST_CFG_DEFINE,
-  ECU_CONFIG_FSM_RST_CFG_RESET,
-  ECU_CONFIG_FSM_RST_CFG_CONFIG,
-  ECU_CONFIG_FSM_RST_CFG_MAX
-}ecu_config_global_rst_cfg_fsm_t;
+  ECU_CONFIG_FSM_DEVICE_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_DEVICE_CFG_DEFINE,
+  ECU_CONFIG_FSM_DEVICE_CFG_RESET,
+  ECU_CONFIG_FSM_DEVICE_CFG_CONFIG,
+  ECU_CONFIG_FSM_DEVICE_CFG_MAX
+}ecu_config_global_device_cfg_fsm_t;
 
 typedef enum {
-  ECU_CONFIG_FSM_SENS_CFG_CONDITION = 0,
-  ECU_CONFIG_FSM_SENS_CFG_DEFINE,
-  ECU_CONFIG_FSM_SENS_CFG_RESET,
-  ECU_CONFIG_FSM_SENS_CFG_CONFIG,
-  ECU_CONFIG_FSM_SENS_CFG_MAX
+  ECU_CONFIG_FSM_SENSOR_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_SENSOR_CFG_DEFINE,
+  ECU_CONFIG_FSM_SENSOR_CFG_RESET,
+  ECU_CONFIG_FSM_SENSOR_CFG_CONFIG,
+  ECU_CONFIG_FSM_SENSOR_CFG_MAX
 }ecu_config_global_sens_cfg_fsm_t;
 
 typedef enum {
@@ -280,8 +288,8 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_FSM_PROCESS_FLASH_INIT = 0,
   ECU_CONFIG_FSM_PROCESS_FLASH_ERASE,
-  ECU_CONFIG_FSM_PROCESS_CFG_RST,
-  ECU_CONFIG_FSM_PROCESS_SENS_CFG,
+  ECU_CONFIG_FSM_PROCESS_DEVICE_CFG,
+  ECU_CONFIG_FSM_PROCESS_SENSOR_CFG,
   ECU_CONFIG_FSM_PROCESS_MODULE_CFG,
   ECU_CONFIG_FSM_PROCESS_COMM_CFG,
   ECU_CONFIG_FSM_PROCESS_OPERATION,
@@ -291,34 +299,41 @@ typedef enum {
 typedef enum {
   ECU_CONFIG_PROCESS_TYPE_NONE = 0,
   ECU_CONFIG_PROCESS_TYPE_FLASH_INIT,
-  ECU_CONFIG_PROCESS_TYPE_DEVS_INIT,
-  ECU_CONFIG_PROCESS_TYPE_SENS_INIT,
-  ECU_CONFIG_PROCESS_TYPE_MODULES_INIT,
+  ECU_CONFIG_PROCESS_TYPE_DEVICE_INIT,
+  ECU_CONFIG_PROCESS_TYPE_SENSOR_INIT,
+  ECU_CONFIG_PROCESS_TYPE_MODULE_INIT,
   ECU_CONFIG_PROCESS_TYPE_COMM_INIT,
   ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE,
   ECU_CONFIG_PROCESS_TYPE_MAX,
 }ecu_config_global_process_type_t;
 
 typedef struct {
+    const ecu_config_device_config_t *flash_config;
     ecu_config_device_ctx_t *flash_ctx;
     uint32_t devices_count;
-    ecu_config_device_ctx_t *devices;
+    const ecu_config_device_config_t *devices_config;
+    ecu_config_device_ctx_t *devices_ctx;
     uint32_t sensors_count;
-    ecu_config_device_ctx_t *sensors;
+    const ecu_config_device_config_t *sensors_config;
+    ecu_config_device_ctx_t *sensors_ctx;
     uint32_t modules_count;
-    ecu_config_device_ctx_t *modules;
+    const ecu_config_device_config_t *modules_config;
+    ecu_config_device_ctx_t *modules_ctx;
     uint32_t calibrations_count;
-    ecu_config_generic_ctx_t *calibrations;
+    const ecu_config_generic_config_t *calibrations_config;
+    ecu_config_generic_ctx_t *calibrations_ctx;
     uint32_t runtimes_count;
-    ecu_config_generic_ctx_t *runtimes;
-    uint32_t comm_count;
-    ecu_config_device_ctx_t *comm;
+    const ecu_config_generic_config_t *runtimes_config;
+    ecu_config_generic_ctx_t *runtimes_ctx;
+    uint32_t comms_count;
+    const ecu_config_device_config_t *comms_config;
+    ecu_config_device_ctx_t *comms_ctx;
     bool global_ready;
     bool devices_initialized;
     bool flash_initialized;
     bool sensors_initialized;
     bool modules_initialized;
-    bool comm_initialized;
+    bool comms_initialized;
     bool core_components_initialized;
 
     DMA_HandleTypeDef *hdma;
@@ -343,8 +358,8 @@ typedef struct {
 
     ecu_config_global_flash_fsm_t fsm_flash;
     ecu_config_global_flash_erase_fsm_t fsm_flash_erase;
-    ecu_config_global_rst_cfg_fsm_t fsm_rst_cfg;
-    ecu_config_global_sens_cfg_fsm_t fsm_sens_cfg;
+    ecu_config_global_device_cfg_fsm_t fsm_device_cfg;
+    ecu_config_global_sens_cfg_fsm_t fsm_sensor_cfg;
     ecu_config_global_module_cfg_fsm_t fsm_module_cfg;
     ecu_config_global_comm_cfg_fsm_t fsm_comm_cfg;
     ecu_config_global_operation_fsm_t fsm_operation;
