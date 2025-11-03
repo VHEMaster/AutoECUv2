@@ -25,6 +25,8 @@ static void calcdata_invalidate(ecu_core_ctx_t *ctx);
 static void calcdata_process(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_read(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
+static void calcdata_inputs_read_internal(ecu_core_ctx_t *ctx);
+static void calcdata_inputs_write_internal(ecu_core_ctx_t *ctx);
 
 time_msmnt_item_t time_calcdata = {0};
 
@@ -76,13 +78,23 @@ STATIC_INLINE void calcdata_process(ecu_core_ctx_t *ctx)
 
 STATIC_INLINE void calcdata_inputs_read(ecu_core_ctx_t *ctx)
 {
+  calcdata_inputs_read_internal(ctx);
+}
+
+STATIC_INLINE void calcdata_inputs_write(ecu_core_ctx_t *ctx)
+{
+  calcdata_inputs_write_internal(ctx);
+}
+
+STATIC_INLINE void calcdata_inputs_read_internal(ecu_core_ctx_t *ctx)
+{
   core_calcdata_sensors_read(ctx);
   core_calcdata_devices_read(ctx);
   core_calcdata_modules_read(ctx);
   core_calcdata_timings_read(ctx);
 }
 
-STATIC_INLINE void calcdata_inputs_write(ecu_core_ctx_t *ctx)
+STATIC_INLINE void calcdata_inputs_write_internal(ecu_core_ctx_t *ctx)
 {
   core_calcdata_devices_write(ctx);
   core_calcdata_modules_write(ctx);

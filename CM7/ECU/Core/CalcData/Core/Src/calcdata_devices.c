@@ -8,6 +8,8 @@
 #include "calcdata_devices.h"
 #include "config_global.h"
 
+#define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
+
 static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 
@@ -75,8 +77,7 @@ static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t
 {
   error_t err;
   cj125_data_t data;
-  ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &ctx->runtime.global.parameters.devices.wbls[instance];
-  ecu_core_runtime_global_parameters_device_wbls_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.devices.wbls[instance];
+  ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.wbls[instance];
 
   err = ecu_devices_wbls_get_data(instance, &data);
   if(err == E_OK) {
@@ -87,19 +88,12 @@ static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t
   } else {
     device_ctx->read_valid = false;
   }
-
-  if(simulated_ctx->read_valid) {
-    device_ctx->read = simulated_ctx->read;
-  } else {
-    simulated_ctx->read = device_ctx->read;
-  }
 }
 
 static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &ctx->runtime.global.parameters.devices.stepper[instance];
-  ecu_core_runtime_global_parameters_device_stepper_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.devices.stepper[instance];
+  ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.stepper[instance];
 
   err = ecu_devices_stepper_get_current(instance, &device_ctx->read.pos_current);
   err |= ecu_devices_stepper_get_target(instance, &device_ctx->read.pos_target);
@@ -109,27 +103,11 @@ static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instanc
   } else {
     device_ctx->read_valid = false;
   }
-
-  if(simulated_ctx->read_valid) {
-    device_ctx->read = simulated_ctx->read;
-  } else {
-    simulated_ctx->read = device_ctx->read;
-  }
 }
 
 static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &ctx->runtime.global.parameters.devices.wbls[instance];
-  ecu_core_runtime_global_parameters_device_wbls_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.devices.wbls[instance];
-
-  if(simulated_ctx->write_valid) {
-    device_ctx->write = simulated_ctx->write;
-    device_ctx->write_valid = true;
-  } else {
-    if(device_ctx->write_valid) {
-      simulated_ctx->write = device_ctx->write;
-    }
-  }
+  ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.wbls[instance];
 
   if(device_ctx->write_valid) {
     (void)ecu_devices_wbls_set_heatup(instance, device_ctx->write.heatup);
@@ -139,17 +117,7 @@ static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_
 
 static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &ctx->runtime.global.parameters.devices.stepper[instance];
-  ecu_core_runtime_global_parameters_device_stepper_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.devices.stepper[instance];
-
-  if(simulated_ctx->write_valid) {
-    device_ctx->write = simulated_ctx->write;
-    device_ctx->write_valid = true;
-  } else {
-    if(device_ctx->write_valid) {
-      simulated_ctx->write = device_ctx->write;
-    }
-  }
+  ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.stepper[instance];
 
   if(device_ctx->write_valid) {
     if(device_ctx->write.set_enabled) {

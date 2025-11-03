@@ -11,7 +11,7 @@ volatile bool calcdata_simulation_apply = true;
 
 void core_calcdata_simulation(ecu_core_ctx_t *ctx)
 {
-  ecu_core_runtime_global_parameters_ctx_t *params = &ctx->runtime.global.parameters_simulated;
+  ecu_core_runtime_global_parameters_ctx_t *params = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED];
   ecu_core_runtime_value_ctx_t *value;
 
   if(calcdata_simulation_apply) {

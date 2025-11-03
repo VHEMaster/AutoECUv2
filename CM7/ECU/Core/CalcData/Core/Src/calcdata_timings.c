@@ -8,6 +8,8 @@
 #include "calcdata_timings.h"
 #include "config_global.h"
 
+#define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
+
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata);
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata);
 
@@ -57,8 +59,7 @@ void core_calcdata_timings_write(ecu_core_ctx_t *ctx)
 
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
-  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.ignition;
-  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.ignition;
+  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.ignition;
   ecu_core_runtime_global_ignition_ctx_t *dst_ctx = &ctx->runtime.global.ignition;
 
   //err = ecu_timings_ignition_get_data(&data);
@@ -70,18 +71,11 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
     timing_ctx->read.groups[i].saturation_time = dst_ctx->groups[i].saturation_time;
   }
   timing_ctx->read_valid = true;
-
-  if(simulated_ctx->read_valid) {
-    timing_ctx->read = simulated_ctx->read;
-  } else {
-    simulated_ctx->read = timing_ctx->read;
-  }
 }
 
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
-  ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.injection;
-  ecu_core_runtime_global_parameters_timing_injection_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.injection;
+  ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.injection;
   ecu_core_runtime_global_injection_ctx_t *dst_ctx = &ctx->runtime.global.injection;
 
   for(int i = 0; i < ECU_CONFIG_INJECTION_GROUP_MAX; i++) {
@@ -97,29 +91,12 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
     timing_ctx->read.groups[i].injector_pressure_diff_mean = dst_ctx->groups[i].injector_pressure_diff_mean;
   }
   timing_ctx->read_valid = true;
-
-  if(simulated_ctx->read_valid) {
-    timing_ctx->read = simulated_ctx->read;
-  } else {
-    simulated_ctx->read = timing_ctx->read;
-  }
 }
 
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
-  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.ignition;
-  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.ignition;
+  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.ignition;
   ecu_core_runtime_global_ignition_input_ctx_t *dst_ctx;
-
-
-  if(simulated_ctx->write_valid) {
-    memcpy(timing_ctx->write, simulated_ctx->write, sizeof(*timing_ctx->write));
-    timing_ctx->write_valid = true;
-  } else {
-    if(timing_ctx->write_valid) {
-      memcpy(simulated_ctx->write, timing_ctx->write, sizeof(*simulated_ctx->write));
-    }
-  }
 
   if(timing_ctx->write_valid) {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
@@ -134,18 +111,8 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 
 static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
-  ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &ctx->runtime.global.parameters.timings.injection;
-  ecu_core_runtime_global_parameters_timing_injection_ctx_t *simulated_ctx = &ctx->runtime.global.parameters_simulated.timings.injection;
+  ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.injection;
   ecu_core_runtime_global_injection_input_ctx_t *dst_ctx;
-
-  if(simulated_ctx->write_valid) {
-    memcpy(timing_ctx->write, simulated_ctx->write, sizeof(*timing_ctx->write));
-    timing_ctx->write_valid = true;
-  } else {
-    if(timing_ctx->write_valid) {
-      memcpy(simulated_ctx->write, timing_ctx->write, sizeof(*simulated_ctx->write));
-    }
-  }
 
   if(timing_ctx->write_valid) {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {

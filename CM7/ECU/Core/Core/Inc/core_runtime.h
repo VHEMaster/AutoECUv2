@@ -21,6 +21,14 @@ typedef enum {
   ECU_CORE_RUNTIME_CYLINDER_SEQUENTIALED_MAX,
 }ecu_core_runtime_cylinder_sequentialed_type_t;
 
+typedef enum {
+  ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED = 0,
+  ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_DIAG,
+  ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_CANBUS,
+  ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL,
+  ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX,
+}ecu_core_runtime_parameters_virtual_source_t;
+
 typedef struct {
     bool valid;
     float ignition_advance;
@@ -182,7 +190,7 @@ typedef struct {
     ecu_core_runtime_global_rough_ctx_t rough;
 
     ecu_core_runtime_global_parameters_ctx_t parameters;
-    ecu_core_runtime_global_parameters_ctx_t parameters_simulated;
+    ecu_core_runtime_global_parameters_ctx_t parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX];
 
     ecu_core_runtime_global_misc_ctx_t misc;
 

@@ -8,6 +8,8 @@
 #include "calcdata_sensors.h"
 #include "config_global.h"
 
+#define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
+
 static void calcdata_sensor_read_aps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_value_ctx_t *result);
 static void calcdata_sensor_read_ckp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_value_ctx_t *result);
 static void calcdata_sensor_read_cmp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_value_ctx_t *result);
@@ -92,7 +94,6 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
   ecu_sensor_instance_t instance_max;
   ecu_core_runtime_value_ctx_t result;
   ecu_core_runtime_value_ctx_t *sensor_value_ctx;
-  ecu_core_runtime_value_ctx_t *sensor_value_simulated_ctx;
 
   for(uint32_t type = 0; type < ECU_SENSOR_TYPE_MAX; type++) {
     sensor_ctx = &ecu_core_calcdata_sensors_ctx.sensors[type];
@@ -102,16 +103,8 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
       for(ecu_sensor_instance_t instance = 0; instance < instance_max; instance++) {
         memset(&result, 0, sizeof(result));
         sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, &result);
-        sensor_value_ctx = &ctx->runtime.global.parameters.sensors[type][instance];
-        sensor_value_simulated_ctx = &ctx->runtime.global.parameters_simulated.sensors[type][instance];
-
-        if(sensor_value_simulated_ctx->valid) {
-          *sensor_value_ctx = *sensor_value_simulated_ctx;
-        } else {
-          *sensor_value_ctx = result;
-          sensor_value_simulated_ctx->value = result.value;
-
-        }
+        sensor_value_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[type][instance];
+        *sensor_value_ctx = result;
       }
     } else {
       memset(&ctx->runtime.global.parameters.sensors[type], 0, sizeof(ctx->runtime.global.parameters.sensors[type]));
