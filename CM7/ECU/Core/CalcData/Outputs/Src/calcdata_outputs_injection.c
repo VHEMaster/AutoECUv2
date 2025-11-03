@@ -55,7 +55,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   float cold_inj_coff;
   uint32_t revs_delta;
 
-  output_ptr = &ctx->runtime.global.parameters.timings.injection;
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings.injection;
 
   if(!turning_flag) {
     revs_delta = 0;

@@ -53,7 +53,7 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   math_pid_koffs_t pid_rpm_k;
   math_pid_ctx_t *pid_rpm;
 
-  output_ptr = &ctx->runtime.global.parameters.timings.ignition;
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings.ignition;
   setup_idle = &ctx->calibration->calcdata.setup.idle;
 
   for(ecu_bank_t bank = 0; bank < banks_count; bank++) {

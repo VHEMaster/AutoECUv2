@@ -13,6 +13,7 @@
 #include "calcdata_modules.h"
 #include "calcdata_timings.h"
 #include "calcdata_banked.h"
+#include "calcdata_virtual.h"
 
 #include "calcdata_inputs.h"
 #include "calcdata_outputs.h"
@@ -79,10 +80,14 @@ STATIC_INLINE void calcdata_process(ecu_core_ctx_t *ctx)
 STATIC_INLINE void calcdata_inputs_read(ecu_core_ctx_t *ctx)
 {
   calcdata_inputs_read_internal(ctx);
+
+  calcdata_virtual_read(ctx);
 }
 
 STATIC_INLINE void calcdata_inputs_write(ecu_core_ctx_t *ctx)
 {
+  calcdata_virtual_write(ctx);
+
   calcdata_inputs_write_internal(ctx);
 }
 
