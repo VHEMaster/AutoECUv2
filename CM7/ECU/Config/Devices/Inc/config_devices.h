@@ -90,6 +90,7 @@ void ecu_devices_loop_fast(void);
 
 error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t instance, void **ctx);
 error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool initialized);
+error_t ecu_devices_get_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool *initialized);
 
 error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t **ctx);
 error_t ecu_devices_get_tcs_ctx(ecu_device_tcs_t instance, max31855_ctx_t **ctx);

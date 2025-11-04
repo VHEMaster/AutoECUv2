@@ -125,6 +125,7 @@ void ecu_sensors_loop_fast(void);
 
 error_t ecu_sensors_get_sensor_ctx(ecu_sensor_type_t type, ecu_sensor_instance_t instance, void **ctx);
 error_t ecu_sensors_set_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool initialized);
+error_t ecu_sensors_get_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool *initialized);
 
 error_t ecu_sensors_get_ckp_ctx(ecu_sensor_ckp_t instance, ckp_ctx_t **ctx);
 error_t ecu_sensors_get_cmp_ctx(ecu_sensor_cmp_t instance, cmp_ctx_t **ctx);

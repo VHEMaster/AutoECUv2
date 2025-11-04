@@ -26,18 +26,19 @@ typedef enum {
 }ecu_config_device_loop_type_t;
 
 typedef struct {
-    ecu_device_loop_func_t loop_main;
-    ecu_device_loop_func_t loop_slow;
-    ecu_device_loop_func_t loop_fast;
-    ecu_device_instance_t instance_max;
-}ecu_config_device_if_instance_t;
-
-typedef struct {
     ecu_device_type_t type;
     ecu_device_instance_t instance;
     void *ctx;
     bool initialized;
 }ecu_config_device_instance_t;
+
+typedef struct {
+    ecu_device_loop_func_t loop_main;
+    ecu_device_loop_func_t loop_slow;
+    ecu_device_loop_func_t loop_fast;
+    ecu_device_instance_t instance_max;
+    ecu_config_device_instance_t *instance_first;
+}ecu_config_device_if_instance_t;
 
 typedef struct {
     ecu_config_device_if_instance_t interfaces[ECU_DEVICE_TYPE_MAX];
@@ -195,6 +196,22 @@ error_t ecu_devices_init(void)
     BREAK_IF_ACTION(device->instance >= interface->instance_max, err = E_FAULT);
   }
 
+  for(int i = 0; i < ITEMSOF(ecu_config_devices.interfaces); i++) {
+    interface = &ecu_config_devices.interfaces[i];
+
+    BREAK_IF_ACTION(interface->instance_max >= ECU_DEVICE_INSTANCE_MAX, err = E_FAULT);
+    interface->instance_first = NULL;
+    for(int n = 0; n < ITEMSOF(ecu_config_devices.devices); n++) {
+      device = &ecu_config_devices.devices[n];
+      if(device->type == i) {
+        BREAK_IF_ACTION(device->instance != 0, err = E_FAULT);
+        interface->instance_first = device;
+        break;
+      }
+    }
+    BREAK_IF(err != E_OK);
+  }
+
   return err;
 }
 
@@ -291,16 +308,47 @@ error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t
 error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool initialized)
 {
   error_t err = E_FAULT;
-  ecu_config_device_instance_t *device;
+  ecu_config_device_instance_t *ctx;
+  ecu_config_device_if_instance_t *interface;
 
-  for(int i = 0; i < ITEMSOF(ecu_config_devices.devices); i++) {
-    device = &ecu_config_devices.devices[i];
-    if(device->type == type && device->instance == instance) {
-      device->initialized = initialized;
-      err = E_OK;
-      break;
+  do {
+    BREAK_IF(type >= ECU_DEVICE_TYPE_MAX);
+    interface = &ecu_config_devices.interfaces[type];
+    BREAK_IF(instance >= interface->instance_max);
+
+    ctx = ecu_config_devices.interfaces[type].instance_first;
+    if(ctx != NULL) {
+      ctx = &ctx[instance];
+      if(ctx->type == type && ctx->instance == instance) {
+        ctx->initialized = initialized;
+        err = E_OK;
+      }
     }
-  }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_get_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool *initialized)
+{
+  error_t err = E_FAULT;
+  const ecu_config_device_instance_t *ctx;
+  const ecu_config_device_if_instance_t *interface;
+
+  do {
+    BREAK_IF(type >= ECU_DEVICE_TYPE_MAX);
+    interface = &ecu_config_devices.interfaces[type];
+    BREAK_IF(instance >= interface->instance_max);
+
+    ctx = interface->instance_first;
+    if(ctx != NULL) {
+      ctx = &ctx[instance];
+      if(ctx->type == type && ctx->instance == instance) {
+        *initialized = ctx->initialized;
+        err = E_OK;
+      }
+    }
+  } while(0);
 
   return err;
 }
