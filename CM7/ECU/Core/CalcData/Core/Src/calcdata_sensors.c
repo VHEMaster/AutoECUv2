@@ -90,9 +90,10 @@ static const ecu_core_calcdata_sensors_ctx_t ecu_core_calcdata_sensors_ctx = {
 
 void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
 {
+  error_t err;
+  bool enabled;
   const ecu_core_calcdata_sensor_ctx_t *sensor_ctx;
   ecu_sensor_instance_t instance_max;
-  ecu_core_runtime_value_ctx_t result;
   ecu_core_runtime_value_ctx_t *sensor_value_ctx;
 
   for(uint32_t type = 0; type < ECU_SENSOR_TYPE_MAX; type++) {
@@ -101,10 +102,13 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
 
     if(sensor_ctx->func_read != NULL) {
       for(ecu_sensor_instance_t instance = 0; instance < instance_max; instance++) {
-        memset(&result, 0, sizeof(result));
-        sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, &result);
         sensor_value_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[type][instance];
-        *sensor_value_ctx = result;
+        err = ecu_sensors_get_sensor_enabled(type, instance, &enabled);
+        if(err == E_OK && enabled) {
+          sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, sensor_value_ctx);
+        } else {
+          sensor_value_ctx->valid = false;
+        }
       }
     } else {
       memset(&ctx->runtime.global.parameters.sensors[type], 0, sizeof(ctx->runtime.global.parameters.sensors[type]));

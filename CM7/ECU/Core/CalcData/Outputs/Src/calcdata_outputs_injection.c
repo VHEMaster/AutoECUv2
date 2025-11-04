@@ -149,5 +149,5 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 
   ctx->runtime.global.misc.injection_startup_revs_counter = startup_revs_counter;
 
-  output_ptr->write_valid = true;
+  output_ptr->flags.write_valid = true;
 }

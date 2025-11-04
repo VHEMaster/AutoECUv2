@@ -164,5 +164,5 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
     }
   }
 
-  output_ptr->write_valid = true;
+  output_ptr->flags.write_valid = true;
 }

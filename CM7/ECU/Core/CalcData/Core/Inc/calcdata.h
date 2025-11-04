@@ -42,6 +42,7 @@ typedef struct {
     ecu_module_instance_t max;
     ecu_core_calcdata_module_proc_func_t func_read;
     ecu_core_calcdata_module_proc_func_t func_write;
+    ecu_core_calcdata_module_proc_func_t func_invalidate;
     void *userdata;
 }ecu_core_calcdata_module_ctx_t;
 
@@ -49,12 +50,14 @@ typedef struct {
     ecu_device_instance_t max;
     ecu_core_calcdata_device_proc_func_t func_read;
     ecu_core_calcdata_device_proc_func_t func_write;
+    ecu_core_calcdata_device_proc_func_t func_invalidate;
     void *userdata;
 }ecu_core_calcdata_device_ctx_t;
 
 typedef struct {
     ecu_core_calcdata_timing_proc_func_t func_read;
     ecu_core_calcdata_timing_proc_func_t func_write;
+    ecu_core_calcdata_timing_proc_func_t func_invalidate;
     void *userdata;
 }ecu_core_calcdata_timing_ctx_t;
 

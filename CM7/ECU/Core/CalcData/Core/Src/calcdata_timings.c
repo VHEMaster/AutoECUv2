@@ -70,7 +70,7 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
     }
     timing_ctx->read.groups[i].saturation_time = dst_ctx->groups[i].saturation_time;
   }
-  timing_ctx->read_valid = true;
+  timing_ctx->flags.read_valid = true;
 }
 
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
@@ -90,7 +90,7 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
     timing_ctx->read.groups[i].injector_output_pressure_mean = dst_ctx->groups[i].injector_output_pressure_mean;
     timing_ctx->read.groups[i].injector_pressure_diff_mean = dst_ctx->groups[i].injector_pressure_diff_mean;
   }
-  timing_ctx->read_valid = true;
+  timing_ctx->flags.read_valid = true;
 }
 
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
@@ -98,14 +98,14 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
   ecu_core_runtime_global_parameters_timing_ignition_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.ignition;
   ecu_core_runtime_global_ignition_input_ctx_t *dst_ctx;
 
-  if(timing_ctx->write_valid) {
+  if(timing_ctx->flags.write_valid) {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       dst_ctx = &ctx->runtime.global.ignition.input_banked[b];
       dst_ctx->allowed = timing_ctx->write[b].allowed;
       dst_ctx->ignition_advance = timing_ctx->write[b].ignition_advance;
     }
     ctx->runtime.global.ignition.input_valid = true;
-    timing_ctx->write_valid = false;
+    timing_ctx->flags.write_valid = false;
   }
 }
 
@@ -114,7 +114,7 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
   ecu_core_runtime_global_parameters_timing_injection_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings.injection;
   ecu_core_runtime_global_injection_input_ctx_t *dst_ctx;
 
-  if(timing_ctx->write_valid) {
+  if(timing_ctx->flags.write_valid) {
     for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
       dst_ctx = &ctx->runtime.global.injection.input_banked[b];
       dst_ctx->allowed = timing_ctx->write[b].allowed;
@@ -122,6 +122,6 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
       dst_ctx->injection_phase = timing_ctx->write[b].injection_phase;
     }
     ctx->runtime.global.injection.input_valid = true;
-    timing_ctx->write_valid = false;
+    timing_ctx->flags.write_valid = false;
   }
 }

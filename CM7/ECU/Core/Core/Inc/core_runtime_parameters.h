@@ -12,6 +12,12 @@
 #include "config_engine.h"
 
 typedef struct {
+    bool read_valid;
+    bool write_valid;
+}ecu_core_runtime_global_parameters_flags_t;
+
+typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         cj125_operating_status_t status;
         float lambda_value;
@@ -19,11 +25,10 @@ typedef struct {
     struct {
         cj125_heatup_type_t heatup;
     }write;
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_device_wbls_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool failure;
         int32_t pos_current;
@@ -41,8 +46,6 @@ typedef struct {
         int32_t pos_reset;
 
     }write;
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_device_stepper_ctx_t;
 
 typedef struct {
@@ -51,16 +54,17 @@ typedef struct {
 }ecu_core_runtime_global_parameters_devices_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         timing_crankshaft_mode_t mode;
         float period;
         float rpm;
         uint32_t revs_count;
     }read;
-    bool read_valid;
 }ecu_core_runtime_global_parameters_module_timing_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool set_enabled;
         bool set_target;
@@ -73,11 +77,10 @@ typedef struct {
         float pos_current;
         float pos_target;
     }read;
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_etc_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool set_enabled;
         bool set_target_pos;
@@ -94,11 +97,10 @@ typedef struct {
         float dc_current;
         float dc_target;
     }read;
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_vvt_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool set_activate_trigger;
         bool activate_trigger;
@@ -106,10 +108,10 @@ typedef struct {
         bool set_emergency_trigger;
         bool emergency_trigger;
     }write;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_coolingfan_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool operating;
     }read;
@@ -119,20 +121,19 @@ typedef struct {
 
         bool operating;
     }write;
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_ignpower_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool set_manual_engaged;
 
         bool manual_enabled;
     }write;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_indication_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         bool set_enabled;
         bool set_boost_target;
@@ -142,7 +143,6 @@ typedef struct {
         float boost_target;
         float dc_target;
     }write;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_module_wgcv_ctx_t;
 
 typedef struct {
@@ -156,6 +156,7 @@ typedef struct {
 }ecu_core_runtime_global_parameters_modules_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         struct {
             float saturation_time;
@@ -166,11 +167,10 @@ typedef struct {
         bool allowed;
         float ignition_advance;
     }write[ECU_BANK_MAX];
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_timing_ignition_ctx_t;
 
 typedef struct {
+    ecu_core_runtime_global_parameters_flags_t flags;
     struct {
         struct {
             float phase_mean;
@@ -190,8 +190,6 @@ typedef struct {
         float injection_phase;
         float injection_mass;
     }write[ECU_BANK_MAX];
-    bool read_valid;
-    bool write_valid;
 }ecu_core_runtime_global_parameters_timing_injection_ctx_t;
 
 typedef struct {

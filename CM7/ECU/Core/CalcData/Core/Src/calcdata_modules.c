@@ -22,54 +22,70 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
 static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 
+static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+static void calcdata_module_invalidate_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
+
 static const ecu_core_calcdata_modules_ctx_t ecu_core_calcdata_modules_ctx = {
     .modules = {
         {
             .max = ECU_MODULE_TIMING_MAX,
             .func_read = calcdata_module_read_timing,
             .func_write = NULL,
+            .func_invalidate = calcdata_module_invalidate_timing,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_TIMING
         {
             .max = ECU_MODULE_ETC_MAX,
             .func_read = calcdata_module_read_etc,
             .func_write = calcdata_module_write_etc,
+            .func_invalidate = calcdata_module_invalidate_etc,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_ETC
         {
             .max = ECU_MODULE_VVT_MAX,
             .func_read = calcdata_module_read_vvt,
             .func_write = calcdata_module_write_vvt,
+            .func_invalidate = calcdata_module_invalidate_vvt,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_VVT
         {
             .max = ECU_MODULE_FUELPUMP_MAX,
             .func_read = NULL,
             .func_write = NULL,
+            .func_invalidate = NULL,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_FUELPUMP
         {
             .max = ECU_MODULE_COOLINGFAN_MAX,
             .func_read = NULL,
             .func_write = calcdata_module_write_coolingfan,
+            .func_invalidate = calcdata_module_invalidate_coolingfan,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_COOLINGFAN
         {
             .max = ECU_MODULE_IGNPOWER_MAX,
             .func_read = calcdata_module_read_ignpower,
             .func_write = calcdata_module_write_ignpower,
+            .func_invalidate = calcdata_module_invalidate_ignpower,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_IGNPOWER
         {
             .max = ECU_MODULE_INDICATION_MAX,
             .func_read = NULL,
             .func_write = calcdata_module_write_indication,
+            .func_invalidate = calcdata_module_invalidate_indication,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_INDICATION
         {
             .max = ECU_MODULE_WGCV_MAX,
             .func_read = NULL,
             .func_write = calcdata_module_write_wgcv,
+            .func_invalidate = calcdata_module_invalidate_wgcv,
             .userdata = NULL,
         }, //ECU_MODULE_TYPE_WGCV
     },
@@ -77,6 +93,8 @@ static const ecu_core_calcdata_modules_ctx_t ecu_core_calcdata_modules_ctx = {
 
 void core_calcdata_modules_read(ecu_core_ctx_t *ctx)
 {
+  error_t err;
+  bool enabled;
   const ecu_core_calcdata_module_ctx_t *module_ctx;
   ecu_module_instance_t instance_max;
 
@@ -86,7 +104,12 @@ void core_calcdata_modules_read(ecu_core_ctx_t *ctx)
 
     if(module_ctx->func_read != NULL) {
       for(ecu_module_instance_t instance = 0; instance < instance_max; instance++) {
-        module_ctx->func_read(ctx, instance, module_ctx->userdata);
+        err = ecu_modules_get_module_enabled(type, instance, &enabled);
+        if(err == E_OK && enabled) {
+          module_ctx->func_read(ctx, instance, module_ctx->userdata);
+        } else if(module_ctx->func_invalidate != NULL) {
+          module_ctx->func_invalidate(ctx, instance, module_ctx->userdata);
+        }
       }
     }
   }
@@ -94,6 +117,8 @@ void core_calcdata_modules_read(ecu_core_ctx_t *ctx)
 
 void core_calcdata_modules_write(ecu_core_ctx_t *ctx)
 {
+  error_t err;
+  bool enabled;
   const ecu_core_calcdata_module_ctx_t *module_ctx;
   ecu_module_instance_t instance_max;
 
@@ -103,7 +128,12 @@ void core_calcdata_modules_write(ecu_core_ctx_t *ctx)
 
     if(module_ctx->func_write != NULL) {
       for(ecu_module_instance_t instance = 0; instance < instance_max; instance++) {
-        module_ctx->func_write(ctx, instance, module_ctx->userdata);
+        err = ecu_modules_get_module_enabled(type, instance, &enabled);
+        if(err == E_OK && enabled) {
+          module_ctx->func_write(ctx, instance, module_ctx->userdata);
+        } else if(module_ctx->func_invalidate != NULL) {
+          module_ctx->func_invalidate(ctx, instance, module_ctx->userdata);
+        }
       }
     }
   }
@@ -121,9 +151,9 @@ static void calcdata_module_read_timing(ecu_core_ctx_t *ctx, ecu_module_instance
     module_ctx->read.period = data.crankshaft.sensor_data.period;
     module_ctx->read.rpm = data.crankshaft.sensor_data.rpm;
     module_ctx->read.revs_count = data.crankshaft.sensor_data.revs_count;
-    module_ctx->read_valid = true;
+    module_ctx->flags.read_valid = true;
   } else {
-    module_ctx->read_valid = false;
+    module_ctx->flags.read_valid = false;
   }
 }
 
@@ -138,9 +168,9 @@ static void calcdata_module_read_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t 
     module_ctx->read.enabled = data.enabled;
     module_ctx->read.pos_current = data.current_position;
     module_ctx->read.pos_target = data.target_position;
-    module_ctx->read_valid = true;
+    module_ctx->flags.read_valid = true;
   } else {
-    module_ctx->read_valid = false;
+    module_ctx->flags.read_valid = false;
   }
 }
 
@@ -157,9 +187,9 @@ static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t 
     module_ctx->read.pos_target = data.pos_target;
     module_ctx->read.dc_current = data.dutycycle_current;
     module_ctx->read.dc_target = data.dutycycle_target;
-    module_ctx->read_valid = true;
+    module_ctx->flags.read_valid = true;
   } else {
-    module_ctx->read_valid = false;
+    module_ctx->flags.read_valid = false;
   }
 }
 
@@ -172,9 +202,9 @@ static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instan
   err = ecu_modules_ignpower_get_data(instance, &data);
   if(err == E_OK) {
     module_ctx->read.operating = data.components_operating || data.crankshaft_operating;
-    module_ctx->read_valid = true;
+    module_ctx->flags.read_valid = true;
   } else {
-    module_ctx->read_valid = false;
+    module_ctx->flags.read_valid = false;
   }
 }
 
@@ -182,14 +212,14 @@ static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t
 {
   ecu_core_runtime_global_parameters_module_etc_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.etc[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_enabled) {
       (void)ecu_modules_etc_set_enabled(instance, module_ctx->write.enabled);
     }
     if(module_ctx->write.set_target) {
       (void)ecu_modules_etc_set_target_position(instance, module_ctx->write.target);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
 }
 
@@ -197,7 +227,7 @@ static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t
 {
   ecu_core_runtime_global_parameters_module_vvt_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.vvt[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_enabled) {
       (void)ecu_modules_vvt_set_enabled(instance, module_ctx->write.enabled);
     }
@@ -207,7 +237,7 @@ static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t
     if(module_ctx->write.set_target_dc) {
       (void)ecu_modules_vvt_set_target_dutycycle(instance, module_ctx->write.target_dc);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
 }
 
@@ -215,14 +245,14 @@ static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_ins
 {
   ecu_core_runtime_global_parameters_module_coolingfan_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.coolingfan[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_activate_trigger) {
       (void)ecu_modules_coolingfan_activate_trigger(instance, module_ctx->write.activate_trigger);
     }
     if(module_ctx->write.set_emergency_trigger) {
       (void)ecu_modules_coolingfan_emergency_trigger(instance, module_ctx->write.emergency_trigger);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
 }
 
@@ -230,13 +260,13 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
 {
   ecu_core_runtime_global_parameters_module_ignpower_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.ignpower[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_operating) {
       (void)ecu_modules_ignpower_set_operating(instance, module_ctx->write.operating);
     } else if(module_ctx->write.set_trigger) {
       (void)ecu_modules_ignpower_trigger_operating_signal(instance);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
 }
 
@@ -244,11 +274,11 @@ static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_ins
 {
   ecu_core_runtime_global_parameters_module_indication_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.indication[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_manual_engaged) {
       (void)ecu_modules_indication_manual_set(instance, module_ctx->write.manual_enabled);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
 }
 
@@ -256,7 +286,7 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
 {
   ecu_core_runtime_global_parameters_module_wgcv_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.wgcv[instance];
 
-  if(module_ctx->write_valid) {
+  if(module_ctx->flags.write_valid) {
     if(module_ctx->write.set_enabled) {
       (void)ecu_modules_wgcv_set_enabled(instance, module_ctx->write.enabled);
     }
@@ -266,6 +296,63 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
     if(module_ctx->write.set_dc_target) {
       (void)ecu_modules_wgcv_set_dutycycle(instance, module_ctx->write.dc_target);
     }
-    module_ctx->write_valid = false;
+    module_ctx->flags.write_valid = false;
   }
+}
+
+
+static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_timing_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.timing[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_etc_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.etc[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_vvt_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.vvt[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_coolingfan_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.coolingfan[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_ignpower_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.ignpower[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_indication_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.indication[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
+}
+
+static void calcdata_module_invalidate_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_module_wgcv_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules.wgcv[instance];
+
+  module_ctx->flags.read_valid = false;
+  module_ctx->flags.write_valid = false;
 }

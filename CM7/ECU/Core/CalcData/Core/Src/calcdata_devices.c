@@ -16,6 +16,9 @@ static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instanc
 static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 
+static void calcdata_device_invalidate_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
+static void calcdata_device_invalidate_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
+
 static const ecu_core_calcdata_devices_ctx_t ecu_core_calcdata_devices_ctx = {
     .devices = {
         {}, //ECU_DEVICE_TYPE_PULSEDADC
@@ -25,12 +28,14 @@ static const ecu_core_calcdata_devices_ctx_t ecu_core_calcdata_devices_ctx = {
             .max = ECU_DEVICE_WBLS_MAX,
             .func_read = calcdata_device_read_wbls,
             .func_write = calcdata_device_write_wbls,
+            .func_invalidate = calcdata_device_invalidate_wbls,
             .userdata = NULL,
         }, //ECU_DEVICE_TYPE_WBLS
         {
             .max = ECU_DEVICE_STEPPER_MAX,
             .func_read = calcdata_device_read_stepper,
             .func_write = calcdata_device_write_stepper,
+            .func_invalidate = calcdata_device_invalidate_stepper,
             .userdata = NULL,
         }, //ECU_DEVICE_TYPE_STEPPER
         {}, //ECU_DEVICE_TYPE_OUTPUT
@@ -41,6 +46,8 @@ static const ecu_core_calcdata_devices_ctx_t ecu_core_calcdata_devices_ctx = {
 
 void core_calcdata_devices_read(ecu_core_ctx_t *ctx)
 {
+  error_t err;
+  bool enabled;
   const ecu_core_calcdata_device_ctx_t *device_ctx;
   ecu_device_instance_t instance_max;
 
@@ -50,7 +57,12 @@ void core_calcdata_devices_read(ecu_core_ctx_t *ctx)
 
     if(device_ctx->func_read != NULL) {
       for(ecu_device_instance_t instance = 0; instance < instance_max; instance++) {
-        device_ctx->func_read(ctx, instance, device_ctx->userdata);
+        err = ecu_devices_get_device_enabled(type, instance, &enabled);
+        if(err == E_OK && enabled) {
+          device_ctx->func_read(ctx, instance, device_ctx->userdata);
+        } else if(device_ctx->func_invalidate != NULL) {
+          device_ctx->func_invalidate(ctx, instance, device_ctx->userdata);
+        }
       }
     }
   }
@@ -58,6 +70,8 @@ void core_calcdata_devices_read(ecu_core_ctx_t *ctx)
 
 void core_calcdata_devices_write(ecu_core_ctx_t *ctx)
 {
+  error_t err;
+  bool enabled;
   const ecu_core_calcdata_device_ctx_t *device_ctx;
   ecu_device_instance_t instance_max;
 
@@ -67,7 +81,12 @@ void core_calcdata_devices_write(ecu_core_ctx_t *ctx)
 
     if(device_ctx->func_write != NULL) {
       for(ecu_device_instance_t instance = 0; instance < instance_max; instance++) {
-        device_ctx->func_write(ctx, instance, device_ctx->userdata);
+        err = ecu_devices_get_device_enabled(type, instance, &enabled);
+        if(err == E_OK && enabled) {
+          device_ctx->func_write(ctx, instance, device_ctx->userdata);
+        } else if(device_ctx->func_invalidate != NULL) {
+          device_ctx->func_invalidate(ctx, instance, device_ctx->userdata);
+        }
       }
     }
   }
@@ -83,10 +102,10 @@ static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t
   if(err == E_OK) {
     device_ctx->read.lambda_value = data.lambda_value;
     device_ctx->read.status = data.operating_status;
-    device_ctx->read_valid = true;
+    device_ctx->flags.read_valid = true;
 
   } else {
-    device_ctx->read_valid = false;
+    device_ctx->flags.read_valid = false;
   }
 }
 
@@ -99,9 +118,9 @@ static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instanc
   err |= ecu_devices_stepper_get_target(instance, &device_ctx->read.pos_target);
   err |= ecu_devices_stepper_is_failure(instance, &device_ctx->read.failure);
   if(err == E_OK) {
-    device_ctx->read_valid = true;
+    device_ctx->flags.read_valid = true;
   } else {
-    device_ctx->read_valid = false;
+    device_ctx->flags.read_valid = false;
   }
 }
 
@@ -109,9 +128,9 @@ static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_
 {
   ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.wbls[instance];
 
-  if(device_ctx->write_valid) {
+  if(device_ctx->flags.write_valid) {
     (void)ecu_devices_wbls_set_heatup(instance, device_ctx->write.heatup);
-    device_ctx->write_valid = false;
+    device_ctx->flags.write_valid = false;
   }
 }
 
@@ -119,7 +138,7 @@ static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instan
 {
   ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.stepper[instance];
 
-  if(device_ctx->write_valid) {
+  if(device_ctx->flags.write_valid) {
     if(device_ctx->write.set_enabled) {
       (void)ecu_devices_stepper_enable(instance, device_ctx->write.enabled);
     }
@@ -133,6 +152,22 @@ static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instan
         (void)ecu_devices_stepper_set_current(instance, device_ctx->write.pos_current);
       }
     }
-    device_ctx->write_valid = false;
+    device_ctx->flags.write_valid = false;
   }
+}
+
+static void calcdata_device_invalidate_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_device_stepper_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.stepper[instance];
+
+  device_ctx->flags.read_valid = false;
+  device_ctx->flags.write_valid = false;
+}
+
+static void calcdata_device_invalidate_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
+{
+  ecu_core_runtime_global_parameters_device_wbls_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices.wbls[instance];
+
+  device_ctx->flags.read_valid = false;
+  device_ctx->flags.write_valid = false;
 }

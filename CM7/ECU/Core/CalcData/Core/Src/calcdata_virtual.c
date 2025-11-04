@@ -46,9 +46,9 @@
           value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase[i];  \
     for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
       value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase[i];  \
-      if(value_src->read_valid) {  \
+      if(value_src->flags.read_valid) {  \
         memcpy(&value_dest->read, &value_src->read, sizeof(value_dest->read));  \
-        value_dest->read_valid = true; \
+        value_dest->flags.read_valid = true; \
         valid = true; \
         if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
           memcpy(&value_sim->read, &value_src->read, sizeof(value_sim->read));  \
@@ -58,8 +58,8 @@
     } \
     \
     if(!valid) {  \
-      value_sim->read_valid = false; \
-      value_dest->read_valid = false; \
+      value_sim->flags.read_valid = false; \
+      value_dest->flags.read_valid = false; \
     } \
   } \
 }
@@ -74,9 +74,9 @@
   value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase;  \
   for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
     value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase;  \
-    if(value_src->read_valid) {  \
+    if(value_src->flags.read_valid) {  \
       memcpy(&value_dest->read, &value_src->read, sizeof(value_dest->read));  \
-      value_dest->read_valid = true; \
+      value_dest->flags.read_valid = true; \
       valid = true; \
       if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
         memcpy(&value_sim->read, &value_src->read, sizeof(value_sim->read));  \
@@ -86,8 +86,8 @@
   } \
   \
   if(!valid) {  \
-    value_sim->read_valid = false; \
-    value_dest->read_valid = false; \
+    value_sim->flags.read_valid = false; \
+    value_dest->flags.read_valid = false; \
   } \
 }
 
@@ -102,9 +102,9 @@
   value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase[i];  \
     for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
       value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase[i];  \
-      if(value_src->write_valid) {  \
+      if(value_src->flags.write_valid) {  \
         memcpy(&value_dest->write, &value_src->write, sizeof(value_dest->write));  \
-        value_dest->write_valid = true; \
+        value_dest->flags.write_valid = true; \
         valid = true; \
         if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
           memcpy(&value_sim->write, &value_src->write, sizeof(value_sim->write));  \
@@ -114,8 +114,8 @@
     } \
     \
     if(!valid) {  \
-    value_sim->write_valid = false; \
-      value_dest->write_valid = false; \
+    value_sim->flags.write_valid = false; \
+      value_dest->flags.write_valid = false; \
     } \
   } \
 }
@@ -130,9 +130,9 @@
   value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase;  \
   for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
     value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase;  \
-    if(value_src->write_valid) {  \
+    if(value_src->flags.write_valid) {  \
       memcpy(&value_dest->write, &value_src->write, sizeof(value_dest->write));  \
-      value_dest->write_valid = true; \
+      value_dest->flags.write_valid = true; \
       valid = true; \
       if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
         memcpy(&value_sim->write, &value_src->write, sizeof(value_sim->write));  \
@@ -142,8 +142,8 @@
   } \
   \
   if(!valid) {  \
-    value_sim->write_valid = false; \
-    value_dest->write_valid = false; \
+    value_sim->flags.write_valid = false; \
+    value_dest->flags.write_valid = false; \
   } \
 }
 
