@@ -30,6 +30,7 @@ typedef struct {
     ecu_module_instance_t instance;
     void *ctx;
     bool initialized;
+    bool enabled;
 }ecu_config_module_instance_t;
 
 typedef struct {
@@ -229,7 +230,7 @@ error_t ecu_modules_init(void)
   for(int i = 0; i < ITEMSOF(ecu_config_modules.interfaces); i++) {
     interface = &ecu_config_modules.interfaces[i];
 
-    BREAK_IF_ACTION(interface->instance_max >= ECU_MODULE_INSTANCE_MAX, err = E_FAULT);
+    BREAK_IF_ACTION(interface->instance_max > ECU_MODULE_INSTANCE_MAX, err = E_FAULT);
     interface->instance_first = NULL;
     for(int n = 0; n < ITEMSOF(ecu_config_modules.modules); n++) {
       module = &ecu_config_modules.modules[n];
@@ -375,6 +376,54 @@ error_t ecu_modules_get_module_initialized(ecu_module_type_t type, ecu_module_in
       ctx = &ctx[instance];
       if(ctx->type == type && ctx->instance == instance) {
         *initialized = ctx->initialized;
+        err = E_OK;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_set_module_enabled(ecu_module_type_t type, ecu_module_instance_t instance, bool enabled)
+{
+  error_t err = E_FAULT;
+  ecu_config_module_instance_t *ctx;
+  ecu_config_module_if_instance_t *interface;
+
+  do {
+    BREAK_IF(type >= ECU_MODULE_TYPE_MAX);
+    interface = &ecu_config_modules.interfaces[type];
+    BREAK_IF(instance >= interface->instance_max);
+
+    ctx = ecu_config_modules.interfaces[type].instance_first;
+    if(ctx != NULL) {
+      ctx = &ctx[instance];
+      if(ctx->type == type && ctx->instance == instance) {
+        ctx->enabled = enabled;
+        err = E_OK;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_get_module_enabled(ecu_module_type_t type, ecu_module_instance_t instance, bool *enabled)
+{
+  error_t err = E_FAULT;
+  const ecu_config_module_instance_t *ctx;
+  const ecu_config_module_if_instance_t *interface;
+
+  do {
+    BREAK_IF(type >= ECU_MODULE_TYPE_MAX);
+    interface = &ecu_config_modules.interfaces[type];
+    BREAK_IF(instance >= interface->instance_max);
+
+    ctx = interface->instance_first;
+    if(ctx != NULL) {
+      ctx = &ctx[instance];
+      if(ctx->type == type && ctx->instance == instance) {
+        *enabled = ctx->enabled;
         err = E_OK;
       }
     }

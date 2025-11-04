@@ -23,6 +23,12 @@ static const uds_config_t ecu_comm_uds_config_default = {
 
 };
 
+static const bool ecu_comm_uds_enabled_default[ECU_COMM_UDS_MAX] = {
+    true,
+    true,
+    true
+};
+
 static ecu_comm_uds_ctx_t ecu_comm_uds_ctx[ECU_COMM_UDS_MAX] = {
     {
       .init = {
@@ -57,10 +63,14 @@ error_t ecu_comm_uds_init(ecu_comm_uds_t instance, uds_ctx_t *ctx)
 
     uds_ctx = &ecu_comm_uds_ctx[instance];
     uds_ctx->ctx = ctx;
+    uds_ctx->config_default.enabled = ecu_comm_uds_enabled_default[instance];
 
     uds_ctx->init.callback_userdata = (void *)uds_ctx;
 
     err = uds_init(uds_ctx->ctx, &uds_ctx->init);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_UDS, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -96,6 +106,10 @@ error_t ecu_comm_uds_configure(ecu_comm_uds_t instance, const uds_config_t *conf
     uds_ctx = &ecu_comm_uds_ctx[instance];
 
     err = uds_configure(uds_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_UDS, instance, uds_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

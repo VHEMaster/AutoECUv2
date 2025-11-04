@@ -42,6 +42,7 @@ typedef struct {
 typedef struct {
     tle4729_init_ctx_t init;
     tle4729_config_t config;
+    bool configured;
     bool enabled;
     bool failure;
     bool moving;

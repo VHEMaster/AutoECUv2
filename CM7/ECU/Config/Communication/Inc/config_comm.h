@@ -28,6 +28,8 @@ void ecu_comm_loop_comm(void);
 error_t ecu_comm_get_comm_ctx(ecu_comm_type_t type, ecu_comm_instance_t instance, void **ctx);
 error_t ecu_comm_set_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t instance, bool initialized);
 error_t ecu_comm_get_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t instance, bool *initialized);
+error_t ecu_comm_set_comm_enabled(ecu_comm_type_t type, ecu_comm_instance_t instance, bool enabled);
+error_t ecu_comm_get_comm_enabled(ecu_comm_type_t type, ecu_comm_instance_t instance, bool *enabled);
 
 error_t ecu_comm_get_can_ctx(ecu_comm_can_t instance, can_ctx_t **ctx);
 error_t ecu_comm_get_kwp_ctx(ecu_comm_kwp_t instance, kwp_ctx_t **ctx);

@@ -98,6 +98,9 @@ error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication
 
     memcpy(&indication_ctx->ctx->config, &indication_ctx->config_default, sizeof(indication_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_INDICATION, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -137,6 +140,10 @@ error_t ecu_modules_indication_configure(ecu_module_indication_t instance, const
     BREAK_IF(err != E_OK);
 
     err = indication_configure(indication_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_INDICATION, instance, indication_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

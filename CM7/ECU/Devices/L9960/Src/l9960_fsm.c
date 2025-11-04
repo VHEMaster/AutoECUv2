@@ -566,9 +566,16 @@ ITCM_FUNC static error_t l9960_fsm_configure(l9960_ctx_t *ctx)
     switch(ctx->config_fsm_state) {
       case L9960_CONFIG_CONDITION:
         if(ctx->initialized == true && ctx->config_request == true && ctx->config_errcode == E_AGAIN) {
-          ctx->config_fsm_state = L9960_CONFIG_TRANSLATE;
-          err = E_AGAIN;
-          continue;
+          if(ctx->config.enabled) {
+            ctx->config_fsm_state = L9960_CONFIG_TRANSLATE;
+            err = E_AGAIN;
+            continue;
+          } else {
+            err = E_OK;
+            ctx->config_errcode = err;
+            ctx->config_fsm_state = L9960_CONFIG_CONDITION;
+            ctx->configured = false;
+          }
         } else {
           err = E_OK;
         }

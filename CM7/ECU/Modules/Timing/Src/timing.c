@@ -124,6 +124,7 @@ ITCM_FUNC void timing_ckp_signal_update(timing_ctx_t *ctx, const ckp_data_t *dat
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->configured == false);
+    BREAK_IF(ctx->config.enabled == false);
 
     crankshaft = &ctx->data.crankshaft;
     crankshaft_config = &ctx->config.crankshaft;
@@ -247,6 +248,7 @@ ITCM_FUNC void timing_cmp_signal_update(timing_ctx_t *ctx, ecu_sensor_cmp_t cmp_
     BREAK_IF(ctx == NULL);
     BREAK_IF(cmp_instance >= ECU_SENSOR_CMP_MAX);
     BREAK_IF(ctx->configured == false);
+    BREAK_IF(ctx->config.enabled == false);
     BREAK_IF(ctx->config.camshafts[cmp_instance].enabled == false);
 
     camshafts = &ctx->data.camshafts;

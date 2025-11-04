@@ -23,6 +23,12 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
 
 };
 
+static const bool ecu_comm_obd2_enabled_default[ECU_COMM_OBD2_MAX] = {
+    true,
+    true,
+    true
+};
+
 static ecu_comm_obd2_ctx_t ecu_comm_obd2_ctx[ECU_COMM_OBD2_MAX] = {
     {
       .init = {
@@ -57,10 +63,14 @@ error_t ecu_comm_obd2_init(ecu_comm_obd2_t instance, obd2_ctx_t *ctx)
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
     obd2_ctx->ctx = ctx;
+    obd2_ctx->config_default.enabled = ecu_comm_obd2_enabled_default[instance];
 
     obd2_ctx->init.callback_userdata = (void *)obd2_ctx;
 
     err = obd2_init(obd2_ctx->ctx, &obd2_ctx->init);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_OBD2, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -96,6 +106,10 @@ error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *c
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
     err = obd2_configure(obd2_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_OBD2, instance, obd2_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

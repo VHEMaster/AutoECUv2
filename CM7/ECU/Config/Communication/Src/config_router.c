@@ -56,6 +56,10 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
   }, //ECU_ROUTER_IF_1
 };
 
+static const bool ecu_comm_router_enabled_default[ECU_COMM_ROUTER_MAX] = {
+    true,
+};
+
 static ecu_comm_router_ctx_t ecu_comm_router_ctx[ECU_COMM_ROUTER_MAX] = {
     {
       .init = {
@@ -77,8 +81,12 @@ error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx)
 
     router_ctx = &ecu_comm_router_ctx[instance];
     router_ctx->ctx = ctx;
+    router_ctx->config_default.enabled = ecu_comm_router_enabled_default[instance];
 
     err = router_init(router_ctx->ctx, &router_ctx->init);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_ROUTER, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -114,6 +122,10 @@ error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_confi
     router_ctx = &ecu_comm_router_ctx[instance];
 
     err = router_configure(router_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_ROUTER, instance, router_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

@@ -84,6 +84,9 @@ error_t ecu_modules_etc_init(ecu_module_etc_t instance, etc_ctx_t *ctx)
 
     memcpy(&etc_ctx->ctx->config, &etc_ctx->config_default, sizeof(etc_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_ETC, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -117,6 +120,10 @@ error_t ecu_modules_etc_configure(ecu_module_etc_t instance, const etc_config_t 
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
     err = etc_configure(etc_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_ETC, instance, etc_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

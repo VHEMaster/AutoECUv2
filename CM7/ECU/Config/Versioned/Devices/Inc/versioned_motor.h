@@ -157,6 +157,8 @@ typedef enum {
 }l9960_config_olon_t;
 
 typedef struct {
+    bool enabled;
+
     l9960_config_cc_t comm_check;
     l9960_config_dce_t diag_clr_en;
     l9960_config_tlc_t tsw_low_current;

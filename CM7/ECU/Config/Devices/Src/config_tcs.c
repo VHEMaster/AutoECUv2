@@ -42,6 +42,9 @@ error_t ecu_devices_tcs_init(ecu_device_tcs_t instance, max31855_ctx_t *ctx)
     err = max31855_init(tcs_ctx->ctx, tcs_ctx->spi_slave);
     BREAK_IF(err != E_OK);
 
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_TCS, instance, true);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;

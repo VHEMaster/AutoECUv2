@@ -91,6 +91,9 @@ error_t ecu_sensors_tps_init(ecu_sensor_tps_t instance, tps_ctx_t *ctx)
 
     memcpy(&tps_ctx->ctx->config, &tps_ctx->config_default, sizeof(tps_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_TPS, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -124,6 +127,10 @@ error_t ecu_sensors_tps_configure(ecu_sensor_tps_t instance, const tps_config_t 
     tps_ctx = &ecu_sensors_tps_ctx[instance];
 
     err = tps_configure(tps_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_TPS, instance, tps_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

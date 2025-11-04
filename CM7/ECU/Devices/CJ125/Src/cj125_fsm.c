@@ -276,25 +276,32 @@ ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
         if(ctx->ready == true && ctx->initialized == true && ctx->config_errcode == E_AGAIN && ctx->config_request == true) {
           ctx->configured = false;
 
-          ctx->regs.init1.data = 0;
-          ctx->regs.init1.bits.vl = ctx->config.ampfactor;
-          ctx->regs.init1.bits.la = CJ125_LA_RA_NORMAL;
-          ctx->regs.init1.bits.en_f3k = 1;
-          ctx->regs.init1.bits.ra = CJ125_LA_RA_NORMAL;
-          ctx->regs.init1.bits.pa = 0;
-          ctx->regs.init1.bits.en_hold = 1;
+          if(ctx->config.enabled) {
+            ctx->regs.init1.data = 0;
+            ctx->regs.init1.bits.vl = ctx->config.ampfactor;
+            ctx->regs.init1.bits.la = CJ125_LA_RA_NORMAL;
+            ctx->regs.init1.bits.en_f3k = 1;
+            ctx->regs.init1.bits.ra = CJ125_LA_RA_NORMAL;
+            ctx->regs.init1.bits.pa = 0;
+            ctx->regs.init1.bits.en_hold = 1;
 
-          ctx->regs.init2.data = 0;
-          ctx->regs.init2.bits.pr = ctx->config.pump_ref_current;
-          ctx->regs.init2.bits.enscun = ctx->config.reg_enscun != false;
-          ctx->regs.init2.bits.set_dia_q = ctx->config.reg_set_dia_q != false;
-          ctx->regs.init2.bits.sreset = 0;
+            ctx->regs.init2.data = 0;
+            ctx->regs.init2.bits.pr = ctx->config.pump_ref_current;
+            ctx->regs.init2.bits.enscun = ctx->config.reg_enscun != false;
+            ctx->regs.init2.bits.set_dia_q = ctx->config.reg_set_dia_q != false;
+            ctx->regs.init2.bits.sreset = 0;
 
-          ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
-          ctx->request.bytes[1] = ctx->regs.init1.data;
-          ctx->config_fsm = CJ125_CONFIG_REQUEST_INIT1;
-          err = E_AGAIN;
-          continue;
+            ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
+            ctx->request.bytes[1] = ctx->regs.init1.data;
+            ctx->config_fsm = CJ125_CONFIG_REQUEST_INIT1;
+            err = E_AGAIN;
+            continue;
+          } else {
+            err = E_OK;
+            ctx->config_errcode = err;
+            ctx->configured = false;
+            ctx->config_fsm = CJ125_CONFIG_CONDITION;
+          }
         } else {
           err = E_OK;
         }

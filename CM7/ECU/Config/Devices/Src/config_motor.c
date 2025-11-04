@@ -52,6 +52,11 @@ static const l9960_config_t ecu_devices_motor_config_default = {
     .ol_on = L9960_CONFIG_OLON_ENABLED,
 };
 
+static const bool ecu_devices_motor_enabled_default[ECU_DEVICE_MOTOR_MAX] = {
+    true,
+    true
+};
+
 static ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_OUTSM1,
@@ -85,6 +90,7 @@ error_t ecu_devices_motor_init(ecu_device_motor_t instance, l9960_ctx_t *ctx)
 
     motor_ctx = &ecu_devices_motor_ctx[instance];
     motor_ctx->ctx = ctx;
+    motor_ctx->config_default.enabled = ecu_devices_motor_enabled_default[instance];
 
     err = middlelayer_spi_get_slave(&motor_ctx->init.spi_slave, motor_ctx->slave_index);
     BREAK_IF(err != E_OK);
@@ -97,6 +103,9 @@ error_t ecu_devices_motor_init(ecu_device_motor_t instance, l9960_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     memcpy(&motor_ctx->ctx->config, &motor_ctx->config_default, sizeof(l9960_config_t));
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_MOTOR, instance, false);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -156,39 +165,44 @@ error_t ecu_devices_motor_configure(ecu_device_motor_t instance, const l9960_con
 
     err = l9960_configure(motor_ctx->ctx, config);
     if(err == E_OK) {
-      status = HAL_TIM_RegisterCallback(motor_ctx->htim_pwm, HAL_TIM_PWM_PULSE_FINISHED_CB_ID, ecu_devices_motor_pulse_cplt);
-      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+      if(motor_ctx->ctx->config.enabled) {
+        status = HAL_TIM_RegisterCallback(motor_ctx->htim_pwm, HAL_TIM_PWM_PULSE_FINISHED_CB_ID, ecu_devices_motor_pulse_cplt);
+        BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-      motor_ctx->channel_ccr = NULL;
-      switch(motor_ctx->channel_pwm) {
-        case TIM_CHANNEL_1:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR1;
-          motor_ctx->htim_pwm->usrdata[0] = motor_ctx;
-          break;
-        case TIM_CHANNEL_2:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR2;
-          motor_ctx->htim_pwm->usrdata[1] = motor_ctx;
-          break;
-        case TIM_CHANNEL_3:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR3;
-          motor_ctx->htim_pwm->usrdata[2] = motor_ctx;
-          break;
-        case TIM_CHANNEL_4:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR4;
-          motor_ctx->htim_pwm->usrdata[3] = motor_ctx;
-          break;
-        case TIM_CHANNEL_5:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR5;
-          motor_ctx->htim_pwm->usrdata[4] = motor_ctx;
-          break;
-        case TIM_CHANNEL_6:
-          motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR6;
-          motor_ctx->htim_pwm->usrdata[5] = motor_ctx;
-          break;
-        default:
-          err = E_PARAM;
-          break;
+        motor_ctx->channel_ccr = NULL;
+        switch(motor_ctx->channel_pwm) {
+          case TIM_CHANNEL_1:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR1;
+            motor_ctx->htim_pwm->usrdata[0] = motor_ctx;
+            break;
+          case TIM_CHANNEL_2:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR2;
+            motor_ctx->htim_pwm->usrdata[1] = motor_ctx;
+            break;
+          case TIM_CHANNEL_3:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR3;
+            motor_ctx->htim_pwm->usrdata[2] = motor_ctx;
+            break;
+          case TIM_CHANNEL_4:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR4;
+            motor_ctx->htim_pwm->usrdata[3] = motor_ctx;
+            break;
+          case TIM_CHANNEL_5:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR5;
+            motor_ctx->htim_pwm->usrdata[4] = motor_ctx;
+            break;
+          case TIM_CHANNEL_6:
+            motor_ctx->channel_ccr = &motor_ctx->htim_pwm->Instance->CCR6;
+            motor_ctx->htim_pwm->usrdata[5] = motor_ctx;
+            break;
+          default:
+            err = E_PARAM;
+            break;
+        }
+        BREAK_IF(err != E_OK);
       }
+
+      err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_MOTOR, instance, motor_ctx->ctx->config.enabled);
       BREAK_IF(err != E_OK);
     }
 

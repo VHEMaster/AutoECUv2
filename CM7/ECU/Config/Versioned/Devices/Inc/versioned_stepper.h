@@ -25,6 +25,8 @@ typedef struct {
 }tle4729_config_relation_t;
 
 typedef struct {
+    bool enabled;
+
     tle4729_config_relation_t voltage_to_step_time_mult;
     tle4729_config_relation_t speed_to_step_time_ms;
     uint8_t acceleration_steps;

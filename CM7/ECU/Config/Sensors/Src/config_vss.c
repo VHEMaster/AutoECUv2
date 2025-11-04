@@ -58,6 +58,9 @@ error_t ecu_sensors_vss_init(ecu_sensor_vss_t instance, vss_ctx_t *ctx)
 
     memcpy(&vss_ctx->ctx->config, &vss_ctx->config_default, sizeof(vss_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_VSS, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -91,6 +94,10 @@ error_t ecu_sensors_vss_configure(ecu_sensor_vss_t instance, const vss_config_t 
     vss_ctx = &ecu_sensors_vss_ctx[instance];
 
     err = vss_configure(vss_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_VSS, instance, vss_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

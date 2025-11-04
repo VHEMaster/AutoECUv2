@@ -108,6 +108,9 @@ error_t ecu_sensors_maf_init(ecu_sensor_maf_t instance, maf_ctx_t *ctx)
 
     memcpy(&maf_ctx->ctx->config, &maf_ctx->config_default, sizeof(maf_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_MAF, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -141,6 +144,10 @@ error_t ecu_sensors_maf_configure(ecu_sensor_maf_t instance, const maf_config_t 
     maf_ctx = &ecu_sensors_maf_ctx[instance];
 
     err = maf_configure(maf_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_MAF, instance, maf_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

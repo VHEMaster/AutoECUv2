@@ -94,6 +94,9 @@ error_t ecu_modules_coolingfan_init(ecu_module_coolingfan_t instance, coolingfan
 
     memcpy(&coolingfan_ctx->ctx->config, &coolingfan_ctx->config_default, sizeof(coolingfan_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_COOLINGFAN, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -133,6 +136,10 @@ error_t ecu_modules_coolingfan_configure(ecu_module_coolingfan_t instance, const
     BREAK_IF(err != E_OK);
 
     err = coolingfan_configure(coolingfan_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_COOLINGFAN, instance, coolingfan_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

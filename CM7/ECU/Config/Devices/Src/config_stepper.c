@@ -56,6 +56,10 @@ static ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_STEPPER_MAX]
     },
 };
 
+static const bool ecu_devices_stepper_enabled_default[ECU_DEVICE_STEPPER_MAX] = {
+    true,
+};
+
 static void ecu_devices_stepper_update_voltages_cb(ecu_devices_stepper_ctx_t *stepper_ctx)
 {
   error_t err = E_OK;
@@ -88,6 +92,7 @@ error_t ecu_devices_stepper_init(ecu_device_stepper_t instance, tle4729_ctx_t *c
 
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
     stepper_ctx->ctx = ctx;
+    stepper_ctx->config_default.enabled = ecu_devices_stepper_enabled_default[instance];
 
     err = tle4729_init(stepper_ctx->ctx, &stepper_ctx->init);
     BREAK_IF(err != E_OK);
@@ -101,6 +106,9 @@ error_t ecu_devices_stepper_init(ecu_device_stepper_t instance, tle4729_ctx_t *c
     BREAK_IF(err != E_OK);
 
     err = ecu_loop_register_slow((ecu_loop_cb_t)ecu_devices_stepper_update_voltages_cb, stepper_ctx, ECU_STEPPER_VOLTAGE_UPDATE_PERIOD);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_STEPPER, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -136,6 +144,10 @@ error_t ecu_devices_stepper_configure(ecu_device_stepper_t instance, const tle47
     stepper_ctx = &ecu_devices_stepper_ctx[instance];
 
     err = tle4729_configure(stepper_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_STEPPER, instance, stepper_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

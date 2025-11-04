@@ -16,6 +16,7 @@ typedef enum {
 }uds_config_versions_t;
 
 typedef struct {
+    bool enabled;
 
     uint32_t align ALIGNED_CACHE;
 }uds_config_v1_t ALIGNED_CACHE;

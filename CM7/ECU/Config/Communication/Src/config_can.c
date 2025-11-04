@@ -57,6 +57,10 @@ static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
   }, //ECU_CAN_IF_1
 };
 
+static const bool ecu_comm_can_enabled_default[ECU_COMM_CAN_MAX] = {
+    true,
+};
+
 static ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
     {
       .init = {
@@ -136,6 +140,7 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
 
     can_ctx = &ecu_comm_can_ctx[instance];
     can_ctx->ctx = ctx;
+    can_ctx->config_default.enabled = ecu_comm_can_enabled_default[instance];
 
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
     switch(instance) {
@@ -149,6 +154,9 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
 #endif /* USE_HAL_CAN_REGISTER_CALLBACKS */
 
     err = can_init(can_ctx->ctx, &can_ctx->init);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_CAN, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -189,6 +197,10 @@ error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *conf
     can_ctx->err_callbacks_count = 0;
 
     err = can_configure(can_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_CAN, instance, can_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

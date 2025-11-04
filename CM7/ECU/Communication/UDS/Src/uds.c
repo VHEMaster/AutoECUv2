@@ -52,7 +52,7 @@ error_t uds_configure(uds_ctx_t *ctx, const uds_config_t *config)
 
     memcpy(&ctx->config, config, sizeof(uds_config_t));
 
-    ctx->configured = true;
+    ctx->configured = ctx->config.enabled;
 
   } while(0);
 

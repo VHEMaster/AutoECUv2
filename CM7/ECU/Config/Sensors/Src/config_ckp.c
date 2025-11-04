@@ -77,6 +77,9 @@ error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx)
 
     memcpy(&ckp_ctx->ctx->config, &ckp_ctx->config_default, sizeof(ckp_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_CKP, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -110,6 +113,10 @@ error_t ecu_sensors_ckp_configure(ecu_sensor_ckp_t instance, const ckp_config_t 
     ckp_ctx = &ecu_sensors_ckp_ctx[instance];
 
     err = ckp_configure(ckp_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_CKP, instance, ckp_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

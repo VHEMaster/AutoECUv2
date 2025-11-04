@@ -70,27 +70,6 @@ static const bool obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
 };
 
-static const bool obd2_pid_type_item_israw[OBD2_PID_TYPE_MAX] = {
-    false, // OBD2_PID_TYPE_UNDEFINED
-    true, // OBD2_PID_TYPE_RAW_SINGLE_BYTE
-    true, // OBD2_PID_TYPE_RAW_SINGLE_WORD
-    true, // OBD2_PID_TYPE_RAW_SINGLE_DWORD
-    true, // OBD2_PID_TYPE_RAW_DUAL_BYTES
-    true, // OBD2_PID_TYPE_RAW_DUAL_WORD
-    true, // OBD2_PID_TYPE_RAW_QUAD_BYTES
-    false, // OBD2_PID_TYPE_SINGLE_BYTE
-    false, // OBD2_PID_TYPE_SINGLE_WORD
-    false, // OBD2_PID_TYPE_SINGLE_DWORD
-    false, // OBD2_PID_TYPE_DUAL_BYTES
-    false, // OBD2_PID_TYPE_DUAL_WORDS
-    false, // OBD2_PID_TYPE_QUAD_BYTES
-    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_BYTES
-    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_BYTES
-    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES
-    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS
-    false, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
-};
-
 static const bool obd2_pid_type_item_has_prefix[OBD2_PID_TYPE_MAX] = {
     false, // OBD2_PID_TYPE_UNDEFINED
     false, // OBD2_PID_TYPE_RAW_SINGLE_BYTE

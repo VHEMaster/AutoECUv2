@@ -157,6 +157,8 @@ error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx
       memcpy(&ctx->config, config_ctx, sizeof(tle4729_config_t));
     }
 
+    ctx->configured = ctx->config.enabled;
+
   } while(0);
 
   return err;
@@ -243,6 +245,7 @@ error_t tle4729_enable(tle4729_ctx_t *ctx, bool enabled)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     ctx->enabled = enabled;
 
@@ -257,6 +260,7 @@ error_t tle4729_set_pwr_voltage(tle4729_ctx_t *ctx, float pwr_voltage)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     ctx->pwr_voltage = pwr_voltage;
 
@@ -271,6 +275,7 @@ error_t tle4729_set_target(tle4729_ctx_t *ctx, int32_t position)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     ctx->pos_target = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
 
@@ -285,6 +290,7 @@ error_t tle4729_get_target(tle4729_ctx_t *ctx, int32_t *position)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || position, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     *position = ctx->pos_target;
 
@@ -299,6 +305,7 @@ error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     ctx->pos_current = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
 
@@ -313,6 +320,7 @@ error_t tle4729_get_current(tle4729_ctx_t *ctx, int32_t *position)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || position, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     *position = ctx->pos_current;
 
@@ -328,6 +336,7 @@ error_t tle4729_pos_reset(tle4729_ctx_t *ctx, int32_t position)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     position = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
 
@@ -347,6 +356,7 @@ error_t tle4729_is_failure(tle4729_ctx_t *ctx, bool *failure)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || failure, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
     *failure = ctx->failure;
 

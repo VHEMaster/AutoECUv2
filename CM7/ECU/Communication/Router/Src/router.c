@@ -38,13 +38,15 @@ error_t router_configure(router_ctx_t *ctx, const router_config_t *config)
     ctx->configured = false;
     memcpy(&ctx->config, config, sizeof(router_config_t));
 
-    err = router_configure_diag(ctx);
-    BREAK_IF(err != E_OK);
+    if(ctx->config.enabled) {
+      err = router_configure_diag(ctx);
+      BREAK_IF(err != E_OK);
 
-    err = router_configure_signals(ctx);
-    BREAK_IF(err != E_OK);
+      err = router_configure_signals(ctx);
+      BREAK_IF(err != E_OK);
+    }
 
-    ctx->configured = true;
+    ctx->configured = ctx->config.enabled;
 
   } while(0);
 

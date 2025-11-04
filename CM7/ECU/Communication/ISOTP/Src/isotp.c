@@ -38,7 +38,7 @@ error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config)
 
     memcpy(&ctx->config, config, sizeof(isotp_config_t));
 
-    ctx->configured = true;
+    ctx->configured = ctx->config.enabled;
 
   } while(0);
 

@@ -75,6 +75,8 @@ typedef struct {
 }can_cfg_global_filter_t;
 
 typedef struct {
+    bool enabled;
+
     can_baudrate_t baudrate;
     can_cfg_global_filter_t global_filter;
     can_config_filter_t filter_config[CAN_RX_FILTER_MAX];

@@ -81,6 +81,10 @@ error_t ecu_modules_ignpower_init(ecu_module_ignpower_t instance, ignpower_ctx_t
     BREAK_IF(err != E_OK);
 
     memcpy(&ignpower_ctx->ctx->config, &ignpower_ctx->config_default, sizeof(ignpower_config_t));
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_IGNPOWER, instance, false);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -118,6 +122,10 @@ error_t ecu_modules_ignpower_configure(ecu_module_ignpower_t instance, const ign
     BREAK_IF(err != E_OK);
 
     err = ignpower_configure(ignpower_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_IGNPOWER, instance, ignpower_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

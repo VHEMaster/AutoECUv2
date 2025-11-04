@@ -93,6 +93,9 @@ error_t ecu_sensors_ect_init(ecu_sensor_ect_t instance, ect_ctx_t *ctx)
 
     memcpy(&ect_ctx->ctx->config, &ect_ctx->config_default, sizeof(ect_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_ECT, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -126,6 +129,10 @@ error_t ecu_sensors_ect_configure(ecu_sensor_ect_t instance, const ect_config_t 
     ect_ctx = &ecu_sensors_ect_ctx[instance];
 
     err = ect_configure(ect_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_ECT, instance, ect_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

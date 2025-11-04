@@ -86,6 +86,10 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     },
 };
 
+static const bool ecu_devices_wbls_enabled_default[ECU_DEVICE_WBLS_MAX] = {
+    true,
+};
+
 static ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_WBLS1,
@@ -165,6 +169,7 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
 
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
     wbls_ctx->ctx = ctx;
+    wbls_ctx->config_default.enabled = ecu_devices_wbls_enabled_default[instance];
 
     err = middlelayer_spi_get_slave(&wbls_ctx->init.spi_slave, wbls_ctx->slave_index);
     BREAK_IF(err != E_OK);
@@ -212,6 +217,9 @@ error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
     err = ecu_loop_register_slow((ecu_loop_cb_t)ecu_devices_wbls_update_voltages_cb, wbls_ctx, ECU_WBLS_VOLTAGE_UPDATE_PERIOD);
     BREAK_IF(err != E_OK);
 
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBLS, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -245,6 +253,10 @@ error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_confi
     wbls_ctx = &ecu_devices_wbls_ctx[instance];
 
     err = cj125_configure(wbls_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBLS, instance, wbls_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

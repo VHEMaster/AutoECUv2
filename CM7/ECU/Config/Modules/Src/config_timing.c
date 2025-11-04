@@ -59,6 +59,10 @@ static const timing_config_t ecu_modules_timing_config_default = {
     .phased_only = true,
 };
 
+static const bool ecu_sensors_timing_enabled_default[ECU_MODULE_TIMING_MAX] = {
+    true
+};
+
 static ecu_modules_timing_ctx_t ecu_modules_timing_ctx[ECU_MODULE_TIMING_MAX] = {
     {
       .init = {
@@ -83,6 +87,7 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
     timing_ctx = &ecu_modules_timing_ctx[instance];
     timing_ctx->ctx = ctx;
 
+    timing_ctx->config_default.enabled = ecu_sensors_timing_enabled_default[instance];
     timing_ctx->ckp_cb_ctx.ckp_instance = timing_ctx->init.ckp_instance;
     timing_ctx->ckp_cb_ctx.module_ctx = timing_ctx;
 
@@ -104,6 +109,9 @@ error_t ecu_modules_timing_init(ecu_module_timing_t instance, timing_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     memcpy(&timing_ctx->ctx->config, &timing_ctx->config_default, sizeof(timing_config_t));
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_TIMING, instance, false);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -138,6 +146,10 @@ error_t ecu_modules_timing_configure(ecu_module_timing_t instance, const timing_
     timing_ctx = &ecu_modules_timing_ctx[instance];
 
     err = timing_configure(timing_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_TIMING, instance, timing_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

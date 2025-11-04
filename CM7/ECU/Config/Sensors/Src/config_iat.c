@@ -157,6 +157,9 @@ error_t ecu_sensors_iat_init(ecu_sensor_iat_t instance, iat_ctx_t *ctx)
 
     memcpy(&iat_ctx->ctx->config, &iat_ctx->config_default, sizeof(iat_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_IAT, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -190,6 +193,10 @@ error_t ecu_sensors_iat_configure(ecu_sensor_iat_t instance, const iat_config_t 
     iat_ctx = &ecu_sensors_iat_ctx[instance];
 
     err = iat_configure(iat_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_IAT, instance, iat_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

@@ -109,6 +109,9 @@ error_t ecu_sensors_map_init(ecu_sensor_map_t instance, map_ctx_t *ctx)
 
     memcpy(&map_ctx->ctx->config, &map_ctx->config_default, sizeof(map_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_MAP, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -142,6 +145,10 @@ error_t ecu_sensors_map_configure(ecu_sensor_map_t instance, const map_config_t 
     map_ctx = &ecu_sensors_map_ctx[instance];
 
     err = map_configure(map_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_MAP, instance, map_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

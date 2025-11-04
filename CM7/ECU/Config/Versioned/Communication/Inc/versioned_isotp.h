@@ -17,6 +17,8 @@ typedef enum {
 }isotp_config_versions_t;
 
 typedef struct {
+    bool enabled;
+
     time_us_t timeout;
     uint16_t upstream_block_size;
     time_delta_us_t upstream_min_separation_time;

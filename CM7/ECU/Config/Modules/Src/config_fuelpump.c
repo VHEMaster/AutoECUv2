@@ -88,6 +88,9 @@ error_t ecu_modules_fuelpump_init(ecu_module_fuelpump_t instance, fuelpump_ctx_t
 
     memcpy(&fuelpump_ctx->ctx->config, &fuelpump_ctx->config_default, sizeof(fuelpump_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_FUELPUMP, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -127,6 +130,10 @@ error_t ecu_modules_fuelpump_configure(ecu_module_fuelpump_t instance, const fue
     BREAK_IF(err != E_OK);
 
     err = fuelpump_configure(fuelpump_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_FUELPUMP, instance, fuelpump_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

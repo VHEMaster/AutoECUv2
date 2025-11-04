@@ -113,6 +113,9 @@ error_t ecu_modules_wgcv_init(ecu_module_wgcv_t instance, wgcv_ctx_t *ctx)
 
     memcpy(&wgcv_ctx->ctx->config, &wgcv_ctx->config_default, sizeof(wgcv_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_WGCV, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -146,6 +149,10 @@ error_t ecu_modules_wgcv_configure(ecu_module_wgcv_t instance, const wgcv_config
     wgcv_ctx = &ecu_modules_wgcv_ctx[instance];
 
     err = wgcv_configure(wgcv_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_WGCV, instance, wgcv_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

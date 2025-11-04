@@ -43,6 +43,8 @@ typedef enum {
 }cj125_config_prc_t;
 
 typedef struct {
+    bool enabled;
+
     cj125_config_relation_t res_to_temp_relation;
     cj125_config_relation_t curr_to_lambda_relation;
     bool temp_ref_resistance_override;

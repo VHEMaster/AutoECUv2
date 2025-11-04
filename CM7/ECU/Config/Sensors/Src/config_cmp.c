@@ -83,8 +83,10 @@ error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
     err = cmp_init(cmp_ctx->ctx, &cmp_ctx->init);
     BREAK_IF(err != E_OK);
 
-
     memcpy(&cmp_ctx->ctx->config, &cmp_ctx->config_default, sizeof(cmp_config_t));
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_CMP, instance, false);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -119,6 +121,10 @@ error_t ecu_sensors_cmp_configure(ecu_sensor_cmp_t instance, const cmp_config_t 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
 
     err = cmp_configure(cmp_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_CMP, instance, cmp_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

@@ -29,6 +29,11 @@ static const isotp_config_t ecu_comm_isotp_config_default = {
     .downstream_pass_early_ovf = false,
 };
 
+static const bool ecu_comm_isotp_enabled_default[ECU_COMM_ISOTP_MAX] = {
+    true,
+    true
+};
+
 static ecu_comm_isotp_ctx_t ecu_comm_isotp_ctx[ECU_COMM_ISOTP_MAX] = {
     {
       .init = {
@@ -56,6 +61,7 @@ error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
     isotp_ctx->ctx = ctx;
+    isotp_ctx->config_default.enabled = ecu_comm_isotp_enabled_default[instance];
 
     isotp_ctx->init.callback_userdata = (void *)isotp_ctx;
 
@@ -63,6 +69,9 @@ error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     isotp_ctx->error_flag = ISOTP_OK;
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_ISOTP, instance, false);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -97,6 +106,10 @@ error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
     err = isotp_configure(isotp_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_ISOTP, instance, isotp_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

@@ -66,6 +66,8 @@ typedef struct {
 }router_config_diag_t;
 
 typedef struct {
+    bool enabled;
+
     router_config_can_t can;
     router_config_diag_t diagnostics;
 

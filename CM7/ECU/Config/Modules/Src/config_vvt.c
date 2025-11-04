@@ -107,6 +107,9 @@ error_t ecu_modules_vvt_init(ecu_module_vvt_t instance, vvt_ctx_t *ctx)
 
     memcpy(&vvt_ctx->ctx->config, &vvt_ctx->config_default, sizeof(vvt_config_t));
 
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_VVT, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -143,6 +146,10 @@ error_t ecu_modules_vvt_configure(ecu_module_vvt_t instance, const vvt_config_t 
     BREAK_IF(err != E_OK);
 
     err = vvt_configure(vvt_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_modules_set_module_enabled(ECU_MODULE_TYPE_VVT, instance, vvt_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

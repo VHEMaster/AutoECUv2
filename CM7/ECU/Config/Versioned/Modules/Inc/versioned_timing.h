@@ -38,6 +38,7 @@ typedef struct {
 }timing_config_camshaft_t;
 
 typedef struct {
+    bool enabled;
     timing_config_crankshaft_t crankshaft;
     timing_config_camshaft_t camshafts[ECU_SENSOR_CMP_MAX];
 

@@ -757,6 +757,9 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     err = ecu_config_gpio_exti_register(flexio_ctx->int_exti_pin, (ecu_gpio_exti_cb_t)l9966_int_irq_handler, flexio_ctx->ctx);
     BREAK_IF(err != E_OK);
 
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_FLEXIO, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -790,6 +793,10 @@ error_t ecu_devices_flexio_configure(ecu_device_flexio_t instance, const l9966_c
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
 
     err = l9966_configure(flexio_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_FLEXIO, instance, true);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

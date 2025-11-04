@@ -81,6 +81,9 @@ error_t ecu_sensors_ots_init(ecu_sensor_ots_t instance, ots_ctx_t *ctx)
 
     memcpy(&ots_ctx->ctx->config, &ots_ctx->config_default, sizeof(ots_config_t));
 
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_OTS, instance, false);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -114,6 +117,10 @@ error_t ecu_sensors_ots_configure(ecu_sensor_ots_t instance, const ots_config_t 
     ots_ctx = &ecu_sensors_ots_ctx[instance];
 
     err = ots_configure(ots_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_sensors_set_sensor_enabled(ECU_SENSOR_TYPE_OTS, instance, ots_ctx->ctx->config.enabled);
+    BREAK_IF(err != E_OK);
 
   } while(0);
 

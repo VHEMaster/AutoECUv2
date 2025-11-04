@@ -283,6 +283,9 @@ error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
     err = qspi_init(flash_ctx->ctx, &flash_ctx->init);
     BREAK_IF(err != E_OK);
 
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_FLASH, instance, true);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;

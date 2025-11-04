@@ -36,7 +36,7 @@ error_t kwp_configure(kwp_ctx_t *ctx, const kwp_config_t *config)
 
     memcpy(&ctx->config, config, sizeof(kwp_config_t));
 
-    ctx->configured = true;
+    ctx->configured = ctx->config.enabled;
 
   } while(0);
 
