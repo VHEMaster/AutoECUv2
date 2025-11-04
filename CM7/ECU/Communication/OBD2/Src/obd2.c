@@ -108,7 +108,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.05f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_FUEL_RATE (0x5E)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_EMISSION_REQUIREMENTS_DESIGN (0x5F)
 
-  { .type = OBD2_PID_TYPE_RAW_QUAD_BYTES }, // OBD2_PID_01_SUPPORTED_61_80 (0x60)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_61_80 (0x60)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -125.0f } } }, // OBD2_PID_01_DRIVERS_DEMAND_TORQUE_PERCENT (0x61)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -125.0f } } }, // OBD2_PID_01_ACTUAL_ENGINE_TORQUE_PERCENT (0x62)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_REFERENCE_TORQUE (0x63)
