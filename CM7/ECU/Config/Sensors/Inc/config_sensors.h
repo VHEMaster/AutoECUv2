@@ -23,8 +23,8 @@
 #include "ops.h"
 
 #define ECU_SENSOR_NONE     (255)
-#define ECU_SENSOR_INSTANCE_MAX (4)
 
+#define ECU_SENSOR_INSTANCE_MAX (4)
 typedef uint32_t ecu_sensor_instance_t;
 
 typedef enum {
@@ -128,6 +128,8 @@ error_t ecu_sensors_set_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_in
 error_t ecu_sensors_get_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool *initialized);
 error_t ecu_sensors_set_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool enabled);
 error_t ecu_sensors_get_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool *enabled);
+error_t ecu_sensors_get_type_max(ecu_sensor_type_t *type_max);
+error_t ecu_sensors_get_instance_max(ecu_sensor_type_t type, ecu_sensor_instance_t *instance_max);
 
 error_t ecu_sensors_get_ckp_ctx(ecu_sensor_ckp_t instance, ckp_ctx_t **ctx);
 error_t ecu_sensors_get_cmp_ctx(ecu_sensor_cmp_t instance, cmp_ctx_t **ctx);

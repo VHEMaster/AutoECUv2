@@ -402,6 +402,38 @@ error_t ecu_devices_get_device_enabled(ecu_device_type_t type, ecu_device_instan
   return err;
 }
 
+error_t ecu_devices_get_type_max(ecu_device_type_t *type_max)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(type_max == NULL, err = E_PARAM);
+
+    *type_max = ECU_DEVICE_TYPE_MAX;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_get_instance_max(ecu_device_type_t type, ecu_device_instance_t *instance_max)
+{
+  error_t err = E_OK;
+  const ecu_config_device_if_instance_t *interface;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_DEVICE_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
+
+    interface = &ecu_config_devices.interfaces[type];
+    *instance_max = interface->instance_max;
+
+  } while(0);
+
+  return err;
+}
+
+
 error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t **ctx)
 {
   return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_PULSEDADC, instance, (void**)ctx);

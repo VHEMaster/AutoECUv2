@@ -11,6 +11,7 @@
 #include "core_comm.h"
 #include "calcdata.h"
 #include "core_init_fsm.h"
+#include "config_common.h"
 #include "common.h"
 
 static ecu_core_ctx_t ecu_core_ctx = {0};
@@ -34,6 +35,9 @@ void core_init(void)
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     err = ecu_config_global_get_engine_runtime_config(&ctx->runtime_config);
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    err = ecu_config_common_init(ctx);
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     err = ecu_modules_timing_register_cb(ECU_MODULE_TIMING_1, core_timing_signal_update_cb, ctx);

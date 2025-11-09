@@ -8,10 +8,10 @@
 #ifndef CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_
 #define CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_
 
-#include <config_calcdata.h>
 #include "common.h"
 
 #include "flash.h"
+#include "config_calcdata.h"
 #include "config_devices.h"
 #include "config_sensors.h"
 #include "config_modules.h"
@@ -62,6 +62,7 @@
 #include "config_obd2.h"
 
 #include "config_engine.h"
+#include "config_common.h"
 
 #define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
 

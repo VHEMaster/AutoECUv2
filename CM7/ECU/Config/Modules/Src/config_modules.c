@@ -432,6 +432,37 @@ error_t ecu_modules_get_module_enabled(ecu_module_type_t type, ecu_module_instan
   return err;
 }
 
+error_t ecu_modules_get_type_max(ecu_module_type_t *type_max)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(type_max == NULL, err = E_PARAM);
+
+    *type_max = ECU_MODULE_TYPE_MAX;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_get_instance_max(ecu_module_type_t type, ecu_module_instance_t *instance_max)
+{
+  error_t err = E_OK;
+  const ecu_config_module_if_instance_t *interface;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_MODULE_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
+
+    interface = &ecu_config_modules.interfaces[type];
+    *instance_max = interface->instance_max;
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx)
 {
   return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_TIMING, instance, (void**)ctx);
