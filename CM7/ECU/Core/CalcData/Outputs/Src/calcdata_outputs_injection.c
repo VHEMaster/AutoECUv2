@@ -42,7 +42,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *input_inj_afr;
   const ecu_core_runtime_value_ctx_t *input_cycle_charge;
 
-  ecu_core_runtime_global_parameters_timing_injection_ctx_t *output_ptr;
+  ecu_core_runtime_global_parameters_timing_ctx_t *output_ptr;
 
   float output_inj_phase;
   float output_inj_mass_run;
@@ -55,7 +55,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   float cold_inj_coff;
   uint32_t revs_delta;
 
-  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings.injection;
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_MAX];
 
   if(!turning_flag) {
     revs_delta = 0;

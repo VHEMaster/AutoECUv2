@@ -38,7 +38,7 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   ecu_core_runtime_banked_ignition_bank_ctx_t *ign_bank_ctx;
 
   ecu_core_runtime_value_ctx_t output_value;
-  ecu_core_runtime_global_parameters_timing_ignition_ctx_t *output_ptr;
+  ecu_core_runtime_global_parameters_timing_ctx_t *output_ptr;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
   bool idle_flag = ctx->runtime.global.misc.idle_flag;
   bool pos_idle_flag = ctx->runtime.global.misc.pos_idle_flag;
@@ -53,7 +53,7 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   math_pid_koffs_t pid_rpm_k;
   math_pid_ctx_t *pid_rpm;
 
-  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings.ignition;
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_IGNITION];
   setup_idle = &ctx->calibration->calcdata.setup.idle;
 
   for(ecu_bank_t bank = 0; bank < banks_count; bank++) {
