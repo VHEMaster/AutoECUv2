@@ -110,8 +110,6 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
           sensor_value_ctx->valid = false;
         }
       }
-    } else {
-      memset(&ctx->runtime.global.parameters.sensors[type], 0, sizeof(ctx->runtime.global.parameters.sensors[type]));
     }
   }
 }
