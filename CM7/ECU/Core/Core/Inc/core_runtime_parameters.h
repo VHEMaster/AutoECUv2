@@ -11,197 +11,47 @@
 #include "common.h"
 #include "config_engine.h"
 
-typedef struct {
-    bool read_valid;
-    bool write_valid;
-}ecu_core_runtime_global_parameters_flags_t;
+#define ECU_RUNTIME_PARAMETER_TRUE    (1.0f)
+#define ECU_RUNTIME_PARAMETER_FALSE   (0.0f)
+
+#define ECU_RUNTIME_SENSORS_READ_PARAMETERS_MAX   (2)
+
+#define ECU_RUNTIME_DEVICES_READ_PARAMETERS_MAX   (8)
+#define ECU_RUNTIME_DEVICES_WRITE_PARAMETERS_MAX  (8)
+
+#define ECU_RUNTIME_MODULES_READ_PARAMETERS_MAX   (8)
+#define ECU_RUNTIME_MODULES_WRITE_PARAMETERS_MAX  (8)
+
+#define ECU_RUNTIME_TIMINGS_READ_PARAMETERS_MAX   (32)
+#define ECU_RUNTIME_TIMINGS_WRITE_PARAMETERS_MAX  (8)
+
+typedef uint8_t ecu_runtime_param_index_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        cj125_operating_status_t status;
-        float lambda_value;
-    }read;
-    struct {
-        cj125_heatup_type_t heatup;
-    }write;
-}ecu_core_runtime_global_parameters_device_wbls_ctx_t;
+    ecu_core_runtime_value_ctx_t read[ECU_RUNTIME_SENSORS_READ_PARAMETERS_MAX];
+}ecu_core_runtime_global_parameters_sensor_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool failure;
-        int32_t pos_current;
-        int32_t pos_target;
-    }read;
-    struct {
-        bool set_enabled;
-        bool set_target;
-        bool set_current;
-        bool set_reset;
-
-        bool enabled;
-        int32_t pos_target;
-        int32_t pos_current;
-        int32_t pos_reset;
-
-    }write;
-}ecu_core_runtime_global_parameters_device_stepper_ctx_t;
+    ecu_core_runtime_value_ctx_t read[ECU_RUNTIME_DEVICES_READ_PARAMETERS_MAX];
+    ecu_core_runtime_value_ctx_t write[ECU_RUNTIME_DEVICES_WRITE_PARAMETERS_MAX];
+}ecu_core_runtime_global_parameters_device_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_device_wbls_ctx_t wbls[ECU_DEVICE_WBLS_MAX];
-    ecu_core_runtime_global_parameters_device_stepper_ctx_t stepper[ECU_DEVICE_STEPPER_MAX];
-}ecu_core_runtime_global_parameters_devices_ctx_t;
+    ecu_core_runtime_value_ctx_t read[ECU_RUNTIME_MODULES_READ_PARAMETERS_MAX];
+    ecu_core_runtime_value_ctx_t write[ECU_RUNTIME_MODULES_WRITE_PARAMETERS_MAX];
+}ecu_core_runtime_global_parameters_module_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        timing_crankshaft_mode_t mode;
-        float period;
-        float rpm;
-        uint32_t revs_count;
-    }read;
-}ecu_core_runtime_global_parameters_module_timing_ctx_t;
+    ecu_core_runtime_value_ctx_t read[ECU_RUNTIME_TIMINGS_READ_PARAMETERS_MAX];
+    ecu_core_runtime_value_ctx_t write[ECU_RUNTIME_TIMINGS_WRITE_PARAMETERS_MAX];
+}ecu_core_runtime_global_parameters_timing_ctx_t;
+
 
 typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool set_enabled;
-        bool set_target;
-
-        bool enabled;
-        float target;
-    }write;
-    struct {
-        bool enabled;
-        float pos_current;
-        float pos_target;
-    }read;
-}ecu_core_runtime_global_parameters_module_etc_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool set_enabled;
-        bool set_target_pos;
-        bool set_target_dc;
-
-        bool enabled;
-        float target_dc;
-        float target_pos;
-    }write;
-    struct {
-        bool enabled;
-        float pos_current;
-        float pos_target;
-        float dc_current;
-        float dc_target;
-    }read;
-}ecu_core_runtime_global_parameters_module_vvt_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool set_activate_trigger;
-        bool activate_trigger;
-
-        bool set_emergency_trigger;
-        bool emergency_trigger;
-    }write;
-}ecu_core_runtime_global_parameters_module_coolingfan_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool operating;
-    }read;
-    struct {
-        bool set_operating;
-        bool set_trigger;
-
-        bool operating;
-    }write;
-}ecu_core_runtime_global_parameters_module_ignpower_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool set_manual_engaged;
-
-        bool manual_enabled;
-    }write;
-}ecu_core_runtime_global_parameters_module_indication_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        bool set_enabled;
-        bool set_boost_target;
-        bool set_dc_target;
-
-        bool enabled;
-        float boost_target;
-        float dc_target;
-    }write;
-}ecu_core_runtime_global_parameters_module_wgcv_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_module_timing_ctx_t timing[ECU_MODULE_TIMING_MAX];
-    ecu_core_runtime_global_parameters_module_etc_ctx_t etc[ECU_MODULE_ETC_MAX];
-    ecu_core_runtime_global_parameters_module_vvt_ctx_t vvt[ECU_MODULE_VVT_MAX];
-    ecu_core_runtime_global_parameters_module_coolingfan_ctx_t coolingfan[ECU_MODULE_COOLINGFAN_MAX];
-    ecu_core_runtime_global_parameters_module_ignpower_ctx_t ignpower[ECU_MODULE_IGNPOWER_MAX];
-    ecu_core_runtime_global_parameters_module_indication_ctx_t indication[ECU_MODULE_INDICATION_MAX];
-    ecu_core_runtime_global_parameters_module_wgcv_ctx_t wgcv[ECU_MODULE_WGCV_MAX];
-}ecu_core_runtime_global_parameters_modules_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        struct {
-            float saturation_time;
-            float advance_cy[ECU_CYLINDER_MAX];
-        }groups[ECU_CONFIG_IGNITION_GROUP_MAX];
-    }read;
-    struct {
-        bool allowed;
-        float ignition_advance;
-    }write[ECU_BANK_MAX];
-}ecu_core_runtime_global_parameters_timing_ignition_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_flags_t flags;
-    struct {
-        struct {
-            float phase_mean;
-            float lag_time;
-            float time_inject_mean;
-            float dutycycle_max;
-            float dutycycle_mean;
-            float enrichment_late_phase;
-
-            float injector_input_pressure_mean;
-            float injector_output_pressure_mean;
-            float injector_pressure_diff_mean;
-        }groups[ECU_CONFIG_INJECTION_GROUP_MAX];
-    }read;
-    struct {
-        bool allowed;
-        float injection_phase;
-        float injection_mass;
-    }write[ECU_BANK_MAX];
-}ecu_core_runtime_global_parameters_timing_injection_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_global_parameters_timing_ignition_ctx_t ignition;
-    ecu_core_runtime_global_parameters_timing_injection_ctx_t injection;
-}ecu_core_runtime_global_parameters_timings_ctx_t;
-
-typedef struct {
-    ecu_core_runtime_value_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
-    ecu_core_runtime_global_parameters_devices_ctx_t devices;
-    ecu_core_runtime_global_parameters_modules_ctx_t modules;
-    ecu_core_runtime_global_parameters_timings_ctx_t timings;
+    ecu_core_runtime_global_parameters_sensor_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
+    ecu_core_runtime_global_parameters_device_ctx_t devices[ECU_DEVICE_TYPE_MAX][ECU_DEVICE_INSTANCE_MAX];
+    ecu_core_runtime_global_parameters_module_ctx_t modules[ECU_MODULE_TYPE_MAX][ECU_MODULE_INSTANCE_MAX];
+    ecu_core_runtime_global_parameters_timing_ctx_t timings[ECU_TIMING_TYPE_MAX];
 }ecu_core_runtime_global_parameters_ctx_t;
 
 #endif /* CORE_CORE_INC_CORE_RUNTIME_PARAMETERS_H_ */

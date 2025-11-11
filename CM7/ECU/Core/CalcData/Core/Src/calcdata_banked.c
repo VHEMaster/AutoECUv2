@@ -8,15 +8,13 @@
 #include "calcdata_banked.h"
 #include "config_global.h"
 
-#define CORE_CALCDATA_GET_SENSOR_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance) &ctx->runtime.global.parameters.typelower##s[ECU_##TYPEUPPER##_TYPE_##INSTUPPER][instance]
-#define CORE_CALCDATA_GET_DEVICE_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance) &ctx->runtime.global.parameters.typelower##s.instlower[instance]
-#define CORE_CALCDATA_GET_MODULE_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance) &ctx->runtime.global.parameters.typelower##s.instlower[instance]
+#define CORE_CALCDATA_GET_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance) &ctx->runtime.global.parameters.typelower##s[ECU_##TYPEUPPER##_TYPE_##INSTUPPER][instance]
 
 #define CORE_CALCDATA_BANKED_APPLY_GLOBAL(TYPEUPPER, typelower, INSTUPPER, instlower) \
   for(ecu_config_io_##instlower##_t i = 0; i < ECU_CONFIG_IO_##INSTUPPER##_MAX; i++) { \
     ecu_##typelower##_##instlower##_t instance = ctx->engine_config->calibration.io.banked.global.typelower##_##instlower[i]; \
     if(instance < ECU_##TYPEUPPER##_##INSTUPPER##_MAX) { \
-      ctx->runtime.banked.raw.global.typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+      ctx->runtime.banked.raw.global.typelower##s_##instlower[i] = CORE_CALCDATA_GET_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
     } else { \
       ctx->runtime.banked.raw.global.typelower##s_##instlower[i] = NULL; \
     } \
@@ -29,14 +27,14 @@
       for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) { \
         instance = ctx->engine_config->calibration.io.banked.banks[b].common.typelower##_##instlower[i]; \
         if(instance < ECU_##TYPEUPPER##_##INSTUPPER##_MAX) { \
-          ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+          ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
         } else { \
           ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = NULL; \
         } \
       } \
     } else { \
       for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) { \
-        ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_##TYPEUPPER##_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
+        ctx->runtime.banked.raw.banks[b].typelower##s_##instlower[i] = CORE_CALCDATA_GET_VALUE_PTR(TYPEUPPER, typelower, INSTUPPER, instlower, instance); \
       } \
     } \
   }

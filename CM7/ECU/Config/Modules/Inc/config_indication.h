@@ -11,6 +11,11 @@
 #include "config_modules.h"
 #include "indication.h"
 
+typedef enum {
+  ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED = 0,
+  ECU_MODULE_INDICATION_WRITE_PARAM_MAX,
+}ecu_module_indication_write_params_t;
+
 error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication_ctx_t *ctx);
 error_t ecu_modules_indication_get_default_config(ecu_module_indication_t instance, indication_config_t *config);
 error_t ecu_modules_indication_configure(ecu_module_indication_t instance, const indication_config_t *config);

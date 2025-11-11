@@ -16,12 +16,6 @@ typedef enum {
   CALCDATA_CALC_TYPE_MAX
 }ecu_core_calcdata_calc_type_t;
 
-typedef enum {
-  ECU_TIMING_TYPE_IGNITION,
-  ECU_TIMING_TYPE_INJECTION,
-  ECU_TIMING_TYPE_MAX
-}ecu_timing_type_t;
-
 typedef struct {
     ecu_core_calcdata_calc_type_t type;
     ecu_bank_t bank;

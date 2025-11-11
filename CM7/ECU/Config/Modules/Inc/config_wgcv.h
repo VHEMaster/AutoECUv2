@@ -11,6 +11,13 @@
 #include "config_modules.h"
 #include "wgcv.h"
 
+typedef enum {
+  ECU_MODULE_WGCV_WRITE_PARAM_ENABLED = 0,
+  ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST,
+  ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE,
+  ECU_MODULE_WGCV_WRITE_PARAM_MAX,
+}ecu_module_wgcv_write_params_t;
+
 error_t ecu_modules_wgcv_init(ecu_module_wgcv_t instance, wgcv_ctx_t *ctx);
 error_t ecu_modules_wgcv_get_default_config(ecu_module_wgcv_t instance, wgcv_config_t *config);
 error_t ecu_modules_wgcv_configure(ecu_module_wgcv_t instance, const wgcv_config_t *config);

@@ -11,6 +11,22 @@
 #include "config_modules.h"
 #include "vvt.h"
 
+typedef enum {
+  ECU_MODULE_VVT_READ_PARAM_ENABLED = 0,
+  ECU_MODULE_VVT_READ_PARAM_POS_CURRENT,
+  ECU_MODULE_VVT_READ_PARAM_POS_TARGET,
+  ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_CURRENT,
+  ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_TARGET,
+  ECU_MODULE_VVT_READ_PARAM_MAX,
+}ecu_module_vvt_read_params_t;
+
+typedef enum {
+  ECU_MODULE_VVT_WRITE_PARAM_ENABLED = 0,
+  ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET,
+  ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET,
+  ECU_MODULE_VVT_WRITE_PARAM_MAX,
+}ecu_module_vvt_write_params_t;
+
 error_t ecu_modules_vvt_init(ecu_module_vvt_t instance, vvt_ctx_t *ctx);
 error_t ecu_modules_vvt_get_default_config(ecu_module_vvt_t instance, vvt_config_t *config);
 error_t ecu_modules_vvt_configure(ecu_module_vvt_t instance, const vvt_config_t *config);
