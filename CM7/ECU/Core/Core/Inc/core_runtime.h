@@ -115,7 +115,6 @@ typedef struct {
 }ecu_core_runtime_global_ignition_input_ctx_t;
 
 typedef struct {
-    bool input_valid;
     ecu_core_runtime_global_ignition_input_ctx_t input_banked[ECU_BANK_MAX];
 
     float power_voltage;
@@ -133,7 +132,6 @@ typedef struct {
 }ecu_core_runtime_global_injection_input_ctx_t;
 
 typedef struct {
-    bool input_valid;
     ecu_core_runtime_global_injection_input_ctx_t input_banked[ECU_BANK_MAX];
 
     float power_voltage;
