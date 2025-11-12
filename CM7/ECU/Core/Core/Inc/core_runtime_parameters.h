@@ -46,7 +46,6 @@ typedef struct {
     ecu_core_runtime_value_ctx_t write[ECU_RUNTIME_TIMINGS_WRITE_PARAMETERS_MAX];
 }ecu_core_runtime_global_parameters_timing_ctx_t;
 
-
 typedef struct {
     ecu_core_runtime_global_parameters_sensor_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
     ecu_core_runtime_global_parameters_device_ctx_t devices[ECU_DEVICE_TYPE_MAX][ECU_DEVICE_INSTANCE_MAX];

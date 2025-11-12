@@ -104,7 +104,7 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
     if(sensor_ctx->func_read != NULL) {
       for(ecu_sensor_instance_t instance = 0; instance < instance_max; instance++) {
         sensor_value_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[type][instance];
-        sensor_value_read_ctx = &sensor_value_ctx->read[0]; // TODO: set proper index
+        sensor_value_read_ctx = &sensor_value_ctx->read[ECU_SENSOR_READ_PARAM_DATA];
         err = ecu_sensors_get_sensor_enabled(type, instance, &enabled);
         if(err == E_OK && enabled) {
           sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, sensor_value_read_ctx);

@@ -189,7 +189,7 @@ static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t 
   vvt_data_t data;
   ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
 
-  err = ecu_modules_etc_get_data(instance, &data);
+  err = ecu_modules_vvt_get_data(instance, &data);
   if(err == E_OK) {
     module_ctx->read[ECU_MODULE_VVT_READ_PARAM_ENABLED].value = data.enabled;
     module_ctx->read[ECU_MODULE_VVT_READ_PARAM_ENABLED].valid = true;
