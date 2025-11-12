@@ -11,6 +11,11 @@
 #include "config_sensors.h"
 #include "egt.h"
 
+typedef enum {
+  ECU_SENSOR_EGT_READ_PARAM_DATA = 0,
+  ECU_SENSOR_EGT_READ_PARAM_MAX,
+}ecu_sensor_egt_read_params_t;
+
 error_t ecu_sensors_egt_init(ecu_sensor_egt_t instance, egt_ctx_t *ctx);
 error_t ecu_sensors_egt_get_default_config(ecu_sensor_egt_t instance, egt_config_t *config);
 error_t ecu_sensors_egt_configure(ecu_sensor_egt_t instance, const egt_config_t *config);

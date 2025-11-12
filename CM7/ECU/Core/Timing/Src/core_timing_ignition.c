@@ -36,6 +36,7 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
   const timing_data_crankshaft_t *crankshaft;
 
   bool input_valid;
+  bool input_valid_b[ECU_BANK_MAX];
   bool input_allowed_b[ECU_BANK_MAX];
   bool use_ignition_acceptance;
 
@@ -103,9 +104,12 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
     crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
         crankshaft->sensor_data.previous.timestamp);
 
-    input_valid = runtime->input_valid;
+    input_valid = banks_count ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
-      input_allowed_b[b]= runtime->input_banked[b].allowed;
+      input_allowed_b[b] = runtime->input_banked[b].allowed.value > ECU_RUNTIME_PARAMETER_FALSE ? true : false;
+      input_valid_b[b] = runtime->input_banked[b].allowed.valid;
+      input_valid_b[b] &= runtime->input_banked[b].ignition_advance.valid;
+      input_valid &= input_valid_b[b];
     }
     use_ignition_acceptance = config->use_ignition_acceptance;
     runtime->signal_prepare_advance = signal_prepare_advance;
@@ -130,14 +134,14 @@ ITCM_FUNC void core_timing_signal_update_ignition(ecu_core_ctx_t *ctx)
             if(ignition_acceptance_gr_cy->valid) {
               runtime_gr->advance_input_cy[cy] = ignition_acceptance_gr_cy->ignition_advance;
             } else {
-              runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance;
+              runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance.value;
             }
           }
         }
       } else {
         for(ecu_config_ignition_group_t gr = 0; gr < ECU_CONFIG_IGNITION_GROUP_MAX; gr++) {
           runtime_gr = &runtime->groups[gr];
-          runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance;
+          runtime_gr->advance_input_cy[cy] = runtime->input_banked[bank_cy].ignition_advance.value;
         }
       }
     }

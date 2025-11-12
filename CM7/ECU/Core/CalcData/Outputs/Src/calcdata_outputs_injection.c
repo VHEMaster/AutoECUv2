@@ -54,6 +54,8 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   float time_blending;
   float cold_inj_coff;
   uint32_t revs_delta;
+  ecu_timing_injection_write_params_t param_index;
+  ecu_timing_injection_write_params_t param_index_base;
 
   output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_MAX];
 
@@ -141,13 +143,20 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
       output_inj_mass = output_inj_mass_start_final;
     }
 
+    param_index_base = ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + ((ECU_TIMING_INJECTION_WRITE_PARAM_B1_END - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + 1) * bank);
 
-    output_ptr->write[bank].allowed = true;
-    output_ptr->write[bank].injection_mass = output_inj_mass;
-    output_ptr->write[bank].injection_phase = output_inj_phase;
+    param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
+    output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
+    output_ptr->write[param_index].valid = true;
+
+    param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_MASS - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
+    output_ptr->write[param_index].value = output_inj_mass;
+    output_ptr->write[param_index].valid = true;
+
+    param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_PHASE - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
+    output_ptr->write[param_index].value = output_inj_phase;
+    output_ptr->write[param_index].valid = true;
   }
 
   ctx->runtime.global.misc.injection_startup_revs_counter = startup_revs_counter;
-
-  output_ptr->flags.write_valid = true;
 }

@@ -11,6 +11,7 @@
 #include "common.h"
 #include "config_gpio.h"
 #include "versioned_cylinders.h"
+#include "versioned_io.h"
 
 #define INJECTION_RELATION_ITEMS_MIN 4
 #define INJECTION_RELATION_ITEMS_MAX 16

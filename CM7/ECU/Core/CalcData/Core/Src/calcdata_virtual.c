@@ -5,117 +5,127 @@
  *      Author: VHEMaster
  */
 
+#include "config_global.h"
 #include "calcdata_virtual.h"
+
 
 #define CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_READ(ctx, TYPEUPPERCASE, typelowercase, INSTUPPERCASE, instlowercase) \
 { \
-  const ecu_core_runtime_global_parameters_##typelowercase##_ctx_t *value_src; \
-  ecu_core_runtime_global_parameters_##typelowercase##_ctx_t *value_dest; \
-  ecu_core_runtime_global_parameters_##typelowercase##_ctx_t *value_sim; \
+  const ecu_core_runtime_value_ctx_t *value_src; \
+  ecu_core_runtime_value_ctx_t *value_dest; \
+  ecu_core_runtime_value_ctx_t *value_sim; \
   bool valid = false; \
   for(ecu_##typelowercase##_##instlowercase##_t i = 0; i < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_MAX; i++) {  \
-    value_dest = &ctx->runtime.global.parameters.typelowercase##s.instlowercase[i]; \
-    value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase[i];  \
-    for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-      value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase[i];  \
-      if(value_src->flags.read_valid) {  \
-        memcpy(&value_dest->read, &value_src->read, sizeof(value_dest->read));  \
-        value_dest->flags.read_valid = true; \
-        valid = true; \
-        if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
-          memcpy(&value_sim->read, &value_src->read, sizeof(value_sim->read));  \
+    for(ecu_##typelowercase##_##instlowercase##_read_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_READ_PARAM_MAX; param++) { \
+      valid = false;  \
+      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param]; \
+      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param];  \
+      for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
+        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param];  \
+        if(value_src->valid) {  \
+          value_dest->value = value_src->value; \
+          value_dest->valid = value_src->valid; \
+          valid = true; \
+          if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
+            value_sim->value = value_src->value; \
+          } \
+          break;  \
         } \
-        break;  \
       } \
-    } \
-    \
-    if(!valid) {  \
-      value_sim->flags.read_valid = false; \
-      value_dest->flags.read_valid = false; \
+      if(!valid) {  \
+        value_sim->valid = false; \
+        value_dest->valid = false; \
+      } \
     } \
   } \
 }
 
 #define CALCDATA_VIRTUAL_TIMING_READ(ctx, TYPEUPPERCASE, typelowercase, INSTUPPERCASE, instlowercase) \
 { \
-  const ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_src; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_dest; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_sim; \
+  const ecu_core_runtime_value_ctx_t *value_src; \
+  ecu_core_runtime_value_ctx_t *value_dest; \
+  ecu_core_runtime_value_ctx_t *value_sim; \
   bool valid = false; \
-  value_dest = &ctx->runtime.global.parameters.typelowercase##s.instlowercase; \
-  value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase;  \
-  for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-    value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase;  \
-    if(value_src->flags.read_valid) {  \
-      memcpy(&value_dest->read, &value_src->read, sizeof(value_dest->read));  \
-      value_dest->flags.read_valid = true; \
-      valid = true; \
-      if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
-        memcpy(&value_sim->read, &value_src->read, sizeof(value_sim->read));  \
+  for(ecu_##typelowercase##_##instlowercase##_read_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_READ_PARAM_MAX; param++) { \
+    valid = false;  \
+    value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].read[param]; \
+    value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].read[param];  \
+    for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
+      value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].read[param];  \
+      if(value_src->valid) {  \
+        value_dest->value = value_src->value; \
+        value_dest->valid = value_src->valid; \
+        valid = true; \
+        if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
+          value_sim->value = value_src->value; \
+        } \
+        break;  \
       } \
-      break;  \
     } \
-  } \
-  \
-  if(!valid) {  \
-    value_sim->flags.read_valid = false; \
-    value_dest->flags.read_valid = false; \
+    if(!valid) {  \
+      value_sim->valid = false; \
+      value_dest->valid = false; \
+    } \
   } \
 }
 
 #define CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_WRITE(ctx, TYPEUPPERCASE, typelowercase, INSTUPPERCASE, instlowercase) \
 { \
-  const ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_src; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_dest; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_sim; \
+  const ecu_core_runtime_value_ctx_t *value_src; \
+  ecu_core_runtime_value_ctx_t *value_dest; \
+  ecu_core_runtime_value_ctx_t *value_sim; \
   bool valid = false; \
   for(ecu_##typelowercase##_##instlowercase##_t i = 0; i < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_MAX; i++) {  \
-    value_dest = &ctx->runtime.global.parameters.typelowercase##s.instlowercase[i]; \
-  value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase[i];  \
-    for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-      value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase[i];  \
-      if(value_src->flags.write_valid) {  \
-        memcpy(&value_dest->write, &value_src->write, sizeof(value_dest->write));  \
-        value_dest->flags.write_valid = true; \
-        valid = true; \
-        if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
-          memcpy(&value_sim->write, &value_src->write, sizeof(value_sim->write));  \
+    for(ecu_##typelowercase##_##instlowercase##_write_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_WRITE_PARAM_MAX; param++) { \
+      valid = false;  \
+      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param]; \
+      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param];  \
+      for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
+        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param];  \
+        if(value_src->valid) {  \
+          value_dest->value = value_src->value; \
+          value_dest->valid = value_src->valid; \
+          valid = true; \
+          if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
+            value_sim->value = value_src->value; \
+          } \
+          break;  \
         } \
-        break;  \
       } \
-    } \
-    \
-    if(!valid) {  \
-    value_sim->flags.write_valid = false; \
-      value_dest->flags.write_valid = false; \
+      if(!valid) {  \
+        value_sim->valid = false; \
+        value_dest->valid = false; \
+      } \
     } \
   } \
 }
 
 #define CALCDATA_VIRTUAL_TIMING_WRITE(ctx, TYPEUPPERCASE, typelowercase, INSTUPPERCASE, instlowercase) \
 { \
-  const ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_src; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_dest; \
-  ecu_core_runtime_global_parameters_##typelowercase##_##instlowercase##_ctx_t *value_sim; \
+  const ecu_core_runtime_value_ctx_t *value_src; \
+  ecu_core_runtime_value_ctx_t *value_dest; \
+  ecu_core_runtime_value_ctx_t *value_sim; \
   bool valid = false; \
-  value_dest = &ctx->runtime.global.parameters.typelowercase##s.instlowercase; \
-  value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s.instlowercase;  \
-  for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-    value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s.instlowercase;  \
-    if(value_src->flags.write_valid) {  \
-      memcpy(&value_dest->write, &value_src->write, sizeof(value_dest->write));  \
-      value_dest->flags.write_valid = true; \
-      valid = true; \
-      if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
-        memcpy(&value_sim->write, &value_src->write, sizeof(value_sim->write));  \
+  for(ecu_##typelowercase##_##instlowercase##_write_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_WRITE_PARAM_MAX; param++) { \
+    valid = false;  \
+    value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].write[param]; \
+    value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].write[param];  \
+    for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
+      value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE].write[param];  \
+      if(value_src->valid) {  \
+        value_dest->value = value_src->value; \
+        value_dest->valid = value_src->valid; \
+        valid = true; \
+        if(source != ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED) { \
+          value_sim->value = value_src->value; \
+        } \
+        break;  \
       } \
-      break;  \
     } \
-  } \
-  \
-  if(!valid) {  \
-    value_sim->flags.write_valid = false; \
-    value_dest->flags.write_valid = false; \
+    if(!valid) {  \
+      value_sim->valid = false; \
+      value_dest->valid = false; \
+    } \
   } \
 }
 

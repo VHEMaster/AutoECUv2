@@ -91,39 +91,39 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
     param_index_base = ECU_TIMING_INJECTION_READ_PARAM_GR1_START + ((ECU_TIMING_INJECTION_READ_PARAM_GR1_END - ECU_TIMING_INJECTION_READ_PARAM_GR1_START + 1) * i);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_PHASE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].phase_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].phase_mean;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_LAG_TIME - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].lag_time;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].lag_time;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_TIME_INJECT_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].time_inject_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].time_inject_mean;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_DUTYCYCLE_MAX - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].dutycycle_max;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].dutycycle_max;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_DUTYCYCLE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].dutycycle_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].dutycycle_mean;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_ENRICHMENT_LATE_PHASE - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].enrichment_late_phase;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].enrichment_late_phase;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_INPUT_PRESSURE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].injector_input_pressure_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].injector_input_pressure_mean;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_OUTPUT_PRESSURE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].injector_output_pressure_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].injector_output_pressure_mean;
     timing_ctx->read[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_PRESSURE_DIFF_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->read[param_index] = dst_ctx->groups[i].injector_pressure_diff_mean;
+    timing_ctx->read[param_index].value = dst_ctx->groups[i].injector_pressure_diff_mean;
     timing_ctx->read[param_index].valid = true;
   }
 }
@@ -139,14 +139,16 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
     dst_ctx = &ctx->runtime.global.ignition.input_banked[b];
     param_index_base = ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + ((ECU_TIMING_IGNITION_WRITE_PARAM_B1_END - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + 1) * b);
 
-    param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START
+    param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->allowed = timing_ctx->write[param_index].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false;
+      dst_ctx->allowed.value = timing_ctx->write[param_index].value;
+      dst_ctx->allowed.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
     param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ADVANCE - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->ignition_advance = timing_ctx->write[param_index].value;
+      dst_ctx->ignition_advance.value = timing_ctx->write[param_index].value;
+      dst_ctx->ignition_advance.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
   }
@@ -165,19 +167,22 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->allowed = timing_ctx->write[param_index].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false;
+      dst_ctx->allowed.value = timing_ctx->write[param_index].value;
+      dst_ctx->allowed.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_MASS - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->injection_mass = timing_ctx->write[param_index].value;
+      dst_ctx->injection_mass.value = timing_ctx->write[param_index].value;
+      dst_ctx->injection_mass.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_PHASE - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->injection_phase = timing_ctx->write[param_index].value;
+      dst_ctx->injection_phase.value = timing_ctx->write[param_index].value;
+      dst_ctx->injection_phase.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
   }

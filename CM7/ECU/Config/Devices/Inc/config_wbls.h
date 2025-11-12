@@ -11,6 +11,17 @@
 #include "config_devices.h"
 #include "cj125.h"
 
+typedef enum {
+  ECU_DEVICE_WBLS_READ_PARAM_LAMBDA_VALUE = 0,
+  ECU_DEVICE_WBLS_READ_PARAM_OPERATING_STATUS,
+  ECU_DEVICE_WBLS_READ_PARAM_MAX,
+}ecu_device_wbls_read_params_t;
+
+typedef enum {
+  ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE = 0,
+  ECU_DEVICE_WBLS_WRITE_PARAM_MAX,
+}ecu_device_wbls_write_params_t;
+
 error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx);
 error_t ecu_devices_wbls_get_default_config(ecu_device_wbls_t instance, cj125_config_t *config);
 error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_config_t *config);

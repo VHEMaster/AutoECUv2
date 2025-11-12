@@ -110,8 +110,8 @@ typedef struct {
 }ecu_core_runtime_global_injection_group_ctx_t;
 
 typedef struct {
-    bool allowed;
-    float ignition_advance;
+    ecu_core_runtime_value_ctx_t allowed;
+    ecu_core_runtime_value_ctx_t ignition_advance;
 }ecu_core_runtime_global_ignition_input_ctx_t;
 
 typedef struct {
@@ -126,9 +126,9 @@ typedef struct {
 }ecu_core_runtime_global_ignition_ctx_t;
 
 typedef struct {
-    bool allowed;
-    float injection_phase;
-    float injection_mass;
+    ecu_core_runtime_value_ctx_t allowed;
+    ecu_core_runtime_value_ctx_t injection_phase;
+    ecu_core_runtime_value_ctx_t injection_mass;
 }ecu_core_runtime_global_injection_input_ctx_t;
 
 typedef struct {

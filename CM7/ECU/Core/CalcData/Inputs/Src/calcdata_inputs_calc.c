@@ -178,6 +178,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   ecu_core_runtime_banked_source_bank_iat_ctx_t *data_iat[ECU_BANK_MAX];
   const ecu_config_calcdata_setup_iat_t *iat_config_base;
   const ecu_config_calcdata_setup_iat_sensor_t *iat_config[ECU_BANK_MAX];
+  const ecu_core_runtime_global_parameters_sensor_ctx_t *iat_sensdata[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *ect_value[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *iat_value[ECU_BANK_MAX];
   ecu_config_io_iat_t iat_type[ECU_BANK_MAX];
@@ -194,7 +195,12 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
     data_iat[b] = &ctx->runtime.banked.source.banks[b].data_iat;
 
     iat_type[b] = data_iat[b]->active_type;
-    iat_value[b] = ctx->runtime.banked.raw.banks[b].sensors_iat[iat_type[b]];
+    iat_sensdata[b] = ctx->runtime.banked.raw.banks[b].sensors_iat[iat_type[b]];
+    if(iat_sensdata[b] != NULL) {
+      iat_value[b] = &iat_sensdata[b]->read[ECU_SENSOR_IAT_READ_PARAM_DATA];
+    } else {
+      iat_value[b] = NULL;
+    }
     iat_config[b] = &iat_config_base->sensors[iat_type[b]];
   }
 

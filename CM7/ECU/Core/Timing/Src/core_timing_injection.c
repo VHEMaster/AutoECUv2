@@ -52,6 +52,7 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
   ecu_bank_t bank_cy;
 
   bool input_valid;
+  bool input_valid_b[ECU_BANK_MAX];
   bool input_allowed_b[ECU_BANK_MAX];
   float input_injection_phase_b[ECU_BANK_MAX];
   float input_injection_mass_b[ECU_BANK_MAX];
@@ -151,12 +152,16 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
     us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
     us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
-    input_valid = runtime->input_valid;
+    input_valid = banks_count > 0 ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
-      input_allowed_b[b] = runtime->input_banked[b].allowed;
+      input_allowed_b[b] = runtime->input_banked[b].allowed.value;
+      input_valid_b[b] = runtime->input_banked[b].allowed.valid;
       if(input_allowed_b[b]) {
-        input_injection_phase_b[b] = runtime->input_banked[b].injection_phase;
-        input_injection_mass_b[b] = runtime->input_banked[b].injection_mass;
+        input_injection_phase_b[b] = runtime->input_banked[b].injection_phase.value;
+        input_injection_mass_b[b] = runtime->input_banked[b].injection_mass.value;
+        input_valid_b[b] &= runtime->input_banked[b].injection_phase.valid;
+        input_valid_b[b] &= runtime->input_banked[b].injection_mass.valid;
+        input_valid &= input_valid_b[b];
       } else {
         input_injection_phase_b[b] = 360.0f;
         input_injection_mass_b[b] = 0.0f;
@@ -565,8 +570,8 @@ ITCM_FUNC void core_timing_signal_update_injection(ecu_core_ctx_t *ctx)
 
                       runtime_cy->scheduled = true;
 
-                      ignition_acceptance->ignition_advance = ctx->runtime.global.ignition.input_banked[bank_cy].ignition_advance;
-                      ignition_acceptance->valid = true;
+                      ignition_acceptance->ignition_advance = ctx->runtime.global.ignition.input_banked[bank_cy].ignition_advance.value;
+                      ignition_acceptance->valid = ctx->runtime.global.ignition.input_banked[bank_cy].ignition_advance.valid;
                     }
                   } else {
                     if(degrees_before_inject_prev - degrees_before_inject_cur < -90.0f) {

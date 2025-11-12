@@ -11,6 +11,11 @@
 #include "config_sensors.h"
 #include "iat.h"
 
+typedef enum {
+  ECU_SENSOR_IAT_READ_PARAM_DATA = 0,
+  ECU_SENSOR_IAT_READ_PARAM_MAX,
+}ecu_sensor_iat_read_params_t;
+
 error_t ecu_sensors_iat_init(ecu_sensor_iat_t instance, iat_ctx_t *ctx);
 error_t ecu_sensors_iat_get_default_config(ecu_sensor_iat_t instance, iat_config_t *config);
 error_t ecu_sensors_iat_configure(ecu_sensor_iat_t instance, const iat_config_t *config);

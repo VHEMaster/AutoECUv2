@@ -11,6 +11,11 @@
 #include "config_sensors.h"
 #include "map.h"
 
+typedef enum {
+  ECU_SENSOR_MAP_READ_PARAM_DATA = 0,
+  ECU_SENSOR_MAP_READ_PARAM_MAX,
+}ecu_sensor_map_read_params_t;
+
 error_t ecu_sensors_map_init(ecu_sensor_map_t instance, map_ctx_t *ctx);
 error_t ecu_sensors_map_get_default_config(ecu_sensor_map_t instance, map_config_t *config);
 error_t ecu_sensors_map_configure(ecu_sensor_map_t instance, const map_config_t *config);

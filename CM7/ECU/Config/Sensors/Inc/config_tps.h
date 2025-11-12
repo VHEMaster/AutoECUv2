@@ -11,6 +11,11 @@
 #include "config_sensors.h"
 #include "tps.h"
 
+typedef enum {
+  ECU_SENSOR_TPS_READ_PARAM_DATA = 0,
+  ECU_SENSOR_TPS_READ_PARAM_MAX,
+}ecu_sensor_tps_read_params_t;
+
 error_t ecu_sensors_tps_init(ecu_sensor_tps_t instance, tps_ctx_t *ctx);
 error_t ecu_sensors_tps_get_default_config(ecu_sensor_tps_t instance, tps_config_t *config);
 error_t ecu_sensors_tps_configure(ecu_sensor_tps_t instance, const tps_config_t *config);

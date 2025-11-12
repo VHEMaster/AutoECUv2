@@ -53,6 +53,9 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   math_pid_koffs_t pid_rpm_k;
   math_pid_ctx_t *pid_rpm;
 
+  ecu_timing_ignition_write_params_t param_index;
+  ecu_timing_ignition_write_params_t param_index_base;
+
   output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_IGNITION];
   setup_idle = &ctx->calibration->calcdata.setup.idle;
 
@@ -156,13 +159,20 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
       output_value.valid = true;
     }
 
+    param_index_base = ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + ((ECU_TIMING_IGNITION_WRITE_PARAM_B1_END - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + 1) * bank);
+
     if(output_value.valid) {
-      output_ptr->write[bank].ignition_advance = output_value.value;
-      output_ptr->write[bank].allowed = true;
+      param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
+      output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
+      output_ptr->write[param_index].valid = true;
+
+      param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ADVANCE - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
+      output_ptr->write[param_index].value = output_value.value;
+      output_ptr->write[param_index].valid = true;
     } else {
-      output_ptr->write[bank].allowed = false;
+      param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
+      output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_FALSE;
+      output_ptr->write[param_index].valid = true;
     }
   }
-
-  output_ptr->flags.write_valid = true;
 }

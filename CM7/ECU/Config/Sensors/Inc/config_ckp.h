@@ -13,6 +13,11 @@
 
 #define ECU_SENSORS_CKP_CALLBACKS_MAX   16
 
+typedef enum {
+  ECU_SENSOR_CKP_READ_PARAM_DATA = 0,
+  ECU_SENSOR_CKP_READ_PARAM_MAX,
+}ecu_sensor_ckp_read_params_t;
+
 error_t ecu_sensors_ckp_init(ecu_sensor_ckp_t instance, ckp_ctx_t *ctx);
 error_t ecu_sensors_ckp_get_default_config(ecu_sensor_ckp_t instance, ckp_config_t *config);
 error_t ecu_sensors_ckp_configure(ecu_sensor_ckp_t instance, const ckp_config_t *config);

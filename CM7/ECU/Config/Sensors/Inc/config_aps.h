@@ -11,6 +11,11 @@
 #include "config_sensors.h"
 #include "aps.h"
 
+typedef enum {
+  ECU_SENSOR_APS_READ_PARAM_DATA = 0,
+  ECU_SENSOR_APS_READ_PARAM_MAX,
+}ecu_sensor_aps_read_params_t;
+
 error_t ecu_sensors_aps_init(ecu_sensor_aps_t instance, aps_ctx_t *ctx);
 error_t ecu_sensors_aps_get_default_config(ecu_sensor_aps_t instance, aps_config_t *config);
 error_t ecu_sensors_aps_configure(ecu_sensor_aps_t instance, const aps_config_t *config);
