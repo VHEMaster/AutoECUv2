@@ -42,7 +42,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *input_inj_afr;
   const ecu_core_runtime_value_ctx_t *input_cycle_charge;
 
-  ecu_core_runtime_global_parameters_timing_ctx_t *output_ptr;
+  ecu_core_runtime_global_instance_parameters_ctx_t *output_ptr;
 
   float output_inj_phase;
   float output_inj_mass_run;

@@ -6,6 +6,7 @@
  */
 
 #include "config_sensors.h"
+#include "config_global.h"
 #include "compiler.h"
 #include "bool.h"
 
@@ -35,6 +36,9 @@ typedef struct {
     void *ctx;
     bool initialized;
     bool enabled;
+
+    ecu_core_runtime_value_ctx_t *params_read_ptr;
+    ecu_core_runtime_value_ctx_t *params_write_ptr;
 }ecu_config_sensor_instance_t;
 
 typedef struct {
@@ -43,6 +47,8 @@ typedef struct {
     ecu_sensor_loop_func_t loop_fast;
     ecu_sensor_instance_t instance_max;
     ecu_config_sensor_instance_t *instance_first;
+    ecu_runtime_param_index_t params_read_count;
+    ecu_runtime_param_index_t params_write_count;
 }ecu_config_sensor_if_instance_t;
 
 typedef struct {
@@ -63,6 +69,19 @@ static aps_ctx_t ecu_config_aps_ctx[ECU_SENSOR_APS_MAX] = {0};
 static ots_ctx_t ecu_config_ots_ctx[ECU_SENSOR_OTS_MAX] = {0};
 static ops_ctx_t ecu_config_ops_ctx[ECU_SENSOR_OPS_MAX] = {0};
 
+static ecu_core_runtime_value_ctx_t ecu_config_ckp_params_read[ECU_SENSOR_CKP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_cmp_params_read[ECU_SENSOR_CMP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_ect_params_read[ECU_SENSOR_ECT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_egt_params_read[ECU_SENSOR_EGT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_iat_params_read[ECU_SENSOR_IAT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_maf_params_read[ECU_SENSOR_MAF_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_map_params_read[ECU_SENSOR_MAP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_tps_params_read[ECU_SENSOR_TPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_vss_params_read[ECU_SENSOR_VSS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+
 static ecu_config_sensors_t ecu_config_sensors = {
     .interfaces = {
         {
@@ -70,72 +89,96 @@ static ecu_config_sensors_t ecu_config_sensors = {
             .loop_slow = (ecu_sensor_loop_func_t)ckp_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)ckp_loop_fast,
             .instance_max = ECU_SENSOR_CKP_MAX,
+            .params_read_count = ECU_SENSOR_CKP_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_CKP
         {
             .loop_main = (ecu_sensor_loop_func_t)cmp_loop_main,
             .loop_slow = (ecu_sensor_loop_func_t)cmp_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)cmp_loop_fast,
             .instance_max = ECU_SENSOR_CMP_MAX,
+            .params_read_count = ECU_SENSOR_CMP_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_CMP
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ect_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_ECT_MAX,
+            .params_read_count = ECU_SENSOR_ECT_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_ECT
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)egt_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_EGT_MAX,
+            .params_read_count = ECU_SENSOR_EGT_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_EGT
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)iat_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_IAT_MAX,
+            .params_read_count = ECU_SENSOR_IAT_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_IAT
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)maf_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_MAF_MAX,
+            .params_read_count = ECU_SENSOR_MAF_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_MAF
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)map_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_MAP_MAX,
+            .params_read_count = ECU_SENSOR_MAP_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_MAP
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)tps_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_TPS_MAX,
+            .params_read_count = ECU_SENSOR_TPS_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_TPS
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)vss_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_VSS_MAX,
+            .params_read_count = ECU_SENSOR_VSS_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_VSS
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)aps_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_APS_MAX,
+            .params_read_count = ECU_SENSOR_APS_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_APS
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ots_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_OTS_MAX,
+            .params_read_count = ECU_SENSOR_OTS_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_OTS
         {
             .loop_main = (ecu_sensor_loop_func_t)NULL,
             .loop_slow = (ecu_sensor_loop_func_t)ops_loop_slow,
             .loop_fast = (ecu_sensor_loop_func_t)NULL,
             .instance_max = ECU_SENSOR_OPS_MAX,
+            .params_read_count = ECU_SENSOR_OPS_READ_PARAM_MAX,
+            .params_write_count = 0,
         }, //ECU_SENSOR_TYPE_OPS
     },
     .sensors = {
@@ -143,126 +186,176 @@ static ecu_config_sensors_t ecu_config_sensors = {
             .type = ECU_SENSOR_TYPE_CKP,
             .instance = ECU_SENSOR_CKP_1,
             .ctx = &ecu_config_ckp_ctx[ECU_SENSOR_CKP_1],
+            .params_read_ptr = ecu_config_ckp_params_read[ECU_SENSOR_CKP_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_CMP,
             .instance = ECU_SENSOR_CMP_1,
             .ctx = &ecu_config_cmp_ctx[ECU_SENSOR_CMP_1],
+            .params_read_ptr = ecu_config_cmp_params_read[ECU_SENSOR_CMP_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_CMP,
             .instance = ECU_SENSOR_CMP_2,
             .ctx = &ecu_config_cmp_ctx[ECU_SENSOR_CMP_2],
+            .params_read_ptr = ecu_config_cmp_params_read[ECU_SENSOR_CMP_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_CMP,
             .instance = ECU_SENSOR_CMP_3,
             .ctx = &ecu_config_cmp_ctx[ECU_SENSOR_CMP_3],
+            .params_read_ptr = ecu_config_cmp_params_read[ECU_SENSOR_CMP_3],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_CMP,
             .instance = ECU_SENSOR_CMP_4,
             .ctx = &ecu_config_cmp_ctx[ECU_SENSOR_CMP_4],
+            .params_read_ptr = ecu_config_cmp_params_read[ECU_SENSOR_CMP_4],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_ECT,
             .instance = ECU_SENSOR_ECT_1,
             .ctx = &ecu_config_ect_ctx[ECU_SENSOR_ECT_1],
+            .params_read_ptr = ecu_config_ect_params_read[ECU_SENSOR_ECT_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_ECT,
             .instance = ECU_SENSOR_ECT_2,
             .ctx = &ecu_config_ect_ctx[ECU_SENSOR_ECT_2],
+            .params_read_ptr = ecu_config_ect_params_read[ECU_SENSOR_ECT_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_EGT,
             .instance = ECU_SENSOR_EGT_1,
             .ctx = &ecu_config_egt_ctx[ECU_SENSOR_EGT_1],
+            .params_read_ptr = ecu_config_egt_params_read[ECU_SENSOR_EGT_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_EGT,
             .instance = ECU_SENSOR_EGT_2,
             .ctx = &ecu_config_egt_ctx[ECU_SENSOR_EGT_2],
+            .params_read_ptr = ecu_config_egt_params_read[ECU_SENSOR_EGT_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_IAT,
             .instance = ECU_SENSOR_IAT_1,
             .ctx = &ecu_config_iat_ctx[ECU_SENSOR_IAT_1],
+            .params_read_ptr = ecu_config_iat_params_read[ECU_SENSOR_IAT_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_IAT,
             .instance = ECU_SENSOR_IAT_2,
             .ctx = &ecu_config_iat_ctx[ECU_SENSOR_IAT_2],
+            .params_read_ptr = ecu_config_iat_params_read[ECU_SENSOR_IAT_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAF,
             .instance = ECU_SENSOR_MAF_1,
             .ctx = &ecu_config_maf_ctx[ECU_SENSOR_MAF_1],
+            .params_read_ptr = ecu_config_maf_params_read[ECU_SENSOR_MAF_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAF,
             .instance = ECU_SENSOR_MAF_2,
             .ctx = &ecu_config_maf_ctx[ECU_SENSOR_MAF_2],
+            .params_read_ptr = ecu_config_maf_params_read[ECU_SENSOR_MAF_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAP,
             .instance = ECU_SENSOR_MAP_1,
             .ctx = &ecu_config_map_ctx[ECU_SENSOR_MAP_1],
+            .params_read_ptr = ecu_config_map_params_read[ECU_SENSOR_MAP_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAP,
             .instance = ECU_SENSOR_MAP_2,
             .ctx = &ecu_config_map_ctx[ECU_SENSOR_MAP_2],
+            .params_read_ptr = ecu_config_map_params_read[ECU_SENSOR_MAP_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAP,
             .instance = ECU_SENSOR_MAP_3,
             .ctx = &ecu_config_map_ctx[ECU_SENSOR_MAP_3],
+            .params_read_ptr = ecu_config_map_params_read[ECU_SENSOR_MAP_3],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_MAP,
             .instance = ECU_SENSOR_MAP_4,
             .ctx = &ecu_config_map_ctx[ECU_SENSOR_MAP_4],
+            .params_read_ptr = ecu_config_map_params_read[ECU_SENSOR_MAP_4],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_TPS,
             .instance = ECU_SENSOR_TPS_1,
             .ctx = &ecu_config_tps_ctx[ECU_SENSOR_TPS_1],
+            .params_read_ptr = ecu_config_tps_params_read[ECU_SENSOR_TPS_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_TPS,
             .instance = ECU_SENSOR_TPS_2,
             .ctx = &ecu_config_tps_ctx[ECU_SENSOR_TPS_2],
+            .params_read_ptr = ecu_config_tps_params_read[ECU_SENSOR_TPS_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_VSS,
             .instance = ECU_SENSOR_VSS_1,
             .ctx = &ecu_config_vss_ctx[ECU_SENSOR_VSS_1],
+            .params_read_ptr = ecu_config_vss_params_read[ECU_SENSOR_VSS_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_APS,
             .instance = ECU_SENSOR_APS_1,
             .ctx = &ecu_config_aps_ctx[ECU_SENSOR_APS_1],
+            .params_read_ptr = ecu_config_aps_params_read[ECU_SENSOR_APS_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_OTS,
             .instance = ECU_SENSOR_OTS_1,
             .ctx = &ecu_config_ots_ctx[ECU_SENSOR_OTS_1],
+            .params_read_ptr = ecu_config_ots_params_read[ECU_SENSOR_OTS_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_OTS,
             .instance = ECU_SENSOR_OTS_2,
             .ctx = &ecu_config_ots_ctx[ECU_SENSOR_OTS_2],
+            .params_read_ptr = ecu_config_ots_params_read[ECU_SENSOR_OTS_2],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_OPS,
             .instance = ECU_SENSOR_OPS_1,
             .ctx = &ecu_config_ops_ctx[ECU_SENSOR_OPS_1],
+            .params_read_ptr = ecu_config_ops_params_read[ECU_SENSOR_OPS_1],
+            .params_write_ptr = NULL,
         },
         {
             .type = ECU_SENSOR_TYPE_OPS,
             .instance = ECU_SENSOR_OPS_2,
             .ctx = &ecu_config_ops_ctx[ECU_SENSOR_OPS_2],
+            .params_read_ptr = ecu_config_ops_params_read[ECU_SENSOR_OPS_2],
+            .params_write_ptr = NULL,
         },
     },
 };
@@ -514,6 +607,58 @@ error_t ecu_sensors_get_instance_max(ecu_sensor_type_t type, ecu_sensor_instance
 
     interface = &ecu_config_sensors.interfaces[type];
     *instance_max = interface->instance_max;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_get_instance_parameters_read(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  ecu_config_sensor_instance_t *ctx;
+  const ecu_config_sensor_if_instance_t *interface;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(read == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface = &ecu_config_sensors.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+
+    ctx = interface->instance_first;
+    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
+    ctx = &ctx[instance];
+
+    *count = interface->params_read_count;
+    *read = &ctx->params_read_ptr[instance];
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_get_instance_parameters_write(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  ecu_config_sensor_instance_t *ctx;
+  const ecu_config_sensor_if_instance_t *interface;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(write == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface = &ecu_config_sensors.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+
+    ctx = interface->instance_first;
+    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
+    ctx = &ctx[instance];
+
+    *count = interface->params_write_count;
+    *write = &ctx->params_write_ptr[instance];
 
   } while(0);
 

@@ -33,6 +33,5 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx);
 error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max);
 error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t *type_max);
 error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t *instance_max);
-error_t ecu_config_common_get_entity_type_instance_parameter_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t instance, ecu_config_common_entity_parameter_t *parameter_max);
 
 #endif /* CONFIG_COMMON_INC_CONFIG_COMMON_H_ */

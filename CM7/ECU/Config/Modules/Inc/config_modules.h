@@ -32,8 +32,11 @@ error_t ecu_modules_set_module_initialized(ecu_module_type_t type, ecu_module_in
 error_t ecu_modules_get_module_initialized(ecu_module_type_t type, ecu_module_instance_t instance, bool *initialized);
 error_t ecu_modules_set_module_enabled(ecu_module_type_t type, ecu_module_instance_t instance, bool enabled);
 error_t ecu_modules_get_module_enabled(ecu_module_type_t type, ecu_module_instance_t instance, bool *enabled);
+
 error_t ecu_modules_get_type_max(ecu_module_type_t *type_max);
 error_t ecu_modules_get_instance_max(ecu_module_type_t type, ecu_module_instance_t *instance_max);
+error_t ecu_modules_get_instance_parameters_read(ecu_module_type_t type, ecu_module_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count);
+error_t ecu_modules_get_instance_parameters_write(ecu_module_type_t type, ecu_module_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count);
 
 error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx);
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx);

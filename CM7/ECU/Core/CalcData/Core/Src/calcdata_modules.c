@@ -143,7 +143,7 @@ static void calcdata_module_read_timing(ecu_core_ctx_t *ctx, ecu_module_instance
 {
   error_t err;
   timing_data_t data;
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
 
   err = ecu_modules_timing_get_data(instance, &data);
   if(err == E_OK) {
@@ -166,7 +166,7 @@ static void calcdata_module_read_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t 
 {
   error_t err;
   etc_data_t data;
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
 
   err = ecu_modules_etc_get_data(instance, &data);
   if(err == E_OK) {
@@ -187,7 +187,7 @@ static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t 
 {
   error_t err;
   vvt_data_t data;
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
 
   err = ecu_modules_vvt_get_data(instance, &data);
   if(err == E_OK) {
@@ -212,7 +212,7 @@ static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instan
 {
   error_t err;
   ignpower_data_t data;
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
 
   err = ecu_modules_ignpower_get_data(instance, &data);
   if(err == E_OK) {
@@ -227,7 +227,7 @@ static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instan
 
 static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
 
   if(module_ctx->write[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid) {
       (void)ecu_modules_etc_set_enabled(instance, module_ctx->write[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -241,7 +241,7 @@ static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t
 
 static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
 
   if(module_ctx->write[ECU_MODULE_VVT_WRITE_PARAM_ENABLED].valid) {
     (void)ecu_modules_vvt_set_enabled(instance, module_ctx->write[ECU_MODULE_VVT_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -259,7 +259,7 @@ static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t
 
 static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
 
   if(module_ctx->write[ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].valid) {
     (void)ecu_modules_coolingfan_activate_trigger(instance, module_ctx->write[ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -273,7 +273,7 @@ static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_ins
 
 static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
 
   if(module_ctx->write[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].valid) {
     (void)ecu_modules_ignpower_set_operating(instance, module_ctx->write[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -287,7 +287,7 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
 
 static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
 
   if(module_ctx->write[ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].valid) {
     (void)ecu_modules_indication_manual_set(instance, module_ctx->write[ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -297,7 +297,7 @@ static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_ins
 
 static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
 
   if(module_ctx->write[ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].valid) {
     (void)ecu_modules_wgcv_set_enabled(instance, module_ctx->write[ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
@@ -316,7 +316,7 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
 
 static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_TIMING_READ_PARAM_MAX; i++) {
     module_ctx->read[i].valid = false;
@@ -325,7 +325,7 @@ static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_in
 
 static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_ETC_READ_PARAM_MAX; i++) {
     module_ctx->read[i].valid = false;
@@ -337,7 +337,7 @@ static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_insta
 
 static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_VVT_READ_PARAM_MAX; i++) {
     module_ctx->read[i].valid = false;
@@ -349,7 +349,7 @@ static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_insta
 
 static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX; i++) {
     module_ctx->write[i].valid = false;
@@ -358,7 +358,7 @@ static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_modul
 
 static void calcdata_module_invalidate_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_IGNPOWER_READ_PARAM_MAX; i++) {
     module_ctx->read[i].valid = false;
@@ -370,7 +370,7 @@ static void calcdata_module_invalidate_ignpower(ecu_core_ctx_t *ctx, ecu_module_
 
 static void calcdata_module_invalidate_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_INDICATION_WRITE_PARAM_MAX; i++) {
     module_ctx->write[i].valid = false;
@@ -379,7 +379,7 @@ static void calcdata_module_invalidate_indication(ecu_core_ctx_t *ctx, ecu_modul
 
 static void calcdata_module_invalidate_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_parameters_module_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_WGCV_WRITE_PARAM_MAX; i++) {
     module_ctx->write[i].valid = false;

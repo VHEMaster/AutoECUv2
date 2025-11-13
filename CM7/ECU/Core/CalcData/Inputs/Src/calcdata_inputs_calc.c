@@ -178,7 +178,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   ecu_core_runtime_banked_source_bank_iat_ctx_t *data_iat[ECU_BANK_MAX];
   const ecu_config_calcdata_setup_iat_t *iat_config_base;
   const ecu_config_calcdata_setup_iat_sensor_t *iat_config[ECU_BANK_MAX];
-  const ecu_core_runtime_global_parameters_sensor_ctx_t *iat_sensdata[ECU_BANK_MAX];
+  const ecu_core_runtime_global_instance_parameters_ctx_t *iat_sensdata[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *ect_value[ECU_BANK_MAX];
   const ecu_core_runtime_value_ctx_t *iat_value[ECU_BANK_MAX];
   ecu_config_io_iat_t iat_type[ECU_BANK_MAX];

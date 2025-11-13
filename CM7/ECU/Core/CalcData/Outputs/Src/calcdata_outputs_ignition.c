@@ -38,7 +38,7 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   ecu_core_runtime_banked_ignition_bank_ctx_t *ign_bank_ctx;
 
   ecu_core_runtime_value_ctx_t output_value;
-  ecu_core_runtime_global_parameters_timing_ctx_t *output_ptr;
+  ecu_core_runtime_global_instance_parameters_ctx_t *output_ptr;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
   bool idle_flag = ctx->runtime.global.misc.idle_flag;
   bool pos_idle_flag = ctx->runtime.global.misc.pos_idle_flag;

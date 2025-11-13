@@ -94,7 +94,7 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
   bool enabled;
   const ecu_core_calcdata_sensor_ctx_t *sensor_ctx;
   ecu_sensor_instance_t instance_max;
-  ecu_core_runtime_global_parameters_sensor_ctx_t *sensor_value_ctx;
+  ecu_core_runtime_global_instance_parameters_ctx_t *sensor_value_ctx;
   ecu_core_runtime_value_ctx_t *sensor_value_read_ctx;
 
   for(uint32_t type = 0; type < ECU_SENSOR_TYPE_MAX; type++) {

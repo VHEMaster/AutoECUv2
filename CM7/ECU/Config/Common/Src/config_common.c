@@ -40,11 +40,15 @@ typedef struct ecu_config_common_ctx_tag ecu_config_common_ctx_t;
 typedef error_t (*ecu_entity_config_func_t)(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity);
 typedef error_t (*ecu_entity_get_type_max_func_t)(ecu_config_common_entity_type_t *type_max);
 typedef error_t (*ecu_entity_get_instance_max_func_t)(ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t *instance_max);
+typedef error_t (*ecu_entity_get_instance_max_func_t)(ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t *instance_max);
+typedef error_t (*ecu_entity_get_instance_params_read_write_func_t)(ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t instance, ecu_core_runtime_value_ctx_t **params, ecu_runtime_param_index_t *count);
 
 typedef struct {
     ecu_entity_config_func_t configure_func;
     ecu_entity_get_type_max_func_t get_type_max_func;
     ecu_entity_get_instance_max_func_t get_instance_max_func;
+    ecu_entity_get_instance_params_read_write_func_t get_instance_params_read_func;
+    ecu_entity_get_instance_params_read_write_func_t get_instance_params_write_func;
 }ecu_config_common_entity_config_t;
 
 typedef struct {
@@ -52,12 +56,7 @@ typedef struct {
 }ecu_config_common_config_t;
 
 typedef struct {
-    void *data_ptr;
-}ecu_config_common_entity_parameters_ctx_t;
-
-typedef struct {
-    ecu_config_common_entity_parameter_t parameters_count;
-    ecu_config_common_entity_parameters_ctx_t parameters[ECU_ENTITY_PARAMETERS_MAX];
+    ecu_core_runtime_global_instance_parameters_ctx_t *parameters;
 } ecu_config_common_entity_instance_ctx_t;
 
 typedef struct {
@@ -83,16 +82,22 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             .configure_func = ecu_config_common_devices,
             .get_type_max_func = ecu_devices_get_type_max,
             .get_instance_max_func = ecu_devices_get_instance_max,
+            .get_instance_params_read_func = ecu_devices_get_instance_parameters_read,
+            .get_instance_params_write_func = ecu_devices_get_instance_parameters_write,
         }, // ECU_COMMON_ENTITY_DEVICE
         {
             .configure_func = ecu_config_common_sensors,
             .get_type_max_func = ecu_sensors_get_type_max,
             .get_instance_max_func = ecu_sensors_get_instance_max,
+            .get_instance_params_read_func = ecu_sensors_get_instance_parameters_read,
+            .get_instance_params_write_func = ecu_sensors_get_instance_parameters_write,
         }, // ECU_COMMON_ENTITY_SENSOR
         {
             .configure_func = ecu_config_common_modules,
             .get_type_max_func = ecu_modules_get_type_max,
             .get_instance_max_func = ecu_modules_get_instance_max,
+            .get_instance_params_read_func = ecu_modules_get_instance_parameters_read,
+            .get_instance_params_write_func = ecu_modules_get_instance_parameters_write,
         }, // ECU_COMMON_ENTITY_MODULE
     },
 };
@@ -170,31 +175,6 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
   return err;
 }
 
-error_t ecu_config_common_get_entity_type_instance_parameter_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t instance, ecu_config_common_entity_parameter_t *parameter_max)
-{
-  error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  ecu_config_common_entity_type_ctx_t *type_ctx;
-  ecu_config_common_entity_instance_ctx_t *instance_ctx;
-
-  do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
-    BREAK_IF_ACTION(parameter_max == NULL, err = E_PARAM);
-
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
-
-    type_ctx = &entity_ctx->types[type];
-    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
-
-    instance_ctx = &type_ctx->instances[instance];
-    *parameter_max = instance_ctx->parameters_count;
-
-  } while(0);
-
-  return err;
-}
-
 static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity)
 {
   error_t err = E_OK;
@@ -202,6 +182,7 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
   ecu_config_common_entity_type_ctx_t *type_ctx;
   ecu_config_common_entity_instance_ctx_t *instance_ctx;
   const ecu_config_common_entity_config_t *entity_config;
+  ecu_core_runtime_global_instance_parameters_ctx_t *parameters;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -221,11 +202,13 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
 
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
+        parameters = &ctx->runtime.global.parameters.devices[t][i];
+        instance_ctx->parameters = parameters;
 
-        instance_ctx->parameters_count = 0;
-        BREAK_IF_ACTION(instance_ctx->parameters_count > ECU_ENTITY_PARAMETERS_MAX, err = E_FAULT);
+        err = entity_config->get_instance_params_read_func(t, i, &parameters->read, &parameters->read_count);
+        BREAK_IF(err != E_OK);
 
-        // TODO: IMPLEMENT
+        err = entity_config->get_instance_params_write_func(t, i, &parameters->write, &parameters->write_count);
         BREAK_IF(err != E_OK);
 
       }
@@ -246,6 +229,7 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
   ecu_config_common_entity_type_ctx_t *type_ctx;
   ecu_config_common_entity_instance_ctx_t *instance_ctx;
   const ecu_config_common_entity_config_t *entity_config;
+  ecu_core_runtime_global_instance_parameters_ctx_t *parameters;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -265,12 +249,13 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
 
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
+        parameters = &ctx->runtime.global.parameters.sensors[t][i];
+        instance_ctx->parameters = parameters;
 
-        instance_ctx->parameters_count = 1;
-        BREAK_IF_ACTION(instance_ctx->parameters_count > ECU_ENTITY_PARAMETERS_MAX, err = E_FAULT);
+        err = entity_config->get_instance_params_read_func(t, i, &parameters->read, &parameters->read_count);
+        BREAK_IF(err != E_OK);
 
-        // TODO: IMPLEMENT PROPERLY
-        instance_ctx->parameters[0].data_ptr = &ctx->runtime.global.parameters.sensors[t][i];
+        err = entity_config->get_instance_params_write_func(t, i, &parameters->write, &parameters->write_count);
         BREAK_IF(err != E_OK);
       }
       BREAK_IF(err != E_OK);
@@ -290,6 +275,7 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
   ecu_config_common_entity_type_ctx_t *type_ctx;
   ecu_config_common_entity_instance_ctx_t *instance_ctx;
   const ecu_config_common_entity_config_t *entity_config;
+  ecu_core_runtime_global_instance_parameters_ctx_t *parameters;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -309,13 +295,14 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
 
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
+        parameters = &ctx->runtime.global.parameters.modules[t][i];
+        instance_ctx->parameters = parameters;
 
-        instance_ctx->parameters_count = 0;
-        BREAK_IF_ACTION(instance_ctx->parameters_count > ECU_ENTITY_PARAMETERS_MAX, err = E_FAULT);
-
-        // TODO: IMPLEMENT
+        err = entity_config->get_instance_params_read_func(t, i, &parameters->read, &parameters->read_count);
         BREAK_IF(err != E_OK);
 
+        err = entity_config->get_instance_params_write_func(t, i, &parameters->write, &parameters->write_count);
+        BREAK_IF(err != E_OK);
       }
       BREAK_IF(err != E_OK);
     }

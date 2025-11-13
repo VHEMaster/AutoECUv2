@@ -93,8 +93,11 @@ error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_in
 error_t ecu_devices_get_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool *initialized);
 error_t ecu_devices_set_device_enabled(ecu_device_type_t type, ecu_device_instance_t instance, bool enabled);
 error_t ecu_devices_get_device_enabled(ecu_device_type_t type, ecu_device_instance_t instance, bool *enabled);
+
 error_t ecu_devices_get_type_max(ecu_device_type_t *type_max);
 error_t ecu_devices_get_instance_max(ecu_device_type_t type, ecu_device_instance_t *instance_max);
+error_t ecu_devices_get_instance_parameters_read(ecu_device_type_t type, ecu_device_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count);
+error_t ecu_devices_get_instance_parameters_write(ecu_device_type_t type, ecu_device_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count);
 
 error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t **ctx);
 error_t ecu_devices_get_tcs_ctx(ecu_device_tcs_t instance, max31855_ctx_t **ctx);

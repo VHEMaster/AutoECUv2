@@ -21,6 +21,7 @@
 #include "errors.h"
 
 typedef uint32_t ecu_calibration_instance_t;
+typedef uint8_t ecu_runtime_param_index_t;
 
 typedef struct {
     float value;
