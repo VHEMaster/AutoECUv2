@@ -16,8 +16,7 @@
 typedef uint32_t ecu_module_instance_t;
 
 typedef enum {
-  ECU_MODULE_TYPE_TIMING = 0,
-  ECU_MODULE_TYPE_ETC,
+  ECU_MODULE_TYPE_ETC = 0,
   ECU_MODULE_TYPE_VVT,
   ECU_MODULE_TYPE_FUELPUMP,
   ECU_MODULE_TYPE_COOLINGFAN,
@@ -26,11 +25,6 @@ typedef enum {
   ECU_MODULE_TYPE_WGCV,
   ECU_MODULE_TYPE_MAX
 }ecu_module_type_t;
-
-typedef enum {
-  ECU_MODULE_TIMING_1 = 0,
-  ECU_MODULE_TIMING_MAX
-}ecu_module_timing_t;
 
 typedef enum {
   ECU_MODULE_ETC_1 = 0,

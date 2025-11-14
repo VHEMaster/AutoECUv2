@@ -6,7 +6,6 @@
  */
 
 #include "core.h"
-#include "core_timing.h"
 #include "core_powermoding.h"
 #include "core_comm.h"
 #include "calcdata.h"
@@ -38,9 +37,6 @@ void core_init(void)
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     err = ecu_config_common_init(ctx);
-    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-
-    err = ecu_modules_timing_register_cb(ECU_MODULE_TIMING_1, core_timing_signal_update_cb, ctx);
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     err = core_powermoding_init(ctx);

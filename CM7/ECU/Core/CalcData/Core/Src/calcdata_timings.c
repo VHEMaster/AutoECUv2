@@ -59,13 +59,20 @@ void core_calcdata_timings_write(ecu_core_ctx_t *ctx)
 
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
+  error_t err;
   ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION];
-  ecu_core_runtime_global_ignition_ctx_t *dst_ctx = &ctx->runtime.global.ignition;
+  ignition_runtime_ctx_t *dst_ctx;
   ecu_timing_ignition_read_params_t param_index;
   ecu_timing_ignition_read_params_t param_index_base_gr;
   ecu_timing_ignition_read_params_t param_index_base_gr_cy;
 
-  for(int i = 0; i < ECU_CONFIG_IGNITION_GROUP_MAX; i++) {
+  // TODO: assign proper instance
+  err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    BREAKPOINT(0);
+  }
+
+  for(int i = 0; i < IGNITION_CONFIG_GROUP_MAX; i++) {
     param_index_base_gr = ECU_TIMING_IGNITION_READ_PARAM_GR1_START + ((ECU_TIMING_IGNITION_READ_PARAM_GR1_END - ECU_TIMING_IGNITION_READ_PARAM_GR1_START + 1) * i);
     for(ecu_cylinder_t cy = 0; cy < ECU_CYLINDER_MAX; cy++) {
       param_index_base_gr_cy = param_index_base_gr + ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_START + ((ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_END - ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_START + 1) * cy);
@@ -82,12 +89,19 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
+  error_t err;
   ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION];
-  ecu_core_runtime_global_injection_ctx_t *dst_ctx = &ctx->runtime.global.injection;
+  injection_runtime_ctx_t *dst_ctx;
   ecu_timing_injection_write_params_t param_index;
   ecu_timing_injection_write_params_t param_index_base;
 
-  for(int i = 0; i < ECU_CONFIG_INJECTION_GROUP_MAX; i++) {
+  // TODO: assign proper instance
+  err = ecu_timings_injection_get_runtime_data_ptr(ECU_TIMING_INJECTION_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    return;
+  }
+
+  for(int i = 0; i < INJECTION_CONFIG_GROUP_MAX; i++) {
     param_index_base = ECU_TIMING_INJECTION_READ_PARAM_GR1_START + ((ECU_TIMING_INJECTION_READ_PARAM_GR1_END - ECU_TIMING_INJECTION_READ_PARAM_GR1_START + 1) * i);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_PHASE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
@@ -130,25 +144,33 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
+  error_t err;
   ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION];
-  ecu_core_runtime_global_ignition_input_ctx_t *dst_ctx;
+  ignition_runtime_ctx_t *dst_ctx;
+  ignition_runtime_input_ctx_t *input_ctx;
   ecu_timing_ignition_write_params_t param_index;
   ecu_timing_ignition_write_params_t param_index_base;
 
+  // TODO: assign proper instance
+  err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    return;
+  }
+
   for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
-    dst_ctx = &ctx->runtime.global.ignition.input_banked[b];
+    input_ctx = &dst_ctx->input_banked[b];
     param_index_base = ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + ((ECU_TIMING_IGNITION_WRITE_PARAM_B1_END - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + 1) * b);
 
     param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->allowed.value = timing_ctx->write[param_index].value;
-      dst_ctx->allowed.valid = true;
+      input_ctx->allowed.value = timing_ctx->write[param_index].value;
+      input_ctx->allowed.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
     param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ADVANCE - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->ignition_advance.value = timing_ctx->write[param_index].value;
-      dst_ctx->ignition_advance.valid = true;
+      input_ctx->ignition_advance.value = timing_ctx->write[param_index].value;
+      input_ctx->ignition_advance.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
   }
@@ -156,33 +178,41 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 
 static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
+  error_t err;
   ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION];
-  ecu_core_runtime_global_injection_input_ctx_t *dst_ctx;
+  injection_runtime_ctx_t *dst_ctx;
+  injection_runtime_input_ctx_t *input_ctx;
   ecu_timing_injection_write_params_t param_index;
   ecu_timing_injection_write_params_t param_index_base;
 
+  // TODO: assign proper instance
+  err = ecu_timings_injection_get_runtime_data_ptr(ECU_TIMING_INJECTION_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    return;
+  }
+
   for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
-    dst_ctx = &ctx->runtime.global.injection.input_banked[b];
+    input_ctx = &dst_ctx->input_banked[b];
     param_index_base = ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + ((ECU_TIMING_INJECTION_WRITE_PARAM_B1_END - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + 1) * b);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->allowed.value = timing_ctx->write[param_index].value;
-      dst_ctx->allowed.valid = true;
+      input_ctx->allowed.value = timing_ctx->write[param_index].value;
+      input_ctx->allowed.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_MASS - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->injection_mass.value = timing_ctx->write[param_index].value;
-      dst_ctx->injection_mass.valid = true;
+      input_ctx->injection_mass.value = timing_ctx->write[param_index].value;
+      input_ctx->injection_mass.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_PHASE - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
     if(timing_ctx->write[param_index].valid) {
-      dst_ctx->injection_phase.value = timing_ctx->write[param_index].value;
-      dst_ctx->injection_phase.valid = true;
+      input_ctx->injection_phase.value = timing_ctx->write[param_index].value;
+      input_ctx->injection_phase.valid = true;
       timing_ctx->write[param_index].valid = false;
     }
   }

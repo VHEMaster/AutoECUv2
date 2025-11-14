@@ -25,7 +25,6 @@ typedef struct {
     const ecu_core_runtime_global_instance_parameters_ctx_t *modules_coolingfan[ECU_CONFIG_IO_COOLINGFAN_MAX];
     const ecu_core_runtime_global_instance_parameters_ctx_t *modules_ignpower[ECU_CONFIG_IO_IGNPOWER_MAX];
     const ecu_core_runtime_global_instance_parameters_ctx_t *modules_indication[ECU_CONFIG_IO_INDICATION_MAX];
-    const ecu_core_runtime_global_instance_parameters_ctx_t *modules_timing[ECU_CONFIG_IO_TIMING_MAX];
 }ecu_core_runtime_banked_global_parameters_ctx_t;
 
 typedef struct {

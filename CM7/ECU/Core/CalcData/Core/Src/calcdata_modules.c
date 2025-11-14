@@ -10,7 +10,6 @@
 
 #define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
 
-static void calcdata_module_read_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_read_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
@@ -22,7 +21,6 @@ static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_insta
 static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 
-static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
@@ -32,13 +30,6 @@ static void calcdata_module_invalidate_wgcv(ecu_core_ctx_t *ctx, ecu_module_inst
 
 static const ecu_core_calcdata_modules_ctx_t ecu_core_calcdata_modules_ctx = {
     .modules = {
-        {
-            .max = ECU_MODULE_TIMING_MAX,
-            .func_read = calcdata_module_read_timing,
-            .func_write = NULL,
-            .func_invalidate = calcdata_module_invalidate_timing,
-            .userdata = NULL,
-        }, //ECU_MODULE_TYPE_TIMING
         {
             .max = ECU_MODULE_ETC_MAX,
             .func_read = calcdata_module_read_etc,
@@ -135,29 +126,6 @@ void core_calcdata_modules_write(ecu_core_ctx_t *ctx)
           module_ctx->func_invalidate(ctx, instance, module_ctx->userdata);
         }
       }
-    }
-  }
-}
-
-static void calcdata_module_read_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
-{
-  error_t err;
-  timing_data_t data;
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
-
-  err = ecu_modules_timing_get_data(instance, &data);
-  if(err == E_OK) {
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_MODE].value = data.crankshaft.mode;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_MODE].valid = true;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_RPM].value = data.crankshaft.sensor_data.period;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_RPM].valid = true;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_PERIOD].value = data.crankshaft.sensor_data.rpm;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_PERIOD].valid = true;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_REVS_COUNT].value = data.crankshaft.sensor_data.revs_count;
-    module_ctx->read[ECU_MODULE_TIMING_READ_PARAM_REVS_COUNT].valid = true;
-  } else {
-    for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_TIMING_READ_PARAM_MAX; i++) {
-      module_ctx->read[i].valid = false;
     }
   }
 }
@@ -310,16 +278,6 @@ static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_
   if(module_ctx->write[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid) {
     (void)ecu_modules_wgcv_set_dutycycle(instance, module_ctx->write[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].value);
     module_ctx->write[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid = false;
-  }
-}
-
-
-static void calcdata_module_invalidate_timing(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
-{
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_TIMING][instance];
-
-  for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_TIMING_READ_PARAM_MAX; i++) {
-    module_ctx->read[i].valid = false;
   }
 }
 

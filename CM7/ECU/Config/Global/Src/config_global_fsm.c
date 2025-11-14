@@ -419,6 +419,90 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
 
   return err;
 }
+static error_t ecu_config_global_fsm_timing_cfg(ecu_config_global_runtime_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->fsm_timing_cfg) {
+      case ECU_CONFIG_FSM_TIMING_CFG_CONDITION:
+        if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_TIMING_INIT && ctx->process_result == E_AGAIN) {
+          ctx->timings_initialized = false;
+          ctx->process_sens_type = 0;
+          ctx->process_instance = 0;
+          ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_DEFINE;
+          err = E_AGAIN;
+          for(int c = 0; c < ctx->timings_count; c++) {
+            ctx->timings_ctx[c].reset_errcode = err;
+            ctx->timings_ctx[c].config_errcode = err;
+          }
+          continue;
+        } else {
+          err = E_OK;
+        }
+        break;
+      case ECU_CONFIG_FSM_TIMING_CFG_DEFINE:
+        if(ctx->process_sens_type >= ctx->timings_count) {
+          ctx->timings_initialized = true;
+          ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_CONDITION;
+          err = E_OK;
+          ctx->process_result = err;
+        } else {
+          err = E_AGAIN;
+          if(ctx->process_instance >= ctx->timings_config[ctx->process_sens_type].instances_count) {
+            ctx->process_instance = 0;
+            ctx->process_sens_type++;
+          } else {
+            ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_RESET;
+          }
+          continue;
+        }
+
+        break;
+      case ECU_CONFIG_FSM_TIMING_CFG_RESET:
+        if(ctx->timings_config[ctx->process_sens_type].reset_func != NULL) {
+          err = ctx->timings_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->timings_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
+              ctx->timings_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
+            ctx->timings_ctx[ctx->process_sens_type].reset_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_CONFIG;
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_TIMING_CFG_CONFIG:
+        if(ctx->timings_config[ctx->process_sens_type].configure_func != NULL) {
+          err = ctx->timings_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->timings_config[ctx->process_sens_type].generic.data_ptr +
+              ctx->timings_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        } else {
+          err = E_OK;
+        }
+        if(err != E_AGAIN) {
+          if(ctx->timings_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
+              ctx->timings_ctx[ctx->process_sens_type].config_errcode == E_OK) {
+            ctx->timings_ctx[ctx->process_sens_type].config_errcode = err;
+          }
+          err = E_AGAIN;
+          ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_DEFINE;
+          ctx->process_instance++;
+          continue;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
 
 static error_t ecu_config_global_fsm_comms_cfg(ecu_config_global_runtime_ctx_t *ctx)
 {
@@ -517,6 +601,9 @@ static void config_global_internal_calculate_index_max(ecu_config_global_runtime
     case ECU_CONFIG_TYPE_MODULE:
       ctx->op_index_max = ctx->modules_count;
       break;
+    case ECU_CONFIG_TYPE_TIMING:
+      ctx->op_index_max = ctx->timings_count;
+      break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_index_max = ctx->calibrations_count;
       break;
@@ -543,6 +630,9 @@ static void config_global_internal_calculate_instance_max(ecu_config_global_runt
       break;
     case ECU_CONFIG_TYPE_MODULE:
       ctx->op_instance_max = ctx->modules_config[ctx->op_index].instances_count;
+      break;
+    case ECU_CONFIG_TYPE_TIMING:
+      ctx->op_instance_max = ctx->timings_config[ctx->op_index].instances_count;
       break;
     case ECU_CONFIG_TYPE_CALIBRATION:
       ctx->op_instance_max = 1;
@@ -644,6 +734,9 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                 break;
               case ECU_CONFIG_TYPE_MODULE:
                 req_config = &ctx->modules_config[ctx->op_index].generic;
+                break;
+              case ECU_CONFIG_TYPE_TIMING:
+                req_config = &ctx->timings_config[ctx->op_index].generic;
                 break;
               case ECU_CONFIG_TYPE_CALIBRATION:
                 req_config = &ctx->calibrations_config[ctx->op_index];
@@ -990,6 +1083,9 @@ error_t ecu_config_global_fsm(ecu_config_global_runtime_ctx_t *ctx)
         break;
       case ECU_CONFIG_FSM_PROCESS_MODULE_CFG:
         err = ecu_config_global_fsm_module_cfg(ctx);
+        break;
+      case ECU_CONFIG_FSM_PROCESS_TIMING_CFG:
+        err = ecu_config_global_fsm_timing_cfg(ctx);
         break;
       case ECU_CONFIG_FSM_PROCESS_COMM_CFG:
         err = ecu_config_global_fsm_comms_cfg(ctx);

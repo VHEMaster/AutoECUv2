@@ -9,7 +9,6 @@
 #define CONFIG_MODULES_INC_CONFIG_MODULES_H_
 
 #include "errors.h"
-#include "timing.h"
 #include "etc.h"
 #include "vvt.h"
 #include "fuelpump.h"
@@ -38,7 +37,6 @@ error_t ecu_modules_get_instance_max(ecu_module_type_t type, ecu_module_instance
 error_t ecu_modules_get_instance_parameters_read(ecu_module_type_t type, ecu_module_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count);
 error_t ecu_modules_get_instance_parameters_write(ecu_module_type_t type, ecu_module_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count);
 
-error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx);
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx);
 error_t ecu_modules_get_vvt_ctx(ecu_module_vvt_t instance, vvt_ctx_t **ctx);
 error_t ecu_modules_get_fuelpump_ctx(ecu_module_fuelpump_t instance, fuelpump_ctx_t **ctx);

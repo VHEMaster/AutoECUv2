@@ -11,7 +11,6 @@
 #include "bool.h"
 
 #define ECU_MODULES_MAX (       \
-    ECU_MODULE_TIMING_MAX     + \
     ECU_MODULE_ETC_MAX        + \
     ECU_MODULE_VVT_MAX        + \
     ECU_MODULE_FUELPUMP_MAX   + \
@@ -52,7 +51,6 @@ typedef struct {
     ecu_config_module_instance_t modules[ECU_MODULES_MAX];
 }ecu_config_modules_t;
 
-static timing_ctx_t ecu_config_timing_ctx[ECU_MODULE_TIMING_MAX] = {0};
 static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
 static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX] = {0};
 static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {0};
@@ -61,7 +59,6 @@ static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {0};
 static indication_ctx_t ecu_config_indication_ctx[ECU_MODULE_INDICATION_MAX] = {0};
 static wgcv_ctx_t ecu_config_wgcv_ctx[ECU_MODULE_WGCV_MAX] = {0};
 
-static ecu_core_runtime_value_ctx_t ecu_config_timing_params_read[ECU_MODULE_TIMING_MAX][ECU_MODULE_TIMING_READ_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_etc_params_read[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_READ_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_read[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_READ_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_read[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_READ_PARAM_MAX] = {0};
@@ -70,7 +67,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_read[ECU_MODULE_I
 //static ecu_core_runtime_value_ctx_t ecu_config_indication_params_read[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_READ_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_read[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_READ_PARAM_MAX] = {0};
 
-//static ecu_core_runtime_value_ctx_t ecu_config_timing_params_write[ECU_MODULE_TIMING_MAX][ECU_MODULE_TIMING_WRITE_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_etc_params_write[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_WRITE_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_write[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_WRITE_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_write[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_WRITE_PARAM_MAX] = {0};
@@ -81,14 +77,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_write[ECU_MODULE_WGCV
 
 static ecu_config_modules_t ecu_config_modules = {
     .interfaces = {
-        {
-            .loop_slow = (ecu_module_loop_func_t)NULL,
-            .loop_main = (ecu_module_loop_func_t)NULL,
-            .loop_fast = (ecu_module_loop_func_t)NULL,
-            .instance_max = ECU_MODULE_TIMING_MAX,
-            .params_read_count = ECU_MODULE_TIMING_READ_PARAM_MAX,
-            .params_write_count = 0,
-        }, //ECU_MODULE_TYPE_TIMING
         {
             .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_slow = (ecu_module_loop_func_t)etc_loop_slow,
@@ -147,13 +135,6 @@ static ecu_config_modules_t ecu_config_modules = {
         }, //ECU_MODULE_TYPE_WGCV
     },
     .modules = {
-        {
-            .type = ECU_MODULE_TYPE_TIMING,
-            .instance = ECU_MODULE_TIMING_1,
-            .ctx = &ecu_config_timing_ctx[ECU_MODULE_TIMING_1],
-            .params_read_ptr = ecu_config_timing_params_read[ECU_MODULE_TIMING_1],
-            .params_write_ptr = NULL,
-        },
         {
             .type = ECU_MODULE_TYPE_ETC,
             .instance = ECU_MODULE_ETC_1,
@@ -593,11 +574,6 @@ error_t ecu_modules_get_instance_parameters_write(ecu_module_type_t type, ecu_mo
   } while(0);
 
   return err;
-}
-
-error_t ecu_modules_get_timing_ctx(ecu_module_timing_t instance, timing_ctx_t **ctx)
-{
-  return ecu_modules_get_module_ctx(ECU_MODULE_TYPE_TIMING, instance, (void**)ctx);
 }
 
 error_t ecu_modules_get_etc_ctx(ecu_module_etc_t instance, etc_ctx_t **ctx)

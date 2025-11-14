@@ -13,6 +13,7 @@
 
 void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
 {
+  error_t err;
   const ecu_core_runtime_banked_source_ctx_t *ctx_source = &ctx->runtime.banked.source;
   const ecu_config_calcdata_t *ctx_cal_calcdata = &ctx->calibration->calcdata;
   ecu_core_runtime_global_ctx_t *ctx_rt_global = &ctx->runtime.global;
@@ -23,7 +24,8 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
   time_float_s_t running_time_current = ctx_rt_global->misc.running_time_current;
 
   const uint32_t banks_count = ctx_rt_global->banks_count;
-  const ckp_data_t *ckp_data = &ctx->timing_data.crankshaft.sensor_data;
+  const ckp_data_t *ckp_data;
+  timing_base_data_crankshaft_t crankshaft_data;
   float runup_rpm_th_l = ctx_cal_calcdata->setup.runup_rpm_threshold_low;
   float runup_rpm_th_h = ctx_cal_calcdata->setup.runup_rpm_threshold_high;
   const ecu_core_runtime_value_ctx_t *idle_pos_value[ECU_BANK_MAX];
@@ -46,6 +48,13 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
   bool t_rpm_idle_flag;
   float pos_idle_flag_cmp_value;
   float rpm_idle_flag_cmp_value;
+
+  err = timing_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
+  if(err != E_OK) {
+    BREAKPOINT(0);
+  }
+
+  ckp_data = &crankshaft_data.sensor_data;
 
   if(ckp_data->validity >= CKP_DATA_VALID) {
     if(ckp_data->rpm > runup_rpm_th_h) {
@@ -170,6 +179,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
 
 void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
 {
+  error_t err;
   const uint32_t banks_count = ctx->runtime.global.banks_count;
   ecu_core_runtime_value_ctx_t output_value;
   const ecu_core_runtime_value_ctx_t *iat_alpha_blending;
@@ -183,12 +193,18 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   const ecu_core_runtime_value_ctx_t *iat_value[ECU_BANK_MAX];
   ecu_config_io_iat_t iat_type[ECU_BANK_MAX];
   ecu_config_calcdata_output_varianted_index_t calc_variant;
+  timing_base_data_crankshaft_t crankshaft_data;
   const ckp_data_t *crankshaft;
   float blending, blending_volume_sum, lpf_value;
   bool data_iat_valid;
 
+  err = timing_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
+  if(err != E_OK) {
+    BREAKPOINT(0);
+  }
+
   iat_config_base = &ctx->calibration->calcdata.setup.iat_model;
-  crankshaft = &ctx->timing_data.crankshaft.sensor_data;
+  crankshaft = &crankshaft_data.sensor_data;
 
   for(ecu_bank_t b = 0; b < banks_count; b++) {
     ect_value[b] = &ctx->runtime.banked.source.banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT].value;

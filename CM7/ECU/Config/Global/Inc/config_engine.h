@@ -12,6 +12,7 @@
 #include "versioned_runtime.h"
 #include "versioned_devices.h"
 #include "versioned_modules.h"
+#include "versioned_timings.h"
 #include "versioned_comm.h"
 
 typedef struct {
@@ -38,7 +39,6 @@ typedef struct {
 }ecu_config_engine_sens_t;
 
 typedef struct {
-    timing_config_t timing[ECU_MODULE_TIMING_MAX];
     etc_config_t etc[ECU_MODULE_ETC_MAX];
     vvt_config_t vvt[ECU_MODULE_VVT_MAX];
     fuelpump_config_t fuelpump[ECU_MODULE_FUELPUMP_MAX];
@@ -49,12 +49,17 @@ typedef struct {
 }ecu_config_engine_modules_t;
 
 typedef struct {
+    timing_base_config_t base[ECU_TIMING_BASE_MAX];
+    ignition_config_t ignition[ECU_TIMING_IGNITION_MAX];
+    injection_config_t injection[ECU_TIMING_INJECTION_MAX];
+    rough_config_t rough[ECU_TIMING_ROUGH_MAX];
+}ecu_config_engine_timings_t;
+
+typedef struct {
     ecu_config_data_identification_t id;
     ecu_config_io_t io;
     ecu_config_powermoding_t powermoding;
     ecu_config_cylinders_t cylinders;
-    ecu_config_injection_t injection;
-    ecu_config_ignition_t ignition;
     ecu_config_calcdata_t calcdata;
     ecu_config_tables_t tables;
 
@@ -79,6 +84,7 @@ typedef struct {
     ecu_config_engine_devs_t devs;
     ecu_config_engine_sens_t sens;
     ecu_config_engine_modules_t modules;
+    ecu_config_engine_timings_t timings;
     ecu_config_engine_calibration_t calibration;
     ecu_config_engine_runtime_t runtime;
     ecu_config_engine_comm_t comm;

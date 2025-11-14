@@ -72,7 +72,6 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/FuelPump/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
@@ -82,9 +81,11 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/CalcData/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Timings/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Runtime/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Timings/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
@@ -97,7 +98,11 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/PowerModing/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Core/Timing/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Common/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Ignition/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Injection/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Base/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Rough/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>
@@ -182,7 +187,7 @@
 							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.468766965" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults" useByScannerDiscovery="false" value="com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || Build_Release || false || Executable || com.st.stm32cube.ide.mcu.gnu.managedbuild.option.toolchain.value.workspace || STM32H745IITx || 0 || 0 || arm-none-eabi- || ${gnu_tools_for_stm32_compiler_path} || ../Core/Inc | ../../Drivers/STM32H7xx_HAL_Driver/Inc | ../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy | ../../Drivers/CMSIS/Device/ST/STM32H7xx/Include | ../../Drivers/CMSIS/Include | ../Core/ThreadSafe ||  ||  || CORE_CM7 | USE_HAL_DRIVER | STM32H745xx | STM32_THREAD_SAFE_STRATEGY=2 ||  || Core/ThreadSafe | Core/Src | Drivers | Core/Startup | Common ||  ||  || ${workspace_loc:/${ProjName}/STM32H745IITX_FLASH.ld} || true || NonSecure ||  || secure_nsclib.o ||  || Generic_AllowLockFromIRQ ||  ||  || " valueType="string"/>
 							<option id="com.st.stm32cube.ide.mcu.debug.option.cpuclock.596192300" name="Cpu clock frequence" superClass="com.st.stm32cube.ide.mcu.debug.option.cpuclock" useByScannerDiscovery="false" value="240" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform.2139557831" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
-							<builder buildPath="${workspace_loc:/AutoECUv2_CM7}/Release" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.2130241094" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
+							<builder buildPath="${workspace_loc:/AutoECUv2_CM7}/Release" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.2130241094" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.586672628" name="MCU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler">
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel.1046790506" name="Debug level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel.value.g0" valueType="enumerated"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1728902673" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
@@ -224,7 +229,6 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/VVT/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Modules/Timing/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/FuelPump/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Modules/CoolingFan/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Flash/Inc"/>
@@ -234,9 +238,11 @@
 									<listOptionValue builtIn="false" value="../ECU/Config/Calibration/CalcData/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Modules/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Timings/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Devices/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Runtime/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Timings/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Sensors/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Config/Versioned/Modules/Inc"/>
@@ -249,7 +255,11 @@
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Flash/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/PowerModing/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Core/Timing/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Common/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Ignition/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Injection/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Base/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/Rough/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>

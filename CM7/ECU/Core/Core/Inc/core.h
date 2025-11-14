@@ -10,7 +10,6 @@
 
 #include "common.h"
 #include "config_engine.h"
-#include "config_timing.h"
 
 #include "core_runtime.h"
 #include "core_comm_types.h"
@@ -40,13 +39,8 @@ typedef struct {
 
     ecu_core_init_fsm_t fsm_core_init;
 
-    timing_ctx_t *timing_ctx;
-    timing_data_t timing_data;
-    timing_diag_t timing_diag;
-
     ecu_core_runtime_ctx_t runtime;
     ecu_core_powermoding_ctx_t *powermoding;
-    uint32_t process_update_trigger_counter;
 }ecu_core_ctx_t;
 
 void core_init(void);

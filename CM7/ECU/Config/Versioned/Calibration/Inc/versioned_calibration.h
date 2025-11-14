@@ -12,8 +12,6 @@
 #include "versioned_io.h"
 #include "versioned_powermoding.h"
 #include "versioned_cylinders.h"
-#include "versioned_injection.h"
-#include "versioned_ignition.h"
 #include "versioned_calcdata.h"
 #include "versioned_tables.h"
 

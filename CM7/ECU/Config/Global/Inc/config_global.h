@@ -15,6 +15,7 @@
 #include "config_devices.h"
 #include "config_sensors.h"
 #include "config_modules.h"
+#include "config_timings.h"
 #include "config_calibration.h"
 #include "config_comm.h"
 
@@ -37,7 +38,6 @@
 #include "config_ops.h"
 #include "config_ots.h"
 
-#include "config_timing.h"
 #include "config_etc.h"
 #include "config_vvt.h"
 #include "config_fuelpump.h"
@@ -45,6 +45,11 @@
 #include "config_ignpower.h"
 #include "config_indication.h"
 #include "config_wgcv.h"
+
+#include "config_timing_base.h"
+#include "config_ignition.h"
+#include "config_injection.h"
+#include "config_rough.h"
 
 #include "config_id.h"
 #include "config_io.h"
@@ -97,8 +102,7 @@ typedef enum {
 }ecu_config_sensor_type_t;
 
 typedef enum {
-  ECU_CONFIG_MODULE_TYPE_TIMING = 0,
-  ECU_CONFIG_MODULE_TYPE_ETC,
+  ECU_CONFIG_MODULE_TYPE_ETC = 0,
   ECU_CONFIG_MODULE_TYPE_VVT,
   ECU_CONFIG_MODULE_TYPE_FUELPUMP,
   ECU_CONFIG_MODULE_TYPE_COOLINGFAN,
@@ -108,6 +112,15 @@ typedef enum {
   ECU_CONFIG_MODULE_TYPE_ALL,
   ECU_CONFIG_MODULE_TYPE_MAX
 }ecu_config_module_type_t;
+
+typedef enum {
+  ECU_CONFIG_TIMING_TYPE_BASE = 0,
+  ECU_CONFIG_TIMING_TYPE_IGNITION,
+  ECU_CONFIG_TIMING_TYPE_INJECTION,
+  ECU_CONFIG_TIMING_TYPE_ROUGH,
+  ECU_CONFIG_TIMING_TYPE_ALL,
+  ECU_CONFIG_TIMING_TYPE_MAX
+}ecu_config_timing_type_t;
 
 typedef enum {
   ECU_CONFIG_CORE_COMPONENT_TYPE_CYLINDERS = 0,
@@ -120,8 +133,6 @@ typedef enum {
   ECU_CONFIG_CALIB_TYPE_IO,
   ECU_CONFIG_CALIB_TYPE_POWERMODING,
   ECU_CONFIG_CALIB_TYPE_CYLINDERS,
-  ECU_CONFIG_CALIB_TYPE_INJECTION,
-  ECU_CONFIG_CALIB_TYPE_IGNITION,
   ECU_CONFIG_CALIB_TYPE_CALCDATA,
   ECU_CONFIG_CALIB_TYPE_TABLES,
   ECU_CONFIG_CALIB_TYPE_ALL,
@@ -149,6 +160,7 @@ typedef enum {
   ECU_CONFIG_TYPE_DEVICE = 0,
   ECU_CONFIG_TYPE_SENSOR,
   ECU_CONFIG_TYPE_MODULE,
+  ECU_CONFIG_TYPE_TIMING,
   ECU_CONFIG_TYPE_CALIBRATION,
   ECU_CONFIG_TYPE_RUNTIME,
   ECU_CONFIG_TYPE_COMM,
@@ -215,7 +227,7 @@ typedef struct {
     const ecu_config_device_config_t *config;
     error_t reset_errcode;
     error_t config_errcode;
-}ecu_config_device_ctx_t;
+}ecu_config_executive_ctx_t;
 
 typedef enum {
   ECU_CONFIG_FSM_DEVICE_CFG_CONDITION = 0,
@@ -240,6 +252,14 @@ typedef enum {
   ECU_CONFIG_FSM_MODULE_CFG_CONFIG,
   ECU_CONFIG_FSM_MODULE_CFG_MAX
 }ecu_config_global_module_cfg_fsm_t;
+
+typedef enum {
+  ECU_CONFIG_FSM_TIMING_CFG_CONDITION = 0,
+  ECU_CONFIG_FSM_TIMING_CFG_DEFINE,
+  ECU_CONFIG_FSM_TIMING_CFG_RESET,
+  ECU_CONFIG_FSM_TIMING_CFG_CONFIG,
+  ECU_CONFIG_FSM_TIMING_CFG_MAX
+}ecu_config_global_timing_cfg_fsm_t;
 
 typedef enum {
   ECU_CONFIG_FSM_COMM_CFG_CONDITION = 0,
@@ -292,6 +312,7 @@ typedef enum {
   ECU_CONFIG_FSM_PROCESS_DEVICE_CFG,
   ECU_CONFIG_FSM_PROCESS_SENSOR_CFG,
   ECU_CONFIG_FSM_PROCESS_MODULE_CFG,
+  ECU_CONFIG_FSM_PROCESS_TIMING_CFG,
   ECU_CONFIG_FSM_PROCESS_COMM_CFG,
   ECU_CONFIG_FSM_PROCESS_OPERATION,
   ECU_CONFIG_FSM_PROCESS_MAX
@@ -303,6 +324,7 @@ typedef enum {
   ECU_CONFIG_PROCESS_TYPE_DEVICE_INIT,
   ECU_CONFIG_PROCESS_TYPE_SENSOR_INIT,
   ECU_CONFIG_PROCESS_TYPE_MODULE_INIT,
+  ECU_CONFIG_PROCESS_TYPE_TIMING_INIT,
   ECU_CONFIG_PROCESS_TYPE_COMM_INIT,
   ECU_CONFIG_PROCESS_TYPE_FLASH_ERASE,
   ECU_CONFIG_PROCESS_TYPE_MAX,
@@ -310,16 +332,19 @@ typedef enum {
 
 typedef struct {
     const ecu_config_device_config_t *flash_config;
-    ecu_config_device_ctx_t *flash_ctx;
+    ecu_config_executive_ctx_t *flash_ctx;
     uint32_t devices_count;
     const ecu_config_device_config_t *devices_config;
-    ecu_config_device_ctx_t *devices_ctx;
+    ecu_config_executive_ctx_t *devices_ctx;
     uint32_t sensors_count;
     const ecu_config_device_config_t *sensors_config;
-    ecu_config_device_ctx_t *sensors_ctx;
+    ecu_config_executive_ctx_t *sensors_ctx;
     uint32_t modules_count;
     const ecu_config_device_config_t *modules_config;
-    ecu_config_device_ctx_t *modules_ctx;
+    ecu_config_executive_ctx_t *modules_ctx;
+    uint32_t timings_count;
+    const ecu_config_device_config_t *timings_config;
+    ecu_config_executive_ctx_t *timings_ctx;
     uint32_t calibrations_count;
     const ecu_config_generic_config_t *calibrations_config;
     ecu_config_generic_ctx_t *calibrations_ctx;
@@ -328,12 +353,13 @@ typedef struct {
     ecu_config_generic_ctx_t *runtimes_ctx;
     uint32_t comms_count;
     const ecu_config_device_config_t *comms_config;
-    ecu_config_device_ctx_t *comms_ctx;
+    ecu_config_executive_ctx_t *comms_ctx;
     bool global_ready;
     bool devices_initialized;
     bool flash_initialized;
     bool sensors_initialized;
     bool modules_initialized;
+    bool timings_initialized;
     bool comms_initialized;
     bool core_components_initialized;
 
@@ -362,6 +388,7 @@ typedef struct {
     ecu_config_global_device_cfg_fsm_t fsm_device_cfg;
     ecu_config_global_sens_cfg_fsm_t fsm_sensor_cfg;
     ecu_config_global_module_cfg_fsm_t fsm_module_cfg;
+    ecu_config_global_timing_cfg_fsm_t fsm_timing_cfg;
     ecu_config_global_comm_cfg_fsm_t fsm_comm_cfg;
     ecu_config_global_operation_fsm_t fsm_operation;
     ecu_config_global_process_fsm_t fsm_process;
@@ -371,6 +398,7 @@ typedef struct {
     ecu_config_device_type_t process_dev_type;
     ecu_config_sensor_type_t process_sens_type;
     ecu_config_module_type_t process_module_type;
+    ecu_config_timing_type_t process_timing_type;
     ecu_config_comm_type_t process_comm_type;
     ecu_device_instance_t process_instance;
 }ecu_config_global_runtime_ctx_t;
@@ -384,6 +412,7 @@ error_t ecu_config_global_flash_initialize(void);
 error_t ecu_config_global_devices_initialize(void);
 error_t ecu_config_global_sensors_initialize(void);
 error_t ecu_config_global_modules_initialize(void);
+error_t ecu_config_global_timings_initialize(void);
 error_t ecu_config_global_comm_initialize(void);
 
 error_t ecu_config_global_flash_erase(void);

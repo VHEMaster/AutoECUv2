@@ -16,6 +16,7 @@
 
 #include "versioned_devices.h"
 #include "versioned_modules.h"
+#include "versioned_timings.h"
 #include "versioned_comm.h"
 #include "versioned_calibration.h"
 #include "versioned_runtime.h"
@@ -360,26 +361,6 @@ static const ecu_config_device_config_t ecu_config_global_sensor_config[ECU_CONF
 
 static const ecu_config_device_config_t ecu_config_global_module_config[ECU_CONFIG_MODULE_TYPE_ALL] = {
     {
-        .device_type = ECU_MODULE_TYPE_TIMING,
-        .instances_count = ECU_MODULE_TIMING_MAX,
-        .configure_func = (ecu_config_configure_func_t)ecu_modules_timing_configure,
-        .reset_func = (ecu_config_reset_func_t)ecu_modules_timing_reset,
-        .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_MODULE_TIMING,
-            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_modules_timing_get_default_config,
-            .data_ptr = &ecu_config_global_engine.modules.timing[0],
-            .data_size = sizeof(ecu_config_global_engine.modules.timing[0]),
-            .versions_count = TIMING_CONFIG_VERSION_MAX,
-            .versions = {
-                {
-                    .version = TIMING_CONFIG_VERSION_V1,
-                    .size = sizeof(timing_config_v1_t),
-                    .translate_func = NULL,
-                }
-            },
-        },
-    }, //ECU_CONFIG_MODULE_TYPE_TIMING
-    {
         .device_type = ECU_MODULE_TYPE_ETC,
         .instances_count = ECU_MODULE_ETC_MAX,
         .configure_func = (ecu_config_configure_func_t)ecu_modules_etc_configure,
@@ -521,6 +502,89 @@ static const ecu_config_device_config_t ecu_config_global_module_config[ECU_CONF
     }, //ECU_CONFIG_MODULE_TYPE_WGCV
 };
 
+static const ecu_config_device_config_t ecu_config_global_timing_config[ECU_CONFIG_TIMING_TYPE_ALL] = {
+    {
+        .device_type = ECU_TIMING_TYPE_BASE,
+        .instances_count = ECU_TIMING_BASE_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_base_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_base_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_BASE,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_base_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.base[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.base[0]),
+            .versions_count = TIMING_BASE_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = TIMING_BASE_CONFIG_VERSION_V1,
+                    .size = sizeof(timing_base_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_TIMING_TYPE_BASE
+    {
+        .device_type = ECU_TIMING_TYPE_IGNITION,
+        .instances_count = ECU_TIMING_IGNITION_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_ignition_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_ignition_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_IGNITION,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_ignition_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.ignition[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.ignition[0]),
+            .versions_count = IGNITION_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = IGNITION_CONFIG_VERSION_V1,
+                    .size = sizeof(ignition_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_TIMING_TYPE_IGNITION
+    {
+        .device_type = ECU_TIMING_TYPE_INJECTION,
+        .instances_count = ECU_TIMING_INJECTION_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_injection_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_injection_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_INJECTION,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_injection_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.injection[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.injection[0]),
+            .versions_count = INJECTION_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = INJECTION_CONFIG_VERSION_V1,
+                    .size = sizeof(injection_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_TIMING_TYPE_INJECTION
+    {
+        .device_type = ECU_TIMING_TYPE_ROUGH,
+        .instances_count = ECU_TIMING_ROUGH_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_rough_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_rough_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_ROUGH,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_rough_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.rough[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.rough[0]),
+            .versions_count = ROUGH_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = ROUGH_CONFIG_VERSION_V1,
+                    .size = sizeof(rough_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_TIMING_TYPE_ROUGH
+};
+
 static const ecu_config_generic_config_t ecu_config_global_calibration_config[ECU_CONFIG_CALIB_TYPE_ALL] = {
     {
         .flash_section_type = FLASH_SECTION_TYPE_ID,
@@ -578,34 +642,6 @@ static const ecu_config_generic_config_t ecu_config_global_calibration_config[EC
             }
         },
     }, //ECU_CONFIG_CALIB_TYPE_CYLINDERS
-    {
-        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_INJECTION,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_injection_get_default_config,
-        .data_ptr = &ecu_config_global_engine.calibration.injection,
-        .data_size = sizeof(ecu_config_global_engine.calibration.injection),
-        .versions_count = ECU_CONFIG_INJECTION_VERSION_MAX,
-        .versions = {
-            {
-                .version = ECU_CONFIG_INJECTION_VERSION_V1,
-                .size = sizeof(ecu_config_injection_v1_t),
-                .translate_func = NULL,
-            }
-        },
-    }, //ECU_CONFIG_CALIB_TYPE_INJECTION
-    {
-        .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_IGNITION,
-        .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_ignition_get_default_config,
-        .data_ptr = &ecu_config_global_engine.calibration.ignition,
-        .data_size = sizeof(ecu_config_global_engine.calibration.ignition),
-        .versions_count = ECU_CONFIG_IGNITION_VERSION_MAX,
-        .versions = {
-            {
-                .version = ECU_CONFIG_IGNITION_VERSION_V1,
-                .size = sizeof(ecu_config_ignition_v1_t),
-                .translate_func = NULL,
-            }
-        },
-    }, //ECU_CONFIG_CALIB_TYPE_IGNITION
     {
         .flash_section_type = FLASH_SECTION_TYPE_CALIBRATION_CALCDATA,
         .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_calibration_calcdata_get_default_config,
@@ -777,13 +813,14 @@ static const ecu_config_device_config_t ecu_config_global_comms_config[ECU_CONFI
     }, //ECU_CONFIG_COMM_TYPE_ROUTER
 };
 
-static ecu_config_device_ctx_t ecu_config_global_flash_ctx;
-static ecu_config_device_ctx_t ecu_config_global_device_ctx[ECU_CONFIG_DEV_TYPE_ALL];
-static ecu_config_device_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENSOR_TYPE_ALL];
-static ecu_config_device_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TYPE_ALL];
+static ecu_config_executive_ctx_t ecu_config_global_flash_ctx;
+static ecu_config_executive_ctx_t ecu_config_global_device_ctx[ECU_CONFIG_DEV_TYPE_ALL];
+static ecu_config_executive_ctx_t ecu_config_global_sensor_ctx[ECU_CONFIG_SENSOR_TYPE_ALL];
+static ecu_config_executive_ctx_t ecu_config_global_module_ctx[ECU_CONFIG_MODULE_TYPE_ALL];
+static ecu_config_executive_ctx_t ecu_config_global_timing_ctx[ECU_CONFIG_TIMING_TYPE_ALL];
 static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CALIB_TYPE_ALL];
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL];
-static ecu_config_device_ctx_t ecu_config_global_comms_ctx[ECU_CONFIG_COMM_TYPE_ALL];
+static ecu_config_executive_ctx_t ecu_config_global_comms_ctx[ECU_CONFIG_COMM_TYPE_ALL];
 
 static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
 {
@@ -834,6 +871,10 @@ error_t ecu_config_global_init(void)
     ctx->modules_count = ITEMSOF(ecu_config_global_module_config);
     ctx->modules_config = ecu_config_global_module_config;
     ctx->modules_ctx = ecu_config_global_module_ctx;
+
+    ctx->timings_count = ITEMSOF(ecu_config_global_timing_config);
+    ctx->timings_config = ecu_config_global_timing_config;
+    ctx->timings_ctx = ecu_config_global_timing_ctx;
 
     ctx->calibrations_count = ITEMSOF(ecu_config_global_calibration_config);
     ctx->calibrations_config = ecu_config_global_calibration_config;
@@ -892,6 +933,23 @@ error_t ecu_config_global_init(void)
 
         if(ctx->modules_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->modules_config[c].generic.get_default_cfg_func(i, ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i);
+        }
+        BREAK_IF(err != E_OK);
+      }
+    }
+    BREAK_IF(err != E_OK);
+
+    for(int c = 0; c < ctx->timings_count; c++) {
+      ctx->timings_ctx[c].config = &ctx->timings_config[c];
+      for(int i = 0; i < ctx->timings_config[c].instances_count; i++) {
+        err = flash_mem_layout_get_section_info(&section_info, ctx->timings_config[c].generic.flash_section_type, i);
+        BREAK_IF(err != E_OK);
+        BREAK_IF_ACTION(ctx->timings_config[c].generic.versions_count == 0, err = E_INVALACT);
+        BREAK_IF_ACTION((ctx->timings_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
+        BREAK_IF_ACTION(ctx->timings_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
+
+        if(ctx->timings_config[c].generic.get_default_cfg_func != NULL) {
+          err = ctx->timings_config[c].generic.get_default_cfg_func(i, ctx->timings_config[c].generic.data_ptr + ctx->timings_config[c].generic.data_size * i);
         }
         BREAK_IF(err != E_OK);
       }
@@ -1080,6 +1138,30 @@ error_t ecu_config_global_modules_initialize(void)
 
     if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
       ctx->process_type = ECU_CONFIG_PROCESS_TYPE_MODULE_INIT;
+      ctx->process_result = E_AGAIN;
+    } else {
+      if(ctx->process_result != E_AGAIN) {
+        err = ctx->process_result;
+        ctx->process_type = ECU_CONFIG_PROCESS_TYPE_NONE;
+      }
+    }
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_global_timings_initialize(void)
+{
+  error_t err = E_AGAIN;
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  do {
+    BREAK_IF_ACTION(ctx->global_ready == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->op_request != ECU_CONFIG_OP_NONE, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->process_type != ECU_CONFIG_PROCESS_TYPE_NONE && ctx->process_type != ECU_CONFIG_PROCESS_TYPE_TIMING_INIT, err = E_INVALACT);
+
+    if(ctx->process_type == ECU_CONFIG_PROCESS_TYPE_NONE) {
+      ctx->process_type = ECU_CONFIG_PROCESS_TYPE_TIMING_INIT;
       ctx->process_result = E_AGAIN;
     } else {
       if(ctx->process_result != E_AGAIN) {

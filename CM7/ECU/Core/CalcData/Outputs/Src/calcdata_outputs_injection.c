@@ -12,19 +12,21 @@
 
 void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 {
+  error_t err;
   const uint32_t banks_count = ctx->runtime.global.banks_count;
   time_float_s_t runned_time_overall = ctx->runtime.global.misc.runned_time_overall;
   time_float_s_t running_time_current = ctx->runtime.global.misc.running_time_current;
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
   bool idle_flag = ctx->runtime.global.misc.idle_flag;
-  bool turning_flag = ctx->timing_data.crankshaft.sensor_data.validity >= CKP_DATA_VALID;
 
   float startup_large_revs = ctx->calibration->calcdata.setup.startup_large_revs;
   float startup_large_to_small_trans_revs = ctx->calibration->calcdata.setup.startup_large_to_small_trans_revs;
   float startup_transition_reset = ctx->calibration->calcdata.setup.startup_transition_reset;
   float startup_revs_counter = ctx->runtime.global.misc.injection_startup_revs_counter;
-  uint32_t ckp_revs_count = ctx->timing_data.crankshaft.sensor_data.revs_count;
+  uint32_t ckp_revs_count;
+  bool turning_flag;
 
+  timing_base_data_t timing_data;;
   const ecu_core_runtime_banked_source_bank_ctx_t *runtime_banked;
 
   const ecu_core_runtime_value_ctx_t *input_inj_phase_run;
@@ -57,6 +59,14 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   ecu_timing_injection_write_params_t param_index;
   ecu_timing_injection_write_params_t param_index_base;
 
+  // TODO: assign proper instance
+  err = ecu_timings_base_get_data(ECU_TIMING_BASE_1, &timing_data);
+  if(err != E_OK) {
+    BREAKPOINT(0);
+  }
+
+  turning_flag = timing_data.crankshaft.sensor_data.validity >= CKP_DATA_VALID;
+  ckp_revs_count = timing_data.crankshaft.sensor_data.revs_count;
   output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_MAX];
 
   if(!turning_flag) {

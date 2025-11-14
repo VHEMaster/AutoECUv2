@@ -18,70 +18,7 @@
 #include "l9960.h"
 #include "qspi.h"
 
-#define ECU_DEVICE_NONE     (255)
-#define ECU_DEVICE_INSTANCE_MAX (2)
-
-typedef uint32_t ecu_device_instance_t;
-
-typedef enum {
-  ECU_DEVICE_TYPE_PULSEDADC,
-  ECU_DEVICE_TYPE_TCS,
-  ECU_DEVICE_TYPE_FLEXIO,
-  ECU_DEVICE_TYPE_WBLS,
-  ECU_DEVICE_TYPE_STEPPER,
-  ECU_DEVICE_TYPE_OUTPUT,
-  ECU_DEVICE_TYPE_MOTOR,
-  ECU_DEVICE_TYPE_FLASH,
-  ECU_DEVICE_TYPE_MAX
-}ecu_device_type_t;
-
-typedef void (*ecu_device_loop_func_t)(void *ctx);
-
-typedef enum {
-  ECU_DEVICE_PULSEDADC_1 = 0,
-  ECU_DEVICE_PULSEDADC_2,
-  ECU_DEVICE_PULSEDADC_MAX
-}ecu_device_pulsedadc_t;
-
-typedef enum {
-  ECU_DEVICE_TCS_1 = 0,
-  ECU_DEVICE_TCS_2,
-  ECU_DEVICE_TCS_MAX
-}ecu_device_tcs_t;
-
-typedef enum {
-  ECU_DEVICE_FLEXIO_1 = 0,
-  ECU_DEVICE_FLEXIO_2,
-  ECU_DEVICE_FLEXIO_MAX
-}ecu_device_flexio_t;
-
-typedef enum {
-  ECU_DEVICE_WBLS_1 = 0,
-  ECU_DEVICE_WBLS_2,
-  ECU_DEVICE_WBLS_MAX
-}ecu_device_wbls_t;
-
-typedef enum {
-  ECU_DEVICE_STEPPER_1 = 0,
-  ECU_DEVICE_STEPPER_MAX
-}ecu_device_stepper_t;
-
-typedef enum {
-  ECU_DEVICE_OUTPUT_1 = 0,
-  ECU_DEVICE_OUTPUT_2,
-  ECU_DEVICE_OUTPUT_MAX
-}ecu_device_output_t;
-
-typedef enum {
-  ECU_DEVICE_MOTOR_1 = 0,
-  ECU_DEVICE_MOTOR_2,
-  ECU_DEVICE_MOTOR_MAX
-}ecu_device_motor_t;
-
-typedef enum {
-  ECU_DEVICE_FLASH_1 = 0,
-  ECU_DEVICE_FLASH_MAX
-}ecu_device_flash_t;
+#include "config_devices_types.h"
 
 error_t ecu_devices_init(void);
 void ecu_devices_loop_main(void);

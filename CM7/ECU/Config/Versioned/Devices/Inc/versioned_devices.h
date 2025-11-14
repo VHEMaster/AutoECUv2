@@ -8,6 +8,7 @@
 #ifndef CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_DEVICES_H_
 #define CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_DEVICES_H_
 
+#include "config_devices_types.h"
 #include "versioned_flexio.h"
 #include "versioned_motor.h"
 #include "versioned_stepper.h"

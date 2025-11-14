@@ -178,7 +178,6 @@ static void calcdata_virtual_read_devices(ecu_core_ctx_t *ctx)
 
 static void calcdata_virtual_read_modules(ecu_core_ctx_t *ctx)
 {
-  CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_READ(ctx, MODULE, module, TIMING, timing);
   CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_READ(ctx, MODULE, module, ETC, etc);
   CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_READ(ctx, MODULE, module, VVT, vvt);
   //CALCDATA_VIRTUAL_SENSOR_DEVICE_MODULE_READ(ctx, MODULE, module, COOLINGFAN, coolingfan);
