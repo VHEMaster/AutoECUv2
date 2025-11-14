@@ -84,6 +84,8 @@ SECTIONS
     *(.text.HAL_UART_R*)  	/* .text.HAL_* sections */
     *(.text.HAL_USART_T*) 	/* .text.HAL_* sections */
     *(.text.HAL_USART_R*) 	/* .text.HAL_* sections */
+    *(.text.HAL_FDCAN_Get*) /* .text.HAL_* sections */
+    *(.text.HAL_FDCAN_Add*) /* .text.HAL_* sections */
 
     . = ALIGN(4);
     _eitcm_func = .;        /* define a global symbol at data end */

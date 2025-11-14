@@ -16,7 +16,7 @@ typedef struct {
     tle6240_ctx_t *ctx;
 }ecu_devices_output_ctx_t;
 
-static ecu_devices_output_ctx_t ecu_devices_output_ctx[ECU_DEVICE_OUTPUT_MAX] = {
+static RAM_SECTION ecu_devices_output_ctx_t ecu_devices_output_ctx[ECU_DEVICE_OUTPUT_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_OUTS1,
       .init = {

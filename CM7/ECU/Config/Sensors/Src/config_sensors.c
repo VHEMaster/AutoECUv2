@@ -31,6 +31,11 @@ typedef enum {
 }ecu_config_sensor_loop_type_t;
 
 typedef struct {
+    bool initialized;
+    bool enabled;
+}ecu_config_sensor_instance_ctx_t;
+
+typedef struct {
     ecu_sensor_type_t type;
     ecu_sensor_instance_t instance;
     void *ctx;
@@ -39,21 +44,31 @@ typedef struct {
 
     ecu_core_runtime_value_ctx_t *params_read_ptr;
     ecu_core_runtime_value_ctx_t *params_write_ptr;
-}ecu_config_sensor_instance_t;
+}ecu_config_sensor_config_ctx_t;
 
 typedef struct {
     ecu_sensor_loop_func_t loop_main;
     ecu_sensor_loop_func_t loop_slow;
     ecu_sensor_loop_func_t loop_fast;
     ecu_sensor_instance_t instance_max;
-    ecu_config_sensor_instance_t *instance_first;
     ecu_runtime_param_index_t params_read_count;
     ecu_runtime_param_index_t params_write_count;
-}ecu_config_sensor_if_instance_t;
+}ecu_config_sensor_if_config_ctx_t;
 
 typedef struct {
-    ecu_config_sensor_if_instance_t interfaces[ECU_SENSOR_TYPE_MAX];
-    ecu_config_sensor_instance_t sensors[ECU_SENSORS_MAX];
+    uint32_t instance_first;
+}ecu_config_sensor_if_instance_ctx_t;
+
+
+typedef struct {
+  ecu_config_sensor_if_config_ctx_t interfaces[ECU_SENSOR_TYPE_MAX];
+  ecu_config_sensor_config_ctx_t sensors[ECU_SENSORS_MAX];
+}ecu_config_sensors_config_t;
+
+typedef struct {
+    const ecu_config_sensors_config_t *config;
+    ecu_config_sensor_if_instance_ctx_t interfaces[ECU_SENSOR_TYPE_MAX];
+    ecu_config_sensor_instance_ctx_t sensors[ECU_SENSORS_MAX];
 }ecu_config_sensors_t;
 
 static ckp_ctx_t ecu_config_ckp_ctx[ECU_SENSOR_CKP_MAX] = {0};
@@ -82,7 +97,9 @@ static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MA
 static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
 
-static ecu_config_sensors_t ecu_config_sensors = {
+static RAM_SECTION ecu_config_sensors_t ecu_config_sensors_ctx = {0};
+
+static const ecu_config_sensors_config_t ecu_config_sensors = {
     .interfaces = {
         {
             .loop_main = (ecu_sensor_loop_func_t)ckp_loop_main,
@@ -363,30 +380,34 @@ static ecu_config_sensors_t ecu_config_sensors = {
 error_t ecu_sensors_init(void)
 {
   error_t err = E_OK;
-  ecu_config_sensor_if_instance_t *interface;
-  ecu_config_sensor_instance_t *sensor;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
+  const ecu_config_sensor_config_ctx_t *sensor_config;
+  ecu_config_sensor_if_instance_ctx_t *interface_ctx;
+  ecu_config_sensor_instance_ctx_t *sensor_ctx;
 
-  for(int i = 0; i < ITEMSOF(ecu_config_sensors.sensors); i++) {
-    sensor = &ecu_config_sensors.sensors[i];
-    sensor->initialized = false;
+  for(int i = 0; i < ECU_SENSORS_MAX; i++) {
+    sensor_config = &ecu_config_sensors.sensors[i];
+    sensor_ctx = &ecu_config_sensors_ctx.sensors[i];
+    sensor_ctx->initialized = false;
 
-    BREAK_IF_ACTION(sensor->type >= ECU_SENSOR_TYPE_MAX, err = E_FAULT);
-    BREAK_IF_ACTION(sensor->ctx == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(sensor_config->type >= ECU_SENSOR_TYPE_MAX, err = E_FAULT);
+    BREAK_IF_ACTION(sensor_config->ctx == NULL, err = E_FAULT);
 
-    interface = &ecu_config_sensors.interfaces[sensor->type];
-    BREAK_IF_ACTION(sensor->instance >= interface->instance_max, err = E_FAULT);
+    interface_config = &ecu_config_sensors.interfaces[sensor_config->type];
+    BREAK_IF_ACTION(sensor_config->instance >= interface_config->instance_max, err = E_FAULT);
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_sensors.interfaces); i++) {
-    interface = &ecu_config_sensors.interfaces[i];
+    interface_config = &ecu_config_sensors.interfaces[i];
+    interface_ctx = &ecu_config_sensors_ctx.interfaces[i];
 
-    BREAK_IF_ACTION(interface->instance_max > ECU_SENSOR_INSTANCE_MAX, err = E_FAULT);
-    interface->instance_first = NULL;
-    for(int n = 0; n < ITEMSOF(ecu_config_sensors.sensors); n++) {
-      sensor = &ecu_config_sensors.sensors[n];
-      if(sensor->type == i) {
-        BREAK_IF_ACTION(sensor->instance != 0, err = E_FAULT);
-        interface->instance_first = sensor;
+    BREAK_IF_ACTION(interface_config->instance_max > ECU_SENSOR_INSTANCE_MAX, err = E_FAULT);
+    interface_ctx->instance_first = ECU_SENSORS_MAX;
+    for(int n = 0; n < ECU_SENSORS_MAX; n++) {
+      sensor_config = &ecu_config_sensors.sensors[n];
+      if(sensor_config->type == i) {
+        BREAK_IF_ACTION(sensor_config->instance != 0, err = E_FAULT);
+        interface_ctx->instance_first = n;
         break;
       }
     }
@@ -398,48 +419,52 @@ error_t ecu_sensors_init(void)
 
 ITCM_FUNC static void ecu_sensors_loop(ecu_config_sensor_loop_type_t loop_type)
 {
-  ecu_config_sensor_if_instance_t *interface;
-  ecu_config_sensor_instance_t *sensor;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
+  const ecu_config_sensor_config_ctx_t *sensor_config;
+  ecu_config_sensor_instance_ctx_t *sensor_ctx;
   ecu_sensor_type_t if_type;
 
   switch(loop_type) {
     case ECU_SENSOR_LOOP_TYPE_FAST:
-      for(int i = 0; i < ITEMSOF(ecu_config_sensors.sensors); i++) {
-        sensor = &ecu_config_sensors.sensors[i];
-        if(sensor->initialized == true) {
-          if_type = sensor->type;
+      for(int i = 0; i < ECU_SENSORS_MAX; i++) {
+        sensor_ctx = &ecu_config_sensors_ctx.sensors[i];
+        sensor_config = &ecu_config_sensors.sensors[i];
+        if(sensor_ctx->initialized == true) {
+          if_type = sensor_config->type;
           if(if_type < ECU_SENSOR_TYPE_MAX) {
-            interface = &ecu_config_sensors.interfaces[if_type];
-            if(interface->loop_fast != NULL && sensor->ctx != NULL) {
-              interface->loop_fast(sensor->ctx);
+            interface_config = &ecu_config_sensors.interfaces[if_type];
+            if(interface_config->loop_fast != NULL && sensor_config->ctx != NULL) {
+              interface_config->loop_fast(sensor_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_SENSOR_LOOP_TYPE_SLOW:
-      for(int i = 0; i < ITEMSOF(ecu_config_sensors.sensors); i++) {
-        sensor = &ecu_config_sensors.sensors[i];
-        if(sensor->initialized == true) {
-          if_type = sensor->type;
+      for(int i = 0; i < ECU_SENSORS_MAX; i++) {
+        sensor_ctx = &ecu_config_sensors_ctx.sensors[i];
+        sensor_config = &ecu_config_sensors.sensors[i];
+        if(sensor_ctx->initialized == true) {
+          if_type = sensor_config->type;
           if(if_type < ECU_SENSOR_TYPE_MAX) {
-            interface = &ecu_config_sensors.interfaces[if_type];
-            if(interface->loop_slow != NULL && sensor->ctx != NULL) {
-              interface->loop_slow(sensor->ctx);
+            interface_config = &ecu_config_sensors.interfaces[if_type];
+            if(interface_config->loop_slow != NULL && sensor_config->ctx != NULL) {
+              interface_config->loop_slow(sensor_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_SENSOR_LOOP_TYPE_MAIN:
-      for(int i = 0; i < ITEMSOF(ecu_config_sensors.sensors); i++) {
-        sensor = &ecu_config_sensors.sensors[i];
-        if(sensor->initialized == true) {
-          if_type = sensor->type;
+      for(int i = 0; i < ECU_SENSORS_MAX; i++) {
+        sensor_ctx = &ecu_config_sensors_ctx.sensors[i];
+        sensor_config = &ecu_config_sensors.sensors[i];
+        if(sensor_ctx->initialized == true) {
+          if_type = sensor_config->type;
           if(if_type < ECU_SENSOR_TYPE_MAX) {
-            interface = &ecu_config_sensors.interfaces[if_type];
-            if(interface->loop_main != NULL && sensor->ctx != NULL) {
-              interface->loop_main(sensor->ctx);
+            interface_config = &ecu_config_sensors.interfaces[if_type];
+            if(interface_config->loop_main != NULL && sensor_config->ctx != NULL) {
+              interface_config->loop_main(sensor_config->ctx);
             }
           }
         }
@@ -468,15 +493,15 @@ ITCM_FUNC void ecu_sensors_loop_fast(void)
 error_t ecu_sensors_get_sensor_ctx(ecu_sensor_type_t type, ecu_sensor_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
-  ecu_config_sensor_instance_t *sensor;
+  const ecu_config_sensor_config_ctx_t *sensor_config;
 
   if(ctx == NULL) {
     err = E_PARAM;
   } else {
-    for(int i = 0; i < ITEMSOF(ecu_config_sensors.sensors); i++) {
-      sensor = &ecu_config_sensors.sensors[i];
-      if(sensor->type == type && sensor->instance == instance) {
-        *ctx = sensor->ctx;
+    for(int i = 0; i < ECU_SENSORS_MAX; i++) {
+      sensor_config = &ecu_config_sensors.sensors[i];
+      if(sensor_config->type == type && sensor_config->instance == instance) {
+        *ctx = sensor_config->ctx;
         err = E_OK;
         break;
       }
@@ -489,21 +514,25 @@ error_t ecu_sensors_get_sensor_ctx(ecu_sensor_type_t type, ecu_sensor_instance_t
 error_t ecu_sensors_set_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool initialized)
 {
   error_t err = E_FAULT;
-  ecu_config_sensor_instance_t *ctx;
-  ecu_config_sensor_if_instance_t *interface;
+  ecu_config_sensor_instance_ctx_t *ctx;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_SENSOR_TYPE_MAX);
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_SENSORS_MAX);
 
-    ctx = ecu_config_sensors.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->initialized = initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_sensors_ctx.sensors[interface->instance_first];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->initialized = initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -513,21 +542,25 @@ error_t ecu_sensors_set_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_in
 error_t ecu_sensors_get_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool *initialized)
 {
   error_t err = E_FAULT;
-  const ecu_config_sensor_instance_t *ctx;
-  const ecu_config_sensor_if_instance_t *interface;
+  const ecu_config_sensor_instance_ctx_t *ctx;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_SENSOR_TYPE_MAX);
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_SENSORS_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *initialized = ctx->initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_sensors_ctx.sensors[interface->instance_first];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *initialized = ctx->initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -537,21 +570,25 @@ error_t ecu_sensors_get_sensor_initialized(ecu_sensor_type_t type, ecu_sensor_in
 error_t ecu_sensors_set_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool enabled)
 {
   error_t err = E_FAULT;
-  ecu_config_sensor_instance_t *ctx;
-  ecu_config_sensor_if_instance_t *interface;
+  ecu_config_sensor_instance_ctx_t *ctx;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_SENSOR_TYPE_MAX);
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_SENSORS_MAX);
 
-    ctx = ecu_config_sensors.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->enabled = enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_sensors_ctx.sensors[interface->instance_first];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->enabled = enabled;
+      err = E_OK;
     }
   } while(0);
 
@@ -561,21 +598,25 @@ error_t ecu_sensors_set_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instan
 error_t ecu_sensors_get_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instance_t instance, bool *enabled)
 {
   error_t err = E_FAULT;
-  const ecu_config_sensor_instance_t *ctx;
-  const ecu_config_sensor_if_instance_t *interface;
+  const ecu_config_sensor_instance_ctx_t *ctx;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_SENSOR_TYPE_MAX);
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_SENSORS_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *enabled = ctx->enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_sensors_ctx.sensors[interface->instance_first];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *enabled = ctx->enabled;
+      err = E_OK;
     }
   } while(0);
 
@@ -599,14 +640,14 @@ error_t ecu_sensors_get_type_max(ecu_sensor_type_t *type_max)
 error_t ecu_sensors_get_instance_max(ecu_sensor_type_t type, ecu_sensor_instance_t *instance_max)
 {
   error_t err = E_OK;
-  const ecu_config_sensor_if_instance_t *interface;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
 
-    interface = &ecu_config_sensors.interfaces[type];
-    *instance_max = interface->instance_max;
+    interface_config = &ecu_config_sensors.interfaces[type];
+    *instance_max = interface_config->instance_max;
 
   } while(0);
 
@@ -616,23 +657,25 @@ error_t ecu_sensors_get_instance_max(ecu_sensor_type_t type, ecu_sensor_instance
 error_t ecu_sensors_get_instance_parameters_read(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count)
 {
   error_t err = E_OK;
-  ecu_config_sensor_instance_t *ctx;
-  const ecu_config_sensor_if_instance_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
 
   do {
     BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(read == NULL, err = E_PARAM);
     BREAK_IF_ACTION(count == NULL, err = E_PARAM);
 
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface_config->instance_max, err = E_PARAM);
+    BREAK_IF_ACTION(interface->instance_first >= ECU_SENSORS_MAX, err = E_FAULT);
 
-    ctx = interface->instance_first;
-    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
-    ctx = &ctx[instance];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx_config = &ctx_config[instance];
 
-    *count = interface->params_read_count;
-    *read = &ctx->params_read_ptr[instance];
+    *count = interface_config->params_read_count;
+    *read = &ctx_config->params_read_ptr[instance];
 
   } while(0);
 
@@ -642,23 +685,25 @@ error_t ecu_sensors_get_instance_parameters_read(ecu_sensor_type_t type, ecu_sen
 error_t ecu_sensors_get_instance_parameters_write(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count)
 {
   error_t err = E_OK;
-  ecu_config_sensor_instance_t *ctx;
-  const ecu_config_sensor_if_instance_t *interface;
+  const ecu_config_sensor_config_ctx_t *ctx_config;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(write == NULL, err = E_PARAM);
     BREAK_IF_ACTION(count == NULL, err = E_PARAM);
 
-    interface = &ecu_config_sensors.interfaces[type];
-    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface_config->instance_max, err = E_PARAM);
+    BREAK_IF_ACTION(interface->instance_first >= ECU_SENSORS_MAX, err = E_FAULT);
 
-    ctx = interface->instance_first;
-    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
-    ctx = &ctx[instance];
+    ctx_config = &ecu_config_sensors.sensors[interface->instance_first];
+    ctx_config = &ctx_config[instance];
 
-    *count = interface->params_write_count;
-    *write = &ctx->params_write_ptr[instance];
+    *count = interface_config->params_write_count;
+    *write = &ctx_config->params_write_ptr[instance];
 
   } while(0);
 

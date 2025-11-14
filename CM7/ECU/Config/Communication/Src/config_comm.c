@@ -24,24 +24,44 @@ typedef enum {
 }ecu_config_comm_loop_type_t;
 
 typedef struct {
+    bool initialized;
+    bool enabled;
+}ecu_config_comm_instance_ctx_t;
+
+typedef struct {
     ecu_comm_type_t type;
     ecu_comm_instance_t instance;
     void *ctx;
     bool initialized;
     bool enabled;
-}ecu_config_comm_instance_t;
+
+    ecu_core_runtime_value_ctx_t *params_read_ptr;
+    ecu_core_runtime_value_ctx_t *params_write_ptr;
+}ecu_config_comm_config_ctx_t;
 
 typedef struct {
     ecu_comm_loop_func_t loop_main;
     ecu_comm_loop_func_t loop_slow;
     ecu_comm_loop_func_t loop_comm;
     ecu_comm_instance_t instance_max;
-    ecu_config_comm_instance_t *instance_first;
-}ecu_config_comm_if_instance_t;
+    ecu_runtime_param_index_t params_read_count;
+    ecu_runtime_param_index_t params_write_count;
+}ecu_config_comm_if_config_ctx_t;
 
 typedef struct {
-    ecu_config_comm_if_instance_t interfaces[ECU_COMM_TYPE_MAX];
-    ecu_config_comm_instance_t comm[ECU_COMM_MAX];
+    uint32_t instance_first;
+}ecu_config_comm_if_instance_ctx_t;
+
+
+typedef struct {
+  ecu_config_comm_if_config_ctx_t interfaces[ECU_COMM_TYPE_MAX];
+  ecu_config_comm_config_ctx_t comm[ECU_COMM_MAX];
+}ecu_config_comm_config_t;
+
+typedef struct {
+    const ecu_config_comm_config_t *config;
+    ecu_config_comm_if_instance_ctx_t interfaces[ECU_COMM_TYPE_MAX];
+    ecu_config_comm_instance_ctx_t comm[ECU_COMM_MAX];
 }ecu_config_comm_t;
 
 static RAM_SECTION can_ctx_t ecu_config_can_ctx[ECU_COMM_CAN_MAX] = {0};
@@ -51,7 +71,9 @@ static RAM_SECTION uds_ctx_t ecu_config_uds_ctx[ECU_COMM_UDS_MAX] = {0};
 static RAM_SECTION obd2_ctx_t ecu_config_obd2_ctx[ECU_COMM_OBD2_MAX] = {0};
 static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0};
 
-static ecu_config_comm_t ecu_config_comm = {
+static RAM_SECTION ecu_config_comm_t ecu_config_comm_ctx = {0};
+
+static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
         {
             .loop_slow = (ecu_comm_loop_func_t)can_loop_slow,
@@ -152,30 +174,34 @@ static ecu_config_comm_t ecu_config_comm = {
 error_t ecu_comm_init(void)
 {
   error_t err = E_OK;
-  ecu_config_comm_if_instance_t *interface;
-  ecu_config_comm_instance_t *comm;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
+  const ecu_config_comm_config_ctx_t *comm_config;
+  ecu_config_comm_if_instance_ctx_t *interface_ctx;
+  ecu_config_comm_instance_ctx_t *comm_ctx;
 
-  for(int i = 0; i < ITEMSOF(ecu_config_comm.comm); i++) {
-    comm = &ecu_config_comm.comm[i];
-    comm->initialized = false;
+  for(int i = 0; i < ECU_COMM_MAX; i++) {
+    comm_config = &ecu_config_comm.comm[i];
+    comm_ctx = &ecu_config_comm_ctx.comm[i];
+    comm_ctx->initialized = false;
 
-    BREAK_IF_ACTION(comm->type >= ECU_COMM_TYPE_MAX, err = E_FAULT);
-    BREAK_IF_ACTION(comm->ctx == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(comm_config->type >= ECU_COMM_TYPE_MAX, err = E_FAULT);
+    BREAK_IF_ACTION(comm_config->ctx == NULL, err = E_FAULT);
 
-    interface = &ecu_config_comm.interfaces[comm->type];
-    BREAK_IF_ACTION(comm->instance >= interface->instance_max, err = E_FAULT);
+    interface_config = &ecu_config_comm.interfaces[comm_config->type];
+    BREAK_IF_ACTION(comm_config->instance >= interface_config->instance_max, err = E_FAULT);
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_comm.interfaces); i++) {
-    interface = &ecu_config_comm.interfaces[i];
+    interface_config = &ecu_config_comm.interfaces[i];
+    interface_ctx = &ecu_config_comm_ctx.interfaces[i];
 
-    BREAK_IF_ACTION(interface->instance_max > ECU_COMM_INSTANCE_MAX, err = E_FAULT);
-    interface->instance_first = NULL;
-    for(int n = 0; n < ITEMSOF(ecu_config_comm.comm); n++) {
-      comm = &ecu_config_comm.comm[n];
-      if(comm->type == i) {
-        BREAK_IF_ACTION(comm->instance != 0, err = E_FAULT);
-        interface->instance_first = comm;
+    BREAK_IF_ACTION(interface_config->instance_max > ECU_COMM_INSTANCE_MAX, err = E_FAULT);
+    interface_ctx->instance_first = ECU_COMM_MAX;
+    for(int n = 0; n < ECU_COMM_MAX; n++) {
+      comm_config = &ecu_config_comm.comm[n];
+      if(comm_config->type == i) {
+        BREAK_IF_ACTION(comm_config->instance != 0, err = E_FAULT);
+        interface_ctx->instance_first = n;
         break;
       }
     }
@@ -187,48 +213,52 @@ error_t ecu_comm_init(void)
 
 ITCM_FUNC static void ecu_comm_loop(ecu_config_comm_loop_type_t loop_type)
 {
-  ecu_config_comm_if_instance_t *interface;
-  ecu_config_comm_instance_t *comm;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
+  const ecu_config_comm_config_ctx_t *comm_config;
+  ecu_config_comm_instance_ctx_t *comm_ctx;
   ecu_comm_type_t if_type;
 
   switch(loop_type) {
     case ECU_COMM_LOOP_TYPE_COMM:
-      for(int i = 0; i < ITEMSOF(ecu_config_comm.comm); i++) {
-        comm = &ecu_config_comm.comm[i];
-        if(comm->initialized == true) {
-          if_type = comm->type;
+      for(int i = 0; i < ECU_COMM_MAX; i++) {
+        comm_ctx = &ecu_config_comm_ctx.comm[i];
+        comm_config = &ecu_config_comm.comm[i];
+        if(comm_ctx->initialized == true) {
+          if_type = comm_config->type;
           if(if_type < ECU_COMM_TYPE_MAX) {
-            interface = &ecu_config_comm.interfaces[if_type];
-            if(interface->loop_comm != NULL && comm->ctx != NULL) {
-              interface->loop_comm(comm->ctx);
+            interface_config = &ecu_config_comm.interfaces[if_type];
+            if(interface_config->loop_comm != NULL && comm_config->ctx != NULL) {
+              interface_config->loop_comm(comm_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_COMM_LOOP_TYPE_SLOW:
-      for(int i = 0; i < ITEMSOF(ecu_config_comm.comm); i++) {
-        comm = &ecu_config_comm.comm[i];
-        if(comm->initialized == true) {
-          if_type = comm->type;
+      for(int i = 0; i < ECU_COMM_MAX; i++) {
+        comm_ctx = &ecu_config_comm_ctx.comm[i];
+        comm_config = &ecu_config_comm.comm[i];
+        if(comm_ctx->initialized == true) {
+          if_type = comm_config->type;
           if(if_type < ECU_COMM_TYPE_MAX) {
-            interface = &ecu_config_comm.interfaces[if_type];
-            if(interface->loop_slow != NULL && comm->ctx != NULL) {
-              interface->loop_slow(comm->ctx);
+            interface_config = &ecu_config_comm.interfaces[if_type];
+            if(interface_config->loop_slow != NULL && comm_config->ctx != NULL) {
+              interface_config->loop_slow(comm_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_COMM_LOOP_TYPE_MAIN:
-      for(int i = 0; i < ITEMSOF(ecu_config_comm.comm); i++) {
-        comm = &ecu_config_comm.comm[i];
-        if(comm->initialized == true) {
-          if_type = comm->type;
+      for(int i = 0; i < ECU_COMM_MAX; i++) {
+        comm_ctx = &ecu_config_comm_ctx.comm[i];
+        comm_config = &ecu_config_comm.comm[i];
+        if(comm_ctx->initialized == true) {
+          if_type = comm_config->type;
           if(if_type < ECU_COMM_TYPE_MAX) {
-            interface = &ecu_config_comm.interfaces[if_type];
-            if(interface->loop_main != NULL && comm->ctx != NULL) {
-              interface->loop_main(comm->ctx);
+            interface_config = &ecu_config_comm.interfaces[if_type];
+            if(interface_config->loop_main != NULL && comm_config->ctx != NULL) {
+              interface_config->loop_main(comm_config->ctx);
             }
           }
         }
@@ -257,15 +287,15 @@ void ecu_comm_loop_comm(void)
 error_t ecu_comm_get_comm_ctx(ecu_comm_type_t type, ecu_comm_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
-  const ecu_config_comm_instance_t *comm;
+  const ecu_config_comm_config_ctx_t *comm_config;
 
   if(ctx == NULL) {
     err = E_PARAM;
   } else {
-    for(int i = 0; i < ITEMSOF(ecu_config_comm.comm); i++) {
-      comm = &ecu_config_comm.comm[i];
-      if(comm->type == type && comm->instance == instance) {
-        *ctx = comm->ctx;
+    for(int i = 0; i < ECU_COMM_MAX; i++) {
+      comm_config = &ecu_config_comm.comm[i];
+      if(comm_config->type == type && comm_config->instance == instance) {
+        *ctx = comm_config->ctx;
         err = E_OK;
         break;
       }
@@ -278,21 +308,25 @@ error_t ecu_comm_get_comm_ctx(ecu_comm_type_t type, ecu_comm_instance_t instance
 error_t ecu_comm_set_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t instance, bool initialized)
 {
   error_t err = E_FAULT;
-  ecu_config_comm_instance_t *ctx;
-  ecu_config_comm_if_instance_t *interface;
+  ecu_config_comm_instance_ctx_t *ctx;
+  const ecu_config_comm_if_instance_ctx_t *interface;
+  const ecu_config_comm_config_ctx_t *ctx_config;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_COMM_TYPE_MAX);
-    interface = &ecu_config_comm.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_comm.interfaces[type];
+    interface = &ecu_config_comm_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_COMM_MAX);
 
-    ctx = ecu_config_comm.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->initialized = initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_comm_ctx.comm[interface->instance_first];
+    ctx_config = &ecu_config_comm.comm[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->initialized = initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -302,21 +336,25 @@ error_t ecu_comm_set_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t 
 error_t ecu_comm_get_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t instance, bool *initialized)
 {
   error_t err = E_FAULT;
-  const ecu_config_comm_instance_t *ctx;
-  const ecu_config_comm_if_instance_t *interface;
+  const ecu_config_comm_instance_ctx_t *ctx;
+  const ecu_config_comm_if_instance_ctx_t *interface;
+  const ecu_config_comm_config_ctx_t *ctx_config;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_COMM_TYPE_MAX);
-    interface = &ecu_config_comm.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_comm.interfaces[type];
+    interface = &ecu_config_comm_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_COMM_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *initialized = ctx->initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_comm_ctx.comm[interface->instance_first];
+    ctx_config = &ecu_config_comm.comm[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *initialized = ctx->initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -326,21 +364,25 @@ error_t ecu_comm_get_comm_initialized(ecu_comm_type_t type, ecu_comm_instance_t 
 error_t ecu_comm_set_comm_enabled(ecu_comm_type_t type, ecu_comm_instance_t instance, bool enabled)
 {
   error_t err = E_FAULT;
-  ecu_config_comm_instance_t *ctx;
-  ecu_config_comm_if_instance_t *interface;
+  ecu_config_comm_instance_ctx_t *ctx;
+  const ecu_config_comm_if_instance_ctx_t *interface;
+  const ecu_config_comm_config_ctx_t *ctx_config;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_COMM_TYPE_MAX);
-    interface = &ecu_config_comm.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_comm.interfaces[type];
+    interface = &ecu_config_comm_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_COMM_MAX);
 
-    ctx = ecu_config_comm.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->enabled = enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_comm_ctx.comm[interface->instance_first];
+    ctx_config = &ecu_config_comm.comm[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->enabled = enabled;
+      err = E_OK;
     }
   } while(0);
 
@@ -350,21 +392,25 @@ error_t ecu_comm_set_comm_enabled(ecu_comm_type_t type, ecu_comm_instance_t inst
 error_t ecu_comm_get_comm_enabled(ecu_comm_type_t type, ecu_comm_instance_t instance, bool *enabled)
 {
   error_t err = E_FAULT;
-  const ecu_config_comm_instance_t *ctx;
-  const ecu_config_comm_if_instance_t *interface;
+  const ecu_config_comm_instance_ctx_t *ctx;
+  const ecu_config_comm_if_instance_ctx_t *interface;
+  const ecu_config_comm_config_ctx_t *ctx_config;
+  const ecu_config_comm_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_COMM_TYPE_MAX);
-    interface = &ecu_config_comm.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_comm.interfaces[type];
+    interface = &ecu_config_comm_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_COMM_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *enabled = ctx->enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_comm_ctx.comm[interface->instance_first];
+    ctx_config = &ecu_config_comm.comm[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *enabled = ctx->enabled;
+      err = E_OK;
     }
   } while(0);
 

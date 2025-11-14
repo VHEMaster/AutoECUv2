@@ -90,7 +90,7 @@ static const bool ecu_devices_wbls_enabled_default[ECU_DEVICE_WBLS_MAX] = {
     true,
 };
 
-static ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
+static RAM_SECTION ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_WBLS1,
       .init = {

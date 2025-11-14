@@ -61,7 +61,7 @@ static const bool ecu_comm_can_enabled_default[ECU_COMM_CAN_MAX] = {
     true,
 };
 
-static ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
+static RAM_SECTION ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
     {
       .init = {
           .handle = &hfdcan1,

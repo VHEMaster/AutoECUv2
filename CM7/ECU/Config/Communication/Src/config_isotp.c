@@ -34,7 +34,7 @@ static const bool ecu_comm_isotp_enabled_default[ECU_COMM_ISOTP_MAX] = {
     true
 };
 
-static ecu_comm_isotp_ctx_t ecu_comm_isotp_ctx[ECU_COMM_ISOTP_MAX] = {
+static RAM_SECTION ecu_comm_isotp_ctx_t ecu_comm_isotp_ctx[ECU_COMM_ISOTP_MAX] = {
     {
       .init = {
           .error_callback = ecu_comm_isotp_error_callback,

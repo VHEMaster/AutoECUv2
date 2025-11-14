@@ -29,7 +29,7 @@ static const bool ecu_comm_uds_enabled_default[ECU_COMM_UDS_MAX] = {
     true
 };
 
-static ecu_comm_uds_ctx_t ecu_comm_uds_ctx[ECU_COMM_UDS_MAX] = {
+static RAM_SECTION ecu_comm_uds_ctx_t ecu_comm_uds_ctx[ECU_COMM_UDS_MAX] = {
     {
       .init = {
           .error_callback = ecu_comm_uds_error_callback,

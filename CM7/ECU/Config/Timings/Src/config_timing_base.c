@@ -63,7 +63,7 @@ static const bool ecu_timings_base_enabled_default[ECU_TIMING_BASE_MAX] = {
     true
 };
 
-static ecu_timings_base_ctx_t ecu_timings_base_ctx[ECU_TIMING_BASE_MAX] = {
+static RAM_SECTION ecu_timings_base_ctx_t ecu_timings_base_ctx[ECU_TIMING_BASE_MAX] = {
     {
       .init = {
           .ckp_instance = ECU_SENSOR_CKP_1,

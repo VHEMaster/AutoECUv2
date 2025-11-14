@@ -25,7 +25,7 @@ typedef struct {
 }ecu_devices_stepper_ctx_t;
 
 
-static ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_STEPPER_MAX] = {
+static RAM_SECTION ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_STEPPER_MAX] = {
     {
       .input_pwr = ECU_IN_PORT2_VIGN,
       .init = {

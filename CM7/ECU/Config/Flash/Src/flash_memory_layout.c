@@ -887,9 +887,9 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
     },
 };
 
-static uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};
-static uint32_t flash_mem_layout_section_type_to_address[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};
-static uint32_t flash_mem_layout_block_index_to_address[ECU_FLASH_BLOCKS_COUNT] = {0};
+static RAM_SECTION uint16_t flash_mem_layout_section_type_to_section_index[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};
+static RAM_SECTION uint32_t flash_mem_layout_section_type_to_address[FLASH_SECTION_TYPE_MAX][FLASH_SECTION_INDEX_MAX] = {0};
+static RAM_SECTION uint32_t flash_mem_layout_block_index_to_address[ECU_FLASH_BLOCKS_COUNT] = {0};
 
 static const flash_mem_layout_t flash_mem_layout = {
     .mem_size = ECU_FLASH_SIZE * ECU_FLASH_DIES_COUNT,

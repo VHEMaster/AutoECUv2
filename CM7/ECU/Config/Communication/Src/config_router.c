@@ -60,7 +60,7 @@ static const bool ecu_comm_router_enabled_default[ECU_COMM_ROUTER_MAX] = {
     true,
 };
 
-static ecu_comm_router_ctx_t ecu_comm_router_ctx[ECU_COMM_ROUTER_MAX] = {
+static RAM_SECTION ecu_comm_router_ctx_t ecu_comm_router_ctx[ECU_COMM_ROUTER_MAX] = {
     {
       .init = {
           .signal_rx_callback = NULL,

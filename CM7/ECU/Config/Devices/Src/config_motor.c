@@ -57,7 +57,7 @@ static const bool ecu_devices_motor_enabled_default[ECU_DEVICE_MOTOR_MAX] = {
     true
 };
 
-static ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {
+static RAM_SECTION ecu_devices_motor_ctx_t ecu_devices_motor_ctx[ECU_DEVICE_MOTOR_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_OUTSM1,
       .init = {

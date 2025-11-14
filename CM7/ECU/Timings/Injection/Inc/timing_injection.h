@@ -85,6 +85,8 @@ error_t injection_init(injection_ctx_t *ctx, const injection_init_ctx_t *init_ct
 error_t injection_configure(injection_ctx_t *ctx, const injection_config_t *config);
 error_t injection_reset(injection_ctx_t *ctx);
 
+error_t injection_get_runtime_data_ptr(injection_ctx_t *ctx, injection_runtime_ctx_t **runtime_data);
+
 void injection_signal_update_callback(injection_ctx_t *ctx);
 
 #endif /* CORE_CORE_INC_CORE_TIMING_INJECTION_H_ */

@@ -185,7 +185,7 @@ static const bool ecu_timings_ignition_enabled_default[ECU_TIMING_IGNITION_MAX] 
     true
 };
 
-static ecu_timings_ignition_ctx_t ecu_timings_ignition_ctx[ECU_TIMING_IGNITION_MAX] = {
+static RAM_SECTION ecu_timings_ignition_ctx_t ecu_timings_ignition_ctx[ECU_TIMING_IGNITION_MAX] = {
     {
       .init = {
 

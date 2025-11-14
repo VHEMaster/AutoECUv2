@@ -13,7 +13,7 @@
 
 #define ECU_PULSEDADC_SAMPLING_BUFFER_SIZE    2048
 
-static uint16_t ecu_devices_pulsedadc_sambling_buffer[ECU_DEVICE_PULSEDADC_MAX][ECU_PULSEDADC_SAMPLING_BUFFER_SIZE];
+static BUFFER_DMA uint16_t ecu_devices_pulsedadc_sambling_buffer[ECU_DEVICE_PULSEDADC_MAX][ECU_PULSEDADC_SAMPLING_BUFFER_SIZE];
 
 typedef struct {
     pulsedadc_init_ctx_t init;
@@ -21,7 +21,7 @@ typedef struct {
 
 }ecu_devices_pulsedadc_ctx_t;
 
-static ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX] = {
+static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX] = {
     {
         .init = {
             .samples_buffer_size = ECU_PULSEDADC_SAMPLING_BUFFER_SIZE,

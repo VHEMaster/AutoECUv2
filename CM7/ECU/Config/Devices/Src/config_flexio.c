@@ -14,7 +14,7 @@
 typedef struct {
     ecu_spi_slave_enum_t slave_index;
     l9966_init_ctx_t init;
-    l9966_config_t config_default;
+    const l9966_config_t *config_default;
     l9966_ctx_t *ctx;
     uint16_t int_exti_pin;
 }ecu_devices_flexio_ctx_t;
@@ -718,7 +718,7 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
           .int_pin = { .port = FLEXIO1_INT_GPIO_Port, .pin = FLEXIO1_INT_Pin },
           .chip_address = L9966_FRAME_CFG_ADDR_LOW,
       },
-      .config_default = ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_1],
+      .config_default = &ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_1],
       .int_exti_pin = FLEXIO1_INT_Pin,
     },
     {
@@ -730,7 +730,7 @@ static ecu_devices_flexio_ctx_t ecu_devices_flexio_ctx[ECU_DEVICE_FLEXIO_MAX] = 
           .int_pin = { .port = FLEXIO2_INT_GPIO_Port, .pin = FLEXIO2_INT_Pin },
           .chip_address = L9966_FRAME_CFG_ADDR_HIGH,
       },
-      .config_default = ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_2],
+      .config_default = &ecu_devices_flexio_config_default[ECU_DEVICE_FLEXIO_2],
       .int_exti_pin = FLEXIO2_INT_Pin,
     },
 };
@@ -752,7 +752,7 @@ error_t ecu_devices_flexio_init(ecu_device_flexio_t instance, l9966_ctx_t *ctx)
     err = l9966_init(flexio_ctx->ctx, &flexio_ctx->init);
     BREAK_IF(err != E_OK);
 
-    memcpy(&flexio_ctx->ctx->config, &flexio_ctx->config_default, sizeof(l9966_config_t));
+    memcpy(&flexio_ctx->ctx->config, flexio_ctx->config_default, sizeof(l9966_config_t));
 
     err = ecu_config_gpio_exti_register(flexio_ctx->int_exti_pin, (ecu_gpio_exti_cb_t)l9966_int_irq_handler, flexio_ctx->ctx);
     BREAK_IF(err != E_OK);
@@ -775,7 +775,7 @@ error_t ecu_devices_flexio_get_default_config(ecu_device_flexio_t instance, l996
 
     flexio_ctx = &ecu_devices_flexio_ctx[instance];
 
-    memcpy(config, &flexio_ctx->config_default, sizeof(l9966_config_t));
+    memcpy(config, flexio_ctx->config_default, sizeof(l9966_config_t));
 
   } while(0);
 

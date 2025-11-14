@@ -25,7 +25,7 @@ static const bool ecu_timings_rough_enabled_default[ECU_TIMING_ROUGH_MAX] = {
     true
 };
 
-static ecu_timings_rough_ctx_t ecu_timings_rough_ctx[ECU_TIMING_ROUGH_MAX] = {
+static RAM_SECTION ecu_timings_rough_ctx_t ecu_timings_rough_ctx[ECU_TIMING_ROUGH_MAX] = {
     {
       .init = {
 

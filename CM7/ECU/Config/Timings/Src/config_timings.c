@@ -23,6 +23,11 @@ typedef enum {
 }ecu_config_timing_loop_type_t;
 
 typedef struct {
+    bool initialized;
+    bool enabled;
+}ecu_config_timing_instance_ctx_t;
+
+typedef struct {
     ecu_timing_type_t type;
     ecu_timing_instance_t instance;
     void *ctx;
@@ -31,21 +36,31 @@ typedef struct {
 
     ecu_core_runtime_value_ctx_t *params_read_ptr;
     ecu_core_runtime_value_ctx_t *params_write_ptr;
-}ecu_config_timing_instance_t;
+}ecu_config_timing_config_ctx_t;
 
 typedef struct {
     ecu_timing_loop_func_t loop_main;
     ecu_timing_loop_func_t loop_slow;
     ecu_timing_loop_func_t loop_fast;
     ecu_timing_instance_t instance_max;
-    ecu_config_timing_instance_t *instance_first;
     ecu_runtime_param_index_t params_read_count;
     ecu_runtime_param_index_t params_write_count;
-}ecu_config_timing_if_instance_t;
+}ecu_config_timing_if_config_ctx_t;
 
 typedef struct {
-    ecu_config_timing_if_instance_t interfaces[ECU_TIMING_TYPE_MAX];
-    ecu_config_timing_instance_t timings[ECU_TIMINGS_MAX];
+    uint32_t instance_first;
+}ecu_config_timing_if_instance_ctx_t;
+
+
+typedef struct {
+  ecu_config_timing_if_config_ctx_t interfaces[ECU_TIMING_TYPE_MAX];
+  ecu_config_timing_config_ctx_t timings[ECU_TIMINGS_MAX];
+}ecu_config_timings_config_t;
+
+typedef struct {
+    const ecu_config_timings_config_t *config;
+    ecu_config_timing_if_instance_ctx_t interfaces[ECU_TIMING_TYPE_MAX];
+    ecu_config_timing_instance_ctx_t timings[ECU_TIMINGS_MAX];
 }ecu_config_timings_t;
 
 static timing_base_ctx_t ecu_config_timing_ctx[ECU_TIMING_BASE_MAX] = {0};
@@ -63,7 +78,9 @@ static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX] = {0};
 
-static ecu_config_timings_t ecu_config_timings = {
+static RAM_SECTION ecu_config_timings_t ecu_config_timings_ctx = {0};
+
+static const ecu_config_timings_config_t ecu_config_timings = {
     .interfaces = {
         {
             .loop_slow = (ecu_timing_loop_func_t)NULL,
@@ -133,30 +150,34 @@ static ecu_config_timings_t ecu_config_timings = {
 error_t ecu_timings_init(void)
 {
   error_t err = E_OK;
-  ecu_config_timing_if_instance_t *interface;
-  ecu_config_timing_instance_t *timing;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
+  const ecu_config_timing_config_ctx_t *timing_config;
+  ecu_config_timing_if_instance_ctx_t *interface_ctx;
+  ecu_config_timing_instance_ctx_t *timing_ctx;
 
-  for(int i = 0; i < ITEMSOF(ecu_config_timings.timings); i++) {
-    timing = &ecu_config_timings.timings[i];
-    timing->initialized = false;
+  for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
+    timing_config = &ecu_config_timings.timings[i];
+    timing_ctx = &ecu_config_timings_ctx.timings[i];
+    timing_ctx->initialized = false;
 
-    BREAK_IF_ACTION(timing->type >= ECU_TIMING_TYPE_MAX, err = E_FAULT);
-    BREAK_IF_ACTION(timing->ctx == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(timing_config->type >= ECU_TIMING_TYPE_MAX, err = E_FAULT);
+    BREAK_IF_ACTION(timing_config->ctx == NULL, err = E_FAULT);
 
-    interface = &ecu_config_timings.interfaces[timing->type];
-    BREAK_IF_ACTION(timing->instance >= interface->instance_max, err = E_FAULT);
+    interface_config = &ecu_config_timings.interfaces[timing_config->type];
+    BREAK_IF_ACTION(timing_config->instance >= interface_config->instance_max, err = E_FAULT);
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_timings.interfaces); i++) {
-    interface = &ecu_config_timings.interfaces[i];
+    interface_config = &ecu_config_timings.interfaces[i];
+    interface_ctx = &ecu_config_timings_ctx.interfaces[i];
 
-    BREAK_IF_ACTION(interface->instance_max > ECU_TIMING_INSTANCE_MAX, err = E_FAULT);
-    interface->instance_first = NULL;
-    for(int n = 0; n < ITEMSOF(ecu_config_timings.timings); n++) {
-      timing = &ecu_config_timings.timings[n];
-      if(timing->type == i) {
-        BREAK_IF_ACTION(timing->instance != 0, err = E_FAULT);
-        interface->instance_first = timing;
+    BREAK_IF_ACTION(interface_config->instance_max > ECU_TIMING_INSTANCE_MAX, err = E_FAULT);
+    interface_ctx->instance_first = ECU_TIMINGS_MAX;
+    for(int n = 0; n < ECU_TIMINGS_MAX; n++) {
+      timing_config = &ecu_config_timings.timings[n];
+      if(timing_config->type == i) {
+        BREAK_IF_ACTION(timing_config->instance != 0, err = E_FAULT);
+        interface_ctx->instance_first = n;
         break;
       }
     }
@@ -168,48 +189,52 @@ error_t ecu_timings_init(void)
 
 ITCM_FUNC static void ecu_timings_loop(ecu_config_timing_loop_type_t loop_type)
 {
-  ecu_config_timing_if_instance_t *interface;
-  ecu_config_timing_instance_t *timing;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
+  const ecu_config_timing_config_ctx_t *timing_config;
+  ecu_config_timing_instance_ctx_t *timing_ctx;
   ecu_timing_type_t if_type;
 
   switch(loop_type) {
     case ECU_TIMING_LOOP_TYPE_FAST:
-      for(int i = 0; i < ITEMSOF(ecu_config_timings.timings); i++) {
-        timing = &ecu_config_timings.timings[i];
-        if(timing->initialized == true) {
-          if_type = timing->type;
+      for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
+        timing_ctx = &ecu_config_timings_ctx.timings[i];
+        timing_config = &ecu_config_timings.timings[i];
+        if(timing_ctx->initialized == true) {
+          if_type = timing_config->type;
           if(if_type < ECU_TIMING_TYPE_MAX) {
-            interface = &ecu_config_timings.interfaces[if_type];
-            if(interface->loop_fast != NULL && timing->ctx != NULL) {
-              interface->loop_fast(timing->ctx);
+            interface_config = &ecu_config_timings.interfaces[if_type];
+            if(interface_config->loop_fast != NULL && timing_config->ctx != NULL) {
+              interface_config->loop_fast(timing_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_TIMING_LOOP_TYPE_SLOW:
-      for(int i = 0; i < ITEMSOF(ecu_config_timings.timings); i++) {
-        timing = &ecu_config_timings.timings[i];
-        if(timing->initialized == true) {
-          if_type = timing->type;
+      for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
+        timing_ctx = &ecu_config_timings_ctx.timings[i];
+        timing_config = &ecu_config_timings.timings[i];
+        if(timing_ctx->initialized == true) {
+          if_type = timing_config->type;
           if(if_type < ECU_TIMING_TYPE_MAX) {
-            interface = &ecu_config_timings.interfaces[if_type];
-            if(interface->loop_slow != NULL && timing->ctx != NULL) {
-              interface->loop_slow(timing->ctx);
+            interface_config = &ecu_config_timings.interfaces[if_type];
+            if(interface_config->loop_slow != NULL && timing_config->ctx != NULL) {
+              interface_config->loop_slow(timing_config->ctx);
             }
           }
         }
       }
       break;
     case ECU_TIMING_LOOP_TYPE_MAIN:
-      for(int i = 0; i < ITEMSOF(ecu_config_timings.timings); i++) {
-        timing = &ecu_config_timings.timings[i];
-        if(timing->initialized == true) {
-          if_type = timing->type;
+      for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
+        timing_ctx = &ecu_config_timings_ctx.timings[i];
+        timing_config = &ecu_config_timings.timings[i];
+        if(timing_ctx->initialized == true) {
+          if_type = timing_config->type;
           if(if_type < ECU_TIMING_TYPE_MAX) {
-            interface = &ecu_config_timings.interfaces[if_type];
-            if(interface->loop_main != NULL && timing->ctx != NULL) {
-              interface->loop_main(timing->ctx);
+            interface_config = &ecu_config_timings.interfaces[if_type];
+            if(interface_config->loop_main != NULL && timing_config->ctx != NULL) {
+              interface_config->loop_main(timing_config->ctx);
             }
           }
         }
@@ -238,15 +263,15 @@ ITCM_FUNC void ecu_timings_loop_fast(void)
 error_t ecu_timings_get_timing_ctx(ecu_timing_type_t type, ecu_timing_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
-  const ecu_config_timing_instance_t *timing;
+  const ecu_config_timing_config_ctx_t *timing_config;
 
   if(ctx == NULL) {
     err = E_PARAM;
   } else {
-    for(int i = 0; i < ITEMSOF(ecu_config_timings.timings); i++) {
-      timing = &ecu_config_timings.timings[i];
-      if(timing->type == type && timing->instance == instance) {
-        *ctx = timing->ctx;
+    for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
+      timing_config = &ecu_config_timings.timings[i];
+      if(timing_config->type == type && timing_config->instance == instance) {
+        *ctx = timing_config->ctx;
         err = E_OK;
         break;
       }
@@ -259,21 +284,25 @@ error_t ecu_timings_get_timing_ctx(ecu_timing_type_t type, ecu_timing_instance_t
 error_t ecu_timings_set_timing_initialized(ecu_timing_type_t type, ecu_timing_instance_t instance, bool initialized)
 {
   error_t err = E_FAULT;
-  ecu_config_timing_instance_t *ctx;
-  ecu_config_timing_if_instance_t *interface;
+  ecu_config_timing_instance_ctx_t *ctx;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_TIMING_TYPE_MAX);
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_TIMINGS_MAX);
 
-    ctx = ecu_config_timings.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->initialized = initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_timings_ctx.timings[interface->instance_first];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->initialized = initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -283,21 +312,25 @@ error_t ecu_timings_set_timing_initialized(ecu_timing_type_t type, ecu_timing_in
 error_t ecu_timings_get_timing_initialized(ecu_timing_type_t type, ecu_timing_instance_t instance, bool *initialized)
 {
   error_t err = E_FAULT;
-  const ecu_config_timing_instance_t *ctx;
-  const ecu_config_timing_if_instance_t *interface;
+  const ecu_config_timing_instance_ctx_t *ctx;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_TIMING_TYPE_MAX);
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_TIMINGS_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *initialized = ctx->initialized;
-        err = E_OK;
-      }
+    ctx = &ecu_config_timings_ctx.timings[interface->instance_first];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *initialized = ctx->initialized;
+      err = E_OK;
     }
   } while(0);
 
@@ -307,21 +340,25 @@ error_t ecu_timings_get_timing_initialized(ecu_timing_type_t type, ecu_timing_in
 error_t ecu_timings_set_timing_enabled(ecu_timing_type_t type, ecu_timing_instance_t instance, bool enabled)
 {
   error_t err = E_FAULT;
-  ecu_config_timing_instance_t *ctx;
-  ecu_config_timing_if_instance_t *interface;
+  ecu_config_timing_instance_ctx_t *ctx;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_TIMING_TYPE_MAX);
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_TIMINGS_MAX);
 
-    ctx = ecu_config_timings.interfaces[type].instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        ctx->enabled = enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_timings_ctx.timings[interface->instance_first];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      ctx->enabled = enabled;
+      err = E_OK;
     }
   } while(0);
 
@@ -331,21 +368,25 @@ error_t ecu_timings_set_timing_enabled(ecu_timing_type_t type, ecu_timing_instan
 error_t ecu_timings_get_timing_enabled(ecu_timing_type_t type, ecu_timing_instance_t instance, bool *enabled)
 {
   error_t err = E_FAULT;
-  const ecu_config_timing_instance_t *ctx;
-  const ecu_config_timing_if_instance_t *interface;
+  const ecu_config_timing_instance_ctx_t *ctx;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF(type >= ECU_TIMING_TYPE_MAX);
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF(instance >= interface->instance_max);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_TIMINGS_MAX);
 
-    ctx = interface->instance_first;
-    if(ctx != NULL) {
-      ctx = &ctx[instance];
-      if(ctx->type == type && ctx->instance == instance) {
-        *enabled = ctx->enabled;
-        err = E_OK;
-      }
+    ctx = &ecu_config_timings_ctx.timings[interface->instance_first];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx = &ctx[instance];
+    ctx_config = &ctx_config[instance];
+    if(ctx_config->type == type && ctx_config->instance == instance) {
+      *enabled = ctx->enabled;
+      err = E_OK;
     }
   } while(0);
 
@@ -369,14 +410,14 @@ error_t ecu_timings_get_type_max(ecu_timing_type_t *type_max)
 error_t ecu_timings_get_instance_max(ecu_timing_type_t type, ecu_timing_instance_t *instance_max)
 {
   error_t err = E_OK;
-  const ecu_config_timing_if_instance_t *interface;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF_ACTION(type >= ECU_TIMING_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
 
-    interface = &ecu_config_timings.interfaces[type];
-    *instance_max = interface->instance_max;
+    interface_config = &ecu_config_timings.interfaces[type];
+    *instance_max = interface_config->instance_max;
 
   } while(0);
 
@@ -386,23 +427,25 @@ error_t ecu_timings_get_instance_max(ecu_timing_type_t type, ecu_timing_instance
 error_t ecu_timings_get_instance_parameters_read(ecu_timing_type_t type, ecu_timing_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count)
 {
   error_t err = E_OK;
-  ecu_config_timing_instance_t *ctx;
-  const ecu_config_timing_if_instance_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
+  const ecu_config_timing_if_instance_ctx_t *interface;
 
   do {
     BREAK_IF_ACTION(type >= ECU_TIMING_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(read == NULL, err = E_PARAM);
     BREAK_IF_ACTION(count == NULL, err = E_PARAM);
 
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface_config->instance_max, err = E_PARAM);
+    BREAK_IF_ACTION(interface->instance_first >= ECU_TIMINGS_MAX, err = E_FAULT);
 
-    ctx = interface->instance_first;
-    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
-    ctx = &ctx[instance];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx_config = &ctx_config[instance];
 
-    *count = interface->params_read_count;
-    *read = &ctx->params_read_ptr[instance];
+    *count = interface_config->params_read_count;
+    *read = &ctx_config->params_read_ptr[instance];
 
   } while(0);
 
@@ -412,23 +455,25 @@ error_t ecu_timings_get_instance_parameters_read(ecu_timing_type_t type, ecu_tim
 error_t ecu_timings_get_instance_parameters_write(ecu_timing_type_t type, ecu_timing_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count)
 {
   error_t err = E_OK;
-  ecu_config_timing_instance_t *ctx;
-  const ecu_config_timing_if_instance_t *interface;
+  const ecu_config_timing_config_ctx_t *ctx_config;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
 
   do {
     BREAK_IF_ACTION(type >= ECU_TIMING_TYPE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(write == NULL, err = E_PARAM);
     BREAK_IF_ACTION(count == NULL, err = E_PARAM);
 
-    interface = &ecu_config_timings.interfaces[type];
-    BREAK_IF_ACTION(instance >= interface->instance_max, err = E_PARAM);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF_ACTION(instance >= interface_config->instance_max, err = E_PARAM);
+    BREAK_IF_ACTION(interface->instance_first >= ECU_TIMINGS_MAX, err = E_FAULT);
 
-    ctx = interface->instance_first;
-    BREAK_IF_ACTION(ctx == NULL, err = E_NOTRDY);
-    ctx = &ctx[instance];
+    ctx_config = &ecu_config_timings.timings[interface->instance_first];
+    ctx_config = &ctx_config[instance];
 
-    *count = interface->params_write_count;
-    *write = &ctx->params_write_ptr[instance];
+    *count = interface_config->params_write_count;
+    *write = &ctx_config->params_write_ptr[instance];
 
   } while(0);
 

@@ -27,7 +27,7 @@ static const bool ecu_comm_kwp_enabled_default[ECU_COMM_KWP_MAX] = {
     true
 };
 
-static ecu_comm_kwp_ctx_t ecu_comm_kwp_ctx[ECU_COMM_KWP_MAX] = {
+static RAM_SECTION ecu_comm_kwp_ctx_t ecu_comm_kwp_ctx[ECU_COMM_KWP_MAX] = {
     {
       .init = {
 

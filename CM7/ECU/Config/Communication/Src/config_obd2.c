@@ -29,7 +29,7 @@ static const bool ecu_comm_obd2_enabled_default[ECU_COMM_OBD2_MAX] = {
     true
 };
 
-static ecu_comm_obd2_ctx_t ecu_comm_obd2_ctx[ECU_COMM_OBD2_MAX] = {
+static RAM_SECTION ecu_comm_obd2_ctx_t ecu_comm_obd2_ctx[ECU_COMM_OBD2_MAX] = {
     {
       .init = {
           .error_callback = ecu_comm_obd2_error_callback,

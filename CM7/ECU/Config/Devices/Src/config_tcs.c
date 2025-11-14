@@ -16,7 +16,7 @@ typedef struct {
     max31855_ctx_t *ctx;
 }ecu_devices_tcs_ctx_t;
 
-static ecu_devices_tcs_ctx_t ecu_devices_tcs_ctx[ECU_DEVICE_TCS_MAX] = {
+static RAM_SECTION ecu_devices_tcs_ctx_t ecu_devices_tcs_ctx[ECU_DEVICE_TCS_MAX] = {
     {
       .slave_index = ECU_SPI_SLAVE_TCS1,
     },
