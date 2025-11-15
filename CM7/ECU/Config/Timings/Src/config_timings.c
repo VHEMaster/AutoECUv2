@@ -504,7 +504,7 @@ error_t ecu_timings_get_ignition_ctx(ecu_timing_base_t instance, ignition_ctx_t 
 
 error_t ecu_timings_get_injection_ctx(ecu_timing_base_t instance, injection_ctx_t **ctx)
 {
-  return ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_IGNITION, instance, (void**)ctx);
+  return ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_INJECTION, instance, (void**)ctx);
 }
 
 error_t ecu_timings_get_rough_ctx(ecu_timing_base_t instance, rough_ctx_t **ctx)

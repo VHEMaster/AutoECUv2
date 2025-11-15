@@ -108,7 +108,7 @@ error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx
 
     memcpy(&timing_ctx->ctx->config, &timing_ctx->config_default, sizeof(timing_base_config_t));
 
-    err = ecu_timings_base_register_cb(instance, timing_base_signal_update_cb, timing_ctx);
+    err = ecu_timings_base_register_cb(instance, timing_base_signal_update_cb, timing_ctx->ctx);
     BREAK_IF(err != E_OK);
 
     err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_BASE, instance, false);
