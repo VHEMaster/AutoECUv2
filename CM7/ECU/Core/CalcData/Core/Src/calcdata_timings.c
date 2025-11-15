@@ -60,7 +60,7 @@ void core_calcdata_timings_write(ecu_core_ctx_t *ctx)
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION];
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1];
   ignition_runtime_ctx_t *dst_ctx;
   ecu_timing_ignition_read_params_t param_index;
   ecu_timing_ignition_read_params_t param_index_base_gr;
@@ -90,7 +90,7 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION];
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1];
   injection_runtime_ctx_t *dst_ctx;
   ecu_timing_injection_write_params_t param_index;
   ecu_timing_injection_write_params_t param_index_base;
@@ -145,7 +145,7 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION];
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1];
   ignition_runtime_ctx_t *dst_ctx;
   ignition_runtime_input_ctx_t *input_ctx;
   ecu_timing_ignition_write_params_t param_index;
@@ -179,7 +179,7 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION];
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1];
   injection_runtime_ctx_t *dst_ctx;
   injection_runtime_input_ctx_t *input_ctx;
   ecu_timing_injection_write_params_t param_index;

@@ -65,12 +65,12 @@ static rough_ctx_t ecu_config_rough_ctx[ECU_TIMING_ROUGH_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_read[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_read[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_read[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_read[ECU_TIMING_ROUGH_MAX][ECU_TIMING_BASE_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_read[ECU_TIMING_ROUGH_MAX][ECU_TIMING_ROUGH_READ_PARAM_MAX];
 
 static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_ROUGH_WRITE_PARAM_MAX];
 
 static const ecu_config_timings_config_t ecu_config_timings = {
     .interfaces = {
@@ -104,7 +104,7 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .loop_fast = (ecu_timing_loop_func_t)NULL,
             .instance_max = ECU_TIMING_ROUGH_MAX,
             .params_read_count = ECU_TIMING_ROUGH_READ_PARAM_MAX,
-            .params_write_count = ECU_TIMING_BASE_WRITE_PARAM_MAX,
+            .params_write_count = ECU_TIMING_ROUGH_WRITE_PARAM_MAX,
         }, //ECU_TIMING_TYPE_ROUGH
     },
     .timings = {

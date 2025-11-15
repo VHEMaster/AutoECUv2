@@ -56,7 +56,7 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
   ecu_timing_ignition_write_params_t param_index;
   ecu_timing_ignition_write_params_t param_index_base;
 
-  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_IGNITION];
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1];
   setup_idle = &ctx->calibration->calcdata.setup.idle;
 
   for(ecu_bank_t bank = 0; bank < banks_count; bank++) {

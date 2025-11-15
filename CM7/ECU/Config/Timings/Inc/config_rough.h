@@ -11,8 +11,12 @@
 #include "versioned_timings.h"
 
 typedef enum {
-  ECU_TIMING_ROUGH_READ_PARAM_MAX,
+  ECU_TIMING_ROUGH_READ_PARAM_MAX
 }ecu_timing_rough_read_params_t;
+
+typedef enum {
+  ECU_TIMING_ROUGH_WRITE_PARAM_MAX
+}ecu_timing_rough_write_params_t;
 
 error_t ecu_timings_rough_init(ecu_timing_rough_t instance, rough_ctx_t *ctx);
 error_t ecu_timings_rough_get_default_config(ecu_timing_rough_t instance, rough_config_t *config);

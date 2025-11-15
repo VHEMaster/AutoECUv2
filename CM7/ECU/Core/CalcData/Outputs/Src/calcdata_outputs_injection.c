@@ -67,7 +67,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
 
   turning_flag = timing_data.crankshaft.sensor_data.validity >= CKP_DATA_VALID;
   ckp_revs_count = timing_data.crankshaft.sensor_data.revs_count;
-  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_MAX];
+  output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1];
 
   if(!turning_flag) {
     revs_delta = 0;

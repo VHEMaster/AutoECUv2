@@ -177,6 +177,12 @@ typedef enum {
   ECU_CONFIG_OP_MAX,
 }ecu_config_op_t;
 
+#define ECU_CONFIG_PARAMETERS_MAX ( \
+    (ECU_DEVICES_PARAMETERS_MAX)  + \
+    (ECU_SENSORS_PARAMETERS_MAX)  + \
+    (ECU_MODULES_PARAMETERS_MAX)  + \
+    (ECU_TIMINGS_PARAMETERS_MAX) )
+
 typedef error_t (*ecu_config_translate_prev_to_this_func_t)(const void *src, void *dest, uint32_t dest_bytes);
 typedef error_t (*ecu_config_get_default_cfg_func_t)(ecu_index_type_t index, void *config);
 typedef error_t (*ecu_config_configure_func_t)(ecu_instance_t instance, const void *config);
