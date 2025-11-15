@@ -10,20 +10,6 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_SENSORS_MAX (     \
-    ECU_SENSOR_CKP_MAX +      \
-    ECU_SENSOR_CMP_MAX +      \
-    ECU_SENSOR_ECT_MAX +      \
-    ECU_SENSOR_EGT_MAX +      \
-    ECU_SENSOR_IAT_MAX +      \
-    ECU_SENSOR_MAF_MAX +      \
-    ECU_SENSOR_MAP_MAX +      \
-    ECU_SENSOR_TPS_MAX +      \
-    ECU_SENSOR_VSS_MAX +      \
-    ECU_SENSOR_APS_MAX +      \
-    ECU_SENSOR_OTS_MAX +      \
-    ECU_SENSOR_OPS_MAX)
-
 typedef enum {
   ECU_SENSOR_LOOP_TYPE_MAIN = 0,
   ECU_SENSOR_LOOP_TYPE_SLOW,
@@ -71,31 +57,31 @@ typedef struct {
     ecu_config_sensor_instance_ctx_t sensors[ECU_SENSORS_MAX];
 }ecu_config_sensors_t;
 
-static ckp_ctx_t ecu_config_ckp_ctx[ECU_SENSOR_CKP_MAX] = {0};
-static cmp_ctx_t ecu_config_cmp_ctx[ECU_SENSOR_CMP_MAX] = {0};
-static ect_ctx_t ecu_config_ect_ctx[ECU_SENSOR_ECT_MAX] = {0};
-static egt_ctx_t ecu_config_egt_ctx[ECU_SENSOR_EGT_MAX] = {0};
-static iat_ctx_t ecu_config_iat_ctx[ECU_SENSOR_IAT_MAX] = {0};
-static maf_ctx_t ecu_config_maf_ctx[ECU_SENSOR_MAF_MAX] = {0};
-static map_ctx_t ecu_config_map_ctx[ECU_SENSOR_MAP_MAX] = {0};
-static tps_ctx_t ecu_config_tps_ctx[ECU_SENSOR_TPS_MAX] = {0};
-static vss_ctx_t ecu_config_vss_ctx[ECU_SENSOR_VSS_MAX] = {0};
-static aps_ctx_t ecu_config_aps_ctx[ECU_SENSOR_APS_MAX] = {0};
-static ots_ctx_t ecu_config_ots_ctx[ECU_SENSOR_OTS_MAX] = {0};
-static ops_ctx_t ecu_config_ops_ctx[ECU_SENSOR_OPS_MAX] = {0};
+static ckp_ctx_t ecu_config_ckp_ctx[ECU_SENSOR_CKP_MAX];
+static cmp_ctx_t ecu_config_cmp_ctx[ECU_SENSOR_CMP_MAX];
+static ect_ctx_t ecu_config_ect_ctx[ECU_SENSOR_ECT_MAX];
+static egt_ctx_t ecu_config_egt_ctx[ECU_SENSOR_EGT_MAX];
+static iat_ctx_t ecu_config_iat_ctx[ECU_SENSOR_IAT_MAX];
+static maf_ctx_t ecu_config_maf_ctx[ECU_SENSOR_MAF_MAX];
+static map_ctx_t ecu_config_map_ctx[ECU_SENSOR_MAP_MAX];
+static tps_ctx_t ecu_config_tps_ctx[ECU_SENSOR_TPS_MAX];
+static vss_ctx_t ecu_config_vss_ctx[ECU_SENSOR_VSS_MAX];
+static aps_ctx_t ecu_config_aps_ctx[ECU_SENSOR_APS_MAX];
+static ots_ctx_t ecu_config_ots_ctx[ECU_SENSOR_OTS_MAX];
+static ops_ctx_t ecu_config_ops_ctx[ECU_SENSOR_OPS_MAX];
 
-static ecu_core_runtime_value_ctx_t ecu_config_ckp_params_read[ECU_SENSOR_CKP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_cmp_params_read[ECU_SENSOR_CMP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_ect_params_read[ECU_SENSOR_ECT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_egt_params_read[ECU_SENSOR_EGT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_iat_params_read[ECU_SENSOR_IAT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_maf_params_read[ECU_SENSOR_MAF_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_map_params_read[ECU_SENSOR_MAP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_tps_params_read[ECU_SENSOR_TPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_vss_params_read[ECU_SENSOR_VSS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_ckp_params_read[ECU_SENSOR_CKP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cmp_params_read[ECU_SENSOR_CMP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ect_params_read[ECU_SENSOR_ECT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_egt_params_read[ECU_SENSOR_EGT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_iat_params_read[ECU_SENSOR_IAT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_maf_params_read[ECU_SENSOR_MAF_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_map_params_read[ECU_SENSOR_MAP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tps_params_read[ECU_SENSOR_TPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_vss_params_read[ECU_SENSOR_VSS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
 
 static const ecu_config_sensors_config_t ecu_config_sensors = {
     .interfaces = {
@@ -397,6 +383,14 @@ error_t ecu_sensors_init(void)
 
     interface_config = &ecu_config_sensors.interfaces[sensor_config->type];
     BREAK_IF_ACTION(sensor_config->instance >= interface_config->instance_max, err = E_FAULT);
+
+    if(sensor_config->params_read_ptr != NULL && interface_config->params_read_count > 0) {
+      memset(sensor_config->params_read_ptr, 0, sizeof(*sensor_config->params_read_ptr) * interface_config->params_read_count);
+    }
+
+    if(sensor_config->params_write_ptr != NULL && interface_config->params_write_count > 0) {
+      memset(sensor_config->params_write_ptr, 0, sizeof(*sensor_config->params_write_ptr) * interface_config->params_write_count);
+    }
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_sensors.interfaces); i++) {

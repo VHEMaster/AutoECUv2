@@ -10,6 +10,12 @@
 
 #include "common.h"
 
+#define ECU_TIMINGS_MAX (       \
+    ECU_TIMING_BASE_MAX       + \
+    ECU_TIMING_IGNITION_MAX   + \
+    ECU_TIMING_INJECTION_MAX  + \
+    ECU_TIMING_ROUGH_MAX)
+
 #define ECU_TIMING_NONE         (255)
 #define ECU_TIMING_INSTANCE_MAX (6)
 

@@ -225,7 +225,7 @@ int main(void)
   MX_QUADSPI_Init();
   MX_SPI6_Init();
   MX_RTC_Init();
-  MX_IWDG1_Init();
+  //MX_IWDG1_Init();
   MX_TIM15_Init();
   MX_USART3_UART_Init();
   MX_ADC1_Init();

@@ -12,9 +12,13 @@
 #include "coolingfan.h"
 
 typedef enum {
+  ECU_MODULE_COOLINGFAN_READ_PARAM_MAX
+}ecu_module_coolingfan_read_params_t;
+
+typedef enum {
   ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER = 0,
   ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER,
-  ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX,
+  ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX
 }ecu_module_coolingfan_write_params_t;
 
 error_t ecu_modules_coolingfan_init(ecu_module_coolingfan_t instance, coolingfan_ctx_t *ctx);

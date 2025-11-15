@@ -15,6 +15,20 @@
 #define ECU_SENSOR_INSTANCE_MAX       (4)
 #define ECU_SENSOR_READ_PARAM_DATA    (4)
 
+#define ECU_SENSORS_MAX (     \
+    ECU_SENSOR_CKP_MAX      + \
+    ECU_SENSOR_CMP_MAX      + \
+    ECU_SENSOR_ECT_MAX      + \
+    ECU_SENSOR_EGT_MAX      + \
+    ECU_SENSOR_IAT_MAX      + \
+    ECU_SENSOR_MAF_MAX      + \
+    ECU_SENSOR_MAP_MAX      + \
+    ECU_SENSOR_TPS_MAX      + \
+    ECU_SENSOR_VSS_MAX      + \
+    ECU_SENSOR_APS_MAX      + \
+    ECU_SENSOR_OTS_MAX      + \
+    ECU_SENSOR_OPS_MAX)
+
 typedef uint32_t ecu_sensor_instance_t;
 
 typedef enum {

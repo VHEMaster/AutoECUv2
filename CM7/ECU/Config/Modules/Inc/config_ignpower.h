@@ -15,13 +15,13 @@
 
 typedef enum {
   ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING = 0,
-  ECU_MODULE_IGNPOWER_READ_PARAM_MAX,
+  ECU_MODULE_IGNPOWER_READ_PARAM_MAX
 }ecu_module_ignpower_read_params_t;
 
 typedef enum {
   ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING = 0,
   ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING_TRIGGER_SIGNAL,
-  ECU_MODULE_IGNPOWER_WRITE_PARAM_MAX,
+  ECU_MODULE_IGNPOWER_WRITE_PARAM_MAX
 }ecu_module_ignpower_write_params_t;
 
 error_t ecu_modules_ignpower_init(ecu_module_ignpower_t instance, ignpower_ctx_t *ctx);

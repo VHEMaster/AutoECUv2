@@ -11,6 +11,14 @@
 #include "config_modules.h"
 #include "fuelpump.h"
 
+typedef enum {
+  ECU_MODULE_FUELPUMP_READ_PARAM_MAX
+}ecu_module_fuelpump_read_params_t;
+
+typedef enum {
+  ECU_MODULE_FUELPUMP_WRITE_PARAM_MAX
+}ecu_module_fuelpump_write_params_t;
+
 error_t ecu_modules_fuelpump_init(ecu_module_fuelpump_t instance, fuelpump_ctx_t *ctx);
 error_t ecu_modules_fuelpump_get_default_config(ecu_module_fuelpump_t instance, fuelpump_config_t *config);
 error_t ecu_modules_fuelpump_configure(ecu_module_fuelpump_t instance, const fuelpump_config_t *config);

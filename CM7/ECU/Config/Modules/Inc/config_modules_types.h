@@ -13,6 +13,15 @@
 #define ECU_MODULE_NONE         (255)
 #define ECU_MODULE_INSTANCE_MAX (6)
 
+#define ECU_MODULES_MAX (       \
+    ECU_MODULE_ETC_MAX        + \
+    ECU_MODULE_VVT_MAX        + \
+    ECU_MODULE_FUELPUMP_MAX   + \
+    ECU_MODULE_COOLINGFAN_MAX + \
+    ECU_MODULE_IGNPOWER_MAX   + \
+    ECU_MODULE_INDICATION_MAX + \
+    ECU_MODULE_WGCV_MAX)
+
 typedef uint32_t ecu_module_instance_t;
 
 typedef enum {

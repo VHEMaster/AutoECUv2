@@ -13,6 +13,16 @@
 #define ECU_DEVICE_NONE     (255)
 #define ECU_DEVICE_INSTANCE_MAX (2)
 
+#define ECU_DEVICES_MAX (       \
+    ECU_DEVICE_PULSEDADC_MAX  + \
+    ECU_DEVICE_TCS_MAX        + \
+    ECU_DEVICE_FLEXIO_MAX     + \
+    ECU_DEVICE_WBLS_MAX       + \
+    ECU_DEVICE_STEPPER_MAX    + \
+    ECU_DEVICE_OUTPUT_MAX     + \
+    ECU_DEVICE_MOTOR_MAX      + \
+    ECU_DEVICE_FLASH_MAX)
+
 typedef uint32_t ecu_device_instance_t;
 
 typedef enum {

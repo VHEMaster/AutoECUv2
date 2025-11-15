@@ -10,15 +10,6 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_MODULES_MAX (       \
-    ECU_MODULE_ETC_MAX        + \
-    ECU_MODULE_VVT_MAX        + \
-    ECU_MODULE_FUELPUMP_MAX   + \
-    ECU_MODULE_COOLINGFAN_MAX + \
-    ECU_MODULE_IGNPOWER_MAX   + \
-    ECU_MODULE_INDICATION_MAX + \
-    ECU_MODULE_WGCV_MAX)
-
 typedef enum {
   ECU_MODULE_LOOP_TYPE_MAIN = 0,
   ECU_MODULE_LOOP_TYPE_SLOW,
@@ -66,29 +57,29 @@ typedef struct {
     ecu_config_module_instance_ctx_t modules[ECU_MODULES_MAX];
 }ecu_config_modules_t;
 
-static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX] = {0};
-static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX] = {0};
-static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {0};
-static coolingfan_ctx_t ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {0};
-static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX] = {0};
-static indication_ctx_t ecu_config_indication_ctx[ECU_MODULE_INDICATION_MAX] = {0};
-static wgcv_ctx_t ecu_config_wgcv_ctx[ECU_MODULE_WGCV_MAX] = {0};
+static etc_ctx_t ecu_config_etc_ctx[ECU_MODULE_ETC_MAX];
+static vvt_ctx_t ecu_config_vvt_ctx[ECU_MODULE_VVT_MAX];
+static fuelpump_ctx_t ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX];
+static coolingfan_ctx_t ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX];
+static ignpower_ctx_t ecu_config_ignpower_ctx[ECU_MODULE_IGNPOWER_MAX];
+static indication_ctx_t ecu_config_indication_ctx[ECU_MODULE_INDICATION_MAX];
+static wgcv_ctx_t ecu_config_wgcv_ctx[ECU_MODULE_WGCV_MAX];
 
-static ecu_core_runtime_value_ctx_t ecu_config_etc_params_read[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_read[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_read[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_coolingfan_params_read[ECU_MODULE_COOLINGFAN_MAX][ECU_MODULE_COOLINGFAN_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_read[ECU_MODULE_IGNPOWER_MAX][ECU_MODULE_IGNPOWER_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_indication_params_read[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_read[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_etc_params_read[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_read[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_read[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_coolingfan_params_read[ECU_MODULE_COOLINGFAN_MAX][ECU_MODULE_COOLINGFAN_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_read[ECU_MODULE_IGNPOWER_MAX][ECU_MODULE_IGNPOWER_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_indication_params_read[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_read[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_READ_PARAM_MAX];
 
-static ecu_core_runtime_value_ctx_t ecu_config_etc_params_write[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_write[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_write[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_coolingfan_params_write[ECU_MODULE_COOLINGFAN_MAX][ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_write[ECU_MODULE_IGNPOWER_MAX][ECU_MODULE_IGNPOWER_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_indication_params_write[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_write[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_WRITE_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_etc_params_write[ECU_MODULE_ETC_MAX][ECU_MODULE_ETC_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_vvt_params_write[ECU_MODULE_VVT_MAX][ECU_MODULE_VVT_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_fuelpump_params_write[ECU_MODULE_FUELPUMP_MAX][ECU_MODULE_FUELPUMP_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_coolingfan_params_write[ECU_MODULE_COOLINGFAN_MAX][ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_write[ECU_MODULE_IGNPOWER_MAX][ECU_MODULE_IGNPOWER_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_indication_params_write[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_write[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_WRITE_PARAM_MAX];
 
 static const ecu_config_modules_config_t ecu_config_modules = {
     .interfaces = {
@@ -113,15 +104,15 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .loop_slow = (ecu_module_loop_func_t)fuelpump_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_FUELPUMP_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_MODULE_FUELPUMP_READ_PARAM_MAX,
+            .params_write_count = ECU_MODULE_FUELPUMP_WRITE_PARAM_MAX,
         }, //ECU_MODULE_TYPE_FUELPUMP
         {
             .loop_main = (ecu_module_loop_func_t)NULL,
             .loop_slow = (ecu_module_loop_func_t)coolingfan_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_COOLINGFAN_MAX,
-            .params_read_count = 0,
+            .params_read_count = ECU_MODULE_COOLINGFAN_READ_PARAM_MAX,
             .params_write_count = ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX,
         }, //ECU_MODULE_TYPE_COOLINGFAN
         {
@@ -137,7 +128,7 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .loop_slow = (ecu_module_loop_func_t)indication_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_INDICATION_MAX,
-            .params_read_count = 0,
+            .params_read_count = ECU_MODULE_INDICATION_READ_PARAM_MAX,
             .params_write_count = ECU_MODULE_INDICATION_WRITE_PARAM_MAX,
         }, //ECU_MODULE_TYPE_INDICATION
         {
@@ -145,7 +136,7 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .loop_slow = (ecu_module_loop_func_t)wgcv_loop_slow,
             .loop_fast = (ecu_module_loop_func_t)NULL,
             .instance_max = ECU_MODULE_WGCV_MAX,
-            .params_read_count = 0,
+            .params_read_count = ECU_MODULE_WGCV_READ_PARAM_MAX,
             .params_write_count = ECU_MODULE_WGCV_WRITE_PARAM_MAX,
         }, //ECU_MODULE_TYPE_WGCV
     },
@@ -196,28 +187,28 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .type = ECU_MODULE_TYPE_FUELPUMP,
             .instance = ECU_MODULE_FUELPUMP_1,
             .ctx = &ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_fuelpump_params_read[ECU_MODULE_FUELPUMP_1],
+            .params_write_ptr = ecu_config_fuelpump_params_write[ECU_MODULE_FUELPUMP_1],
         },
         {
             .type = ECU_MODULE_TYPE_FUELPUMP,
             .instance = ECU_MODULE_FUELPUMP_2,
             .ctx = &ecu_config_fuelpump_ctx[ECU_MODULE_FUELPUMP_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_fuelpump_params_read[ECU_MODULE_FUELPUMP_2],
+            .params_write_ptr = ecu_config_fuelpump_params_write[ECU_MODULE_FUELPUMP_2],
         },
         {
             .type = ECU_MODULE_TYPE_COOLINGFAN,
             .instance = ECU_MODULE_COOLINGFAN_1,
             .ctx = &ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_1],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_coolingfan_params_read[ECU_MODULE_COOLINGFAN_1],
             .params_write_ptr = ecu_config_coolingfan_params_write[ECU_MODULE_COOLINGFAN_1],
         },
         {
             .type = ECU_MODULE_TYPE_COOLINGFAN,
             .instance = ECU_MODULE_COOLINGFAN_2,
             .ctx = &ecu_config_coolingfan_ctx[ECU_MODULE_COOLINGFAN_2],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_coolingfan_params_read[ECU_MODULE_COOLINGFAN_2],
             .params_write_ptr = ecu_config_coolingfan_params_write[ECU_MODULE_COOLINGFAN_2],
         },
         {
@@ -231,56 +222,56 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_1,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_1],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_1],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_1],
         },
         {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_2,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_2],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_2],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_2],
         },
         {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_3,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_3],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_3],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_3],
         },
         {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_4,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_4],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_4],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_4],
         },
         {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_5,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_5],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_5],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_5],
         },
         {
             .type = ECU_MODULE_TYPE_INDICATION,
             .instance = ECU_MODULE_INDICATION_6,
             .ctx = &ecu_config_indication_ctx[ECU_MODULE_INDICATION_6],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_indication_params_read[ECU_MODULE_INDICATION_6],
             .params_write_ptr = ecu_config_indication_params_write[ECU_MODULE_INDICATION_6],
         },
         {
             .type = ECU_MODULE_TYPE_WGCV,
             .instance = ECU_MODULE_WGCV_1,
             .ctx = &ecu_config_wgcv_ctx[ECU_MODULE_WGCV_1],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_wgcv_params_read[ECU_MODULE_WGCV_1],
             .params_write_ptr = ecu_config_wgcv_params_write[ECU_MODULE_WGCV_1],
         },
         {
             .type = ECU_MODULE_TYPE_WGCV,
             .instance = ECU_MODULE_WGCV_2,
             .ctx = &ecu_config_wgcv_ctx[ECU_MODULE_WGCV_2],
-            .params_read_ptr = NULL,
+            .params_read_ptr = ecu_config_wgcv_params_read[ECU_MODULE_WGCV_2],
             .params_write_ptr = ecu_config_wgcv_params_write[ECU_MODULE_WGCV_2],
         },
     },
@@ -308,6 +299,14 @@ error_t ecu_modules_init(void)
 
     interface_config = &ecu_config_modules.interfaces[module_config->type];
     BREAK_IF_ACTION(module_config->instance >= interface_config->instance_max, err = E_FAULT);
+
+    if(module_config->params_read_ptr != NULL && interface_config->params_read_count > 0) {
+      memset(module_config->params_read_ptr, 0, sizeof(*module_config->params_read_ptr) * interface_config->params_read_count);
+    }
+
+    if(module_config->params_write_ptr != NULL && interface_config->params_write_count > 0) {
+      memset(module_config->params_write_ptr, 0, sizeof(*module_config->params_write_ptr) * interface_config->params_write_count);
+    }
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_modules.interfaces); i++) {

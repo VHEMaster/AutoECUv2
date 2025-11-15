@@ -12,8 +12,12 @@
 #include "indication.h"
 
 typedef enum {
+  ECU_MODULE_INDICATION_READ_PARAM_MAX
+}ecu_module_indication_read_params_t;
+
+typedef enum {
   ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED = 0,
-  ECU_MODULE_INDICATION_WRITE_PARAM_MAX,
+  ECU_MODULE_INDICATION_WRITE_PARAM_MAX
 }ecu_module_indication_write_params_t;
 
 error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication_ctx_t *ctx);

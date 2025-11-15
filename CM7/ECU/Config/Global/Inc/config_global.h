@@ -24,6 +24,8 @@
 #include "config_motor.h"
 #include "config_stepper.h"
 #include "config_wbls.h"
+#include "config_output.h"
+#include "config_tcs.h"
 
 #include "config_ckp.h"
 #include "config_cmp.h"

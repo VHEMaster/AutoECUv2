@@ -15,13 +15,13 @@ typedef enum {
   ECU_MODULE_ETC_READ_PARAM_ENABLED = 0,
   ECU_MODULE_ETC_READ_PARAM_POS_CURRENT,
   ECU_MODULE_ETC_READ_PARAM_POS_TARGET,
-  ECU_MODULE_ETC_READ_PARAM_MAX,
+  ECU_MODULE_ETC_READ_PARAM_MAX
 }ecu_module_etc_read_params_t;
 
 typedef enum {
   ECU_MODULE_ETC_WRITE_PARAM_ENABLED = 0,
   ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET,
-  ECU_MODULE_ETC_WRITE_PARAM_MAX,
+  ECU_MODULE_ETC_WRITE_PARAM_MAX
 }ecu_module_etc_write_params_t;
 
 error_t ecu_modules_etc_init(ecu_module_etc_t instance, etc_ctx_t *ctx);

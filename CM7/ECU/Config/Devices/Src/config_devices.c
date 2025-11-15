@@ -10,16 +10,6 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_DEVICES_MAX (     \
-    ECU_DEVICE_PULSEDADC_MAX +      \
-    ECU_DEVICE_TCS_MAX +      \
-    ECU_DEVICE_FLEXIO_MAX +   \
-    ECU_DEVICE_WBLS_MAX +   \
-    ECU_DEVICE_STEPPER_MAX +  \
-    ECU_DEVICE_OUTPUT_MAX +   \
-    ECU_DEVICE_MOTOR_MAX +   \
-    ECU_DEVICE_FLASH_MAX)
-
 typedef enum {
   ECU_DEVICE_LOOP_TYPE_MAIN = 0,
   ECU_DEVICE_LOOP_TYPE_SLOW,
@@ -67,32 +57,32 @@ typedef struct {
     ecu_config_device_instance_ctx_t devices[ECU_DEVICES_MAX];
 }ecu_config_devices_t;
 
-static pulsedadc_ctx_t ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX] = {0};
-static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_TCS_MAX] = {0};
-static l9966_ctx_t ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_MAX] = {0};
-static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX] = {0};
-static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX] = {0};
-static tle6240_ctx_t ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_MAX] = {0};
-static l9960_ctx_t ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_MAX] = {0};
-static qspi_ctx_t ecu_config_qspi_ctx[ECU_DEVICE_FLASH_MAX] = {0};
+static pulsedadc_ctx_t ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX];
+static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_TCS_MAX];
+static l9966_ctx_t ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_MAX];
+static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX];
+static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX];
+static tle6240_ctx_t ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_MAX];
+static l9960_ctx_t ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_MAX];
+static qspi_ctx_t ecu_config_qspi_ctx[ECU_DEVICE_FLASH_MAX];
 
-//static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_read[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_read[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_read[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_read[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_read[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_read[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_read[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_READ_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_read[ECU_DEVICE_FLASH_MAX][ECU_DEVICE_FLASH_READ_PARAM_MAX] = {0};
+//static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_read[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_read[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_read[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_read[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_read[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_read[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_read[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_read[ECU_DEVICE_FLASH_MAX][ECU_DEVICE_FLASH_READ_PARAM_MAX];
 
-//static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_write[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_write[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_write[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_write[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_write[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_write[ECU_DEVICE_FLASH_MAX][ECU_DEVICE_FLASH_WRITE_PARAM_MAX] = {0};
+//static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_write[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_write[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_write[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_write[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_write[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_write[ECU_DEVICE_FLASH_MAX][ECU_DEVICE_FLASH_WRITE_PARAM_MAX];
 
 static const ecu_config_devices_config_t ecu_config_devices = {
     .interfaces = {
@@ -101,24 +91,24 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             //.loop_slow = (ecu_device_loop_func_t)pulsedadc_loop_slow,
             //.loop_fast = (ecu_device_loop_func_t)pulsedadc_loop_fast,
             .instance_max = ECU_DEVICE_PULSEDADC_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
-        }, //ECU_DEVICE_TYPE_TCS
+            //.params_read_count = ECU_DEVICE_PULSEDADC_READ_PARAM_MAX,
+            //.params_write_count = ECU_DEVICE_PULSEDADC_WRITE_PARAM_MAX,
+        }, //ECU_DEVICE_TYPE_PULSEDADC
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)max31855_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)NULL,
             .instance_max = ECU_DEVICE_TCS_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_DEVICE_TCS_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_TCS_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_TCS
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)l9966_loop_fast,
             .instance_max = ECU_DEVICE_FLEXIO_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_DEVICE_FLEXIO_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_FLEXIO_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_FLEXIO
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
@@ -141,24 +131,24 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)tle6240_loop_fast,
             .instance_max = ECU_DEVICE_OUTPUT_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_DEVICE_OUTPUT_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_OUTPUT_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_OUTPUT
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)l9960_loop_fast,
             .instance_max = ECU_DEVICE_MOTOR_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_DEVICE_MOTOR_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_MOTOR_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_MOTOR
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)NULL,
             .loop_fast = (ecu_device_loop_func_t)qspi_loop_fast,
             .instance_max = ECU_DEVICE_FLASH_MAX,
-            .params_read_count = 0,
-            .params_write_count = 0,
+            .params_read_count = ECU_DEVICE_FLASH_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_FLASH_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_FLASH
     },
     .devices = {
@@ -166,43 +156,43 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .type = ECU_DEVICE_TYPE_PULSEDADC,
             .instance = ECU_DEVICE_PULSEDADC_1,
             .ctx = &ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            //.params_read_ptr = ecu_config_pulsedadc_params_read,
+            //.params_write_ptr = ecu_config_pulsedadc_params_write,
         },
         {
             .type = ECU_DEVICE_TYPE_PULSEDADC,
             .instance = ECU_DEVICE_PULSEDADC_2,
             .ctx = &ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            //.params_read_ptr = ecu_config_pulsedadc_params_read,
+            //.params_write_ptr = ecu_config_pulsedadc_params_write,
         },
         {
             .type = ECU_DEVICE_TYPE_TCS,
             .instance = ECU_DEVICE_TCS_1,
             .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_TCS_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_max31855_params_read[ECU_DEVICE_TCS_1],
+            .params_write_ptr = ecu_config_max31855_params_write[ECU_DEVICE_TCS_1],
         },
         {
             .type = ECU_DEVICE_TYPE_TCS,
             .instance = ECU_DEVICE_TCS_2,
             .ctx = &ecu_config_max31855_ctx[ECU_DEVICE_TCS_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_max31855_params_read[ECU_DEVICE_TCS_2],
+            .params_write_ptr = ecu_config_max31855_params_write[ECU_DEVICE_TCS_2],
         },
         {
             .type = ECU_DEVICE_TYPE_FLEXIO,
             .instance = ECU_DEVICE_FLEXIO_1,
             .ctx = &ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_l9966_params_read[ECU_DEVICE_FLEXIO_1],
+            .params_write_ptr = ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_1],
         },
         {
             .type = ECU_DEVICE_TYPE_FLEXIO,
             .instance = ECU_DEVICE_FLEXIO_2,
             .ctx = &ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_l9966_params_read[ECU_DEVICE_FLEXIO_2],
+            .params_write_ptr = ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_2],
         },
         {
             .type = ECU_DEVICE_TYPE_WBLS,
@@ -229,36 +219,36 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .type = ECU_DEVICE_TYPE_OUTPUT,
             .instance = ECU_DEVICE_OUTPUT_1,
             .ctx = &ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_tle6240_params_read[ECU_DEVICE_OUTPUT_1],
+            .params_write_ptr = ecu_config_tle6240_params_write[ECU_DEVICE_OUTPUT_1],
         },
         {
             .type = ECU_DEVICE_TYPE_OUTPUT,
             .instance = ECU_DEVICE_OUTPUT_2,
             .ctx = &ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_tle6240_params_read[ECU_DEVICE_OUTPUT_2],
+            .params_write_ptr = ecu_config_tle6240_params_write[ECU_DEVICE_OUTPUT_2],
         },
         {
             .type = ECU_DEVICE_TYPE_MOTOR,
             .instance = ECU_DEVICE_MOTOR_1,
             .ctx = &ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_l9960_params_read[ECU_DEVICE_MOTOR_1],
+            .params_write_ptr = ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_1],
         },
         {
             .type = ECU_DEVICE_TYPE_MOTOR,
             .instance = ECU_DEVICE_MOTOR_2,
             .ctx = &ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_2],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_l9960_params_read[ECU_DEVICE_MOTOR_2],
+            .params_write_ptr = ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_2],
         },
         {
             .type = ECU_DEVICE_TYPE_FLASH,
             .instance = ECU_DEVICE_FLASH_1,
             .ctx = &ecu_config_qspi_ctx[ECU_DEVICE_FLASH_1],
-            .params_read_ptr = NULL,
-            .params_write_ptr = NULL,
+            .params_read_ptr = ecu_config_qspi_params_read[ECU_DEVICE_FLASH_1],
+            .params_write_ptr = ecu_config_qspi_params_write[ECU_DEVICE_FLASH_1],
         },
     },
 };
@@ -285,6 +275,14 @@ error_t ecu_devices_init(void)
 
     interface_config = &ecu_config_devices.interfaces[device_config->type];
     BREAK_IF_ACTION(device_config->instance >= interface_config->instance_max, err = E_FAULT);
+
+    if(device_config->params_read_ptr != NULL && interface_config->params_read_count > 0) {
+      memset(device_config->params_read_ptr, 0, sizeof(*device_config->params_read_ptr) * interface_config->params_read_count);
+    }
+
+    if(device_config->params_write_ptr != NULL && interface_config->params_write_count > 0) {
+      memset(device_config->params_write_ptr, 0, sizeof(*device_config->params_write_ptr) * interface_config->params_write_count);
+    }
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_devices.interfaces); i++) {

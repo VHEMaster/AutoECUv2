@@ -30,7 +30,8 @@
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
 #define BUFFER_DMA                __attribute__((section(".dmabss")))
 #define RAM_SECTION               __attribute__((section(".ramdata")))
-#define ITCM_FUNC                 __attribute__((section(".itcm_func")))
+#define ITCM_FUNC
+//#define ITCM_FUNC                 __attribute__((section(".itcm_func")))
 #define OPTIMIZE(flag)            __attribute__((optimize(flag)))
 #define OPTIMIZE_FAST             OPTIMIZE("Ofast")
 #define OPTIMIZE_SIZE             OPTIMIZE("Os")

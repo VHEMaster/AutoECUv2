@@ -21,8 +21,12 @@ typedef enum {
   ECU_TIMING_BASE_READ_PARAM_RPM,
   ECU_TIMING_BASE_READ_PARAM_PERIOD,
   ECU_TIMING_BASE_READ_PARAM_REVS_COUNT,
-  ECU_TIMING_BASE_READ_PARAM_MAX,
+  ECU_TIMING_BASE_READ_PARAM_MAX
 }ecu_timing_base_read_params_t;
+
+typedef enum {
+  ECU_TIMING_BASE_WRITE_PARAM_MAX
+}ecu_timing_base_write_params_t;
 
 error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx);
 error_t ecu_timings_base_get_default_config(ecu_timing_base_t instance, timing_base_config_t *config);

@@ -10,12 +10,6 @@
 #include "compiler.h"
 #include "bool.h"
 
-#define ECU_TIMINGS_MAX (       \
-    ECU_TIMING_BASE_MAX       + \
-    ECU_TIMING_IGNITION_MAX   + \
-    ECU_TIMING_INJECTION_MAX  + \
-    ECU_TIMING_ROUGH_MAX)
-
 typedef enum {
   ECU_TIMING_LOOP_TYPE_MAIN = 0,
   ECU_TIMING_LOOP_TYPE_SLOW,
@@ -63,20 +57,20 @@ typedef struct {
     ecu_config_timing_instance_ctx_t timings[ECU_TIMINGS_MAX];
 }ecu_config_timings_t;
 
-static timing_base_ctx_t ecu_config_timing_ctx[ECU_TIMING_BASE_MAX] = {0};
-static ignition_ctx_t ecu_config_ignition_ctx[ECU_TIMING_IGNITION_MAX] = {0};
-static injection_ctx_t ecu_config_injection_ctx[ECU_TIMING_INJECTION_MAX] = {0};
-static rough_ctx_t ecu_config_rough_ctx[ECU_TIMING_ROUGH_MAX] = {0};
+static timing_base_ctx_t ecu_config_timing_ctx[ECU_TIMING_BASE_MAX];
+static ignition_ctx_t ecu_config_ignition_ctx[ECU_TIMING_IGNITION_MAX];
+static injection_ctx_t ecu_config_injection_ctx[ECU_TIMING_INJECTION_MAX];
+static rough_ctx_t ecu_config_rough_ctx[ECU_TIMING_ROUGH_MAX];
 
-static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_read[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_read[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_read[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_READ_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_read[ECU_TIMING_ROUGH_MAX][ECU_TIMING_BASE_READ_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_read[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_read[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_read[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_read[ECU_TIMING_ROUGH_MAX][ECU_TIMING_BASE_READ_PARAM_MAX];
 
-//static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_WRITE_PARAM_MAX] = {0};
-static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX] = {0};
-//static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX] = {0};
+static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX];
 
 static const ecu_config_timings_config_t ecu_config_timings = {
     .interfaces = {
@@ -86,7 +80,7 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .loop_fast = (ecu_timing_loop_func_t)NULL,
             .instance_max = ECU_TIMING_BASE_MAX,
             .params_read_count = ECU_TIMING_BASE_READ_PARAM_MAX,
-            .params_write_count = 0,
+            .params_write_count = ECU_TIMING_BASE_WRITE_PARAM_MAX,
         }, //ECU_TIMING_TYPE_BASE
         {
             .loop_slow = (ecu_timing_loop_func_t)NULL,
@@ -110,7 +104,7 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .loop_fast = (ecu_timing_loop_func_t)NULL,
             .instance_max = ECU_TIMING_ROUGH_MAX,
             .params_read_count = ECU_TIMING_ROUGH_READ_PARAM_MAX,
-            .params_write_count = 0,
+            .params_write_count = ECU_TIMING_BASE_WRITE_PARAM_MAX,
         }, //ECU_TIMING_TYPE_ROUGH
     },
     .timings = {
@@ -119,7 +113,7 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .instance = ECU_TIMING_BASE_1,
             .ctx = &ecu_config_timing_ctx[ECU_TIMING_BASE_1],
             .params_read_ptr = ecu_config_timing_base_params_read[ECU_TIMING_BASE_1],
-            .params_write_ptr = NULL,
+            .params_write_ptr = ecu_config_timing_base_params_write[ECU_TIMING_BASE_1],
         },
         {
             .type = ECU_TIMING_TYPE_IGNITION,
@@ -140,7 +134,7 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .instance = ECU_TIMING_ROUGH_1,
             .ctx = &ecu_config_rough_ctx[ECU_TIMING_ROUGH_1],
             .params_read_ptr = ecu_config_timing_rough_params_read[ECU_TIMING_ROUGH_1],
-            .params_write_ptr = NULL,
+            .params_write_ptr = ecu_config_timing_rough_params_write[ECU_TIMING_ROUGH_1],
         },
     }
 };
@@ -167,6 +161,14 @@ error_t ecu_timings_init(void)
 
     interface_config = &ecu_config_timings.interfaces[timing_config->type];
     BREAK_IF_ACTION(timing_config->instance >= interface_config->instance_max, err = E_FAULT);
+
+    if(timing_config->params_read_ptr != NULL && interface_config->params_read_count > 0) {
+      memset(timing_config->params_read_ptr, 0, sizeof(*timing_config->params_read_ptr) * interface_config->params_read_count);
+    }
+
+    if(timing_config->params_write_ptr != NULL && interface_config->params_write_count > 0) {
+      memset(timing_config->params_write_ptr, 0, sizeof(*timing_config->params_write_ptr) * interface_config->params_write_count);
+    }
   }
 
   for(int i = 0; i < ITEMSOF(ecu_config_timings.interfaces); i++) {
@@ -447,7 +449,11 @@ error_t ecu_timings_get_instance_parameters_read(ecu_timing_type_t type, ecu_tim
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_read_count;
-    *read = &ctx_config->params_read_ptr[instance];
+    if(interface_config->params_read_count > 0) {
+      *read = &ctx_config->params_read_ptr[instance];
+    } else {
+      *read = NULL;
+    }
 
   } while(0);
 
@@ -475,7 +481,11 @@ error_t ecu_timings_get_instance_parameters_write(ecu_timing_type_t type, ecu_ti
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_write_count;
-    *write = &ctx_config->params_write_ptr[instance];
+    if(interface_config->params_write_count > 0) {
+      *write = &ctx_config->params_write_ptr[instance];
+    } else {
+      *write = NULL;
+    }
 
   } while(0);
 
