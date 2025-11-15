@@ -49,7 +49,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
   float pos_idle_flag_cmp_value;
   float rpm_idle_flag_cmp_value;
 
-  err = timing_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
+  err = ecu_timings_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
   if(err != E_OK) {
     BREAKPOINT(0);
   }
@@ -198,7 +198,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   float blending, blending_volume_sum, lpf_value;
   bool data_iat_valid;
 
-  err = timing_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
+  err = ecu_timings_base_get_crankshaft_data(ECU_TIMING_BASE_1, &crankshaft_data);
   if(err != E_OK) {
     BREAKPOINT(0);
   }

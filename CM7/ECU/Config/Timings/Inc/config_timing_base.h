@@ -31,6 +31,7 @@ error_t ecu_timings_base_reset(ecu_timing_base_t instance);
 
 error_t ecu_timings_base_register_cb(ecu_timing_base_t instance, timing_base_signal_update_cb_t callback, void *usrdata);
 
+error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_base_data_crankshaft_t *data);
 error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t *data);
 error_t ecu_timings_base_get_diag(ecu_timing_base_t instance, timing_base_diag_t *diag);
 

@@ -90,8 +90,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_ignpower_params_write[ECU_MODULE_
 static ecu_core_runtime_value_ctx_t ecu_config_indication_params_write[ECU_MODULE_INDICATION_MAX][ECU_MODULE_INDICATION_WRITE_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_wgcv_params_write[ECU_MODULE_WGCV_MAX][ECU_MODULE_WGCV_WRITE_PARAM_MAX] = {0};
 
-static RAM_SECTION ecu_config_modules_t ecu_config_modules_ctx = {0};
-
 static const ecu_config_modules_config_t ecu_config_modules = {
     .interfaces = {
         {
@@ -286,6 +284,10 @@ static const ecu_config_modules_config_t ecu_config_modules = {
             .params_write_ptr = ecu_config_wgcv_params_write[ECU_MODULE_WGCV_2],
         },
     },
+};
+
+static RAM_SECTION ecu_config_modules_t ecu_config_modules_ctx = {
+    .config = &ecu_config_modules,
 };
 
 error_t ecu_modules_init(void)

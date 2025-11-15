@@ -94,8 +94,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_write[ECU_DEVICE_S
 //static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_WRITE_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_write[ECU_DEVICE_FLASH_MAX][ECU_DEVICE_FLASH_WRITE_PARAM_MAX] = {0};
 
-static RAM_SECTION ecu_config_devices_t ecu_config_devices_ctx = {0};
-
 static const ecu_config_devices_config_t ecu_config_devices = {
     .interfaces = {
         {
@@ -263,6 +261,10 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .params_write_ptr = NULL,
         },
     },
+};
+
+static RAM_SECTION ecu_config_devices_t ecu_config_devices_ctx = {
+    .config = &ecu_config_devices,
 };
 
 error_t ecu_devices_init(void)

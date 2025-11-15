@@ -71,8 +71,6 @@ static RAM_SECTION uds_ctx_t ecu_config_uds_ctx[ECU_COMM_UDS_MAX] = {0};
 static RAM_SECTION obd2_ctx_t ecu_config_obd2_ctx[ECU_COMM_OBD2_MAX] = {0};
 static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0};
 
-static RAM_SECTION ecu_config_comm_t ecu_config_comm_ctx = {0};
-
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
         {
@@ -169,6 +167,10 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .ctx = &ecu_config_router_ctx[ECU_COMM_ROUTER_1],
         },
     },
+};
+
+static RAM_SECTION ecu_config_comm_t ecu_config_comm_ctx = {
+    .config = &ecu_config_comm,
 };
 
 error_t ecu_comm_init(void)

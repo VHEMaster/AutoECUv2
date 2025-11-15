@@ -96,6 +96,7 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
   ecu_sensor_instance_t instance_max;
   ecu_core_runtime_global_instance_parameters_ctx_t *sensor_value_ctx;
   ecu_core_runtime_value_ctx_t *sensor_value_read_ctx;
+  ecu_runtime_param_index_t param_index = ECU_SENSOR_READ_PARAM_DATA;
 
   for(uint32_t type = 0; type < ECU_SENSOR_TYPE_MAX; type++) {
     sensor_ctx = &ecu_core_calcdata_sensors_ctx.sensors[type];
@@ -104,12 +105,16 @@ void core_calcdata_sensors_read(ecu_core_ctx_t *ctx)
     if(sensor_ctx->func_read != NULL) {
       for(ecu_sensor_instance_t instance = 0; instance < instance_max; instance++) {
         sensor_value_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[type][instance];
-        sensor_value_read_ctx = &sensor_value_ctx->read[ECU_SENSOR_READ_PARAM_DATA];
-        err = ecu_sensors_get_sensor_enabled(type, instance, &enabled);
-        if(err == E_OK && enabled) {
-          sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, sensor_value_read_ctx);
+        if(sensor_value_ctx->read_count > param_index && sensor_value_ctx->read) {
+          sensor_value_read_ctx = &sensor_value_ctx->read[param_index];
+          err = ecu_sensors_get_sensor_enabled(type, instance, &enabled);
+          if(err == E_OK && enabled) {
+            sensor_ctx->func_read(ctx, instance, sensor_ctx->userdata, sensor_value_read_ctx);
+          } else {
+            sensor_value_read_ctx->valid = false;
+          }
         } else {
-          sensor_value_read_ctx->valid = false;
+          // TODO: DTC HERE
         }
       }
     }

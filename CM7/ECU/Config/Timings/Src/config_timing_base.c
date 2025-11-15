@@ -174,6 +174,24 @@ error_t ecu_timings_base_reset(ecu_timing_base_t instance)
   return err;
 }
 
+error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_base_data_crankshaft_t *data)
+{
+  error_t err = E_OK;
+  ecu_timings_base_ctx_t *timing_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_TIMING_BASE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    timing_ctx = &ecu_timings_base_ctx[instance];
+
+    err = timing_base_get_crankshaft_data(timing_ctx->ctx, data);
+
+  } while(0);
+
+  return err;
+}
+
 error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t *data)
 {
   error_t err = E_OK;

@@ -97,8 +97,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MA
 static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
 static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX] = {0};
 
-static RAM_SECTION ecu_config_sensors_t ecu_config_sensors_ctx = {0};
-
 static const ecu_config_sensors_config_t ecu_config_sensors = {
     .interfaces = {
         {
@@ -375,6 +373,10 @@ static const ecu_config_sensors_config_t ecu_config_sensors = {
             .params_write_ptr = NULL,
         },
     },
+};
+
+static RAM_SECTION ecu_config_sensors_t ecu_config_sensors_ctx = {
+    .config = &ecu_config_sensors,
 };
 
 error_t ecu_sensors_init(void)

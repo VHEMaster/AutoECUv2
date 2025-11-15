@@ -78,8 +78,6 @@ static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX] = {0};
 //static ecu_core_runtime_value_ctx_t ecu_config_timing_rough_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX] = {0};
 
-static RAM_SECTION ecu_config_timings_t ecu_config_timings_ctx = {0};
-
 static const ecu_config_timings_config_t ecu_config_timings = {
     .interfaces = {
         {
@@ -145,6 +143,10 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .params_write_ptr = NULL,
         },
     }
+};
+
+static RAM_SECTION ecu_config_timings_t ecu_config_timings_ctx = {
+    .config = &ecu_config_timings,
 };
 
 error_t ecu_timings_init(void)
