@@ -212,7 +212,7 @@ error_t ecu_timings_ignition_init(ecu_timing_ignition_t instance, ignition_ctx_t
 
     memcpy(&timing_ctx->ctx->config, &timing_ctx->config_default, sizeof(ignition_config_t));
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_IGNITION, instance, false);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_IGNITION, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -250,7 +250,7 @@ error_t ecu_timings_ignition_configure(ecu_timing_ignition_t instance, const ign
     err = ignition_configure(timing_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_IGNITION, instance, timing_ctx->ctx->config.enabled);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_IGNITION, instance, timing_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
 
   } while(0);

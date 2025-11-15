@@ -191,7 +191,7 @@ error_t ecu_timings_injection_init(ecu_timing_injection_t instance, injection_ct
 
     memcpy(&timing_ctx->ctx->config, &timing_ctx->config_default, sizeof(injection_config_t));
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_INJECTION, instance, false);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_INJECTION, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -229,7 +229,7 @@ error_t ecu_timings_injection_configure(ecu_timing_injection_t instance, const i
     err = injection_configure(timing_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_INJECTION, instance, timing_ctx->ctx->config.enabled);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_INJECTION, instance, timing_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
 
   } while(0);

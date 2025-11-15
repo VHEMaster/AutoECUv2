@@ -41,7 +41,7 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
           ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
         }
         break;
-      case ECU_CORE_INIT_FSM_INIT_DEVS:
+      case ECU_CORE_INIT_FSM_INIT_DEVICES:
         err = ecu_config_global_devices_initialize();
         if(err == E_OK) {
           ctx->fsm_core_init++;
@@ -51,7 +51,7 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
           ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
         }
         break;
-      case ECU_CORE_INIT_FSM_INIT_SENS:
+      case ECU_CORE_INIT_FSM_INIT_SENSORS:
         err = ecu_config_global_sensors_initialize();
         if(err == E_OK) {
           ctx->fsm_core_init++;
@@ -63,6 +63,16 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
         break;
       case ECU_CORE_INIT_FSM_INIT_MODULES:
         err = ecu_config_global_modules_initialize();
+        if(err == E_OK) {
+          ctx->fsm_core_init++;
+          continue;
+        } else if(err != E_AGAIN) {
+          ctx->core_init_errcode = err;
+          ctx->fsm_core_init = ECU_CORE_INIT_FSM_INITIAL;
+        }
+        break;
+      case ECU_CORE_INIT_FSM_INIT_TIMINGS:
+        err = ecu_config_global_timings_initialize();
         if(err == E_OK) {
           ctx->fsm_core_init++;
           continue;

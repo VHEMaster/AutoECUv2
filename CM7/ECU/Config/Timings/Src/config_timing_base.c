@@ -25,12 +25,12 @@ typedef struct {
 
 typedef struct {
     ecu_sensor_ckp_t ckp_instance;
-    ecu_timings_base_ctx_t *module_ctx;
+    ecu_timings_base_ctx_t *timing_ctx;
 }ecu_timings_base_ckp_cb_ctx_t;
 
 typedef struct {
     ecu_sensor_cmp_t cmp_instance;
-    ecu_timings_base_ctx_t *module_ctx;
+    ecu_timings_base_ctx_t *timing_ctx;
 }ecu_timings_base_cmp_cb_ctx_t;
 
 typedef struct ecu_timings_base_ctx_tag {
@@ -87,7 +87,7 @@ error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx
 
     timing_ctx->config_default.enabled = ecu_timings_base_enabled_default[instance];
     timing_ctx->ckp_cb_ctx.ckp_instance = timing_ctx->init.ckp_instance;
-    timing_ctx->ckp_cb_ctx.module_ctx = timing_ctx;
+    timing_ctx->ckp_cb_ctx.timing_ctx = timing_ctx;
 
     err = ecu_sensors_ckp_register_cb(timing_ctx->init.ckp_instance, ecu_timings_base_ckp_signal_update_cb, &timing_ctx->ckp_cb_ctx);
     BREAK_IF(err != E_OK);
@@ -96,7 +96,7 @@ error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx
       timing_ctx->init.cmp_instances[i] = ECU_SENSOR_CMP_1 + i;
       timing_ctx->config_default.camshafts[i].cmp_instance = ECU_SENSOR_CMP_1 + i;
       timing_ctx->cmp_cb_ctx[i].cmp_instance = ECU_SENSOR_CMP_1 + i;
-      timing_ctx->cmp_cb_ctx[i].module_ctx = timing_ctx;
+      timing_ctx->cmp_cb_ctx[i].timing_ctx = timing_ctx;
 
       err = ecu_sensors_cmp_register_cb(i, ecu_timings_base_cmp_signal_update_cb, &timing_ctx->cmp_cb_ctx[i]);
       BREAK_IF(err != E_OK);
@@ -111,7 +111,7 @@ error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx
     err = ecu_timings_base_register_cb(instance, timing_base_signal_update_cb, timing_ctx);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_BASE, instance, false);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_BASE, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -149,7 +149,7 @@ error_t ecu_timings_base_configure(ecu_timing_base_t instance, const timing_base
     err = timing_base_configure(timing_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_BASE, instance, timing_ctx->ctx->config.enabled);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_BASE, instance, timing_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -262,14 +262,14 @@ error_t ecu_timings_base_register_cb(ecu_timing_base_t instance, timing_base_sig
 ITCM_FUNC static void ecu_timings_base_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   ecu_timings_base_ckp_cb_ctx_t *ckp_cb_ctx = (ecu_timings_base_ckp_cb_ctx_t *)usrdata;
-  ecu_timings_base_ctx_t *module_ctx;
+  ecu_timings_base_ctx_t *timing_ctx;
   timing_base_ctx_t *ctx;
 
   do {
     BREAK_IF(ckp_cb_ctx == NULL);
-    module_ctx = ckp_cb_ctx->module_ctx;
-    BREAK_IF(module_ctx == NULL);
-    ctx = module_ctx->ctx;
+    timing_ctx = ckp_cb_ctx->timing_ctx;
+    BREAK_IF(timing_ctx == NULL);
+    ctx = timing_ctx->ctx;
     BREAK_IF(ctx == NULL);
 
     timing_base_ckp_signal_update(ctx, data, diag);
@@ -284,14 +284,14 @@ ITCM_FUNC static void ecu_timings_base_ckp_signal_update_cb(void *usrdata, const
 ITCM_FUNC static void ecu_timings_base_cmp_signal_update_cb(void *usrdata, const cmp_data_t *data, const cmp_diag_t *diag)
 {
   ecu_timings_base_cmp_cb_ctx_t *cmp_cb_ctx = (ecu_timings_base_cmp_cb_ctx_t *)usrdata;
-  ecu_timings_base_ctx_t *module_ctx;
+  ecu_timings_base_ctx_t *timing_ctx;
   timing_base_ctx_t *ctx;
 
   do {
     BREAK_IF(cmp_cb_ctx == NULL);
-    module_ctx = cmp_cb_ctx->module_ctx;
-    BREAK_IF(module_ctx == NULL);
-    ctx = module_ctx->ctx;
+    timing_ctx = cmp_cb_ctx->timing_ctx;
+    BREAK_IF(timing_ctx == NULL);
+    ctx = timing_ctx->ctx;
     BREAK_IF(ctx == NULL);
 
     timing_base_cmp_signal_update(ctx, cmp_cb_ctx->cmp_instance, data, diag);

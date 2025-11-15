@@ -52,7 +52,7 @@ error_t ecu_timings_rough_init(ecu_timing_rough_t instance, rough_ctx_t *ctx)
 
     memcpy(&timing_ctx->ctx->config, &timing_ctx->config_default, sizeof(rough_config_t));
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_ROUGH, instance, false);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_ROUGH, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -90,7 +90,7 @@ error_t ecu_timings_rough_configure(ecu_timing_rough_t instance, const rough_con
     err = rough_configure(timing_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
-    err = ecu_modules_set_module_enabled(ECU_TIMING_TYPE_ROUGH, instance, timing_ctx->ctx->config.enabled);
+    err = ecu_timings_set_timing_enabled(ECU_TIMING_TYPE_ROUGH, instance, timing_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
 
   } while(0);
