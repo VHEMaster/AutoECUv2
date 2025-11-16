@@ -200,6 +200,90 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
   return err;
 }
 
+
+error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, const ecu_core_runtime_value_ctx_t **ptr)
+{
+  error_t err = E_OK;
+  ecu_config_common_entity_ctx_t *entity_ctx;
+  ecu_config_common_entity_type_ctx_t *type_ctx;
+  ecu_config_common_entity_instance_ctx_t *instance_ctx;
+
+  ecu_config_common_entity_parameter_t parameter = id.bitfield.parameter;
+  ecu_config_common_entity_instance_t instance = id.bitfield.instance;
+  ecu_config_common_entity_type_t type = id.bitfield.type;
+  ecu_config_common_read_write_t read_write = id.bitfield.read_write;
+  ecu_config_common_entity_t entity = id.bitfield.entity;
+
+  do {
+    BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+
+    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+
+    type_ctx = &entity_ctx->types[type];
+    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+
+    instance_ctx = &type_ctx->instances[instance];
+
+    if(read_write == ECU_COMMON_READ) {
+      BREAK_IF_ACTION(parameter >= instance_ctx->parameters->read_count, err = E_PARAM);
+      *ptr = &instance_ctx->parameters->read[parameter];
+    } else if(read_write == ECU_COMMON_WRITE) {
+      BREAK_IF_ACTION(parameter >= instance_ctx->parameters->write_count, err = E_PARAM);
+      *ptr = &instance_ctx->parameters->write[parameter];
+    } else {
+      err = E_PARAM;
+      break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id, ecu_core_runtime_value_ctx_t *ptr)
+{
+  error_t err = E_OK;
+  ecu_config_common_entity_ctx_t *entity_ctx;
+  ecu_config_common_entity_type_ctx_t *type_ctx;
+  ecu_config_common_entity_instance_ctx_t *instance_ctx;
+
+  ecu_config_common_entity_parameter_t parameter = id.bitfield.parameter;
+  ecu_config_common_entity_instance_t instance = id.bitfield.instance;
+  ecu_config_common_entity_type_t type = id.bitfield.type;
+  ecu_config_common_read_write_t read_write = id.bitfield.read_write;
+  ecu_config_common_entity_t entity = id.bitfield.entity;
+
+  do {
+    BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+
+    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+
+    type_ctx = &entity_ctx->types[type];
+    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+
+    instance_ctx = &type_ctx->instances[instance];
+
+    if(read_write == ECU_COMMON_READ) {
+      BREAK_IF_ACTION(parameter >= instance_ctx->parameters->read_count, err = E_PARAM);
+      memcpy(ptr, &instance_ctx->parameters->read[parameter], sizeof(instance_ctx->parameters->read[parameter]));
+    } else if(read_write == ECU_COMMON_WRITE) {
+      BREAK_IF_ACTION(parameter >= instance_ctx->parameters->write_count, err = E_PARAM);
+      memcpy(ptr, &instance_ctx->parameters->write[parameter], sizeof(instance_ctx->parameters->write[parameter]));
+    } else {
+      err = E_PARAM;
+      break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+
 static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity)
 {
   error_t err = E_OK;

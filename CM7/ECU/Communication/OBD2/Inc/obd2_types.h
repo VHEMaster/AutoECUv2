@@ -10,7 +10,6 @@
 
 #include "common.h"
 #include "time.h"
-#include "versioned_obd2.h"
 
 #define OBD2_DATA_LENGTH_MAX           255
 #define OBD2_ASCII_LENGTH_MAX          64
@@ -312,10 +311,6 @@ typedef enum
   OBD2_FUEL_HYDROGEN              = 24
 }obd2_fuel_type_t;
 
-typedef struct obd2_ctx_tag obd2_ctx_t;
-
-typedef void (*obd2_error_callback_t)(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
-
 typedef enum
 {
   OBD2_PID_TYPE_UNDEFINED = 0,
@@ -366,35 +361,5 @@ typedef struct {
     uint16_t length[4];
     const uint8_t *value[4];
 }obd2_mode9_data_t;
-
-typedef struct {
-    obd2_error_callback_t error_callback;
-    void *callback_userdata;
-}obd2_init_ctx_t;
-
-typedef struct obd2_ctx_tag {
-    obd2_config_t config;
-    obd2_init_ctx_t init;
-    bool initialized;
-    bool configured;
-
-    const obd2_mode1_setup_t *mode1_setup;
-    obd2_mode1_data_t mode1_data[OBD2_PID_01_MAX];
-    obd2_mode9_data_t mode9_data[OBD2_PID_09_MAX];
-
-    obd2_error_code_t error_code;
-    bool reset_trigger;
-
-    uint8_t upstream_data[OBD2_DATA_LENGTH_MAX];
-    uint16_t upstream_data_len;
-    bool upstream_available;
-
-    uint8_t downstream_data[OBD2_DATA_LENGTH_MAX];
-    uint16_t downstream_data_len;
-    bool downstream_available;
-
-    time_us_t downstream_time;
-
-}obd2_ctx_t;
 
 #endif /* COMMUNICATION_OBD2_INC_OBD2_TYPES_H_ */

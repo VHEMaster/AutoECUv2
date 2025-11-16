@@ -5,7 +5,7 @@
  *      Author: VHEMaster
  */
 
-#include "obd2_private.h"
+#include "obd2.h"
 
 static const uint8_t obd2_pid_type_item_length[OBD2_PID_TYPE_MAX] = {
     0, // OBD2_PID_TYPE_UNDEFINED

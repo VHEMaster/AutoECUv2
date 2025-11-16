@@ -17,7 +17,6 @@
 #include "config_modules.h"
 #include "config_timings.h"
 #include "config_calibration.h"
-#include "config_comm.h"
 
 #include "config_flash.h"
 #include "config_flexio.h"
