@@ -450,7 +450,7 @@ error_t ecu_timings_get_instance_parameters_read(ecu_timing_type_t type, ecu_tim
 
     *count = interface_config->params_read_count;
     if(interface_config->params_read_count > 0) {
-      *read = &ctx_config->params_read_ptr[instance];
+      *read = ctx_config->params_read_ptr;
     } else {
       *read = NULL;
     }
@@ -482,7 +482,7 @@ error_t ecu_timings_get_instance_parameters_write(ecu_timing_type_t type, ecu_ti
 
     *count = interface_config->params_write_count;
     if(interface_config->params_write_count > 0) {
-      *write = &ctx_config->params_write_ptr[instance];
+      *write = ctx_config->params_write_ptr;
     } else {
       *write = NULL;
     }
@@ -491,6 +491,41 @@ error_t ecu_timings_get_instance_parameters_write(ecu_timing_type_t type, ecu_ti
 
   return err;
 }
+
+error_t ecu_timings_get_type_parameters_count_read(ecu_timing_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_TIMING_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_timings.interfaces[type];
+    *count = interface_config->params_read_count;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_timings_get_type_parameters_count_write(ecu_timing_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_TIMING_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_timings.interfaces[type];
+    *count = interface_config->params_write_count;
+
+  } while(0);
+
+  return err;
+}
+
 
 error_t ecu_timings_get_base_ctx(ecu_timing_base_t instance, timing_base_ctx_t **ctx)
 {

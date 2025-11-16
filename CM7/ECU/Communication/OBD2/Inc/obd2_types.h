@@ -350,7 +350,6 @@ typedef struct {
 }obd2_mode1_data_value_t;
 
 typedef struct {
-    bool supported;
     uint8_t prefix_byte;
     obd2_mode1_data_value_t value[6];
 }obd2_mode1_data_t;

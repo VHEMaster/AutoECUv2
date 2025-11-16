@@ -9,6 +9,8 @@
 #include "config_obd2.h"
 #include "compiler.h"
 
+#include "config_global.h"
+
 typedef struct ecu_comm_obd2_ctx_tag ecu_comm_obd2_ctx_t;
 
 static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
@@ -39,7 +41,20 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_CALCULATED_ENGINE_LOAD
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_ECT,
+                            .instance = ECU_SENSOR_ECT_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_COOLANT_TEMPERATURE
             {
                 .supported = false,
@@ -60,22 +75,87 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_INTAKE_MANIFOLD_PRESSURE
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_CKP,
+                            .instance = ECU_SENSOR_CKP_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_ENGINE_RPM
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_VSS,
+                            .instance = ECU_SENSOR_VSS_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_VEHICLE_SPEED
             {
                 .supported = false,
             }, // OBD2_PID_01_TIMING_ADVANCE
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_IAT,
+                            .instance = ECU_SENSOR_IAT_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_INTAKE_AIR_TEMPERATURE
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_MAF,
+                            .instance = ECU_SENSOR_MAF_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_MAF_AIR_FLOW_RATE
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_TPS,
+                            .instance = ECU_SENSOR_TPS_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_THROTTLE_POSITION
             {
                 .supported = false,
@@ -387,7 +467,30 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_CACT
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_EGT,
+                            .instance = ECU_SENSOR_EGT_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_EGT,
+                            .instance = ECU_SENSOR_EGT_2,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1
             {
                 .supported = false,

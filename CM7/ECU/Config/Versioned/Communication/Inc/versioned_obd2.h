@@ -9,7 +9,7 @@
 #define CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_OBD2_H_
 
 #include "common.h"
-#include "config_common.h"
+#include "config_common_types.h"
 #include "obd2_types.h"
 
 typedef enum {
@@ -17,9 +17,17 @@ typedef enum {
   OBD2_CONFIG_VERSION_MAX
 }obd2_config_versions_t;
 
+typedef enum {
+  OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_HARD = 0,
+  OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+  OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_MAX
+}obd2_config_mode_01_linkage_source_t;
+
 typedef struct {
     bool supported;
-    ecu_config_parameter_id_t ids[4];
+    obd2_config_mode_01_linkage_source_t source;
+
+    ecu_config_parameter_id_t common_ids[4];
 }obd2_config_mode_01_linkage_parameter_t;
 
 typedef struct {

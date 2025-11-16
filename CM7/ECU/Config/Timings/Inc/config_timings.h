@@ -33,6 +33,8 @@ error_t ecu_timings_get_type_max(ecu_timing_type_t *type_max);
 error_t ecu_timings_get_instance_max(ecu_timing_type_t type, ecu_timing_instance_t *instance_max);
 error_t ecu_timings_get_instance_parameters_read(ecu_timing_type_t type, ecu_timing_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count);
 error_t ecu_timings_get_instance_parameters_write(ecu_timing_type_t type, ecu_timing_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count);
+error_t ecu_timings_get_type_parameters_count_read(ecu_timing_type_t type, ecu_runtime_param_index_t *count);
+error_t ecu_timings_get_type_parameters_count_write(ecu_timing_type_t type, ecu_runtime_param_index_t *count);
 
 error_t ecu_timings_get_base_ctx(ecu_timing_base_t instance, timing_base_ctx_t **ctx);
 error_t ecu_timings_get_ignition_ctx(ecu_timing_base_t instance, ignition_ctx_t **ctx);

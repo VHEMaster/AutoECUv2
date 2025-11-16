@@ -71,17 +71,17 @@ static ots_ctx_t ecu_config_ots_ctx[ECU_SENSOR_OTS_MAX];
 static ops_ctx_t ecu_config_ops_ctx[ECU_SENSOR_OPS_MAX];
 
 static ecu_core_runtime_value_ctx_t ecu_config_ckp_params_read[ECU_SENSOR_CKP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_cmp_params_read[ECU_SENSOR_CMP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_ect_params_read[ECU_SENSOR_ECT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_egt_params_read[ECU_SENSOR_EGT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_iat_params_read[ECU_SENSOR_IAT_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_maf_params_read[ECU_SENSOR_MAF_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_map_params_read[ECU_SENSOR_MAP_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_tps_params_read[ECU_SENSOR_TPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_vss_params_read[ECU_SENSOR_VSS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_CKP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cmp_params_read[ECU_SENSOR_CMP_MAX][ECU_SENSOR_CMP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ect_params_read[ECU_SENSOR_ECT_MAX][ECU_SENSOR_ECT_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_egt_params_read[ECU_SENSOR_EGT_MAX][ECU_SENSOR_EGT_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_iat_params_read[ECU_SENSOR_IAT_MAX][ECU_SENSOR_IAT_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_maf_params_read[ECU_SENSOR_MAF_MAX][ECU_SENSOR_MAF_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_map_params_read[ECU_SENSOR_MAP_MAX][ECU_SENSOR_MAP_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_tps_params_read[ECU_SENSOR_TPS_MAX][ECU_SENSOR_TPS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_vss_params_read[ECU_SENSOR_VSS_MAX][ECU_SENSOR_VSS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_aps_params_read[ECU_SENSOR_APS_MAX][ECU_SENSOR_APS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ots_params_read[ECU_SENSOR_OTS_MAX][ECU_SENSOR_OTS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_ops_params_read[ECU_SENSOR_OPS_MAX][ECU_SENSOR_OPS_READ_PARAM_MAX];
 
 static const ecu_config_sensors_config_t ecu_config_sensors = {
     .interfaces = {
@@ -671,7 +671,7 @@ error_t ecu_sensors_get_instance_parameters_read(ecu_sensor_type_t type, ecu_sen
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_read_count;
-    *read = &ctx_config->params_read_ptr[instance];
+    *read = ctx_config->params_read_ptr;
 
   } while(0);
 
@@ -699,7 +699,41 @@ error_t ecu_sensors_get_instance_parameters_write(ecu_sensor_type_t type, ecu_se
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_write_count;
-    *write = &ctx_config->params_write_ptr[instance];
+    *write = ctx_config->params_write_ptr;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_get_type_parameters_count_read(ecu_sensor_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_sensors.interfaces[type];
+    *count = interface_config->params_read_count;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_sensors_get_type_parameters_count_write(ecu_sensor_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_SENSOR_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_sensors.interfaces[type];
+    *count = interface_config->params_write_count;
 
   } while(0);
 

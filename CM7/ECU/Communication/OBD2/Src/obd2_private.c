@@ -6,6 +6,7 @@
  */
 
 #include "obd2.h"
+#include "config_common.h"
 
 static const uint8_t obd2_pid_type_item_length[OBD2_PID_TYPE_MAX] = {
     0, // OBD2_PID_TYPE_UNDEFINED
@@ -171,6 +172,7 @@ void obd2_loop_handler(obd2_ctx_t *ctx)
 
 static void obd2_sid_current_data(obd2_ctx_t *ctx)
 {
+  error_t err = E_OK;
   uint8_t adder;
   uint32_t payload;
   uint8_t pid;
@@ -179,6 +181,8 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
   obd2_mode1_pid_type_t dtype;
   obd2_mode1_data_t *md1;
   float raw;
+  const obd2_config_mode_01_linkage_parameter_t *param_cfg;
+  ecu_core_runtime_value_ctx_t param_value;
 
   do {
     for(int i = 1; i < ctx->upstream_data_len; i++) {
@@ -186,8 +190,9 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
       dtype = ctx->mode1_setup[pid].type;
       dlen = obd2_pid_type_item_length[dtype];
       md1 = &ctx->mode1_data[pid];
+      param_cfg = &ctx->config.mode_01_linkage.parameters[pid];
 
-      if(pid < OBD2_PID_01_MAX && md1->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
+      if(pid < OBD2_PID_01_MAX && param_cfg->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
         switch(pid) {
           case OBD2_PID_01_SUPPORTED_01_20:
           case OBD2_PID_01_SUPPORTED_21_40:
@@ -198,7 +203,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
             payload = 0;
             for(uint8_t p = 0, idx = adder + 1; p < 0x20; p++, idx++) {
               BREAK_IF(idx >= OBD2_PID_01_MAX);
-              if(ctx->mode1_data[idx].supported && ctx->mode1_setup[pid].type != OBD2_PID_TYPE_UNDEFINED) {
+              if(ctx->config.mode_01_linkage.parameters[idx].supported && ctx->mode1_setup[pid].type != OBD2_PID_TYPE_UNDEFINED) {
                 payload |= 1 << p;
               }
             }
@@ -209,6 +214,21 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
             break;
           default:
             ctx->downstream_data[ctx->downstream_data_len++] = pid;
+
+            if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_HARD) {
+              // TODO: probably, implement
+            } else if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) {
+              md1->prefix_byte = 0;
+              for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
+                err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
+                if(err == E_OK) {
+                  md1->prefix_byte |= 1 << i;
+                  md1->value[i].flt = param_value.value;
+                  md1->value[i].raw = roundf(param_value.value);
+                }
+              }
+            }
+
             if(obd2_pid_type_item_has_prefix[dtype]) {
               ctx->downstream_data[ctx->downstream_data_len++] = md1->prefix_byte;
             }

@@ -100,14 +100,14 @@ static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t
 
   err = ecu_devices_wbls_get_data(instance, &data);
   if(err == E_OK) {
-    device_ctx->read[ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.lambda_value;
-    device_ctx->read[ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
-    device_ctx->read[ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.operating_status;
-    device_ctx->read[ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.lambda_value;
+    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.operating_status;
+    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
 
   } else {
     for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_READ_PARAM_MAX; i++) {
-      device_ctx->read[i].valid = false;
+      device_ctx->params[ECU_COMMON_READ][i].valid = false;
     }
   }
 }
@@ -121,27 +121,27 @@ static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instanc
 
   err = ecu_devices_stepper_get_current(instance, &position);
   if(err == E_OK) {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].value = position;
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].value = position;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].valid = true;
   } else {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].valid = false;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_CURRENT].valid = false;
   }
 
   err = ecu_devices_stepper_get_target(instance, &position);
   if(err == E_OK) {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].value = position;
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].value = position;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].valid = true;
 
   } else {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].valid = false;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_POS_TARGET].valid = false;
   }
 
   err = ecu_devices_stepper_is_failure(instance, &failure);
   if(err == E_OK) {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].value = failure ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].value = failure ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].valid = true;
   } else {
-    device_ctx->read[ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].valid = false;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_STEPPER_READ_PARAM_FAILURE].valid = false;
   }
 }
 
@@ -149,9 +149,9 @@ static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_
 {
   ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBLS][instance];
 
-  if(device_ctx->write[ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid) {
-    (void)ecu_devices_wbls_set_heatup(instance, device_ctx->write[ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].value);
-    device_ctx->write[ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid) {
+    (void)ecu_devices_wbls_set_heatup(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].value);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid = false;
   }
 }
 
@@ -159,21 +159,21 @@ static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instan
 {
   ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_STEPPER][instance];
 
-  if(device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].valid) {
-    (void)ecu_devices_stepper_enable(instance, device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].valid) {
+    (void)ecu_devices_stepper_enable(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_ENABLED].valid = false;
   }
-  if(device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].valid) {
-    (void)ecu_devices_stepper_pos_reset(instance, device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].value);
-    device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].valid) {
+    (void)ecu_devices_stepper_pos_reset(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].value);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_RESET].valid = false;
   }
-  if(device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].valid) {
-    (void)ecu_devices_stepper_set_target(instance, device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].value);
-    device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].valid) {
+    (void)ecu_devices_stepper_set_target(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].value);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_TARGET].valid = false;
   }
-  if(device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].valid) {
-    (void)ecu_devices_stepper_set_current(instance, device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].value);
-    device_ctx->write[ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].valid) {
+    (void)ecu_devices_stepper_set_current(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].value);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_STEPPER_WRITE_PARAM_POS_CURRENT].valid = false;
   }
 }
 
@@ -182,10 +182,10 @@ static void calcdata_device_invalidate_stepper(ecu_core_ctx_t *ctx, ecu_device_i
   ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_STEPPER][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_STEPPER_READ_PARAM_MAX; i++) {
-    device_ctx->read[i].valid = false;
+    device_ctx->params[ECU_COMMON_READ][i].valid = false;
   }
   for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_STEPPER_WRITE_PARAM_MAX; i++) {
-    device_ctx->write[i].valid = false;
+    device_ctx->params[ECU_COMMON_WRITE][i].valid = false;
   }
 }
 
@@ -194,9 +194,9 @@ static void calcdata_device_invalidate_wbls(ecu_core_ctx_t *ctx, ecu_device_inst
   ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBLS][instance];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_READ_PARAM_MAX; i++) {
-    device_ctx->read[i].valid = false;
+    device_ctx->params[ECU_COMMON_READ][i].valid = false;
   }
   for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_WRITE_PARAM_MAX; i++) {
-    device_ctx->write[i].valid = false;
+    device_ctx->params[ECU_COMMON_WRITE][i].valid = false;
   }
 }

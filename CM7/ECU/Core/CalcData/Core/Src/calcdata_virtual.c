@@ -18,10 +18,10 @@
   for(ecu_##typelowercase##_##instlowercase##_t i = 0; i < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_MAX; i++) {  \
     for(ecu_##typelowercase##_##instlowercase##_read_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_READ_PARAM_MAX; param++) { \
       valid = false;  \
-      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param]; \
-      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param];  \
+      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_READ][param]; \
+      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_READ][param];  \
       for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].read[param];  \
+        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_READ][param];  \
         if(value_src->valid) {  \
           value_dest->value = value_src->value; \
           value_dest->valid = value_src->valid; \
@@ -49,10 +49,10 @@
   for(ecu_##typelowercase##_##instlowercase##_t i = 0; i < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_MAX; i++) {  \
     for(ecu_##typelowercase##_##instlowercase##_write_params_t param = 0; param < ECU_##TYPEUPPERCASE##_##INSTUPPERCASE##_WRITE_PARAM_MAX; param++) { \
       valid = false;  \
-      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param]; \
-      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param];  \
+      value_dest = &ctx->runtime.global.parameters.typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_WRITE][param]; \
+      value_sim = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_SIMULATED].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_WRITE][param];  \
       for(ecu_core_runtime_parameters_virtual_source_t source = 0; source < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; source++) {  \
-        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].write[param];  \
+        value_src = &ctx->runtime.global.parameters_virtual[source].typelowercase##s[ECU_##TYPEUPPERCASE##_TYPE_##INSTUPPERCASE][i].params[ECU_COMMON_WRITE][param];  \
         if(value_src->valid) {  \
           value_dest->value = value_src->value; \
           value_dest->valid = value_src->valid; \
@@ -97,19 +97,46 @@ void calcdata_virtual_write(ecu_core_ctx_t *ctx)
 
 static void calcdata_virtual_read_sensors(ecu_core_ctx_t *ctx)
 {
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, APS, aps);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, CKP, ckp);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, ECT, ect);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, OPS, ops);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, OTS, ots);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, VSS, vss);
+  error_t err;
+  bool valid = false;
 
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, CMP, cmp);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, EGT, egt);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, IAT, iat);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, MAF, maf);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, MAP, map);
-  CALCDATA_VIRTUAL_READ(ctx, SENSOR, sensor, TPS, tps);
+  ecu_config_common_entity_type_t type_max;
+  ecu_config_common_entity_instance_t instance_max;
+  const ecu_core_runtime_global_instance_parameters_ctx_t *param_ctx_src;
+  const ecu_core_runtime_value_ctx_t *param_value_src;
+
+  ecu_core_runtime_global_instance_parameters_ctx_t *param_ctx_dst;
+  ecu_core_runtime_value_ctx_t *param_value_dst;
+
+  do {
+    err = ecu_config_common_get_entity_type_max(ECU_COMMON_ENTITY_SENSOR, &type_max);
+    BREAK_IF(err != E_OK);
+
+    for(ecu_config_common_entity_type_t t = 0; t < type_max; t++) {
+      err = ecu_config_common_get_entity_type_instance_max(ECU_COMMON_ENTITY_SENSOR, t, &instance_max);
+      BREAK_IF(err != E_OK);
+      for(ecu_config_common_entity_instance_t i = 0; i < instance_max; i++) {
+        param_ctx_dst = &ctx->runtime.global.parameters.sensors[t][i];
+        for(ecu_runtime_param_index_t p = 0; p < param_ctx_dst->count[ECU_COMMON_READ]; p++) {
+          valid = false;
+          param_value_dst = &param_ctx_dst->params[ECU_COMMON_READ][p];
+          for(ecu_core_runtime_parameters_virtual_source_t s = 0; s < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; s++) {
+            param_ctx_src = &ctx->runtime.global.parameters_virtual[s].sensors[t][i];
+            param_value_src = &param_ctx_src->params[ECU_COMMON_READ][p];
+            if(param_value_src->valid) {
+              param_value_dst->value = param_value_src->value;
+              param_value_dst->valid = param_value_src->valid;
+              valid = true;
+              break;
+            }
+          }
+          if(valid != true) {
+            param_value_dst->valid = false;
+          }
+        }
+      }
+    }
+  } while(0);
 }
 
 static void calcdata_virtual_read_devices(ecu_core_ctx_t *ctx)

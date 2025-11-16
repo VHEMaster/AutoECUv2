@@ -176,7 +176,7 @@ static error_t ecu_config_global_fsm_device_cfg(ecu_config_global_runtime_ctx_t 
       case ECU_CONFIG_FSM_DEVICE_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_DEVICE_INIT && ctx->process_result == E_AGAIN) {
           ctx->devices_initialized = false;
-          ctx->process_sens_type = 0;
+          ctx->process_device_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_device_cfg = ECU_CONFIG_FSM_DEVICE_CFG_DEFINE;
           err = E_AGAIN;
@@ -190,16 +190,16 @@ static error_t ecu_config_global_fsm_device_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_DEVICE_CFG_DEFINE:
-        if(ctx->process_sens_type >= ctx->devices_count) {
+        if(ctx->process_device_type >= ctx->devices_count) {
           ctx->devices_initialized = true;
           ctx->fsm_device_cfg = ECU_CONFIG_FSM_DEVICE_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->devices_config[ctx->process_sens_type].instances_count) {
+          if(ctx->process_instance >= ctx->devices_config[ctx->process_device_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_sens_type++;
+            ctx->process_device_type++;
           } else {
             ctx->fsm_device_cfg = ECU_CONFIG_FSM_DEVICE_CFG_RESET;
           }
@@ -208,15 +208,15 @@ static error_t ecu_config_global_fsm_device_cfg(ecu_config_global_runtime_ctx_t 
 
         break;
       case ECU_CONFIG_FSM_DEVICE_CFG_RESET:
-        if(ctx->devices_config[ctx->process_sens_type].reset_func != NULL) {
-          err = ctx->devices_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        if(ctx->devices_config[ctx->process_device_type].reset_func != NULL) {
+          err = ctx->devices_config[ctx->process_device_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->devices_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
-              ctx->devices_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
-            ctx->devices_ctx[ctx->process_sens_type].reset_errcode = err;
+          if(ctx->devices_ctx[ctx->process_device_type].reset_errcode == E_AGAIN ||
+              ctx->devices_ctx[ctx->process_device_type].reset_errcode == E_OK) {
+            ctx->devices_ctx[ctx->process_device_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_device_cfg = ECU_CONFIG_FSM_DEVICE_CFG_CONFIG;
@@ -224,16 +224,16 @@ static error_t ecu_config_global_fsm_device_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_DEVICE_CFG_CONFIG:
-        if(ctx->devices_config[ctx->process_sens_type].configure_func != NULL) {
-          err = ctx->devices_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->devices_config[ctx->process_sens_type].generic.data_ptr +
-              ctx->devices_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        if(ctx->devices_config[ctx->process_device_type].configure_func != NULL) {
+          err = ctx->devices_config[ctx->process_device_type].configure_func(ctx->process_instance, ctx->devices_config[ctx->process_device_type].generic.data_ptr +
+              ctx->devices_config[ctx->process_device_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->devices_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
-              ctx->devices_ctx[ctx->process_sens_type].config_errcode == E_OK) {
-            ctx->devices_ctx[ctx->process_sens_type].config_errcode = err;
+          if(ctx->devices_ctx[ctx->process_device_type].config_errcode == E_AGAIN ||
+              ctx->devices_ctx[ctx->process_device_type].config_errcode == E_OK) {
+            ctx->devices_ctx[ctx->process_device_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_device_cfg = ECU_CONFIG_FSM_DEVICE_CFG_DEFINE;
@@ -261,7 +261,7 @@ static error_t ecu_config_global_fsm_sensor_cfg(ecu_config_global_runtime_ctx_t 
       case ECU_CONFIG_FSM_SENSOR_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_SENSOR_INIT && ctx->process_result == E_AGAIN) {
           ctx->sensors_initialized = false;
-          ctx->process_sens_type = 0;
+          ctx->process_sensor_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_sensor_cfg = ECU_CONFIG_FSM_SENSOR_CFG_DEFINE;
           err = E_AGAIN;
@@ -275,16 +275,16 @@ static error_t ecu_config_global_fsm_sensor_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_SENSOR_CFG_DEFINE:
-        if(ctx->process_sens_type >= ctx->sensors_count) {
+        if(ctx->process_sensor_type >= ctx->sensors_count) {
           ctx->sensors_initialized = true;
           ctx->fsm_sensor_cfg = ECU_CONFIG_FSM_SENSOR_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->sensors_config[ctx->process_sens_type].instances_count) {
+          if(ctx->process_instance >= ctx->sensors_config[ctx->process_sensor_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_sens_type++;
+            ctx->process_sensor_type++;
           } else {
             ctx->fsm_sensor_cfg = ECU_CONFIG_FSM_SENSOR_CFG_RESET;
           }
@@ -293,15 +293,15 @@ static error_t ecu_config_global_fsm_sensor_cfg(ecu_config_global_runtime_ctx_t 
 
         break;
       case ECU_CONFIG_FSM_SENSOR_CFG_RESET:
-        if(ctx->sensors_config[ctx->process_sens_type].reset_func != NULL) {
-          err = ctx->sensors_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        if(ctx->sensors_config[ctx->process_sensor_type].reset_func != NULL) {
+          err = ctx->sensors_config[ctx->process_sensor_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->sensors_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
-              ctx->sensors_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
-            ctx->sensors_ctx[ctx->process_sens_type].reset_errcode = err;
+          if(ctx->sensors_ctx[ctx->process_sensor_type].reset_errcode == E_AGAIN ||
+              ctx->sensors_ctx[ctx->process_sensor_type].reset_errcode == E_OK) {
+            ctx->sensors_ctx[ctx->process_sensor_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_sensor_cfg = ECU_CONFIG_FSM_SENSOR_CFG_CONFIG;
@@ -309,16 +309,16 @@ static error_t ecu_config_global_fsm_sensor_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_SENSOR_CFG_CONFIG:
-        if(ctx->sensors_config[ctx->process_sens_type].configure_func != NULL) {
-          err = ctx->sensors_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->sensors_config[ctx->process_sens_type].generic.data_ptr +
-              ctx->sensors_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        if(ctx->sensors_config[ctx->process_sensor_type].configure_func != NULL) {
+          err = ctx->sensors_config[ctx->process_sensor_type].configure_func(ctx->process_instance, ctx->sensors_config[ctx->process_sensor_type].generic.data_ptr +
+              ctx->sensors_config[ctx->process_sensor_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->sensors_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
-              ctx->sensors_ctx[ctx->process_sens_type].config_errcode == E_OK) {
-            ctx->sensors_ctx[ctx->process_sens_type].config_errcode = err;
+          if(ctx->sensors_ctx[ctx->process_sensor_type].config_errcode == E_AGAIN ||
+              ctx->sensors_ctx[ctx->process_sensor_type].config_errcode == E_OK) {
+            ctx->sensors_ctx[ctx->process_sensor_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_sensor_cfg = ECU_CONFIG_FSM_SENSOR_CFG_DEFINE;
@@ -346,7 +346,7 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
       case ECU_CONFIG_FSM_MODULE_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_MODULE_INIT && ctx->process_result == E_AGAIN) {
           ctx->modules_initialized = false;
-          ctx->process_sens_type = 0;
+          ctx->process_module_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_DEFINE;
           err = E_AGAIN;
@@ -360,16 +360,16 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_MODULE_CFG_DEFINE:
-        if(ctx->process_sens_type >= ctx->modules_count) {
+        if(ctx->process_module_type >= ctx->modules_count) {
           ctx->modules_initialized = true;
           ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->modules_config[ctx->process_sens_type].instances_count) {
+          if(ctx->process_instance >= ctx->modules_config[ctx->process_module_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_sens_type++;
+            ctx->process_module_type++;
           } else {
             ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_RESET;
           }
@@ -378,15 +378,15 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
 
         break;
       case ECU_CONFIG_FSM_MODULE_CFG_RESET:
-        if(ctx->modules_config[ctx->process_sens_type].reset_func != NULL) {
-          err = ctx->modules_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        if(ctx->modules_config[ctx->process_module_type].reset_func != NULL) {
+          err = ctx->modules_config[ctx->process_module_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->modules_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
-              ctx->modules_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
-            ctx->modules_ctx[ctx->process_sens_type].reset_errcode = err;
+          if(ctx->modules_ctx[ctx->process_module_type].reset_errcode == E_AGAIN ||
+              ctx->modules_ctx[ctx->process_module_type].reset_errcode == E_OK) {
+            ctx->modules_ctx[ctx->process_module_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_CONFIG;
@@ -394,16 +394,16 @@ static error_t ecu_config_global_fsm_module_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_MODULE_CFG_CONFIG:
-        if(ctx->modules_config[ctx->process_sens_type].configure_func != NULL) {
-          err = ctx->modules_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->modules_config[ctx->process_sens_type].generic.data_ptr +
-              ctx->modules_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        if(ctx->modules_config[ctx->process_module_type].configure_func != NULL) {
+          err = ctx->modules_config[ctx->process_module_type].configure_func(ctx->process_instance, ctx->modules_config[ctx->process_module_type].generic.data_ptr +
+              ctx->modules_config[ctx->process_module_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->modules_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
-              ctx->modules_ctx[ctx->process_sens_type].config_errcode == E_OK) {
-            ctx->modules_ctx[ctx->process_sens_type].config_errcode = err;
+          if(ctx->modules_ctx[ctx->process_module_type].config_errcode == E_AGAIN ||
+              ctx->modules_ctx[ctx->process_module_type].config_errcode == E_OK) {
+            ctx->modules_ctx[ctx->process_module_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_module_cfg = ECU_CONFIG_FSM_MODULE_CFG_DEFINE;
@@ -430,7 +430,7 @@ static error_t ecu_config_global_fsm_timing_cfg(ecu_config_global_runtime_ctx_t 
       case ECU_CONFIG_FSM_TIMING_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_TIMING_INIT && ctx->process_result == E_AGAIN) {
           ctx->timings_initialized = false;
-          ctx->process_sens_type = 0;
+          ctx->process_timing_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_DEFINE;
           err = E_AGAIN;
@@ -444,16 +444,16 @@ static error_t ecu_config_global_fsm_timing_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_TIMING_CFG_DEFINE:
-        if(ctx->process_sens_type >= ctx->timings_count) {
+        if(ctx->process_timing_type >= ctx->timings_count) {
           ctx->timings_initialized = true;
           ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->timings_config[ctx->process_sens_type].instances_count) {
+          if(ctx->process_instance >= ctx->timings_config[ctx->process_timing_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_sens_type++;
+            ctx->process_timing_type++;
           } else {
             ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_RESET;
           }
@@ -462,15 +462,15 @@ static error_t ecu_config_global_fsm_timing_cfg(ecu_config_global_runtime_ctx_t 
 
         break;
       case ECU_CONFIG_FSM_TIMING_CFG_RESET:
-        if(ctx->timings_config[ctx->process_sens_type].reset_func != NULL) {
-          err = ctx->timings_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        if(ctx->timings_config[ctx->process_timing_type].reset_func != NULL) {
+          err = ctx->timings_config[ctx->process_timing_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->timings_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
-              ctx->timings_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
-            ctx->timings_ctx[ctx->process_sens_type].reset_errcode = err;
+          if(ctx->timings_ctx[ctx->process_timing_type].reset_errcode == E_AGAIN ||
+              ctx->timings_ctx[ctx->process_timing_type].reset_errcode == E_OK) {
+            ctx->timings_ctx[ctx->process_timing_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_CONFIG;
@@ -478,16 +478,16 @@ static error_t ecu_config_global_fsm_timing_cfg(ecu_config_global_runtime_ctx_t 
         }
         break;
       case ECU_CONFIG_FSM_TIMING_CFG_CONFIG:
-        if(ctx->timings_config[ctx->process_sens_type].configure_func != NULL) {
-          err = ctx->timings_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->timings_config[ctx->process_sens_type].generic.data_ptr +
-              ctx->timings_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        if(ctx->timings_config[ctx->process_timing_type].configure_func != NULL) {
+          err = ctx->timings_config[ctx->process_timing_type].configure_func(ctx->process_instance, ctx->timings_config[ctx->process_timing_type].generic.data_ptr +
+              ctx->timings_config[ctx->process_timing_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->timings_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
-              ctx->timings_ctx[ctx->process_sens_type].config_errcode == E_OK) {
-            ctx->timings_ctx[ctx->process_sens_type].config_errcode = err;
+          if(ctx->timings_ctx[ctx->process_timing_type].config_errcode == E_AGAIN ||
+              ctx->timings_ctx[ctx->process_timing_type].config_errcode == E_OK) {
+            ctx->timings_ctx[ctx->process_timing_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_timing_cfg = ECU_CONFIG_FSM_TIMING_CFG_DEFINE;
@@ -515,7 +515,7 @@ static error_t ecu_config_global_fsm_comms_cfg(ecu_config_global_runtime_ctx_t *
       case ECU_CONFIG_FSM_COMM_CFG_CONDITION:
         if(ctx->global_ready == true && ctx->process_type == ECU_CONFIG_PROCESS_TYPE_COMM_INIT && ctx->process_result == E_AGAIN) {
           ctx->comms_initialized = false;
-          ctx->process_sens_type = 0;
+          ctx->process_comm_type = 0;
           ctx->process_instance = 0;
           ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_DEFINE;
           err = E_AGAIN;
@@ -529,16 +529,16 @@ static error_t ecu_config_global_fsm_comms_cfg(ecu_config_global_runtime_ctx_t *
         }
         break;
       case ECU_CONFIG_FSM_COMM_CFG_DEFINE:
-        if(ctx->process_sens_type >= ctx->comms_count) {
+        if(ctx->process_comm_type >= ctx->comms_count) {
           ctx->comms_initialized = true;
           ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_CONDITION;
           err = E_OK;
           ctx->process_result = err;
         } else {
           err = E_AGAIN;
-          if(ctx->process_instance >= ctx->comms_config[ctx->process_sens_type].instances_count) {
+          if(ctx->process_instance >= ctx->comms_config[ctx->process_comm_type].instances_count) {
             ctx->process_instance = 0;
-            ctx->process_sens_type++;
+            ctx->process_comm_type++;
           } else {
             ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_RESET;
           }
@@ -547,15 +547,15 @@ static error_t ecu_config_global_fsm_comms_cfg(ecu_config_global_runtime_ctx_t *
 
         break;
       case ECU_CONFIG_FSM_COMM_CFG_RESET:
-        if(ctx->comms_config[ctx->process_sens_type].reset_func != NULL) {
-          err = ctx->comms_config[ctx->process_sens_type].reset_func(ctx->process_instance);
+        if(ctx->comms_config[ctx->process_comm_type].reset_func != NULL) {
+          err = ctx->comms_config[ctx->process_comm_type].reset_func(ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->comms_ctx[ctx->process_sens_type].reset_errcode == E_AGAIN ||
-              ctx->comms_ctx[ctx->process_sens_type].reset_errcode == E_OK) {
-            ctx->comms_ctx[ctx->process_sens_type].reset_errcode = err;
+          if(ctx->comms_ctx[ctx->process_comm_type].reset_errcode == E_AGAIN ||
+              ctx->comms_ctx[ctx->process_comm_type].reset_errcode == E_OK) {
+            ctx->comms_ctx[ctx->process_comm_type].reset_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_CONFIG;
@@ -563,16 +563,16 @@ static error_t ecu_config_global_fsm_comms_cfg(ecu_config_global_runtime_ctx_t *
         }
         break;
       case ECU_CONFIG_FSM_COMM_CFG_CONFIG:
-        if(ctx->comms_config[ctx->process_sens_type].configure_func != NULL) {
-          err = ctx->comms_config[ctx->process_sens_type].configure_func(ctx->process_instance, ctx->comms_config[ctx->process_sens_type].generic.data_ptr +
-              ctx->comms_config[ctx->process_sens_type].generic.data_size * ctx->process_instance);
+        if(ctx->comms_config[ctx->process_comm_type].configure_func != NULL) {
+          err = ctx->comms_config[ctx->process_comm_type].configure_func(ctx->process_instance, ctx->comms_config[ctx->process_comm_type].generic.data_ptr +
+              ctx->comms_config[ctx->process_comm_type].generic.data_size * ctx->process_instance);
         } else {
           err = E_OK;
         }
         if(err != E_AGAIN) {
-          if(ctx->comms_ctx[ctx->process_sens_type].config_errcode == E_AGAIN ||
-              ctx->comms_ctx[ctx->process_sens_type].config_errcode == E_OK) {
-            ctx->comms_ctx[ctx->process_sens_type].config_errcode = err;
+          if(ctx->comms_ctx[ctx->process_comm_type].config_errcode == E_AGAIN ||
+              ctx->comms_ctx[ctx->process_comm_type].config_errcode == E_OK) {
+            ctx->comms_ctx[ctx->process_comm_type].config_errcode = err;
           }
           err = E_AGAIN;
           ctx->fsm_comm_cfg = ECU_CONFIG_FSM_COMM_CFG_DEFINE;

@@ -402,8 +402,8 @@ typedef struct {
 
     ecu_config_global_process_type_t process_type;
     error_t process_result;
-    ecu_config_device_type_t process_dev_type;
-    ecu_config_sensor_type_t process_sens_type;
+    ecu_config_device_type_t process_device_type;
+    ecu_config_sensor_type_t process_sensor_type;
     ecu_config_module_type_t process_module_type;
     ecu_config_timing_type_t process_timing_type;
     ecu_config_comm_type_t process_comm_type;

@@ -156,16 +156,16 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
     param_index_base = ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + ((ECU_TIMING_INJECTION_WRITE_PARAM_B1_END - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + 1) * bank);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
-    output_ptr->write[param_index].valid = true;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_MASS - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    output_ptr->write[param_index].value = output_inj_mass;
-    output_ptr->write[param_index].valid = true;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].value = output_inj_mass;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_PHASE - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    output_ptr->write[param_index].value = output_inj_phase;
-    output_ptr->write[param_index].valid = true;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].value = output_inj_phase;
+    output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
   }
 
   ctx->runtime.global.misc.injection_startup_revs_counter = startup_revs_counter;

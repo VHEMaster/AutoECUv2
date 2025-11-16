@@ -163,16 +163,16 @@ void calcdata_outputs_ignition(ecu_core_ctx_t *ctx)
 
     if(output_value.valid) {
       param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
-      output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
-      output_ptr->write[param_index].valid = true;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].value = ECU_RUNTIME_PARAMETER_TRUE;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
 
       param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ADVANCE - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
-      output_ptr->write[param_index].value = output_value.value;
-      output_ptr->write[param_index].valid = true;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].value = output_value.value;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
     } else {
       param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
-      output_ptr->write[param_index].value = ECU_RUNTIME_PARAMETER_FALSE;
-      output_ptr->write[param_index].valid = true;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].value = ECU_RUNTIME_PARAMETER_FALSE;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
     }
   }
 }

@@ -213,7 +213,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
     iat_type[b] = data_iat[b]->active_type;
     iat_sensdata[b] = ctx->runtime.banked.raw.banks[b].sensors_iat[iat_type[b]];
     if(iat_sensdata[b] != NULL) {
-      iat_value[b] = &iat_sensdata[b]->read[ECU_SENSOR_IAT_READ_PARAM_DATA];
+      iat_value[b] = &iat_sensdata[b]->params[ECU_COMMON_READ][ECU_SENSOR_IAT_READ_PARAM_DATA];
     } else {
       iat_value[b] = NULL;
     }

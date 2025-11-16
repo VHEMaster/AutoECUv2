@@ -16,22 +16,28 @@ void core_calcdata_simulation(ecu_core_ctx_t *ctx)
   ecu_core_runtime_value_ctx_t *value;
 
   if(calcdata_simulation_apply) {
-    value = &params->sensors[ECU_SENSOR_TYPE_IAT][ECU_SENSOR_IAT_1].read[ECU_SENSOR_IAT_READ_PARAM_DATA];
-    value->value = 25.0f; value->valid = true;
+    value = &params->sensors[ECU_SENSOR_TYPE_IAT][ECU_SENSOR_IAT_1].params[ECU_COMMON_READ][ECU_SENSOR_IAT_READ_PARAM_DATA];
+    value->value = 35.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_IAT][ECU_SENSOR_IAT_2].read[ECU_SENSOR_IAT_READ_PARAM_DATA];
-    value->value = 25.0f; value->valid = true;
+    value = &params->sensors[ECU_SENSOR_TYPE_IAT][ECU_SENSOR_IAT_2].params[ECU_COMMON_READ][ECU_SENSOR_IAT_READ_PARAM_DATA];
+    value->value = 36.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_ECT][ECU_SENSOR_ECT_1].read[ECU_SENSOR_ECT_READ_PARAM_DATA];
-    value->value = 20.0f; value->valid = true;
+    value = &params->sensors[ECU_SENSOR_TYPE_ECT][ECU_SENSOR_ECT_1].params[ECU_COMMON_READ][ECU_SENSOR_ECT_READ_PARAM_DATA];
+    value->value = 15.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_MAF][ECU_SENSOR_MAF_1].read[ECU_SENSOR_MAF_READ_PARAM_DATA];
+    value = &params->sensors[ECU_SENSOR_TYPE_MAF][ECU_SENSOR_MAF_1].params[ECU_COMMON_READ][ECU_SENSOR_MAF_READ_PARAM_DATA];
     value->value = 250.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_MAP][ECU_SENSOR_MAP_1].read[ECU_SENSOR_MAP_READ_PARAM_DATA];
+    value = &params->sensors[ECU_SENSOR_TYPE_MAP][ECU_SENSOR_MAP_1].params[ECU_COMMON_READ][ECU_SENSOR_MAP_READ_PARAM_DATA];
     value->value = 0.880f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_TPS][ECU_SENSOR_TPS_1].read[ECU_SENSOR_TPS_READ_PARAM_DATA];
-    value->value = 30.0f; value->valid = true;
+    value = &params->sensors[ECU_SENSOR_TYPE_TPS][ECU_SENSOR_TPS_1].params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_DATA];
+    value->value = 28.0f; value->valid = true;
+
+    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_1].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_DATA];
+    value->value = 700.0f; value->valid = true;
+
+    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_2].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_DATA];
+    value->value = 720.0f; value->valid = true;
   }
 }

@@ -14,5 +14,6 @@
 #include "versioned_isotp.h"
 #include "versioned_uds.h"
 #include "versioned_router.h"
+#include "versioned_obd2.h"
 
 #endif /* CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_COMM_H_ */

@@ -587,7 +587,7 @@ error_t ecu_modules_get_instance_parameters_read(ecu_module_type_t type, ecu_mod
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_read_count;
-    *read = &ctx_config->params_read_ptr[instance];
+    *read = ctx_config->params_read_ptr;
 
   } while(0);
 
@@ -615,7 +615,41 @@ error_t ecu_modules_get_instance_parameters_write(ecu_module_type_t type, ecu_mo
     ctx_config = &ctx_config[instance];
 
     *count = interface_config->params_write_count;
-    *write = &ctx_config->params_write_ptr[instance];
+    *write = ctx_config->params_write_ptr;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_get_type_parameters_count_read(ecu_module_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_module_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_MODULE_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_modules.interfaces[type];
+    *count = interface_config->params_read_count;
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_get_type_parameters_count_write(ecu_module_type_t type, ecu_runtime_param_index_t *count)
+{
+  error_t err = E_OK;
+  const ecu_config_module_if_config_ctx_t *interface_config;
+
+  do {
+    BREAK_IF_ACTION(type >= ECU_MODULE_TYPE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(count == NULL, err = E_PARAM);
+
+    interface_config = &ecu_config_modules.interfaces[type];
+    *count = interface_config->params_write_count;
 
   } while(0);
 
