@@ -22,6 +22,10 @@
 
 #define TIME_US_IN_TICK (0.0125f)
 
+#define TIME_MSMT_TYPE        time_msmnt_item_np_t
+#define TIME_MSMT_START(x)    time_msmt_start_nested_protected(x)
+#define TIME_MSMT_STOP(x)     time_msmt_stop_nested_protected(x)
+
 typedef uint32_t time_tick_t;
 typedef uint32_t time_us_t;
 typedef uint32_t time_ms_t;
@@ -40,12 +44,20 @@ typedef float time_float_delta_s_t;
 
 typedef struct {
     time_tick_t last_tick;
+    time_float_delta_us_t reduce_us;
     time_float_delta_us_t period;
 
     time_float_delta_us_t load_last;
     time_float_delta_us_t load_min;
     time_float_delta_us_t load_max;
+    time_float_delta_us_t load_mean;
 }time_msmnt_item_t;
+
+typedef struct {
+    time_msmnt_item_t generic;
+    uint32_t bitmap_mask;
+    uint32_t array_pos;
+}time_msmnt_item_np_t;
 
 void time_init_timebase(volatile time_us_t *timebase, time_us_t mask);
 time_us_t time_now_us(void);
@@ -57,8 +69,10 @@ time_tick_t time_now_tick(void);
 time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b);
 time_tick_t time_tick_mask(void);
 
-
 void time_msmt_start(time_msmnt_item_t *item);
 void time_msmt_stop(time_msmnt_item_t *item);
+
+void time_msmt_start_nested_protected(time_msmnt_item_np_t *item);
+void time_msmt_stop_nested_protected(time_msmnt_item_np_t *item);
 
 #endif /* DRIVERS_TIME_INC_TIME_H_ */

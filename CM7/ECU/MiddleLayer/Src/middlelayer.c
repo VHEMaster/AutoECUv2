@@ -23,17 +23,17 @@
 #include "time.h"
 
 typedef struct {
-    time_msmnt_item_t main;
-    time_msmnt_item_t slow;
-    time_msmnt_item_t comm;
-    time_msmnt_item_t fast;
+    TIME_MSMT_TYPE main;
+    TIME_MSMT_TYPE slow;
+    TIME_MSMT_TYPE comm;
+    TIME_MSMT_TYPE fast;
 }ml_loop_time_msmt_t;
 
 static ml_loop_time_msmt_t ml_loop_time_msmt = {0};
 
 static void middlelayer_tim_slow_irq(void *)
 {
-  time_msmt_start(&ml_loop_time_msmt.slow);
+  TIME_MSMT_START(&ml_loop_time_msmt.slow);
 
   middlelayer_gpio_loop_slow();
   middlelayer_spi_loop_slow();
@@ -49,22 +49,22 @@ static void middlelayer_tim_slow_irq(void *)
 
   core_loop_slow();
 
-  time_msmt_stop(&ml_loop_time_msmt.slow);
+  TIME_MSMT_STOP(&ml_loop_time_msmt.slow);
 }
 
 ITCM_FUNC static void middlelayer_tim_comm_irq(void)
 {
-  time_msmt_start(&ml_loop_time_msmt.comm);
+  TIME_MSMT_START(&ml_loop_time_msmt.comm);
 
   middlelayer_comm_loop_comm();
   core_loop_comm();
 
-  time_msmt_stop(&ml_loop_time_msmt.comm);
+  TIME_MSMT_STOP(&ml_loop_time_msmt.comm);
 }
 
 ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 {
-  time_msmt_start(&ml_loop_time_msmt.fast);
+  TIME_MSMT_START(&ml_loop_time_msmt.fast);
 
   middlelayer_gpio_loop_fast();
   middlelayer_spi_loop_fast();
@@ -81,13 +81,13 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 
   ecu_config_swi_poll();
 
-  time_msmt_stop(&ml_loop_time_msmt.fast);
+  TIME_MSMT_STOP(&ml_loop_time_msmt.fast);
 
 }
 
 void middlelayer_loop(void)
 {
-  time_msmt_start(&ml_loop_time_msmt.main);
+  TIME_MSMT_START(&ml_loop_time_msmt.main);
 
   ecu_config_iwgd_refresh();
   middlelayer_gpio_loop_main();
@@ -105,7 +105,7 @@ void middlelayer_loop(void)
 
   core_loop_main();
 
-  time_msmt_stop(&ml_loop_time_msmt.main);
+  TIME_MSMT_STOP(&ml_loop_time_msmt.main);
 }
 
 void middlelayer_init(void)

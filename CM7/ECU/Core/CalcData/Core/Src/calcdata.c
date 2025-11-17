@@ -29,13 +29,13 @@ static void calcdata_inputs_write(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_read_internal(ecu_core_ctx_t *ctx);
 static void calcdata_inputs_write_internal(ecu_core_ctx_t *ctx);
 
-time_msmnt_item_t time_calcdata = {0};
+TIME_MSMT_TYPE time_calcdata = {0};
 
 void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
 {
   core_calcdata_simulation(ctx);
 
-  time_msmt_start(&time_calcdata);
+  TIME_MSMT_START(&time_calcdata);
 
   calcdata_prepare(ctx);
   calcdata_invalidate(ctx);
@@ -48,7 +48,7 @@ void core_calcdata_loop_slow(ecu_core_ctx_t *ctx)
 
   calcdata_inputs_write(ctx);
 
-  time_msmt_stop(&time_calcdata);
+  TIME_MSMT_STOP(&time_calcdata);
 }
 
 STATIC_INLINE void calcdata_prepare(ecu_core_ctx_t *ctx)

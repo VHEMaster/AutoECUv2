@@ -107,8 +107,8 @@ typedef struct cmp_ctx_tag {
     bool started;
     time_us_t startup_time;
 
-    time_msmnt_item_t load_signal_cb;
-    time_msmnt_item_t load_update_cb;
+    TIME_MSMT_TYPE load_signal_cb;
+    TIME_MSMT_TYPE load_update_cb;
 
 }cmp_ctx_t;
 
