@@ -118,8 +118,10 @@ error_t ecu_modules_ignpower_configure(ecu_module_ignpower_t instance, const ign
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
 
-    err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_ignpower_ckp_signal_update_cb, ignpower_ctx);
-    BREAK_IF(err != E_OK);
+    if(config->enabled) {
+      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_ignpower_ckp_signal_update_cb, ignpower_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = ignpower_configure(ignpower_ctx->ctx, config);
     BREAK_IF(err != E_OK);

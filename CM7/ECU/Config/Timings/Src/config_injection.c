@@ -19,7 +19,7 @@ typedef struct ecu_timings_injection_ctx_tag {
 
 static const injection_config_t ecu_timings_injection_config_default = {
     .signal_prepare_advance = 16.0f,
-    .process_update_trigger = INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_1ST,
+    .process_update_trigger = INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_ALWAYS,
     .uspd_source = INJECTION_CONFIG_USPD_SOURCE_PER_REVOLUTION,
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
     .groups = {

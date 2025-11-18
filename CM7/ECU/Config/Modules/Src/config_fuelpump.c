@@ -53,17 +53,21 @@ static RAM_SECTION ecu_modules_fuelpump_ctx_t ecu_modules_fuelpump_ctx[ECU_MODUL
 
 static const bool ecu_sensors_fuelpump_enabled_default[ECU_MODULE_FUELPUMP_MAX] = {
     true,
+    false,
 };
 
 static const ecu_gpio_output_pin_t ecu_sensors_fuelpump_output_drive_pin_default[ECU_MODULE_FUELPUMP_MAX] = {
     ECU_OUT_PORT1_PIN8,
+    ECU_OUT_NONE,
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_fuelpump_input_control_pin_default[ECU_MODULE_FUELPUMP_MAX] = {
     ECU_IN_NONE,
+    ECU_IN_NONE,
 };
 
 static const ecu_gpio_input_pin_t ecu_sensors_fuelpump_input_trigger_pin_default[ECU_MODULE_FUELPUMP_MAX] = {
+    ECU_IN_NONE,
     ECU_IN_NONE,
 };
 
@@ -123,11 +127,13 @@ error_t ecu_modules_fuelpump_configure(ecu_module_fuelpump_t instance, const fue
 
     fuelpump_ctx = &ecu_modules_fuelpump_ctx[instance];
 
-    err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_fuelpump_ckp_signal_update_cb, fuelpump_ctx);
-    BREAK_IF(err != E_OK);
+    if(config->enabled) {
+      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_fuelpump_ckp_signal_update_cb, fuelpump_ctx);
+      BREAK_IF(err != E_OK);
 
-    err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_fuelpump_ignpower_signal_update_cb, fuelpump_ctx);
-    BREAK_IF(err != E_OK);
+      err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_fuelpump_ignpower_signal_update_cb, fuelpump_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = fuelpump_configure(fuelpump_ctx->ctx, config);
     BREAK_IF(err != E_OK);

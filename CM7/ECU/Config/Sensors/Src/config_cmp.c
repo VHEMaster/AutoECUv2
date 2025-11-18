@@ -77,9 +77,6 @@ error_t ecu_sensors_cmp_init(ecu_sensor_cmp_t instance, cmp_ctx_t *ctx)
     cmp_ctx->config_default.enabled = ecu_sensors_cmp_enabled_default[instance];
     cmp_ctx->config_default.input_pin = ecu_sensors_cmp_input_pin_default[instance];
 
-    err = ecu_sensors_ckp_register_cb(ctx->init.ckp_instance_index, cmp_ckp_signal_update, cmp_ctx->ctx);
-    BREAK_IF(err != E_OK);
-
     err = cmp_init(cmp_ctx->ctx, &cmp_ctx->init);
     BREAK_IF(err != E_OK);
 
@@ -119,6 +116,11 @@ error_t ecu_sensors_cmp_configure(ecu_sensor_cmp_t instance, const cmp_config_t 
     BREAK_IF_ACTION(instance >= ECU_SENSOR_CMP_MAX || config == NULL, err = E_PARAM);
 
     cmp_ctx = &ecu_sensors_cmp_ctx[instance];
+
+    if(config->enabled) {
+      err = ecu_sensors_ckp_register_cb(cmp_ctx->init.ckp_instance_index, cmp_ckp_signal_update, cmp_ctx->ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = cmp_configure(cmp_ctx->ctx, config);
     BREAK_IF(err != E_OK);

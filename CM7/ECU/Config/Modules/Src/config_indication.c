@@ -73,10 +73,20 @@ static RAM_SECTION ecu_modules_indication_ctx_t ecu_modules_indication_ctx[ECU_M
 
 static const bool ecu_sensors_indication_enabled_default[ECU_MODULE_INDICATION_MAX] = {
     true,
+    false,
+    false,
+    false,
+    false,
+    false,
 };
 
 static const ecu_gpio_output_pin_t ecu_sensors_indication_output_pin_default[ECU_MODULE_INDICATION_MAX] = {
     ECU_OUT_PORT1_PIN7,
+    ECU_OUT_NONE,
+    ECU_OUT_NONE,
+    ECU_OUT_NONE,
+    ECU_OUT_NONE,
+    ECU_OUT_NONE,
 };
 
 error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication_ctx_t *ctx)
@@ -133,11 +143,13 @@ error_t ecu_modules_indication_configure(ecu_module_indication_t instance, const
 
     indication_ctx = &ecu_modules_indication_ctx[instance];
 
-    err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_indication_ckp_signal_update_cb, indication_ctx);
-    BREAK_IF(err != E_OK);
+    if(config->enabled) {
+      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_indication_ckp_signal_update_cb, indication_ctx);
+      BREAK_IF(err != E_OK);
 
-    err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_indication_ignpower_signal_update_cb, indication_ctx);
-    BREAK_IF(err != E_OK);
+      err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_indication_ignpower_signal_update_cb, indication_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = indication_configure(indication_ctx->ctx, config);
     BREAK_IF(err != E_OK);

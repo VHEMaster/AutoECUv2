@@ -129,11 +129,13 @@ error_t ecu_modules_coolingfan_configure(ecu_module_coolingfan_t instance, const
 
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
-    err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_coolingfan_ckp_signal_update_cb, coolingfan_ctx);
-    BREAK_IF(err != E_OK);
+    if(config->enabled) {
+      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_coolingfan_ckp_signal_update_cb, coolingfan_ctx);
+      BREAK_IF(err != E_OK);
 
-    err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_coolingfan_ignpower_signal_update_cb, coolingfan_ctx);
-    BREAK_IF(err != E_OK);
+      err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_coolingfan_ignpower_signal_update_cb, coolingfan_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = coolingfan_configure(coolingfan_ctx->ctx, config);
     BREAK_IF(err != E_OK);
