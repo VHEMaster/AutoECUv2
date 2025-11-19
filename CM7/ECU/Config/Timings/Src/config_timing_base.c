@@ -103,6 +103,10 @@ error_t ecu_timings_base_init(ecu_timing_base_t instance, timing_base_ctx_t *ctx
     }
     BREAK_IF(err != E_OK);
 
+    err = ecu_config_global_get_engine_calibration_config(&timing_ctx->init.calibration_config);
+    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+    BREAK_IF_ACTION(timing_ctx->init.calibration_config == NULL, err = E_FAULT);
+
     err = timing_base_init(timing_ctx->ctx, &timing_ctx->init);
     BREAK_IF(err != E_OK);
 
@@ -174,7 +178,7 @@ error_t ecu_timings_base_reset(ecu_timing_base_t instance)
   return err;
 }
 
-error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_base_data_crankshaft_t *data)
+ITCM_FUNC error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_base_data_crankshaft_t *data)
 {
   error_t err = E_OK;
   ecu_timings_base_ctx_t *timing_ctx;
@@ -192,7 +196,7 @@ error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_
   return err;
 }
 
-error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t *data)
+ITCM_FUNC error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t *data)
 {
   error_t err = E_OK;
   ecu_timings_base_ctx_t *timing_ctx;
@@ -210,7 +214,25 @@ error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t
   return err;
 }
 
-error_t ecu_timings_base_get_diag(ecu_timing_base_t instance, timing_base_diag_t *diag)
+ITCM_FUNC error_t ecu_timings_base_get_data_ptr(ecu_timing_base_t instance, const timing_base_data_t **data)
+{
+  error_t err = E_OK;
+  ecu_timings_base_ctx_t *timing_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_TIMING_BASE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+
+    timing_ctx = &ecu_timings_base_ctx[instance];
+
+    err = timing_base_get_data_ptr(timing_ctx->ctx, data);
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t ecu_timings_base_get_diag(ecu_timing_base_t instance, timing_base_diag_t *diag)
 {
   error_t err = E_OK;
   ecu_timings_base_ctx_t *timing_ctx;

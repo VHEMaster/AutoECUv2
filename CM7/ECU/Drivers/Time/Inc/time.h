@@ -43,8 +43,10 @@ typedef float time_float_delta_ms_t;
 typedef float time_float_delta_s_t;
 
 typedef struct {
-    time_tick_t last_tick;
     time_float_delta_us_t reduce_us;
+    time_float_delta_us_t load_last_nr;
+
+    time_tick_t last_tick;
     time_float_delta_us_t period;
 
     time_float_delta_us_t load_last;
@@ -57,6 +59,10 @@ typedef struct {
     time_msmnt_item_t generic;
     uint32_t bitmap_mask;
     uint32_t array_pos;
+
+    time_float_delta_us_t reduce_us_mean;
+    time_float_delta_us_t load_mean_nreduced;
+    time_float_delta_us_t load_mean_reduced;
 }time_msmnt_item_np_t;
 
 void time_init_timebase(volatile time_us_t *timebase, time_us_t mask);

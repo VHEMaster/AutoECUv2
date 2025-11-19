@@ -405,20 +405,22 @@ ITCM_FUNC void ecu_modules_loop_fast(void)
 error_t ecu_modules_get_module_ctx(ecu_module_type_t type, ecu_module_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
+  const ecu_config_module_if_instance_ctx_t *interface;
+  const ecu_config_module_if_config_ctx_t *interface_config;
   const ecu_config_module_config_ctx_t *module_config;
 
-  if(ctx == NULL) {
-    err = E_PARAM;
-  } else {
-    for(int i = 0; i < ECU_MODULES_MAX; i++) {
-      module_config = &ecu_config_modules.modules[i];
-      if(module_config->type == type && module_config->instance == instance) {
-        *ctx = module_config->ctx;
-        err = E_OK;
-        break;
-      }
-    }
-  }
+  do {
+    BREAK_IF(type >= ECU_MODULE_TYPE_MAX);
+    interface_config = &ecu_config_modules.interfaces[type];
+    interface = &ecu_config_modules_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_MODULES_MAX);
+
+    module_config = &ecu_config_modules.modules[interface->instance_first];
+    module_config = &module_config[instance];
+    *ctx = module_config->ctx;
+    err = E_OK;
+  } while(0);
 
   return err;
 }

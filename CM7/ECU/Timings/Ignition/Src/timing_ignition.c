@@ -17,6 +17,7 @@ error_t ignition_init(ignition_ctx_t *ctx, const ignition_init_ctx_t *init_ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->calibration_config == NULL, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(ignition_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(ignition_init_ctx_t));
@@ -87,7 +88,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
   ignition_config_group_mode_t group_mode;
-  timing_base_data_crankshaft_t *crankshaft_data;
   input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
@@ -106,6 +106,8 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   const ignition_config_group_setup_t *group_config;
   const timing_base_data_crankshaft_t *crankshaft;
   const ecu_config_engine_calibration_t *calibration_config;
+  const timing_base_data_crankshaft_t *crankshaft_data;
+  const timing_base_data_t *timing_base_data;
 
   bool input_valid;
   bool input_valid_b[ECU_BANK_MAX];
@@ -153,18 +155,16 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   bool slew_adder_valid;
 
   do {
-    err = ecu_config_global_get_engine_calibration_config(&calibration_config);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(calibration_config == NULL, err = E_FAULT);
-
     // TODO: assign proper instance
-    err = ecu_timings_base_get_data(ECU_TIMING_BASE_1, &ctx->timing_base_data);
+    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
     config = &ctx->config;
     runtime = &ctx->runtime;
-    crankshaft = &ctx->timing_base_data.crankshaft;
+    crankshaft = &timing_base_data->crankshaft;
 
+    calibration_config = ctx->init.calibration_config;
     banks_count = calibration_config->cylinders.banks_count;
     cylinders_count = calibration_config->cylinders.cylinders_count;
 
@@ -377,7 +377,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
 
                 ignition_advance_cy = ignition_advance_gr_cy[cy];
                 ignition_advance_cy += ignition_advance_cy_add;
-                crankshaft_data = &ctx->timing_base_data.sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
+                crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
                 position_cy = crankshaft_data->sensor_data.current_position;
                 output_valid = false;
 

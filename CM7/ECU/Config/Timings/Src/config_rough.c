@@ -47,6 +47,10 @@ error_t ecu_timings_rough_init(ecu_timing_rough_t instance, rough_ctx_t *ctx)
 
     timing_ctx->config_default.enabled = ecu_timings_rough_enabled_default[instance];
 
+    err = ecu_config_global_get_engine_calibration_config(&timing_ctx->init.calibration_config);
+    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+    BREAK_IF_ACTION(timing_ctx->init.calibration_config == NULL, err = E_FAULT);
+
     err = rough_init(timing_ctx->ctx, &timing_ctx->init);
     BREAK_IF(err != E_OK);
 

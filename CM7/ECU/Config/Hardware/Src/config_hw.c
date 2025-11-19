@@ -22,7 +22,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 
 INLINE void ecu_config_set_ignition_enabled(bool enabled) {
-  HAL_GPIO_WritePin(IGN_NEN_GPIO_Port, IGN_NEN_Pin, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(IGN_NEN_GPIO_Port, IGN_NEN_Pin, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
+  if(enabled) {
+    IGN_NEN_GPIO_Port->BSRR = IGN_NEN_Pin << 16;
+  } else {
+    IGN_NEN_GPIO_Port->BSRR = IGN_NEN_Pin;
+  }
 }
 
 INLINE void ecu_config_iwgd_refresh(void) {

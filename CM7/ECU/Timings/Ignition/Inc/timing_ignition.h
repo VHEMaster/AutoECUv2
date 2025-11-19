@@ -9,6 +9,7 @@
 #define CORE_CORE_INC_CORE_TIMING_IGNITION_H_
 
 #include "core.h"
+#include "config_engine.h"
 
 typedef struct {
     bool initialized;
@@ -63,6 +64,7 @@ typedef struct {
 }ignition_runtime_ctx_t;
 
 typedef struct {
+    const ecu_config_engine_calibration_t *calibration_config;
 
 }ignition_init_ctx_t;
 
@@ -73,7 +75,6 @@ typedef struct {
     bool configured;
 
     ignition_runtime_ctx_t runtime;
-    timing_base_data_t timing_base_data;
 
 }ignition_ctx_t;
 

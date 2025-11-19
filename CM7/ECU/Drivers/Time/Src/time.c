@@ -81,14 +81,15 @@ ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_start(time_msmnt_item_t *item)
 
   item->period = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
 
-  item->last_tick = time_now_tick();
   item->reduce_us = 0;
+  item->last_tick = time_now_tick();
 }
 
 ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_stop(time_msmnt_item_t *item)
 {
   const time_tick_t tick = time_now_tick();
-  const time_float_delta_us_t load_tick = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK - item->reduce_us;
+  const time_float_delta_us_t load_tick_nr = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
+  const time_float_delta_us_t load_tick = load_tick_nr - item->reduce_us;
   const float mean_blend = g_time_mean_lpf;
 
   if(item->load_max < load_tick || item->load_max == 0) {
@@ -103,6 +104,7 @@ ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_stop(time_msmnt_item_t *item)
     item->load_mean = BLEND(item->load_mean, load_tick, mean_blend);
   }
 
+  item->load_last_nr = load_tick_nr;
   item->load_last = load_tick;
 }
 
@@ -134,19 +136,41 @@ ITCM_FUNC OPTIMIZE_FAST void time_msmt_stop_nested_protected(time_msmnt_item_np_
 {
   uint32_t prim = EnterCritical();
   time_msmt_stop(&item->generic);
+  const time_float_delta_us_t reduce_us = item->generic.reduce_us;
+  const float mean_blend = g_time_mean_lpf;
+
+  if(item->reduce_us_mean == 0.0f) {
+    item->reduce_us_mean = reduce_us;
+  } else{
+    item->reduce_us_mean = BLEND(item->reduce_us_mean, reduce_us, mean_blend);
+  }
 
   uint32_t bitmap = time_msmnt_nested_protection_ctx.bitmap;
   uint32_t mask = item->bitmap_mask;
   uint32_t pos = item->array_pos;
   time_float_delta_us_t load_last;
+  time_float_delta_us_t load_last_nr;
 
   bitmap &= ~mask;
   time_msmnt_nested_protection_ctx.bitmap = bitmap;
   time_msmnt_nested_protection_ctx.items[pos] = NULL;
 
   load_last = item->generic.load_last;
+  load_last_nr = item->generic.load_last_nr;
   for(uint32_t i = 0; i < pos; i++) {
     time_msmnt_nested_protection_ctx.items[i]->reduce_us += load_last;
+  }
+
+  if(item->load_mean_reduced == 0.0f) {
+    item->load_mean_reduced = load_last;
+  } else{
+    item->load_mean_reduced = BLEND(item->load_mean_reduced, load_last, mean_blend);
+  }
+
+  if(item->load_mean_nreduced == 0.0f) {
+    item->load_mean_nreduced = load_last_nr;
+  } else{
+    item->load_mean_nreduced = BLEND(item->load_mean_nreduced, load_last_nr, mean_blend);
   }
 
   ExitCritical(prim);

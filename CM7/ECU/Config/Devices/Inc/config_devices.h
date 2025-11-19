@@ -25,7 +25,7 @@ void ecu_devices_loop_main(void);
 void ecu_devices_loop_slow(void);
 void ecu_devices_loop_fast(void);
 
-error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t instance, void **ctx);
+error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t instance, void **ctx_ptr);
 error_t ecu_devices_set_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool initialized);
 error_t ecu_devices_get_device_initialized(ecu_device_type_t type, ecu_device_instance_t instance, bool *initialized);
 error_t ecu_devices_set_device_enabled(ecu_device_type_t type, ecu_device_instance_t instance, bool enabled);

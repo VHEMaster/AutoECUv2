@@ -9,6 +9,7 @@
 #define CORE_CORE_INC_CORE_TIMING_INJECTION_H_
 
 #include "core.h"
+#include "config_engine.h"
 
 typedef struct {
     bool initialized;
@@ -67,6 +68,7 @@ typedef struct {
 }injection_runtime_ctx_t;
 
 typedef struct {
+    const ecu_config_engine_calibration_t *calibration_config;
 
 }injection_init_ctx_t;
 

@@ -334,10 +334,10 @@ ITCM_FUNC error_t input_get_value(input_id_t channel_id, input_value_t *value, t
   time_us_t now, valtime;
 
   do {
-    if(channel_id < 0 || channel_id >= input_ctx.chs_count || value == NULL) {
-      err = E_PARAM;
-      break;
-    }
+    BREAK_IF_ACTION(value == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(channel_id < 0, err = E_PARAM);
+    BREAK_IF_ACTION(channel_id >= input_ctx.chs_count, err = E_PARAM);
+
     ch = &input_ctx.chs[channel_id];
     now = time_now_us();
 

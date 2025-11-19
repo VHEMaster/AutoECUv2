@@ -9,6 +9,7 @@
 #define CORE_CORE_INC_CORE_TIMING_ROUGH_H_
 
 #include "core.h"
+#include "config_engine.h"
 
 typedef struct {
     bool ready;
@@ -28,6 +29,7 @@ typedef struct {
 }rough_runtime_ctx_t;
 
 typedef struct {
+    const ecu_config_engine_calibration_t *calibration_config;
 
 }rough_init_ctx_t;
 

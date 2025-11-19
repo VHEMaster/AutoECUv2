@@ -381,20 +381,22 @@ ITCM_FUNC void ecu_devices_loop_fast(void)
 error_t ecu_devices_get_device_ctx(ecu_device_type_t type, ecu_device_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
+  const ecu_config_device_if_instance_ctx_t *interface;
+  const ecu_config_device_if_config_ctx_t *interface_config;
   const ecu_config_device_config_ctx_t *device_config;
 
-  if(ctx == NULL) {
-    err = E_PARAM;
-  } else {
-    for(int i = 0; i < ECU_DEVICES_MAX; i++) {
-      device_config = &ecu_config_devices.devices[i];
-      if(device_config->type == type && device_config->instance == instance) {
-        *ctx = device_config->ctx;
-        err = E_OK;
-        break;
-      }
-    }
-  }
+  do {
+    BREAK_IF(type >= ECU_DEVICE_TYPE_MAX);
+    interface_config = &ecu_config_devices.interfaces[type];
+    interface = &ecu_config_devices_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_DEVICES_MAX);
+
+    device_config = &ecu_config_devices.devices[interface->instance_first];
+    device_config = &device_config[instance];
+    *ctx = device_config->ctx;
+    err = E_OK;
+  } while(0);
 
   return err;
 }

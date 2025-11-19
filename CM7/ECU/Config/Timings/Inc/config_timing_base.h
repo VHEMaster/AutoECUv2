@@ -37,6 +37,7 @@ error_t ecu_timings_base_register_cb(ecu_timing_base_t instance, timing_base_sig
 
 error_t ecu_timings_base_get_crankshaft_data(ecu_timing_base_t instance, timing_base_data_crankshaft_t *data);
 error_t ecu_timings_base_get_data(ecu_timing_base_t instance, timing_base_data_t *data);
+error_t ecu_timings_base_get_data_ptr(ecu_timing_base_t instance, const timing_base_data_t **data);
 error_t ecu_timings_base_get_diag(ecu_timing_base_t instance, timing_base_diag_t *diag);
 
 #endif /* CONFIG_INC_CONFIG_TIMING_BASE_H_ */

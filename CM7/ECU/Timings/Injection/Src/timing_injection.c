@@ -19,6 +19,7 @@ error_t injection_init(injection_ctx_t *ctx, const injection_init_ctx_t *init_ct
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->calibration_config == NULL, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(injection_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(injection_init_ctx_t));
@@ -90,7 +91,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
   timing_base_crankshaft_mode_t crankshaft_mode;
   injection_config_group_mode_t group_mode;
-  timing_base_data_crankshaft_t *crankshaft_data;
   input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
@@ -110,6 +110,8 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
   const ecu_config_io_banked_t *banked_config;
   const timing_base_data_crankshaft_t *crankshaft;
   const ecu_config_engine_calibration_t *calibration_config;
+  const timing_base_data_crankshaft_t *crankshaft_data;
+  const timing_base_data_t *timing_base_data;
 
   float signal_prepare_advance;
   ignition_runtime_ctx_t *runtime_ignition = NULL;
@@ -195,23 +197,21 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
   bool slew_adder_valid;
 
   do {
-    err = ecu_config_global_get_engine_calibration_config(&calibration_config);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(calibration_config == NULL, err = E_FAULT);
-
     // TODO: assign proper instance
-    err = ecu_timings_base_get_data(ECU_TIMING_BASE_1, &ctx->timing_base_data);
+    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
     // TODO: assign proper instance
     err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &runtime_ignition);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
     BREAK_IF_ACTION(runtime_ignition == NULL, err = E_FAULT);
 
+    calibration_config = ctx->init.calibration_config;
     banked_config = &calibration_config->io.banked;
     config = &ctx->config;
     runtime = &ctx->runtime;
-    crankshaft = &ctx->timing_base_data.crankshaft;
+    crankshaft = &timing_base_data->crankshaft;
 
     banks_count = calibration_config->cylinders.banks_count;
     cylinders_count = calibration_config->cylinders.cylinders_count;
@@ -548,7 +548,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
                 bank_cy = calibration_config->cylinders.cylinders[cy].bank;
                 injection_phase_cy = injection_phase_gr_b[bank_cy] + injection_phase_cy_add;
-                crankshaft_data = &ctx->timing_base_data.sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
+                crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
                 position_cy = crankshaft_data->sensor_data.current_position;
                 output_valid = false;
 

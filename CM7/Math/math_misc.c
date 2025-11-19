@@ -63,7 +63,7 @@ INLINE int math_binary_search(const float *array, int start_index, int end_index
 {
   int iterations = 0;
   while(start_index <= end_index && ++iterations < 256) {
-    int middle = start_index + ((end_index- start_index ) >> 1);
+    int middle = start_index + ((end_index - start_index ) >> 1);
     if (array[middle] <= element && array[middle + 1] > element)
       return middle;
     if (array[middle + 1] <= element)

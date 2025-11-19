@@ -19,6 +19,7 @@ error_t timing_base_init(timing_base_ctx_t *ctx, const timing_base_init_ctx_t *i
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->calibration_config == NULL, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(timing_base_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(timing_base_init_ctx_t));
@@ -312,22 +313,30 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
 
   do {
-    // TODO: assign proper instance
-    err = ecu_timings_get_ignition_ctx(ECU_TIMING_IGNITION_1, &ignition_ctx);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(ignition_ctx == NULL, err = E_FAULT);
-    // TODO: assign proper instance
-    err = ecu_timings_get_injection_ctx(ECU_TIMING_INJECTION_1, &injection_ctx);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(injection_ctx == NULL, err = E_FAULT);
-    // TODO: assign proper instance
-    err = ecu_timings_get_rough_ctx(ECU_TIMING_ROUGH_1, &rough_ctx);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(rough_ctx == NULL, err = E_FAULT);
+    if(ctx->runtime.configured != true) {
+      // TODO: assign proper instance
+      err = ecu_timings_get_ignition_ctx(ECU_TIMING_IGNITION_1, &ignition_ctx);
+      BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+      BREAK_IF_ACTION(ignition_ctx == NULL, err = E_FAULT);
+      // TODO: assign proper instance
+      err = ecu_timings_get_injection_ctx(ECU_TIMING_INJECTION_1, &injection_ctx);
+      BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+      BREAK_IF_ACTION(injection_ctx == NULL, err = E_FAULT);
+      // TODO: assign proper instance
+      err = ecu_timings_get_rough_ctx(ECU_TIMING_ROUGH_1, &rough_ctx);
+      BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+      BREAK_IF_ACTION(rough_ctx == NULL, err = E_FAULT);
 
-    err = ecu_config_global_get_engine_calibration_config(&calibration_config);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(calibration_config == NULL, err = E_FAULT);
+      ctx->runtime.ignition_ctx = ignition_ctx;
+      ctx->runtime.injection_ctx = injection_ctx;
+      ctx->runtime.rough_ctx = rough_ctx;
+      ctx->runtime.configured = true;
+    } else {
+      ignition_ctx = ctx->runtime.ignition_ctx;
+      injection_ctx = ctx->runtime.injection_ctx;
+      rough_ctx = ctx->runtime.rough_ctx;
+    }
+    calibration_config = ctx->init.calibration_config;
 
     if(ctx->data.crankshaft.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       ecu_config_set_ignition_enabled(true);
@@ -477,7 +486,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   ctx->process_update_trigger_counter = process_update_trigger_counter + 1;
 }
 
-error_t timing_base_get_crankshaft_data(timing_base_ctx_t *ctx, timing_base_data_crankshaft_t *data)
+ITCM_FUNC error_t timing_base_get_crankshaft_data(timing_base_ctx_t *ctx, timing_base_data_crankshaft_t *data)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -496,7 +505,7 @@ error_t timing_base_get_crankshaft_data(timing_base_ctx_t *ctx, timing_base_data
   return err;
 }
 
-error_t timing_base_get_data(timing_base_ctx_t *ctx, timing_base_data_t *data)
+ITCM_FUNC error_t timing_base_get_data(timing_base_ctx_t *ctx, timing_base_data_t *data)
 {
   error_t err = E_OK;
   uint32_t prim;
@@ -515,7 +524,23 @@ error_t timing_base_get_data(timing_base_ctx_t *ctx, timing_base_data_t *data)
   return err;
 }
 
-error_t timing_base_get_diag(timing_base_ctx_t *ctx, timing_base_diag_t *diag)
+ITCM_FUNC error_t timing_base_get_data_ptr(timing_base_ctx_t *ctx, const timing_base_data_t **data)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
+
+    *data = &ctx->data;
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t timing_base_get_diag(timing_base_ctx_t *ctx, timing_base_diag_t *diag)
 {
   error_t err = E_OK;
   uint32_t prim;

@@ -13,6 +13,7 @@
 #include "time.h"
 
 #include "config_sensors.h"
+#include "config_engine.h"
 
 typedef struct timing_base_diag_tag timing_base_diag_t;
 typedef struct timing_base_data_tag timing_base_data_t;
@@ -114,13 +115,24 @@ typedef struct {
     ecu_sensor_cmp_t cmp_instances[ECU_SENSOR_CMP_MAX];
     timing_base_signal_update_cb_t signal_update_cb;
     void *signal_update_usrdata;
+    const ecu_config_engine_calibration_t *calibration_config;
 }timing_base_init_ctx_t;
+
+typedef struct {
+    bool configured;
+
+    void *ignition_ctx;
+    void *injection_ctx;
+    void *rough_ctx;
+}timing_base_runtime_t;
 
 typedef struct {
     timing_base_init_ctx_t init;
     timing_base_config_t config;
     bool ready;
     bool configured;
+
+    timing_base_runtime_t runtime;
 
     timing_base_diag_t diag;
     timing_base_data_t data;
@@ -139,6 +151,7 @@ void timing_base_signal_update_cb(void *usrdata, const timing_base_data_t *data,
 
 error_t timing_base_get_crankshaft_data(timing_base_ctx_t *ctx, timing_base_data_crankshaft_t *data);
 error_t timing_base_get_data(timing_base_ctx_t *ctx, timing_base_data_t *data);
+error_t timing_base_get_data_ptr(timing_base_ctx_t *ctx, const timing_base_data_t **data);
 error_t timing_base_get_diag(timing_base_ctx_t *ctx, timing_base_diag_t *diag);
 
 #endif /* TIMING_BASE_INC_TIMING_BASE_H_ */

@@ -12,6 +12,8 @@
 INLINE sMathInterpolateInput math_interpolate_input(float value, const float *table, uint32_t size)
 {
   sMathInterpolateInput result = {0};
+  uint32_t idx0, idx1;
+  float val0, val1;
   int find_index = -1;
 
   if(value != value)
@@ -22,38 +24,48 @@ INLINE sMathInterpolateInput math_interpolate_input(float value, const float *ta
 
   if(size == 1)
   {
-    result.indexes[0] = 0;
-    result.indexes[1] = 0;
-    result.values[0] = table[0];
-    result.values[1] = table[0];
+    idx0 = 0;
+    idx1 = 0;
+    val0 = table[0];
+    val1 = table[0];
   }
   else if(value <= table[1])
   {
-    result.indexes[0] = 0;
-    result.indexes[1] = 1;
-    result.values[0] = table[result.indexes[0]];
-    result.values[1] = table[result.indexes[1]];
+    idx0 = 0;
+    idx1 = 1;
+    val0 = table[idx0];
+    val1 = table[idx1];
   }
   else if(value >= table[size - 2])
   {
-    result.indexes[0] = size - 2;
-    result.indexes[1] = size - 1;
-    result.values[0] = table[result.indexes[0]];
-    result.values[1] = table[result.indexes[1]];
+    idx0 = size - 2;
+    idx1 = size - 1;
+    val0 = table[idx0];
+    val1 = table[idx1];
   }
   else
   {
     find_index = math_binary_search(table, 0, size - 1, value);
     if(find_index >= 0) {
-      result.indexes[0] = find_index;
-      result.indexes[1] = find_index + 1;
-      result.values[0] = table[find_index];
-      result.values[1] = table[find_index+1];
+      idx0 = find_index;
+      idx1 = find_index + 1;
+      val0 = table[idx0];
+      val1 = table[idx1];
+    } else {
+      idx0 = 0;
+      idx1 = 0;
+      val0 = 0;
+      val1 = 0;
     }
   }
 
-  if(result.values[1] != result.values[0])
-    result.mult = (value - result.values[0]) / (result.values[1] - result.values[0]);
+  result.indexes[0] = idx0;
+  result.indexes[1] = idx1;
+  result.values[0] = val0;
+  result.values[1] = val1;
+
+  if(val1 != val0)
+    result.mult = (value - val0) / (val1 - val0);
   else result.mult = 1.0f;
 
   return result;

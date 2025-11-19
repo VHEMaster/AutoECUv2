@@ -17,6 +17,7 @@ error_t rough_init(rough_ctx_t *ctx, const rough_init_ctx_t *init_ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->calibration_config == NULL, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(rough_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(rough_init_ctx_t));
@@ -86,9 +87,10 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
 {
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
-  timing_base_data_crankshaft_t *crankshaft_data;
   const ecu_config_cylinders_t *cylinders_config;
   const ecu_config_engine_calibration_t *calibration_config;
+  const timing_base_data_crankshaft_t *crankshaft_data;
+  const timing_base_data_t *timing_base_data;
   rough_runtime_ctx_t *runtime;
   rough_runtime_cylinder_ctx_t *runtime_cy;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
@@ -98,15 +100,13 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
   float start_pos, end_pos, mid_pos;
 
   do {
-    err = ecu_config_global_get_engine_calibration_config(&calibration_config);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(calibration_config == NULL, err = E_FAULT);
-
     // TODO: assign proper instance
-    err = ecu_timings_base_get_data(ECU_TIMING_BASE_1, &ctx->timing_base_data);
+    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
-    crankshaft_mode = ctx->timing_base_data.crankshaft.mode;
+    calibration_config = ctx->init.calibration_config;
+    crankshaft_mode = timing_base_data->crankshaft.mode;
     sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
     cylinders_config = &calibration_config->cylinders;
     runtime = &ctx->runtime;
@@ -134,7 +134,7 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
 
     if(!needtoclear) {
       for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-        crankshaft_data = &ctx->timing_base_data.sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
+        crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
         runtime_cy = &runtime->cylinders[cy];
         needtoclear = false;
 

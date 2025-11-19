@@ -267,20 +267,22 @@ ITCM_FUNC void ecu_timings_loop_fast(void)
 error_t ecu_timings_get_timing_ctx(ecu_timing_type_t type, ecu_timing_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
+  const ecu_config_timing_if_instance_ctx_t *interface;
+  const ecu_config_timing_if_config_ctx_t *interface_config;
   const ecu_config_timing_config_ctx_t *timing_config;
 
-  if(ctx == NULL) {
-    err = E_PARAM;
-  } else {
-    for(int i = 0; i < ECU_TIMINGS_MAX; i++) {
-      timing_config = &ecu_config_timings.timings[i];
-      if(timing_config->type == type && timing_config->instance == instance) {
-        *ctx = timing_config->ctx;
-        err = E_OK;
-        break;
-      }
-    }
-  }
+  do {
+    BREAK_IF(type >= ECU_TIMING_TYPE_MAX);
+    interface_config = &ecu_config_timings.interfaces[type];
+    interface = &ecu_config_timings_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_TIMINGS_MAX);
+
+    timing_config = &ecu_config_timings.timings[interface->instance_first];
+    timing_config = &timing_config[instance];
+    *ctx = timing_config->ctx;
+    err = E_OK;
+  } while(0);
 
   return err;
 }

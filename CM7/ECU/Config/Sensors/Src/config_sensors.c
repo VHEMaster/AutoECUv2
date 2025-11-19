@@ -489,20 +489,22 @@ ITCM_FUNC void ecu_sensors_loop_fast(void)
 error_t ecu_sensors_get_sensor_ctx(ecu_sensor_type_t type, ecu_sensor_instance_t instance, void **ctx)
 {
   error_t err = E_FAULT;
+  const ecu_config_sensor_if_instance_ctx_t *interface;
+  const ecu_config_sensor_if_config_ctx_t *interface_config;
   const ecu_config_sensor_config_ctx_t *sensor_config;
 
-  if(ctx == NULL) {
-    err = E_PARAM;
-  } else {
-    for(int i = 0; i < ECU_SENSORS_MAX; i++) {
-      sensor_config = &ecu_config_sensors.sensors[i];
-      if(sensor_config->type == type && sensor_config->instance == instance) {
-        *ctx = sensor_config->ctx;
-        err = E_OK;
-        break;
-      }
-    }
-  }
+  do {
+    BREAK_IF(type >= ECU_SENSOR_TYPE_MAX);
+    interface_config = &ecu_config_sensors.interfaces[type];
+    interface = &ecu_config_sensors_ctx.interfaces[type];
+    BREAK_IF(instance >= interface_config->instance_max);
+    BREAK_IF(interface->instance_first >= ECU_SENSORS_MAX);
+
+    sensor_config = &ecu_config_sensors.sensors[interface->instance_first];
+    sensor_config = &sensor_config[instance];
+    *ctx = sensor_config->ctx;
+    err = E_OK;
+  } while(0);
 
   return err;
 }

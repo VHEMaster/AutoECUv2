@@ -1559,7 +1559,7 @@ error_t ecu_config_gpio_input_set_capture_edge(ecu_gpio_input_pin_t pin, ecu_gpi
   return err;
 }
 
-error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support)
+ITCM_FUNC error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpio_input_type_t mode, bool *support)
 {
   error_t err = E_OK;
 
@@ -1579,7 +1579,7 @@ error_t ecu_config_gpio_input_has_mode_support(ecu_gpio_input_pin_t pin, ecu_gpi
   return err;
 }
 
-error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio)
+ITCM_FUNC error_t ecu_config_gpio_output_get_pin(ecu_gpio_output_pin_t pin, gpio_t *gpio)
 {
   error_t err = E_OK;
 
@@ -1625,7 +1625,7 @@ ITCM_FUNC error_t ecu_config_gpio_output_write(ecu_gpio_output_pin_t pin, output
   return err;
 }
 
-error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id)
+ITCM_FUNC error_t ecu_config_gpio_input_get_id(ecu_gpio_input_pin_t pin, input_id_t *id)
 {
   error_t err = E_OK;
 
