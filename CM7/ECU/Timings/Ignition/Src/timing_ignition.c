@@ -44,7 +44,10 @@ error_t ignition_configure(ignition_ctx_t *ctx, const ignition_config_t *config)
       memcpy(&ctx->config, config, sizeof(ignition_config_t));
     }
 
-    ctx->configured = true;
+    if(ctx->config.enabled) {
+
+      ctx->configured = true;
+    }
 
   } while(0);
 
@@ -155,6 +158,9 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   bool slew_adder_valid;
 
   do {
+    BREAK_IF(ctx->configured == false);
+    BREAK_IF(ctx->config.enabled == false);
+
     // TODO: assign proper instance
     err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);

@@ -46,7 +46,10 @@ error_t timing_base_configure(timing_base_ctx_t *ctx, const timing_base_config_t
       memcpy(&ctx->config, config, sizeof(timing_base_config_t));
     }
 
-    ctx->configured = true;
+    if(ctx->config.enabled) {
+
+      ctx->configured = true;
+    }
 
   } while(0);
 
@@ -313,6 +316,9 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
 
   do {
+    BREAK_IF(ctx->configured == false);
+    BREAK_IF(ctx->config.enabled == false);
+
     if(ctx->runtime.configured != true) {
       // TODO: assign proper instance
       err = ecu_timings_get_ignition_ctx(ECU_TIMING_IGNITION_1, &ignition_ctx);

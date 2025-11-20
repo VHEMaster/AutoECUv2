@@ -142,8 +142,10 @@ error_t ecu_modules_vvt_configure(ecu_module_vvt_t instance, const vvt_config_t 
 
     vvt_ctx = &ecu_modules_vvt_ctx[instance];
 
-    err = ecu_sensors_cmp_register_cb(config->sensor_cmp, ecu_modules_vvt_cmp_signal_update_cb, vvt_ctx);
-    BREAK_IF(err != E_OK);
+    if(config->enabled) {
+      err = ecu_sensors_cmp_register_cb(config->sensor_cmp, ecu_modules_vvt_cmp_signal_update_cb, vvt_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = vvt_configure(vvt_ctx->ctx, config);
     BREAK_IF(err != E_OK);
