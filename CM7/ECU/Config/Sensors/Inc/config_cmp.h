@@ -11,7 +11,7 @@
 #include "config_sensors.h"
 #include "cmp.h"
 
-#define ECU_SENSORS_CMP_CALLBACKS_MAX   16
+#define ECU_SENSORS_CMP_CALLBACKS_MAX   32
 
 typedef enum {
   ECU_SENSOR_CMP_READ_PARAM_DATA = 0,

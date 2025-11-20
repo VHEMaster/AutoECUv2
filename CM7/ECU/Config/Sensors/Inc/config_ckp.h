@@ -11,7 +11,7 @@
 #include "config_sensors.h"
 #include "ckp.h"
 
-#define ECU_SENSORS_CKP_CALLBACKS_MAX   16
+#define ECU_SENSORS_CKP_CALLBACKS_MAX   32
 
 typedef enum {
   ECU_SENSOR_CKP_READ_PARAM_DATA = 0,

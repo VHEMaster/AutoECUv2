@@ -11,7 +11,7 @@
 #include "config_modules.h"
 #include "ignpower.h"
 
-#define ECU_MODULES_IGNPOWER_CALLBACKS_MAX   16
+#define ECU_MODULES_IGNPOWER_CALLBACKS_MAX   32
 
 typedef enum {
   ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING = 0,

@@ -14,7 +14,7 @@
 #include "versioned_ignition.h"
 #include "versioned_injection.h"
 
-#define ECU_TIMINGS_BASE_CALLBACKS_MAX   4
+#define ECU_TIMINGS_BASE_CALLBACKS_MAX   16
 
 typedef enum {
   ECU_TIMING_BASE_READ_PARAM_MODE = 0,
