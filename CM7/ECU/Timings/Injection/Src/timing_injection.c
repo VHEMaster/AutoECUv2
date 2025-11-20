@@ -91,6 +91,8 @@ OPTIMIZE_FAST
 ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 {
   error_t err;
+  time_us_t now, last;
+  time_float_delta_us_t time_delta;
 
   timing_base_crankshaft_mode_t crankshaft_mode;
   injection_config_group_mode_t group_mode;
@@ -98,6 +100,8 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
   input_value_t input_analog_value;
   float power_voltage;
 
+
+  injection_config_group_phase_slew_rate_mode_t phase_slew_rate_mode;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
   bool needtoclear;
   output_value_t output_value;
@@ -165,7 +169,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
   float crankshaft_rpm;
   float crankshaft_period;
-  float crankshaft_signal_delta;
   float phase_slew_rate;
 
   float dutycycle_cy;
@@ -213,6 +216,12 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
     BREAK_IF_ACTION(runtime_ignition == NULL, err = E_FAULT);
 
+    now = time_now_us();
+    last = ctx->signal_handle_last;
+    time_delta = time_diff(now, last);
+    ctx->signal_handle_last = now;
+    BREAK_IF(last == 0);
+
     calibration_config = ctx->init.calibration_config;
     banked_config = &calibration_config->io.banked;
     config = &ctx->config;
@@ -237,8 +246,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
     crankshaft_rpm = crankshaft->sensor_data.rpm;
     crankshaft_period = crankshaft->sensor_data.period;
     signal_prepare_advance = config->signal_prepare_advance;
-    crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
-        crankshaft->sensor_data.previous.timestamp);
 
     us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
     us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
@@ -306,9 +313,11 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
             slew_adder_valid = false;
             if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+              slew_adder_valid = true;
               injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
               injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
               phase_slew_rate = group_config->phase_slew_rate;
+              phase_slew_rate_mode = group_config->phase_slew_rate_mode;
               if(injection_phase_gr_accept_vs_requested > 0.0f) {
                 injection_phase_gr_adder = phase_slew_rate;
               } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
@@ -316,14 +325,25 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
               } else {
                 injection_phase_gr_adder = 0.0f;
               }
-              injection_phase_gr_adder *= crankshaft_signal_delta / crankshaft_period;
 
-              if(injection_phase_gr_adder == injection_phase_gr_adder) {
-                if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
-                    (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
-                  injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+              if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND) {
+                injection_phase_gr_adder *= time_delta * TIME_S_IN_US;
+              } else if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION) {
+                injection_phase_gr_adder *= time_delta / crankshaft_period;
+              } else {
+                injection_phase_gr_adder = 0.0f;
+                slew_adder_valid = false;
+              }
+
+              if(slew_adder_valid) {
+                if(injection_phase_gr_adder == injection_phase_gr_adder) {
+                  if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
+                      (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
+                    injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+                  }
+                } else {
+                  slew_adder_valid = false;
                 }
-                slew_adder_valid = true;
               }
             }
 

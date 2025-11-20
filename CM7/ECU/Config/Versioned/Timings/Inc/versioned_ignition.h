@@ -51,6 +51,12 @@ typedef enum {
 }ignition_config_group_mode_t;
 
 typedef enum {
+  IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND = 0,
+  IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION,
+  IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_MAX,
+}ignition_config_group_advance_slew_rate_mode_t;
+
+typedef enum {
   IGNITION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE = 0,
   IGNITION_CONFIG_USPD_SOURCE_PER_REVOLUTION,
   IGNITION_CONFIG_USPD_SOURCE_MAX,
@@ -76,6 +82,7 @@ typedef struct {
     ignition_config_group_cylinder_setup_t cylinders[ECU_CYLINDER_MAX];
 
     float advance_add;
+    ignition_config_group_advance_slew_rate_mode_t advance_slew_rate_mode;
     float advance_slew_rate_earlier;
     float advance_slew_rate_later;
     ignition_config_relation_t voltage_to_saturation_time;

@@ -75,6 +75,7 @@ typedef struct {
     bool configured;
 
     ignition_runtime_ctx_t runtime;
+    time_us_t signal_handle_last;
 
 }ignition_ctx_t;
 

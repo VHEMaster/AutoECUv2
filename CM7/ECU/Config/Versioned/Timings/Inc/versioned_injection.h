@@ -54,6 +54,12 @@ typedef enum {
 }injection_config_group_late_phase_mode_t;
 
 typedef enum {
+  INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND = 0,
+  INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION,
+  INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_MAX,
+}injection_config_group_phase_slew_rate_mode_t;
+
+typedef enum {
   INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_ONLY = 0,
   INJECTION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY,
   INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL,
@@ -135,6 +141,7 @@ typedef struct {
 
     float phase_add;
     float phase_slew_rate;
+    injection_config_group_phase_slew_rate_mode_t phase_slew_rate_mode;
     injection_config_group_phase_mode_t phase_mode;
     injection_config_relation_t rpm_to_phase_add;
 

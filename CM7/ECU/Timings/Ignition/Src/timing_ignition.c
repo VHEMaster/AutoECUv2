@@ -89,6 +89,9 @@ OPTIMIZE_FAST
 ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
 {
   error_t err;
+  time_us_t now, last;
+  time_float_delta_us_t time_delta;
+
   timing_base_crankshaft_mode_t crankshaft_mode;
   ignition_config_group_mode_t group_mode;
   input_id_t power_voltage_pin;
@@ -97,6 +100,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   uint32_t banks_count;
   uint32_t cylinders_count;
 
+  ignition_config_group_advance_slew_rate_mode_t advance_slew_rate_mode;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
   bool distributor;
   bool needtoclear;
@@ -144,7 +148,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
   float degrees_before_ignite_prev;
 
   float crankshaft_period;
-  float crankshaft_signal_delta;
 
   float ignition_advance_gr_cy[ECU_CYLINDER_MAX];
   float ignition_advance_gr_requested_cy[ECU_CYLINDER_MAX];
@@ -166,6 +169,12 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
     BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
+    now = time_now_us();
+    last = ctx->signal_handle_last;
+    time_delta = time_diff(now, last);
+    ctx->signal_handle_last = now;
+    BREAK_IF(last == 0);
+
     config = &ctx->config;
     runtime = &ctx->runtime;
     crankshaft = &timing_base_data->crankshaft;
@@ -186,8 +195,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
     crankshaft_mode = crankshaft->mode;
     crankshaft_period = crankshaft->sensor_data.period;
     signal_prepare_advance = config->signal_prepare_advance;
-    crankshaft_signal_delta = time_diff(crankshaft->sensor_data.current.timestamp,
-        crankshaft->sensor_data.previous.timestamp);
 
     input_valid = banks_count ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -273,9 +280,11 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
           us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
+          advance_slew_rate_mode = group_config->advance_slew_rate_mode;
           for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
             slew_adder_valid = false;
             if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+              slew_adder_valid = true;
               ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
               ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested_cy[cy] - ignition_advance_gr_cy[cy];
               if(ignition_advance_gr_accept_vs_requested > 0.0f) {
@@ -285,15 +294,26 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
               } else {
                 ignition_advance_gr_adder = 0.0f;
               }
-              ignition_advance_gr_adder *= crankshaft_signal_delta / crankshaft_period;
 
-              if(ignition_advance_gr_adder) {
-                if((ignition_advance_gr_accept_vs_requested > 0.0f && ignition_advance_gr_adder > ignition_advance_gr_accept_vs_requested) ||
-                    (ignition_advance_gr_accept_vs_requested < 0.0f && ignition_advance_gr_adder < ignition_advance_gr_accept_vs_requested)) {
-                  ignition_advance_gr_adder = ignition_advance_gr_accept_vs_requested;
+              if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
+                ignition_advance_gr_adder *= time_delta * TIME_S_IN_US;
+              } else if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION) {
+                ignition_advance_gr_adder *= time_delta / crankshaft_period;
+              } else {
+                ignition_advance_gr_adder = 0.0f;
+                slew_adder_valid = false;
+              }
+
+              if(slew_adder_valid) {
+                if(ignition_advance_gr_adder == ignition_advance_gr_adder) {
+                  if((ignition_advance_gr_accept_vs_requested > 0.0f && ignition_advance_gr_adder > ignition_advance_gr_accept_vs_requested) ||
+                      (ignition_advance_gr_accept_vs_requested < 0.0f && ignition_advance_gr_adder < ignition_advance_gr_accept_vs_requested)) {
+                    ignition_advance_gr_adder = ignition_advance_gr_accept_vs_requested;
+                  }
+                } else {
+                  slew_adder_valid = false;
                 }
               }
-              slew_adder_valid = true;
             }
 
             if(slew_adder_valid) {

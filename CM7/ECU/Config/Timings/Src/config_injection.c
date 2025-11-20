@@ -123,6 +123,7 @@ static const injection_config_t ecu_timings_injection_config_default = {
 
             .phase_add = 0.0f,
             .phase_slew_rate = 24.0f,
+            .phase_slew_rate_mode = INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION,
             .phase_mode = INJECTION_CONFIG_GROUP_PHASE_MODE_ENDING,
 
             .rpm_to_phase_add = {

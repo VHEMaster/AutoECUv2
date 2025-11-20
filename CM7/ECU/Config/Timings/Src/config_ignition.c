@@ -52,6 +52,7 @@ static const ignition_config_t ecu_timings_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_mode = IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND,
             .advance_slew_rate_earlier = 50.0f,
             .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {
@@ -103,6 +104,7 @@ static const ignition_config_t ecu_timings_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_mode = IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND,
             .advance_slew_rate_earlier = 50.0f,
             .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {
@@ -154,6 +156,7 @@ static const ignition_config_t ecu_timings_ignition_config_default = {
                 }, //ECU_CYLINDER_4
             },
             .advance_add = 0.0f,
+            .advance_slew_rate_mode = IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND,
             .advance_slew_rate_earlier = 50.0f,
             .advance_slew_rate_later = 1000.0f,
             .voltage_to_saturation_time = {

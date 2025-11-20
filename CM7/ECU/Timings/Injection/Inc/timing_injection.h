@@ -80,6 +80,7 @@ typedef struct {
 
     injection_runtime_ctx_t runtime;
     timing_base_data_t timing_base_data;
+    time_us_t signal_handle_last;
 
 }injection_ctx_t;
 
