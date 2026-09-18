@@ -58,17 +58,17 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     .temp_ref_resistance_override = false,
     .temp_ref_resistance = 300.0f,
     .temp_ref_res_max_deviation = 50.0f,
-    .shunt_resistance = 61.9f,
-    .pushpull_resistance = 33000.0f,
+    .shunt_resistance = 62.0f,
+    .pushpull_resistance = 47000.0f,
     .ampfactor = CJ125_AF_17,
-    .pump_ref_current = CJ125_CONFIG_PRC_OFF,
+    .pump_ref_current = CJ125_CONFIG_PRC_20UA,
 
     // LSU ADV: disable or change to 1% per 100°C
-    .lambda_temperature_correction = true,
+    .lambda_temperature_correction = false,
     .temperature_correction_value = 0.0004f,
     .temperature_reference = 780.0f,
 
-    .reg_enscun = true,
+    .reg_enscun = false,
     .reg_set_dia_q = false,
 
     .heater_preheat_voltage = 2.0f,
@@ -87,6 +87,7 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
 };
 
 static const bool ecu_devices_wbls_enabled_default[ECU_DEVICE_WBLS_MAX] = {
+    true,
     true,
 };
 
