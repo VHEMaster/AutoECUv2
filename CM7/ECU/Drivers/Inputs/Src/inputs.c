@@ -85,8 +85,6 @@ error_t input_if_configure(input_if_id_t interface_id, const void *configuration
     }
 
     interface = &input_ctx.ifs[interface_id];
-    memset(interface, 0u, sizeof(input_if_ctx_t));
-
     if(interface->func_if_configure != NULL) {
       interface->func_if_configure(interface_id, configuration, interface->usrdata);
     }
@@ -108,6 +106,8 @@ input_id_t input_ch_register(input_if_id_t interface_id, input_ch_id_t channel_i
   if(interface_id < input_ctx.ifs_count && input_ctx.chs_count < INPUTS_CHS_MAX) {
     if(id_count < INPUTS_CHS_MAX) {
       interface = &input_ctx.ifs[interface_id];
+      RETURN_IF(interface->chs_count >= INPUTS_CHS_MAX, err = E_OVERFLOW);
+
       channel = &input_ctx.chs[id_new];
 
       memset(channel, 0u, sizeof(input_ch_ctx_t));
@@ -192,7 +192,7 @@ error_t input_ch_debounce(input_id_t channel_id, time_delta_us_t debounce_time)
 error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t polling_mode)
 {
   error_t err = E_OK;
-  input_ch_poll_ctx_t *poll_old;
+  input_ch_poll_ctx_t *poll_old = NULL;
   input_ch_poll_ctx_t *poll_new;
   input_polling_mode_t mode_old;
   input_ch_ctx_t *channel;
@@ -207,27 +207,29 @@ error_t input_ch_polling_mode(input_id_t channel_id, input_polling_mode_t pollin
     mode_old = channel->polling_mode;
 
     if(mode_old != polling_mode) {
-      poll_old = &input_ctx.poll[mode_old];
-      poll_new = &input_ctx.poll[polling_mode];
-      channel->polling_mode = polling_mode;
+      if(mode_old < INPUT_POLLING_MODE_MAX) {
+        poll_old = &input_ctx.poll[mode_old];
 
-      for(int c = 0; c < poll_old->channels_count; c++) {
-        if(poll_old->channels[c] == channel) {
-          poll_old->channels_count--;
-          poll_old->channels[c] = NULL;
+        for(int c = 0; c < poll_old->channels_count; c++) {
+          if(poll_old->channels[c] == channel) {
+            poll_old->channels_count--;
+            poll_old->channels[c] = NULL;
 
-          for(int i = c; i < poll_old->channels_count; i++) {
-            poll_old->channels[i] = poll_old->channels[i + 1];
+            for(int i = c; i < poll_old->channels_count; i++) {
+              poll_old->channels[i] = poll_old->channels[i + 1];
+            }
+            poll_old->channels[poll_old->channels_count] = NULL;
+            break;
           }
-          poll_old->channels[poll_old->channels_count] = NULL;
-          break;
         }
-
       }
 
+      poll_new = &input_ctx.poll[polling_mode];
+      BREAK_IF_ACTION(poll_new->channels_count >= INPUTS_CHS_MAX, err = E_OVERFLOW);
+
+      channel->polling_mode = polling_mode;
       poll_new->channels[poll_new->channels_count] = channel;
       poll_new->channels_count++;
-
     }
 
   } while(0);

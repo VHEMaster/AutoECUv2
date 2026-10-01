@@ -100,9 +100,11 @@ typedef struct isotp_ctx_tag {
 
     isotp_error_code_t local_error_code;
     isotp_error_code_t error_code;
+    isotp_state_t state_prev;
     isotp_state_t state;
     time_us_t state_time;
     bool reset_trigger;
+
 
 }isotp_ctx_t;
 

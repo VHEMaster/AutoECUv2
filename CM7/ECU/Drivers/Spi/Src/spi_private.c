@@ -69,7 +69,7 @@ ITCM_FUNC void spi_private_tx_then_rx_tx_cplt_cb(spi_slave_t *spi_slave, error_t
   spi->errorcode = errorcode;
   if(errorcode == E_OK) {
     spi->cplt_callback = spi_private_txrx_full_cplt_cb;
-    spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_bytes);
+    spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_length);
   } else {
     spi_private_error_cb(spi_slave, errorcode);
   }
@@ -82,7 +82,7 @@ ITCM_FUNC void spi_private_tx_and_poll_tx_cplt_cb(spi_slave_t *spi_slave, error_
   spi->errorcode = errorcode;
   if(errorcode == E_OK) {
     spi->cplt_callback = spi_private_tx_and_poll_rx_cplt_cb;
-    spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_bytes);
+    spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_length);
   } else {
     spi_private_error_cb(spi_slave, errorcode);
   }
@@ -95,11 +95,12 @@ ITCM_FUNC void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_
   const uint8_t *value = spi->rx_value;
   const uint8_t *rxbyte = spi->rx_buffer;
   uint32_t poll_begin_time, now;
+  uint32_t bytescnt = spi->rx_length * ((spi_slave->datasize + 7) >> 3);
   bool match = true;
 
   if(errorcode == E_OK) {
 
-    for(int i = 0; i < spi->rx_bytes; i++) {
+    for(int i = 0; i < bytescnt; i++) {
       if((*rxbyte & *mask) != *value) {
         match = false;
         break;
@@ -116,7 +117,7 @@ ITCM_FUNC void spi_private_tx_and_poll_rx_cplt_cb(spi_slave_t *spi_slave, error_
       now = time_now_us();
       if(time_diff(now, poll_begin_time) <= spi->time_poll_timeout) {
         if(spi->poll_period == 0u) {
-          spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_bytes);
+          spi_private_receive(spi_slave, spi->rx_buffer, spi->rx_length);
         } else {
           spi->poll_startpoint = time_now_us();
           spi->poll_scheduled = true;
@@ -146,15 +147,10 @@ ITCM_FUNC INLINE error_t spi_private_transmit_receive(spi_slave_t *spi_slave, co
     if(status == HAL_OK) {
       err = E_AGAIN;
     }
-  } else if(spi->cfg.use_interrupt) {
+  } else {
     status = HAL_SPI_TransmitReceive_IT(spi->cfg.hspi, (const uint8_t *)tx_data, (uint8_t *)rx_data, size);
     if(status == HAL_OK) {
       err = E_AGAIN;
-    }
-  } else {
-    status = HAL_SPI_TransmitReceive(spi->cfg.hspi, (const uint8_t *)tx_data, (uint8_t *)rx_data, size, spi->cfg.timeout / TIME_US_IN_MS);
-    if(status == HAL_OK) {
-      err = E_OK;
     }
   }
 
@@ -181,15 +177,10 @@ ITCM_FUNC INLINE error_t spi_private_transmit(spi_slave_t *spi_slave, const void
     if(status == HAL_OK) {
       err = E_AGAIN;
     }
-  } else if(spi->cfg.use_interrupt) {
+  } else {
     status = HAL_SPI_Transmit_IT(spi->cfg.hspi, (const uint8_t *)data, size);
     if(status == HAL_OK) {
       err = E_AGAIN;
-    }
-  } else {
-    status = HAL_SPI_Transmit(spi->cfg.hspi, (const uint8_t *)data, size, spi->cfg.timeout / TIME_US_IN_MS);
-    if(status == HAL_OK) {
-      err = E_OK;
     }
   }
 
@@ -216,15 +207,10 @@ ITCM_FUNC INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data,
     if(status == HAL_OK) {
       err = E_AGAIN;
     }
-  } else if(spi->cfg.use_interrupt) {
+  } else {
     status = HAL_SPI_Receive_IT(spi->cfg.hspi, (uint8_t *)data, size);
     if(status == HAL_OK) {
       err = E_AGAIN;
-    }
-  } else {
-    status = HAL_SPI_Receive(spi->cfg.hspi, (uint8_t *)data, size, spi->cfg.timeout / TIME_US_IN_MS);
-    if(status == HAL_OK) {
-      err = E_OK;
     }
   }
 
@@ -234,6 +220,17 @@ ITCM_FUNC INLINE error_t spi_private_receive(spi_slave_t *spi_slave, void *data,
   }
 
   return err;
+}
+
+ITCM_FUNC void spi_private_abort(spi_slave_t *spi_slave)
+{
+  spi_t *spi = spi_slave->spi;
+
+  HAL_SPI_Abort(spi->cfg.hspi);
+
+  gpio_set(&spi_slave->nss_pin);
+  spi->state = SPI_STATE_ERROR;
+
 }
 
 ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
@@ -247,7 +244,7 @@ ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
       spi->time_transaction = now;
       spi->poll_scheduled = false;
       spi->poll_startpoint = now;
-      spi_private_receive(spi->slave_own, spi->rx_buffer, spi->rx_bytes);
+      spi_private_receive(spi->slave_own, spi->rx_buffer, spi->rx_length);
     }
   }
 }

@@ -34,36 +34,34 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
     }
 
 #if (USE_HAL_SPI_REGISTER_CALLBACKS == 1UL)
-    if(spi->cfg.use_dma || spi->cfg.use_interrupt) {
-      if(spi->cfg.tx_cplt_cb != NULL) {
-        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_COMPLETE_CB_ID, spi->cfg.tx_cplt_cb);
-      } else {
-        err = E_PARAM;
-        break;
-      }
-      if(spi->cfg.rx_cplt_cb != NULL) {
-        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_RX_COMPLETE_CB_ID, spi->cfg.rx_cplt_cb);
-      } else {
-        err = E_PARAM;
-        break;
-      }
-      if(spi->cfg.txrx_cplt_cb != NULL) {
-        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_RX_COMPLETE_CB_ID, spi->cfg.txrx_cplt_cb);
-      } else {
-        err = E_PARAM;
-        break;
-      }
-      if(spi->cfg.err_cplt_cb != NULL) {
-        status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_ERROR_CB_ID, spi->cfg.err_cplt_cb);
-      } else {
-        err = E_PARAM;
-        break;
-      }
+    if(spi->cfg.tx_cplt_cb != NULL) {
+      status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_COMPLETE_CB_ID, spi->cfg.tx_cplt_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(spi->cfg.rx_cplt_cb != NULL) {
+      status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_RX_COMPLETE_CB_ID, spi->cfg.rx_cplt_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(spi->cfg.txrx_cplt_cb != NULL) {
+      status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_TX_RX_COMPLETE_CB_ID, spi->cfg.txrx_cplt_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
+    if(spi->cfg.err_cplt_cb != NULL) {
+      status |= HAL_SPI_RegisterCallback(spi->cfg.hspi, HAL_SPI_ERROR_CB_ID, spi->cfg.err_cplt_cb);
+    } else {
+      err = E_PARAM;
+      break;
+    }
 
-      if(status != HAL_OK) {
-        err = E_HAL;
-        break;
-      }
+    if(status != HAL_OK) {
+      err = E_HAL;
+      break;
     }
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
@@ -253,24 +251,28 @@ ITCM_FUNC INLINE error_t spi_slave_configure_callback(spi_slave_t *spi_slave, sp
   return err;
 }
 
-ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes)
+ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t length)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
   do {
     if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      spi->busy = true;
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
+        spi->busy = false;
         break;
       }
 
-      spi->busy = true;
       spi->slave_own = spi_slave;
       spi->cplt_callback = spi_private_txrx_full_cplt_cb;
       spi->err_callback = spi_private_error_cb;
 
-      err = spi_private_transmit(spi_slave, data, bytes);
+      err = spi_private_transmit(spi_slave, data, length);
+      if(err != E_AGAIN) {
+        spi_private_slave_reset(spi_slave);
+      }
 
     } else {
       err = spi_sync(spi_slave);
@@ -282,36 +284,83 @@ ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_
 
 ITCM_FUNC error_t spi_transmit_byte(spi_slave_t *spi_slave, uint8_t data)
 {
-  return spi_transmit(spi_slave, &data, sizeof(data));
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+
+  do {
+    BREAK_IF_ACTION(datasize > 8u, err = E_INVALACT);
+    err = spi_transmit(spi_slave, &data, 1u);
+  } while(0);
+
+  return err;
 }
 
 ITCM_FUNC error_t spi_transmit_halfword(spi_slave_t *spi_slave, uint16_t data)
 {
-  return spi_transmit(spi_slave, &data, sizeof(data));
-}
-ITCM_FUNC error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data)
-{
-  return spi_transmit(spi_slave, &data, sizeof(data));
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+  uint16_t length;
+
+  do {
+    BREAK_IF_ACTION(datasize > 16u, err = E_INVALACT);
+    if(datasize > 8u) {
+      length = 1u;
+    } else {
+      length = 2u;
+    }
+
+    err = spi_transmit(spi_slave, &data, length);
+
+  } while(0);
+
+  return err;
 }
 
-ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes)
+ITCM_FUNC error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data)
+{
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+  uint16_t length;
+
+  do {
+    BREAK_IF_ACTION(datasize > 32u, err = E_INVALACT);
+    if(datasize > 16u) {
+      length = 1;
+    } else if(datasize > 8u) {
+      length = 2u;
+    } else {
+      length = 4u;
+    }
+
+    err = spi_transmit(spi_slave, &data, length);
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t length)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
   do {
     if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      spi->busy = true;
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
+        spi->busy = false;
         break;
       }
 
-      spi->busy = true;
       spi->slave_own = spi_slave;
       spi->cplt_callback = spi_private_txrx_full_cplt_cb;
       spi->err_callback = spi_private_error_cb;
 
-      err = spi_private_receive(spi_slave, data, bytes);
+      err = spi_private_receive(spi_slave, data, length);
+      if(err != E_AGAIN) {
+        spi_private_slave_reset(spi_slave);
+      }
 
     } else {
       err = spi_sync(spi_slave);
@@ -323,37 +372,83 @@ ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes
 
 ITCM_FUNC error_t spi_receive_byte(spi_slave_t *spi_slave, uint8_t *data)
 {
-  return spi_receive(spi_slave, data, sizeof(data));
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+
+  do {
+    BREAK_IF_ACTION(datasize > 8u, err = E_INVALACT);
+    err = spi_receive(spi_slave, data, 1u);
+  } while(0);
+
+  return err;
 }
 
 ITCM_FUNC error_t spi_receive_halfword(spi_slave_t *spi_slave, uint16_t *data)
 {
-  return spi_receive(spi_slave, data, sizeof(data));
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+  uint16_t length;
+
+  do {
+    BREAK_IF_ACTION(datasize > 16u, err = E_INVALACT);
+    if(datasize > 8u) {
+      length = 1u;
+    } else {
+      length = 2u;
+    }
+
+    err = spi_receive(spi_slave, data, length);
+
+  } while(0);
+
+  return err;
 }
 
 ITCM_FUNC error_t spi_receive_word(spi_slave_t *spi_slave, uint32_t *data)
 {
-  return spi_receive(spi_slave, data, sizeof(data));
+  error_t err = E_OK;
+  uint8_t datasize = spi_slave->datasize;
+  uint16_t length;
+
+  do {
+    BREAK_IF_ACTION(datasize > 32u, err = E_INVALACT);
+    if(datasize > 16u) {
+      length = 1;
+    } else if(datasize > 8u) {
+      length = 2u;
+    } else {
+      length = 4u;
+    }
+
+    err = spi_receive(spi_slave, data, length);
+
+  } while(0);
+
+  return err;
 }
 
-ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t bytes)
+ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t length)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
   do {
     if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      spi->busy = true;
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
+        spi->busy = false;
         break;
       }
 
-      spi->busy = true;
       spi->slave_own = spi_slave;
       spi->cplt_callback = spi_private_txrx_full_cplt_cb;
       spi->err_callback = spi_private_error_cb;
 
-      err = spi_private_transmit_receive(spi_slave, transmit, receive, bytes);
+      err = spi_private_transmit_receive(spi_slave, transmit, receive, length);
+      if(err != E_AGAIN) {
+        spi_private_slave_reset(spi_slave);
+      }
 
     } else {
       err = spi_sync(spi_slave);
@@ -363,26 +458,30 @@ ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *t
   return err;
 }
 
-ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_bytes, void *receive, uint8_t rx_bytes)
+ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_length, void *receive, uint8_t rx_length)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
   do {
     if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      spi->busy = true;
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
+        spi->busy = false;
         break;
       }
 
-      spi->busy = true;
       spi->slave_own = spi_slave;
       spi->rx_buffer = receive;
-      spi->rx_bytes = rx_bytes;
+      spi->rx_length = rx_length;
       spi->cplt_callback = spi_private_tx_then_rx_tx_cplt_cb;
       spi->err_callback = spi_private_error_cb;
 
-      err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+      err = spi_private_transmit(spi_slave, transmit, tx_length);
+      if(err != E_AGAIN) {
+        spi_private_slave_reset(spi_slave);
+      }
 
     } else {
       err = spi_sync(spi_slave);
@@ -392,31 +491,35 @@ ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *
   return err;
 }
 
-ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_bytes, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_bytes, time_delta_us_t poll_period, time_delta_us_t timeout)
+ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_length, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_length, time_delta_us_t poll_period, time_delta_us_t timeout)
 {
   error_t err = E_OK;
   spi_t *spi = spi_slave->spi;
 
   do {
     if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
+      spi->busy = true;
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
+        spi->busy = false;
         break;
       }
 
-      spi->busy = true;
       spi->slave_own = spi_slave;
       spi->rx_mask = rx_mask;
       spi->rx_value = rx_value;
       spi->rx_buffer = receive;
-      spi->rx_bytes = rx_bytes;
+      spi->rx_length = rx_length;
       spi->poll_period = poll_period;
       spi->cplt_callback = spi_private_tx_and_poll_tx_cplt_cb;
       spi->err_callback = spi_private_error_cb;
       spi->time_poll_begin = time_now_us();
       spi->time_poll_timeout = timeout;
 
-      err = spi_private_transmit(spi_slave, transmit, tx_bytes);
+      err = spi_private_transmit(spi_slave, transmit, tx_length);
+      if(err != E_AGAIN) {
+        spi_private_slave_reset(spi_slave);
+      }
 
     } else {
       err = spi_sync(spi_slave);
@@ -445,8 +548,10 @@ ITCM_FUNC error_t spi_sync(spi_slave_t *spi_slave)
       if(spi->poll_scheduled == false) {
         if(time_diff(now, time_transaction) >= spi->cfg.timeout) {
           err = E_TIMEOUT;
+          spi_private_abort(spi_slave);
           spi_private_error_cb(spi_slave, err);
           spi_private_slave_reset(spi_slave);
+          // TODO: add diagnostic flag here
         }
       }
     }
@@ -459,7 +564,8 @@ ITCM_FUNC error_t spi_sync(spi_slave_t *spi_slave)
 
 ITCM_FUNC error_t spi_transmit_byte_and_poll_byte(spi_slave_t *spi_slave, uint8_t transmit, uint8_t *receive, uint8_t rx_mask, uint8_t rx_value, time_delta_us_t poll_period, time_delta_us_t timeout)
 {
-  return spi_transmit_and_poll(spi_slave, &transmit, sizeof(transmit), &receive, &rx_mask, &rx_value, sizeof(rx_value), poll_period, timeout);
+  RETURN_IF(spi_slave->datasize > 8, E_NOTSUPPORT);
+  return spi_transmit_and_poll(spi_slave, &transmit, sizeof(transmit), receive, &rx_mask, &rx_value, sizeof(rx_value), poll_period, timeout);
 }
 
 ITCM_FUNC void spi_tx_irq(spi_t *spi)

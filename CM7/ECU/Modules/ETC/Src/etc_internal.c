@@ -18,6 +18,9 @@ error_t etc_internal_process(etc_ctx_t *ctx)
   bool enabled;
   input_value_t input_analog_value;
 
+  // TODO: set minimum control time delta
+  // TODO: derivative filters, plausibility, TPS validity?
+
   float speed, current, voltage, power_voltage, dutycycle, target;
 
   do {
@@ -34,7 +37,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->diag.bits.tps_handle_error = true;
     }
 
-    err = ecu_sensors_tps_get_diag(ctx->config.device_motor, &ctx->tps_diag);
+    err = ecu_sensors_tps_get_diag(ctx->config.sensor_tps, &ctx->tps_diag);
     if(err != E_OK && err != E_AGAIN) {
       ctx->diag.bits.tps_handle_error = true;
     }

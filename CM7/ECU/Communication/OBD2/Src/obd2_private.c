@@ -183,74 +183,89 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
   float raw;
   const obd2_config_mode_01_linkage_parameter_t *param_cfg;
   ecu_core_runtime_value_ctx_t param_value;
+  bool response_too_long = false;
 
   do {
     for(int i = 1; i < ctx->upstream_data_len; i++) {
       pid = ctx->upstream_data[i];
-      dtype = ctx->mode1_setup[pid].type;
-      dlen = obd2_pid_type_item_length[dtype];
-      md1 = &ctx->mode1_data[pid];
-      param_cfg = &ctx->config.mode_01_linkage.parameters[pid];
 
-      if(pid < OBD2_PID_01_MAX && param_cfg->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
-        switch(pid) {
-          case OBD2_PID_01_SUPPORTED_01_20:
-          case OBD2_PID_01_SUPPORTED_21_40:
-          case OBD2_PID_01_SUPPORTED_41_60:
-          case OBD2_PID_01_SUPPORTED_61_80:
-            ctx->downstream_data[ctx->downstream_data_len++] = pid;
-            adder = pid;
-            payload = 0;
-            for(uint8_t p = 0, idx = adder + 1; p < 0x20; p++, idx++) {
-              BREAK_IF(idx >= OBD2_PID_01_MAX);
-              if(ctx->config.mode_01_linkage.parameters[idx].supported && ctx->mode1_setup[pid].type != OBD2_PID_TYPE_UNDEFINED) {
-                payload |= 1 << p;
-              }
-            }
-            payload = __RBIT(payload);
-            payload = __REV(payload);
-            memcpy(&ctx->downstream_data[ctx->downstream_data_len], &payload, dlen);
-            ctx->downstream_data_len += dlen;
-            break;
-          default:
-            ctx->downstream_data[ctx->downstream_data_len++] = pid;
+      if(pid < OBD2_PID_01_MAX) {
+        param_cfg = &ctx->config.mode_01_linkage.parameters[pid];
+        dtype = ctx->mode1_setup[pid].type;
+        dlen = obd2_pid_type_item_length[dtype];
 
-            if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_HARD) {
-              // TODO: probably, implement
-            } else if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) {
-              md1->prefix_byte = 0;
-              for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
-                err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
-                if(err == E_OK) {
-                  md1->prefix_byte |= 1 << i;
-                  md1->value[i].flt = param_value.value;
-                  md1->value[i].raw = roundf(param_value.value);
+        if(param_cfg->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
+          md1 = &ctx->mode1_data[pid];
+
+          switch(pid) {
+            case OBD2_PID_01_SUPPORTED_01_20:
+            case OBD2_PID_01_SUPPORTED_21_40:
+            case OBD2_PID_01_SUPPORTED_41_60:
+            case OBD2_PID_01_SUPPORTED_61_80:
+              BREAK_IF_ACTION(ctx->downstream_data_len + 1 > OBD2_DATA_LENGTH_MAX, response_too_long = true);
+              ctx->downstream_data[ctx->downstream_data_len++] = pid;
+              adder = pid;
+              payload = 0;
+              for(uint8_t p = 0, idx = adder + 1; p < 0x20; p++, idx++) {
+                BREAK_IF(idx >= OBD2_PID_01_MAX);
+                if(ctx->config.mode_01_linkage.parameters[idx].supported && ctx->mode1_setup[idx].type != OBD2_PID_TYPE_UNDEFINED) {
+                  payload |= 1u << p;
                 }
               }
-            }
-
-            if(obd2_pid_type_item_has_prefix[dtype]) {
-              ctx->downstream_data[ctx->downstream_data_len++] = md1->prefix_byte;
-            }
-            for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
-              if(obd2_pid_type_item_isfloat[dtype]) {
-                raw = md1->value[i].flt;
-                raw -= ctx->mode1_setup[pid].gain_offset[i].offset;
-                raw /= ctx->mode1_setup[pid].gain_offset[i].gain;
-                md1->value[i].raw = roundf(raw);
-              }
-
-              payload = md1->value[i].raw << (32 - dlen * 8);
+              payload = __RBIT(payload);
               payload = __REV(payload);
+              BREAK_IF_ACTION(ctx->downstream_data_len + dlen > OBD2_DATA_LENGTH_MAX, response_too_long = true);
               memcpy(&ctx->downstream_data[ctx->downstream_data_len], &payload, dlen);
               ctx->downstream_data_len += dlen;
-            }
-            break;
+              break;
+            default:
+              BREAK_IF_ACTION(ctx->downstream_data_len + 1 > OBD2_DATA_LENGTH_MAX, response_too_long = true);
+              ctx->downstream_data[ctx->downstream_data_len++] = pid;
+
+              if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_HARD) {
+                // TODO: probably, implement
+              } else if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) {
+                md1->prefix_byte = 0;
+                for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
+                  err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
+                  if(err == E_OK) {
+                    md1->prefix_byte |= 1u << i;
+                    md1->value[i].flt = param_value.value;
+                    md1->value[i].raw = roundf(param_value.value);
+                  }
+                }
+              }
+
+              if(obd2_pid_type_item_has_prefix[dtype]) {
+                BREAK_IF_ACTION(ctx->downstream_data_len + 1 > OBD2_DATA_LENGTH_MAX, response_too_long = true);
+                ctx->downstream_data[ctx->downstream_data_len++] = md1->prefix_byte;
+              }
+              for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
+                if(obd2_pid_type_item_isfloat[dtype]) {
+                  raw = md1->value[i].flt;
+                  raw -= ctx->mode1_setup[pid].gain_offset[i].offset;
+                  raw /= ctx->mode1_setup[pid].gain_offset[i].gain;
+                  md1->value[i].raw = roundf(raw);
+                }
+
+                payload = md1->value[i].raw << (32 - dlen * 8);
+                payload = __REV(payload);
+                BREAK_IF_ACTION(ctx->downstream_data_len + dlen > OBD2_DATA_LENGTH_MAX, response_too_long = true);
+                memcpy(&ctx->downstream_data[ctx->downstream_data_len], &payload, dlen);
+                ctx->downstream_data_len += dlen;
+              }
+              break;
+          }
         }
       }
+      BREAK_IF(response_too_long != false);
     }
-
-    if(ctx->downstream_data_len <= 1) {
+    if(response_too_long) {
+      ctx->downstream_data_len = 0;
+      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
+      ctx->downstream_data[ctx->downstream_data_len++] = ctx->upstream_data[0];
+      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_RESPONSE_TOO_LONG;
+    } else if(ctx->downstream_data_len <= 1) {
       ctx->downstream_data_len = 0;
       ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
       ctx->downstream_data[ctx->downstream_data_len++] = ctx->upstream_data[0];
@@ -345,6 +360,7 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
   uint8_t pid;
   uint8_t idx;
   uint8_t dlen;
+  bool response_too_long = false;
 
   do {
     pid = ctx->upstream_data[1];
@@ -365,7 +381,7 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
           for(uint8_t p = 0, idx = adder + 1; p < 0x20; p++, idx++) {
             BREAK_IF(idx >= OBD2_PID_09_MAX);
             if(ctx->mode9_data[idx].supported) {
-              payload |= 1 << p;
+              payload |= 1u << p;
             }
           }
           payload = __RBIT(payload);
@@ -391,6 +407,7 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
             ctx->downstream_data[ctx->downstream_data_len++] = pid;
             ctx->downstream_data[ctx->downstream_data_len++] = idx;
             dlen = ctx->mode9_data[pid].length[idx - 1u];
+            BREAK_IF_ACTION(ctx->downstream_data_len + dlen > OBD2_DATA_LENGTH_MAX, response_too_long = true);
             memcpy(&ctx->downstream_data[ctx->downstream_data_len], ctx->mode9_data[pid].value[idx - 1u], dlen);
             ctx->downstream_data_len += dlen;
           } else {
@@ -404,17 +421,19 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
           if(ctx->mode9_data[pid].count > 0) {
             ctx->downstream_data[ctx->downstream_data_len++] = pid;
             dlen = ctx->mode9_data[pid].length[0];
-            if(dlen > OBD2_DATA_LENGTH_MAX) {
-              dlen = OBD2_DATA_LENGTH_MAX;
-            }
+            BREAK_IF_ACTION(ctx->downstream_data_len + dlen > OBD2_DATA_LENGTH_MAX, response_too_long = true);
             memcpy(&ctx->downstream_data[ctx->downstream_data_len], ctx->mode9_data[pid].value[0], dlen);
             ctx->downstream_data_len += dlen;
           }
           break;
       }
     }
-
-    if(ctx->downstream_data_len <= 1) {
+    if(response_too_long) {
+      ctx->downstream_data_len = 0;
+      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
+      ctx->downstream_data[ctx->downstream_data_len++] = ctx->upstream_data[0];
+      ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_RESPONSE_TOO_LONG;
+    } else if(ctx->downstream_data_len <= 1) {
       ctx->downstream_data_len = 0;
       ctx->downstream_data[ctx->downstream_data_len++] = OBD2_RESPONSE_NEGATIVE_CODE;
       ctx->downstream_data[ctx->downstream_data_len++] = ctx->upstream_data[0];

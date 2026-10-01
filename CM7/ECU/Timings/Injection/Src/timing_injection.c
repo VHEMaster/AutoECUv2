@@ -680,7 +680,8 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
                         time_to_inject = time_to_activate + pulse_time_cy;
 
                         err = timing_pulse_schedule(cy_config->output_pin,
-                            time_to_activate, time_to_inject);
+                            time_to_activate, time_to_inject,
+                            TIMING_LATE_POLICY_KEEP_WIDTH);
                         BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
                       }
 

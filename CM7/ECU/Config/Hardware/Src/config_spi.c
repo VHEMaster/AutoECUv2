@@ -27,7 +27,6 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
       .prescaler = SPI_BAUDRATEPRESCALER_8,
       .timeout = 10 * TIME_US_IN_MS,
       .use_dma = false,
-      .use_interrupt = true,
     },
     .slaves_cfg = {
         { .slave_enum = ECU_SPI_SLAVE_FLEXIO1, .nss_pin = { .port = SPI2_NSS_FLEXIO1_GPIO_Port, .pin = SPI2_NSS_FLEXIO1_Pin } },
@@ -41,7 +40,6 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
       .prescaler = SPI_BAUDRATEPRESCALER_8,
       .timeout = 10 * TIME_US_IN_MS,
       .use_dma = false,
-      .use_interrupt = true,
       },
       .slaves_cfg = {
           { .slave_enum = ECU_SPI_SLAVE_FLEXIO2, .nss_pin = { .port = SPI3_NSS_FLEXIO2_GPIO_Port, .pin = SPI3_NSS_FLEXIO2_Pin } },
@@ -55,7 +53,6 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
       .prescaler = SPI_BAUDRATEPRESCALER_16,
       .timeout = 10 * TIME_US_IN_MS,
       .use_dma = false,
-      .use_interrupt = true,
     },
     .slaves_cfg = {
         { .slave_enum = ECU_SPI_SLAVE_OUTS1, .nss_pin = { .port = SPI5_NSS_OUTS1_GPIO_Port, .pin = SPI5_NSS_OUTS1_Pin } },
@@ -72,7 +69,6 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
       .prescaler = SPI_BAUDRATEPRESCALER_16,
       .timeout = 10 * TIME_US_IN_MS,
       .use_dma = false,
-      .use_interrupt = true,
     },
     .slaves_cfg = {
         { .slave_enum = ECU_SPI_SLAVE_TCS1, .nss_pin = { .port = SPI6_NSS_TCS1_GPIO_Port, .pin = SPI6_NSS_TCS1_Pin } },

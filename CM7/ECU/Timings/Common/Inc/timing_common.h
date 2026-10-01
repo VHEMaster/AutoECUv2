@@ -11,7 +11,13 @@
 #include "core.h"
 #include "timing_base.h"
 
-error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end);
+typedef enum {
+  TIMING_LATE_POLICY_KEEP_WIDTH = 0,
+  TIMING_LATE_POLICY_KEEP_END,
+  TIMING_LATE_POLICY_MAX
+}timing_late_policy_t;
+
+error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end, timing_late_policy_t late_policy);
 void timing_position_clamp(float input, bool phased, float *output);
 
 error_t timing_calculate_current_position(timing_base_ctx_t *ctx, float offset, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data);

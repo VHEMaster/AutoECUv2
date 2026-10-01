@@ -93,8 +93,6 @@ error_t output_if_configure(output_if_id_t interface_id, const void *configurati
     }
 
     interface = &output_ctx.ifs[interface_id];
-    memset(interface, 0u, sizeof(output_if_ctx_t));
-
     if(interface->func_if_configure != NULL) {
       interface->func_if_configure(interface_id, configuration, interface->usrdata);
     }
@@ -116,6 +114,7 @@ output_id_t output_ch_register(output_if_id_t interface_id, output_ch_id_t chann
   if(interface_id < output_ctx.ifs_count && output_ctx.chs_count < OUTPUTS_CHS_MAX) {
     if(id_count < OUTPUTS_CHS_MAX) {
       interface = &output_ctx.ifs[interface_id];
+      RETURN_IF(interface->chs_count >= OUTPUTS_CHS_MAX, err = E_OVERFLOW);
       channel = &output_ctx.chs[id_new];
 
       memset(channel, 0u, sizeof(output_ch_ctx_t));
@@ -135,7 +134,7 @@ output_id_t output_ch_register(output_if_id_t interface_id, output_ch_id_t chann
 
       channel->periodic_polling_mode = OUTPUT_POLLING_MODE_MAX;
       err = output_ch_periodic_polling_mode(id_new, OUTPUT_POLLING_MODE_SLOW);
-      RETURN_IF(err != E_OK,  err);
+      RETURN_IF(err != E_OK, err);
 
     } else {
       id_new = E_OVERFLOW;
@@ -256,7 +255,7 @@ error_t output_ch_dest_void(output_id_t channel_id)
 error_t output_ch_periodic_polling_mode(output_id_t channel_id, output_polling_mode_t polling_mode)
 {
   error_t err = E_OK;
-  output_ch_poll_ctx_t *poll_old;
+  output_ch_poll_ctx_t *poll_old = NULL;
   output_ch_poll_ctx_t *poll_new;
   output_polling_mode_t mode_old;
   output_ch_ctx_t *channel;
@@ -271,24 +270,27 @@ error_t output_ch_periodic_polling_mode(output_id_t channel_id, output_polling_m
     mode_old = channel->periodic_polling_mode;
 
     if(mode_old != polling_mode) {
-      poll_old = &output_ctx.poll[mode_old];
-      poll_new = &output_ctx.poll[polling_mode];
-      channel->periodic_polling_mode = polling_mode;
+      if(mode_old < OUTPUT_POLLING_MODE_MAX) {
+        poll_old = &output_ctx.poll[mode_old];
 
-      for(int c = 0; c < poll_old->channels_count; c++) {
-        if(poll_old->channels[c] == channel) {
-          poll_old->channels_count--;
-          poll_old->channels[c] = NULL;
+        for(int c = 0; c < poll_old->channels_count; c++) {
+          if(poll_old->channels[c] == channel) {
+            poll_old->channels_count--;
+            poll_old->channels[c] = NULL;
 
-          for(int i = c; i < poll_old->channels_count; i++) {
-            poll_old->channels[i] = poll_old->channels[i + 1];
+            for(int i = c; i < poll_old->channels_count; i++) {
+              poll_old->channels[i] = poll_old->channels[i + 1];
+            }
+            poll_old->channels[poll_old->channels_count] = NULL;
+            break;
           }
-          poll_old->channels[poll_old->channels_count] = NULL;
-          break;
         }
-
       }
 
+      poll_new = &output_ctx.poll[polling_mode];
+      BREAK_IF_ACTION(poll_new->channels_count >= OUTPUTS_CHS_MAX, err = E_OVERFLOW);
+
+      channel->periodic_polling_mode = polling_mode;
       poll_new->channels[poll_new->channels_count] = channel;
       poll_new->channels_count++;
     }

@@ -268,7 +268,7 @@ ITCM_FUNC static error_t l9966_fsm_check_irq_flags(l9966_ctx_t *ctx)
         if(err == E_OK) {
           ctx->sc_int |= (status.bits.INTx & 1) != 0;
           for(int i = 0; i < L9966_EU_COUNT; i++) {
-            ctx->eu_int[i] |= (status.bits.INTx & (1 << (i + 1))) != 0;
+            ctx->eu_int[i] |= (status.bits.INTx & (1u << (i + 1))) != 0;
           }
           ctx->check_irq_flags_fsm_state = L9966_CHECK_IRQ_FLAGS_CONDITION;
         }
@@ -462,7 +462,7 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
                 }
               }
               ctx->sqncr_cmd_results[i] = result_float;
-              ctx->sqncr_cmd_ready_mask |= 1 << i;
+              ctx->sqncr_cmd_ready_mask |= 1u << i;
             }
           }
           ctx->read_sqncr_fsm_state = L9966_READ_SQNCR_CONDITION;

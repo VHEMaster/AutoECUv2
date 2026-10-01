@@ -437,7 +437,8 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
 
                       if(input_allowed_b[bank_cy]) {
                         err = timing_pulse_schedule(group_config->cylinders[cy].output_pin,
-                            time_to_saturate, time_to_ignite);
+                            time_to_saturate, time_to_ignite,
+                            TIMING_LATE_POLICY_KEEP_END);
                         BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
                       }
                       ignition_acceptance_gr_cy->valid = false;

@@ -174,7 +174,7 @@ error_t l9966_get_sqncr_output(l9966_ctx_t *ctx, uint8_t cmd_index, float *sqncr
     BREAK_IF_ACTION(ctx == NULL || sqncr_output == NULL || cmd_index >= L9966_CHANNELS, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
 
-    if((ctx->sqncr_cmd_ready_mask & (1 << cmd_index)) == 0) {
+    if((ctx->sqncr_cmd_ready_mask & (1u << cmd_index)) == 0) {
       err = E_AGAIN;
     }
 

@@ -15,17 +15,20 @@
 static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data);
 
 OPTIMIZE_FAST
-ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end)
+ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end, timing_late_policy_t late_policy)
 {
+  error_t ret = E_OK;
   time_us_t now;
   time_us_t time_mask, time_mask_2;
   output_id_t pin;
   error_t err;
-  error_t ret;
   time_delta_us_t delta;
 
+  // TODO: do the diagnostics of lateness
+
   do {
-    ret = E_OK;
+    BREAK_IF_ACTION(late_policy >= TIMING_LATE_POLICY_MAX, ret = E_PARAM);
+
     time_mask = time_mask_us();
     time_mask_2 = time_mask >> 1;
 
@@ -47,7 +50,12 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
     }
 
     err = E_OK;
-    delta = time_diff(pulse_end, pulse_start);
+    if(late_policy == TIMING_LATE_POLICY_KEEP_WIDTH) {
+      delta = time_diff(pulse_end, pulse_start);
+    } else if(late_policy == TIMING_LATE_POLICY_KEEP_END) {
+      now = time_now_us();
+      delta = time_diff(pulse_end, now);
+    }
     if(delta < time_mask_2) {
       err = queuedpulses_enqueue_ex(pin, delta, CORE_OUTPUT_ACTIVE);
     } else {

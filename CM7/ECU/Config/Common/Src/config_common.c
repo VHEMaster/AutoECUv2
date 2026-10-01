@@ -147,7 +147,7 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             },
             .get_type_params_count_read_write_funcs = {
                 ecu_timings_get_type_parameters_count_read,
-                ecu_devices_get_type_parameters_count_write,
+                ecu_timings_get_type_parameters_count_write,
             },
         }, // ECU_COMMON_ENTITY_TIMING
     },

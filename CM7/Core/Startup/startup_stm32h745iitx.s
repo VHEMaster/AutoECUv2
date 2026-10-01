@@ -141,7 +141,21 @@ LoopFillZerobss:
   cmp r2, r4
   bcc FillZerobss
 
-/* Zero fill the bss segment. */
+/* Zero fill the dmabss segment. */
+  ldr r2, =_sdmabss
+  ldr r4, =_edmabss
+  movs r3, #0
+  b LoopFillZeroDmabss
+
+FillZeroDmabss:
+  str  r3, [r2]
+  adds r2, r2, #4
+
+LoopFillZeroDmabss:
+  cmp r2, r4
+  bcc FillZeroDmabss
+
+/* Zero fill the rambss segment. */
   ldr r2, =_srambss
   ldr r4, =_erambss
   movs r3, #0

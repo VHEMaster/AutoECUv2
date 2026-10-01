@@ -43,7 +43,6 @@ typedef enum {
 
 typedef struct {
   SPI_HandleTypeDef *hspi;
-  bool use_interrupt;
   bool use_dma;
   uint8_t dma_usage_threshold;
   time_delta_us_t timeout;
@@ -71,7 +70,7 @@ typedef struct {
   const void *rx_mask;
   const void *rx_value;
   void *rx_buffer;
-  uint16_t rx_bytes;
+  uint16_t rx_length;
   time_delta_us_t poll_period;
   bool poll_scheduled;
   time_us_t poll_startpoint;
@@ -118,20 +117,20 @@ error_t spi_slave_configure_datasize(spi_slave_t *spi_slave, uint8_t datasize);
 
 error_t spi_slave_configure_callback(spi_slave_t *spi_slave, spi_op_cplt_cb_t callback);
 
-error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t bytes);
+error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_t length);
 error_t spi_transmit_byte(spi_slave_t *spi_slave, uint8_t data);
 error_t spi_transmit_halfword(spi_slave_t *spi_slave, uint16_t data);
 error_t spi_transmit_word(spi_slave_t *spi_slave, uint32_t data);
 
-error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t bytes);
+error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t length);
 error_t spi_receive_byte(spi_slave_t *spi_slave, uint8_t *data);
 error_t spi_receive_halfword(spi_slave_t *spi_slave, uint16_t *data);
 error_t spi_receive_word(spi_slave_t *spi_slave, uint32_t *data);
 
-error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t bytes);
-error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_bytes, void *receive, uint8_t rx_bytes);
+error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *transmit, void *receive, uint16_t length);
+error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *transmit, uint8_t tx_length, void *receive, uint8_t rx_length);
 
-error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_bytes, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_bytes, time_delta_us_t poll_period, time_delta_us_t timeout);
+error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *transmit, uint16_t tx_length, void *receive, const void *rx_mask, const void *rx_value, uint16_t rx_length, time_delta_us_t poll_period, time_delta_us_t timeout);
 error_t spi_transmit_byte_and_poll_byte(spi_slave_t *spi_slave, uint8_t transmit, uint8_t *receive, uint8_t rx_mask, uint8_t rx_value, time_delta_us_t poll_period, time_delta_us_t timeout);
 
 error_t spi_sync(spi_slave_t *spi_slave);

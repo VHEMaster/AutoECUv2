@@ -46,8 +46,9 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
     }
 
     if(ctx->ready && ctx->initialized && ctx->configured && ctx->heater_ready &&
-        time_delta <= CJ125_VOLTAGES_TIMEOUT_US && ctx->diag.byte == CJ125_DIAG_OK
-        && config_staged != NULL) {
+        time_delta <= CJ125_VOLTAGES_TIMEOUT_US &&
+        ctx->diag_valid && ctx->diag.byte == CJ125_DIAG_OK &&
+        config_staged != NULL) {
 
       ctx->data.regs.init1.bits.pa = config_staged->pa_enabled;
       ctx->data.regs.init2.bits.enscun = config_staged->reg_enscun;
@@ -77,7 +78,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           if(ctx->config.heated_value_thr_override) {
             heat_cplt_ref = ctx->config.heatup_ref_resistance_cplt;
           } else {
-            heat_cplt_ref = ctx->data.heat_resistance;
+            heat_cplt_ref = ctx->data.heat_ref_resistance;
           }
           heat_val = ctx->data.heat_resistance;
           heat_cplt_condition = heat_val <= heat_cplt_ref;

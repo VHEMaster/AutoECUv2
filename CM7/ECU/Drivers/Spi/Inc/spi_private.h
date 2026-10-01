@@ -16,6 +16,7 @@ void spi_private_poll_loop(spi_t *spi);
 void spi_private_irq_handler(spi_t *spi, error_t errorcode);
 void spi_private_call_slave_cb(spi_slave_t *spi_slave, error_t errorcode);
 void spi_private_error_cb(spi_slave_t *spi_slave, error_t errorcode);
+void spi_private_abort(spi_slave_t *spi_slave);
 
 void spi_private_txrx_full_cplt_cb(spi_slave_t *spi_slave, error_t errorcode);
 void spi_private_tx_then_rx_tx_cplt_cb(spi_slave_t *spi_slave, error_t errorcode);

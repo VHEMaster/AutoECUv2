@@ -267,6 +267,7 @@ ITCM_FUNC static error_t cj125_fsm_diag(cj125_ctx_t *ctx)
           ctx->diag.byte = ctx->regs.diag.data ^ 0xFF;
           ctx->diag_fsm = CJ125_DIAG_CONDITION;
           ctx->diag_timestamp = now;
+          ctx->diag_valid = true;
           err = E_OK;
         } else if(err != E_AGAIN) {
           ctx->diag_fsm = CJ125_DIAG_CONDITION;
@@ -384,8 +385,8 @@ ITCM_FUNC static error_t cj125_fsm_live_config(cj125_ctx_t *ctx)
             ctx->live_init1_ready = true;
           }
 
-          if(ctx->regs.init2.data != ctx->data.regs.init1.data) {
-            ctx->regs.init2.data = ctx->data.regs.init1.data;
+          if(ctx->regs.init2.data != ctx->data.regs.init2.data) {
+            ctx->regs.init2.data = ctx->data.regs.init2.data;
             ctx->live_init2_ready = true;
           }
 
@@ -410,7 +411,7 @@ ITCM_FUNC static error_t cj125_fsm_live_config(cj125_ctx_t *ctx)
           err = E_OK;
         }
         break;
-      case CJ125_CONFIG_REQUEST_INIT1:
+      case CJ125_LIVE_CONFIG_REQUEST_INIT1:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
           if(ctx->live_init2_ready) {

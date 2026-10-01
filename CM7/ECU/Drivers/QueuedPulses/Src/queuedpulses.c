@@ -13,6 +13,7 @@
 static queuedpulse_ctx_t queuedpulse_ctx;
 
 static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim);
+static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bool allowed_to_loop);
 
 error_t queuedpulses_init(void)
 {
@@ -46,7 +47,7 @@ error_t queuedpulses_timer_register(TIM_HandleTypeDef *htim, IRQn_Type irq)
       err = E_PARAM;
       break;
     }
-    if(queuedpulse_ctx.timers_count >= QUEUEDPULSE_QUEUE_ENTRIES ) {
+    if(queuedpulse_ctx.timers_count >= QUEUEDPULSE_TIMERS) {
       err = E_OVERFLOW;
       break;
     }
@@ -91,81 +92,110 @@ error_t queuedpulses_output_configure(output_id_t output, output_value_t value_o
 ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
 {
   queuedpulse_timer_t *timer = NULL;
-  queuedpulse_output_t *out = NULL;
-  queuedpulse_entry_t *entry = NULL;
-  uint32_t prim, psc, prd, now, diff;
-  output_value_t value_temp;
-  uint32_t entry_id_to_release;
+  uint32_t prim;
+  error_t err, i;
 
   if(htim != NULL) {
     timer = htim->usrdata[0];
 
     if(timer != NULL) {
+      i = 0;
       prim = EnterCritical();
-      out = timer->output_assigned;
-      entry = timer->entry_assigned;
 
-      if(out != NULL) {
-        if(entry->out_seq_next == NULL) {
-          value_temp = out->value_off;
-          if(out->value_cur != value_temp) {
-            (void)output_set_value(out->id, value_temp);
-            out->value_cur = value_temp;
-          }
-          out->queue_entry = NULL;
-          out->timer = NULL;
-        } else {
-          value_temp = entry->out_seq_next->value_on;
-          if(out->value_cur != value_temp) {
-            (void)output_set_value(out->id, value_temp);
-            out->value_cur = value_temp;
-          }
-          out->queue_entry = entry->out_seq_next;
+      while(true) {
+        err = queuedpulses_tim_handler(timer, true);
+#if QUEUEDPULSE_MAX_EVENTS_PER_IRQ > 1u
+        BREAK_IF(err != E_AGAIN);
+        if(++i >= QUEUEDPULSE_MAX_EVENTS_PER_IRQ - 1) {
+          err = queuedpulses_tim_handler(timer, false);
+          break;
         }
-      }
-
-      entry_id_to_release = entry->id;
-      entry->timer = NULL;
-      entry->out_seq_next = NULL;
-      entry->output_assigned = NULL;
-
-      entry = entry->next;
-      timer->entry_assigned->next = NULL;
-      timer->entry_assigned = NULL;
-      timer->output_assigned = NULL;
-
-      queuedpulse_ctx.queue.entries_bitmap &= ~(1 << entry_id_to_release);
-
-      queuedpulses_internal_tim_disable(timer);
-
-      if(entry) {
-        out = entry->output_assigned;
-        out->timer = timer;
-        out->queue_entry = entry;
-        timer->output_assigned = out;
-        timer->entry_assigned = entry;
-
-
-        psc = timer->prescaler_default;
-        prd = entry->pulse;
-
-        now = time_now_us();
-        diff = time_diff(now, entry->time);
-        if(diff + 1 >= prd) {
-          prd = 0;
-          queuedpulses_tim_irq_handler(htim);
-        } else {
-          prd -= diff;
-          queuedpulses_internal_tim_enable(timer, prd, psc);
-        }
-
-      } else {
-        queuedpulse_ctx.timers_bitmap &= ~(1 << timer->id);
+#else
+        break;
+#endif
       }
 
       ExitCritical(prim);
     }
   }
+}
+
+ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bool allowed_to_loop)
+{
+  error_t err = E_OK;
+  queuedpulse_output_t *out = NULL;
+  queuedpulse_entry_t *entry = NULL;
+  uint32_t  psc, prd, now, diff;
+  output_value_t value_temp;
+  uint32_t entry_id_to_release;
+
+  out = timer->output_assigned;
+  entry = timer->entry_assigned;
+
+  if(out != NULL) {
+    if(entry->out_seq_next == NULL) {
+      value_temp = out->value_off;
+      if(out->value_cur != value_temp) {
+        (void)output_set_value(out->id, value_temp);
+        out->value_cur = value_temp;
+      }
+      out->queue_entry = NULL;
+      out->timer = NULL;
+    } else {
+      value_temp = entry->out_seq_next->value_on;
+      if(out->value_cur != value_temp) {
+        (void)output_set_value(out->id, value_temp);
+        out->value_cur = value_temp;
+      }
+      out->queue_entry = entry->out_seq_next;
+    }
+  }
+
+  entry_id_to_release = entry->id;
+  entry->timer = NULL;
+  entry->out_seq_next = NULL;
+  entry->output_assigned = NULL;
+
+  entry = entry->next;
+  timer->entry_assigned->next = NULL;
+  timer->entry_assigned = NULL;
+  timer->output_assigned = NULL;
+
+  queuedpulse_ctx.queue.entries_bitmap &= ~(1u << entry_id_to_release);
+
+  queuedpulses_internal_tim_disable(timer);
+
+  if(entry) {
+    out = entry->output_assigned;
+    out->timer = timer;
+    out->queue_entry = entry;
+    timer->output_assigned = out;
+    timer->entry_assigned = entry;
+
+
+    psc = timer->prescaler_default;
+    prd = entry->pulse;
+
+    // TODO: do the diagnostics of late pulses with defined deadline
+
+    now = time_now_us();
+    diff = time_diff(now, entry->time);
+    if(diff + 1 >= prd) {
+      if(allowed_to_loop) {
+        err = E_AGAIN;
+      } else {
+        queuedpulses_internal_tim_enable(timer, 1, psc);
+      }
+    } else {
+      prd -= diff;
+      queuedpulses_internal_tim_enable(timer, prd, psc);
+    }
+
+  } else {
+    queuedpulse_ctx.timers_bitmap &= ~(1u << timer->id);
+  }
+
+  return err;
 }
 
 ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_delta_us_t pulse)
@@ -201,6 +231,8 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
 
   time_us_t now;
 
+  now = time_now_us();
+
   do {
     BREAK_IF_ACTION(output < 0 || output >= OUTPUTS_CHS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(pulse < 10, err = E_OK);
@@ -208,7 +240,6 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
 
     out = &queuedpulse_ctx.outputs[output];
 
-    now = time_now_us();
     prim = EnterCritical();
 
     BREAK_IF_ACTION(queuedpulse_ctx.queue.entries_bitmap == QUEUEDPULSE_ENTRIES_BITMAP_MAX, (ExitCritical(prim), err = E_OVERFLOW));
@@ -259,8 +290,8 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
         }
       }
 
-      queuedpulse_ctx.queue.entries_bitmap |= 1 << entry->id;
-      queuedpulse_ctx.timers_bitmap |= 1 << timer->id;
+      queuedpulse_ctx.queue.entries_bitmap |= 1u << entry->id;
+      queuedpulse_ctx.timers_bitmap |= 1u << timer->id;
       entry->value_on = value_on;
       if(out->value_cur != value_on) {
         err = output_set_value(out->id, value_on);
@@ -311,7 +342,7 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
       BREAK_IF_ACTION(index >= QUEUEDPULSE_QUEUE_ENTRIES, (ExitCritical(prim), err = E_FAULT));
 
       entry = &queuedpulse_ctx.queue.entries[index];
-      queuedpulse_ctx.queue.entries_bitmap |= 1 << entry->id;
+      queuedpulse_ctx.queue.entries_bitmap |= 1u << entry->id;
 
       entry_temp_next = timer->entry_assigned;
       do {

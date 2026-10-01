@@ -56,7 +56,7 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_diff(time_us_t a, time_us_t 
   if(a >= b) {
     retval = a - b;
   } else {
-    retval = (g_time_mask - b) + a;
+    retval = (g_time_mask - b) + a + 1;
   }
 
   return retval;
@@ -69,7 +69,7 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_tick_t time_tick_diff(time_tick_t a, t
   if(a >= b) {
     retval = a - b;
   } else {
-    retval = (g_tick_mask - b) + a;
+    retval = (g_tick_mask - b) + a + 1;
   }
 
   return retval;
@@ -120,7 +120,7 @@ ITCM_FUNC OPTIMIZE_FAST void time_msmt_start_nested_protected(time_msmnt_item_np
   uint32_t prim = EnterCritical();
   uint32_t bitmap = time_msmnt_nested_protection_ctx.bitmap;
   uint32_t pos = 32 - __CLZ(bitmap);
-  uint32_t mask = 1 << (pos);
+  uint32_t mask = 1u << (pos);
 
   bitmap |= mask;
   item->bitmap_mask = mask;

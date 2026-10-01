@@ -24,6 +24,7 @@ ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polli
         if(interface->func_if_periodic_fast) {
           interface->func_if_periodic_fast(interface->id, deltatime, interface->usrdata);
         }
+        interface->time_fast_last = now;
       }
     } else if(polling_mode == INPUT_POLLING_MODE_SLOW) {
       for(int i = 0; i < ctx->ifs_count; i++) {
@@ -32,6 +33,7 @@ ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polli
         if(interface->func_if_periodic_slow) {
           interface->func_if_periodic_slow(interface->id, deltatime, interface->usrdata);
         }
+        interface->time_slow_last = now;
       }
     } else if(polling_mode == INPUT_POLLING_MODE_MAIN) {
       for(int i = 0; i < ctx->ifs_count; i++) {
@@ -40,6 +42,7 @@ ITCM_FUNC void inputs_internal_loop(input_ctx_t *ctx, input_polling_mode_t polli
         if(interface->func_if_periodic_main) {
           interface->func_if_periodic_main(interface->id, deltatime, interface->usrdata);
         }
+        interface->time_main_last = now;
       }
     }
 

@@ -225,6 +225,7 @@ typedef enum
   OBD2_RESPONSE_SERVICE_NOT_SUPPORTED                         = 0x11,  // Service not supported
   OBD2_RESPONSE_SUBFUNCTION_NOT_SUPPORTED                     = 0x12,  // Sub-function not supported
   OBD2_RESPONSE_INVALID_MESSAGE_LENGTH_OR_FORMAT              = 0x13,  // Invalid message length or format
+  OBD2_RESPONSE_RESPONSE_TOO_LONG                             = 0x14,  // Response is too long
   OBD2_RESPONSE_REQUEST_OUT_OF_RANGE                          = 0x31,  // Parameter or DID out of range
 
   OBD2_RESPONSE_REQUEST_CORRECTLY_RECEIVED_RESPONSE_PENDING   = 0x78,  // ECU accepted request but processing is pending (Response Pending)
@@ -232,17 +233,17 @@ typedef enum
 
 typedef enum
 {
-  OBD2_MON_MISFIRE            = 1 << 0,
-  OBD2_MON_FUEL_SYSTEM        = 1 << 1,
-  OBD2_MON_COMPONENTS         = 1 << 2,
-  OBD2_MON_CATALYST           = 1 << 3,
-  OBD2_MON_HEATED_CATALYST    = 1 << 4,
-  OBD2_MON_EVAP_SYSTEM        = 1 << 5,
-  OBD2_MON_SECONDARY_AIR      = 1 << 6,
-  OBD2_MON_AC_REFRIGERANT     = 1 << 7,
-  OBD2_MON_O2_SENSOR          = 1 << 8,
-  OBD2_MON_O2_HEATER          = 1 << 9,
-  OBD2_MON_EGR_SYSTEM         = 1 << 10
+  OBD2_MON_MISFIRE            = 1u << 0,
+  OBD2_MON_FUEL_SYSTEM        = 1u << 1,
+  OBD2_MON_COMPONENTS         = 1u << 2,
+  OBD2_MON_CATALYST           = 1u << 3,
+  OBD2_MON_HEATED_CATALYST    = 1u << 4,
+  OBD2_MON_EVAP_SYSTEM        = 1u << 5,
+  OBD2_MON_SECONDARY_AIR      = 1u << 6,
+  OBD2_MON_AC_REFRIGERANT     = 1u << 7,
+  OBD2_MON_O2_SENSOR          = 1u << 8,
+  OBD2_MON_O2_HEATER          = 1u << 9,
+  OBD2_MON_EGR_SYSTEM         = 1u << 10
 }obd2_monitor_bit_t;
 
 typedef struct

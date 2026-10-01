@@ -34,8 +34,6 @@ static error_t isotp_fsm_tx_cf(isotp_ctx_t *ctx);
 
 void isotp_fsm(isotp_ctx_t *ctx)
 {
-  static isotp_state_t state_prev = ISOTP_STATE_IDLE;
-
   error_t err;
 
   while(true) {
@@ -72,8 +70,8 @@ void isotp_fsm(isotp_ctx_t *ctx)
         break;
     }
 
-    if(state_prev != ctx->state) {
-      state_prev = ctx->state;
+    if(ctx->state_prev != ctx->state) {
+      ctx->state_prev = ctx->state;
       ctx->state_time = time_now_us();
     }
 
@@ -151,7 +149,10 @@ static error_t isotp_fsm_rx_sf_ff(isotp_ctx_t *ctx)
       datalen = frame_rx->payload[0] & ISOTP_SF_FF_DATALEN_MASK;
       datalen <<= 8;
       datalen |= frame_rx->payload[1];
-      if(datalen <= ISOTP_PAYLOAD_LEN_MAX) {
+      if(datalen <= ISOTP_FRAME_LEN - 1) {
+        ctx->state = ISOTP_STATE_RX_FC_OVF;
+        err = E_AGAIN;
+      } else if(datalen <= ISOTP_PAYLOAD_LEN_MAX) {
         framelen = ISOTP_FRAME_LEN - 2;
         fc->sn = 1;
         fc->pos = framelen;

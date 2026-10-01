@@ -301,10 +301,10 @@ error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data)
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->configured == false, err = E_NOTRDY);
+    BREAK_IF_ACTION(ctx->data_temp_valid == false, err = E_AGAIN);
+    BREAK_IF_ACTION(ctx->data_lambda_valid == false, err = E_AGAIN);
 
     memcpy(data, &ctx->data, sizeof(cj125_data_t));
-
-    BREAK_IF_ACTION(ctx->data_temp_valid && ctx->data_lambda_valid, err = E_AGAIN);
 
   } while(0);
 
@@ -334,7 +334,7 @@ error_t cj125_get_diag(cj125_ctx_t *ctx, cj125_diag_t *diag)
   do {
     BREAK_IF_ACTION(ctx == NULL || diag == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->diag_valid, err = E_AGAIN);
+    BREAK_IF_ACTION(ctx->diag_valid == false, err = E_AGAIN);
 
     memcpy(diag, &ctx->diag, sizeof(cj125_diag_t));
 

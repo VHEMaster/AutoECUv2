@@ -90,6 +90,7 @@ error_t isotp_data_write_downstream(isotp_ctx_t *ctx, const uint8_t *payload, ui
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(payload == NULL || length == 0, err = E_PARAM);
+    BREAK_IF_ACTION(length > ISOTP_PAYLOAD_LEN_MAX, err = E_PARAM);
 
     data = &ctx->data_downstream;
     BREAK_IF_ACTION(data->ready, err = E_AGAIN);

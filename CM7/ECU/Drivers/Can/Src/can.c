@@ -434,7 +434,7 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
       err = can_rx_get_msg(ctx, buffer_index);
       BREAK_IF(err != E_OK);
 
-      bitmask = 1 << buffer_index_rel;
+      bitmask = 1u << buffer_index_rel;
       if(buffers_l) {
         buffers_l &= ~bitmask;
         ctx->init.handle->Instance->NDAT1 = bitmask;

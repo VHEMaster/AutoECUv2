@@ -156,7 +156,7 @@ ITCM_FUNC error_t tle6240_ch_write(tle6240_ctx_t *ctx, uint8_t channel, bool val
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    ch_bit = 1 << channel;
+    ch_bit = 1u << channel;
 
     prim = EnterCritical();
     temp_value = ctx->output_state;
@@ -185,7 +185,7 @@ ITCM_FUNC error_t tle6240_ch_read(tle6240_ctx_t *ctx, uint8_t channel, bool *val
     BREAK_IF_ACTION(value == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    ch_bit = 1 << channel;
+    ch_bit = 1u << channel;
 
     temp_value = ctx->output_state;
     temp_value &= ch_bit;
