@@ -23,6 +23,7 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
   output_id_t pin;
   error_t err;
   time_delta_us_t delta;
+  bool start_late;
 
   // TODO: do the diagnostics of lateness
 
@@ -39,8 +40,10 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
     now = time_now_us();
     delta = time_diff(pulse_start, now);
     if(delta < time_mask_2) {
+      start_late = false;
       err = queuedpulses_enqueue_ex(pin, delta, CORE_OUTPUT_INACTIVE);
     } else {
+      start_late = true;
       err = output_set_value(pin, CORE_OUTPUT_ACTIVE);
     }
     if(ret == E_OK && err != E_OK) {
@@ -50,9 +53,9 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
     }
 
     err = E_OK;
-    if(late_policy == TIMING_LATE_POLICY_KEEP_WIDTH) {
+    if(start_late == false || late_policy == TIMING_LATE_POLICY_KEEP_WIDTH) {
       delta = time_diff(pulse_end, pulse_start);
-    } else if(late_policy == TIMING_LATE_POLICY_KEEP_END) {
+    } else {
       now = time_now_us();
       delta = time_diff(pulse_end, now);
     }

@@ -191,9 +191,14 @@ error_t l9966_start_sc(l9966_ctx_t *ctx, const l9966_ctrl_sc_conf_t *cfg)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(cfg == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->digital_inputs_valid != true, err = E_AGAIN);
     BREAK_IF_ACTION(ctx->initialized == false || ctx->configured == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->sc_enabled == true, err = E_INVALACT);
+
+    ctx->sc_control.adc_mux = cfg->adc_mux;
+    ctx->sc_control.pu_div_sel = cfg->pu_div_sel;
+    ctx->sc_control.r_volt_sel = cfg->r_volt_sel;
 
     ctx->sc_enabled = true;
 

@@ -16,6 +16,7 @@
 #define QUEUEDPULSE_TIMERS              4u
 #define QUEUEDPULSE_QUEUE_ENTRIES       32u
 #define QUEUEDPULSE_MAX_EVENTS_PER_IRQ  8u
+#define QUEUEDPULSE_MINIMUM_PULSE_US    10u
 
 error_t queuedpulses_init(void);
 void queuedpulses_loop_main(void);

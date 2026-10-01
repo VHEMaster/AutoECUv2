@@ -51,6 +51,8 @@ ITCM_FUNC error_t l9966_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *data)
         }
       } else if(err == E_BUSY) {
         err = E_AGAIN;
+      } else if(err != E_AGAIN) {
+        ctx->spi_busy = false;
       }
     }
     break;
@@ -102,6 +104,8 @@ ITCM_FUNC error_t l9966_reg_write(l9966_ctx_t *ctx, uint8_t reg, uint16_t data)
         }
       } else if(err == E_BUSY) {
         err = E_AGAIN;
+      } else if(err != E_AGAIN) {
+        ctx->spi_busy = false;
       }
     }
     break;
@@ -164,6 +168,8 @@ ITCM_FUNC error_t l9966_burst_reg_read(l9966_ctx_t *ctx, uint8_t reg, uint16_t *
         }
       } else if(err == E_BUSY) {
         err = E_AGAIN;
+      } else if(err != E_AGAIN) {
+        ctx->spi_busy = false;
       }
     }
     break;
@@ -226,6 +232,8 @@ ITCM_FUNC error_t l9966_burst_reg_write(l9966_ctx_t *ctx, uint8_t reg, const uin
         }
       } else if(err == E_BUSY) {
         err = E_AGAIN;
+      } else if(err != E_AGAIN) {
+        ctx->spi_busy = false;
       }
     }
     break;

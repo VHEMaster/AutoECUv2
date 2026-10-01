@@ -298,7 +298,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
           // TODO: IMPLEMENT THAT FEATURE
           if(group_config->enrichment_late_phase_mode > INJECTION_CONFIG_GROUP_LATE_PHASE_MODE_DISABLED) {
             ip_input = math_interpolate_input(crankshaft_rpm, group_config->enrichment_late_phase.input, group_config->enrichment_late_phase.items);
-            enrichment_late_phase_gr = math_interpolate_1d(ip_input, group_config->rpm_to_phase_add.output);
+            enrichment_late_phase_gr = math_interpolate_1d(ip_input, group_config->enrichment_late_phase.output);
           } else {
             enrichment_late_phase_gr = 0;
           }
@@ -442,7 +442,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
               injector_input_pressure_gr_b[b] += temp_val;
             }
             if(map_data_manifold_b[b].valid) {
-              temp_val = map_data_fuelramp_b[b].manifold_air_pressure;
+              temp_val = map_data_manifold_b[b].manifold_air_pressure;
               temp_val = CLAMP(temp_val,
                   group_config->performance_fuel_pressure_manifold_clamp_min,
                   group_config->performance_fuel_pressure_manifold_clamp_max);
@@ -676,7 +676,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
                       if(pulse_time_cy) {
                         time_to_activate = crankshaft_data->sensor_data.current.timestamp +
-                            (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
+                            lrintf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
                         time_to_inject = time_to_activate + pulse_time_cy;
 
                         err = timing_pulse_schedule(cy_config->output_pin,

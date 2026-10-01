@@ -432,7 +432,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx)
                     degrees_before_prepare = degrees_before_ignite_cur - signal_prepare_advance_gr;
                     if(degrees_before_prepare < 0.0f) {
                       time_to_saturate = crankshaft_data->sensor_data.current.timestamp +
-                          (signal_prepare_advance + degrees_before_prepare) * us_per_degree_pulsed;
+                          lrintf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
                       time_to_ignite = time_to_saturate + saturation_time;
 
                       if(input_allowed_b[bank_cy]) {

@@ -27,6 +27,10 @@ typedef enum {
 #define L9966_DIV_INTERNAL_VI5V   4.1f
 #define L9966_DIV_INTERNAL_VIX    21.0f
 
+#define L9966_DIV_INTERNAL_5V     4.0f
+#define L9966_DIV_INTERNAL_20V    16.0f
+#define L9966_DIV_INTERNAL_40V    32.0f
+
 typedef enum {
   L9966_CFG_CSC_CSS_FORCE0 = 0,
   L9966_CFG_CSC_CSS_CH1,

@@ -28,8 +28,21 @@ ITCM_FUNC static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
     switch(ctx->reset_fsm_state) {
       case L9966_RESET_CONDITION:
         if(ctx->reset_request == true && ctx->reset_errcode == E_AGAIN) {
+
           ctx->sqncr_cmd_ready_mask = 0;
           memset(ctx->sqncr_cmd_results, 0u, sizeof(ctx->sqncr_cmd_results));
+          ctx->initialized = false;
+          ctx->configured = false;
+
+          ctx->status_valid = false;
+          ctx->digital_inputs_valid = false;
+
+          ctx->sc_ready = false;
+          ctx->sc_enabled = false;
+          ctx->sc_enabled_accept = false;
+          memset(ctx->eu_enabled, 0u, sizeof(ctx->eu_enabled));
+          memset(ctx->eu_enabled_accept, 0u, sizeof(ctx->eu_enabled_accept));
+
           if(gpio_valid(&ctx->init.nrst_pin)) {
             ctx->reset_fsm_state = L9966_RESET_HARD_SET;
           } else {
@@ -136,12 +149,13 @@ ITCM_FUNC static error_t l9966_fsm_reset(l9966_ctx_t *ctx)
       case L9966_RESET_SOFT_VERSION_VERIFY:
         if(ctx->version.dev_id != L9966_DEV_ID) {
           ctx->reset_errcode = E_BADRESP;
+          ctx->version_valid = false;
         } else {
           ctx->reset_errcode = E_OK;
+          ctx->version_valid = true;
         }
         ctx->reset_fsm_state = L9966_RESET_CONDITION;
         ctx->sqncr_cmd_ready_mask = 0;
-        ctx->version_valid = true;
         ctx->initialized = true;
         err = E_OK;
         break;
@@ -409,32 +423,31 @@ ITCM_FUNC static error_t l9966_fsm_read_sqncr(l9966_ctx_t *ctx)
               result_voltage.data = ctx->fsm_rx_burst_payload[i];
               if(result_voltage.bits.NEW_RESULT_FLAG) {
                 ctx->sqncr_cmd_results_raw[i] = result_voltage.bits.ADC_RESULT;
-                result_float = result_voltage.bits.ADC_RESULT;
+                result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f * 1.25f;
                 switch(i + 1) {
                   case L9966_CFG_SQNCR_PC_UBSW:
-                    result_float *= L9966_DIV_INTERNAL_UBSW * 0.0003f;
+                    result_float *= L9966_DIV_INTERNAL_UBSW;
                     break;
                   case L9966_CFG_SQNCR_PC_VI5V:
-                    result_float *= L9966_DIV_INTERNAL_VI5V * 0.0003f;
+                    result_float *= L9966_DIV_INTERNAL_VI5V;
                     break;
                   case L9966_CFG_SQNCR_PC_VIX:
-                    result_float *= L9966_DIV_INTERNAL_VIX * 0.0003f;
+                    result_float *= L9966_DIV_INTERNAL_VIX;
                     break;
                   default:
                     switch(sqncr_cmd->pu_div_sel) {
                       case L9966_CFG_SQNCR_CMD_DIV_5V:
-                        result_float *= 0.00122f;
+                        result_float *= L9966_DIV_INTERNAL_5V;
                         break;
                       case L9966_CFG_SQNCR_CMD_DIV_20V:
-                        result_float *= 0.005f;
+                        result_float *= L9966_DIV_INTERNAL_20V;
                         break;
                       case L9966_CFG_SQNCR_CMD_DIV_40V:
-                        result_float *= 0.010f;
+                        result_float *= L9966_DIV_INTERNAL_40V;
                         break;
-                      case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                        result_float *= 0.0003f;
                       default:
                         break;
+
                     }
                     break;
                 }
@@ -516,30 +529,28 @@ ITCM_FUNC static error_t l9966_fsm_read_sc(l9966_ctx_t *ctx)
             result_float = (float)result_resistor.bits.ADC_RESULT * 0.00048828125f * resistor;
           } else if(ctx->sc_control.r_volt_sel == L9966_CTRL_SC_RVM_VOLTAGE) {
             result_voltage.data = ctx->fsm_rx_payload;
-            result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f;
-            switch(ctx->sc_control.adc_mux + 1) {
+            result_float = result_voltage.bits.ADC_RESULT * 0.000244140625f * 1.25f;
+            switch(ctx->sc_control.adc_mux) {
               case L9966_CFG_SQNCR_PC_UBSW:
-                result_float *= L9966_DIV_INTERNAL_UBSW * 1.25f;
+                result_float *= L9966_DIV_INTERNAL_UBSW;
                 break;
               case L9966_CFG_SQNCR_PC_VI5V:
-                result_float *= L9966_DIV_INTERNAL_VI5V * 1.25f;
+                result_float *= L9966_DIV_INTERNAL_VI5V;
                 break;
               case L9966_CFG_SQNCR_PC_VIX:
-                result_float *= L9966_DIV_INTERNAL_VIX * 1.25f;
+                result_float *= L9966_DIV_INTERNAL_VIX;
                 break;
               default:
                 switch(ctx->sc_control.pu_div_sel) {
                   case L9966_CFG_SQNCR_CMD_DIV_5V:
-                    result_float *= 5.0f;
+                    result_float *= L9966_DIV_INTERNAL_5V;
                     break;
                   case L9966_CFG_SQNCR_CMD_DIV_20V:
-                    result_float *= 20.0f;
+                    result_float *= L9966_DIV_INTERNAL_20V;
                     break;
                   case L9966_CFG_SQNCR_CMD_DIV_40V:
-                    result_float *= 40.0f;
+                    result_float *= L9966_DIV_INTERNAL_40V;
                     break;
-                  case L9966_CFG_SQNCR_CMD_DIV_1V25:
-                    result_float *= 1.25f;
                   default:
                     break;
                 }
@@ -575,7 +586,8 @@ ITCM_FUNC static error_t l9966_fsm_sc_maintain(l9966_ctx_t *ctx)
       case L9966_MAINTAIN_SC_CONDITION:
         if(ctx->initialized && ctx->configured) {
           if(ctx->sc_enabled == true && ctx->sc_enabled_accept == false) {
-            ctx->sc_enabled = ctx->sc_enabled_accept;
+            ctx->sc_enabled_accept = ctx->sc_enabled;
+            ctx->sc_ready = false;
             ctx->sc_int = false;
             ctx->sc_maintain_fsm_state = L9966_MAINTAIN_SC_SPI_WRITE_REQ;
 
