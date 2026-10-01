@@ -55,21 +55,66 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     },
     */
 
-    .temp_ref_resistance_override = false,
-    .temp_ref_resistance = 300.0f,
-    .temp_ref_res_max_deviation = 50.0f,
+    .staged_nunited = CJ125_CONFIG_STAGED_STAGED,
+    .config_staged = {
+        {
+            .reg_enscun = true,
+            .reg_set_dia_q = false,
+            .pa_enabled = false,
+            .pump_ref_current = CJ125_CONFIG_PRC_OFF,
+        }, //CJ125_CONFIG_STAGED_STAGE_IDLE
+        {
+            .reg_enscun = true,
+            .reg_set_dia_q = false,
+            .pa_enabled = false,
+            .pump_ref_current = CJ125_CONFIG_PRC_OFF,
+        }, //CJ125_CONFIG_STAGED_STAGE_PREHEAT
+        {
+            .reg_enscun = false,
+            .reg_set_dia_q = false,
+            .pa_enabled = false,
+            .pump_ref_current = CJ125_CONFIG_PRC_OFF,
+        }, //CJ125_CONFIG_STAGED_STAGE_HEATUP_INITIAL
+        {
+            .reg_enscun = false,
+            .reg_set_dia_q = false,
+            .pa_enabled = false,
+            .pump_ref_current = CJ125_CONFIG_PRC_20UA,
+        }, //CJ125_CONFIG_STAGED_STAGE_HEATUP_FINAL
+        {
+            .reg_enscun = false,
+            .reg_set_dia_q = false,
+            .pa_enabled = true,
+            .pump_ref_current = CJ125_CONFIG_PRC_20UA,
+        }, //CJ125_CONFIG_STAGED_STAGE_OPERATING
+    },
+    .config_united = {
+        .reg_enscun = false,
+        .reg_set_dia_q = false,
+        .pa_enabled = true,
+        .pump_ref_current = CJ125_CONFIG_PRC_20UA,
+    },
+
+    .heated_value_thr_source = CJ125_CONFIG_HEATED_TEMP_THR_SRC_RESISTANCE,
+    .heated_value_thr_override = false,
+
+    .heatup_ref_resistance_initial = 1000.0f,
+    .heatup_ref_temperature_initial = 630.0f,
+
+    .heatup_ref_resistance_cplt = 300.0f,
+    .heatup_ref_temperature_cplt = 780.0f,
+
+    .calibration_ref_resistance = 300.0f,
+    .calibration_ref_res_max_deviation = 50.0f,
+
     .shunt_resistance = 62.0f,
     .pushpull_resistance = 47000.0f,
     .ampfactor = CJ125_AF_17,
-    .pump_ref_current = CJ125_CONFIG_PRC_20UA,
 
     // LSU ADV: disable or change to 1% per 100°C
     .lambda_temperature_correction = false,
     .temperature_correction_value = 0.0004f,
-    .temperature_reference = 780.0f,
-
-    .reg_enscun = false,
-    .reg_set_dia_q = false,
+    .temperature_correction_reference = 780.0f,
 
     .heater_preheat_voltage = 2.0f,
     .heater_initial_voltage = 5.0f,

@@ -19,6 +19,7 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
   error_t err;
   time_us_t now;
   uint32_t prim;
+  float inv;
 
   while(true) {
     err = E_AGAIN;
@@ -38,7 +39,10 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
           ctx->heatup_type = CJ125_HEATUP_TYPE_OFF;
           ctx->initialized = false;
           ctx->configured = false;
+          ctx->live_init1_ready = false;
+          ctx->live_init2_ready = false;
           ctx->data.heater_voltage = 0;
+          ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_IDLE;
           ctx->data.operating_status = CJ125_OPERATING_STATUS_IDLE;
           ctx->diag_timestamp = now;
           err = E_AGAIN;
@@ -96,9 +100,11 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
           ctx->calib_init1_byte = ctx->response.bytes[1];
           ctx->reset_fsm = CJ125_RESET_CALIB_INIT_WRITE;
           ctx->regs.init1.data = ctx->calib_init1_byte;
-          ctx->regs.init1.bits.la = CJ125_LA_RA_CALIBRATE;
-          ctx->regs.init1.bits.ra = CJ125_LA_RA_CALIBRATE;
+          ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
+          ctx->regs.init1.bits.la = CJ125_LA_CALIBRATE;
+          ctx->regs.init1.bits.ra = CJ125_RA_CALIBRATE;
           ctx->data.ampfactor = ctx->regs.init1.bits.vl;
+
           ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
           ctx->request.bytes[1] = ctx->regs.init1.data;
           err = E_AGAIN;
@@ -131,8 +137,10 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
             time_diff(now, ctx->calib_timestamp) >= CJ125_CALIBRATION_MIN_PERIOD_US) {
           ctx->reset_fsm = CJ125_RESET_CALIB_INIT_RESTORE;
           ctx->regs.init1.data = ctx->calib_init1_byte;
-          ctx->regs.init1.bits.la = CJ125_LA_RA_NORMAL;
-          ctx->regs.init1.bits.ra = CJ125_LA_RA_NORMAL;
+          ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
+          ctx->regs.init1.bits.la = CJ125_LA_NORMAL;
+          ctx->regs.init1.bits.ra = CJ125_RA_NORMAL;
+
           ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
           ctx->request.bytes[1] = ctx->regs.init1.data;
           err = E_AGAIN;
@@ -180,9 +188,10 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
         break;
       case CJ125_RESET_CALIB_CALCULATE:
         prim = EnterCritical();
-        ctx->calib_ua_voltage /= ctx->calib_samples;
-        ctx->calib_ur_voltage /= ctx->calib_samples;
-        ctx->calib_ref_voltage /= ctx->calib_samples;
+        inv = 1.0f / ctx->calib_samples;
+        ctx->calib_ua_voltage *= inv;
+        ctx->calib_ur_voltage *= inv;
+        ctx->calib_ref_voltage *= inv;
 
         ctx->data.ua_voltage = ctx->calib_ua_voltage;
         ctx->data.ur_voltage = ctx->calib_ur_voltage;
@@ -192,6 +201,8 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
 
         err = cj125_update_data(ctx, true);
         if(err == E_OK) {
+          err = E_OK;
+
           ctx->data.heat_ref_voltage = ctx->calib_ur_voltage;
           ctx->data.heat_ref_temp = ctx->data.temp_value;
           ctx->data.heat_ref_resistance = ctx->data.heat_resistance;
@@ -199,10 +210,16 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
           ctx->data.lambda_ref_voltage = ctx->calib_ua_voltage;
           ctx->data.lambda_radj = ctx->calib_ua_voltage / ctx->calib_ref_voltage;
 
-          err = E_OK;
+          if(ctx->data.heat_ref_resistance < ctx->config.calibration_ref_resistance - ctx->config.calibration_ref_res_max_deviation ||
+              ctx->data.heat_ref_resistance > ctx->config.calibration_ref_resistance + ctx->config.calibration_ref_res_max_deviation) {
+            err = E_BADVALUE;
+          }
+
           ctx->reset_fsm = CJ125_RESET_CONDITION;
           ctx->reset_errcode = err;
-          ctx->initialized = true;
+          if(err == E_OK) {
+            ctx->initialized = true;
+          }
         } else {
           ctx->reset_fsm = CJ125_RESET_CONDITION;
           ctx->reset_errcode = err;
@@ -279,17 +296,25 @@ ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
           if(ctx->config.enabled) {
             ctx->regs.init1.data = 0;
             ctx->regs.init1.bits.vl = ctx->config.ampfactor;
-            ctx->regs.init1.bits.la = CJ125_LA_RA_NORMAL;
+            ctx->regs.init1.bits.la = CJ125_LA_NORMAL;
             ctx->regs.init1.bits.en_f3k = 1;
-            ctx->regs.init1.bits.ra = CJ125_LA_RA_NORMAL;
-            ctx->regs.init1.bits.pa = 0;
+            ctx->regs.init1.bits.ra = CJ125_RA_NORMAL;
+            ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
             ctx->regs.init1.bits.en_hold = 1;
 
             ctx->regs.init2.data = 0;
-            ctx->regs.init2.bits.pr = ctx->config.pump_ref_current;
-            ctx->regs.init2.bits.enscun = ctx->config.reg_enscun != false;
-            ctx->regs.init2.bits.set_dia_q = ctx->config.reg_set_dia_q != false;
+            ctx->regs.init2.bits.pr = 0;
+            ctx->regs.init2.bits.enscun = 0;
+            ctx->regs.init2.bits.set_dia_q = 0;
             ctx->regs.init2.bits.sreset = 0;
+
+            ctx->data.regs.init1.data = ctx->regs.init1.data;
+            ctx->data.regs.init2.data = ctx->regs.init2.data;
+            ctx->live_regs_temp.init1.data = ctx->data.regs.init1.data;
+            ctx->live_regs_temp.init2.data = ctx->data.regs.init2.data;
+
+            ctx->live_init1_ready = false;
+            ctx->live_init2_ready = false;
 
             ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
             ctx->request.bytes[1] = ctx->regs.init1.data;
@@ -340,6 +365,89 @@ ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
   return err;
 }
 
+ITCM_FUNC static error_t cj125_fsm_live_config(cj125_ctx_t *ctx)
+{
+  error_t err;
+
+  while(true) {
+    err = E_AGAIN;
+
+    switch(ctx->live_config_fsm) {
+      case CJ125_LIVE_CONFIG_CONDITION:
+        if(ctx->ready == true && ctx->initialized == true && ctx->configured == true) {
+
+          ctx->regs.init2.bits.sreset = 0;
+          ctx->data.regs.init2.bits.sreset = 0;
+
+          if(ctx->regs.init1.data != ctx->data.regs.init1.data) {
+            ctx->regs.init1.data = ctx->data.regs.init1.data;
+            ctx->live_init1_ready = true;
+          }
+
+          if(ctx->regs.init2.data != ctx->data.regs.init1.data) {
+            ctx->regs.init2.data = ctx->data.regs.init1.data;
+            ctx->live_init2_ready = true;
+          }
+
+          if(ctx->live_init1_ready) {
+            ctx->live_init1_ready = false;
+            ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
+            ctx->request.bytes[1] = ctx->regs.init1.data;
+            ctx->live_config_fsm = CJ125_LIVE_CONFIG_REQUEST_INIT1;
+            err = E_AGAIN;
+            continue;
+          } else if(ctx->live_init2_ready) {
+            ctx->live_init2_ready = false;
+            ctx->request.bytes[0] = CJ125_REG_WR_INIT2;
+            ctx->request.bytes[1] = ctx->regs.init2.data;
+            ctx->live_config_fsm = CJ125_LIVE_CONFIG_REQUEST_INIT2;
+            err = E_AGAIN;
+            continue;
+          } else {
+            err = E_OK;
+          }
+        } else {
+          err = E_OK;
+        }
+        break;
+      case CJ125_CONFIG_REQUEST_INIT1:
+        err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
+        if(err == E_OK) {
+          if(ctx->live_init2_ready) {
+            ctx->live_init2_ready = false;
+            ctx->request.bytes[0] = CJ125_REG_WR_INIT2;
+            ctx->request.bytes[1] = ctx->regs.init2.data;
+            ctx->live_config_fsm = CJ125_LIVE_CONFIG_REQUEST_INIT2;
+            err = E_AGAIN;
+            continue;
+          } else {
+            ctx->live_config_fsm = CJ125_LIVE_CONFIG_CONDITION;
+            err = E_OK;
+          }
+        } else if(err != E_AGAIN) {
+          ctx->live_config_fsm = CJ125_LIVE_CONFIG_CONDITION;
+          err = E_OK;
+        }
+        break;
+      case CJ125_LIVE_CONFIG_REQUEST_INIT2:
+        err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
+        if(err == E_OK) {
+          err = E_OK;
+          ctx->live_config_fsm = CJ125_LIVE_CONFIG_CONDITION;
+        } else if(err != E_AGAIN) {
+          ctx->live_config_fsm = CJ125_LIVE_CONFIG_CONDITION;
+          err = E_OK;
+        }
+        break;
+      default:
+        break;
+    }
+    break;
+  }
+
+  return err;
+}
+
 ITCM_FUNC error_t cj125_fsm(cj125_ctx_t *ctx)
 {
   error_t err;
@@ -356,6 +464,9 @@ ITCM_FUNC error_t cj125_fsm(cj125_ctx_t *ctx)
         break;
       case CJ125_PROCESS_CONFIGURE:
         err = cj125_fsm_configure(ctx);
+        break;
+      case CJ125_PROCESS_LIVE_CONFIG:
+        err = cj125_fsm_live_config(ctx);
         break;
       default:
         break;

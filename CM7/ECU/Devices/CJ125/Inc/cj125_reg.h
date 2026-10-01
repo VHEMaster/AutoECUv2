@@ -21,8 +21,18 @@
 #define CJ125_REG_RD_INIT2      (0x7E)
 #define CJ125_REG_WR_INIT2      (0x5A)
 
-#define CJ125_LA_RA_NORMAL      (0)
-#define CJ125_LA_RA_CALIBRATE   (1)
+#define CJ125_LA_NORMAL         (0)
+#define CJ125_LA_CALIBRATE      (1)
+
+#define CJ125_PA_NORMAL         (0)
+#define CJ125_PA_HOLD           (1)
+
+#define CJ125_RA_NORMAL         (0)
+#define CJ125_RA_CALIBRATE      (1)
+
+#define CJ125_ENSCUN_DIS        (0)
+#define CJ125_ENSCUN_EN         (1)
+
 #define CJ125_SRESET_SET        (1)
 
 typedef union {

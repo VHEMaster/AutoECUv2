@@ -67,6 +67,7 @@ typedef enum {
   CJ125_PROCESS_CONFIGURE,
   CJ125_PROCESS_DIAG,
   CJ125_PROCESS_CALIBRATE,
+  CJ125_PROCESS_LIVE_CONFIG,
   CJ125_PROCESS_MAX,
 }cj125_process_fsm_t;
 
@@ -74,7 +75,7 @@ typedef enum {
   CJ125_HEATER_RESET = 0,
   CJ125_HEATER_PREHEAT,
   CJ125_HEATER_HEATUP,
-  CJ125_HEATER_HEATUP_WAITING,
+  CJ125_HEATER_HEATUP_WAITING_CPLT,
   CJ125_HEATER_OPERATING,
   CJ125_HEATER_ERROR,
   CJ125_HEATER_MAX,
@@ -105,6 +106,13 @@ typedef enum {
   CJ125_CONFIG_REQUEST_INIT2,
   CJ125_CONFIG_MAX,
 }cj125_config_fsm_t;
+
+typedef enum {
+  CJ125_LIVE_CONFIG_CONDITION = 0,
+  CJ125_LIVE_CONFIG_REQUEST_INIT1,
+  CJ125_LIVE_CONFIG_REQUEST_INIT2,
+  CJ125_LIVE_CONFIG_MAX,
+}cj125_live_config_fsm_t;
 
 typedef struct cj125_ctx_tag cj125_ctx_t;
 typedef void (*cj125_cb_t)(cj125_ctx_t *ctx, void *usrdata);
@@ -144,6 +152,13 @@ typedef struct {
 }cj125_heater_t;
 
 typedef struct {
+    cj125_reg_init1_t init1;
+    cj125_reg_init2_t init2;
+}cj125_data_regs_t;
+
+typedef struct {
+    cj125_data_regs_t regs;
+
     float lambda_value;
     float temp_value;
 
@@ -167,6 +182,7 @@ typedef struct {
     float ua_voltage;
 
     cj125_operating_status_t operating_status;
+    cj125_config_staged_stage_t staged_stage;
 
 }cj125_data_t;
 
@@ -216,6 +232,9 @@ typedef struct cj125_ctx_tag {
     cj125_reset_fsm_t reset_fsm;
     cj125_diag_fsm_t diag_fsm;
     cj125_config_fsm_t config_fsm;
+    cj125_live_config_fsm_t live_config_fsm;
+
+    cj125_data_regs_t live_regs_temp;
 
     cj125_payload_t request;
     cj125_payload_t response;
@@ -232,6 +251,9 @@ typedef struct cj125_ctx_tag {
     bool data_lambda_valid;
     bool data_temp_valid;
     bool diag_valid;
+
+    bool live_init1_ready;
+    bool live_init2_ready;
 
 }cj125_ctx_t;
 

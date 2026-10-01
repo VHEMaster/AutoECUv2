@@ -199,10 +199,25 @@ error_t cj125_configure(cj125_ctx_t *ctx, const cj125_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->curr_to_lambda_relation.items == 0 || config->curr_to_lambda_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->res_to_temp_relation.items == 0 || config->res_to_temp_relation.items >= CJ125_RELATION_ITEMS_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(config->pump_ref_current >= CJ125_CONFIG_PRC_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->ampfactor >= CJ125_AF_MAX, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
+
+    BREAK_IF_ACTION(config->heated_value_thr_source >= CJ125_CONFIG_HEATED_TEMP_THR_SRC_COUNT, err = E_PARAM);
+    BREAK_IF_ACTION(config->heatup_ref_resistance_initial < config->heatup_ref_resistance_cplt, err = E_PARAM);
+    BREAK_IF_ACTION(config->heatup_ref_temperature_initial > config->heatup_ref_temperature_cplt, err = E_PARAM);
+
+    if(config->staged_nunited == CJ125_CONFIG_STAGED_UNITED) {
+      BREAK_IF_ACTION(config->config_united.pump_ref_current > CJ125_CONFIG_PRC_MAX, err = E_PARAM);
+    } else if(config->staged_nunited == CJ125_CONFIG_STAGED_STAGED) {
+      for(uint8_t i = 0; i < CJ125_CONFIG_STAGED_STAGE_COUNT; i++) {
+        BREAK_IF_ACTION(config->config_staged[i].pump_ref_current > CJ125_CONFIG_PRC_MAX, err = E_PARAM);
+      }
+      BREAK_IF(err != E_OK);
+    } else {
+      err = E_PARAM;
+      break;
+    }
 
     if(ctx->config_request == false) {
       if(&ctx->config != config) {

@@ -94,7 +94,7 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
 
       ctx->data.lambda_current = ua_volt_sub_vcc / (ctx->config.shunt_resistance * ampfactor) * 1000.0f;
       if(ctx->config.lambda_temperature_correction) {
-        ctx->data.lambda_current_tc = ctx->data.lambda_current / (1.0f + (ctx->config.temperature_correction_value * (ctx->data.temp_value - ctx->config.temperature_reference)));
+        ctx->data.lambda_current_tc = ctx->data.lambda_current / (1.0f + (ctx->config.temperature_correction_value * (ctx->data.temp_value - ctx->config.temperature_correction_reference)));
       } else {
         ctx->data.lambda_current_tc = ctx->data.lambda_current;
       }

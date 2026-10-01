@@ -39,27 +39,66 @@ typedef enum {
   CJ125_CONFIG_PRC_20UA = 2,
   CJ125_CONFIG_PRC_40UA = 4,
   CJ125_CONFIG_PRC_80UA = 8,
-  CJ125_CONFIG_PRC_MAX = 16
+  CJ125_CONFIG_PRC_MAX = 15
 }cj125_config_prc_t;
+
+typedef enum {
+  CJ125_CONFIG_HEATED_TEMP_THR_SRC_RESISTANCE = 0,
+  CJ125_CONFIG_HEATED_TEMP_THR_SRC_TEMPERATURE,
+  CJ125_CONFIG_HEATED_TEMP_THR_SRC_COUNT
+}cj125_config_heated_temp_thr_src_t;
+
+typedef enum {
+  CJ125_CONFIG_STAGED_UNITED = 0,
+  CJ125_CONFIG_STAGED_STAGED,
+  CJ125_CONFIG_STAGED_COUNT
+}cj125_config_staged_nunited_t;
+
+typedef enum {
+  CJ125_CONFIG_STAGED_STAGE_IDLE = 0,
+  CJ125_CONFIG_STAGED_STAGE_PREHEAT,
+  CJ125_CONFIG_STAGED_STAGE_HEATUP_INITIAL,
+  CJ125_CONFIG_STAGED_STAGE_HEATUP_FINAL,
+  CJ125_CONFIG_STAGED_STAGE_OPERATING,
+  CJ125_CONFIG_STAGED_STAGE_COUNT
+}cj125_config_staged_stage_t;
+
+typedef struct  {
+    bool reg_enscun;
+    bool reg_set_dia_q;
+    bool pa_enabled;
+    cj125_config_prc_t pump_ref_current;
+}cj125_config_stage_t;
 
 typedef struct {
     bool enabled;
 
     cj125_config_relation_t res_to_temp_relation;
     cj125_config_relation_t curr_to_lambda_relation;
-    bool temp_ref_resistance_override;
-    float temp_ref_resistance;
-    float temp_ref_res_max_deviation;
+
+    cj125_config_heated_temp_thr_src_t heated_value_thr_source;
+    bool heated_value_thr_override;
+
+    float heatup_ref_resistance_cplt;
+    float heatup_ref_temperature_cplt;
+
+    float heatup_ref_resistance_initial;
+    float heatup_ref_temperature_initial;
+
+    float calibration_ref_resistance;
+    float calibration_ref_res_max_deviation;
     float shunt_resistance;
     float pushpull_resistance;
     cj125_af_t ampfactor;
 
+    cj125_config_staged_nunited_t staged_nunited;
+    cj125_config_stage_t config_united;
+    cj125_config_stage_t config_staged[CJ125_CONFIG_STAGED_STAGE_COUNT];
+
+
     bool lambda_temperature_correction;
     float temperature_correction_value;
-    float temperature_reference;
-
-    bool reg_enscun;
-    bool reg_set_dia_q;
+    float temperature_correction_reference;
 
     float heater_preheat_voltage;
     float heater_initial_voltage;
@@ -71,7 +110,6 @@ typedef struct {
     math_pid_koffs_t heater_pid_koffs;
     time_us_t heater_pid_update_period;
 
-    cj125_config_prc_t pump_ref_current;
     time_delta_us_t pid_cb_period;
 
     uint32_t align ALIGNED_CACHE;
