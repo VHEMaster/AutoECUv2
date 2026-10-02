@@ -65,7 +65,7 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
     }
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
-    spi->busy = false;
+    __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
 
     spi->state = SPI_STATE_IDLE;
   } while(0);
@@ -257,11 +257,10 @@ ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_
   spi_t *spi = spi_slave->spi;
 
   do {
-    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-      spi->busy = true;
+    if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        spi->busy = false;
+        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
         break;
       }
 
@@ -345,11 +344,10 @@ ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t lengt
   spi_t *spi = spi_slave->spi;
 
   do {
-    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-      spi->busy = true;
+    if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        spi->busy = false;
+        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
         break;
       }
 
@@ -433,11 +431,10 @@ ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *t
   spi_t *spi = spi_slave->spi;
 
   do {
-    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-      spi->busy = true;
+    if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        spi->busy = false;
+        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
         break;
       }
 
@@ -464,11 +461,10 @@ ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *
   spi_t *spi = spi_slave->spi;
 
   do {
-    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-      spi->busy = true;
+    if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        spi->busy = false;
+        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
         break;
       }
 
@@ -497,11 +493,10 @@ ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *tran
   spi_t *spi = spi_slave->spi;
 
   do {
-    if(spi->state == SPI_STATE_IDLE && spi->busy == false) {
-      spi->busy = true;
+    if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        spi->busy = false;
+        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
         break;
       }
 

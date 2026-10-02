@@ -15,7 +15,7 @@ ITCM_FUNC INLINE void spi_private_slave_reset(spi_slave_t *spi_slave)
   spi->slave_own = NULL;
   spi->poll_scheduled = false;
   spi->errorcode = E_OK;
-  spi->busy = false;
+  ATOMIC_RELEASE(spi->busy, false);
 }
 
 ITCM_FUNC INLINE void spi_private_irq_handler(spi_t *spi, error_t errorcode)
