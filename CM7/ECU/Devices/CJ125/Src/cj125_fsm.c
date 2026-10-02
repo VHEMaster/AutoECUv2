@@ -291,10 +291,10 @@ ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
             ctx->regs.init1.data = 0;
             ctx->regs.init1.bits.vl = ctx->config.ampfactor;
             ctx->regs.init1.bits.la = CJ125_LA_NORMAL;
-            ctx->regs.init1.bits.en_f3k = 1;
+            ctx->regs.init1.bits.en_f3k = CJ125_F3K_EN;
             ctx->regs.init1.bits.ra = CJ125_RA_NORMAL;
             ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
-            ctx->regs.init1.bits.en_hold = 1;
+            ctx->regs.init1.bits.en_hold = CJ125_HOLD_EN;
 
             ctx->regs.init2.data = 0;
             ctx->regs.init2.bits.pr = 0;
@@ -328,6 +328,7 @@ ITCM_FUNC static error_t cj125_fsm_configure(cj125_ctx_t *ctx)
       case CJ125_CONFIG_REQUEST_INIT1:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
+          ctx->data.ampfactor = ctx->regs.init1.bits.vl;
           ctx->request.bytes[0] = CJ125_REG_WR_INIT2;
           ctx->request.bytes[1] = ctx->regs.init2.data;
           ctx->config_fsm = CJ125_CONFIG_REQUEST_INIT2;
@@ -407,6 +408,7 @@ ITCM_FUNC static error_t cj125_fsm_live_config(cj125_ctx_t *ctx)
       case CJ125_LIVE_CONFIG_REQUEST_INIT1:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
+          ctx->data.ampfactor = ctx->regs.init1.bits.vl;
           if(ctx->live_init2_ready) {
             ctx->live_init2_ready = false;
             ctx->request.bytes[0] = CJ125_REG_WR_INIT2;

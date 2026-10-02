@@ -48,7 +48,6 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     ctx->data.ampfactor = CJ125_AF_17;
-    ctx->ampfactor_req_data = ctx->data.ampfactor;
 
     ctx->ready = true;
 
@@ -230,37 +229,6 @@ error_t cj125_configure(cj125_ctx_t *ctx, const cj125_config_t *config)
     if(ctx->config_errcode != E_AGAIN) {
       err = ctx->config_errcode;
       ctx->config_request = false;
-    } else {
-      err = E_AGAIN;
-    }
-
-  } while(0);
-
-  return err;
-}
-
-error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->initialized == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ampfactor >= CJ125_AF_MAX, err = E_PARAM);
-
-    if(ctx->ampfactor_request == false) {
-      if(ctx->ampfactor_req_data != ampfactor) {
-        ctx->ampfactor_req_data = ampfactor;
-        ctx->ampfactor_errcode = E_AGAIN;
-        ctx->ampfactor_request = true;
-      } else {
-        err = E_OK;
-      }
-    }
-    if(ctx->ampfactor_errcode != E_AGAIN) {
-      err = ctx->ampfactor_errcode;
-      ctx->ampfactor_request = false;
     } else {
       err = E_AGAIN;
     }

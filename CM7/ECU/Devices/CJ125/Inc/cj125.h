@@ -217,9 +217,6 @@ typedef struct cj125_ctx_tag {
     float calib_ua_voltage;
     float calib_ref_voltage;
 
-    bool ampfactor_request;
-    error_t ampfactor_errcode;
-    cj125_af_t ampfactor_req_data;
     cj125_heatup_type_t heatup_type;
 
     cj125_data_t data;
@@ -264,7 +261,6 @@ void cj125_loop_fast(cj125_ctx_t *ctx);
 
 error_t cj125_reset(cj125_ctx_t *ctx);
 error_t cj125_configure(cj125_ctx_t *ctx, const cj125_config_t *config);
-error_t cj125_set_ampfactor(cj125_ctx_t *ctx, cj125_af_t ampfactor);
 
 error_t cj125_update_voltages(cj125_ctx_t *ctx, const cj125_voltages_t *voltages);
 error_t cj125_get_data(cj125_ctx_t *ctx, cj125_data_t *data);
