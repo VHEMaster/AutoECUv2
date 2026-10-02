@@ -66,7 +66,7 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
       .datasize = 8,
       .hspi = &hspi6,
       .mode = SPI_MODE_1,
-      .prescaler = SPI_BAUDRATEPRESCALER_16,
+      .prescaler = SPI_BAUDRATEPRESCALER_32,
       .timeout = 10 * TIME_US_IN_MS,
       .use_dma = false,
     },

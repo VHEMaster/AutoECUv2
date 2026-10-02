@@ -16,6 +16,7 @@
 #include "cj125_reg.h"
 #include "versioned_wbls.h"
 
+#define CJ125_SPI_DATASIZE                      (16u)
 #define CJ125_SPI_MODE                          (SPI_MODE_1)
 
 #define CJ125_DIAG_POLL_PERIOD_US               (20 * TIME_US_IN_MS)

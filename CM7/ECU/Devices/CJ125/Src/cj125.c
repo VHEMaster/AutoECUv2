@@ -38,7 +38,7 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
 
     math_pid_init(&ctx->heater_pid);
 
-    err = spi_slave_configure_datasize(ctx->init.spi_slave, 16);
+    err = spi_slave_configure_datasize(ctx->init.spi_slave, CJ125_SPI_DATASIZE);
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(ctx->init.spi_slave, CJ125_SPI_MODE);
