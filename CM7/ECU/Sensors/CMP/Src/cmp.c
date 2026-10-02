@@ -54,7 +54,7 @@ ITCM_FUNC static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
     }
     TIME_MSMT_STOP(&ctx->load_signal_cb);
 
-    if(data.validity >= CMP_DATA_VALID) {
+    if(ctx->data.validity >= CMP_DATA_VALID) {
       TIME_MSMT_START(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
