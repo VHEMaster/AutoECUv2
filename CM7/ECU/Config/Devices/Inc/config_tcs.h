@@ -21,6 +21,10 @@ typedef enum {
 }ecu_device_tcs_write_params_t;
 
 error_t ecu_devices_tcs_init(ecu_device_tcs_t instance, max31855_ctx_t *ctx);
+error_t ecu_devices_tcs_configure(ecu_device_tcs_t instance, const max31855_config_t *config);
+error_t ecu_devices_tcs_reset(ecu_device_tcs_t instance);
+error_t ecu_devices_tcs_get_default_config(ecu_device_tcs_t instance, max31855_config_t *config);
+
 error_t ecu_devices_tcs_get_data(ecu_device_tcs_t instance, max31855_data_t *data);
 error_t ecu_devices_tcs_get_diag(ecu_device_tcs_t instance, max31855_diag_t *diag);
 

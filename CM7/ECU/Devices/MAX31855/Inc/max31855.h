@@ -13,9 +13,9 @@
 #include "gpio.h"
 
 #include "spi.h"
+#include "versioned_tcs.h"
 
-#define MAX31855_DEFAULT_POLL_PERIOD_US   (100 * TIME_US_IN_MS)
-#define MAX31855_SPI_MODE           (SPI_MODE_0)
+#define MAX31855_SPI_MODE                 (SPI_MODE_0)
 
 typedef union {
     uint8_t byte;
@@ -30,6 +30,7 @@ typedef union {
 typedef struct {
     float temperature;
     float reference;
+    bool valid;
 }max31855_data_t;
 
 typedef union {
@@ -47,26 +48,26 @@ typedef union {
 }max31855_payload_t;
 
 typedef struct {
+    max31855_config_t config;
     spi_slave_t *spi_slave;
-    float reference;
-    float temperature;
-    max31855_payload_t data;
+    max31855_data_t data;
+    max31855_payload_t payload;
     uint32_t payload_rx;
     uint32_t payload_tx;
     time_us_t time_last;
     bool update_triggered;
-    time_delta_us_t poll_period;
     error_t comm_errorcode;
     bool comm_busy;
-    bool ready;
+    bool initialized;
+    bool configured;
 }max31855_ctx_t;
 
 error_t max31855_init(max31855_ctx_t *ctx, spi_slave_t *spi_slave);
+error_t max31855_configure(max31855_ctx_t *ctx, const max31855_config_t *config);
+error_t max31855_reset(max31855_ctx_t *ctx);
 void max31855_loop_main(max31855_ctx_t *ctx);
 void max31855_loop_slow(max31855_ctx_t *ctx);
 void max31855_loop_fast(max31855_ctx_t *ctx);
-
-error_t max31855_set_poll_period(max31855_ctx_t *ctx, time_delta_us_t period);
 
 error_t max31855_trigger_update(max31855_ctx_t *ctx);
 

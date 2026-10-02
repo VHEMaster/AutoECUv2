@@ -13,5 +13,6 @@
 #include "versioned_motor.h"
 #include "versioned_stepper.h"
 #include "versioned_wbls.h"
+#include "versioned_tcs.h"
 
 #endif /* CONFIG_VERSIONED_HARDWARE_INC_VERSIONED_DEVICES_H_ */

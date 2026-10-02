@@ -257,26 +257,24 @@ ITCM_FUNC error_t spi_private_slave_reconfigure(spi_slave_t *spi_slave)
 
   do {
     if(spi_slave->prescaler_configured && spi_cfg->prescaler != spi_slave->prescaler) {
-      err |= spi_configure_prescaler(spi_slave->spi, spi_slave->prescaler);
+      err = spi_configure_prescaler(spi_slave->spi, spi_slave->prescaler);
       config_change = true;
     }
+    BREAK_IF(err != E_OK);
     if(spi_slave->datasize_configured && spi_cfg->datasize != spi_slave->datasize) {
-      err |= spi_configure_datasize(spi_slave->spi, spi_slave->datasize);
+      err = spi_configure_datasize(spi_slave->spi, spi_slave->datasize);
       config_change = true;
     }
+    BREAK_IF(err != E_OK);
     if(spi_slave->mode_configured && spi_cfg->mode != spi_slave->mode) {
-      err |= spi_configure_mode(spi_slave->spi, spi_slave->mode);
+      err = spi_configure_mode(spi_slave->spi, spi_slave->mode);
       config_change = true;
     }
-    if(err != E_OK) {
-      break;
-    }
+    BREAK_IF(err != E_OK);
 
     if(config_change == true) {
-      err |= spi_configure_flush(spi_slave->spi);
-      if(err != E_OK) {
-        break;
-      }
+      err = spi_configure_flush(spi_slave->spi);
+      BREAK_IF(err != E_OK);
     }
   } while(0);
 

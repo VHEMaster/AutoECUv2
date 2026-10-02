@@ -114,6 +114,26 @@ static const ecu_config_device_config_t ecu_config_global_device_config[ECU_CONF
               },
           },
       }, //ECU_CONFIG_COMP_TYPE_WBLS
+      {
+          .device_type = ECU_DEVICE_TYPE_TCS,
+          .instances_count = ECU_DEVICE_TCS_MAX,
+          .configure_func = (ecu_config_configure_func_t)ecu_devices_tcs_configure,
+          .reset_func = (ecu_config_reset_func_t)ecu_devices_tcs_reset,
+          .generic = {
+              .flash_section_type = FLASH_SECTION_TYPE_HW_TCS,
+              .data_ptr = &ecu_config_global_engine.devs.tcs[0],
+              .data_size = sizeof(ecu_config_global_engine.devs.tcs[0]),
+              .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_devices_tcs_get_default_config,
+              .versions_count = TCS_CONFIG_VERSION_MAX,
+              .versions = {
+                  {
+                      .version = TCS_CONFIG_VERSION_V1,
+                      .size = sizeof(max31855_config_v1_t),
+                      .translate_func = NULL,
+                  }
+              },
+          },
+      }, //ECU_CONFIG_COMP_TYPE_TCS
 };
 
 static const ecu_config_device_config_t ecu_config_global_sensor_config[ECU_CONFIG_SENSOR_TYPE_ALL] = {
