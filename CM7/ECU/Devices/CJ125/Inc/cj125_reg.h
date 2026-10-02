@@ -33,6 +33,12 @@
 #define CJ125_ENSCUN_DIS        (0)
 #define CJ125_ENSCUN_EN         (1)
 
+#define CJ125_F3K_DIS           (0)
+#define CJ125_F3K_EN            (1)
+
+#define CJ125_HOLD_DIS          (0)
+#define CJ125_HOLD_EN           (1)
+
 #define CJ125_SRESET_SET        (1)
 
 typedef union {

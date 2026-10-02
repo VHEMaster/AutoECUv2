@@ -87,10 +87,9 @@ typedef enum {
   CJ125_RESET_IDENT,
   CJ125_RESET_CHECK,
   CJ125_RESET_REQUEST,
-  CJ125_RESET_CALIB_INIT_READ,
-  CJ125_RESET_CALIB_INIT_WRITE,
+  CJ125_RESET_CALIB_INIT_CALIBRATE,
   CJ125_RESET_CALIB_SAMPLE,
-  CJ125_RESET_CALIB_INIT_RESTORE,
+  CJ125_RESET_CALIB_INIT_NORMAL,
   CJ125_RESET_CALIB_CALCULATE,
   CJ125_RESET_MAX,
 }cj125_reset_fsm_t;
@@ -217,7 +216,6 @@ typedef struct cj125_ctx_tag {
     float calib_ur_voltage;
     float calib_ua_voltage;
     float calib_ref_voltage;
-    uint8_t calib_init1_byte;
 
     bool ampfactor_request;
     error_t ampfactor_errcode;

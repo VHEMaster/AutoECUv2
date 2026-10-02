@@ -82,8 +82,18 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
       case CJ125_RESET_REQUEST:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
-          ctx->reset_fsm = CJ125_RESET_CALIB_INIT_READ;
-          ctx->request.bytes[0] = CJ125_REG_RD_INIT1;
+          ctx->reset_fsm = CJ125_RESET_CALIB_INIT_CALIBRATE;
+          ctx->regs.init1.data = 0;
+          ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
+          ctx->regs.init1.bits.la = CJ125_LA_CALIBRATE;
+          ctx->regs.init1.bits.ra = CJ125_RA_CALIBRATE;
+          ctx->regs.init1.bits.en_f3k = CJ125_F3K_EN;
+          ctx->regs.init1.bits.en_hold = CJ125_HOLD_EN;
+          ctx->data.ampfactor = ctx->regs.init1.bits.vl;
+
+          ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
+          ctx->request.bytes[1] = ctx->regs.init1.data;
+
           ctx->data_lambda_valid = 0;
           ctx->data_temp_valid = 0;
           err = E_AGAIN;
@@ -94,27 +104,7 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
           ctx->reset_errcode = err;
         }
         break;
-      case CJ125_RESET_CALIB_INIT_READ:
-        err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
-        if(err == E_OK) {
-          ctx->calib_init1_byte = ctx->response.bytes[1];
-          ctx->reset_fsm = CJ125_RESET_CALIB_INIT_WRITE;
-          ctx->regs.init1.data = ctx->calib_init1_byte;
-          ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
-          ctx->regs.init1.bits.la = CJ125_LA_CALIBRATE;
-          ctx->regs.init1.bits.ra = CJ125_RA_CALIBRATE;
-          ctx->data.ampfactor = ctx->regs.init1.bits.vl;
-
-          ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
-          ctx->request.bytes[1] = ctx->regs.init1.data;
-          err = E_AGAIN;
-          continue;
-        } else if(err != E_AGAIN) {
-          ctx->reset_fsm = CJ125_RESET_CONDITION;
-          ctx->reset_errcode = err;
-        }
-        break;
-      case CJ125_RESET_CALIB_INIT_WRITE:
+      case CJ125_RESET_CALIB_INIT_CALIBRATE:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
           ctx->reset_fsm = CJ125_RESET_CALIB_SAMPLE;
@@ -135,11 +125,14 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
       case CJ125_RESET_CALIB_SAMPLE:
         if(ctx->calib_samples >= CJ125_CALIBRATION_MIN_SAMPLES &&
             time_diff(now, ctx->calib_timestamp) >= CJ125_CALIBRATION_MIN_PERIOD_US) {
-          ctx->reset_fsm = CJ125_RESET_CALIB_INIT_RESTORE;
-          ctx->regs.init1.data = ctx->calib_init1_byte;
+          ctx->reset_fsm = CJ125_RESET_CALIB_INIT_NORMAL;
+          ctx->regs.init1.data = 0;
           ctx->regs.init1.bits.pa = CJ125_PA_HOLD;
           ctx->regs.init1.bits.la = CJ125_LA_NORMAL;
           ctx->regs.init1.bits.ra = CJ125_RA_NORMAL;
+          ctx->regs.init1.bits.en_f3k = CJ125_F3K_EN;
+          ctx->regs.init1.bits.en_hold = CJ125_HOLD_EN;
+          ctx->data.ampfactor = ctx->regs.init1.bits.vl;
 
           ctx->request.bytes[0] = CJ125_REG_WR_INIT1;
           ctx->request.bytes[1] = ctx->regs.init1.data;
@@ -174,7 +167,7 @@ ITCM_FUNC static error_t cj125_fsm_reset(cj125_ctx_t *ctx)
           ctx->reset_errcode = err;
         }
         break;
-      case CJ125_RESET_CALIB_INIT_RESTORE:
+      case CJ125_RESET_CALIB_INIT_NORMAL:
         err = cj125_serial_operation(ctx, ctx->request, &ctx->response);
         if(err == E_OK) {
           ctx->reset_fsm = CJ125_RESET_CALIB_CALCULATE;
