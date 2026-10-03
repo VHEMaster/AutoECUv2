@@ -90,6 +90,8 @@ error_t ckp_signal_regular_60_2_init(ckp_ctx_t *ctx, ckp_instance_t instance_ind
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     *signal_ctx = &ckp_signal_regular_60_2_ctx[instance_index];
 
+    memset(ckp_signal_regular_60_2_ctx, 0u, sizeof(ckp_signal_regular_60_2_ctx));
+
     ckp_signal_regular_60_2_ctx[instance_index].level_prev = UCHAR_MAX;
   } while(0);
 
@@ -290,6 +292,8 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
       initial_cur_found = signal_ctx->runtime.indexed[index].initial_found;
       for(int i = 1; i < CKP_SIGNAL_REGULAR_60_2_INDEX_MAX; i++) {
         if(initial_cur_found != signal_ctx->runtime.indexed[index_prev].initial_found) {
+          signal_ctx->runtime.indexed[index].initial_found = false;
+          signal_ctx->runtime.indexed[index_prev].initial_found = false;
           ctx->diag.bits.signal_missing_second_sync = true;
           desync_needed = true;
         }
