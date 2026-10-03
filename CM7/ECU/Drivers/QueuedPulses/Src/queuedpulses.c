@@ -225,7 +225,6 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
   queuedpulse_entry_t *entry_temp_next = NULL;
   uint32_t index, prim;
   bool timer_immediate_change = true;
-  output_value_t value_temp;
 
   time_delta_us_t tim_rel_value;
   time_delta_us_t pulse_diff = 0u;
@@ -240,16 +239,15 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
 
     out = &queuedpulse_ctx.outputs[output];
 
+    prim = EnterCritical();
+
     if(pulse < QUEUEDPULSE_MINIMUM_PULSE_US) {
-      value_temp = out->value_off;
-      if(out->value_cur != value_temp) {
-        err = output_set_value(out->id, value_temp);
-        out->value_cur = value_temp;
-      }
+      err = output_set_value(out->id, out->value_off);
+      out->value_cur = out->value_off;
+      ExitCritical(prim);
       break;
     }
 
-    prim = EnterCritical();
 
     BREAK_IF_ACTION(queuedpulse_ctx.queue.entries_bitmap == QUEUEDPULSE_ENTRIES_BITMAP_MAX, (ExitCritical(prim), err = E_OVERFLOW));
 
