@@ -56,6 +56,7 @@ typedef struct {
     queuedpulse_timer_t timers[QUEUEDPULSE_TIMERS];
     uint32_t timers_bitmap;
     uint32_t timers_count;
+    uint32_t timer_index_next;
 
 }queuedpulse_ctx_t;
 

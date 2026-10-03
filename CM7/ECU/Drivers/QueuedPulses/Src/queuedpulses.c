@@ -269,8 +269,13 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
       }
 
       if(timer == NULL) {
-        index = 0;
+        index = queuedpulse_ctx.timer_index_next;
         timer = &queuedpulse_ctx.timers[index];
+
+        if(++index >= queuedpulse_ctx.timers_count) {
+          index = 0;
+        }
+        queuedpulse_ctx.timer_index_next = index;
 
         entry_temp_next = timer->entry_assigned;
         do {
@@ -293,10 +298,6 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
           entry_temp_prev->next = entry;
         }
         entry->next = entry_temp_next;
-
-        if(++index >= queuedpulse_ctx.timers_count) {
-          index = 0;
-        }
       }
 
       queuedpulse_ctx.queue.entries_bitmap |= 1u << entry->id;
