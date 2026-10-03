@@ -62,6 +62,16 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_diff(time_us_t a, time_us_t 
   return retval;
 }
 
+ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_add(time_us_t time, time_delta_us_t delta)
+{
+  time_us_t retval;
+
+  retval = time + delta;
+  retval &= g_time_mask;
+
+  return retval;
+}
+
 ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
 {
   time_us_t retval;

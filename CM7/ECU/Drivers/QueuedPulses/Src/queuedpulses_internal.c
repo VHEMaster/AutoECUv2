@@ -37,7 +37,7 @@ ITCM_FUNC void queuedpulses_internal_tim_disable(queuedpulse_timer_t *timer)
 
 ITCM_FUNC time_delta_us_t queuedpulses_internal_calculate_pulse_cplt_time(queuedpulse_entry_t *entry, time_us_t now)
 {
-  time_us_t absolute_time = entry->time + entry->pulse;
+  time_us_t absolute_time = time_add(entry->time, entry->pulse);
   time_delta_us_t relative_time = time_diff(absolute_time, now);
 
   /* TODO: probably not needed, but let's keep it... Just in case */

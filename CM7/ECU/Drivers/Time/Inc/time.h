@@ -69,6 +69,7 @@ void time_init_timebase(volatile time_us_t *timebase, time_us_t mask);
 time_us_t time_now_us(void);
 time_us_t time_mask_us(void);
 time_delta_us_t time_diff(time_us_t a, time_us_t b);
+time_delta_us_t time_add(time_us_t time, time_delta_us_t delta);
 
 void time_init_tickbase(volatile time_tick_t *tickbase, time_tick_t mask);
 time_tick_t time_now_tick(void);
