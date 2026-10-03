@@ -314,38 +314,41 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
       out->timer = timer;
       out->queue_entry = entry;
     } else if(entry->value_on == value_on && entry->out_seq_next == NULL) {
-      tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry, now);
+      index = POSITION_VAL(~queuedpulse_ctx.queue.entries_bitmap);
+      BREAK_IF_ACTION(index >= QUEUEDPULSE_QUEUE_ENTRIES, (ExitCritical(prim), err = E_FAULT));
 
-      pulse_diff = tim_rel_value;
-      entry->pulse = pulse + pulse_diff;
-      entry->time = now;
-      timer_immediate_change = true;
-      if(timer->entry_assigned != NULL) {
-        entry_temp_next = timer->entry_assigned;
-        do {
-          if(entry != entry_temp_next) {
-            tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry_temp_next, now);
+      entry_temp_seq = entry;
+      pulse_diff = queuedpulses_internal_calculate_pulse_cplt_time(entry_temp_seq, now);
 
-            if(entry->pulse >= tim_rel_value) {
-              entry_temp_prev = entry_temp_next;
-              pulse_diff = tim_rel_value;
-            } else {
-              break;
-            }
-          }
+      entry = &queuedpulse_ctx.queue.entries[index];
+      queuedpulse_ctx.queue.entries_bitmap |= 1u << entry->id;
 
-          entry_temp_next = entry_temp_next->next;
-        } while(entry_temp_next);
+      entry_temp_prev = entry_temp_seq;
+      entry_temp_next = entry_temp_seq->next;
 
-        if(entry_temp_prev != NULL) {
-          entry_temp_prev->next = entry;
-          entry->next = entry_temp_next;
-          entry = entry_temp_prev;
-          entry->time = now;
-          entry->pulse = pulse_diff;
-          out = entry->output_assigned;
+      while(entry_temp_next != NULL) {
+        tim_rel_value = queuedpulses_internal_calculate_pulse_cplt_time(entry_temp_next, now);
+
+        if(pulse + pulse_diff >= tim_rel_value) {
+          entry_temp_prev = entry_temp_next;
+        } else {
+          break;
         }
+
+        entry_temp_next = entry_temp_next->next;
       }
+
+      entry_temp_prev->next = entry;
+      entry_temp_seq->out_seq_next = entry;
+
+      entry->time = now;
+      entry->timer = timer;
+      entry->output_assigned = out;
+      entry->value_on = value_on;
+      entry->pulse = pulse + pulse_diff;
+      entry->next = entry_temp_next;
+      entry->out_seq_next = NULL;
+      timer_immediate_change = false;
     } else {
       index = POSITION_VAL(~queuedpulse_ctx.queue.entries_bitmap);
       BREAK_IF_ACTION(index >= QUEUEDPULSE_QUEUE_ENTRIES, (ExitCritical(prim), err = E_FAULT));
