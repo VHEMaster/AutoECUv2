@@ -137,3 +137,12 @@ void middlelayer_init(void)
   ecu_config_start_periodic_timers((pTIM_CallbackTypeDef)middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
 
 }
+
+void middlelayer_hardfault(void)
+{
+  IGN_NEN_GPIO_Port->BSRR = IGN_NEN_Pin;
+  LAMBDA_HEATER_NEN_GPIO_Port->BSRR = LAMBDA_HEATER_NEN_Pin;
+  OUTS_RESET_GPIO_Port->BSRR = OUTS_RESET_Pin << 16;
+  LAMBDA_NRST_GPIO_Port->BSRR = LAMBDA_NRST_Pin << 16;
+
+}

@@ -14,4 +14,6 @@ void middlelayer_ll_init(void);
 void middlelayer_init(void);
 void middlelayer_loop(void);
 
+void middlelayer_hardfault(void);
+
 #endif /* MIDDLELAYER_INC_MIDDLELAYER_H_ */
