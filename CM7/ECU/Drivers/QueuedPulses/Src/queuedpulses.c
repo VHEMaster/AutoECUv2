@@ -385,6 +385,7 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
       }
 
       if(entry_temp_seq != NULL) {
+        entry->out_seq_next = entry_temp_seq->out_seq_next;
         entry_temp_seq->out_seq_next = entry;
       }
 
