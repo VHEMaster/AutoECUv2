@@ -10,11 +10,15 @@
 
 #include "common.h"
 
+#define PULSEDADC_SAMPLES_ALL   (0u)
+
 typedef enum {
-  PULSEDADC_STATUS_IDLE = 0,
-  PULSEDADC_STATUS_PREPARED,
-  PULSEDADC_STATUS_RUNNING,
-  PULSEDADC_STATUS_OVERFLOW,
+  PULSEDADC_STATUS_NONE = 0,
+  PULSEDADC_STATUS_IDLE = 1,
+  PULSEDADC_STATUS_PREPARED = 2,
+  PULSEDADC_STATUS_RUNNING = 4,
+  PULSEDADC_STATUS_CPLT = 8,
+  PULSEDADC_STATUS_ERROR = 16,
 }pulsedadc_status_t;
 
 typedef struct {
@@ -37,6 +41,7 @@ typedef struct {
     pulsedadc_status_t status;
 
     uint32_t sampling_frequency;
+    uint32_t target_samples;
     uint32_t current_samples;
 }pulsedadc_ctx_t;
 
@@ -44,12 +49,13 @@ error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ct
 
 error_t pulsedadc_set_sampling_frequency(pulsedadc_ctx_t *ctx, uint32_t sampling_frequency);
 
-error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx);
+error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples);
 error_t pulsedadc_start(pulsedadc_ctx_t *ctx);
 error_t pulsedadc_stop(pulsedadc_ctx_t *ctx);
 error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, uint16_t **buffer, uint32_t *samples);
 error_t pulsedadc_get_status(pulsedadc_ctx_t *ctx, pulsedadc_status_t *status);
 
+void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx);
 void pulsedadc_adc_dma_error(pulsedadc_ctx_t *ctx);
 
 #endif /* DRIVERS_PULSEDADC_INC_PULSEDADC_H_ */

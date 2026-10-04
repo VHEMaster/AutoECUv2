@@ -34,7 +34,7 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
             .hrtim_index = HRTIM_TIMERINDEX_TIMER_A,
 
             .base_frequency = 0,
-            .sampling_frequency_default = 44100,
+            .sampling_frequency_default = 64000,
         },
     },
     {
@@ -49,10 +49,24 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
             .hrtim_index = HRTIM_TIMERINDEX_TIMER_B,
 
             .base_frequency = 0,
-            .sampling_frequency_default = 44100,
+            .sampling_frequency_default = 64000,
         },
     }
 };
+
+static void ecu_devices_pulsedadc_cplt_cb(ADC_HandleTypeDef *hadc)
+{
+  ecu_devices_pulsedadc_ctx_t *pulsedadc_ctx;
+
+  for(int i = 0; i < ITEMSOF(ecu_devices_pulsedadc_ctx); i++) {
+    pulsedadc_ctx = &ecu_devices_pulsedadc_ctx[i];
+
+    if(pulsedadc_ctx->init.hadc == hadc) {
+      pulsedadc_adc_dma_cplt(pulsedadc_ctx->ctx);
+      break;
+    }
+  }
+}
 
 static void ecu_devices_pulsedadc_error_cb(ADC_HandleTypeDef *hadc)
 {
@@ -63,6 +77,7 @@ static void ecu_devices_pulsedadc_error_cb(ADC_HandleTypeDef *hadc)
 
     if(pulsedadc_ctx->init.hadc == hadc) {
       pulsedadc_adc_dma_error(pulsedadc_ctx->ctx);
+      break;
     }
   }
 }
@@ -82,7 +97,7 @@ error_t ecu_devices_pulsedadc_init(ecu_device_pulsedadc_t instance, pulsedadc_ct
     err = ecu_config_get_tim_base_frequency(&htim2, &pulsedadc_ctx->init.base_frequency);
     BREAK_IF(err != E_OK);
 
-    status = HAL_ADC_RegisterCallback(pulsedadc_ctx->init.hadc, HAL_ADC_CONVERSION_COMPLETE_CB_ID, ecu_devices_pulsedadc_error_cb);
+    status = HAL_ADC_RegisterCallback(pulsedadc_ctx->init.hadc, HAL_ADC_CONVERSION_COMPLETE_CB_ID, ecu_devices_pulsedadc_cplt_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
     status = HAL_ADC_RegisterCallback(pulsedadc_ctx->init.hadc, HAL_ADC_ERROR_CB_ID, ecu_devices_pulsedadc_error_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
