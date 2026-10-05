@@ -40,7 +40,7 @@ typedef struct {
     bool configured;
 
     rough_runtime_ctx_t runtime;
-    timing_base_data_t timing_base_data;
+    const timing_base_data_t *timing_base_data;
 
 }rough_ctx_t;
 

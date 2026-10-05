@@ -90,10 +90,10 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
 {
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
-  const ecu_config_cylinders_t *cylinders_config;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
   const timing_base_data_t *timing_base_data;
+  const rough_config_t *config;
   rough_runtime_ctx_t *runtime;
   rough_runtime_cylinder_ctx_t *runtime_cy;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
@@ -103,23 +103,26 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
   float start_pos, end_pos, mid_pos;
 
   do {
+    config = &ctx->config;
+
     BREAK_IF(ctx->configured == false);
-    BREAK_IF(ctx->config.enabled == false);
+    BREAK_IF(config->enabled == false);
 
     // TODO: assign proper instance
     err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
     BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
     BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
+    ctx->timing_base_data = timing_base_data;
+
     calibration_config = ctx->init.calibration_config;
     crankshaft_mode = timing_base_data->crankshaft.mode;
     sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
-    cylinders_config = &calibration_config->cylinders;
     runtime = &ctx->runtime;
 
     cylinders_count = calibration_config->cylinders.cylinders_count;
 
-    end_pos = fabsf(cylinders_config->rough_measure_range);
+    end_pos = fabsf(config->rough_measure_range);
     start_pos = -end_pos;
     mid_pos = 0.0f;
 
