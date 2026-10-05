@@ -17,7 +17,9 @@ typedef enum {
 
 typedef struct {
     bool enabled;
-    float rough_measure_range;
+    float measure_startpoint;
+    float measure_midpoint;
+    float measure_endpoint;
 
     uint32_t align ALIGNED_CACHE;
 }rough_config_v1_t ALIGNED_CACHE;

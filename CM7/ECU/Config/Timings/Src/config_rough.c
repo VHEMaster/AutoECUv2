@@ -18,7 +18,9 @@ typedef struct ecu_timings_rough_ctx_tag {
 }ecu_timings_rough_ctx_t;
 
 static const rough_config_t ecu_timings_rough_config_default = {
-    .rough_measure_range = 90.0f,
+    .measure_startpoint = -90.0f,
+    .measure_midpoint = 0.0f,
+    .measure_endpoint = 90.0f,
 };
 
 static const bool ecu_timings_rough_enabled_default[ECU_TIMING_ROUGH_MAX] = {

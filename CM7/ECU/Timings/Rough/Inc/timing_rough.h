@@ -19,6 +19,9 @@ typedef struct {
     time_us_t time_tdc;
     time_us_t time_end;
 
+    time_float_delta_us_t delta_btdc;
+    time_float_delta_us_t delta_atdc;
+
     float rough_value;
 }rough_runtime_cylinder_ctx_t;
 

@@ -122,9 +122,9 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
 
     cylinders_count = calibration_config->cylinders.cylinders_count;
 
-    end_pos = fabsf(config->rough_measure_range);
-    start_pos = -end_pos;
-    mid_pos = 0.0f;
+    start_pos = config->measure_startpoint;
+    mid_pos = config->measure_midpoint;
+    end_pos = config->measure_endpoint;
 
     if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
@@ -166,8 +166,10 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
               runtime_cy->measuring_end = false;
               runtime_cy->measuring_start = false;
 
-              runtime_cy->rough_value = math_interpolate(
-                  runtime_cy->time_start, runtime_cy->time_tdc, runtime_cy->time_end, -100.0f, 100.0f);
+              runtime_cy->delta_btdc = time_diff(runtime_cy->time_tdc, runtime_cy->time_start);
+              runtime_cy->delta_atdc = time_diff(runtime_cy->time_end, runtime_cy->time_tdc);
+              runtime_cy->rough_value = (runtime_cy->delta_atdc - runtime_cy->delta_btdc) /
+                  ((runtime_cy->delta_atdc + runtime_cy->delta_btdc) * 0.5f) * 100.0f;
 
             } else if(crankshaft_data->sensor_data.current.position < start_pos) {
               needtoclear = true;

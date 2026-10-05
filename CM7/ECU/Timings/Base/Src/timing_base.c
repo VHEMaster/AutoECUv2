@@ -371,10 +371,8 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
 
       err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_ROUGH, ECU_TIMING_ROUGH_1, &enabled);
       if(err == E_OK && enabled) {
-        if(rough_ctx->config.rough_measure_range != 0.0f) {
-          rough_update_trigger = true;
-          sequential_needed = true;
-        }
+        rough_update_trigger = true;
+        sequential_needed = true;
       }
 
       if(ignition_update_trigger) {
