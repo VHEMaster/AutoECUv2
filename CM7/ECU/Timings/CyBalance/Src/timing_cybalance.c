@@ -97,10 +97,13 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
   cybalance_runtime_ctx_t *runtime;
   cybalance_runtime_cylinder_ctx_t *runtime_cy;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
-  bool needtoclear = false;
   uint32_t cylinders_count;
+  bool needtoclear = false;
+  bool updated = false;
 
   float start_pos, end_pos, mid_pos;
+  float normalized_value;
+  uint32_t normalized_count;
 
   do {
     config = &ctx->config;
@@ -170,6 +173,9 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
               runtime_cy->delta_atdc = time_diff(runtime_cy->time_end, runtime_cy->time_tdc);
               runtime_cy->balance_value = (runtime_cy->delta_atdc - runtime_cy->delta_btdc) /
                   ((runtime_cy->delta_atdc + runtime_cy->delta_btdc) * 0.5f) * 100.0f;
+              runtime_cy->value_valid = true;
+
+              updated = true;
 
             } else if(crankshaft_data->sensor_data.current.position < start_pos) {
               needtoclear = true;
@@ -188,12 +194,35 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
             runtime_cy->ready = true;
             runtime_cy->measuring_start = false;
             runtime_cy->measuring_end = false;
+            runtime_cy->value_valid = false;
           }
         }
 
         if(needtoclear) {
           memset(&runtime->cylinders[cy], 0, sizeof(runtime->cylinders[cy]));
           needtoclear = false;
+        }
+      }
+
+      if(updated) {
+        normalized_count = 0;
+        normalized_value = 0;
+
+        for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+          runtime_cy = &runtime->cylinders[cy];
+          if(runtime_cy->value_valid) {
+            normalized_count++;
+            normalized_value += runtime_cy->balance_value;
+          }
+        }
+
+        normalized_value /= normalized_count;
+
+        for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+          runtime_cy = &runtime->cylinders[cy];
+          if(runtime_cy->value_valid) {
+            runtime_cy->normalized_value = runtime_cy->balance_value - normalized_value;
+          }
         }
       }
     } else {

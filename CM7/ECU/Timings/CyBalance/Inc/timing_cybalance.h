@@ -22,7 +22,9 @@ typedef struct {
     time_float_delta_us_t delta_btdc;
     time_float_delta_us_t delta_atdc;
 
+    bool value_valid;
     float balance_value;
+    float normalized_value;
 }cybalance_runtime_cylinder_ctx_t;
 
 typedef struct {
