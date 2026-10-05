@@ -69,7 +69,10 @@ void time_init_timebase(volatile time_us_t *timebase, time_us_t mask);
 time_us_t time_now_us(void);
 time_us_t time_mask_us(void);
 time_delta_us_t time_diff(time_us_t a, time_us_t b);
-time_delta_us_t time_add(time_us_t time, time_delta_us_t delta);
+time_us_t time_add(time_us_t time, time_delta_us_t delta);
+time_us_t time_sub(time_us_t time, time_delta_us_t delta);
+time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right);
+float time_interpolate_value(time_us_t time_left, time_us_t time_mid, time_us_t time_right, float value_left, float value_right);
 
 void time_init_tickbase(volatile time_tick_t *tickbase, time_tick_t mask);
 time_tick_t time_now_tick(void);

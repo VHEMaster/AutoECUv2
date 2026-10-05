@@ -229,7 +229,7 @@ OPTIMIZE_FAST
 ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_t *req_ctx, ckp_data_t *data)
 {
   error_t err = E_OK;
-  float pos, pos_prev, mult, time_delta;
+  float pos, pos_cur, pos_prev;
   ckp_data_t data_cur;
   time_us_t now;
   uint32_t prim;
@@ -244,18 +244,16 @@ ITCM_FUNC INLINE error_t ckp_calculate_current_position(ckp_ctx_t *ctx, ckp_req_
 
   if(data_cur.validity >= CKP_DATA_VALID) {
     if(req_ctx == NULL || req_ctx->position_valid) {
-      if(data_cur.current.timestamp != data_cur.previous.timestamp) {
-        time_delta = time_diff(data_cur.current.timestamp, data_cur.previous.timestamp);
-        now = time_diff(now, data_cur.previous.timestamp);
+      pos_cur = data_cur.current.position;
+      pos_prev = data_cur.previous.position;
 
-        if(data_cur.current.position < data_cur.previous.position) {
-          data_cur.current.position += 360.0f;
-        }
-
-        pos = data_cur.current.position - data_cur.previous.position;
-        mult = pos / time_delta;
-        pos = mult * now + data_cur.previous.position;
+      if(pos_cur < pos_prev) {
+        pos_cur += 360.0f;
       }
+
+      pos = time_interpolate_value(data_cur.previous.timestamp,
+          now, data_cur.current.timestamp,
+          pos_prev, pos_cur);
 
       while(pos >= 180.0f) {
         pos -= 360.0f;

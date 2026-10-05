@@ -106,7 +106,7 @@ OPTIMIZE_FAST
 ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data)
 {
   error_t err = E_OK;
-  float pos, pos_prev, mult, time_delta, current, previous;
+  float pos, pos_prev, current, previous;
   timing_base_data_crankshaft_t data_cur;
   time_us_t now;
   uint32_t prim;
@@ -151,25 +151,23 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
 
       if(req_ctx == NULL || req_ctx->position_valid) {
         if(time_recalc) {
-          if(data_cur.sensor_data.current.timestamp != data_cur.sensor_data.previous.timestamp) {
-            time_delta = time_diff(data_cur.sensor_data.current.timestamp, data_cur.sensor_data.previous.timestamp);
-            now = time_diff(now, data_cur.sensor_data.previous.timestamp);
+          current = data_cur.sensor_data.current.position;
+          previous = data_cur.sensor_data.previous.position;
 
-            current = data_cur.sensor_data.current.position;
-            previous = data_cur.sensor_data.previous.position;
-
-            if(current < previous) {
-              if(phased_internal) {
-                current += 720.0f;
-              } else {
-                current += 360.0f;
-              }
+          if(current < previous) {
+            if(phased_internal) {
+              current += 720.0f;
+            } else {
+              current += 360.0f;
             }
-
-            pos = current - previous;
-            mult = pos / time_delta;
-            pos = mult * now + previous;
           }
+
+          pos = time_interpolate_value(
+              data_cur.sensor_data.previous.timestamp,
+              now,
+              data_cur.sensor_data.current.timestamp,
+              previous,
+              current);
 
           timing_position_clamp(pos, phased_internal, &pos);
         }

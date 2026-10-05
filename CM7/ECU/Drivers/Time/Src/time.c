@@ -62,7 +62,7 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_diff(time_us_t a, time_us_t 
   return retval;
 }
 
-ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_add(time_us_t time, time_delta_us_t delta)
+ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_add(time_us_t time, time_delta_us_t delta)
 {
   time_us_t retval;
 
@@ -70,6 +70,68 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_add(time_us_t time, time_del
   retval &= g_time_mask;
 
   return retval;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_sub(time_us_t time, time_delta_us_t delta)
+{
+  time_us_t retval;
+
+  retval = time - delta;
+  retval &= g_time_mask;
+
+  return retval;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right)
+{
+  time_us_t result;
+  time_delta_us_t time_delta = time_diff(time_right, time_left);
+  int32_t time_adder;
+
+  float mult;
+
+  if(input_right != input_left) {
+    mult = (input_mid - input_left) / (input_right - input_left);
+    time_adder = lrintf(time_delta * mult);
+
+    if(time_adder >= 0) {
+      result = time_add(time_left, (time_delta_us_t)time_adder);
+    } else {
+      result = time_sub(time_left, (time_delta_us_t)(-time_adder));
+    }
+  } else {
+    result = time_add(time_left, time_delta >> 1);
+  }
+
+  return result;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE float time_interpolate_value(time_us_t time_left, time_us_t time_mid, time_us_t time_right, float value_left, float value_right)
+{
+  float result;
+  time_delta_us_t time_delta;
+  time_delta_us_t time_offset;
+
+  float mult;
+
+  if(time_right != time_left) {
+      time_delta = time_diff(time_right, time_left);
+      time_offset = time_diff(time_mid, time_left);
+
+      if(time_offset > (g_time_mask >> 1)) {
+        time_offset = (g_time_mask + 1) - time_offset;
+        mult = -(float)time_offset / (float)time_delta;
+      } else {
+        mult = (float)time_offset / (float)time_delta;
+      }
+
+
+      result = (value_right - value_left) * mult + value_left;
+  } else {
+      result = (value_left + value_right) * 0.5f;
+  }
+
+  return result;
 }
 
 ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)

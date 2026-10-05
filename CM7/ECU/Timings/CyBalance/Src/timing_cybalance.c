@@ -150,7 +150,7 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
         if(runtime_cy->ready) {
           if(runtime_cy->measuring_start) {
             if(crankshaft_data->sensor_data.current.position >= mid_pos && crankshaft_data->sensor_data.current.position <= end_pos) {
-              runtime_cy->time_tdc = math_interpolate(
+              runtime_cy->time_tdc = time_interpolate_time(
                   crankshaft_data->sensor_data.previous.position, mid_pos, crankshaft_data->sensor_data.current.position,
                   crankshaft_data->sensor_data.previous.timestamp, crankshaft_data->sensor_data.current.timestamp);
               runtime_cy->measuring_end = true;
@@ -160,7 +160,7 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
             }
           } else if(runtime_cy->measuring_end) {
             if(crankshaft_data->sensor_data.current.position >= end_pos && crankshaft_data->sensor_data.current.position >= start_pos) {
-              runtime_cy->time_end = math_interpolate(
+              runtime_cy->time_end = time_interpolate_time(
                   crankshaft_data->sensor_data.previous.position, end_pos, crankshaft_data->sensor_data.current.position,
                   crankshaft_data->sensor_data.previous.timestamp, crankshaft_data->sensor_data.current.timestamp);
               runtime_cy->measuring_end = false;
@@ -176,7 +176,7 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
             }
           } else {
             if(crankshaft_data->sensor_data.current.position >= start_pos && crankshaft_data->sensor_data.current.position <= mid_pos) {
-              runtime_cy->time_start = math_interpolate(
+              runtime_cy->time_start = time_interpolate_time(
                   crankshaft_data->sensor_data.previous.position, start_pos, crankshaft_data->sensor_data.current.position,
                   crankshaft_data->sensor_data.previous.timestamp, crankshaft_data->sensor_data.current.timestamp);
               runtime_cy->measuring_start = true;
