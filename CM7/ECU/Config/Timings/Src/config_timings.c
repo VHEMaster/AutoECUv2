@@ -61,16 +61,19 @@ static timing_base_ctx_t ecu_config_timing_ctx[ECU_TIMING_BASE_MAX];
 static ignition_ctx_t ecu_config_ignition_ctx[ECU_TIMING_IGNITION_MAX];
 static injection_ctx_t ecu_config_injection_ctx[ECU_TIMING_INJECTION_MAX];
 static cybalance_ctx_t ecu_config_cybalance_ctx[ECU_TIMING_CYBALANCE_MAX];
+static cybalance_ctx_t ecu_config_knockwindow_ctx[ECU_TIMING_KNOCKWINDOW_MAX];
 
 static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_read[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_read[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_read[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_cybalance_params_read[ECU_TIMING_CYBALANCE_MAX][ECU_TIMING_CYBALANCE_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_knockwindow_params_read[ECU_TIMING_KNOCKWINDOW_MAX][ECU_TIMING_KNOCKWINDOW_READ_PARAM_MAX];
 
 static ecu_core_runtime_value_ctx_t ecu_config_timing_base_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_BASE_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_ignition_params_write[ECU_TIMING_IGNITION_MAX][ECU_TIMING_IGNITION_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_timing_injection_params_write[ECU_TIMING_INJECTION_MAX][ECU_TIMING_INJECTION_WRITE_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_timing_cybalance_params_write[ECU_TIMING_BASE_MAX][ECU_TIMING_CYBALANCE_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_cybalance_params_write[ECU_TIMING_CYBALANCE_MAX][ECU_TIMING_CYBALANCE_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_timing_knockwindow_params_write[ECU_TIMING_KNOCKWINDOW_MAX][ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_MAX];
 
 static const ecu_config_timings_config_t ecu_config_timings = {
     .interfaces = {
@@ -106,6 +109,14 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .params_read_count = ECU_TIMING_CYBALANCE_READ_PARAM_MAX,
             .params_write_count = ECU_TIMING_CYBALANCE_WRITE_PARAM_MAX,
         }, //ECU_TIMING_TYPE_CYBALANCE
+        {
+            .loop_slow = (ecu_timing_loop_func_t)NULL,
+            .loop_main = (ecu_timing_loop_func_t)NULL,
+            .loop_fast = (ecu_timing_loop_func_t)NULL,
+            .instance_max = ECU_TIMING_KNOCKWINDOW_MAX,
+            .params_read_count = ECU_TIMING_KNOCKWINDOW_READ_PARAM_MAX,
+            .params_write_count = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_MAX,
+        }, //ECU_TIMING_TYPE_KNOCKWINDOW
     },
     .timings = {
         {
@@ -135,6 +146,13 @@ static const ecu_config_timings_config_t ecu_config_timings = {
             .ctx = &ecu_config_cybalance_ctx[ECU_TIMING_CYBALANCE_1],
             .params_read_ptr = ecu_config_timing_cybalance_params_read[ECU_TIMING_CYBALANCE_1],
             .params_write_ptr = ecu_config_timing_cybalance_params_write[ECU_TIMING_CYBALANCE_1],
+        },
+        {
+            .type = ECU_TIMING_TYPE_KNOCKWINDOW,
+            .instance = ECU_TIMING_KNOCKWINDOW_1,
+            .ctx = &ecu_config_knockwindow_ctx[ECU_TIMING_KNOCKWINDOW_1],
+            .params_read_ptr = ecu_config_timing_knockwindow_params_read[ECU_TIMING_KNOCKWINDOW_1],
+            .params_write_ptr = ecu_config_timing_knockwindow_params_write[ECU_TIMING_KNOCKWINDOW_1],
         },
     }
 };
@@ -547,4 +565,9 @@ error_t ecu_timings_get_injection_ctx(ecu_timing_base_t instance, injection_ctx_
 error_t ecu_timings_get_cybalance_ctx(ecu_timing_base_t instance, cybalance_ctx_t **ctx)
 {
   return ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_CYBALANCE, instance, (void**)ctx);
+}
+
+error_t ecu_timings_get_knockwindow_ctx(ecu_timing_base_t instance, knockwindow_ctx_t **ctx)
+{
+  return ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_KNOCKWINDOW, instance, (void**)ctx);
 }

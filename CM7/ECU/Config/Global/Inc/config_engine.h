@@ -53,6 +53,7 @@ typedef struct {
     ignition_config_t ignition[ECU_TIMING_IGNITION_MAX];
     injection_config_t injection[ECU_TIMING_INJECTION_MAX];
     cybalance_config_t cybalance[ECU_TIMING_CYBALANCE_MAX];
+    knockwindow_config_t knockwindow[ECU_TIMING_KNOCKWINDOW_MAX];
 }ecu_config_engine_timings_t;
 
 typedef struct {

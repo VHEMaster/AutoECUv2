@@ -860,6 +860,14 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_TIMING_KNOCKWINDOW,
+        .section_index = ECU_TIMING_KNOCKWINDOW_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 11,
+        .sector_index = 4,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_CALIBRATION_IO,
         .section_length = ECU_FLASH_SECTOR_SIZE,
         .block_index = 12,

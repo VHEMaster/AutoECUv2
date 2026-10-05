@@ -13,5 +13,6 @@
 #include "versioned_injection.h"
 #include "versioned_ignition.h"
 #include "versioned_cybalance.h"
+#include "versioned_knockwindow.h"
 
 #endif /* CONFIG_VERSIONED_TIMINGS_INC_VERSIONED_TIMINGS_H_ */

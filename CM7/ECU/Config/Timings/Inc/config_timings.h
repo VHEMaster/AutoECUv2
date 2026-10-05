@@ -13,6 +13,7 @@
 #include "timing_ignition.h"
 #include "timing_injection.h"
 #include "timing_cybalance.h"
+#include "timing_knockwindow.h"
 
 #include "config_timings_types.h"
 
@@ -40,5 +41,6 @@ error_t ecu_timings_get_base_ctx(ecu_timing_base_t instance, timing_base_ctx_t *
 error_t ecu_timings_get_ignition_ctx(ecu_timing_base_t instance, ignition_ctx_t **ctx);
 error_t ecu_timings_get_injection_ctx(ecu_timing_base_t instance, injection_ctx_t **ctx);
 error_t ecu_timings_get_cybalance_ctx(ecu_timing_base_t instance, cybalance_ctx_t **ctx);
+error_t ecu_timings_get_knockwindow_ctx(ecu_timing_base_t instance, knockwindow_ctx_t **ctx);
 
 #endif /* CONFIG_TIMINGS_INC_CONFIG_TIMINGS_H_ */

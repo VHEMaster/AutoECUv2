@@ -603,6 +603,26 @@ static const ecu_config_device_config_t ecu_config_global_timing_config[ECU_CONF
             },
         },
     }, //ECU_CONFIG_TIMING_TYPE_CYBALANCE
+    {
+        .device_type = ECU_TIMING_TYPE_KNOCKWINDOW,
+        .instances_count = ECU_TIMING_KNOCKWINDOW_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_knockwindow_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_knockwindow_reset,
+        .generic = {
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_KNOCKWINDOW,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_knockwindow_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.knockwindow[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.knockwindow[0]),
+            .versions_count = KNOCKWINDOW_CONFIG_VERSION_MAX,
+            .versions = {
+                {
+                    .version = KNOCKWINDOW_CONFIG_VERSION_V1,
+                    .size = sizeof(knockwindow_config_v1_t),
+                    .translate_func = NULL,
+                }
+            },
+        },
+    }, //ECU_CONFIG_TIMING_TYPE_KNOCKWINDOW
 };
 
 static const ecu_config_generic_config_t ecu_config_global_calibration_config[ECU_CONFIG_CALIB_TYPE_ALL] = {
