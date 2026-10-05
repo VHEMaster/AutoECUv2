@@ -50,7 +50,7 @@
 #include "config_timing_base.h"
 #include "config_ignition.h"
 #include "config_injection.h"
-#include "config_rough.h"
+#include "config_cybalance.h"
 
 #include "config_id.h"
 #include "config_io.h"
@@ -119,7 +119,7 @@ typedef enum {
   ECU_CONFIG_TIMING_TYPE_BASE = 0,
   ECU_CONFIG_TIMING_TYPE_IGNITION,
   ECU_CONFIG_TIMING_TYPE_INJECTION,
-  ECU_CONFIG_TIMING_TYPE_ROUGH,
+  ECU_CONFIG_TIMING_TYPE_CYBALANCE,
   ECU_CONFIG_TIMING_TYPE_ALL,
   ECU_CONFIG_TIMING_TYPE_MAX
 }ecu_config_timing_type_t;

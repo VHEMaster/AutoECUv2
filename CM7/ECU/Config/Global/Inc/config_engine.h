@@ -52,7 +52,7 @@ typedef struct {
     timing_base_config_t base[ECU_TIMING_BASE_MAX];
     ignition_config_t ignition[ECU_TIMING_IGNITION_MAX];
     injection_config_t injection[ECU_TIMING_INJECTION_MAX];
-    rough_config_t rough[ECU_TIMING_ROUGH_MAX];
+    cybalance_config_t cybalance[ECU_TIMING_CYBALANCE_MAX];
 }ecu_config_engine_timings_t;
 
 typedef struct {

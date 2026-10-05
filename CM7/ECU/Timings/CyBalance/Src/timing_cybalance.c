@@ -1,5 +1,5 @@
 /*
- * timing_rough.c
+ * timing_cybalance.c
  *
  *  Created on: Jun 1, 2025
  *      Author: VHEMaster
@@ -11,7 +11,7 @@
 #include "common.h"
 #include "interpolation.h"
 
-error_t rough_init(rough_ctx_t *ctx, const rough_init_ctx_t *init_ctx)
+error_t cybalance_init(cybalance_ctx_t *ctx, const cybalance_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
 
@@ -19,8 +19,8 @@ error_t rough_init(rough_ctx_t *ctx, const rough_init_ctx_t *init_ctx)
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(init_ctx->calibration_config == NULL, err = E_PARAM);
 
-    memset(ctx, 0u, sizeof(rough_ctx_t));
-    memcpy(&ctx->init, init_ctx, sizeof(rough_init_ctx_t));
+    memset(ctx, 0u, sizeof(cybalance_ctx_t));
+    memcpy(&ctx->init, init_ctx, sizeof(cybalance_init_ctx_t));
 
 
     ctx->ready = true;
@@ -30,7 +30,7 @@ error_t rough_init(rough_ctx_t *ctx, const rough_init_ctx_t *init_ctx)
   return err;
 }
 
-error_t rough_configure(rough_ctx_t *ctx, const rough_config_t *config)
+error_t cybalance_configure(cybalance_ctx_t *ctx, const cybalance_config_t *config)
 {
   error_t err = E_OK;
 
@@ -41,7 +41,7 @@ error_t rough_configure(rough_ctx_t *ctx, const rough_config_t *config)
     ctx->configured = false;
 
     if(&ctx->config != config) {
-      memcpy(&ctx->config, config, sizeof(rough_config_t));
+      memcpy(&ctx->config, config, sizeof(cybalance_config_t));
     }
 
     if(ctx->config.enabled) {
@@ -54,7 +54,7 @@ error_t rough_configure(rough_ctx_t *ctx, const rough_config_t *config)
   return err;
 }
 
-error_t rough_reset(rough_ctx_t *ctx)
+error_t cybalance_reset(cybalance_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -69,7 +69,7 @@ error_t rough_reset(rough_ctx_t *ctx)
   return err;
 }
 
-error_t rough_get_runtime_data_ptr(rough_ctx_t *ctx, rough_runtime_ctx_t **runtime_data)
+error_t cybalance_get_runtime_data_ptr(cybalance_ctx_t *ctx, cybalance_runtime_ctx_t **runtime_data)
 {
   error_t err = E_OK;
 
@@ -86,16 +86,16 @@ error_t rough_get_runtime_data_ptr(rough_ctx_t *ctx, rough_runtime_ctx_t **runti
 }
 
 OPTIMIZE_FAST
-ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
+ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
 {
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
   const timing_base_data_t *timing_base_data;
-  const rough_config_t *config;
-  rough_runtime_ctx_t *runtime;
-  rough_runtime_cylinder_ctx_t *runtime_cy;
+  const cybalance_config_t *config;
+  cybalance_runtime_ctx_t *runtime;
+  cybalance_runtime_cylinder_ctx_t *runtime_cy;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
   bool needtoclear = false;
   uint32_t cylinders_count;
@@ -168,7 +168,7 @@ ITCM_FUNC void rough_signal_update_callback(rough_ctx_t *ctx)
 
               runtime_cy->delta_btdc = time_diff(runtime_cy->time_tdc, runtime_cy->time_start);
               runtime_cy->delta_atdc = time_diff(runtime_cy->time_end, runtime_cy->time_tdc);
-              runtime_cy->rough_value = (runtime_cy->delta_atdc - runtime_cy->delta_btdc) /
+              runtime_cy->balance_value = (runtime_cy->delta_atdc - runtime_cy->delta_btdc) /
                   ((runtime_cy->delta_atdc + runtime_cy->delta_btdc) * 0.5f) * 100.0f;
 
             } else if(crankshaft_data->sensor_data.current.position < start_pos) {

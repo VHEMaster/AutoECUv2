@@ -11,7 +11,7 @@
 #include "config_timing_base.h"
 #include "config_ignition.h"
 #include "config_injection.h"
-#include "config_rough.h"
+#include "config_cybalance.h"
 
 #include "compiler.h"
 
@@ -77,14 +77,14 @@ void middlelayer_timings_init(void)
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-    for(int i = 0; i < ECU_TIMING_ROUGH_MAX; i++) {
-      err = ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_ROUGH, i, &timing_ctx);
+    for(int i = 0; i < ECU_TIMING_CYBALANCE_MAX; i++) {
+      err = ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_CYBALANCE, i, &timing_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_timings_rough_init(i, (rough_ctx_t *)timing_ctx);
+      err = ecu_timings_cybalance_init(i, (cybalance_ctx_t *)timing_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_timings_set_timing_initialized(ECU_TIMING_TYPE_ROUGH, i, true);
+      err = ecu_timings_set_timing_initialized(ECU_TIMING_TYPE_CYBALANCE, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

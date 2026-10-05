@@ -54,8 +54,8 @@ typedef struct {
 }ecu_core_runtime_global_ctx_t;
 
 typedef struct {
-    float rough_value;
-}ecu_core_runtime_cylinder_rough_t;
+    float balance_value;
+}ecu_core_runtime_cylinder_balance_t;
 
 typedef struct {
 

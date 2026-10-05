@@ -123,7 +123,7 @@ typedef struct {
 
     void *ignition_ctx;
     void *injection_ctx;
-    void *rough_ctx;
+    void *cybalance_ctx;
 }timing_base_runtime_t;
 
 typedef struct {

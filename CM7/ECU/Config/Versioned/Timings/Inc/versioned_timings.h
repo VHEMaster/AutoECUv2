@@ -12,6 +12,6 @@
 #include "versioned_timing_base.h"
 #include "versioned_injection.h"
 #include "versioned_ignition.h"
-#include "versioned_rough.h"
+#include "versioned_cybalance.h"
 
 #endif /* CONFIG_VERSIONED_TIMINGS_INC_VERSIONED_TIMINGS_H_ */

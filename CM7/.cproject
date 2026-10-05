@@ -104,7 +104,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Timings/Ignition/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Timings/Injection/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Timings/Base/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Timings/Rough/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/CyBalance/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>
@@ -263,7 +263,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Timings/Ignition/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Timings/Injection/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Timings/Base/Inc"/>
-									<listOptionValue builtIn="false" value="../ECU/Timings/Rough/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Timings/CyBalance/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Core/CalcData/Inputs/Inc"/>

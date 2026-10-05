@@ -584,25 +584,25 @@ static const ecu_config_device_config_t ecu_config_global_timing_config[ECU_CONF
         },
     }, //ECU_CONFIG_TIMING_TYPE_INJECTION
     {
-        .device_type = ECU_TIMING_TYPE_ROUGH,
-        .instances_count = ECU_TIMING_ROUGH_MAX,
-        .configure_func = (ecu_config_configure_func_t)ecu_timings_rough_configure,
-        .reset_func = (ecu_config_reset_func_t)ecu_timings_rough_reset,
+        .device_type = ECU_TIMING_TYPE_CYBALANCE,
+        .instances_count = ECU_TIMING_CYBALANCE_MAX,
+        .configure_func = (ecu_config_configure_func_t)ecu_timings_cybalance_configure,
+        .reset_func = (ecu_config_reset_func_t)ecu_timings_cybalance_reset,
         .generic = {
-            .flash_section_type = FLASH_SECTION_TYPE_TIMING_ROUGH,
-            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_rough_get_default_config,
-            .data_ptr = &ecu_config_global_engine.timings.rough[0],
-            .data_size = sizeof(ecu_config_global_engine.timings.rough[0]),
-            .versions_count = ROUGH_CONFIG_VERSION_MAX,
+            .flash_section_type = FLASH_SECTION_TYPE_TIMING_CYBALANCE,
+            .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_timings_cybalance_get_default_config,
+            .data_ptr = &ecu_config_global_engine.timings.cybalance[0],
+            .data_size = sizeof(ecu_config_global_engine.timings.cybalance[0]),
+            .versions_count = CYBALANCE_CONFIG_VERSION_MAX,
             .versions = {
                 {
-                    .version = ROUGH_CONFIG_VERSION_V1,
-                    .size = sizeof(rough_config_v1_t),
+                    .version = CYBALANCE_CONFIG_VERSION_V1,
+                    .size = sizeof(cybalance_config_v1_t),
                     .translate_func = NULL,
                 }
             },
         },
-    }, //ECU_CONFIG_TIMING_TYPE_ROUGH
+    }, //ECU_CONFIG_TIMING_TYPE_CYBALANCE
 };
 
 static const ecu_config_generic_config_t ecu_config_global_calibration_config[ECU_CONFIG_CALIB_TYPE_ALL] = {

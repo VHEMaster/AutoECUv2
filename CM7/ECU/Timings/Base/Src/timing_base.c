@@ -9,7 +9,7 @@
 #include "timing_base.h"
 #include "timing_ignition.h"
 #include "timing_injection.h"
-#include "timing_rough.h"
+#include "timing_cybalance.h"
 #include "config_hw.h"
 #include "config_timings.h"
 
@@ -298,7 +298,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   timing_base_ctx_t *ctx = (timing_base_ctx_t *)usrdata;
   ignition_ctx_t *ignition_ctx = NULL;
   injection_ctx_t *injection_ctx = NULL;
-  rough_ctx_t *rough_ctx = NULL;
+  cybalance_ctx_t *cybalance_ctx = NULL;
   const ecu_config_engine_calibration_t *calibration_config = NULL;
 
   timing_base_cylinder_sequentialed_cylinder_ctx_t *sequentialed;
@@ -311,7 +311,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   bool sequential_needed = false;
   bool ignition_update_trigger = false;
   bool injection_update_trigger = false;
-  bool rough_update_trigger = false;
+  bool cybalance_update_trigger = false;
   uint32_t process_update_trigger_counter = ctx->process_update_trigger_counter;
   uint8_t process_update_trigger_counter_1of2 = process_update_trigger_counter & 1;
 
@@ -329,18 +329,18 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
       BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
       BREAK_IF_ACTION(injection_ctx == NULL, err = E_FAULT);
       // TODO: assign proper instance
-      err = ecu_timings_get_rough_ctx(ECU_TIMING_ROUGH_1, &rough_ctx);
+      err = ecu_timings_get_cybalance_ctx(ECU_TIMING_CYBALANCE_1, &cybalance_ctx);
       BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-      BREAK_IF_ACTION(rough_ctx == NULL, err = E_FAULT);
+      BREAK_IF_ACTION(cybalance_ctx == NULL, err = E_FAULT);
 
       ctx->runtime.ignition_ctx = ignition_ctx;
       ctx->runtime.injection_ctx = injection_ctx;
-      ctx->runtime.rough_ctx = rough_ctx;
+      ctx->runtime.cybalance_ctx = cybalance_ctx;
       ctx->runtime.configured = true;
     } else {
       ignition_ctx = ctx->runtime.ignition_ctx;
       injection_ctx = ctx->runtime.injection_ctx;
-      rough_ctx = ctx->runtime.rough_ctx;
+      cybalance_ctx = ctx->runtime.cybalance_ctx;
     }
     calibration_config = ctx->init.calibration_config;
 
@@ -369,9 +369,9 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
         }
       }
 
-      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_ROUGH, ECU_TIMING_ROUGH_1, &enabled);
+      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_CYBALANCE, ECU_TIMING_CYBALANCE_1, &enabled);
       if(err == E_OK && enabled) {
-        rough_update_trigger = true;
+        cybalance_update_trigger = true;
         sequential_needed = true;
       }
 
@@ -473,7 +473,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
 
       ignition_update_trigger = true;
       injection_update_trigger = true;
-      rough_update_trigger = true;
+      cybalance_update_trigger = true;
     }
 
     if(ignition_update_trigger) {
@@ -482,8 +482,8 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
     if(injection_update_trigger) {
       injection_signal_update_callback(injection_ctx);
     }
-    if(rough_update_trigger) {
-      rough_signal_update_callback(rough_ctx);
+    if(cybalance_update_trigger) {
+      cybalance_signal_update_callback(cybalance_ctx);
     }
   } while(0);
 
