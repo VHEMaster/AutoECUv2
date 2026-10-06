@@ -236,9 +236,9 @@ void Error_Handler(void);
 #define NVIC_PRIO_DMA_M2M_4 5
 
 #define NVIC_PRIO_ADC1 10
-#define NVIC_PRIO_ADC1_DMA 11
+#define NVIC_PRIO_ADC1_DMA 5
 #define NVIC_PRIO_ADC2 10
-#define NVIC_PRIO_ADC2_DMA 11
+#define NVIC_PRIO_ADC2_DMA 5
 #define NVIC_PRIO_UART1 13
 #define NVIC_PRIO_UART1_DMA_TX 13
 #define NVIC_PRIO_UART1_DMA_RX 13
