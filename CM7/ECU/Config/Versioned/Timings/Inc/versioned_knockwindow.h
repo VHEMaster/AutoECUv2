@@ -9,14 +9,27 @@
 #define CONFIG_VERSIONED_TIMINGS_INC_VERSIONED_KNOCKWINDOW_H_
 
 #include "common.h"
+#include "config_pulsedadc.h"
 
 typedef enum {
   KNOCKWINDOW_CONFIG_VERSION_V1 = 0,
   KNOCKWINDOW_CONFIG_VERSION_MAX
 }ecu_config_knockwindow_versions_t;
 
+typedef enum {
+  KNOCKWINDOW_CONFIG_WINDOW_TYPE_FIXED = 0,
+  KNOCKWINDOW_CONFIG_WINDOW_TYPE_FLOATING,
+  KNOCKWINDOW_CONFIG_WINDOW_TYPE_MAX
+}knockwindow_config_window_type_t;
+
+
 typedef struct {
     bool enabled;
+
+
+
+    knockwindow_config_window_type_t window_type;
+
 
     uint32_t align ALIGNED_CACHE;
 }knockwindow_config_v1_t ALIGNED_CACHE;

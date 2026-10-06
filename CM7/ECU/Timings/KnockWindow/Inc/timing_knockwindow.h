@@ -12,12 +12,13 @@
 #include "config_engine.h"
 
 typedef struct {
-    bool ready;
-
-}knockwindow_runtime_cylinder_ctx_t;
+    ecu_core_runtime_value_ctx_t allowed;
+    ecu_core_runtime_value_ctx_t knock_window_start;
+    ecu_core_runtime_value_ctx_t knock_window_end;
+}knockwindow_runtime_input_ctx_t;
 
 typedef struct {
-    knockwindow_runtime_cylinder_ctx_t cylinders[ECU_CYLINDER_MAX];
+    knockwindow_runtime_input_ctx_t inputs;
 
     timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
 }knockwindow_runtime_ctx_t;

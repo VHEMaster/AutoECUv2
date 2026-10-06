@@ -18,7 +18,7 @@ typedef struct ecu_timings_knockwindow_ctx_tag {
 }ecu_timings_knockwindow_ctx_t;
 
 static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
-
+    .window_type = KNOCKWINDOW_CONFIG_WINDOW_TYPE_FIXED,
 };
 
 static const bool ecu_timings_knockwindow_enabled_default[ECU_TIMING_KNOCKWINDOW_MAX] = {

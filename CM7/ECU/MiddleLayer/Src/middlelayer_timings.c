@@ -12,6 +12,7 @@
 #include "config_ignition.h"
 #include "config_injection.h"
 #include "config_cybalance.h"
+#include "config_knockwindow.h"
 
 #include "compiler.h"
 
@@ -85,6 +86,18 @@ void middlelayer_timings_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_timings_set_timing_initialized(ECU_TIMING_TYPE_CYBALANCE, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_TIMING_KNOCKWINDOW_MAX; i++) {
+      err = ecu_timings_get_timing_ctx(ECU_TIMING_TYPE_KNOCKWINDOW, i, &timing_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_timings_knockwindow_init(i, (knockwindow_ctx_t *)timing_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_timings_set_timing_initialized(ECU_TIMING_TYPE_KNOCKWINDOW, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

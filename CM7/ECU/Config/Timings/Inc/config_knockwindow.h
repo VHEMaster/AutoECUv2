@@ -15,6 +15,9 @@ typedef enum {
 }ecu_timing_knockwindow_read_params_t;
 
 typedef enum {
+  ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_ALLOWED = 0,
+  ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_START,
+  ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_END,
   ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_MAX
 }ecu_timing_knockwindow_write_params_t;
 

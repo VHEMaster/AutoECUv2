@@ -12,9 +12,14 @@
 
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata);
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata);
+static void calcdata_timing_read_cybalance(ecu_core_ctx_t *ctx, void *userdata);
+static void calcdata_timing_read_knockwindow(ecu_core_ctx_t *ctx, void *userdata);
 
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata);
 static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata);
+static void calcdata_timing_write_cybalance(ecu_core_ctx_t *ctx, void *userdata);
+static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdata);
+
 
 static const ecu_core_calcdata_timings_ctx_t ecu_core_calcdata_timings_ctx = {
     .timings = {
@@ -28,6 +33,16 @@ static const ecu_core_calcdata_timings_ctx_t ecu_core_calcdata_timings_ctx = {
             .func_write = calcdata_timing_write_injection,
             .userdata = NULL,
         }, //ECU_TIMING_TYPE_INJECTION
+        {
+            .func_read = calcdata_timing_read_cybalance,
+            .func_write = calcdata_timing_write_cybalance,
+            .userdata = NULL,
+        }, //ECU_TIMING_TYPE_CYBALANCE
+        {
+            .func_read = calcdata_timing_read_knockwindow,
+            .func_write = calcdata_timing_write_knockwindow,
+            .userdata = NULL,
+        }, //ECU_TIMING_TYPE_KNOCKWINDOW
     },
 };
 
@@ -142,6 +157,50 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
   }
 }
 
+static void calcdata_timing_read_cybalance(ecu_core_ctx_t *ctx, void *userdata)
+{
+  error_t err;
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  cybalance_runtime_ctx_t *dst_ctx;
+  ecu_timing_cybalance_read_params_t param_index;
+  ecu_timing_cybalance_read_params_t param_index_base_cy;
+
+  // TODO: assign proper instance
+  err = ecu_timings_cybalance_get_runtime_data_ptr(ECU_TIMING_CYBALANCE_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    BREAKPOINT(0);
+  }
+
+  for(ecu_cylinder_t cy = 0; cy < ECU_CYLINDER_MAX; cy++) {
+    param_index_base_cy = ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START + ((ECU_TIMING_CYBALANCE_READ_PARAM_CY1_END - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START + 1) * cy);
+
+    param_index = param_index_base_cy + ECU_TIMING_CYBALANCE_READ_PARAM_CY1_BALANCE - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START;
+    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->cylinders[cy].balance_value;
+    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+
+    param_index = param_index_base_cy + ECU_TIMING_CYBALANCE_READ_PARAM_CY1_BALANCE_NORMALIZED - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START;
+    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->cylinders[cy].normalized_value;
+    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+  }
+}
+
+static void calcdata_timing_read_knockwindow(ecu_core_ctx_t *ctx, void *userdata)
+{
+  error_t err;
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  knockwindow_runtime_ctx_t *dst_ctx;
+
+  // TODO: assign proper instance
+  err = ecu_timings_knockwindow_get_runtime_data_ptr(ECU_TIMING_KNOCKWINDOW_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    BREAKPOINT(0);
+  }
+
+  // TODO: nothing to do
+  (void)timing_ctx;
+  (void)dst_ctx;
+}
+
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
@@ -215,5 +274,60 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
       input_ctx->injection_phase.valid = true;
       timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
     }
+  }
+}
+
+static void calcdata_timing_write_cybalance(ecu_core_ctx_t *ctx, void *userdata)
+{
+  error_t err;
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  cybalance_runtime_ctx_t *dst_ctx;
+
+  // TODO: assign proper instance
+  err = ecu_timings_cybalance_get_runtime_data_ptr(ECU_TIMING_CYBALANCE_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    BREAKPOINT(0);
+  }
+
+  // TODO: nothing to do
+  (void)timing_ctx;
+  (void)dst_ctx;
+}
+
+static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdata)
+{
+  error_t err;
+  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_KNOCKWINDOW][ECU_TIMING_KNOCKWINDOW_1];
+  knockwindow_runtime_ctx_t *dst_ctx;
+  knockwindow_runtime_input_ctx_t *input_ctx;
+  ecu_timing_knockwindow_write_params_t param_index;
+
+  // TODO: assign proper instance
+  err = ecu_timings_knockwindow_get_runtime_data_ptr(ECU_TIMING_KNOCKWINDOW_1, &dst_ctx);
+  if(err != E_OK || dst_ctx == NULL) {
+    BREAKPOINT(0);
+  }
+
+  input_ctx = &dst_ctx->inputs;
+
+  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_ALLOWED;
+  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+    input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    input_ctx->allowed.valid = true;
+    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+  }
+
+  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_START;
+  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+    input_ctx->knock_window_start.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    input_ctx->knock_window_start.valid = true;
+    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+  }
+
+  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_END;
+  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+    input_ctx->knock_window_end.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    input_ctx->knock_window_end.valid = true;
+    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
   }
 }

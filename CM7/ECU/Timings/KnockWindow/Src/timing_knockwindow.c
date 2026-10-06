@@ -90,5 +90,5 @@ error_t knockwindow_get_runtime_data_ptr(knockwindow_ctx_t *ctx, knockwindow_run
 OPTIMIZE_FAST
 ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
 {
-
+  // TODO: to be implemented
 }
