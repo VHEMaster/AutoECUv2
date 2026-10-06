@@ -86,6 +86,9 @@ SECTIONS
     *(.text.HAL_USART_R*) 	/* .text.HAL_* sections */
     *(.text.HAL_FDCAN_Get*) /* .text.HAL_* sections */
     *(.text.HAL_FDCAN_Add*) /* .text.HAL_* sections */
+    
+    *(.text.HAL_*_IRQHandler)  	/* .text.HAL_* sections */
+    *(.text.*_IRQHandler)  			/* .text.IRQHandler sections */
 
     . = ALIGN(4);
     _eitcm_func = .;        /* define a global symbol at data end */
