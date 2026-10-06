@@ -16,20 +16,13 @@ typedef enum {
   KNOCKWINDOW_CONFIG_VERSION_MAX
 }ecu_config_knockwindow_versions_t;
 
-typedef enum {
-  KNOCKWINDOW_CONFIG_WINDOW_TYPE_FIXED = 0,
-  KNOCKWINDOW_CONFIG_WINDOW_TYPE_FLOATING,
-  KNOCKWINDOW_CONFIG_WINDOW_TYPE_MAX
-}knockwindow_config_window_type_t;
-
 
 typedef struct {
     bool enabled;
 
+    float window_prepare_advance;
 
-
-    knockwindow_config_window_type_t window_type;
-
+    ecu_device_pulsedadc_t pulsedadc_instance;
 
     uint32_t align ALIGNED_CACHE;
 }knockwindow_config_v1_t ALIGNED_CACHE;

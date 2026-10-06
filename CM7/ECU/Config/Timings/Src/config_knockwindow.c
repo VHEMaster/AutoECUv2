@@ -6,19 +6,24 @@
  */
 
 #include "common.h"
+#include "config_knockwindow.h"
 #include "config_timings.h"
 #include "versioned_timings.h"
 
 typedef struct ecu_timings_knockwindow_ctx_tag ecu_timings_knockwindow_ctx_t;
 
+static void ecu_timings_knockwindow_sampling_cplt_cb(void *usrdata, const knockwindow_sampling_cplt_ctx_t *cplt_ctx);
+
 typedef struct ecu_timings_knockwindow_ctx_tag {
     knockwindow_config_t config_default;
     knockwindow_init_ctx_t init;
     knockwindow_ctx_t *ctx;
+    ecu_timings_knockwindow_cb_t sampling_callbacks[ECU_TIMINGS_KNOCKWINDOW_CALLBACKS_MAX];
 }ecu_timings_knockwindow_ctx_t;
 
 static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
-    .window_type = KNOCKWINDOW_CONFIG_WINDOW_TYPE_FIXED,
+    .window_prepare_advance = 10.0f,
+    .pulsedadc_instance = ECU_DEVICE_PULSEDADC_1,
 };
 
 static const bool ecu_timings_knockwindow_enabled_default[ECU_TIMING_KNOCKWINDOW_MAX] = {
@@ -28,7 +33,8 @@ static const bool ecu_timings_knockwindow_enabled_default[ECU_TIMING_KNOCKWINDOW
 static RAM_SECTION ecu_timings_knockwindow_ctx_t ecu_timings_knockwindow_ctx[ECU_TIMING_KNOCKWINDOW_MAX] = {
     {
       .init = {
-
+          .callback = ecu_timings_knockwindow_sampling_cplt_cb,
+          .callback_usrdata = &ecu_timings_knockwindow_ctx[ECU_TIMING_KNOCKWINDOW_1],
       },
       .config_default = ecu_timings_knockwindow_config_default,
     },
@@ -136,4 +142,51 @@ error_t ecu_timings_knockwindow_get_runtime_data_ptr(ecu_timing_knockwindow_t in
   } while(0);
 
   return err;
+}
+
+error_t ecu_timings_knockwindow_register_cb(ecu_timing_knockwindow_t instance, knockwindow_sampling_cplt_cb_t callback, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_timings_knockwindow_ctx_t *knockwindow_ctx;
+  ecu_timings_knockwindow_cb_t *cb;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_TIMING_KNOCKWINDOW_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(callback == NULL, err = E_PARAM);
+
+    knockwindow_ctx = &ecu_timings_knockwindow_ctx[instance];
+
+    err = E_OVERFLOW;
+
+    for(int i = 0; i < ECU_TIMINGS_KNOCKWINDOW_CALLBACKS_MAX; i++) {
+      cb = &knockwindow_ctx->sampling_callbacks[i];
+      if(cb->callback == callback && cb->usrdata == usrdata) {
+        err = E_OK;
+        break;
+      } else if(cb->callback == NULL) {
+        cb->callback = callback;
+        cb->usrdata = usrdata;
+        err = E_OK;
+        break;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+
+ITCM_FUNC static void ecu_timings_knockwindow_sampling_cplt_cb(void *usrdata, const knockwindow_sampling_cplt_ctx_t *cplt_ctx)
+{
+  ecu_timings_knockwindow_ctx_t *ctx = (ecu_timings_knockwindow_ctx_t *)usrdata;
+  ecu_timings_knockwindow_cb_t *cb;
+
+  for(int i = 0; i < ECU_TIMINGS_KNOCKWINDOW_CALLBACKS_MAX; i++) {
+    cb = &ctx->sampling_callbacks[i];
+    if(cb->callback != NULL) {
+      cb->callback(cb->usrdata, cplt_ctx);
+    } else {
+      break;
+    }
+  }
 }

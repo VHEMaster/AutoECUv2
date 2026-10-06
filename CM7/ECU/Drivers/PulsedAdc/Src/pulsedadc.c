@@ -42,6 +42,7 @@ ITCM_FUNC error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status;
+  uint16_t *samples_buffer;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -51,13 +52,18 @@ ITCM_FUNC error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples)
         PULSEDADC_STATUS_ERROR)), err = E_INVALACT);
     BREAK_IF_ACTION(samples > ctx->init.samples_buffer_size, err = E_OVERFLOW);
 
+    samples_buffer = ctx->init.samples_buffer;
+
     if(samples == PULSEDADC_SAMPLES_ALL) {
-      ctx->target_samples = ctx->init.samples_buffer_size;
-    } else {
-      ctx->target_samples = samples;
+      samples = ctx->init.samples_buffer_size;
     }
 
-    status = HAL_ADC_Start_DMA(ctx->init.hadc, (uint32_t *)ctx->init.samples_buffer, samples);
+    ctx->target_samples = samples;
+
+    ctx->sampling_cplt_ctx.samples_buffer = samples_buffer;
+    ctx->sampling_cplt_ctx.samples_count = samples;
+
+    status = HAL_ADC_Start_DMA(ctx->init.hadc, (uint32_t *)samples_buffer, samples);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     ctx->status = PULSEDADC_STATUS_PREPARED;
@@ -84,6 +90,8 @@ ITCM_FUNC error_t pulsedadc_start(pulsedadc_ctx_t *ctx)
       err = pulsedadc_prepare(ctx, ctx->init.samples_buffer_size);
       BREAK_IF(err != E_OK);
     }
+
+    ctx->sampling_cplt_ctx.time_start = time_now_us();
 
     status = HAL_HRTIM_SimpleBaseStart(ctx->init.hhrtim, ctx->init.hrtim_index);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
@@ -165,11 +173,18 @@ void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx)
   do {
     BREAK_IF(ctx == NULL || ctx->status != PULSEDADC_STATUS_RUNNING);
 
+    ctx->sampling_cplt_ctx.time_cplt = time_now_us();
+
     HAL_HRTIM_SimpleBaseStop(ctx->init.hhrtim, ctx->init.hrtim_index);
+    CacheInvalidate(ctx->init.samples_buffer, ctx->target_samples * sizeof(*ctx->init.samples_buffer));
 
     ctx->current_samples = ctx->target_samples;
 
     ctx->status = PULSEDADC_STATUS_CPLT;
+
+    if(ctx->init.sampling_cplt_cb != NULL) {
+      ctx->init.sampling_cplt_cb(ctx->init.callback_usrdata, &ctx->sampling_cplt_ctx);
+    }
 
   } while(0);
 }
@@ -184,6 +199,10 @@ void pulsedadc_adc_dma_error(pulsedadc_ctx_t *ctx)
 
     ctx->status = PULSEDADC_STATUS_ERROR;
     ctx->current_samples = 0u;
+
+    if(ctx->init.sampling_error_cb != NULL) {
+      ctx->init.sampling_error_cb(ctx->init.callback_usrdata);
+    }
 
   } while(0);
 }

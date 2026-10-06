@@ -130,7 +130,7 @@ static const ignition_config_t ecu_timings_ignition_config_default = {
             .distributor_dutycycle = 0.5f,
         }, //IGNITION_CONFIG_GROUP_SECONDARY
         {
-            .enabled = false,
+            .enabled = true,
             .process_update_trigger = IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS,
             .mode = IGNITION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY,
             .cylinders = {

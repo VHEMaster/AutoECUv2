@@ -9,8 +9,14 @@
 #define DRIVERS_PULSEDADC_INC_PULSEDADC_H_
 
 #include "common.h"
+#include "time.h"
 
 #define PULSEDADC_SAMPLES_ALL   (0u)
+
+typedef struct pulsedadc_sampling_cplt_ctx_tag pulsedadc_sampling_cplt_ctx_t;
+
+typedef void (*pulsedadc_sampling_cplt_cb_t)(void *usrdata, const pulsedadc_sampling_cplt_ctx_t *cplt_ctx);
+typedef void (*pulsedadc_sampling_error_cb_t)(void *usrdata);
 
 typedef enum {
   PULSEDADC_STATUS_NONE = 0,
@@ -20,6 +26,13 @@ typedef enum {
   PULSEDADC_STATUS_CPLT = 8,
   PULSEDADC_STATUS_ERROR = 16,
 }pulsedadc_status_t;
+
+typedef struct pulsedadc_sampling_cplt_ctx_tag {
+    const uint16_t *samples_buffer;
+    uint16_t samples_count;
+    time_us_t time_start;
+    time_us_t time_cplt;
+}pulsedadc_sampling_cplt_ctx_t;
 
 typedef struct {
     uint32_t samples_buffer_size;
@@ -33,6 +46,10 @@ typedef struct {
 
     uint32_t base_frequency;
     uint32_t sampling_frequency_default;
+
+    pulsedadc_sampling_cplt_cb_t sampling_cplt_cb;
+    pulsedadc_sampling_error_cb_t sampling_error_cb;
+    void *callback_usrdata;
 }pulsedadc_init_ctx_t;
 
 typedef struct {
@@ -43,6 +60,8 @@ typedef struct {
     uint32_t sampling_frequency;
     uint32_t target_samples;
     uint32_t current_samples;
+
+    pulsedadc_sampling_cplt_ctx_t sampling_cplt_ctx;
 }pulsedadc_ctx_t;
 
 error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ctx);

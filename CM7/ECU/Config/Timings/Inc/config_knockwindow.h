@@ -9,6 +9,14 @@
 #define CONFIG_TIMINGS_INC_CONFIG_KNOCKWINDOW_H_
 
 #include "versioned_timings.h"
+#include "timing_knockwindow.h"
+
+#define ECU_TIMINGS_KNOCKWINDOW_CALLBACKS_MAX   8
+
+typedef struct {
+    knockwindow_sampling_cplt_cb_t callback;
+    void *usrdata;
+}ecu_timings_knockwindow_cb_t;
 
 typedef enum {
   ECU_TIMING_KNOCKWINDOW_READ_PARAM_MAX
@@ -27,6 +35,9 @@ error_t ecu_timings_knockwindow_configure(ecu_timing_knockwindow_t instance, con
 error_t ecu_timings_knockwindow_reset(ecu_timing_knockwindow_t instance);
 
 error_t ecu_timings_knockwindow_get_runtime_data_ptr(ecu_timing_knockwindow_t instance, knockwindow_runtime_ctx_t **data);
+
+
+error_t ecu_timings_knockwindow_register_cb(ecu_timing_knockwindow_t instance, knockwindow_sampling_cplt_cb_t callback, void *usrdata);
 
 
 
