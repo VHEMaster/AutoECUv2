@@ -54,18 +54,22 @@
 #if __CORTEX_M == (7)
 STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer & (ALIGNMENT_CACHE - 1);
-  if(aligned == 0)
-    SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, size);
-  else SCB_InvalidateDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
+  uintptr_t address = (uintptr_t)buffer;
+  uintptr_t aligned_address = address & ~(uintptr_t)(ALIGNMENT_CACHE - 1u);
+
+  uint32_t aligned_size = size + (uint32_t)(address - aligned_address);
+
+  SCB_InvalidateDCache_by_Addr((uint32_t *)aligned_address, aligned_size);
 }
 
 STATIC_INLINE void CacheClean(const void * buffer, uint32_t size)
 {
-  uint32_t aligned = (uint32_t)buffer & (ALIGNMENT_CACHE - 1);
-  if(aligned == 0)
-    SCB_CleanDCache_by_Addr((uint32_t*)buffer, size);
-  else SCB_CleanDCache_by_Addr((uint32_t*)((uint32_t)buffer - aligned), size + aligned);
+  uintptr_t address = (uintptr_t)buffer;
+  uintptr_t aligned_address = address & ~(uintptr_t)(ALIGNMENT_CACHE - 1u);
+
+  uint32_t aligned_size = size + (uint32_t)(address - aligned_address);
+
+  SCB_CleanDCache_by_Addr((uint32_t *)aligned_address, aligned_size);
 }
 #endif
 
