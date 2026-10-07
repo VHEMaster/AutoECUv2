@@ -33,15 +33,15 @@ static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
                     .cy = ECU_CYLINDER_1,
                 },
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_2,
                 },
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_3,
                 },
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_4,
                 },
             },
@@ -50,11 +50,11 @@ static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
             .pulsedadc_instance = ECU_DEVICE_PULSEDADC_2,
             .cylinders_supported = {
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_1,
                 },
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_2,
                 },
                 {
@@ -62,7 +62,7 @@ static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
                     .cy = ECU_CYLINDER_3,
                 },
                 {
-                    .enabled = false,
+                    .enabled = true,
                     .cy = ECU_CYLINDER_4,
                 },
             },

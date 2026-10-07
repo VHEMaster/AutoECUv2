@@ -37,6 +37,7 @@ typedef struct pulsedadc_sampling_cplt_ctx_tag {
 typedef struct {
     uint32_t samples_buffer_size;
     uint16_t *samples_buffer;
+    bool ring_buffer;
 
     ADC_HandleTypeDef *hadc;
     uint32_t adc_channel;
@@ -60,6 +61,7 @@ typedef struct {
     uint32_t sampling_frequency;
     uint32_t target_samples;
     uint32_t current_samples;
+    uint16_t *samples_buffer;
 
     pulsedadc_sampling_cplt_ctx_t sampling_cplt_ctx;
 }pulsedadc_ctx_t;

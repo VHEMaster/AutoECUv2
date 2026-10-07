@@ -17,6 +17,8 @@ error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ct
 
   do {
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL || init_ctx->hadc == NULL || init_ctx->hhrtim == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->samples_buffer == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(((uintptr_t)init_ctx->samples_buffer & (ALIGNMENT_CACHE - 1u)), err = E_PARAM);
 
     memset(ctx, 0u, sizeof(pulsedadc_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(pulsedadc_init_ctx_t));
@@ -30,6 +32,8 @@ error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ct
     status = HAL_HRTIM_TimeBaseConfig(ctx->init.hhrtim, ctx->init.hrtim_index, &time_base_cfg);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
+    ctx->samples_buffer = ctx->init.samples_buffer;
+    ctx->current_samples = 0;
     ctx->status = PULSEDADC_STATUS_IDLE;
     ctx->ready = true;
 
@@ -52,10 +56,21 @@ ITCM_FUNC error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples)
         PULSEDADC_STATUS_ERROR)), err = E_INVALACT);
     BREAK_IF_ACTION(samples > ctx->init.samples_buffer_size, err = E_OVERFLOW);
 
-    samples_buffer = ctx->init.samples_buffer;
+    samples_buffer = ctx->samples_buffer;
 
     if(samples == PULSEDADC_SAMPLES_ALL) {
       samples = ctx->init.samples_buffer_size;
+    }
+
+    if(ctx->init.ring_buffer == true && ctx->current_samples > 0) {
+      samples_buffer += ctx->current_samples;
+      samples_buffer = (uint16_t *)(((uintptr_t)samples_buffer + ALIGNMENT_CACHE - 1u) &
+          ~(uintptr_t)(ALIGNMENT_CACHE - 1u));
+
+      if(samples_buffer + samples > ctx->init.samples_buffer + ctx->init.samples_buffer_size) {
+        samples_buffer = ctx->init.samples_buffer;
+      }
+      ctx->samples_buffer = samples_buffer;
     }
 
     ctx->target_samples = samples;
@@ -145,7 +160,7 @@ error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, uint16_t **buffer, uint32_t 
           ((DMA_Stream_TypeDef *)ctx->init.hadc->DMA_Handle->Instance)->NDTR;
     }
 
-    *buffer = ctx->init.samples_buffer;
+    *buffer = ctx->samples_buffer;
     *samples = ctx->current_samples;
 
   } while(0);
@@ -176,7 +191,7 @@ void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx)
     ctx->sampling_cplt_ctx.time_cplt = time_now_us();
 
     HAL_HRTIM_SimpleBaseStop(ctx->init.hhrtim, ctx->init.hrtim_index);
-    CacheInvalidate(ctx->init.samples_buffer, ctx->target_samples * sizeof(*ctx->init.samples_buffer));
+    CacheInvalidate(ctx->samples_buffer, ctx->target_samples * sizeof(*ctx->samples_buffer));
 
     ctx->current_samples = ctx->target_samples;
 

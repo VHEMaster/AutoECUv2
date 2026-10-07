@@ -11,7 +11,7 @@
 #include "config_extern.h"
 #include "compiler.h"
 
-#define ECU_PULSEDADC_SAMPLING_BUFFER_SIZE    2048
+#define ECU_PULSEDADC_SAMPLING_BUFFER_SIZE    8192
 
 static void ecu_devices_pulsedadc_sampling_cplt_cb(void *usrdata, const pulsedadc_sampling_cplt_ctx_t *cplt_ctx);
 static void ecu_devices_pulsedadc_sampling_error_cb(void *usrdata);
@@ -31,6 +31,7 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
         .init = {
             .samples_buffer_size = ECU_PULSEDADC_SAMPLING_BUFFER_SIZE,
             .samples_buffer = ecu_devices_pulsedadc_sambling_buffer[ECU_DEVICE_PULSEDADC_1],
+            .ring_buffer = true,
 
             .hadc = &hadc1,
             .adc_channel = ADC_CHANNEL_10,
@@ -50,6 +51,7 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
         .init = {
             .samples_buffer_size = ECU_PULSEDADC_SAMPLING_BUFFER_SIZE,
             .samples_buffer = ecu_devices_pulsedadc_sambling_buffer[ECU_DEVICE_PULSEDADC_2],
+            .ring_buffer = true,
 
             .hadc = &hadc2,
             .adc_channel = ADC_CHANNEL_11,
