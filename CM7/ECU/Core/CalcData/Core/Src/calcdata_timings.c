@@ -301,6 +301,7 @@ static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdat
   knockwindow_runtime_ctx_t *dst_ctx;
   knockwindow_runtime_input_ctx_t *input_ctx;
   ecu_timing_knockwindow_write_params_t param_index;
+  ecu_timing_injection_write_params_t param_index_base;
 
   // TODO: assign proper instance
   err = ecu_timings_knockwindow_get_runtime_data_ptr(ECU_TIMING_KNOCKWINDOW_1, &dst_ctx);
@@ -308,26 +309,29 @@ static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdat
     BREAKPOINT(0);
   }
 
-  input_ctx = &dst_ctx->inputs;
+  for(ecu_bank_t b = 0; b < ECU_BANK_MAX; b++) {
+    input_ctx = &dst_ctx->input_banked[b];
+    param_index_base = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START + ((ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_END - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START + 1) * b);
 
-  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_ALLOWED;
-  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-    input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
-    input_ctx->allowed.valid = true;
-    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
-  }
+    param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
+    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+      input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+      input_ctx->allowed.valid = true;
+      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+    }
 
-  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_START;
-  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-    input_ctx->knock_window_start.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
-    input_ctx->knock_window_start.valid = true;
-    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
-  }
+    param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_KNOCK_WINDOW_START - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
+    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+      input_ctx->knock_window_start.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+      input_ctx->knock_window_start.valid = true;
+      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+    }
 
-  param_index = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_KNOCK_WINDOW_END;
-  if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-    input_ctx->knock_window_end.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
-    input_ctx->knock_window_end.valid = true;
-    timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+    param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_KNOCK_WINDOW_END - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
+    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
+      input_ctx->knock_window_end.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+      input_ctx->knock_window_end.valid = true;
+      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+    }
   }
 }

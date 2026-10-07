@@ -23,7 +23,51 @@ typedef struct ecu_timings_knockwindow_ctx_tag {
 
 static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
     .window_prepare_advance = 10.0f,
-    .pulsedadc_instance = ECU_DEVICE_PULSEDADC_1,
+    .setups_count = 2,
+    .setups = {
+        {
+            .pulsedadc_instance = ECU_DEVICE_PULSEDADC_1,
+            .cylinders_supported = {
+                {
+                    .enabled = true,
+                    .cy = ECU_CYLINDER_1,
+                },
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_2,
+                },
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_3,
+                },
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_4,
+                },
+            },
+        }, //KNOCKWINDOW_CONFIG_SETUP_1
+        {
+            .pulsedadc_instance = ECU_DEVICE_PULSEDADC_2,
+            .cylinders_supported = {
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_1,
+                },
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_2,
+                },
+                {
+                    .enabled = true,
+                    .cy = ECU_CYLINDER_3,
+                },
+                {
+                    .enabled = false,
+                    .cy = ECU_CYLINDER_4,
+                },
+            },
+        }, //KNOCKWINDOW_CONFIG_SETUP_2
+    },
 };
 
 static const bool ecu_timings_knockwindow_enabled_default[ECU_TIMING_KNOCKWINDOW_MAX] = {

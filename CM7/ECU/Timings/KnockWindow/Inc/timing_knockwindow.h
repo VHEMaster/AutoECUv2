@@ -37,20 +37,40 @@ typedef struct knockwindow_sampling_cplt_ctx_tag {
     time_us_t time_cplt;
     float position_start;
     float position_cplt;
+    ecu_cylinder_t cylinder;
+    knockwindow_config_setup_t setup_index;
 }knockwindow_sampling_cplt_ctx_t;
 
 typedef struct {
-    knockwindow_runtime_input_ctx_t inputs;
+    knockwindow_runtime_input_ctx_t input_banked[ECU_BANK_MAX];
+}knockwindow_runtime_ctx_t;
 
+typedef struct {
     knockwindow_runtime_state_t state;
+
+}knockwindow_setup_runtime_cylinder_ctx_t;
+
+typedef struct {
     bool cplt_irq;
     bool error_irq;
     uint16_t samples_requested;
 
     float position_start;
     float position_cplt;
+    ecu_cylinder_t cylinder_occupied;
 
-}knockwindow_runtime_ctx_t;
+    bool working;
+    knockwindow_setup_runtime_cylinder_ctx_t cylinder[ECU_CYLINDER_MAX];
+
+}knockwindow_setup_runtime_ctx_t;
+
+typedef struct {
+    knockwindow_setup_runtime_ctx_t runtime;
+
+    const timing_base_data_t *timing_base_data;
+    pulsedadc_ctx_t *pulsedadc_ctx;
+    knockwindow_sampling_cplt_ctx_t sampling_cplt_ctx;
+}knockwindow_setup_ctx_t;
 
 typedef struct {
     const ecu_config_engine_calibration_t *calibration_config;
@@ -67,9 +87,7 @@ typedef struct {
     bool configured;
 
     knockwindow_runtime_ctx_t runtime;
-    const timing_base_data_t *timing_base_data;
-    pulsedadc_ctx_t *pulsedadc_ctx;
-    knockwindow_sampling_cplt_ctx_t sampling_cplt_ctx;
+    knockwindow_setup_ctx_t setups[KNOCKWINDOW_CONFIG_SETUP_MAX];
 
 }knockwindow_ctx_t;
 
