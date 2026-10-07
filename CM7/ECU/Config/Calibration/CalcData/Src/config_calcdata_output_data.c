@@ -1063,7 +1063,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
             },
         }, //CALCDATA_OUTPUT_KNOCK_WINDOW_START
         {
-            .data_failsafe = { .value = 50.0f },
+            .data_failsafe = { .value = -50.0f },
             .variations = 1,
             .variants = {
                 {

@@ -175,8 +175,8 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
         CONTINUE_IF(inputs->knock_window_start.valid != true);
         CONTINUE_IF(inputs->knock_window_end.valid != true);
 
-        window_start = inputs->knock_window_start.value;
-        window_end = inputs->knock_window_end.value;
+        window_start = -inputs->knock_window_start.value;
+        window_end = -inputs->knock_window_end.value;
         window_prepare = window_start - config->window_prepare_advance;
         window_overflow = window_end + config->window_overflow_threshold;
 
@@ -198,8 +198,8 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
                   samples_requested = window_delta * setup->pulsedadc_ctx->sampling_frequency * TIME_S_IN_US;
                   setup_runtime->working_started_time = time_now_us();
                   setup_runtime->cylinder_occupied = cy;
-                  setup_runtime->position_start = window_start;
-                  setup_runtime->position_cplt = window_end;
+                  setup_runtime->position_start = -window_start;
+                  setup_runtime->position_cplt = -window_end;
                   setup_runtime->samples_requested = samples_requested;
                   setup_runtime->cplt_irq = false;
                   setup_runtime->error_irq = false;
@@ -229,6 +229,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
             if(crankshaft_data->valid == true) {
               if(crankshaft_data->sensor_data.current.position >= window_start) {
                 if(crankshaft_data->sensor_data.current.position < window_end) {
+                  setup_runtime->position_start = -crankshaft_data->sensor_data.current.position;
                   err = pulsedadc_start(setup->pulsedadc_ctx);
                   if(err != E_OK) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
@@ -261,6 +262,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
             if(setup_runtime->cplt_irq) {
               if(setup->sampling_cplt_ctx.samples_buffer != NULL &&
                   setup->sampling_cplt_ctx.samples_count > 0u) {
+                setup_runtime->position_cplt = -crankshaft_data->sensor_data.current.position;
                 setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
                 setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
                 setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
@@ -298,6 +300,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
 
               if(setup->sampling_cplt_ctx.samples_buffer != NULL &&
                   setup->sampling_cplt_ctx.samples_count > 0u) {
+                setup_runtime->position_cplt = -crankshaft_data->sensor_data.current.position;
                 setup->sampling_cplt_ctx.time_start = setup_runtime->working_started_time;
                 setup->sampling_cplt_ctx.time_cplt = time_now_us();
                 setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
