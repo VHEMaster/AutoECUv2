@@ -53,11 +53,8 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_diff(time_us_t a, time_us_t 
 {
   time_us_t retval;
 
-  if(a >= b) {
-    retval = a - b;
-  } else {
-    retval = (g_time_mask - b) + a + 1;
-  }
+  retval = a - b;
+  retval &= g_time_mask;
 
   return retval;
 }
@@ -138,11 +135,8 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_tick_t time_tick_diff(time_tick_t a, t
 {
   time_us_t retval;
 
-  if(a >= b) {
-    retval = a - b;
-  } else {
-    retval = (g_tick_mask - b) + a + 1;
-  }
+  retval = a - b;
+  retval &= g_tick_mask;
 
   return retval;
 }
