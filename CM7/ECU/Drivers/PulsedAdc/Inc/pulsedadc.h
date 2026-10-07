@@ -73,7 +73,7 @@ error_t pulsedadc_set_sampling_frequency(pulsedadc_ctx_t *ctx, uint32_t sampling
 error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples);
 error_t pulsedadc_start(pulsedadc_ctx_t *ctx);
 error_t pulsedadc_stop(pulsedadc_ctx_t *ctx);
-error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, uint16_t **buffer, uint32_t *samples);
+error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, const uint16_t **buffer, uint16_t *samples);
 error_t pulsedadc_get_status(pulsedadc_ctx_t *ctx, pulsedadc_status_t *status);
 
 void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx);

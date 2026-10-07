@@ -60,7 +60,9 @@ typedef struct {
     ecu_cylinder_t cylinder_occupied;
 
     bool working;
+    time_us_t working_started_time;
     knockwindow_setup_runtime_cylinder_ctx_t cylinder[ECU_CYLINDER_MAX];
+
 
 }knockwindow_setup_runtime_ctx_t;
 

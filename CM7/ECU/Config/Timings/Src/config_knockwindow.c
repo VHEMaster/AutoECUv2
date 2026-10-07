@@ -23,9 +23,10 @@ typedef struct ecu_timings_knockwindow_ctx_tag {
 
 static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
     .window_prepare_advance = 10.0f,
-    .setups_count = 2,
+    .window_overflow_threshold = 10.0f,
     .setups = {
         {
+            .enabled = true,
             .pulsedadc_instance = ECU_DEVICE_PULSEDADC_1,
             .cylinders_supported = {
                 {
@@ -47,6 +48,7 @@ static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
             },
         }, //KNOCKWINDOW_CONFIG_SETUP_1
         {
+            .enabled = true,
             .pulsedadc_instance = ECU_DEVICE_PULSEDADC_2,
             .cylinders_supported = {
                 {

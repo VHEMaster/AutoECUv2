@@ -145,7 +145,7 @@ ITCM_FUNC error_t pulsedadc_stop(pulsedadc_ctx_t *ctx)
   return err;
 }
 
-error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, uint16_t **buffer, uint32_t *samples)
+error_t pulsedadc_get_samples(pulsedadc_ctx_t *ctx, const uint16_t **buffer, uint16_t *samples)
 {
   error_t err = E_OK;
 

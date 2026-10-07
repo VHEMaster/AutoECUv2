@@ -52,18 +52,20 @@ error_t knockwindow_configure(knockwindow_ctx_t *ctx, const knockwindow_config_t
     }
 
     if(ctx->config.enabled) {
-      for(uint8_t i = 0; i < config->setups_count; i++) {
+      for(uint8_t i = 0; i < KNOCKWINDOW_CONFIG_SETUP_MAX; i++) {
         config_setup = &ctx->config.setups[i];
         setup = &ctx->setups[i];
 
-        err = ecu_devices_get_pulsedadc_ctx(config_setup->pulsedadc_instance, &setup->pulsedadc_ctx);
-        BREAK_IF(err != E_OK);
+        if(config_setup->enabled) {
+          err = ecu_devices_get_pulsedadc_ctx(config_setup->pulsedadc_instance, &setup->pulsedadc_ctx);
+          BREAK_IF(err != E_OK);
 
-        err = ecu_devices_pulsedadc_register_cb(config_setup->pulsedadc_instance,
-            knockwindow_pulsedadc_sampling_cplt_cb_t,
-            knockwindow_pulsedadc_sampling_error_cb_t,
-            setup);
-        BREAK_IF(err != E_OK);
+          err = ecu_devices_pulsedadc_register_cb(config_setup->pulsedadc_instance,
+              knockwindow_pulsedadc_sampling_cplt_cb_t,
+              knockwindow_pulsedadc_sampling_error_cb_t,
+              setup);
+          BREAK_IF(err != E_OK);
+        }
       }
 
       ctx->configured = true;
@@ -126,7 +128,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
   ecu_bank_t bank_cy;
 
   uint32_t cylinders_count;
-  float window_start, window_end, window_prepare;
+  float window_start, window_end, window_prepare, window_overflow;
 
   do {
     config = &ctx->config;
@@ -145,12 +147,14 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
     calibration_config = ctx->init.calibration_config;
     cylinders_count = calibration_config->cylinders.cylinders_count;
 
-    for(knockwindow_config_setup_t s = 0; s < config->setups_count; s++) {
+    for(knockwindow_config_setup_t s = 0; s < KNOCKWINDOW_CONFIG_SETUP_MAX; s++) {
+      config_setup = &config->setups[s];
+      CONTINUE_IF(config_setup->enabled == false);
+
       setup = &ctx->setups[s];
       BREAK_IF(setup->pulsedadc_ctx == NULL);
 
       setup->timing_base_data = timing_base_data;
-      config_setup = &config->setups[s];
 
       runtime = &ctx->runtime;
 
@@ -174,73 +178,97 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
         window_start = inputs->knock_window_start.value;
         window_end = inputs->knock_window_end.value;
         window_prepare = window_start - config->window_prepare_advance;
+        window_overflow = window_end + config->window_overflow_threshold;
 
         crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
         runtime_cy = &setup_runtime->cylinder[cy];
 
         if(runtime_cy->state == KNOCKWINDOW_STATE_SYNC) {
-          if(crankshaft_data->sensor_data.current.position > window_end || crankshaft_data->sensor_data.current.position < window_prepare) {
+          if(crankshaft_data->valid &&
+              (crankshaft_data->sensor_data.current.position > window_end ||
+              crankshaft_data->sensor_data.current.position < window_prepare)) {
             runtime_cy->state = KNOCKWINDOW_STATE_WAITING;
           }
         } else if(runtime_cy->state == KNOCKWINDOW_STATE_WAITING) {
           if(setup_runtime->working == false) {
-            if(crankshaft_data->sensor_data.current.position >= window_prepare && crankshaft_data->sensor_data.current.position < window_end) {
-              if(crankshaft_data->sensor_data.current.position < window_start) {
-                window_delta = (window_end - window_start) * crankshaft_data->sensor_data.us_per_degree_pulsed;
-                samples_requested = window_delta * setup->pulsedadc_ctx->sampling_frequency * TIME_S_IN_US;
-                setup_runtime->cylinder_occupied = cy;
-                setup_runtime->position_start = window_start;
-                setup_runtime->position_cplt = window_end;
-                setup_runtime->samples_requested = samples_requested;
-                setup_runtime->cplt_irq = false;
-                setup_runtime->error_irq = false;
-                err = pulsedadc_prepare(setup->pulsedadc_ctx, samples_requested);
-                if(err == E_OVERFLOW) {
+            if(crankshaft_data->valid == true) {
+              if(crankshaft_data->sensor_data.current.position >= window_prepare && crankshaft_data->sensor_data.current.position < window_end) {
+                if(crankshaft_data->sensor_data.current.position < window_start) {
+                  window_delta = (window_end - window_start) * crankshaft_data->sensor_data.us_per_degree_pulsed;
+                  samples_requested = window_delta * setup->pulsedadc_ctx->sampling_frequency * TIME_S_IN_US;
+                  setup_runtime->working_started_time = time_now_us();
+                  setup_runtime->cylinder_occupied = cy;
+                  setup_runtime->position_start = window_start;
+                  setup_runtime->position_cplt = window_end;
+                  setup_runtime->samples_requested = samples_requested;
+                  setup_runtime->cplt_irq = false;
+                  setup_runtime->error_irq = false;
+                  err = pulsedadc_prepare(setup->pulsedadc_ctx, samples_requested);
+                  if(err == E_OVERFLOW) {
+                    runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+                  } else  if(err != E_OK) {
+                    runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+                    // TODO: error handling
+                    break;
+                  }
+                  runtime_cy->state = KNOCKWINDOW_STATE_PREPARED;
+                  setup_runtime->working = true;
+                } else {
                   runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                } else  if(err != E_OK) {
-                  runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                  // TODO: error handling
+                  // TODO: OVERSHOOT
                   break;
                 }
-                runtime_cy->state = KNOCKWINDOW_STATE_PREPARED;
-                setup_runtime->working = true;
-              } else {
-                runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                // TODO: OVERSHOOT
-                break;
               }
+            } else {
+              runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+              break;
             }
           }
         } else if(setup_runtime->working == true && setup_runtime->cylinder_occupied == cy) {
           if(runtime_cy->state == KNOCKWINDOW_STATE_PREPARED) {
-            if(crankshaft_data->sensor_data.current.position >= window_start) {
-              if(crankshaft_data->sensor_data.current.position < window_end) {
-                err = pulsedadc_start(setup->pulsedadc_ctx);
-                if(err != E_OK) {
+            if(crankshaft_data->valid == true) {
+              if(crankshaft_data->sensor_data.current.position >= window_start) {
+                if(crankshaft_data->sensor_data.current.position < window_end) {
+                  err = pulsedadc_start(setup->pulsedadc_ctx);
+                  if(err != E_OK) {
+                    runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+                    setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
+                    setup_runtime->working = false;
+                    // TODO: error handling
+                    break;
+                  }
+                  runtime_cy->state = KNOCKWINDOW_STATE_SAMPLING;
+                } else {
                   runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
                   setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
                   setup_runtime->working = false;
-                  // TODO: error handling
+                  // TODO: OVERSHOOT
                   break;
                 }
-                runtime_cy->state = KNOCKWINDOW_STATE_SAMPLING;
-              } else {
-                runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
-                setup_runtime->working = false;
-                // TODO: OVERSHOOT
+              }
+            } else {
+              err = pulsedadc_stop(setup->pulsedadc_ctx);
+              if(err != E_OK) {
+                // TODO: error handling
                 break;
               }
+              runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+              setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
+              setup_runtime->working = false;
+              break;
             }
           } else if(runtime_cy->state == KNOCKWINDOW_STATE_SAMPLING) {
             if(setup_runtime->cplt_irq) {
-              setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
-              setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
-              setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
-              setup->sampling_cplt_ctx.setup_index = s;
+              if(setup->sampling_cplt_ctx.samples_buffer != NULL &&
+                  setup->sampling_cplt_ctx.samples_count > 0u) {
+                setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
+                setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
+                setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
+                setup->sampling_cplt_ctx.setup_index = s;
 
-              if(ctx->init.callback != NULL) {
-                ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                if(ctx->init.callback != NULL) {
+                  ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                }
               }
 
               runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
@@ -252,15 +280,42 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
               setup_runtime->error_irq = false;
               setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
               setup_runtime->working = false;
-            }
+            } else if(crankshaft_data->sensor_data.current.position >= window_overflow) {
+              err = pulsedadc_get_samples(setup->pulsedadc_ctx, &setup->sampling_cplt_ctx.samples_buffer, &setup->sampling_cplt_ctx.samples_count);
+              if(err != E_OK) {
+                setup->sampling_cplt_ctx.samples_buffer = NULL;
+                setup->sampling_cplt_ctx.samples_count = 0u;
+              }
+              err = pulsedadc_stop(setup->pulsedadc_ctx);
+              if(err != E_OK) {
+                runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
+                setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
+                setup_runtime->working = false;
+                setup_runtime->cplt_irq = false;
+                setup_runtime->error_irq = false;
+                break;
+              }
 
-            // TODO: timeout handling
-            /*
-            if(crankshaft_data->sensor_data.current.position >= window_end) {
+              if(setup->sampling_cplt_ctx.samples_buffer != NULL &&
+                  setup->sampling_cplt_ctx.samples_count > 0u) {
+                setup->sampling_cplt_ctx.time_start = setup_runtime->working_started_time;
+                setup->sampling_cplt_ctx.time_cplt = time_now_us();
+                setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
+                setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
+                setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
+                setup->sampling_cplt_ctx.setup_index = s;
+
+                if(ctx->init.callback != NULL) {
+                  ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                }
+              }
+
+              setup_runtime->cplt_irq = false;
+              setup_runtime->error_irq = false;
+
               runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
               setup_runtime->working = false;
             }
-            */
           }
         }
       }

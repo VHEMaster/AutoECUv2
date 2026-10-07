@@ -28,6 +28,7 @@ typedef struct {
 }knockwindow_config_setup_cylinder_t;
 
 typedef struct {
+    bool enabled;
     ecu_device_pulsedadc_t pulsedadc_instance;
 
     knockwindow_config_setup_cylinder_t cylinders_supported[ECU_CYLINDER_MAX];
@@ -38,8 +39,8 @@ typedef struct {
     bool enabled;
 
     float window_prepare_advance;
+    float window_overflow_threshold;
 
-    uint16_t setups_count;
     knockwindow_config_setup_ctx_t setups[KNOCKWINDOW_CONFIG_SETUP_MAX];
 
     uint32_t align ALIGNED_CACHE;
