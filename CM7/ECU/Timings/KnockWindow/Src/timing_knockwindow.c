@@ -387,7 +387,7 @@ ITCM_FUNC static void knockwindow_pulsedadc_sampling_error_cb_t(void *usrdata)
   }
 }
 
-static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx_t *setup_runtime, knockwindow_sampling_cplt_ctx_t *sampling_cplt_ctx)
+ITCM_FUNC static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx_t *setup_runtime, knockwindow_sampling_cplt_ctx_t *sampling_cplt_ctx)
 {
   float position_start_target = setup_runtime->position_start_target;
   float position_cplt_target = setup_runtime->position_cplt_target;

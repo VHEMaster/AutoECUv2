@@ -89,7 +89,7 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left,
 
   if(input_right != input_left) {
     mult = (input_mid - input_left) / (input_right - input_left);
-    time_adder = lrintf(time_delta * mult);
+    time_adder = roundf(time_delta * mult);
 
     if(time_adder >= 0) {
       result = time_add(time_left, (time_delta_us_t)time_adder);

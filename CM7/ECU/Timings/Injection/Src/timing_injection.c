@@ -676,7 +676,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
 
                       if(pulse_time_cy) {
                         time_to_activate = crankshaft_data->sensor_data.current.timestamp +
-                            lrintf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
+                            roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
                         time_to_inject = time_to_activate + pulse_time_cy;
 
                         err = timing_pulse_schedule(cy_config->output_pin,
