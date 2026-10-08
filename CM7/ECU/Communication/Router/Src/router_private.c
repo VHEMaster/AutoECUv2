@@ -8,8 +8,6 @@
 #include "config_comm.h"
 #include "router_private.h"
 #include "config_isotp.h"
-#include "config_common.h"
-#include <math.h>
 
 static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
 static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata);
@@ -393,76 +391,12 @@ error_t router_configure_diag(router_ctx_t *ctx)
   return err;
 }
 
-static bool router_signal_id_match(const router_config_can_signals_list_item_t *route, uint32_t id)
-{
-  if(!route->enabled) {
-    return false;
-  }
-  if(route->msg_id_1_start == route->msg_id_2_end) {
-    return id == route->msg_id_1_start;
-  }
-  return id >= route->msg_id_1_start && id <= route->msg_id_2_end;
-}
-
 error_t router_configure_signals(router_ctx_t *ctx)
 {
   error_t err = E_OK;
-  const router_signal_tx_config_t *tx;
-  const router_signal_tx_message_config_t *msg;
-
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    memset(&ctx->signals, 0, sizeof(ctx->signals));
 
-    tx = ctx->init.signals_tx;
-    if(tx == NULL) {
-      break;
-    }
-    BREAK_IF_ACTION(tx->messages_count > ROUTER_SIGNAL_TX_MESSAGES_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(tx->messages_count && tx->messages == NULL, err = E_PARAM);
-
-    for(uint8_t i = 0; i < tx->messages_count; i++) {
-      msg = &tx->messages[i];
-      if(!msg->enabled) {
-        continue;
-      }
-      BREAK_IF_ACTION(msg->period == 0 || msg->signals_count > ROUTER_SIGNAL_TX_ITEMS_MAX, err = E_PARAM);
-      BREAK_IF_ACTION(msg->message_id > 0x7FFu && (msg->message_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0, err = E_PARAM);
-      for(uint8_t s = 0; s < msg->signals_count; s++) {
-        uint8_t offset = msg->signals[s].byte_offset;
-        BREAK_IF_ACTION(offset > 4, err = E_PARAM);
-        for(uint8_t n = 0; n < s; n++) {
-          uint8_t previous = msg->signals[n].byte_offset;
-          BREAK_IF_ACTION(offset == previous || offset + 1 == previous || previous + 1 == offset, err = E_PARAM);
-        }
-        BREAK_IF(err != E_OK);
-      }
-      BREAK_IF(err != E_OK);
-    }
-  } while(0);
-
-  return err;
-}
-
-error_t router_signals_transmit(router_ctx_t *ctx, const can_message_t *message)
-{
-  error_t err = E_INVALACT;
-  const router_config_can_signals_list_item_t *route;
-  can_ctx_t *can_ctx;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL || message == NULL, err = E_PARAM);
-    for(uint8_t i = 0; i < ROUTER_SIGNAL_DOWNSTREAM_LIST_LENGTH; i++) {
-      route = &ctx->config.can.signals.downstream_list[i];
-      if(!router_signal_id_match(route, message->id)) {
-        continue;
-      }
-      BREAK_IF_ACTION(route->can_instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
-      err = ecu_comm_get_can_ctx(route->can_instance, &can_ctx);
-      BREAK_IF(err != E_OK);
-      err = can_tx(can_ctx, message);
-      break;
-    }
   } while(0);
 
   return err;
@@ -481,74 +415,46 @@ void router_handle_diag(router_ctx_t *ctx)
 
 void router_handle_signals(router_ctx_t *ctx)
 {
-  const router_signal_tx_config_t *tx;
-  const router_signal_tx_message_config_t *cfg;
-  const router_signal_tx_item_t *signal;
-  ecu_core_runtime_value_ctx_t value;
-  can_message_t message;
-  time_us_t now;
-  float scaled;
-  uint16_t raw;
-  error_t err;
-
   do {
     BREAK_IF(ctx == NULL);
-    tx = ctx->init.signals_tx;
-    BREAK_IF(tx == NULL || tx->messages == NULL);
 
-    now = time_now_us();
-    for(uint8_t i = 0; i < tx->messages_count; i++) {
-      cfg = &tx->messages[i];
-      if(!cfg->enabled) {
+
+  } while(0);
+}
+
+static bool router_signal_id_match(const router_config_can_signals_list_item_t *route, uint32_t id)
+{
+  if(route->enabled == false) {
+    return false;
+  }
+  if(route->msg_id_1_start == route->msg_id_2_end) {
+    return id == route->msg_id_1_start;
+  }
+  return id >= route->msg_id_1_start && id <= route->msg_id_2_end;
+}
+
+error_t router_signals_transmit(router_ctx_t *ctx, const can_message_t *message)
+{
+  error_t err = E_NOTSUPPORT;
+  const router_config_can_signals_list_item_t *route;
+  can_ctx_t *can_ctx;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL || message == NULL, err = E_PARAM);
+
+    for(uint8_t i = 0; i < ROUTER_SIGNAL_DOWNSTREAM_LIST_LENGTH; i++) {
+      route = &ctx->config.can.signals.downstream_list[i];
+      if(!router_signal_id_match(route, message->id)) {
         continue;
       }
+      BREAK_IF_ACTION(route->can_instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+      err = ecu_comm_get_can_ctx(route->can_instance, &can_ctx);
+      BREAK_IF(err != E_OK);
 
-      if(ctx->signals.pending_valid[i]) {
-        err = router_signal_transmit(ctx, &ctx->signals.pending[i]);
-        if(err == E_OK) {
-          ctx->signals.pending_valid[i] = false;
-        }
-        continue;
-      }
-
-      if(!ctx->signals.started[i]) {
-        ctx->signals.last_sent[i] = now;
-        ctx->signals.started[i] = true;
-        continue;
-      }
-      if(time_diff(now, ctx->signals.last_sent[i]) < cfg->period) {
-        continue;
-      }
-      ctx->signals.last_sent[i] = time_add(ctx->signals.last_sent[i], cfg->period);
-      if(time_diff(now, ctx->signals.last_sent[i]) >= cfg->period) {
-        ctx->signals.last_sent[i] = now;
-      }
-
-      memset(&message, 0, sizeof(message));
-      message.id = cfg->message_id;
-      message.len = CAN_MESSAGE_PAYLOAD_LEN_MAX;
-      for(uint8_t s = 0; s < cfg->signals_count; s++) {
-        signal = &cfg->signals[s];
-        err = ecu_config_common_get_parameter_value_by_id(signal->parameter_id, &value);
-        if(err != E_OK || !value.valid || !isfinite(value.value)) {
-          continue;
-        }
-        scaled = value.value * signal->multiplier + signal->offset;
-        if(!isfinite(scaled)) {
-          continue;
-        }
-        scaled = MAX(0.0f, MIN(65535.0f, scaled));
-        raw = (uint16_t)(scaled + 0.5f);
-        message.payload[signal->byte_offset] = (uint8_t)raw;
-        message.payload[signal->byte_offset + 1] = (uint8_t)(raw >> 8);
-        message.payload[6] |= (uint8_t)(1u << s);
-      }
-
-      err = router_signal_transmit(ctx, &message);
-      if(err == E_AGAIN) {
-        ctx->signals.pending[i] = message;
-        ctx->signals.pending_valid[i] = true;
-      }
+      err = can_tx(can_ctx, message);
+      break;
     }
   } while(0);
+
+  return err;
 }
