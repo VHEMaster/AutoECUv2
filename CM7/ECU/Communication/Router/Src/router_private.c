@@ -429,7 +429,13 @@ error_t router_configure_signals(router_ctx_t *ctx)
       BREAK_IF_ACTION(msg->period == 0 || msg->signals_count > ROUTER_SIGNAL_TX_ITEMS_MAX, err = E_PARAM);
       BREAK_IF_ACTION(msg->message_id > 0x7FFu && (msg->message_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0, err = E_PARAM);
       for(uint8_t s = 0; s < msg->signals_count; s++) {
-        BREAK_IF_ACTION(msg->signals[s].byte_offset > 6, err = E_PARAM);
+        uint8_t offset = msg->signals[s].byte_offset;
+        BREAK_IF_ACTION(offset > 4, err = E_PARAM);
+        for(uint8_t n = 0; n < s; n++) {
+          uint8_t previous = msg->signals[n].byte_offset;
+          BREAK_IF_ACTION(offset == previous || offset + 1 == previous || previous + 1 == offset, err = E_PARAM);
+        }
+        BREAK_IF(err != E_OK);
       }
       BREAK_IF(err != E_OK);
     }
