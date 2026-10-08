@@ -54,9 +54,16 @@ typedef struct {
     bool cplt_irq;
     bool error_irq;
     uint16_t samples_requested;
+    uint32_t sampling_frequency;
 
     float position_start;
     float position_cplt;
+
+    float position_start_target;
+    float position_cplt_target;
+
+    float uspd;
+
     ecu_cylinder_t cylinder_occupied;
 
     bool working;

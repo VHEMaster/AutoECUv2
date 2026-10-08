@@ -39,6 +39,7 @@ typedef struct {
     bool enabled;
 
     float window_prepare_advance;
+    float window_start_advance;
     float window_overflow_threshold;
 
     knockwindow_config_setup_ctx_t setups[KNOCKWINDOW_CONFIG_SETUP_MAX];

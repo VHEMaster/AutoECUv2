@@ -22,7 +22,8 @@ typedef struct ecu_timings_knockwindow_ctx_tag {
 }ecu_timings_knockwindow_ctx_t;
 
 static const knockwindow_config_t ecu_timings_knockwindow_config_default = {
-    .window_prepare_advance = 10.0f,
+    .window_prepare_advance = 5.0f,
+    .window_start_advance = 5.0f,
     .window_overflow_threshold = 10.0f,
     .setups = {
         {

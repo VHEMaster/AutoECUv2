@@ -15,6 +15,7 @@
 
 static void knockwindow_pulsedadc_sampling_cplt_cb_t(void *usrdata, const pulsedadc_sampling_cplt_ctx_t *cplt_ctx);
 static void knockwindow_pulsedadc_sampling_error_cb_t(void *usrdata);
+static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx_t *setup_runtime, knockwindow_sampling_cplt_ctx_t *sampling_cplt_ctx);
 
 error_t knockwindow_init(knockwindow_ctx_t *ctx, const knockwindow_init_ctx_t *init_ctx)
 {
@@ -126,9 +127,10 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
   uint16_t samples_requested;
   time_float_delta_us_t window_delta;
   ecu_bank_t bank_cy;
+  time_us_t now;
 
   uint32_t cylinders_count;
-  float window_start, window_end, window_prepare, window_overflow;
+  float window_start, window_end, window_start_advanced, window_prepare, window_overflow, uspd;
 
   do {
     config = &ctx->config;
@@ -177,7 +179,8 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
 
         window_start = -inputs->knock_window_start.value;
         window_end = -inputs->knock_window_end.value;
-        window_prepare = window_start - config->window_prepare_advance;
+        window_start_advanced = window_start - config->window_start_advance;
+        window_prepare = window_start_advanced - config->window_prepare_advance;
         window_overflow = window_end + config->window_overflow_threshold;
 
         crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
@@ -193,13 +196,17 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
           if(setup_runtime->working == false) {
             if(crankshaft_data->valid == true) {
               if(crankshaft_data->sensor_data.current.position >= window_prepare && crankshaft_data->sensor_data.current.position < window_end) {
-                if(crankshaft_data->sensor_data.current.position < window_start) {
-                  window_delta = (window_end - window_start) * crankshaft_data->sensor_data.us_per_degree_pulsed;
+                if(crankshaft_data->sensor_data.current.position < window_start_advanced) {
+                  uspd = crankshaft_data->sensor_data.us_per_degree_pulsed;
+                  window_delta = (window_end - window_start_advanced) * uspd;
                   samples_requested = window_delta * setup->pulsedadc_ctx->sampling_frequency * TIME_S_IN_US;
-                  setup_runtime->working_started_time = time_now_us();
+                  setup_runtime->sampling_frequency = setup->pulsedadc_ctx->sampling_frequency;
                   setup_runtime->cylinder_occupied = cy;
-                  setup_runtime->position_start = -window_start;
+                  setup_runtime->uspd = uspd;
+                  setup_runtime->position_start = -window_start_advanced;
                   setup_runtime->position_cplt = -window_end;
+                  setup_runtime->position_start_target = -window_start;
+                  setup_runtime->position_cplt_target = -window_end;
                   setup_runtime->samples_requested = samples_requested;
                   setup_runtime->cplt_irq = false;
                   setup_runtime->error_irq = false;
@@ -227,9 +234,13 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
         } else if(setup_runtime->working == true && setup_runtime->cylinder_occupied == cy) {
           if(runtime_cy->state == KNOCKWINDOW_STATE_PREPARED) {
             if(crankshaft_data->valid == true) {
-              if(crankshaft_data->sensor_data.current.position >= window_start) {
+              if(crankshaft_data->sensor_data.current.position >= window_start_advanced) {
                 if(crankshaft_data->sensor_data.current.position < window_end) {
-                  setup_runtime->position_start = -crankshaft_data->sensor_data.current.position;
+                  now = time_now_us();
+                  setup_runtime->working_started_time = now;
+                  setup_runtime->position_start = time_interpolate_value(
+                      crankshaft_data->sensor_data.previous.timestamp, now, crankshaft_data->sensor_data.current.timestamp,
+                      crankshaft_data->sensor_data.previous.position, crankshaft_data->sensor_data.current.position);
                   err = pulsedadc_start(setup->pulsedadc_ctx);
                   if(err != E_OK) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
@@ -262,11 +273,12 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
             if(setup_runtime->cplt_irq) {
               if(setup->sampling_cplt_ctx.samples_buffer != NULL &&
                   setup->sampling_cplt_ctx.samples_count > 0u) {
-                setup_runtime->position_cplt = -crankshaft_data->sensor_data.current.position;
-                setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
-                setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
+                setup->sampling_cplt_ctx.position_start = -setup_runtime->position_start;
+                setup->sampling_cplt_ctx.position_cplt = -setup_runtime->position_cplt;
                 setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
                 setup->sampling_cplt_ctx.setup_index = s;
+
+                knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
 
                 if(ctx->init.callback != NULL) {
                   ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
@@ -303,10 +315,12 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
                 setup_runtime->position_cplt = -crankshaft_data->sensor_data.current.position;
                 setup->sampling_cplt_ctx.time_start = setup_runtime->working_started_time;
                 setup->sampling_cplt_ctx.time_cplt = time_now_us();
-                setup->sampling_cplt_ctx.position_start = setup_runtime->position_start;
-                setup->sampling_cplt_ctx.position_cplt = setup_runtime->position_cplt;
+                setup->sampling_cplt_ctx.position_start = -setup_runtime->position_start;
+                setup->sampling_cplt_ctx.position_cplt = -setup_runtime->position_cplt;
                 setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
                 setup->sampling_cplt_ctx.setup_index = s;
+
+                knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
 
                 if(ctx->init.callback != NULL) {
                   ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
@@ -329,6 +343,32 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
 ITCM_FUNC static void knockwindow_pulsedadc_sampling_cplt_cb_t(void *usrdata, const pulsedadc_sampling_cplt_ctx_t *cplt_ctx)
 {
   knockwindow_setup_ctx_t *setup = (knockwindow_setup_ctx_t *)usrdata;
+  const timing_base_data_crankshaft_t *crankshaft_data;
+  const timing_base_data_t *timing_base_data;
+  ecu_cylinder_t cy = setup->runtime.cylinder_occupied;
+  ckp_data_position_t sensordata_current;
+  ckp_data_position_t sensordata_previous;
+  uint32_t prim;
+  time_us_t now;
+  error_t err;
+
+  err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
+
+  if(!setup->runtime.working || cy >= ECU_CYLINDER_MAX || err != E_OK) {
+    return;
+  }
+
+  crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
+
+  prim = EnterCritical();
+  now = time_now_us();
+  sensordata_current = crankshaft_data->sensor_data.current;
+  sensordata_previous = crankshaft_data->sensor_data.previous;
+  ExitCritical(prim);
+
+  setup->runtime.position_cplt = time_interpolate_value(
+      sensordata_previous.timestamp, now, sensordata_current.timestamp,
+      sensordata_previous.position, sensordata_current.position);
 
   setup->sampling_cplt_ctx.samples_buffer = cplt_ctx->samples_buffer;
   setup->sampling_cplt_ctx.samples_count = cplt_ctx->samples_count;
@@ -342,5 +382,54 @@ ITCM_FUNC static void knockwindow_pulsedadc_sampling_error_cb_t(void *usrdata)
 {
   knockwindow_setup_ctx_t *setup = (knockwindow_setup_ctx_t *)usrdata;
 
-  setup->runtime.error_irq = true;
+  if(setup->runtime.working) {
+    setup->runtime.error_irq = true;
+  }
+}
+
+static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx_t *setup_runtime, knockwindow_sampling_cplt_ctx_t *sampling_cplt_ctx)
+{
+  float position_start_target = setup_runtime->position_start_target;
+  float position_cplt_target = setup_runtime->position_cplt_target;
+  float position_start = sampling_cplt_ctx->position_start;
+  float position_cplt = sampling_cplt_ctx->position_cplt;
+  const uint16_t *samples_buffer = sampling_cplt_ctx->samples_buffer;
+
+  float position_start_diff = position_start - position_start_target;
+  float position_cplt_diff =  position_cplt_target - position_cplt;
+
+  float sampling_frequency = setup_runtime->sampling_frequency;
+  float uspd = setup_runtime->uspd;
+
+  float multiplying = uspd * sampling_frequency * TIME_S_IN_US;
+  float r_multiplying = 1.0f / multiplying;
+
+  uint32_t samples_count = sampling_cplt_ctx->samples_count;
+
+  uint32_t samples_cut_start = 0;
+  uint32_t samples_cut_end = 0;
+
+  position_start -= r_multiplying * 0.5f;
+
+  if(position_start_diff > 0) {
+    samples_cut_start = roundf(position_start_diff * multiplying);
+    if(samples_cut_start > samples_count)
+      samples_cut_start = samples_count;
+    samples_buffer += samples_cut_start;
+    samples_count -= samples_cut_start;
+    position_start -= samples_cut_start * r_multiplying;
+  }
+
+  if(position_cplt_diff > 0) {
+    samples_cut_end = roundf(position_cplt_diff * multiplying);
+    if(samples_cut_end > samples_count)
+      samples_cut_end = samples_count;
+    samples_count -= samples_cut_end;
+    position_cplt += samples_cut_end * r_multiplying;
+  }
+
+  sampling_cplt_ctx->samples_buffer = samples_buffer;
+  sampling_cplt_ctx->samples_count = samples_count;
+  sampling_cplt_ctx->position_start = position_start;
+  sampling_cplt_ctx->position_cplt = position_cplt;
 }
