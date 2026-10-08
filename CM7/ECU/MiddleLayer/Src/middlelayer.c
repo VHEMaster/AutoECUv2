@@ -138,11 +138,12 @@ void middlelayer_init(void)
 
 }
 
-void middlelayer_hardfault(void)
+INLINE void middlelayer_fault(middlelayer_fault_type_t fault_type)
 {
   IGN_NEN_GPIO_Port->BSRR = IGN_NEN_Pin;
   LAMBDA_HEATER_NEN_GPIO_Port->BSRR = LAMBDA_HEATER_NEN_Pin;
   OUTS_RESET_GPIO_Port->BSRR = OUTS_RESET_Pin << 16;
   LAMBDA_NRST_GPIO_Port->BSRR = LAMBDA_NRST_Pin << 16;
 
+  (void)fault_type;
 }
