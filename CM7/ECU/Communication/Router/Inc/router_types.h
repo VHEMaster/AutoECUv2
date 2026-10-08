@@ -11,6 +11,7 @@
 #include "common.h"
 #include "time.h"
 #include "versioned_router.h"
+#include "config_common_types.h"
 
 #include "can.h"
 #include "kwp.h"
