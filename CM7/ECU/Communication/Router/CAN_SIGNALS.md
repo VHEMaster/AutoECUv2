@@ -42,5 +42,5 @@ by successful queueing.
 
 - Static firmware configuration only; the CAN signal definitions are not yet stored in versioned flash.
 - Signal mapping uses fixed offsets and unsigned 16-bit little-endian encoding.
-- No automatic detection or rejection of overlapping fields; configure them carefully.
+- Signal fields overlapping one another or reserved bytes 6..7 are rejected during router configuration.
 - No hardware-in-loop or STM32CubeIDE build has been executed for this change.
