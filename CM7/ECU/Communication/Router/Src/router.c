@@ -41,8 +41,7 @@ error_t router_configure(router_ctx_t *ctx, const router_config_t *config)
     if(ctx->config.enabled) {
       err = router_configure_diag(ctx);
       BREAK_IF(err != E_OK);
-
-     }
+    }
 
     ctx->configured = ctx->config.enabled;
 
