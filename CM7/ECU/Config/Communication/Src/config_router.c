@@ -8,6 +8,10 @@
 #include "config_router.h"
 #include "config_extern.h"
 #include "common.h"
+#include "config_common.h"
+#include "config_ckp.h"
+#include "config_map.h"
+#include "config_tps.h"
 
 typedef struct ecu_comm_router_ctx_tag ecu_comm_router_ctx_t;
 
@@ -16,6 +20,46 @@ typedef struct ecu_comm_router_ctx_tag {
   router_init_ctx_t init;
   router_ctx_t *ctx;
 }ecu_comm_router_ctx_t;
+
+static const router_signal_tx_message_config_t ecu_router_tx_messages[] = {
+    {
+        .enabled = true,
+        .message_id = 0x600,
+        .period = 100u * TIME_US_IN_MS,
+        .signals_count = 3,
+        .signals = {
+            {
+                .parameter_id = { .bitfield = {
+                    .supported = true, .entity = ECU_COMMON_ENTITY_SENSOR,
+                    .type = ECU_SENSOR_TYPE_CKP, .instance = ECU_SENSOR_CKP_1,
+                    .read_write = ECU_COMMON_READ, .parameter = ECU_SENSOR_CKP_READ_PARAM_DATA,
+                }},
+                .multiplier = 1.0f, .byte_offset = 0,
+            },
+            {
+                .parameter_id = { .bitfield = {
+                    .supported = true, .entity = ECU_COMMON_ENTITY_SENSOR,
+                    .type = ECU_SENSOR_TYPE_MAP, .instance = ECU_SENSOR_MAP_1,
+                    .read_write = ECU_COMMON_READ, .parameter = ECU_SENSOR_MAP_READ_PARAM_DATA,
+                }},
+                .multiplier = 1000.0f, .byte_offset = 2,
+            },
+            {
+                .parameter_id = { .bitfield = {
+                    .supported = true, .entity = ECU_COMMON_ENTITY_SENSOR,
+                    .type = ECU_SENSOR_TYPE_TPS, .instance = ECU_SENSOR_TPS_1,
+                    .read_write = ECU_COMMON_READ, .parameter = ECU_SENSOR_TPS_READ_PARAM_DATA,
+                }},
+                .multiplier = 100.0f, .byte_offset = 4,
+            },
+        },
+    },
+};
+
+static const router_signal_tx_config_t ecu_router_tx_config = {
+    .messages_count = ITEMSOF(ecu_router_tx_messages),
+    .messages = ecu_router_tx_messages,
+};
 
 static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX] = {
   {
@@ -26,7 +70,7 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
 
               },
               .downstream_list = {
-
+                  { .enabled = true, .msg_id_1_start = 0x600, .msg_id_2_end = 0x600, .can_instance = ECU_COMM_CAN_1 },
               },
           },
       },
@@ -63,6 +107,7 @@ static const bool ecu_comm_router_enabled_default[ECU_COMM_ROUTER_MAX] = {
 static RAM_SECTION ecu_comm_router_ctx_t ecu_comm_router_ctx[ECU_COMM_ROUTER_MAX] = {
     {
       .init = {
+          .signals_tx = &ecu_router_tx_config,
           .signal_rx_callback = NULL,
           .error_callback = NULL,
           .callback_userdata = NULL,
