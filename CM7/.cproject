@@ -51,6 +51,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Communication/ISOTP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/OBD2/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/Router/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Communication/Signals/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/UDS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/KWP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Can/Inc"/>
@@ -210,6 +211,7 @@
 									<listOptionValue builtIn="false" value="../ECU/Communication/ISOTP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/OBD2/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/Router/Inc"/>
+									<listOptionValue builtIn="false" value="../ECU/Communication/Signals/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/UDS/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Communication/KWP/Inc"/>
 									<listOptionValue builtIn="false" value="../ECU/Drivers/Can/Inc"/>
