@@ -31,7 +31,9 @@ INLINE void ecu_config_set_ignition_enabled(bool enabled) {
 }
 
 INLINE void ecu_config_iwgd_refresh(void) {
-  HAL_IWDG_Refresh(&hiwdg1);
+  if(hiwdg1.Instance != NULL) {
+    HAL_IWDG_Refresh(&hiwdg1);
+  }
 }
 
 void ecu_config_ll_init(void)
