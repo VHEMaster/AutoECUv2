@@ -1,46 +1,42 @@
 # Periodic CAN signals
 
-This feature is configured using the static `router_signal_tx_message_config_t` table in
-`CM7/ECU/Config/Communication/Src/config_router.c`. The router instance receives the table through
-`router_init_ctx_t.signals_tx` and runs it from the existing communication loop.
-No additional RTOS task, dynamic allocation, or flash configuration layout modification is needed.
+The periodic polling, encoding and retry logic belongs exclusively to `Communication/Signals`.
+The Router only accepts an already encoded `can_message_t` and selects the CAN transport using its
+configured downstream message-ID routing list. The CAN driver performs the actual transmission.
 
-Each message independently specifies its CAN identifier, period (microseconds), enable flag,
-and up to four signals. Each signal specifies an existing parameter ID
-(`ecu_config_parameter_id_t`), linear scaling (`value * multiplier + offset`),
-and the starting payload byte offset for a little-endian unsigned 16-bit integer.
-Values are rounded to nearest nonnegative integer and saturated to 0..65535.
-Invalid/unavailable/nonfinite parameters become zero and have their validity bit cleared.
-Avoid overlapping signal fields or using bytes 6 and 7 for signals: byte 6 is the validity mask.
+`config_signals.c` contains the current firmware default configuration and initializes the
+Signals component after communication devices in `middlelayer_comm_init()`.
+`middlelayer_comm_loop_comm()` calls the Signals poller after `ecu_comm_loop_comm()`.
+No additional task or RTOS timer is required.
 
-The router matches outgoing message IDs against
-`router_config_t.can.signals.downstream_list` and selects the configured CAN instance.
-For the initial configuration the list maps standard CAN ID 0x600 to CAN1.
+Messages are configured independently (enabled, CAN ID, period in microseconds, number of
+signals and source parameters). A signal specifies a parameter-keeper ID, multiplier, offset and
+payload byte offset. Values are encoded as saturated, rounded unsigned 16-bit little-endian
+integers. The layout reserves byte 6 for per-signal validity flags and byte 7 as zero.
+Invalid source values are encoded as zero with their validity bit clear.
 
-## Initial message (CAN ID 0x600, 8 bytes, every 100 ms)
+## Default CAN1 message
 
-| Byte | Signal | Encoding |
+Standard ID 0x600, period 100 ms, 8 bytes:
+
+| Bytes | Parameter | Encoding |
 |---|---|---|
-| 0..1 | CKP1 RPM | uint16 little endian, 1 rpm/bit |
-| 2..3 | MAP1 | uint16 little endian, value in bar * 1000 (0.1 kPa/bit) |
-| 4..5 | TPS1 | uint16 little endian, percentage * 100 (0.01%/bit) |
-| 6 | Validity | bit0 RPM, bit1 MAP, bit2 TPS; 1 = valid |
-| 7 | Reserved | zero |
+| 0-1 | CKP1 engine RPM | uint16 little-endian, 1 rpm/bit |
+| 2-3 | MAP1 manifold pressure | uint16 little-endian, bar x 1000 (0.1 kPa/bit) |
+| 4-5 | TPS1 throttle position | uint16 little-endian, percent x 100 (0.01%/bit) |
+| 6 | Validity mask | bit 0 RPM, bit 1 MAP, bit 2 TPS |
+| 7 | Reserved | 0 |
 
-The default IDs reference the configured CKP1, MAP1, TPS1 sensor instances in the global
-parameter keeper, not the calculated bank-specific blended source. The current default
-sensor-to-bank mapping uses MAP1 and TPS1 globally; for alternative bank mappings, update
-the parameter IDs in the table accordingly.
+The default parameter IDs use the global sensor instances CKP1/MAP1/TPS1 rather than
+bank-blended calculated inputs. These correspond to the currently configured physical sensors
+for bank 1. Remapping requires editing the firmware configuration.
 
-Timing uses the firmware microsecond timebase (`time_now_us` / `time_diff`) with
-first transmission after one complete period. If the FDCAN TX FIFO is full
-(`E_AGAIN`), a fully encoded message is retained and retried in subsequent
-communication-loop iterations. Hardware acceptance and bus delivery are not guaranteed
-by successful queueing.
+On `E_AGAIN` (CAN TX queue full), Signals retains the encoded frame and retries on later
+poll iterations. The 100 ms period is a best-effort software schedule and is not a hard
+real-time bus delivery guarantee. No new frames are generated while the previous one is pending.
+The table currently supports up to 4 messages, with up to 4 unsigned 16-bit signals each
+(the maximum non-overlapping fields in bytes 0..5 is actually 3). A source field cannot
+overlap another source field or reserved bytes 6-7.
 
-## Limitations
-
-- Static firmware configuration only; the CAN signal definitions are not yet stored in versioned flash.
-- Signal mapping uses fixed offsets and unsigned 16-bit little-endian encoding.
-- Signal fields overlapping one another or reserved bytes 6..7 are rejected during router configuration.
-- No hardware-in-loop or STM32CubeIDE build has been executed for this change.
+Signal definitions are static firmware configuration, not versioned flash settings.
+Build and hardware integration still require validation in STM32CubeIDE and with a CAN analyzer.
