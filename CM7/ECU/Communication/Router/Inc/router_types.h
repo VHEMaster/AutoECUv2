@@ -29,10 +29,34 @@ typedef struct router_ctx_tag router_ctx_t;
 typedef void (*router_error_callback_t)(router_ctx_t *ctx, router_error_code_t code, void *userdata);
 typedef void (*router_signal_rx_callback_t)(router_ctx_t *ctx, const can_message_t *message, void *userdata);
 
+#define ROUTER_SIGNAL_TX_MESSAGES_MAX   4u
+#define ROUTER_SIGNAL_TX_ITEMS_MAX      4u
+
+typedef struct {
+    ecu_config_parameter_id_t parameter_id;
+    float multiplier;
+    float offset;
+    uint8_t byte_offset;
+}router_signal_tx_item_t;
+
+typedef struct {
+    bool enabled;
+    uint32_t message_id;
+    time_delta_us_t period;
+    uint8_t signals_count;
+    router_signal_tx_item_t signals[ROUTER_SIGNAL_TX_ITEMS_MAX];
+}router_signal_tx_message_config_t;
+
+typedef struct {
+    uint8_t messages_count;
+    const router_signal_tx_message_config_t *messages;
+}router_signal_tx_config_t;
+
 typedef struct {
     router_signal_rx_callback_t signal_rx_callback;
     router_error_callback_t error_callback;
     void *callback_userdata;
+    const router_signal_tx_config_t *signals_tx;
 }router_init_ctx_t;
 
 typedef struct {
@@ -84,6 +108,13 @@ typedef struct router_ctx_tag {
     bool configured;
 
     router_diag_ctx_t diag;
+
+    struct {
+        time_us_t last_sent[ROUTER_SIGNAL_TX_MESSAGES_MAX];
+        bool started[ROUTER_SIGNAL_TX_MESSAGES_MAX];
+        can_message_t pending[ROUTER_SIGNAL_TX_MESSAGES_MAX];
+        bool pending_valid[ROUTER_SIGNAL_TX_MESSAGES_MAX];
+    }signals;
 
     router_error_code_t error_code;
     bool reset_trigger;
