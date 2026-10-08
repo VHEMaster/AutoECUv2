@@ -14,6 +14,7 @@
 #include "config_uds.h"
 #include "config_obd2.h"
 #include "config_router.h"
+#include "config_signals.h"
 
 #include "compiler.h"
 
@@ -30,6 +31,7 @@ void middlelayer_comm_loop_slow(void)
 void middlelayer_comm_loop_comm(void)
 {
   ecu_comm_loop_comm();
+  ecu_comm_signals_loop_comm();
 }
 
 void middlelayer_comm_init(void)
@@ -113,6 +115,9 @@ void middlelayer_comm_init(void)
       err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_ROUTER, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    err = ecu_comm_signals_init();
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
   } while(0);
