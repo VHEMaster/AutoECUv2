@@ -340,6 +340,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
   } while(0);
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static void knockwindow_pulsedadc_sampling_cplt_cb_t(void *usrdata, const pulsedadc_sampling_cplt_ctx_t *cplt_ctx)
 {
   knockwindow_setup_ctx_t *setup = (knockwindow_setup_ctx_t *)usrdata;
