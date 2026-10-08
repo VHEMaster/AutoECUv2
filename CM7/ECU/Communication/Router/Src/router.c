@@ -42,9 +42,7 @@ error_t router_configure(router_ctx_t *ctx, const router_config_t *config)
       err = router_configure_diag(ctx);
       BREAK_IF(err != E_OK);
 
-      err = router_configure_signals(ctx);
-      BREAK_IF(err != E_OK);
-    }
+     }
 
     ctx->configured = ctx->config.enabled;
 
@@ -101,7 +99,6 @@ void router_loop_comm(router_ctx_t *ctx)
     BREAK_IF(ctx->configured == false);
 
     router_handle_diag(ctx);
-    router_handle_signals(ctx);
 
   } while(0);
 }
@@ -122,7 +119,8 @@ error_t router_signal_transmit(router_ctx_t *ctx, const can_message_t *message)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(!ctx->configured, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+    BREAK_IF_ACTION(message->len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
 
     err = router_signals_transmit(ctx, message);
 
