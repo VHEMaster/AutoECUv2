@@ -74,7 +74,7 @@ static RAM_SECTION ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
 
 #define ECU_CONFIG_CAN_1ARG_CB(interface, type)  \
-static void ecu_config_can_##interface##_##type##_cb(CAN_HANDLE_TYPE *hcan)   \
+static ITCM_FUNC void ecu_config_can_##interface##_##type##_cb(CAN_HANDLE_TYPE *hcan)   \
 {                                                         \
   can_ctx_t *can = ecu_comm_can_ctx[interface].ctx;            \
   if(can != NULL) {                                       \
@@ -83,7 +83,7 @@ static void ecu_config_can_##interface##_##type##_cb(CAN_HANDLE_TYPE *hcan)   \
 }
 
 #define ECU_CONFIG_CAN_2ARG_CB(interface, type)  \
-static void ecu_config_can_##interface##_##type##_cb(CAN_HANDLE_TYPE *hcan, uint32_t arg2)   \
+static ITCM_FUNC void ecu_config_can_##interface##_##type##_cb(CAN_HANDLE_TYPE *hcan, uint32_t arg2)   \
 {                                                         \
   can_ctx_t *can = ecu_comm_can_ctx[interface].ctx;            \
   if(can != NULL) {                                       \
@@ -108,7 +108,7 @@ ECU_CONFIG_CAN_IF_CB_DEFINE(ECU_COMM_CAN_1);
 #else /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
 
 #define ECU_CONFIG_CAN_CB(hal_op, can_op)  \
-INLINE void HAL_FDCAN_##hal_op##Callback(CAN_HANDLE_TYPE *hcan)   \
+INLINE ITCM_FUNC void HAL_FDCAN_##hal_op##Callback(CAN_HANDLE_TYPE *hcan)   \
 {                                                                 \
   can_t *can = NULL;                                              \
   error_t err;                                                    \
