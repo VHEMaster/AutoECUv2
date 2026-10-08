@@ -213,7 +213,7 @@ error_t ecu_comm_init(void)
   return err;
 }
 
-ITCM_FUNC static void ecu_comm_loop(ecu_config_comm_loop_type_t loop_type)
+static void ecu_comm_loop(ecu_config_comm_loop_type_t loop_type)
 {
   const ecu_config_comm_if_config_ctx_t *interface_config;
   const ecu_config_comm_config_ctx_t *comm_config;
