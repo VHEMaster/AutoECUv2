@@ -122,6 +122,9 @@ error_t router_signal_transmit(router_ctx_t *ctx, const can_message_t *message)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(!ctx->configured, err = E_INVALACT);
+
+    err = router_signals_transmit(ctx, message);
 
   } while(0);
 
