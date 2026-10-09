@@ -53,16 +53,19 @@ ITCM_FUNC static void cmp_gpio_input_cb(ecu_gpio_input_pin_t pin, ecu_gpio_input
   cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;
   cmp_data_t data;
   cmp_diag_t diag;
+  cmp_data_validity_t validity_before;
   uint32_t prim;
 
   if(ctx != NULL && ctx->configured != false) {
+    validity_before = ctx->data.validity;
     TIME_MSMT_START(&ctx->load_signal_cb);
     if(ctx->signal_ref_type_ctx.cfg->func_signal_cb != NULL) {
       ctx->signal_ref_type_ctx.cfg->func_signal_cb(ctx, level, ctx->signal_ref_type_ctx.usrdata);
     }
     TIME_MSMT_STOP(&ctx->load_signal_cb);
 
-    if(ctx->data.validity >= CMP_DATA_VALID) {
+    if(ctx->data.validity >= CMP_DATA_VALID ||
+        (validity_before == CMP_DATA_VALID && ctx->data.validity < CMP_DATA_VALID)) {
       TIME_MSMT_START(&ctx->load_update_cb);
       if(ctx->init.signal_update_cb != NULL) {
         prim = EnterCritical();
@@ -231,13 +234,31 @@ OPTIMIZE_FAST
 ITCM_FUNC void cmp_ckp_signal_update(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   cmp_ctx_t *ctx = (cmp_ctx_t *)usrdata;
+  cmp_data_validity_t validity_before;
+  cmp_data_t updated;
+  cmp_diag_t updated_diag;
+  uint32_t prim;
 
   do {
     BREAK_IF(ctx == NULL);
     if(ctx->configured) {
       if(ctx->started) {
         if(ctx->signal_ref_type_ctx.cfg->func_ckp_update_cb != NULL) {
+          validity_before = ctx->data.validity;
           ctx->signal_ref_type_ctx.cfg->func_ckp_update_cb(ctx, ctx->signal_ref_type_ctx.usrdata, data, diag);
+
+          /* Invalidate engine phase immediately when the camshaft loses sync.
+           * Successful CKP-initiated acquisition is reported by the decoder.
+           */
+          if(validity_before == CMP_DATA_VALID &&
+              ctx->data.validity < CMP_DATA_VALID &&
+              ctx->init.signal_update_cb != NULL) {
+            prim = EnterCritical();
+            updated = ctx->data;
+            updated_diag = ctx->diag;
+            ExitCritical(prim);
+            ctx->init.signal_update_cb(ctx->init.signal_update_usrdata, &updated, &updated_diag);
+          }
         }
       }
     }
