@@ -295,9 +295,20 @@ ITCM_FUNC void timing_base_cmp_signal_update(timing_base_ctx_t *ctx, ecu_sensor_
           ctx->diag.camshafts[cmp_instance].bits.pos_too_early = true;
         }
         camshaft->valid = true;
-      } else if(camshaft->sensor_data.validity < CMP_DATA_DETECTED) {
-        if(camshafts->synchronized) {
+      } else {
+        /* DETECTED and SYNCHRONIZED are not sufficient to retain the
+         * crankshaft's 720-degree phase. Only CMP_DATA_VALID is. */
+        camshaft->valid = false;
+        if(camshafts->synchronized && camshafts->sync_camshaft_instance == cmp_instance) {
+          prim = EnterCritical();
           ctx->diag.camshafts[cmp_instance].bits.signal_lost = true;
+          camshafts->synchronized = false;
+          camshafts->valid = false;
+          crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
+          if(ctx->config.phased_only) {
+            crankshaft->valid = false;
+          }
+          ExitCritical(prim);
         }
       }
     } else {
