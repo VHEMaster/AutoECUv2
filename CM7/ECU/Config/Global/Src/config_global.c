@@ -25,6 +25,28 @@
 extern ecu_config_global_engine_t ecu_config_global_engine;
 extern ecu_config_global_engine_double_t ecu_config_global_engine_double;
 
+/* Preserve persisted CMP V1 configuration when adding the patterned V2 type. */
+static error_t ecu_config_cmp_translate_v1_to_v2(const void *src, void *dest, uint32_t dest_bytes)
+{
+  cmp_config_v1_t old;
+  cmp_config_v2_t *current = (cmp_config_v2_t *)dest;
+
+  if(src == NULL || dest == NULL || dest_bytes < sizeof(cmp_config_v2_t)) {
+    return E_PARAM;
+  }
+
+  memcpy(&old, src, sizeof(old));
+  memset(current, 0, sizeof(*current));
+  current->enabled = old.enabled;
+  current->boot_time = old.boot_time;
+  current->desync_on_error = old.desync_on_error;
+  current->input_pin = old.input_pin;
+  current->signal_ref_type = old.signal_ref_type;
+  current->signal_ref_types_config.singlepulse = old.signal_ref_types_config.singlepulse;
+
+  return E_OK;
+}
+
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 
 static const ecu_config_device_config_t ecu_config_global_flash_config = {
@@ -173,6 +195,11 @@ static const ecu_config_device_config_t ecu_config_global_sensor_config[ECU_CONF
                     .version = CMP_CONFIG_VERSION_V1,
                     .size = sizeof(cmp_config_v1_t),
                     .translate_func = NULL,
+                },
+                {
+                    .version = CMP_CONFIG_VERSION_V2,
+                    .size = sizeof(cmp_config_v2_t),
+                    .translate_func = ecu_config_cmp_translate_v1_to_v2,
                 }
             },
         },
