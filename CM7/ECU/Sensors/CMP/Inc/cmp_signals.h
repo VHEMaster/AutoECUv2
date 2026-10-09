@@ -9,5 +9,6 @@
 #define SENSORS_CMP_INC_CMP_SIGNALS_H_
 
 #include "cmp_signal_singlepulse.h"
+#include "cmp_signal_patterned.h"
 
 #endif /* SENSORS_CMP_INC_CMP_SIGNALS_H_ */
