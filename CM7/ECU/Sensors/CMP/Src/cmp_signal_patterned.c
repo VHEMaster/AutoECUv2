@@ -343,6 +343,7 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   ckp_data_t ckp;
   cmp_data_t result;
   cmp_signal_patterned_event_t *event;
+  cmp_signal_patterned_ctx_t snapshot;
   uint8_t found = 0;
   bool found_phase = false;
   uint8_t found_index = 0;
@@ -390,8 +391,20 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
         state->count++;
       }
       ExitCritical(event_prim);
-      cmp_patterned_independent_search(cfg, state);
+      /* Snapshot under IRQ lock: CKP can preempt this callback. */
+      event_prim = EnterCritical();
+      snapshot = *state;
+      ExitCritical(event_prim);
+      cmp_patterned_independent_search(cfg, &snapshot);
+      event_prim = EnterCritical();
+      if(snapshot.next == state->next && snapshot.count == state->count &&
+          snapshot.last_edge_time == state->last_edge_time) {
+        state->independent_synced = snapshot.independent_synced;
+        state->independent_index = snapshot.independent_index;
+        state->independent_us_per_degree = snapshot.independent_us_per_degree;
+      }
       ctx->data.validity = state->independent_synced ? CMP_DATA_SYNCHRONIZED : CMP_DATA_DETECTED;
+      ExitCritical(event_prim);
     } else {
       state->count = 0;
       state->independent_synced = false;
@@ -402,12 +415,15 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   }
 
   if(state->independent_synced) {
+    event_prim = EnterCritical();
     cmp_patterned_resolve_ckp(ctx, state, &ckp);
     if(ctx->data.validity == CMP_DATA_VALID) {
       state->count = 0;
       state->next = 0;
+      ExitCritical(event_prim);
       return;
     }
+    ExitCritical(event_prim);
   } else if(state->count > 0 && !state->ckp_synced) {
     state->count = 0;
     state->next = 0;
@@ -434,11 +450,17 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     return;
   }
 
+  /* Match a stable snapshot, keeping the critical section short.
+   * CKP callback must not reset the ring while its contents are copied. */
+  event_prim = EnterCritical();
+  snapshot = *state;
+  ExitCritical(event_prim);
+
   /* Search all circular template windows and both CKP-revolution hypotheses. */
   for(uint8_t phase = 0; phase < 2; phase++) {
     for(uint8_t index = 0; index < cfg->edges_count; index++) {
       float vvt;
-      if(cmp_patterned_match(cfg, state, index, phase, &vvt)) {
+      if(cmp_patterned_match(cfg, &snapshot, index, phase, &vvt)) {
         found++;
         found_phase = phase != 0;
         found_index = index;
@@ -448,6 +470,12 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   }
 
   prim = EnterCritical();
+  /* Discard stale computations after any concurrent CKP reset/reacquisition. */
+  if(snapshot.next != state->next || snapshot.count != state->count ||
+      snapshot.last_edge_time != state->last_edge_time) {
+    ExitCritical(prim);
+    return;
+  }
   result = ctx->data;
   if(found == 1) {
     if(state->matched && state->match_phase != found_phase) {
@@ -563,13 +591,15 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
 
   if(data->validity >= CKP_DATA_VALID) {
     if(state->independent_synced && state->count > 0) {
+      uint32_t prim = EnterCritical();
       cmp_data_validity_t previous_validity = ctx->data.validity;
       cmp_patterned_resolve_ckp(ctx, state, data);
-      if(previous_validity != CMP_DATA_VALID &&
-          ctx->data.validity == CMP_DATA_VALID &&
-          ctx->init.signal_update_cb != NULL) {
-        cmp_data_t result = ctx->data;
-        cmp_diag_t diagnosis = ctx->diag;
+      bool notify = (previous_validity != CMP_DATA_VALID &&
+          ctx->data.validity == CMP_DATA_VALID);
+      cmp_data_t result = ctx->data;
+      cmp_diag_t diagnosis = ctx->diag;
+      ExitCritical(prim);
+      if(notify && ctx->init.signal_update_cb != NULL) {
         ctx->init.signal_update_cb(ctx->init.signal_update_usrdata,
             &result, &diagnosis);
       }
