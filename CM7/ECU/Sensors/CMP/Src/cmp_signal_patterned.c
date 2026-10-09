@@ -211,8 +211,9 @@ static void cmp_patterned_resolve_ckp(cmp_ctx_t *ctx,
   }
 
   float observed_at_cmp = cmp_patterned_wrap(
-      ckp->current.position - (float)elapsed / uspd + 180.0f, 360.0f) +
-      (ckp->odd_rev ? 360.0f : 0.0f);
+      ckp->current.position + 180.0f +
+      (ckp->odd_rev ? 360.0f : 0.0f) -
+      (float)elapsed / uspd, 720.0f);
   float expected = cfg->edges[state->independent_index].angle +
       cfg->reference_offset + 180.0f;
   for(uint8_t candidate = 0; candidate < 2; candidate++) {
@@ -362,7 +363,6 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   if(ctx->init.ckp_update_req_cb == NULL ||
       ctx->init.ckp_update_req_cb(ctx->init.ckp_update_usrdata, NULL, &ckp) != E_OK ||
       ckp.validity < CKP_DATA_VALID) {
-    state->count = 0;
     state->matched = false;
     if(cfg->independent_sync_enabled) {
       event = &state->history[state->next];
@@ -385,7 +385,16 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
 
   if(state->independent_synced) {
     cmp_patterned_resolve_ckp(ctx, state, &ckp);
+    if(ctx->data.validity == CMP_DATA_VALID) {
+      state->count = 0;
+      state->next = 0;
+      return;
+    }
+  } else if(state->count > 0 && !state->ckp_synced) {
+    state->count = 0;
+    state->next = 0;
   }
+  state->ckp_synced = true;
   event = &state->history[state->next];
   event->position = ckp.current_position;
   event->odd_rev = ckp.odd_rev;
@@ -493,6 +502,7 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
       }
     }
   } else if(!ctx->config.signal_ref_types_config.patterned.independent_sync_enabled) {
+    state->ckp_synced = false;
     state->count = 0;
     state->next = 0;
     state->level_known = false;
@@ -500,5 +510,10 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
     state->independent_synced = false;
     ctx->data.validity = CMP_DATA_NONE;
     ctx->diag.bits.position_out_of_range = false;
+  } else {
+    state->ckp_synced = false;
+    if(ctx->data.validity == CMP_DATA_VALID) {
+      ctx->data.validity = CMP_DATA_DETECTED;
+    }
   }
 }
