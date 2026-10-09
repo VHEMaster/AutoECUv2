@@ -406,7 +406,9 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   }
 
   if(state->count < CMP_PATTERNED_MIN_EDGES) {
-    ctx->data.validity = CMP_DATA_DETECTED;
+    if(!state->matched) {
+      ctx->data.validity = CMP_DATA_DETECTED;
+    }
     return;
   }
 
@@ -492,8 +494,10 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
 
   if(data->validity >= CKP_DATA_VALID) {
     if(state->independent_synced && state->count > 0) {
+      cmp_data_validity_t previous_validity = ctx->data.validity;
       cmp_patterned_resolve_ckp(ctx, state, data);
-      if(ctx->data.validity == CMP_DATA_VALID &&
+      if(previous_validity != CMP_DATA_VALID &&
+          ctx->data.validity == CMP_DATA_VALID &&
           ctx->init.signal_update_cb != NULL) {
         cmp_data_t result = ctx->data;
         cmp_diag_t diagnosis = ctx->diag;
@@ -512,8 +516,10 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
     ctx->diag.bits.position_out_of_range = false;
   } else {
     state->ckp_synced = false;
+    state->matched = false;
     if(ctx->data.validity == CMP_DATA_VALID) {
       ctx->data.validity = CMP_DATA_DETECTED;
+      ctx->diag.bits.ckp_error = true;
     }
   }
 }
