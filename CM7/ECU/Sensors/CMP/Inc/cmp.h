@@ -59,6 +59,7 @@ typedef union cmp_diag_tag {
         bool signal_width : 1;
         bool bad_pulse : 1;
         bool ckp_error : 1;
+        bool position_out_of_range : 1; /* Angle is still valid if pattern is matched */
     }bits;
 }cmp_diag_t;
 
