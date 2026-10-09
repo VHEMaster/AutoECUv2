@@ -164,8 +164,20 @@ ITCM_FUNC void timing_base_ckp_signal_update(timing_base_ctx_t *ctx, const ckp_d
                   }
                 }
               }
-            } else if(sync_at_odd_rev == ckp_sensor_data.odd_rev) {
+            } else {
+              /* Phase is known as soon as CMP is matched. The current CKP
+               * revolution does not have to be the configured reference
+               * revolution: shift current/previous coordinates now. */
               crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
+              for(int i = 0; i < ITEMSOF(position_values); i++) {
+                if(sync_at_odd_rev != odd_rev[i]) {
+                  if(*position_values[i] < 0.0f) {
+                    *position_values[i] += 360.0f;
+                  } else {
+                    *position_values[i] -= 360.0f;
+                  }
+                }
+              }
             }
           } else {
             crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
