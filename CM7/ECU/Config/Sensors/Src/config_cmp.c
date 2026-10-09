@@ -31,6 +31,24 @@ static const cmp_config_t ecu_sensors_cmp_config_default = {
     .signal_ref_type = CMP_CONFIG_SIGNAL_REF_TYPE_SINGLEPULSE,
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_ref_types_config = {
+        .patterned = {
+            /* BMW N55 / N52 three-sector wheel, measured relative geometry.
+             * reference_offset requires CKP/CMP calibration before phased synchronization.
+             */
+            .edges_count = 6,
+            .reference_calibrated = false,
+            .reference_offset = 0.0f,
+            .vvt_min = -70.0f,
+            .vvt_max = 70.0f,
+            .angle_tolerance = 5.0f,
+            .interval_tolerance = 8.0f,
+            .vvt_slew_rate = 250.0f,
+            .edges = {
+                { 39.0f, true }, { 88.0f, false },
+                { 219.0f, true }, { 398.0f, false },
+                { 439.0f, true }, { 578.0f, false },
+            },
+        },
         .singlepulse = {
             .pulse_edge_pos_min = -140,
             .pulse_edge_pos_max = -60,
