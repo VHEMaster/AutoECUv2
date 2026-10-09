@@ -14,7 +14,6 @@
 
 typedef enum {
   CMP_CONFIG_VERSION_V1 = 0,
-  CMP_CONFIG_VERSION_V2,
   CMP_CONFIG_VERSION_MAX
 }cmp_config_versions_t;
 
@@ -38,11 +37,6 @@ typedef struct {
     cmp_config_signal_polarity_t polarity;
 }cmp_config_signal_ref_type_singlepulse_t;
 
-/* Keep the V1 layout unchanged for flash migration. */
-typedef struct {
-    cmp_config_signal_ref_type_singlepulse_t singlepulse;
-}cmp_config_signal_ref_types_config_v1_t;
-
 #define CMP_CONFIG_PATTERNED_EDGES_MAX    16
 
 typedef struct {
@@ -65,7 +59,7 @@ typedef struct {
 typedef struct {
     cmp_config_signal_ref_type_singlepulse_t singlepulse;
     cmp_config_signal_ref_type_patterned_t patterned;
-}cmp_config_signal_ref_types_config_v2_t;
+}cmp_config_signal_ref_types_config_t;
 
 typedef struct {
     bool enabled;
@@ -76,25 +70,11 @@ typedef struct {
     ecu_gpio_input_pin_t input_pin;
 
     cmp_config_signal_ref_type_t signal_ref_type;
-    cmp_config_signal_ref_types_config_v1_t signal_ref_types_config;
+    cmp_config_signal_ref_types_config_t signal_ref_types_config;
 
     uint32_t align ALIGNED_CACHE;
 }cmp_config_v1_t ALIGNED_CACHE;
 
-typedef struct {
-    bool enabled;
-
-    time_delta_us_t boot_time;
-    bool desync_on_error;
-
-    ecu_gpio_input_pin_t input_pin;
-
-    cmp_config_signal_ref_type_t signal_ref_type;
-    cmp_config_signal_ref_types_config_v2_t signal_ref_types_config;
-
-    uint32_t align ALIGNED_CACHE;
-}cmp_config_v2_t ALIGNED_CACHE;
-
-typedef cmp_config_v2_t cmp_config_t;
+typedef cmp_config_v1_t cmp_config_t;
 
 #endif /* CONFIG_VERSIONED_SENSORS_INC_VERSIONED_CMP_H_ */
