@@ -46,10 +46,9 @@ typedef struct {
 
 typedef struct {
     uint8_t edges_count;
-    bool reference_calibrated;
     float reference_offset;          /* CKP 0 -> profile geometry, crank degrees */
-    float vvt_min;                   /* Relative to calibrated reference, crank degrees */
-    float vvt_max;
+    float vvt_min;                   /* Diagnostic lower bound of relative VVT, crank degrees */
+    float vvt_max;                   /* Diagnostic upper bound; not a synchronization gate */
     float angle_tolerance;           /* Per-edge position tolerance, crank degrees */
     float interval_tolerance;        /* Between-edge tolerance, crank degrees */
     float vvt_slew_rate;             /* Maximum VVT movement, crank degrees / second */
