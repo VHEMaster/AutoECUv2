@@ -249,6 +249,8 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
       ctx->diag.bits.wrong_signal = true;
       if(ctx->config.desync_on_error) {
         result.validity = CMP_DATA_DETECTED;
+        state->matched = false;
+        state->count = 0;
       }
     } else {
       result.validity = CMP_DATA_VALID;
@@ -261,11 +263,12 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
   } else {
     if(found == 0) {
       ctx->diag.bits.wrong_signal = true;
-      state->count = 0;
-      state->matched = false;
     }
-    if(ctx->config.desync_on_error || result.validity < CMP_DATA_VALID) {
-      result.validity = CMP_DATA_DETECTED;
+    /* No unique full-cycle match: never retain an obsolete VALID result. */
+    result.validity = CMP_DATA_DETECTED;
+    state->matched = false;
+    if(found == 0) {
+      state->count = 0;
     }
   }
   ctx->data = result;
