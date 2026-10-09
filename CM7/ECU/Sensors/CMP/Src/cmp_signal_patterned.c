@@ -117,7 +117,12 @@ static bool cmp_patterned_match(const cmp_config_signal_ref_type_patterned_t *cf
   float previous_expected = cfg->edges[newest_index].angle;
   time_us_t previous_time = latest->timestamp;
 
-  if(fitted_vvt < cfg->vvt_min || fitted_vvt > cfg->vvt_max) {
+  /* The configured VVT limits are diagnostic, not matching limits.
+   * Only +/-180 crank degrees is needed to disambiguate the two
+   * CKP-revolution hypotheses. A shift outside that range cannot be
+   * distinguished from the opposite revolution without another reference.
+   */
+  if(fitted_vvt <= -180.0f || fitted_vvt >= 180.0f) {
     return false;
   }
 
@@ -133,9 +138,7 @@ static bool cmp_patterned_match(const cmp_config_signal_ref_type_patterned_t *cf
     float allowance = cfg->angle_tolerance + cfg->vvt_slew_rate * elapsed;
 
     if(event->rising != cfg->edges[index].rising ||
-        fabsf(residual - fitted_vvt) > allowance ||
-        residual < cfg->vvt_min - cfg->angle_tolerance ||
-        residual > cfg->vvt_max + cfg->angle_tolerance) {
+        fabsf(cmp_patterned_delta(residual - fitted_vvt)) > allowance) {
       return false;
     }
 
@@ -216,6 +219,7 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     state->count = 0;
     state->matched = false;
     ctx->data.validity = CMP_DATA_NONE;
+    ctx->diag.bits.position_out_of_range = false;
     return;
   }
 
@@ -249,7 +253,7 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
 
   prim = EnterCritical();
   result = ctx->data;
-  if(found == 1 && cfg->reference_calibrated) {
+  if(found == 1) {
     if(state->matched && state->match_phase != found_phase) {
       ctx->diag.bits.wrong_signal = true;
       if(ctx->config.desync_on_error) {
@@ -260,7 +264,11 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     } else {
       result.validity = CMP_DATA_VALID;
       result.sync_at_odd_rev = found_phase;
-      result.position = cmp_patterned_delta(cfg->reference_offset + found_vvt);
+      result.position = cmp_patterned_wrap(cfg->reference_offset + found_vvt + 180.0f, 360.0f) - 180.0f;
+      /* Preserve the measured phase and synchronization even when the
+       * camshaft is outside the configured permitted operating range. */
+      ctx->diag.bits.position_out_of_range =
+          (found_vvt < cfg->vvt_min || found_vvt > cfg->vvt_max);
       state->matched = true;
       state->match_phase = found_phase;
       state->match_index = found_index;
@@ -271,6 +279,7 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     }
     /* No unique full-cycle match: never retain an obsolete VALID result. */
     result.validity = CMP_DATA_DETECTED;
+    ctx->diag.bits.position_out_of_range = false;
     state->matched = false;
     if(found == 0) {
       state->count = 0;
@@ -315,5 +324,6 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
     state->level_known = false;
     state->matched = false;
     ctx->data.validity = CMP_DATA_NONE;
+    ctx->diag.bits.position_out_of_range = false;
   }
 }
