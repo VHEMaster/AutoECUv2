@@ -253,10 +253,16 @@ ITCM_FUNC void timing_base_cmp_signal_update(timing_base_ctx_t *ctx, ecu_sensor_
     camshaft->sensor_data = *data;
     ctx->diag.camshafts[cmp_instance].bits.cmp_failure = diag->data ? true : false;
 
-    if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+    /* CMP_DATA_VALID implies CKP angular alignment was available to the
+     * camshaft decoder. Accept this update even if Timing Base has not yet
+     * processed the same CKP event (callback registration order).
+     */
+    if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID ||
+        data->validity == CMP_DATA_VALID) {
       if(camshaft->sensor_data.validity == CMP_DATA_VALID) {
         if(camshaft_config->use_for_phased_sync) {
-          if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID) {
+          if(crankshaft->mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED ||
+              !camshafts->synchronized) {
 
             prim = EnterCritical();
             camshafts->valid = true;
