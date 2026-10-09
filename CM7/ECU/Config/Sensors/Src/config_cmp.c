@@ -43,10 +43,19 @@ static const cmp_config_t ecu_sensors_cmp_config_default = {
             .angle_tolerance = 5.0f,
             .interval_tolerance = 8.0f,
             .vvt_slew_rate = 250.0f,
+            /* Bench test wheel aligned to the CKP 60-2 missing-tooth
+             * center. Angles are CRANK degrees, not camshaft degrees.
+             * The old measured N52/N55 wheel geometry remains below.
+             *
+             * Measured geometric wheel angles (not CKP calibrated):
+             * { 39.0f, true }, { 88.0f, false },
+             * { 219.0f, true }, { 398.0f, false },
+             * { 439.0f, true }, { 578.0f, false },
+             */
             .edges = {
-                { 39.0f, true }, { 88.0f, false },
-                { 219.0f, true }, { 398.0f, false },
-                { 439.0f, true }, { 578.0f, false },
+                {   0.0f, true }, {  48.0f, false },
+                { 180.0f, true }, { 360.0f, false },
+                { 402.0f, true }, { 540.0f, false },
             },
         },
         .singlepulse = {
