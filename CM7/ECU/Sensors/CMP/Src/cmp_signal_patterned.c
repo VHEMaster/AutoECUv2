@@ -31,6 +31,8 @@ typedef struct {
     bool independent_synced;
     uint8_t independent_index;
     float independent_us_per_degree;
+    time_us_t last_edge_time;
+    bool last_edge_valid;
     bool matched;
     bool match_phase;
     uint8_t match_index;
@@ -201,12 +203,20 @@ static void cmp_patterned_resolve_ckp(cmp_ctx_t *ctx,
       &ctx->config.signal_ref_types_config.patterned;
   const cmp_signal_patterned_event_t *last = cmp_patterned_history(state, 0);
   float uspd = ckp->us_per_degree_revolution;
+  float cmp_uspd = state->independent_us_per_degree;
   time_delta_us_t elapsed = time_diff(ckp->current.timestamp, last->timestamp);
   bool found = false;
   bool phase = false;
   float fitted_vvt = 0.0f;
 
-  if(uspd <= 0.0f || !isfinite(uspd) || elapsed > ckp->period * 1.5f) {
+  /* Do not extrapolate across a long interval or a large acceleration.
+   * Independent CMP speed and current CKP speed must agree closely.
+   * Otherwise keep searching until new CMP timing is available.
+   */
+  if(uspd <= 0.0f || !isfinite(uspd) ||
+      cmp_uspd <= 0.0f || !isfinite(cmp_uspd) ||
+      elapsed > (time_delta_us_t)(uspd * 45.0f) ||
+      fabsf(cmp_uspd - uspd) > uspd * 0.10f) {
     return;
   }
 
@@ -346,14 +356,18 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
 
   cfg = &ctx->config.signal_ref_types_config.patterned;
   bool rising = level == ECU_IN_LEVEL_HIGH;
+  time_us_t now = time_now_us();
+  uint32_t event_prim;
 
   if(state->level_known && state->last_rising == rising) {
     ctx->diag.bits.signal_sequence = true;
     if(ctx->config.desync_on_error) {
+      event_prim = EnterCritical();
       state->count = 0;
       state->matched = false;
       state->independent_synced = false;
       ctx->data.validity = CMP_DATA_NONE;
+      ExitCritical(event_prim);
     }
     return;
   }
@@ -365,13 +379,17 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
       ckp.validity < CKP_DATA_VALID) {
     state->matched = false;
     if(cfg->independent_sync_enabled) {
+      event_prim = EnterCritical();
       event = &state->history[state->next];
       event->rising = rising;
-      event->timestamp = time_now_us();
+      event->timestamp = now;
+      state->last_edge_time = now;
+      state->last_edge_valid = true;
       state->next = (uint8_t)((state->next + 1u) % CMP_PATTERNED_HISTORY_MAX);
       if(state->count < cfg->edges_count) {
         state->count++;
       }
+      ExitCritical(event_prim);
       cmp_patterned_independent_search(cfg, state);
       ctx->data.validity = state->independent_synced ? CMP_DATA_SYNCHRONIZED : CMP_DATA_DETECTED;
     } else {
@@ -395,15 +413,19 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     state->next = 0;
   }
   state->ckp_synced = true;
+  event_prim = EnterCritical();
   event = &state->history[state->next];
   event->position = ckp.current_position;
   event->odd_rev = ckp.odd_rev;
   event->rising = rising;
-  event->timestamp = time_now_us();
+  event->timestamp = now;
+  state->last_edge_time = now;
+  state->last_edge_valid = true;
   state->next = (uint8_t)((state->next + 1u) % CMP_PATTERNED_HISTORY_MAX);
   if(state->count < cfg->edges_count) {
     state->count++;
   }
+  ExitCritical(event_prim);
 
   if(state->count < CMP_PATTERNED_MIN_EDGES) {
     if(!state->matched) {
@@ -471,8 +493,55 @@ void cmp_signal_patterned_loop_main(cmp_ctx_t *ctx, void *usrdata)
 
 void cmp_signal_patterned_loop_slow(cmp_ctx_t *ctx, void *usrdata)
 {
-  (void)ctx;
-  (void)usrdata;
+  cmp_signal_patterned_ctx_t *state = (cmp_signal_patterned_ctx_t *)usrdata;
+  time_us_t now;
+  time_delta_us_t timeout;
+  float uspd;
+  uint32_t prim;
+
+  if(ctx == NULL || state == NULL || !state->last_edge_valid ||
+      ctx->init.ckp_update_req_cb == NULL) {
+    return;
+  }
+
+  ckp_data_t ckp;
+  if(ctx->init.ckp_update_req_cb(ctx->init.ckp_update_usrdata, NULL, &ckp) != E_OK ||
+      ckp.validity < CKP_DATA_VALID) {
+    return;
+  }
+  uspd = ckp.us_per_degree_revolution;
+  if(!isfinite(uspd) || uspd <= 0.0f) {
+    return;
+  }
+
+  /* Longest expected gap across the configured wheel geometry. */
+  const cmp_config_signal_ref_type_patterned_t *cfg =
+      &ctx->config.signal_ref_types_config.patterned;
+  float longest = 0.0f;
+  for(uint8_t i = 0; i < cfg->edges_count; i++) {
+    float previous = cfg->edges[(i + cfg->edges_count - 1u) % cfg->edges_count].angle;
+    float gap = cmp_patterned_wrap(cfg->edges[i].angle - previous, 720.0f);
+    if(gap > longest) {
+      longest = gap;
+    }
+  }
+  timeout = (time_delta_us_t)((longest + cfg->angle_tolerance +
+      cfg->interval_tolerance) * uspd * 1.5f);
+  now = time_now_us();
+  if(time_diff(now, state->last_edge_time) > timeout) {
+    prim = EnterCritical();
+    if(state->last_edge_valid &&
+        time_diff(now, state->last_edge_time) > timeout) {
+      state->count = 0;
+      state->next = 0;
+      state->independent_synced = false;
+      state->matched = false;
+      state->last_edge_valid = false;
+      ctx->data.validity = CMP_DATA_NONE;
+      ctx->diag.bits.signal_lost = true;
+    }
+    ExitCritical(prim);
+  }
 }
 
 ITCM_FUNC void cmp_signal_patterned_loop_fast(cmp_ctx_t *ctx, void *usrdata)
