@@ -95,7 +95,12 @@ static cmp_signal_patterned_event_t *cmp_patterned_history(
 
 static float cmp_patterned_event_angle(const cmp_signal_patterned_event_t *event)
 {
-  return cmp_patterned_wrap(event->position, 360.0f) +
+  /* CKP uses [-180, +180) and flips odd_rev at the -180 boundary.
+   * Shift this coordinate by 180 before combining it with the revolution bit.
+   * A simple wrap(position, 360) silently assigns negative CKP angles to
+   * the wrong 360-degree half of the 720-degree engine cycle.
+   */
+  return cmp_patterned_wrap(event->position + 180.0f, 360.0f) +
       (event->odd_rev ? 360.0f : 0.0f);
 }
 
@@ -105,7 +110,7 @@ static bool cmp_patterned_match(const cmp_config_signal_ref_type_patterned_t *cf
 {
   cmp_signal_patterned_event_t *latest = cmp_patterned_history(state, 0);
   float latest_expected = cfg->edges[newest_index].angle +
-      cfg->reference_offset + (phase ? 360.0f : 0.0f);
+      cfg->reference_offset + 180.0f + (phase ? 360.0f : 0.0f);
   float latest_position = cmp_patterned_event_angle(latest);
   float fitted_vvt = cmp_patterned_delta(latest_position - latest_expected);
   float previous_actual = latest_position;
@@ -121,7 +126,7 @@ static bool cmp_patterned_match(const cmp_config_signal_ref_type_patterned_t *cf
     uint8_t index = (uint8_t)((newest_index + cfg->edges_count -
         (n % cfg->edges_count)) % cfg->edges_count);
     float expected = cfg->edges[index].angle +
-        cfg->reference_offset + (phase ? 360.0f : 0.0f);
+        cfg->reference_offset + 180.0f + (phase ? 360.0f : 0.0f);
     float actual = cmp_patterned_event_angle(event);
     float residual = cmp_patterned_delta(actual - expected);
     float elapsed = (float)time_diff(latest->timestamp, event->timestamp) * 0.000001f;
