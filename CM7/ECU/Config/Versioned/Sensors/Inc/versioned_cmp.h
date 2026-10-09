@@ -46,6 +46,7 @@ typedef struct {
 
 typedef struct {
     uint8_t edges_count;
+    bool independent_sync_enabled;  /* Decode CMP timing before CKP is valid */
     float reference_offset;          /* CKP 0 -> profile geometry, crank degrees */
     float vvt_min;                   /* Diagnostic lower bound of relative VVT, crank degrees */
     float vvt_max;                   /* Diagnostic upper bound; not a synchronization gate */
