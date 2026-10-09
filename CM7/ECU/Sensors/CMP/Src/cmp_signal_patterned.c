@@ -28,6 +28,9 @@ typedef struct {
     bool level_known;
     bool last_rising;
     bool ckp_synced;
+    bool independent_synced;
+    uint8_t independent_index;
+    float independent_us_per_degree;
     bool matched;
     bool match_phase;
     uint8_t match_index;
@@ -102,6 +105,148 @@ static float cmp_patterned_event_angle(const cmp_signal_patterned_event_t *event
    */
   return cmp_patterned_wrap(event->position + 180.0f, 360.0f) +
       (event->odd_rev ? 360.0f : 0.0f);
+}
+
+/* Before CKP sync, match the ratio of successive CMP edge intervals.
+ * The pattern is identified by comparing angular interval ratios to
+ * timestamp interval ratios; speed is estimated from the candidate.
+ * Require >= 4 edges to avoid trusting a single interval ratio.
+ */
+static void cmp_patterned_independent_search(
+    const cmp_config_signal_ref_type_patterned_t *cfg,
+    cmp_signal_patterned_ctx_t *state)
+{
+  bool found = false;
+  uint8_t unique_index = 0;
+  float unique_uspd = 0.0f;
+  uint8_t count = state->count;
+
+  state->independent_synced = false;
+  if(count < 4) {
+    return;
+  }
+
+  for(uint8_t newest = 0; newest < cfg->edges_count; newest++) {
+    uint8_t count_matched = 0;
+    float sum_time = 0.0f;
+    float sum_angle = 0.0f;
+    bool valid = true;
+    for(uint8_t n = 0; n < count; n++) {
+      const cmp_signal_patterned_event_t *event = cmp_patterned_history(state, n);
+      uint8_t index = (uint8_t)((newest + cfg->edges_count -
+          (n % cfg->edges_count)) % cfg->edges_count);
+      if(event->rising != cfg->edges[index].rising) {
+        valid = false;
+        break;
+      }
+      if(n + 1 < count) {
+        const cmp_signal_patterned_event_t *previous = cmp_patterned_history(state, n + 1);
+        uint8_t prev_index = (uint8_t)((index + cfg->edges_count - 1u) % cfg->edges_count);
+        float angle = cmp_patterned_wrap(cfg->edges[index].angle -
+            cfg->edges[prev_index].angle, 720.0f);
+        time_delta_us_t dt = time_diff(event->timestamp, previous->timestamp);
+        if(angle <= 0.0f || dt == 0u) {
+          valid = false;
+          break;
+        }
+        sum_time += (float)dt;
+        sum_angle += angle;
+        count_matched++;
+      }
+    }
+    if(!valid || count_matched == 0 || sum_angle <= 0.0f) {
+      continue;
+    }
+    float uspd = sum_time / sum_angle;
+    for(uint8_t n = 0; n + 1 < count; n++) {
+      const cmp_signal_patterned_event_t *event = cmp_patterned_history(state, n);
+      const cmp_signal_patterned_event_t *previous = cmp_patterned_history(state, n + 1);
+      uint8_t index = (uint8_t)((newest + cfg->edges_count -
+          (n % cfg->edges_count)) % cfg->edges_count);
+      uint8_t prev_index = (uint8_t)((index + cfg->edges_count - 1u) % cfg->edges_count);
+      float angle = cmp_patterned_wrap(cfg->edges[index].angle -
+          cfg->edges[prev_index].angle, 720.0f);
+      float measured = (float)time_diff(event->timestamp, previous->timestamp);
+      float expected = angle * uspd;
+      if(fabsf(measured - expected) > uspd * cfg->interval_tolerance +
+          cfg->vvt_slew_rate * measured * uspd * 0.000001f) {
+        valid = false;
+        break;
+      }
+    }
+    if(valid) {
+      if(found) {
+        return; /* Ambiguous cyclic index: no independent sync */
+      }
+      found = true;
+      unique_index = newest;
+      unique_uspd = uspd;
+    }
+  }
+
+  if(found) {
+    state->independent_synced = true;
+    state->independent_index = unique_index;
+    state->independent_us_per_degree = unique_uspd;
+  }
+}
+
+/* Resolve an independently matched CMP index at the first CKP position.
+ * CKP angle here is the current, synchronized, signed crank position.
+ */
+static void cmp_patterned_resolve_ckp(cmp_ctx_t *ctx,
+    cmp_signal_patterned_ctx_t *state, const ckp_data_t *ckp)
+{
+  const cmp_config_signal_ref_type_patterned_t *cfg =
+      &ctx->config.signal_ref_types_config.patterned;
+  const cmp_signal_patterned_event_t *last = cmp_patterned_history(state, 0);
+  float uspd = ckp->us_per_degree_revolution;
+  time_delta_us_t elapsed = time_diff(ckp->current.timestamp, last->timestamp);
+  bool found = false;
+  bool phase = false;
+  float fitted_vvt = 0.0f;
+
+  if(uspd <= 0.0f || !isfinite(uspd) || elapsed > ckp->period * 1.5f) {
+    return;
+  }
+
+  float observed_at_cmp = cmp_patterned_wrap(
+      ckp->current.position - (float)elapsed / uspd + 180.0f, 360.0f) +
+      (ckp->odd_rev ? 360.0f : 0.0f);
+  float expected = cfg->edges[state->independent_index].angle +
+      cfg->reference_offset + 180.0f;
+  for(uint8_t candidate = 0; candidate < 2; candidate++) {
+    float vvt = cmp_patterned_delta(observed_at_cmp -
+        expected - (candidate != 0 ? 360.0f : 0.0f));
+    if(vvt > -180.0f && vvt < 180.0f) {
+      /* Restrict initial alignment to the mechanically plausible half cycle;
+       * do not clamp to diagnostic VVT limits. */
+      if(fabsf(vvt) <= 180.0f - cfg->angle_tolerance) {
+        if(found) {
+          return;
+        }
+        found = true;
+        phase = candidate != 0;
+        fitted_vvt = vvt;
+      }
+    }
+  }
+  if(!found) {
+    return;
+  }
+
+  ctx->data.position = cmp_patterned_wrap(cfg->reference_offset +
+      fitted_vvt + 180.0f, 360.0f) - 180.0f;
+  ctx->data.sync_at_odd_rev = phase;
+  ctx->data.validity = CMP_DATA_VALID;
+  ctx->diag.bits.position_out_of_range =
+      (fitted_vvt < cfg->vvt_min || fitted_vvt > cfg->vvt_max);
+  state->matched = true;
+  state->match_phase = phase;
+  state->match_index = state->independent_index;
+  state->independent_synced = false;
+  state->count = 0;
+  state->next = 0;
 }
 
 static bool cmp_patterned_match(const cmp_config_signal_ref_type_patterned_t *cfg,
@@ -206,6 +351,7 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
     if(ctx->config.desync_on_error) {
       state->count = 0;
       state->matched = false;
+      state->independent_synced = false;
       ctx->data.validity = CMP_DATA_NONE;
     }
     return;
@@ -218,11 +364,28 @@ ITCM_FUNC void cmp_signal_patterned_signal(cmp_ctx_t *ctx, ecu_gpio_input_level_
       ckp.validity < CKP_DATA_VALID) {
     state->count = 0;
     state->matched = false;
-    ctx->data.validity = CMP_DATA_NONE;
+    if(cfg->independent_sync_enabled) {
+      event = &state->history[state->next];
+      event->rising = rising;
+      event->timestamp = time_now_us();
+      state->next = (uint8_t)((state->next + 1u) % CMP_PATTERNED_HISTORY_MAX);
+      if(state->count < cfg->edges_count) {
+        state->count++;
+      }
+      cmp_patterned_independent_search(cfg, state);
+      ctx->data.validity = state->independent_synced ? CMP_DATA_SYNCHRONIZED : CMP_DATA_DETECTED;
+    } else {
+      state->count = 0;
+      state->independent_synced = false;
+      ctx->data.validity = CMP_DATA_NONE;
+    }
     ctx->diag.bits.position_out_of_range = false;
     return;
   }
 
+  if(state->independent_synced) {
+    cmp_patterned_resolve_ckp(ctx, state, &ckp);
+  }
   event = &state->history[state->next];
   event->position = ckp.current_position;
   event->odd_rev = ckp.odd_rev;
@@ -318,11 +481,23 @@ ITCM_FUNC void cmp_signal_patterned_ckp_update(cmp_ctx_t *ctx, void *usrdata,
     return;
   }
 
-  if(data->validity < CKP_DATA_VALID) {
+  if(data->validity >= CKP_DATA_VALID) {
+    if(state->independent_synced && state->count > 0) {
+      cmp_patterned_resolve_ckp(ctx, state, data);
+      if(ctx->data.validity == CMP_DATA_VALID &&
+          ctx->init.signal_update_cb != NULL) {
+        cmp_data_t result = ctx->data;
+        cmp_diag_t diagnosis = ctx->diag;
+        ctx->init.signal_update_cb(ctx->init.signal_update_usrdata,
+            &result, &diagnosis);
+      }
+    }
+  } else if(!ctx->config.signal_ref_types_config.patterned.independent_sync_enabled) {
     state->count = 0;
     state->next = 0;
     state->level_known = false;
     state->matched = false;
+    state->independent_synced = false;
     ctx->data.validity = CMP_DATA_NONE;
     ctx->diag.bits.position_out_of_range = false;
   }
