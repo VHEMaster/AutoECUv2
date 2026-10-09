@@ -36,6 +36,7 @@ static const cmp_config_t ecu_sensors_cmp_config_default = {
              * reference_offset requires CKP/CMP calibration before phased synchronization.
              */
             .edges_count = 6,
+            .independent_sync_enabled = true,
             /* Synthetic bench profile aligned to the chosen CKP zero.
              * Use a measured CKP-to-CMP offset on a physical N55.
              */
