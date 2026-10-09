@@ -19,7 +19,15 @@ static const cmp_signal_ref_cfg_t cmp_signal_ref_cfg[CMP_CONFIG_SIGNAL_REF_TYPE_
         .func_slow_cb = cmp_signal_singlepulse_loop_slow,
         .func_fast_cb = cmp_signal_singlepulse_loop_fast,
         .func_ckp_update_cb = cmp_signal_singlepulse_ckp_update,
-    }, //CMP_CONFIG_SIGNAL_REF_TYPE_REGULAR_60_2
+    }, //CMP_CONFIG_SIGNAL_REF_TYPE_SINGLEPULSE
+    {
+        .func_init_cb = cmp_signal_patterned_init,
+        .func_signal_cb = cmp_signal_patterned_signal,
+        .func_main_cb = cmp_signal_patterned_loop_main,
+        .func_slow_cb = cmp_signal_patterned_loop_slow,
+        .func_fast_cb = cmp_signal_patterned_loop_fast,
+        .func_ckp_update_cb = cmp_signal_patterned_ckp_update,
+    }, //CMP_CONFIG_SIGNAL_REF_TYPE_PATTERNED
 };
 
 error_t cmp_init(cmp_ctx_t *ctx, const cmp_init_ctx_t *init_ctx)
