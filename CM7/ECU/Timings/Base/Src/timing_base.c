@@ -164,20 +164,8 @@ ITCM_FUNC void timing_base_ckp_signal_update(timing_base_ctx_t *ctx, const ckp_d
                   }
                 }
               }
-            } else {
-              /* Phase is known as soon as CMP is matched. The current CKP
-               * revolution does not have to be the configured reference
-               * revolution: shift current/previous coordinates now. */
+            } else if(sync_at_odd_rev == ckp_sensor_data.odd_rev) {
               crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
-              for(int i = 0; i < ITEMSOF(position_values); i++) {
-                if(sync_at_odd_rev != odd_rev[i]) {
-                  if(*position_values[i] < 0.0f) {
-                    *position_values[i] += 360.0f;
-                  } else {
-                    *position_values[i] -= 360.0f;
-                  }
-                }
-              }
             }
           } else {
             crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
@@ -253,16 +241,10 @@ ITCM_FUNC void timing_base_cmp_signal_update(timing_base_ctx_t *ctx, ecu_sensor_
     camshaft->sensor_data = *data;
     ctx->diag.camshafts[cmp_instance].bits.cmp_failure = diag->data ? true : false;
 
-    /* CMP_DATA_VALID implies CKP angular alignment was available to the
-     * camshaft decoder. Accept this update even if Timing Base has not yet
-     * processed the same CKP event (callback registration order).
-     */
-    if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID ||
-        data->validity == CMP_DATA_VALID) {
+    if(crankshaft->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       if(camshaft->sensor_data.validity == CMP_DATA_VALID) {
         if(camshaft_config->use_for_phased_sync) {
-          if(crankshaft->mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED ||
-              !camshafts->synchronized) {
+          if(crankshaft->mode == TIMING_CRANKSHAFT_MODE_VALID) {
 
             prim = EnterCritical();
             camshafts->valid = true;
@@ -295,20 +277,9 @@ ITCM_FUNC void timing_base_cmp_signal_update(timing_base_ctx_t *ctx, ecu_sensor_
           ctx->diag.camshafts[cmp_instance].bits.pos_too_early = true;
         }
         camshaft->valid = true;
-      } else {
-        /* DETECTED and SYNCHRONIZED are not sufficient to retain the
-         * crankshaft's 720-degree phase. Only CMP_DATA_VALID is. */
-        camshaft->valid = false;
-        if(camshafts->synchronized && camshafts->sync_camshaft_instance == cmp_instance) {
-          prim = EnterCritical();
+      } else if(camshaft->sensor_data.validity < CMP_DATA_DETECTED) {
+        if(camshafts->synchronized) {
           ctx->diag.camshafts[cmp_instance].bits.signal_lost = true;
-          camshafts->synchronized = false;
-          camshafts->valid = false;
-          crankshaft->mode = TIMING_CRANKSHAFT_MODE_VALID;
-          if(ctx->config.phased_only) {
-            crankshaft->valid = false;
-          }
-          ExitCritical(prim);
         }
       }
     } else {
