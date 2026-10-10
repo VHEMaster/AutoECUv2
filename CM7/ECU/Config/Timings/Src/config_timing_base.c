@@ -50,15 +50,9 @@ static const timing_base_config_t ecu_timings_base_config_default = {
         {
           .enabled = true,
           .use_for_phased_sync = true,
-          /* Original singlepulse configuration:
-           * .pos_relative = -105.8f,
-           * .pos_min = -3.0f,
-           * .pos_max = 3.0f,
-           */
-          /* Patterned bench profile; CKP missing-tooth center at zero. */
-          .pos_relative = 0.0f,
-          .pos_min = -70.0f,
-          .pos_max = 70.0f,
+          .pos_relative = -105.8f,
+          .pos_min = -3.0f,
+          .pos_max = 3.0f,
         }, //ECU_SENSOR_CMP_1
     },
     .phased_syncmode = TIMING_BASE_CONFIG_PHASEDSYNCMODE_CAMSHAFT,
