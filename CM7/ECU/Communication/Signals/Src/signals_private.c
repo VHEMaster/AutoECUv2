@@ -132,6 +132,8 @@ error_t signals_config_build(signals_ctx_t *ctx)
 
     now = time_now_us();
 
+    //TODO: implement validation of CAN signals overlapping
+
     for(uint32_t i = 0; i < ITEMSOF(config->messages_lists.downstream_list); i++) {
       RETURN_IF(ctx->runtime.messages_downstream.messages_used >= ITEMSOF(config->messages_lists.downstream_list), E_PARAM);
 

@@ -541,6 +541,8 @@ error_t router_configure_signals(router_ctx_t *ctx)
     }
     BREAK_IF(err != E_OK);
 
+    //TODO: implement error when one signal is linked to multiple CAN interfaces
+
   } while(0);
 
   return err;
