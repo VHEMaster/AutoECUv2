@@ -15,6 +15,7 @@
 #include "uds.h"
 #include "obd2.h"
 #include "router.h"
+#include "signals.h"
 
 #include "config_comm_types.h"
 
@@ -37,5 +38,6 @@ error_t ecu_comm_get_isotp_ctx(ecu_comm_isotp_t instance, isotp_ctx_t **ctx);
 error_t ecu_comm_get_uds_ctx(ecu_comm_uds_t instance, uds_ctx_t **ctx);
 error_t ecu_comm_get_obd2_ctx(ecu_comm_obd2_t instance, obd2_ctx_t **ctx);
 error_t ecu_comm_get_router_ctx(ecu_comm_router_t instance, router_ctx_t **ctx);
+error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ctx);
 
 #endif /* CONFIG_COMMUNICATION_INC_CONFIG_COMM_H_ */

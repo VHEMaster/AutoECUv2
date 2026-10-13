@@ -18,6 +18,7 @@
 #include "uds.h"
 #include "obd2.h"
 #include "router.h"
+#include "signals.h"
 
 typedef enum {
   ROUTER_OK = 0,

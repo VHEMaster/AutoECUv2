@@ -851,6 +851,26 @@ static const ecu_config_device_config_t ecu_config_global_comms_config[ECU_CONFI
           },
       }
     }, //ECU_CONFIG_COMM_TYPE_ROUTER
+    {
+      .device_type = ECU_COMM_TYPE_SIGNALS,
+      .instances_count = ECU_COMM_SIGNALS_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_signals_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_signals_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_SIGNALS,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_signals_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.signals[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.signals[0]),
+          .versions_count = SIGNALS_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = SIGNALS_CONFIG_VERSION_V1,
+                  .size = sizeof(signals_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_SIGNALS
 };
 
 static ecu_config_executive_ctx_t ecu_config_global_flash_ctx;

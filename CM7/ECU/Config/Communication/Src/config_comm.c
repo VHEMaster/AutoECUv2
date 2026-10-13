@@ -15,7 +15,8 @@
     ECU_COMM_ISOTP_MAX    + \
     ECU_COMM_UDS_MAX      + \
     ECU_COMM_OBD2_MAX     + \
-    ECU_COMM_ROUTER_MAX)
+    ECU_COMM_ROUTER_MAX   + \
+    ECU_COMM_SIGNALS_MAX)
 
 typedef enum {
   ECU_COMM_LOOP_TYPE_MAIN = 0,
@@ -70,6 +71,7 @@ static RAM_SECTION isotp_ctx_t ecu_config_isotp_ctx[ECU_COMM_ISOTP_MAX] = {0};
 static RAM_SECTION uds_ctx_t ecu_config_uds_ctx[ECU_COMM_UDS_MAX] = {0};
 static RAM_SECTION obd2_ctx_t ecu_config_obd2_ctx[ECU_COMM_OBD2_MAX] = {0};
 static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0};
+static RAM_SECTION signals_ctx_t ecu_config_signals_ctx[ECU_COMM_SIGNALS_MAX] = {0};
 
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
@@ -109,6 +111,12 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .loop_comm = (ecu_comm_loop_func_t)router_loop_comm,
             .instance_max = ECU_COMM_ROUTER_MAX,
         }, //ECU_COMM_TYPE_ROUTER
+        {
+            .loop_slow = (ecu_comm_loop_func_t)signals_loop_slow,
+            .loop_main = (ecu_comm_loop_func_t)signals_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)signals_loop_comm,
+            .instance_max = ECU_COMM_SIGNALS_MAX,
+        }, //ECU_COMM_TYPE_SIGNALS
     },
     .comm = {
         {
@@ -165,6 +173,11 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .type = ECU_COMM_TYPE_ROUTER,
             .instance = ECU_COMM_ROUTER_1,
             .ctx = &ecu_config_router_ctx[ECU_COMM_ROUTER_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_SIGNALS,
+            .instance = ECU_COMM_SIGNALS_1,
+            .ctx = &ecu_config_signals_ctx[ECU_COMM_SIGNALS_1],
         },
     },
 };
@@ -447,4 +460,9 @@ error_t ecu_comm_get_obd2_ctx(ecu_comm_obd2_t instance, obd2_ctx_t **ctx)
 error_t ecu_comm_get_router_ctx(ecu_comm_router_t instance, router_ctx_t **ctx)
 {
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ROUTER, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_SIGNALS, instance, (void**)ctx);
 }

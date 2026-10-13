@@ -15,5 +15,6 @@
 #include "versioned_uds.h"
 #include "versioned_router.h"
 #include "versioned_obd2.h"
+#include "versioned_signals.h"
 
 #endif /* CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_COMM_H_ */
