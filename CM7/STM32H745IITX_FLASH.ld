@@ -89,6 +89,7 @@ SECTIONS
     
     *(.text.HAL_*_IRQHandler)  	/* .text.HAL_* sections */
     *(.text.*_IRQHandler)  			/* .text.IRQHandler sections */
+    
 
     . = ALIGN(4);
     _eitcm_func = .;        /* define a global symbol at data end */
@@ -199,7 +200,7 @@ SECTIONS
   } >DTCMRAM
 
   /* User_heap section, used to check that there is enough "RAM" Ram  type memory left */
-  ._user_heap :
+  ._user_heap (NOLOAD) :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
@@ -209,7 +210,7 @@ SECTIONS
   } >RAM_D1
 
   /* User_stack section, used to check that there is enough "RAM" Ram  type memory left */
-  ._user_stack :
+  ._user_stack (NOLOAD) :
   {
     . = ALIGN(8);
     PROVIDE ( end = . );
@@ -220,7 +221,7 @@ SECTIONS
   
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
-  .dmabss :
+  .dmabss (NOLOAD) :
   {
     /* This is used by the startup in order to initialize the .dmabss section */
     _sdmabss = .;         /* define a global symbol at dmabss start */
@@ -235,7 +236,7 @@ SECTIONS
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
-  .rambss :
+  .rambss (NOLOAD) :
   {
     /* This is used by the startup in order to initialize the .rambss section */
     _srambss = .;         /* define a global symbol at rambss start */

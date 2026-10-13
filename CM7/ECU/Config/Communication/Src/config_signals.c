@@ -78,7 +78,7 @@ static const signals_config_t ecu_comm_signals_default_config[ECU_COMM_SIGNALS_M
                       .bitlength = 8,
                       .startbit = 8,
                       .offset = 0,
-                      .gain = 1200.0f,
+                      .gain = 0.012f,
                   },
                   .parameter_id = { .bitfield = {
                       .supported = true, .entity = ECU_COMMON_ENTITY_SENSOR,

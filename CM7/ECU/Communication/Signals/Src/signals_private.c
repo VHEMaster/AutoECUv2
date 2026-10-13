@@ -136,100 +136,102 @@ error_t signals_config_build(signals_ctx_t *ctx)
       RETURN_IF(ctx->runtime.messages_downstream.messages_used >= ITEMSOF(config->messages_lists.downstream_list), E_PARAM);
 
       message_config = &config->messages_lists.downstream_list[i];
-      if(message_config->enabled) {
-        RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
-        if(message_config->has_crc) {
-          RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
-        }
-        if(message_config->has_counter) {
-          RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
-        }
-        if(message_config->has_crc && message_config->has_counter) {
-          RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
-        }
+      CONTINUE_IF(message_config->enabled != true);
 
-        message_runtime = &ctx->runtime.messages_downstream.messages[ctx->runtime.messages_downstream.messages_used];
-        message_runtime->used = true;
-        message_runtime->last = now;
-        message_runtime->signals_tree = NULL;
-        message_runtime->message_config = message_config;
-        message_id = message_config->message_id;
-        signal_runtime_prev = NULL;
-
-        for(uint32_t s = 0; s < ITEMSOF(config->signals_lists.downstream_list); s++) {
-          signal_config = &config->signals_lists.downstream_list[s];
-          if(signal_config->message_id == message_id) {
-            RETURN_IF(ctx->runtime.messages_downstream.signals_used >= ITEMSOF(config->signals_lists.downstream_list), E_PARAM);
-            signal_runtime = &ctx->runtime.messages_downstream.signal_tree[ctx->runtime.messages_downstream.signals_used];
-            signal_runtime->signal_config = signal_config;
-            err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
-            BREAK_IF(err != E_OK);
-            BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
-            signal_runtime->parameter_ptr = value;
-            signal_runtime->next = NULL;
-            if(signal_runtime_prev != NULL) {
-              signal_runtime_prev->next = signal_runtime;
-            } else {
-              message_runtime->signals_tree = signal_runtime;
-            }
-            signal_runtime_prev = signal_runtime;
-            ctx->runtime.messages_downstream.signals_used++;
-          }
-        }
-        BREAK_IF(err != E_OK);
-        ctx->runtime.messages_downstream.messages_used++;
+      RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
+      if(message_config->has_crc) {
+        RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
       }
+      if(message_config->has_counter) {
+        RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
+      }
+      if(message_config->has_crc && message_config->has_counter) {
+        RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
+      }
+
+      message_runtime = &ctx->runtime.messages_downstream.messages[ctx->runtime.messages_downstream.messages_used];
+      message_runtime->used = true;
+      message_runtime->last = now;
+      message_runtime->signals_tree = NULL;
+      message_runtime->message_config = message_config;
+      message_id = message_config->message_id;
+      signal_runtime_prev = NULL;
+
+      for(uint32_t s = 0; s < ITEMSOF(config->signals_lists.downstream_list); s++) {
+        signal_config = &config->signals_lists.downstream_list[s];
+        CONTINUE_IF(signal_config->enabled != true);
+        if(signal_config->message_id == message_id) {
+          RETURN_IF(ctx->runtime.messages_downstream.signals_used >= ITEMSOF(config->signals_lists.downstream_list), E_PARAM);
+          signal_runtime = &ctx->runtime.messages_downstream.signal_tree[ctx->runtime.messages_downstream.signals_used];
+          signal_runtime->signal_config = signal_config;
+          err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
+          BREAK_IF(err != E_OK);
+          BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
+          signal_runtime->parameter_ptr = value;
+          signal_runtime->next = NULL;
+          if(signal_runtime_prev != NULL) {
+            signal_runtime_prev->next = signal_runtime;
+          } else {
+            message_runtime->signals_tree = signal_runtime;
+          }
+          signal_runtime_prev = signal_runtime;
+          ctx->runtime.messages_downstream.signals_used++;
+        }
+      }
+      BREAK_IF(err != E_OK);
+      ctx->runtime.messages_downstream.messages_used++;
     }
     BREAK_IF(err != E_OK);
 
     for(uint32_t i = 0; i < ITEMSOF(config->messages_lists.upstream_list); i++) {
       RETURN_IF(ctx->runtime.messages_upstream.messages_used >= ITEMSOF(config->messages_lists.upstream_list), E_PARAM);
       message_config = &config->messages_lists.upstream_list[i];
-      if(message_config->enabled) {
-        RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
-        if(message_config->has_crc) {
-          RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
-        }
-        if(message_config->has_counter) {
-          RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
-        }
-        if(message_config->has_crc && message_config->has_counter) {
-          RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
-        }
+      CONTINUE_IF(message_config->enabled != true);
 
-        message_runtime = &ctx->runtime.messages_upstream.messages[ctx->runtime.messages_upstream.messages_used];
-        message_runtime->used = true;
-        message_runtime->last = now;
-        message_runtime->signals_tree = NULL;
-        message_runtime->message_config = message_config;
-        message_id = message_config->message_id;
-        signal_runtime_prev = NULL;
-
-        for(uint32_t s = 0; s < ITEMSOF(config->signals_lists.upstream_list); s++) {
-          signal_config = &config->signals_lists.upstream_list[s];
-          if(signal_config->message_id == message_id) {
-            RETURN_IF(ctx->runtime.messages_upstream.signals_used >= ITEMSOF(config->signals_lists.upstream_list), E_PARAM);
-            signal_runtime = &ctx->runtime.messages_upstream.signal_tree[ctx->runtime.messages_upstream.signals_used];
-            signal_runtime->signal_config = signal_config;
-
-            // TODO: assign proper ID to be written by CAN
-            err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
-            BREAK_IF(err != E_OK);
-            BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
-            signal_runtime->parameter_ptr = value;
-            signal_runtime->next = NULL;
-            if(signal_runtime_prev != NULL) {
-              signal_runtime_prev->next = signal_runtime;
-            } else {
-              message_runtime->signals_tree = signal_runtime;
-            }
-            signal_runtime_prev = signal_runtime;
-            ctx->runtime.messages_upstream.signals_used++;
-          }
-        }
-        BREAK_IF(err != E_OK);
-        ctx->runtime.messages_upstream.messages_used++;
+      RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
+      if(message_config->has_crc) {
+        RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
       }
+      if(message_config->has_counter) {
+        RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
+      }
+      if(message_config->has_crc && message_config->has_counter) {
+        RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
+      }
+
+      message_runtime = &ctx->runtime.messages_upstream.messages[ctx->runtime.messages_upstream.messages_used];
+      message_runtime->used = true;
+      message_runtime->last = now;
+      message_runtime->signals_tree = NULL;
+      message_runtime->message_config = message_config;
+      message_id = message_config->message_id;
+      signal_runtime_prev = NULL;
+
+      for(uint32_t s = 0; s < ITEMSOF(config->signals_lists.upstream_list); s++) {
+        signal_config = &config->signals_lists.upstream_list[s];
+        CONTINUE_IF(signal_config->enabled != true);
+        if(signal_config->message_id == message_id) {
+          RETURN_IF(ctx->runtime.messages_upstream.signals_used >= ITEMSOF(config->signals_lists.upstream_list), E_PARAM);
+          signal_runtime = &ctx->runtime.messages_upstream.signal_tree[ctx->runtime.messages_upstream.signals_used];
+          signal_runtime->signal_config = signal_config;
+
+          // TODO: assign proper ID to be written by CAN
+          err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
+          BREAK_IF(err != E_OK);
+          BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
+          signal_runtime->parameter_ptr = value;
+          signal_runtime->next = NULL;
+          if(signal_runtime_prev != NULL) {
+            signal_runtime_prev->next = signal_runtime;
+          } else {
+            message_runtime->signals_tree = signal_runtime;
+          }
+          signal_runtime_prev = signal_runtime;
+          ctx->runtime.messages_upstream.signals_used++;
+        }
+      }
+      BREAK_IF(err != E_OK);
+      ctx->runtime.messages_upstream.messages_used++;
     }
     BREAK_IF(err != E_OK);
 
@@ -328,7 +330,7 @@ void signals_handle_downstream(signals_ctx_t *ctx)
         err = signals_frame_fifo_push(&ctx->runtime.fifo_messages_downstream, working_item);
         if(err == E_OK) {
           message->last = now;
-        } else if(message->message_config->upstream_timeout == 0u &&
+        } else if(message->message_config->upstream_timeout != 0u &&
             time_diff(now, message->last) > message->message_config->upstream_timeout) {
           // TODO: error handling
           message->last = now;
