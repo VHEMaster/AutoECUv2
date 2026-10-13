@@ -78,12 +78,18 @@ typedef struct {
 
 }router_diag_ctx_t;
 
+typedef struct {
+
+
+}router_signals_ctx_t;
+
 typedef struct router_ctx_tag {
     router_config_t config;
     router_init_ctx_t init;
     bool initialized;
     bool configured;
 
+    router_signals_ctx_t signals;
     router_diag_ctx_t diag;
 
     router_error_code_t error_code;

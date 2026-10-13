@@ -277,7 +277,7 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
   return err;
 }
 
-error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, const ecu_core_runtime_value_ctx_t **ptr)
+error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, ecu_core_runtime_value_ctx_t **ptr)
 {
   error_t err = E_OK;
   ecu_config_common_entity_ctx_t *entity_ctx;

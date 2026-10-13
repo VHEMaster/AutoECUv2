@@ -31,6 +31,7 @@ typedef struct {
     uint32_t msg_id_1_start;
     uint32_t msg_id_2_end;
     ecu_comm_can_t can_instance;
+    ecu_comm_signals_t signals_instance;
 }router_config_can_signals_list_item_t;
 
 typedef struct {

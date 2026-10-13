@@ -18,4 +18,7 @@ void signals_loop_comm(signals_ctx_t *ctx);
 
 error_t signals_reset(signals_ctx_t *ctx);
 
+error_t signals_data_write_upstream(signals_ctx_t *ctx, const signals_runtime_messages_fifo_item_t *message);
+error_t signals_data_read_downstream(signals_ctx_t *ctx, signals_runtime_messages_fifo_item_t *message);
+
 #endif /* COMMUNICATION_SIGNALS_INC_SIGNALS_H_ */

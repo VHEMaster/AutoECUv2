@@ -23,10 +23,15 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
           .signals = {
               .upstream_list = {
 
-
               },
               .downstream_list = {
-
+                  {
+                      .enabled = true,
+                      .msg_id_1_start = 0x100,
+                      .msg_id_2_end = 0x1FF,
+                      .can_instance = ECU_COMM_CAN_1,
+                      .signals_instance = ECU_COMM_SIGNALS_1,
+                  },
               },
           },
       },
@@ -53,7 +58,7 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
               }, //ECU_COMM_KWP_1
           },
       },
-  }, //ECU_ROUTER_IF_1
+  }, //ECU_COMM_ROUTER_1
 };
 
 static const bool ecu_comm_router_enabled_default[ECU_COMM_ROUTER_MAX] = {
