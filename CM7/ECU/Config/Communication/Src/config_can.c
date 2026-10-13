@@ -15,7 +15,8 @@ static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *messag
 static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata);
 
 typedef struct {
-    uint32_t msg_id;
+    uint32_t msg_id_start;
+    uint32_t msg_id_end;
     ecu_comm_can_t instance;
     ecu_comm_can_ctx_t *ctx;
     void *func;
@@ -258,7 +259,7 @@ error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
   return err;
 }
 
-error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata)
+error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_can_ctx_t *can_ctx;
@@ -274,13 +275,14 @@ error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_
     BREAK_IF_ACTION(cb_count >= CAN_RX_CB_MAX, err = E_OVERFLOW);
 
     cb = &can_ctx->rx_callbacks[cb_count];
-    cb->msg_id = msg_id;
+    cb->msg_id_start = msg_id_start;
+    cb->msg_id_end = msg_id_end;
     cb->instance = instance;
     cb->ctx = can_ctx;
     cb->func = func;
     cb->usrdata = usrdata;
 
-    err = can_register_rx_callback(can_ctx->ctx, msg_id, ecu_comm_can_rx_callback, cb);
+    err = can_register_rx_callback(can_ctx->ctx, msg_id_start, msg_id_end, ecu_comm_can_rx_callback, cb);
     if(err == E_OK) {
       can_ctx->rx_callbacks_count = ++cb_count;
     }

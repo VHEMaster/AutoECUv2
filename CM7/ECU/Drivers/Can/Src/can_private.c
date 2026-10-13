@@ -26,7 +26,7 @@ error_t can_rx_get_msg(can_ctx_t *ctx, uint32_t rxindex)
     for(int i = 0; i < CAN_RX_CB_MAX; i++) {
       cb = &ctx->rx_callbacks[i];
       if(cb->enabled) {
-        if(cb->msg_id == ctx->rxmessage.id) {
+        if(ctx->rxmessage.id >= cb->msg_id_start && ctx->rxmessage.id <= cb->msg_id_end) {
           if(cb->func != NULL) {
             cb->func(ctx, &ctx->rxmessage, cb->usrdata);
           }

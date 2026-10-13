@@ -274,7 +274,7 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message)
   return err;
 }
 
-error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata)
+error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata)
 {
   error_t err = E_OK;
   can_rx_cb_t *cb;
@@ -283,21 +283,26 @@ error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id, can_rx_callbac
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(func == NULL, err = E_PARAM);
-    BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && msg_id > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
-    BREAK_IF_ACTION((msg_id & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && msg_id > 0x7FF, err = E_PARAM);
+    BREAK_IF_ACTION((msg_id_start & CAN_MESSAGE_EXTENDED_ID_FLAG) != (msg_id_end & CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
+    BREAK_IF_ACTION((msg_id_start & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && msg_id_start > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
+    BREAK_IF_ACTION((msg_id_start & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && msg_id_start > 0x7FF, err = E_PARAM);
+    BREAK_IF_ACTION((msg_id_end & CAN_MESSAGE_EXTENDED_ID_FLAG) != 0 && msg_id_end > (0x1FFFFFFF | CAN_MESSAGE_EXTENDED_ID_FLAG), err = E_PARAM);
+    BREAK_IF_ACTION((msg_id_end & CAN_MESSAGE_EXTENDED_ID_FLAG) == 0 && msg_id_end > 0x7FF, err = E_PARAM);
+
 
     err = E_OVERFLOW;
     for(int i = 0; i < CAN_RX_CB_MAX; i++) {
       cb = &ctx->rx_callbacks[i];
       if(!cb->enabled) {
-        cb->msg_id = msg_id;
+        cb->msg_id_start = msg_id_start;
+        cb->msg_id_end = msg_id_end;
         cb->func = func;
         cb->usrdata = usrdata;
         cb->enabled = true;
         err = E_OK;
         break;
       } else {
-        if(cb->msg_id == msg_id && cb->func == func && cb->usrdata == usrdata) {
+        if(cb->msg_id_start == msg_id_start && cb->msg_id_end == msg_id_end && cb->func == func && cb->usrdata == usrdata) {
           err = E_EXISTS;
           break;
         }

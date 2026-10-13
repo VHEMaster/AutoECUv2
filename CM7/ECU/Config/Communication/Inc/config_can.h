@@ -22,7 +22,7 @@ error_t ecu_comm_can_reset(ecu_comm_can_t instance);
 error_t ecu_comm_can_transmit(ecu_comm_can_t instance, const can_message_t *message);
 error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message);
 
-error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id, can_rx_callback_func_t func, void *usrdata);
+error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata);
 error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_callback_func_t func, void *usrdata);
 
 #endif /* CONFIG_INC_CONFIG_CAN_H_ */

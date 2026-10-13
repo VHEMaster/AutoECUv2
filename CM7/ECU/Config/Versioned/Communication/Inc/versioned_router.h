@@ -11,8 +11,8 @@
 #include "common.h"
 #include "config_comm_types.h"
 
-#define ROUTER_SIGNAL_UPSTREAM_LIST_LENGTH    (16)
-#define ROUTER_SIGNAL_DOWNSTREAM_LIST_LENGTH  (16)
+#define ROUTER_SIGNAL_UPSTREAM_LIST_LENGTH    (16u)
+#define ROUTER_SIGNAL_DOWNSTREAM_LIST_LENGTH  (16u)
 
 typedef enum {
   ROUTER_CONFIG_VERSION_V1 = 0,

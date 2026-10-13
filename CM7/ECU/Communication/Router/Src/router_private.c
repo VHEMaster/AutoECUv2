@@ -272,10 +272,12 @@ static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_is
         diag_ctx->obd2_ctx = NULL;
       }
 
-      err = can_register_rx_callback(diag_ctx->can_ctx, diag_cfg->upstream_phy_msg_id, router_can_isotp_rx_callback, diag_ctx);
+      err = can_register_rx_callback(diag_ctx->can_ctx, diag_cfg->upstream_phy_msg_id,
+          diag_cfg->upstream_phy_msg_id, router_can_isotp_rx_callback, diag_ctx);
       BREAK_IF(err != E_OK);
       if(diag_cfg->upstream_func_msg_id != diag_cfg->upstream_phy_msg_id) {
-        err = can_register_rx_callback(diag_ctx->can_ctx, diag_cfg->upstream_func_msg_id, router_can_isotp_rx_callback, diag_ctx);
+        err = can_register_rx_callback(diag_ctx->can_ctx, diag_cfg->upstream_func_msg_id,
+            diag_cfg->upstream_func_msg_id, router_can_isotp_rx_callback, diag_ctx);
         BREAK_IF(err != E_OK);
       }
       err = can_register_err_callback(diag_ctx->can_ctx, router_can_isotp_err_callback, diag_ctx);
