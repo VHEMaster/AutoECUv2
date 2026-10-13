@@ -25,6 +25,7 @@ static void router_handle_diag_protocols(router_ctx_t *ctx);
 static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance);
 static error_t router_configure_diag_io_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance);
 static error_t router_configure_diag_io(router_ctx_t *ctx);
+static error_t router_validate_can_signals_routes(const router_config_can_signals_list_item_t *items, uint32_t count);
 
 static void router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx);
 static void router_reset_can(router_diag_isotp_ctx_t *diag_ctx);
@@ -477,6 +478,38 @@ static void router_handle_signal_downstream(router_ctx_t *ctx)
 
 }
 
+static error_t router_validate_can_signals_routes(const router_config_can_signals_list_item_t *items, uint32_t count)
+{
+  error_t err = E_OK;
+  const router_config_can_signals_list_item_t *route;
+  const router_config_can_signals_list_item_t *previous;
+
+  do {
+    BREAK_IF_ACTION(items == NULL, err = E_PARAM);
+
+    for(uint32_t i = 0; i < count; i++) {
+      route = &items[i];
+      CONTINUE_IF(route->enabled == false);
+
+      BREAK_IF_ACTION(route->msg_id_1_start > route->msg_id_2_end, err = E_PARAM);
+
+      for(uint32_t p = 0; p < i; p++) {
+        previous = &items[p];
+        CONTINUE_IF(previous->enabled == false);
+
+        BREAK_IF_ACTION(route->signals_instance == previous->signals_instance &&
+            route->can_instance != previous->can_instance &&
+            route->msg_id_1_start <= previous->msg_id_2_end &&
+            previous->msg_id_1_start <= route->msg_id_2_end, err = E_PARAM);
+      }
+      BREAK_IF(err != E_OK);
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t router_configure_diag(router_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -500,6 +533,14 @@ error_t router_configure_signals(router_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     memset(&ctx->signals, 0, sizeof(ctx->signals));
+
+    err = router_validate_can_signals_routes(ctx->config.can.signals.upstream_list,
+        ITEMSOF(ctx->config.can.signals.upstream_list));
+    BREAK_IF(err != E_OK);
+
+    err = router_validate_can_signals_routes(ctx->config.can.signals.downstream_list,
+        ITEMSOF(ctx->config.can.signals.downstream_list));
+    BREAK_IF(err != E_OK);
 
     for(uint32_t s = 0; s < ITEMSOF(ctx->config.can.signals.upstream_list); s++) {
       config_signal_item = &ctx->config.can.signals.upstream_list[s];
@@ -540,8 +581,6 @@ error_t router_configure_signals(router_ctx_t *ctx)
       }
     }
     BREAK_IF(err != E_OK);
-
-    //TODO: implement error when one signal is linked to multiple CAN interfaces
 
   } while(0);
 

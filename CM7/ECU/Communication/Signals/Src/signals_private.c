@@ -31,6 +31,8 @@ static signals_conversion_func_t signals_raw_to_phy_funcs[CAN_SIGNAL_TYPE_MAX] =
     signals_raw_to_phy_sint  //CAN_SIGNAL_TYPE_SFLT
 };
 
+static error_t signals_validate_message_layout(const signals_config_message_description_t *message, const signals_config_signal_description_t *signals, uint32_t signals_count);
+
 static error_t signals_handle_downstream_message(signals_runtime_messages_fifo_item_t *working_item, signals_runtime_message_ctx_t *message);
 static error_t signals_handle_upstream_message(signals_runtime_messages_fifo_item_t *working_item, signals_runtime_message_ctx_t *message);
 
@@ -99,6 +101,58 @@ INLINE error_t signals_frame_fifo_pull(signals_runtime_messages_fifo_t *fifo, si
   return err;
 }
 
+static error_t signals_validate_message_layout(const signals_config_message_description_t *message, const signals_config_signal_description_t *signals, uint32_t signals_count)
+{
+  error_t err = E_OK;
+  const signals_config_signal_description_t *signal;
+  uint8_t occupied[CAN_MESSAGE_PAYLOAD_LEN_MAX] = {0};
+  uint32_t bit_position, position;
+  uint8_t bit_mask;
+
+  do {
+    BREAK_IF_ACTION(message == NULL || signals == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
+
+    if(message->has_crc) {
+      BREAK_IF_ACTION(message->crc_byte_pos >= message->message_len, err = E_PARAM);
+      occupied[message->crc_byte_pos] = 0xFFu;
+    }
+    if(message->has_counter) {
+      BREAK_IF_ACTION(message->counter_byte_pos >= message->message_len, err = E_PARAM);
+      occupied[message->counter_byte_pos] = 0xFFu;
+    }
+
+    for(uint32_t s = 0; s < signals_count; s++) {
+      signal = &signals[s];
+      CONTINUE_IF(signal->enabled == false || signal->message_id != message->message_id);
+
+      BREAK_IF_ACTION(signal->description.bitlength == 0u ||
+          signal->description.bitlength > 32u, err = E_PARAM);
+      BREAK_IF_ACTION(signal->description.byteorder != CAN_SIGNAL_BYTEORDER_INTEL &&
+          signal->description.byteorder != CAN_SIGNAL_BYTEORDER_MOTOROLA, err = E_PARAM);
+
+      bit_position = signal->description.startbit;
+      if(signal->description.byteorder == CAN_SIGNAL_BYTEORDER_MOTOROLA) {
+        bit_position ^= 0x7u;
+      }
+      BREAK_IF_ACTION(bit_position + signal->description.bitlength >
+          (uint32_t)message->message_len << 3u, err = E_PARAM);
+
+      for(uint32_t bit = 0; bit < signal->description.bitlength; bit++) {
+        position = bit_position + bit;
+        bit_mask = 1u << ((signal->description.byteorder == CAN_SIGNAL_BYTEORDER_INTEL)
+            ? (position & 0x7u) : (7u - (position & 0x7u)));
+        BREAK_IF_ACTION((occupied[position >> 3u] & bit_mask) != 0u, err = E_PARAM);
+        occupied[position >> 3u] |= bit_mask;
+      }
+      BREAK_IF(err != E_OK);
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t signals_config_build(signals_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -131,8 +185,6 @@ error_t signals_config_build(signals_ctx_t *ctx)
     ctx->runtime.downstream_working_item_sending = false;
 
     now = time_now_us();
-
-    //TODO: implement validation of CAN signals overlapping
 
     for(uint32_t i = 0; i < ITEMSOF(config->messages_lists.downstream_list); i++) {
       RETURN_IF(ctx->runtime.messages_downstream.messages_used >= ITEMSOF(config->messages_lists.downstream_list), E_PARAM);
@@ -185,6 +237,10 @@ error_t signals_config_build(signals_ctx_t *ctx)
     }
     BREAK_IF(err != E_OK);
 
+    err = signals_validate_message_layout(message_config, config->signals_lists.downstream_list,
+        ITEMSOF(config->signals_lists.downstream_list));
+    BREAK_IF(err != E_OK);
+
     for(uint32_t i = 0; i < ITEMSOF(config->messages_lists.upstream_list); i++) {
       RETURN_IF(ctx->runtime.messages_upstream.messages_used >= ITEMSOF(config->messages_lists.upstream_list), E_PARAM);
       message_config = &config->messages_lists.upstream_list[i];
@@ -235,6 +291,10 @@ error_t signals_config_build(signals_ctx_t *ctx)
       BREAK_IF(err != E_OK);
       ctx->runtime.messages_upstream.messages_used++;
     }
+    BREAK_IF(err != E_OK);
+
+    err = signals_validate_message_layout(message_config, config->signals_lists.upstream_list,
+        ITEMSOF(config->signals_lists.upstream_list));
     BREAK_IF(err != E_OK);
 
   } while(0);
