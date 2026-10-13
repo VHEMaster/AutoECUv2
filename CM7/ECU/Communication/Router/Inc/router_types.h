@@ -25,6 +25,8 @@ typedef enum {
   ROUTER_MAX
 }router_error_code_t;
 
+#define ROUTER_DOWNSTREAM_LOOP_ITERATIONS_MAX   32u
+
 typedef struct router_ctx_tag router_ctx_t;
 
 typedef void (*router_error_callback_t)(router_ctx_t *ctx, router_error_code_t code, void *userdata);
@@ -79,7 +81,25 @@ typedef struct {
 }router_diag_ctx_t;
 
 typedef struct {
+    signals_runtime_messages_fifo_item_t message;
+    bool signal_message_pending;
+}router_signals_downstream_signal_ctx_t;
 
+typedef struct {
+    signals_runtime_messages_fifo_item_t message;
+    bool can_message_pending;
+}router_signals_downstream_can_ctx_t;
+
+typedef struct {
+    router_signals_downstream_signal_ctx_t signals[ECU_COMM_SIGNALS_MAX];
+    router_signals_downstream_can_ctx_t cans[ECU_COMM_CAN_MAX];
+}router_signals_downstream_ctx_t;
+
+typedef struct {
+    can_ctx_t *can_ctxs[ECU_COMM_CAN_MAX];
+    signals_ctx_t *signals_ctxs[ECU_COMM_SIGNALS_MAX];
+
+    router_signals_downstream_ctx_t downstream;
 
 }router_signals_ctx_t;
 

@@ -15,6 +15,9 @@ static void router_can_isotp_err_callback(can_ctx_t *ctx, void *usrdata);
 static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance);
 static void router_handle_diag_io(router_ctx_t *ctx);
 
+static void router_handle_signal_upstream(router_ctx_t *ctx);
+static void router_handle_signal_downstream(router_ctx_t *ctx);
+
 static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance);
 static void router_handle_diag_protocol_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance);
 static void router_handle_diag_protocols(router_ctx_t *ctx);
@@ -376,6 +379,102 @@ static void router_reset_isotp(router_diag_isotp_ctx_t *diag_ctx)
   memset(&diag_ctx->runtime, 0, sizeof(diag_ctx->runtime));
 }
 
+static void router_handle_signal_upstream(router_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+
+  } while(0);
+}
+
+static void router_handle_signal_downstream(router_ctx_t *ctx)
+{
+  error_t err = E_OK;
+  signals_ctx_t *signal_ctx;
+  can_ctx_t *can_ctx;
+  signals_runtime_messages_fifo_item_t *message;
+  router_signals_downstream_signal_ctx_t *downstream_signal;
+  router_signals_downstream_can_ctx_t *downstream_can;
+  const router_config_can_signals_list_item_t *signal_item;
+  uint32_t message_id;
+  bool break_condition;
+  bool route_found;
+  uint32_t iterations = 0;
+
+  do {
+    BREAK_IF(iterations++ >= ROUTER_DOWNSTREAM_LOOP_ITERATIONS_MAX);
+    break_condition = true;
+
+    for(ecu_comm_signals_t i = 0; i < ECU_COMM_SIGNALS_MAX; i++) {
+      downstream_signal = &ctx->signals.downstream.signals[i];
+      signal_ctx = ctx->signals.signals_ctxs[i];
+      if(signal_ctx != NULL) {
+        message = &downstream_signal->message;
+        if(downstream_signal->signal_message_pending == false) {
+          err = signals_data_read_downstream(signal_ctx, message);
+          if(err == E_OK) {
+            downstream_signal->signal_message_pending = true;
+            break_condition = false;
+          } else if(err != E_AGAIN) {
+            // TODO: error handling
+          }
+        }
+
+        if(downstream_signal->signal_message_pending == true) {
+          message_id = message->message.id;
+          route_found = false;
+          for(uint32_t s = 0; s < ROUTER_SIGNAL_DOWNSTREAM_LIST_LENGTH; s++) {
+            signal_item = &ctx->config.can.signals.downstream_list[s];
+            CONTINUE_IF(signal_item->enabled == false);
+
+            if(signal_item->signals_instance == i &&
+                message_id >= signal_item->msg_id_1_start &&
+                message_id <= signal_item->msg_id_2_end) {
+              downstream_can = &ctx->signals.downstream.cans[signal_item->can_instance];
+              can_ctx = ctx->signals.can_ctxs[signal_item->can_instance];
+              if(can_ctx != NULL) {
+                if(downstream_can->can_message_pending == false) {
+                  memcpy(&downstream_can->message, message, sizeof(signals_runtime_messages_fifo_item_t));
+                  downstream_can->can_message_pending = true;
+                  downstream_signal->signal_message_pending = false;
+                  break_condition = false;
+                }
+              }
+              route_found = true;
+              break;
+            }
+          }
+          if(route_found == false) {
+            downstream_signal->signal_message_pending = false;
+            break_condition = false;
+          }
+        }
+      }
+    }
+
+    for(ecu_comm_can_t i = 0; i < ECU_COMM_CAN_MAX; i++) {
+      downstream_can = &ctx->signals.downstream.cans[i];
+      can_ctx = ctx->signals.can_ctxs[i];
+      if(can_ctx != NULL) {
+        if(downstream_can->can_message_pending == true) {
+          err = can_tx(can_ctx, &downstream_can->message.message);
+          if(err != E_AGAIN) {
+            if(err == E_OK) {
+              break_condition = false;
+            } else {
+              // TODO: error handling
+            }
+            downstream_can->can_message_pending = false;
+          }
+        }
+      }
+
+    }
+  } while(break_condition == false);
+
+}
+
 error_t router_configure_diag(router_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -394,8 +493,51 @@ error_t router_configure_diag(router_ctx_t *ctx)
 error_t router_configure_signals(router_ctx_t *ctx)
 {
   error_t err = E_OK;
+  const router_config_can_signals_list_item_t *config_signal_item;
+
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    memset(&ctx->signals, 0, sizeof(ctx->signals));
+
+    for(uint32_t s = 0; s < ITEMSOF(ctx->config.can.signals.upstream_list); s++) {
+      config_signal_item = &ctx->config.can.signals.upstream_list[s];
+      CONTINUE_IF(config_signal_item->enabled == false);
+
+      BREAK_IF_ACTION(config_signal_item->can_instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+      BREAK_IF_ACTION(config_signal_item->signals_instance >= ECU_COMM_SIGNALS_MAX, err = E_PARAM);
+
+      if(ctx->signals.can_ctxs[config_signal_item->can_instance] == NULL) {
+        err = ecu_comm_get_can_ctx(config_signal_item->can_instance,
+            &ctx->signals.can_ctxs[config_signal_item->can_instance]);
+        BREAK_IF(err != E_OK);
+      }
+      if(ctx->signals.signals_ctxs[config_signal_item->signals_instance] == NULL) {
+        err = ecu_comm_get_signals_ctx(config_signal_item->signals_instance,
+            &ctx->signals.signals_ctxs[config_signal_item->signals_instance]);
+        BREAK_IF(err != E_OK);
+      }
+    }
+    BREAK_IF(err != E_OK);
+
+    for(uint32_t s = 0; s < ITEMSOF(ctx->config.can.signals.downstream_list); s++) {
+      config_signal_item = &ctx->config.can.signals.downstream_list[s];
+      CONTINUE_IF(config_signal_item->enabled == false);
+
+      BREAK_IF_ACTION(config_signal_item->can_instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
+      BREAK_IF_ACTION(config_signal_item->signals_instance >= ECU_COMM_SIGNALS_MAX, err = E_PARAM);
+
+      if(ctx->signals.can_ctxs[config_signal_item->can_instance] == NULL) {
+        err = ecu_comm_get_can_ctx(config_signal_item->can_instance,
+            &ctx->signals.can_ctxs[config_signal_item->can_instance]);
+        BREAK_IF(err != E_OK);
+      }
+      if(ctx->signals.signals_ctxs[config_signal_item->signals_instance] == NULL) {
+        err = ecu_comm_get_signals_ctx(config_signal_item->signals_instance,
+            &ctx->signals.signals_ctxs[config_signal_item->signals_instance]);
+        BREAK_IF(err != E_OK);
+      }
+    }
+    BREAK_IF(err != E_OK);
 
   } while(0);
 
@@ -418,6 +560,8 @@ void router_handle_signals(router_ctx_t *ctx)
   do {
     BREAK_IF(ctx == NULL);
 
+    router_handle_signal_upstream(ctx);
+    router_handle_signal_downstream(ctx);
 
   } while(0);
 }
