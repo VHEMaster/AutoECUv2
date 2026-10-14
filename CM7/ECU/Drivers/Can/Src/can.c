@@ -274,6 +274,100 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message)
   return err;
 }
 
+error_t can_unregister_rx_callback(can_ctx_t *ctx, can_rx_callback_func_t func, void *usrdata)
+{
+  error_t err = E_OK;
+  can_rx_cb_t *cb;
+  can_rx_cb_t *cb_l;
+  can_rx_cb_t *cb_r;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+    BREAK_IF_ACTION(func == NULL, err = E_PARAM);
+
+    for(uint32_t i = 0; i < CAN_RX_CB_MAX;) {
+      cb = &ctx->rx_callbacks[i];
+      if(cb->enabled) {
+        if(cb->func == func && cb->usrdata == usrdata) {
+          if(i + 1 < CAN_RX_CB_MAX) {
+            for(uint32_t j = i; j < CAN_RX_CB_MAX - 1; j++) {
+              cb_l = &ctx->rx_callbacks[j];
+              cb_r = &ctx->rx_callbacks[j + 1];
+
+              if(cb_r->enabled) {
+                cb_l->enabled = false;
+                cb_r->enabled = false;
+                memcpy(cb_l, cb_r, sizeof(can_rx_cb_t));
+                cb_l->enabled = true;
+              } else {
+                cb_l->enabled = false;
+                break;
+              }
+            }
+          } else {
+            cb->enabled = false;
+          }
+        } else {
+          i++;
+        }
+      } else {
+        break;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+
+error_t can_unregister_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata)
+{
+  error_t err = E_OK;
+  can_err_cb_t *cb;
+  can_err_cb_t *cb_l;
+  can_err_cb_t *cb_r;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+    BREAK_IF_ACTION(func == NULL, err = E_PARAM);
+
+    for(uint32_t i = 0; i < CAN_ERR_CB_MAX;) {
+      cb = &ctx->err_callbacks[i];
+      if(cb->enabled) {
+        if(cb->func == func && cb->usrdata == usrdata) {
+          if(i + 1 < CAN_ERR_CB_MAX) {
+            for(uint32_t j = i; j < CAN_ERR_CB_MAX - 1; j++) {
+              cb_l = &ctx->err_callbacks[j];
+              cb_r = &ctx->err_callbacks[j + 1];
+
+              if(cb_r->enabled) {
+                cb_l->enabled = false;
+                cb_r->enabled = false;
+                memcpy(cb_l, cb_r, sizeof(can_err_cb_t));
+                cb_l->enabled = true;
+              } else {
+                cb_l->enabled = false;
+                break;
+              }
+            }
+          } else {
+            cb->enabled = false;
+          }
+        } else {
+          i++;
+        }
+      } else {
+        break;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+
 error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata)
 {
   error_t err = E_OK;

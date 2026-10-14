@@ -13,7 +13,7 @@
 #include "gpio.h"
 #include "versioned_can.h"
 
-#define CAN_RX_CB_MAX     (32)
+#define CAN_RX_CB_MAX     (64)
 #define CAN_ERR_CB_MAX    (8)
 #define CAN_RX_FIFO_SIZE  (64)
 
@@ -98,5 +98,8 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message);
 
 error_t can_register_rx_callback(can_ctx_t *ctx, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata);
 error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata);
+
+error_t can_unregister_rx_callback(can_ctx_t *ctx, can_rx_callback_func_t func, void *usrdata);
+error_t can_unregister_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata);
 
 #endif /* COMMUNICATION_CAN_INC_CAN_H_ */

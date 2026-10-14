@@ -25,6 +25,7 @@ typedef enum {
   ROUTER_MAX
 }router_error_code_t;
 
+#define ROUTER_UPSTREAM_LOOP_ITERATIONS_MAX     32u
 #define ROUTER_DOWNSTREAM_LOOP_ITERATIONS_MAX   32u
 
 typedef struct router_ctx_tag router_ctx_t;
@@ -46,6 +47,7 @@ typedef struct {
     isotp_ctx_t *isotp_ctx;
     uds_ctx_t *uds_ctx;
     obd2_ctx_t *obd2_ctx;
+    router_ctx_t *router_ctx;
 
     uint8_t upstream_data[ISOTP_PAYLOAD_LEN_MAX];
     uint16_t upstream_data_len;
@@ -72,6 +74,7 @@ typedef struct {
     kwp_ctx_t *kwp_ctx;
     uds_ctx_t *uds_ctx;
     obd2_ctx_t *obd2_ctx;
+    router_ctx_t *router_ctx;
 }router_diag_kwp_ctx_t;
 
 typedef struct {
@@ -96,10 +99,22 @@ typedef struct {
 }router_signals_downstream_ctx_t;
 
 typedef struct {
+    const router_config_can_signals_list_item_t *config_signal_item;
+    router_ctx_t *router_ctx;
+    can_ctx_t *can_ctx;
+    signals_runtime_messages_fifo_item_t message;
+}router_signals_upstream_rx_callback_ctx_t;
+
+typedef struct {
+    router_signals_upstream_rx_callback_ctx_t rx_cb_ctx[ROUTER_SIGNAL_UPSTREAM_LIST_LENGTH];
+}router_signals_upstream_ctx_t;
+
+typedef struct {
     can_ctx_t *can_ctxs[ECU_COMM_CAN_MAX];
     signals_ctx_t *signals_ctxs[ECU_COMM_SIGNALS_MAX];
 
     router_signals_downstream_ctx_t downstream;
+    router_signals_upstream_ctx_t upstream;
 
 }router_signals_ctx_t;
 
