@@ -2252,7 +2252,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : USART3_LO_Pin */
   GPIO_InitStruct.Pin = USART3_LO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USART3_LO_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : FLEXIO1_WAKE_Pin */
@@ -2303,8 +2303,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : FDCAN1_LBK_Pin */
   GPIO_InitStruct.Pin = FDCAN1_LBK_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(FDCAN1_LBK_GPIO_Port, &GPIO_InitStruct);
 
