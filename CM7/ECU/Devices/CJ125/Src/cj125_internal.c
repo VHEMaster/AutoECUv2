@@ -40,6 +40,8 @@ error_t cj125_serial_operation(cj125_ctx_t *ctx, cj125_payload_t request, cj125_
         }
       } else if(err == E_BUSY) {
         err = E_AGAIN;
+      } else if(err != E_AGAIN) {
+        ctx->spi_busy = false;
       }
     }
     break;
@@ -53,11 +55,10 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
   error_t err = E_OK;
   float ur_volt_sub_vcc, ua_volt_sub_vcc;
   float Vref_div_r17, Vref_div_radj;
-  float Vvm, Irm, Vref;
+  float Irm, Vref;
   float ampfactor;
   const float r_17 = 0.05882352f;
   const float Vri = 15.5f;
-  const float Vrefpump = 0.450f;
   sMathInterpolateInput mii_current, mii_temperature;
 
   if(ctx->configured || force) {
@@ -65,12 +66,10 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
       ctx->voltages_updated = false;
 
       Vref = ctx->data.ref_voltage;
-      Vvm = Vref * 0.5f;
 
       Vref_div_r17 = Vref * r_17;
       ur_volt_sub_vcc = ctx->data.ur_voltage - Vref_div_r17;
-      Irm = (Vvm - Vrefpump) / ctx->config.pushpull_resistance;
-      Irm *= 2.0f;
+      Irm = Vref / ctx->config.pushpull_resistance;
 
       ctx->data.heat_resistance = ur_volt_sub_vcc / (Vri * Irm);
       mii_temperature = math_interpolate_input(ctx->data.heat_resistance, ctx->config.res_to_temp_relation.input, ctx->config.res_to_temp_relation.items);

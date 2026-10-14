@@ -32,28 +32,11 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
     clamp_temp = ctx->config.heater_max_voltage - ctx->config.heater_nominal_voltage;
     math_pid_set_clamp(&ctx->heater_pid, -clamp_temp, clamp_temp);
 
-    if(ctx->config.staged_nunited == CJ125_CONFIG_STAGED_UNITED) {
-      config_staged = &ctx->config.config_united;
-    } else if(ctx->config.staged_nunited == CJ125_CONFIG_STAGED_STAGED) {
-      staged_stage = ctx->data.staged_stage;
-      if(staged_stage < CJ125_CONFIG_STAGED_STAGE_COUNT) {
-        config_staged = &ctx->config.config_staged[staged_stage];
-      } else {
-        config_staged = NULL;
-      }
-    } else {
-      config_staged = NULL;
-    }
-
     if(ctx->ready && ctx->initialized && ctx->configured && ctx->heater_ready &&
         time_delta <= CJ125_VOLTAGES_TIMEOUT_US &&
         ctx->diag_valid && ctx->diag.byte == CJ125_DIAG_OK &&
-        config_staged != NULL) {
-
-      ctx->data.regs.init1.bits.pa = config_staged->pa_enabled;
-      ctx->data.regs.init2.bits.enscun = config_staged->reg_enscun;
-      ctx->data.regs.init2.bits.set_dia_q = config_staged->reg_set_dia_q;
-      ctx->data.regs.init2.bits.pr = config_staged->pump_ref_current;
+        (ctx->config.staged_nunited == CJ125_CONFIG_STAGED_UNITED ||
+         ctx->config.staged_nunited == CJ125_CONFIG_STAGED_STAGED)) {
 
       heat_initial_condition = false;
       if(ctx->heater_fsm == CJ125_HEATER_HEATUP ||
@@ -93,6 +76,10 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
         } else {
           heat_cplt_condition = false;
         }
+      }
+
+      if(ctx->heatup_type == CJ125_HEATUP_TYPE_OFF) {
+        ctx->heater_fsm = CJ125_HEATER_RESET;
       }
 
       switch(ctx->heater_fsm) {
@@ -147,7 +134,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           break;
         case CJ125_HEATER_HEATUP_WAITING_CPLT:
           time_delta = time_diff(now, ctx->heater_fsm_last);
-          ctx->data.operating_status = CJ125_HEATER_HEATUP_WAITING_CPLT;
+          ctx->data.operating_status = CJ125_OPERATING_STATUS_HEATUP;
           ctx->data.heater_voltage = ctx->config.heater_initial_max_voltage;
 
           if(!heat_initial_condition) {
@@ -166,6 +153,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           } else if(time_delta >= ctx->config.heater_temperature_timeout) {
             ctx->data.heater_voltage = 0;
             ctx->data.operating_status = CJ125_OPERATING_STATUS_ERROR;
+            ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_IDLE;
             ctx->heater_fsm = CJ125_HEATER_ERROR;
           } else if(ctx->heatup_type == CJ125_HEATUP_TYPE_OFF) {
             ctx->data.heater_voltage = 0.0f;
@@ -176,22 +164,25 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
           time_delta = time_diff(now, ctx->heater_fsm_last);
           ctx->data.operating_status = CJ125_OPERATING_STATUS_OPERATING;
           ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_OPERATING;
-          if(time_delta >= ctx->config.heater_pid_update_period) {
-            ctx->heater_fsm_last = now;
-
-            voltage_temp = math_pid_update(&ctx->heater_pid, ctx->data.temp_value, now) + ctx->config.heater_nominal_voltage;
-            ctx->data.heater_voltage = CLAMP(voltage_temp, 0.0f, ctx->config.heater_max_voltage);
-          } else if(ctx->heatup_type == CJ125_HEATUP_TYPE_OFF) {
+          if(ctx->heatup_type == CJ125_HEATUP_TYPE_OFF) {
             ctx->data.heater_voltage = 0.0f;
+            ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_IDLE;
             ctx->heater_fsm = CJ125_HEATER_RESET;
           } else if(ctx->data.ur_voltage >= CJ125_HEATER_OPERATING_UR_LIMIT_H) {
             ctx->data.heater_voltage = 0;
             ctx->data.operating_status = CJ125_OPERATING_STATUS_ERROR;
+            ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_IDLE;
             ctx->heater_fsm = CJ125_HEATER_ERROR;
+          } else if(time_delta >= ctx->config.heater_pid_update_period) {
+            ctx->heater_fsm_last = now;
+
+            voltage_temp = math_pid_update(&ctx->heater_pid, ctx->data.temp_value, now) + ctx->config.heater_nominal_voltage;
+            ctx->data.heater_voltage = CLAMP(voltage_temp, 0.0f, ctx->config.heater_max_voltage);
           }
           break;
         case CJ125_HEATER_ERROR:
           ctx->data.heater_voltage = 0.0f;
+          ctx->data.staged_stage = CJ125_CONFIG_STAGED_STAGE_IDLE;
           if(ctx->heatup_type <= CJ125_HEATUP_TYPE_PREHEAT) {
             ctx->heater_fsm = CJ125_HEATER_RESET;
           }
@@ -206,6 +197,35 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
       ctx->heater_fsm = CJ125_HEATER_RESET;
     }
     break;
+  }
+
+  if(ctx->config.staged_nunited == CJ125_CONFIG_STAGED_UNITED) {
+    if(ctx->data.staged_stage != CJ125_CONFIG_STAGED_STAGE_IDLE) {
+      config_staged = &ctx->config.config_united;
+    } else {
+      config_staged = NULL;
+    }
+  } else if(ctx->config.staged_nunited == CJ125_CONFIG_STAGED_STAGED) {
+    staged_stage = ctx->data.staged_stage;
+    if(staged_stage < CJ125_CONFIG_STAGED_STAGE_COUNT) {
+      config_staged = &ctx->config.config_staged[staged_stage];
+    } else {
+      config_staged = NULL;
+    }
+  } else {
+    config_staged = NULL;
+  }
+
+  if(config_staged != NULL) {
+    ctx->data.regs.init1.bits.pa = config_staged->pa_enabled ? CJ125_PA_NORMAL : CJ125_PA_HOLD;
+    ctx->data.regs.init2.bits.enscun = config_staged->reg_enscun;
+    ctx->data.regs.init2.bits.set_dia_q = config_staged->reg_set_dia_q;
+    ctx->data.regs.init2.bits.pr = config_staged->pump_ref_current;
+  } else {
+    ctx->data.regs.init1.bits.pa = CJ125_PA_HOLD;
+    ctx->data.regs.init2.bits.enscun = CJ125_ENSCUN_EN;
+    ctx->data.regs.init2.bits.set_dia_q = false;
+    ctx->data.regs.init2.bits.pr = CJ125_CONFIG_PRC_OFF;
   }
 
   return err;
