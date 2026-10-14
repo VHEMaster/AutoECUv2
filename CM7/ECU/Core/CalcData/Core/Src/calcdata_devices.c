@@ -10,13 +10,13 @@
 
 #define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
 
-static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
+static void calcdata_device_read_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 
-static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
+static void calcdata_device_write_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 static void calcdata_device_write_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 
-static void calcdata_device_invalidate_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
+static void calcdata_device_invalidate_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 static void calcdata_device_invalidate_stepper(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 
 static const ecu_core_calcdata_devices_ctx_t ecu_core_calcdata_devices_ctx = {
@@ -25,12 +25,12 @@ static const ecu_core_calcdata_devices_ctx_t ecu_core_calcdata_devices_ctx = {
         {}, //ECU_DEVICE_TYPE_TCS
         {}, //ECU_DEVICE_TYPE_FLEXIO
         {
-            .max = ECU_DEVICE_WBLS_MAX,
-            .func_read = calcdata_device_read_wbls,
-            .func_write = calcdata_device_write_wbls,
-            .func_invalidate = calcdata_device_invalidate_wbls,
+            .max = ECU_DEVICE_WBO2_MAX,
+            .func_read = calcdata_device_read_wbo2,
+            .func_write = calcdata_device_write_wbo2,
+            .func_invalidate = calcdata_device_invalidate_wbo2,
             .userdata = NULL,
-        }, //ECU_DEVICE_TYPE_WBLS
+        }, //ECU_DEVICE_TYPE_WBO2
         {
             .max = ECU_DEVICE_STEPPER_MAX,
             .func_read = calcdata_device_read_stepper,
@@ -92,13 +92,13 @@ void core_calcdata_devices_write(ecu_core_ctx_t *ctx)
   }
 }
 
-static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
+static void calcdata_device_read_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
   error_t err;
   cj125_data_t data;
-  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBLS][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBO2][instance];
 
-  err = ecu_devices_wbls_get_data(instance, &data);
+  err = ecu_devices_wbo2_get_data(instance, &data);
   if(err == E_OK) {
     device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.lambda_value;
     device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
@@ -106,7 +106,7 @@ static void calcdata_device_read_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t
     device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
 
   } else {
-    for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_READ_PARAM_MAX; i++) {
+    for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBO2_READ_PARAM_MAX; i++) {
       device_ctx->params[ECU_COMMON_READ][i].valid = false;
     }
   }
@@ -145,13 +145,13 @@ static void calcdata_device_read_stepper(ecu_core_ctx_t *ctx, ecu_device_instanc
   }
 }
 
-static void calcdata_device_write_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
+static void calcdata_device_write_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBLS][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBO2][instance];
 
-  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid) {
-    (void)ecu_devices_wbls_set_heatup(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].value);
-    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBLS_WRITE_PARAM_HEATUP_TYPE].valid = false;
+  if(device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBO2_WRITE_PARAM_HEATUP_TYPE].valid) {
+    (void)ecu_devices_wbo2_set_heatup(instance, device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBO2_WRITE_PARAM_HEATUP_TYPE].value);
+    device_ctx->params[ECU_COMMON_WRITE][ECU_DEVICE_WBO2_WRITE_PARAM_HEATUP_TYPE].valid = false;
   }
 }
 
@@ -189,14 +189,14 @@ static void calcdata_device_invalidate_stepper(ecu_core_ctx_t *ctx, ecu_device_i
   }
 }
 
-static void calcdata_device_invalidate_wbls(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
+static void calcdata_device_invalidate_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBLS][instance];
+  ecu_core_runtime_global_instance_parameters_ctx_t *device_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).devices[ECU_DEVICE_TYPE_WBO2][instance];
 
-  for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_READ_PARAM_MAX; i++) {
+  for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBO2_READ_PARAM_MAX; i++) {
     device_ctx->params[ECU_COMMON_READ][i].valid = false;
   }
-  for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBLS_WRITE_PARAM_MAX; i++) {
+  for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBO2_WRITE_PARAM_MAX; i++) {
     device_ctx->params[ECU_COMMON_WRITE][i].valid = false;
   }
 }

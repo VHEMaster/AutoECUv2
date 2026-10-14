@@ -1,12 +1,12 @@
 /*
- * versioned_wbls.h
+ * versioned_wbo2.h
  *
  *  Created on: Apr 30, 2024
  *      Author: VHEMaster
  */
 
-#ifndef CONFIG_PROJECT_INC_VERSIONED_WBLS_H_
-#define CONFIG_PROJECT_INC_VERSIONED_WBLS_H_
+#ifndef CONFIG_PROJECT_INC_VERSIONED_WBO2_H_
+#define CONFIG_PROJECT_INC_VERSIONED_WBO2_H_
 
 #include "bool.h"
 #include "pid.h"
@@ -15,9 +15,9 @@
 #include <stdint.h>
 
 typedef enum {
-  WBLS_CONFIG_VERSION_V1 = 0,
-  WBLS_CONFIG_VERSION_MAX
-}wbls_config_versions_t;
+  WBO2_CONFIG_VERSION_V1 = 0,
+  WBO2_CONFIG_VERSION_MAX
+}wbo2_config_versions_t;
 
 #define CJ125_RELATION_ITEMS_MAX      (32)
 
@@ -117,4 +117,4 @@ typedef struct {
 
 typedef cj125_config_v1_t cj125_config_t;
 
-#endif /* CONFIG_PROJECT_INC_VERSIONED_WBLS_H_ */
+#endif /* CONFIG_PROJECT_INC_VERSIONED_WBO2_H_ */

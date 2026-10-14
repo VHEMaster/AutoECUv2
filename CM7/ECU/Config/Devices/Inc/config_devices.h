@@ -41,7 +41,7 @@ error_t ecu_devices_get_type_parameters_count_write(ecu_device_type_t type, ecu_
 error_t ecu_devices_get_pulsedadc_ctx(ecu_device_pulsedadc_t instance, pulsedadc_ctx_t **ctx);
 error_t ecu_devices_get_tcs_ctx(ecu_device_tcs_t instance, max31855_ctx_t **ctx);
 error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **ctx);
-error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx);
+error_t ecu_devices_get_wbo2_ctx(ecu_device_wbo2_t instance, cj125_ctx_t **ctx);
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx);
 error_t ecu_devices_get_output_ctx(ecu_device_output_t instance, tle6240_ctx_t **ctx);
 error_t ecu_devices_get_motor_ctx(ecu_device_motor_t instance, l9960_ctx_t **ctx);

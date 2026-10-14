@@ -22,7 +22,7 @@
 #include "config_flexio.h"
 #include "config_motor.h"
 #include "config_stepper.h"
-#include "config_wbls.h"
+#include "config_wbo2.h"
 #include "config_output.h"
 #include "config_tcs.h"
 
@@ -82,7 +82,7 @@ typedef enum {
   ECU_CONFIG_DEV_TYPE_FLEXIO = 0,
   ECU_CONFIG_DEV_TYPE_MOTOR,
   ECU_CONFIG_DEV_TYPE_STEPPER,
-  ECU_CONFIG_DEV_TYPE_WBLS,
+  ECU_CONFIG_DEV_TYPE_WBO2,
   ECU_CONFIG_DEV_TYPE_TCS,
   ECU_CONFIG_DEV_TYPE_ALL,
   ECU_CONFIG_DEV_TYPE_MAX

@@ -70,7 +70,7 @@ STATIC_INLINE void core_calcdata_banked_apply_sensors(ecu_core_ctx_t *ctx)
 STATIC_INLINE void core_calcdata_banked_apply_devices(ecu_core_ctx_t *ctx)
 {
   CORE_CALCDATA_BANKED_APPLY_BANKED(DEVICE, device, STEPPER, stepper);
-  CORE_CALCDATA_BANKED_APPLY_BANKED(DEVICE, device, WBLS, wbls);
+  CORE_CALCDATA_BANKED_APPLY_BANKED(DEVICE, device, WBO2, wbo2);
 }
 
 STATIC_INLINE void core_calcdata_banked_apply_modules(ecu_core_ctx_t *ctx)

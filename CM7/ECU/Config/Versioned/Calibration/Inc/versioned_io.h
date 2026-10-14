@@ -92,9 +92,9 @@ typedef enum {
 }ecu_config_io_stepper_t;
 
 typedef enum {
-  ECU_CONFIG_IO_WBLS_PRIMARY = 0,
-  ECU_CONFIG_IO_WBLS_MAX
-}ecu_config_io_wbls_t;
+  ECU_CONFIG_IO_WBO2_PRIMARY = 0,
+  ECU_CONFIG_IO_WBO2_MAX
+}ecu_config_io_wbo2_t;
 
 typedef enum {
   ECU_CONFIG_IO_ETC_PRIMARY = 0,
@@ -154,7 +154,7 @@ typedef struct {
 
 
     ecu_device_stepper_t device_stepper[ECU_CONFIG_IO_STEPPER_MAX];
-    ecu_device_wbls_t device_wbls[ECU_CONFIG_IO_WBLS_MAX];
+    ecu_device_wbo2_t device_wbo2[ECU_CONFIG_IO_WBO2_MAX];
 
     ecu_module_etc_t module_etc[ECU_CONFIG_IO_ETC_MAX];
     ecu_module_vvt_t module_vvt[ECU_CONFIG_IO_VVT_MAX];

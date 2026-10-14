@@ -1,5 +1,5 @@
 /*
- * config_wbls.c
+ * config_wbo2.c
  *
  *  Created on: Apr 9, 2024
  *      Author: VHEMaster
@@ -7,14 +7,14 @@
 
 #include <string.h>
 #include "config_rcc.h"
-#include "config_wbls.h"
+#include "config_wbo2.h"
 #include "config_loop.h"
 #include "config_gpio.h"
 #include "config_extern.h"
 #include "middlelayer_spi.h"
 #include "compiler.h"
 
-#define ECU_WBLS_VOLTAGE_UPDATE_PERIOD    (1500)
+#define ECU_WBO2_VOLTAGE_UPDATE_PERIOD    (1500)
 
 typedef struct {
     ecu_spi_slave_enum_t slave_index;
@@ -32,9 +32,9 @@ typedef struct {
     input_id_t input_id_ref;
     input_id_t input_id_pwr;
 
-}ecu_devices_wbls_ctx_t;
+}ecu_devices_wbo2_ctx_t;
 
-static const cj125_config_t ecu_devices_wbls_config_default = {
+static const cj125_config_t ecu_devices_wbo2_config_default = {
     .res_to_temp_relation = {
         .input = { 60.0f, 70.0f, 80.0f, 90.0f, 100.0f, 200.0f, 300.0f, 400.0f, 500.0f, 600.0f, 700.0f, 800.0f, 900.0f, 1000.0f, 1500.0f },
         .output = { 1176.0f, 1108.0f, 1056.0f, 1021.0f, 991.0f, 845.0f, 780.0f, 740.0f, 711.0f, 689.0f, 672.0f, 656.0f, 643.0f, 633.0f, 0.0f },
@@ -131,18 +131,18 @@ static const cj125_config_t ecu_devices_wbls_config_default = {
     },
 };
 
-static const bool ecu_devices_wbls_enabled_default[ECU_DEVICE_WBLS_MAX] = {
+static const bool ecu_devices_wbo2_enabled_default[ECU_DEVICE_WBO2_MAX] = {
     true,
     true,
 };
 
-static RAM_SECTION ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_MAX] = {
+static RAM_SECTION ecu_devices_wbo2_ctx_t ecu_devices_wbo2_ctx[ECU_DEVICE_WBO2_MAX] = {
     {
-      .slave_index = ECU_SPI_SLAVE_WBLS1,
+      .slave_index = ECU_SPI_SLAVE_WBO21,
       .init = {
           .nrst_pin = { .port = LAMBDA_NRST_GPIO_Port, .pin = LAMBDA_NRST_Pin },
       },
-      .config_default = ecu_devices_wbls_config_default,
+      .config_default = ecu_devices_wbo2_config_default,
       .heater = {
           .heater_pwm = &htim15,
           .heater_pwm_ch = TIM_CHANNEL_1,
@@ -154,11 +154,11 @@ static RAM_SECTION ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_M
       .input_pwr = ECU_IN_PORT2_VIGN,
     },
     {
-      .slave_index = ECU_SPI_SLAVE_WBLS2,
+      .slave_index = ECU_SPI_SLAVE_WBO22,
       .init = {
           .nrst_pin = { .port = LAMBDA_NRST_GPIO_Port, .pin = LAMBDA_NRST_Pin },
       },
-      .config_default = ecu_devices_wbls_config_default,
+      .config_default = ecu_devices_wbo2_config_default,
       .heater = {
           .heater_pwm = &htim15,
           .heater_pwm_ch = TIM_CHANNEL_2,
@@ -171,30 +171,30 @@ static RAM_SECTION ecu_devices_wbls_ctx_t ecu_devices_wbls_ctx[ECU_DEVICE_WBLS_M
     },
 };
 
-static void ecu_devices_wbls_update_voltages_cb(ecu_devices_wbls_ctx_t *wbls_ctx)
+static void ecu_devices_wbo2_update_voltages_cb(ecu_devices_wbo2_ctx_t *wbo2_ctx)
 {
   error_t err = E_OK;
   cj125_voltages_t voltages;
   input_value_t value;
 
   do {
-    err = input_get_value(wbls_ctx->input_id_ua, &value, NULL);
+    err = input_get_value(wbo2_ctx->input_id_ua, &value, NULL);
     BREAK_IF(err != E_OK);
     voltages.ua = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
 
-    err = input_get_value(wbls_ctx->input_id_ur, &value, NULL);
+    err = input_get_value(wbo2_ctx->input_id_ur, &value, NULL);
     BREAK_IF(err != E_OK);
     voltages.ur = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
 
-    err = input_get_value(wbls_ctx->input_id_ref, &value, NULL);
+    err = input_get_value(wbo2_ctx->input_id_ref, &value, NULL);
     BREAK_IF(err != E_OK);
     voltages.ref = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
 
-    err = input_get_value(wbls_ctx->input_id_pwr, &value, NULL);
+    err = input_get_value(wbo2_ctx->input_id_pwr, &value, NULL);
     BREAK_IF(err != E_OK);
     voltages.pwr = (float)value * INPUTS_ANALOG_MULTIPLIER_R;
 
-    err = cj125_update_voltages(wbls_ctx->ctx, &voltages);
+    err = cj125_update_voltages(wbo2_ctx->ctx, &voltages);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -205,103 +205,65 @@ static void ecu_devices_wbls_update_voltages_cb(ecu_devices_wbls_ctx_t *wbls_ctx
 }
 
 
-error_t ecu_devices_wbls_init(ecu_device_wbls_t instance, cj125_ctx_t *ctx)
+error_t ecu_devices_wbo2_init(ecu_device_wbo2_t instance, cj125_ctx_t *ctx)
 {
   error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX || ctx == NULL, err = E_PARAM);
 
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
-    wbls_ctx->ctx = ctx;
-    wbls_ctx->config_default.enabled = ecu_devices_wbls_enabled_default[instance];
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
+    wbo2_ctx->ctx = ctx;
+    wbo2_ctx->config_default.enabled = ecu_devices_wbo2_enabled_default[instance];
 
-    err = middlelayer_spi_get_slave(&wbls_ctx->init.spi_slave, wbls_ctx->slave_index);
+    err = middlelayer_spi_get_slave(&wbo2_ctx->init.spi_slave, wbo2_ctx->slave_index);
     BREAK_IF(err != E_OK);
 
-    err = cj125_init(wbls_ctx->ctx, &wbls_ctx->init);
+    err = cj125_init(wbo2_ctx->ctx, &wbo2_ctx->init);
     BREAK_IF(err != E_OK);
 
-    memcpy(&wbls_ctx->ctx->config, &wbls_ctx->config_default, sizeof(cj125_config_t));
+    memcpy(&wbo2_ctx->ctx->config, &wbo2_ctx->config_default, sizeof(cj125_config_t));
 
-    err = ecu_config_get_tim_base_frequency(wbls_ctx->heater.heater_pwm, &wbls_ctx->heater.tim_base_freq);
+    err = ecu_config_get_tim_base_frequency(wbo2_ctx->heater.heater_pwm, &wbo2_ctx->heater.tim_base_freq);
     BREAK_IF(err != E_OK);
-    BREAK_IF_ACTION(wbls_ctx->heater.tim_base_freq == 0, err = E_FAULT);
+    BREAK_IF_ACTION(wbo2_ctx->heater.tim_base_freq == 0, err = E_FAULT);
 
-    err = cj125_heater_init(wbls_ctx->ctx, &wbls_ctx->heater);
-    BREAK_IF(err != E_OK);
-
-
-    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ua, &wbls_ctx->input_id_ua);
-    BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ur, &wbls_ctx->input_id_ur);
-    BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_get_id(wbls_ctx->input_ref, &wbls_ctx->input_id_ref);
-    BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_get_id(wbls_ctx->input_pwr, &wbls_ctx->input_id_pwr);
+    err = cj125_heater_init(wbo2_ctx->ctx, &wbo2_ctx->heater);
     BREAK_IF(err != E_OK);
 
-    err = ecu_config_gpio_input_lock(wbls_ctx->input_ua);
+
+    err = ecu_config_gpio_input_get_id(wbo2_ctx->input_ua, &wbo2_ctx->input_id_ua);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbo2_ctx->input_ur, &wbo2_ctx->input_id_ur);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbo2_ctx->input_ref, &wbo2_ctx->input_id_ref);
+    BREAK_IF(err != E_OK);
+    err = ecu_config_gpio_input_get_id(wbo2_ctx->input_pwr, &wbo2_ctx->input_id_pwr);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_config_gpio_input_lock(wbo2_ctx->input_ua);
     BREAK_IF(err != E_OK && err != E_BUSY);
-    err = ecu_config_gpio_input_lock(wbls_ctx->input_ur);
+    err = ecu_config_gpio_input_lock(wbo2_ctx->input_ur);
     BREAK_IF(err != E_OK && err != E_BUSY);
-    err = ecu_config_gpio_input_lock(wbls_ctx->input_ref);
+    err = ecu_config_gpio_input_lock(wbo2_ctx->input_ref);
     BREAK_IF(err != E_OK && err != E_BUSY);
-    err = ecu_config_gpio_input_lock(wbls_ctx->input_pwr);
+    err = ecu_config_gpio_input_lock(wbo2_ctx->input_pwr);
     BREAK_IF(err != E_OK && err != E_BUSY);
 
-    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ua, ECU_GPIO_INPUT_TYPE_ANALOG);
+    err = ecu_config_gpio_input_set_mode(wbo2_ctx->input_ua, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ur, ECU_GPIO_INPUT_TYPE_ANALOG);
+    err = ecu_config_gpio_input_set_mode(wbo2_ctx->input_ur, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_ref, ECU_GPIO_INPUT_TYPE_ANALOG);
+    err = ecu_config_gpio_input_set_mode(wbo2_ctx->input_ref, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
-    err = ecu_config_gpio_input_set_mode(wbls_ctx->input_pwr, ECU_GPIO_INPUT_TYPE_ANALOG);
-    BREAK_IF(err != E_OK);
-
-    err = ecu_loop_register_slow((ecu_loop_cb_t)ecu_devices_wbls_update_voltages_cb, wbls_ctx, ECU_WBLS_VOLTAGE_UPDATE_PERIOD);
+    err = ecu_config_gpio_input_set_mode(wbo2_ctx->input_pwr, ECU_GPIO_INPUT_TYPE_ANALOG);
     BREAK_IF(err != E_OK);
 
-    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBLS, instance, false);
+    err = ecu_loop_register_slow((ecu_loop_cb_t)ecu_devices_wbo2_update_voltages_cb, wbo2_ctx, ECU_WBO2_VOLTAGE_UPDATE_PERIOD);
     BREAK_IF(err != E_OK);
 
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_devices_wbls_get_default_config(ecu_device_wbls_t instance, cj125_config_t *config)
-{
-  error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
-
-  do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
-
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
-
-    memcpy(config, &wbls_ctx->config_default, sizeof(cj125_config_t));
-
-  } while(0);
-
-  return err;
-}
-
-error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_config_t *config)
-{
-  error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
-
-  do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || config == NULL, err = E_PARAM);
-
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
-
-    err = cj125_configure(wbls_ctx->ctx, config);
-    BREAK_IF(err != E_OK);
-
-    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBLS, instance, wbls_ctx->ctx->config.enabled);
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBO2, instance, false);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -309,34 +271,37 @@ error_t ecu_devices_wbls_configure(ecu_device_wbls_t instance, const cj125_confi
   return err;
 }
 
-error_t ecu_devices_wbls_reset(ecu_device_wbls_t instance)
+error_t ecu_devices_wbo2_get_default_config(ecu_device_wbo2_t instance, cj125_config_t *config)
 {
   error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX || config == NULL, err = E_PARAM);
 
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
 
-    err = cj125_reset(wbls_ctx->ctx);
+    memcpy(config, &wbo2_ctx->config_default, sizeof(cj125_config_t));
 
   } while(0);
 
   return err;
 }
 
-error_t ecu_devices_wbls_set_heatup(ecu_device_wbls_t instance, cj125_heatup_type_t type)
+error_t ecu_devices_wbo2_configure(ecu_device_wbo2_t instance, const cj125_config_t *config)
 {
   error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX || config == NULL, err = E_PARAM);
 
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
 
-    err = cj125_set_heatup(wbls_ctx->ctx, type);
+    err = cj125_configure(wbo2_ctx->ctx, config);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_devices_set_device_enabled(ECU_DEVICE_TYPE_WBO2, instance, wbo2_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -344,17 +309,34 @@ error_t ecu_devices_wbls_set_heatup(ecu_device_wbls_t instance, cj125_heatup_typ
   return err;
 }
 
-error_t ecu_devices_wbls_get_data(ecu_device_wbls_t instance, cj125_data_t *data)
+error_t ecu_devices_wbo2_reset(ecu_device_wbo2_t instance)
 {
   error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || data == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX, err = E_PARAM);
 
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
 
-    err = cj125_get_data(wbls_ctx->ctx, data);
+    err = cj125_reset(wbo2_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_wbo2_set_heatup(ecu_device_wbo2_t instance, cj125_heatup_type_t type)
+{
+  error_t err = E_OK;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX, err = E_PARAM);
+
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
+
+    err = cj125_set_heatup(wbo2_ctx->ctx, type);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -362,17 +344,35 @@ error_t ecu_devices_wbls_get_data(ecu_device_wbls_t instance, cj125_data_t *data
   return err;
 }
 
-error_t ecu_devices_wbls_get_diag(ecu_device_wbls_t instance, cj125_diag_t *diag)
+error_t ecu_devices_wbo2_get_data(ecu_device_wbo2_t instance, cj125_data_t *data)
 {
   error_t err = E_OK;
-  ecu_devices_wbls_ctx_t *wbls_ctx;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
 
   do {
-    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBLS_MAX || diag == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX || data == NULL, err = E_PARAM);
 
-    wbls_ctx = &ecu_devices_wbls_ctx[instance];
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
 
-    err = cj125_get_diag(wbls_ctx->ctx, diag);
+    err = cj125_get_data(wbo2_ctx->ctx, data);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_devices_wbo2_get_diag(ecu_device_wbo2_t instance, cj125_diag_t *diag)
+{
+  error_t err = E_OK;
+  ecu_devices_wbo2_ctx_t *wbo2_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_DEVICE_WBO2_MAX || diag == NULL, err = E_PARAM);
+
+    wbo2_ctx = &ecu_devices_wbo2_ctx[instance];
+
+    err = cj125_get_diag(wbo2_ctx->ctx, diag);
     BREAK_IF(err != E_OK);
 
   } while(0);

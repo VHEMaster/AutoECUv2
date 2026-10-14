@@ -74,8 +74,8 @@ static const ecu_config_spi_if_t ecu_config_spi[ECU_SPI_IF_MAX] = {
         { .slave_enum = ECU_SPI_SLAVE_TCS1, .nss_pin = { .port = SPI6_NSS_TCS1_GPIO_Port, .pin = SPI6_NSS_TCS1_Pin } },
         { .slave_enum = ECU_SPI_SLAVE_TCS2, .nss_pin = { .port = SPI6_NSS_TCS2_GPIO_Port, .pin = SPI6_NSS_TCS2_Pin } },
         { .slave_enum = ECU_SPI_SLAVE_KNOCK, .nss_pin = { .port = SPI6_NSS_KNOCK_GPIO_Port, .pin = SPI6_NSS_KNOCK_Pin } },
-        { .slave_enum = ECU_SPI_SLAVE_WBLS1, .nss_pin = { .port = SPI6_NSS_LAMBDA1_GPIO_Port, .pin = SPI6_NSS_LAMBDA1_Pin } },
-        { .slave_enum = ECU_SPI_SLAVE_WBLS2, .nss_pin = { .port = SPI6_NSS_LAMBDA2_GPIO_Port, .pin = SPI6_NSS_LAMBDA2_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_WBO21, .nss_pin = { .port = SPI6_NSS_LAMBDA1_GPIO_Port, .pin = SPI6_NSS_LAMBDA1_Pin } },
+        { .slave_enum = ECU_SPI_SLAVE_WBO22, .nss_pin = { .port = SPI6_NSS_LAMBDA2_GPIO_Port, .pin = SPI6_NSS_LAMBDA2_Pin } },
     },
   }, //ECU_SPI_IF_MISC
 };

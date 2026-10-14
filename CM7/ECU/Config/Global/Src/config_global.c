@@ -95,25 +95,25 @@ static const ecu_config_device_config_t ecu_config_global_device_config[ECU_CONF
           },
       }, //ECU_CONFIG_COMP_TYPE_STEPPER
       {
-          .device_type = ECU_DEVICE_TYPE_WBLS,
-          .instances_count = ECU_DEVICE_WBLS_MAX,
-          .configure_func = (ecu_config_configure_func_t)ecu_devices_wbls_configure,
-          .reset_func = (ecu_config_reset_func_t)ecu_devices_wbls_reset,
+          .device_type = ECU_DEVICE_TYPE_WBO2,
+          .instances_count = ECU_DEVICE_WBO2_MAX,
+          .configure_func = (ecu_config_configure_func_t)ecu_devices_wbo2_configure,
+          .reset_func = (ecu_config_reset_func_t)ecu_devices_wbo2_reset,
           .generic = {
-              .flash_section_type = FLASH_SECTION_TYPE_HW_WBLS,
-              .data_ptr = &ecu_config_global_engine.devs.wbls[0],
-              .data_size = sizeof(ecu_config_global_engine.devs.wbls[0]),
-              .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_devices_wbls_get_default_config,
-              .versions_count = WBLS_CONFIG_VERSION_MAX,
+              .flash_section_type = FLASH_SECTION_TYPE_HW_WBO2,
+              .data_ptr = &ecu_config_global_engine.devs.wbo2[0],
+              .data_size = sizeof(ecu_config_global_engine.devs.wbo2[0]),
+              .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_devices_wbo2_get_default_config,
+              .versions_count = WBO2_CONFIG_VERSION_MAX,
               .versions = {
                   {
-                      .version = WBLS_CONFIG_VERSION_V1,
+                      .version = WBO2_CONFIG_VERSION_V1,
                       .size = sizeof(cj125_config_v1_t),
                       .translate_func = NULL,
                   }
               },
           },
-      }, //ECU_CONFIG_COMP_TYPE_WBLS
+      }, //ECU_CONFIG_COMP_TYPE_WBO2
       {
           .device_type = ECU_DEVICE_TYPE_TCS,
           .instances_count = ECU_DEVICE_TCS_MAX,

@@ -141,7 +141,7 @@ static void calcdata_virtual_read_sensors(ecu_core_ctx_t *ctx)
 
 static void calcdata_virtual_read_devices(ecu_core_ctx_t *ctx)
 {
-  CALCDATA_VIRTUAL_READ(ctx, DEVICE, device, WBLS, wbls);
+  CALCDATA_VIRTUAL_READ(ctx, DEVICE, device, WBO2, wbo2);
   CALCDATA_VIRTUAL_READ(ctx, DEVICE, device, STEPPER, stepper);
 }
 
@@ -163,7 +163,7 @@ static void calcdata_virtual_read_timings(ecu_core_ctx_t *ctx)
 
 static void calcdata_virtual_write_devices(ecu_core_ctx_t *ctx)
 {
-  CALCDATA_VIRTUAL_WRITE(ctx, DEVICE, device, WBLS, wbls);
+  CALCDATA_VIRTUAL_WRITE(ctx, DEVICE, device, WBO2, wbo2);
   CALCDATA_VIRTUAL_WRITE(ctx, DEVICE, device, STEPPER, stepper);
 }
 

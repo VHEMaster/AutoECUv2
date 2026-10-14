@@ -14,7 +14,7 @@
 #include "pid.h"
 
 #include "cj125_reg.h"
-#include "versioned_wbls.h"
+#include "versioned_wbo2.h"
 
 #define CJ125_SPI_DATASIZE                      (16u)
 #define CJ125_SPI_MODE                          (SPI_MODE_1)

@@ -60,7 +60,7 @@ typedef struct {
 static pulsedadc_ctx_t ecu_config_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_MAX];
 static max31855_ctx_t ecu_config_max31855_ctx[ECU_DEVICE_TCS_MAX];
 static l9966_ctx_t ecu_config_l9966_ctx[ECU_DEVICE_FLEXIO_MAX];
-static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBLS_MAX];
+static cj125_ctx_t ecu_config_cj125_ctx[ECU_DEVICE_WBO2_MAX];
 static tle4729_ctx_t ecu_config_tle4729_ctx[ECU_DEVICE_STEPPER_MAX];
 static tle6240_ctx_t ecu_config_tle6240_ctx[ECU_DEVICE_OUTPUT_MAX];
 static l9960_ctx_t ecu_config_l9960_ctx[ECU_DEVICE_MOTOR_MAX];
@@ -69,7 +69,7 @@ static qspi_ctx_t ecu_config_qspi_ctx[ECU_DEVICE_FLASH_MAX];
 //static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_read[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_read[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_read[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_READ_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_read[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_READ_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_read[ECU_DEVICE_WBO2_MAX][ECU_DEVICE_WBO2_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_read[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_read[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_READ_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_read[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_READ_PARAM_MAX];
@@ -78,7 +78,7 @@ static ecu_core_runtime_value_ctx_t ecu_config_qspi_params_read[ECU_DEVICE_FLASH
 //static ecu_core_runtime_value_ctx_t ecu_config_pulsedadc_params_write[ECU_DEVICE_PULSEDADC_MAX][ECU_DEVICE_PULSEDADC_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_max31855_params_write[ECU_DEVICE_TCS_MAX][ECU_DEVICE_TCS_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_MAX][ECU_DEVICE_FLEXIO_WRITE_PARAM_MAX];
-static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_write[ECU_DEVICE_WBLS_MAX][ECU_DEVICE_WBLS_WRITE_PARAM_MAX];
+static ecu_core_runtime_value_ctx_t ecu_config_cj125_params_write[ECU_DEVICE_WBO2_MAX][ECU_DEVICE_WBO2_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_tle4729_params_write[ECU_DEVICE_STEPPER_MAX][ECU_DEVICE_STEPPER_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_tle6240_params_write[ECU_DEVICE_OUTPUT_MAX][ECU_DEVICE_OUTPUT_WRITE_PARAM_MAX];
 static ecu_core_runtime_value_ctx_t ecu_config_l9960_params_write[ECU_DEVICE_MOTOR_MAX][ECU_DEVICE_MOTOR_WRITE_PARAM_MAX];
@@ -114,9 +114,9 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .loop_main = (ecu_device_loop_func_t)NULL,
             .loop_slow = (ecu_device_loop_func_t)cj125_loop_slow,
             .loop_fast = (ecu_device_loop_func_t)cj125_loop_fast,
-            .instance_max = ECU_DEVICE_WBLS_MAX,
-            .params_read_count = ECU_DEVICE_WBLS_READ_PARAM_MAX,
-            .params_write_count = ECU_DEVICE_WBLS_WRITE_PARAM_MAX,
+            .instance_max = ECU_DEVICE_WBO2_MAX,
+            .params_read_count = ECU_DEVICE_WBO2_READ_PARAM_MAX,
+            .params_write_count = ECU_DEVICE_WBO2_WRITE_PARAM_MAX,
         }, //ECU_DEVICE_TYPE_LAMBDA
         {
             .loop_main = (ecu_device_loop_func_t)NULL,
@@ -195,18 +195,18 @@ static const ecu_config_devices_config_t ecu_config_devices = {
             .params_write_ptr = ecu_config_l9966_params_write[ECU_DEVICE_FLEXIO_2],
         },
         {
-            .type = ECU_DEVICE_TYPE_WBLS,
-            .instance = ECU_DEVICE_WBLS_1,
-            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBLS_1],
-            .params_read_ptr = ecu_config_cj125_params_read[ECU_DEVICE_WBLS_1],
-            .params_write_ptr = ecu_config_cj125_params_write[ECU_DEVICE_WBLS_1],
+            .type = ECU_DEVICE_TYPE_WBO2,
+            .instance = ECU_DEVICE_WBO2_1,
+            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBO2_1],
+            .params_read_ptr = ecu_config_cj125_params_read[ECU_DEVICE_WBO2_1],
+            .params_write_ptr = ecu_config_cj125_params_write[ECU_DEVICE_WBO2_1],
         },
         {
-            .type = ECU_DEVICE_TYPE_WBLS,
-            .instance = ECU_DEVICE_WBLS_2,
-            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBLS_2],
-            .params_read_ptr = ecu_config_cj125_params_read[ECU_DEVICE_WBLS_2],
-            .params_write_ptr = ecu_config_cj125_params_write[ECU_DEVICE_WBLS_2],
+            .type = ECU_DEVICE_TYPE_WBO2,
+            .instance = ECU_DEVICE_WBO2_2,
+            .ctx = &ecu_config_cj125_ctx[ECU_DEVICE_WBO2_2],
+            .params_read_ptr = ecu_config_cj125_params_read[ECU_DEVICE_WBO2_2],
+            .params_write_ptr = ecu_config_cj125_params_write[ECU_DEVICE_WBO2_2],
         },
         {
             .type = ECU_DEVICE_TYPE_STEPPER,
@@ -649,9 +649,9 @@ error_t ecu_devices_get_flexio_ctx(ecu_device_flexio_t instance, l9966_ctx_t **c
   return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_FLEXIO, instance, (void**)ctx);
 }
 
-error_t ecu_devices_get_wbls_ctx(ecu_device_wbls_t instance, cj125_ctx_t **ctx)
+error_t ecu_devices_get_wbo2_ctx(ecu_device_wbo2_t instance, cj125_ctx_t **ctx)
 {
-  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_WBLS, instance, (void**)ctx);
+  return ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_WBO2, instance, (void**)ctx);
 }
 
 error_t ecu_devices_get_stepper_ctx(ecu_device_stepper_t instance, tle4729_ctx_t **ctx)

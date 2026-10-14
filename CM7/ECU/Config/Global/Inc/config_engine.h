@@ -19,7 +19,7 @@ typedef struct {
     l9966_config_t flexio[ECU_DEVICE_FLEXIO_MAX];
     l9960_config_t motor[ECU_DEVICE_MOTOR_MAX];
     tle4729_config_t stepper[ECU_DEVICE_STEPPER_MAX];
-    cj125_config_t wbls[ECU_DEVICE_WBLS_MAX];
+    cj125_config_t wbo2[ECU_DEVICE_WBO2_MAX];
     max31855_config_t tcs[ECU_DEVICE_TCS_MAX];
 }ecu_config_engine_devs_t;
 

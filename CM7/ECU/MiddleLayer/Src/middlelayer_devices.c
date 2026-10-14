@@ -13,7 +13,7 @@
 #include "config_output.h"
 #include "config_motor.h"
 #include "config_flash.h"
-#include "config_wbls.h"
+#include "config_wbo2.h"
 #include "config_tcs.h"
 #include "compiler.h"
 
@@ -104,14 +104,14 @@ void middlelayer_devices_init(void)
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-    for(int i = 0; i < ECU_DEVICE_WBLS_MAX; i++) {
-      err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_WBLS, i, &device_ctx);
+    for(int i = 0; i < ECU_DEVICE_WBO2_MAX; i++) {
+      err = ecu_devices_get_device_ctx(ECU_DEVICE_TYPE_WBO2, i, &device_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_devices_wbls_init(i, (cj125_ctx_t *)device_ctx);
+      err = ecu_devices_wbo2_init(i, (cj125_ctx_t *)device_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_WBLS, i, true);
+      err = ecu_devices_set_device_initialized(ECU_DEVICE_TYPE_WBO2, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

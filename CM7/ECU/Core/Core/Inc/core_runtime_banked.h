@@ -36,7 +36,7 @@ typedef struct {
     const ecu_core_runtime_global_instance_parameters_ctx_t *sensors_tps[ECU_CONFIG_IO_TPS_MAX];
 
     const ecu_core_runtime_global_instance_parameters_ctx_t *devices_stepper[ECU_CONFIG_IO_STEPPER_MAX];
-    const ecu_core_runtime_global_instance_parameters_ctx_t *devices_wbls[ECU_CONFIG_IO_WBLS_MAX];
+    const ecu_core_runtime_global_instance_parameters_ctx_t *devices_wbo2[ECU_CONFIG_IO_WBO2_MAX];
 
     const ecu_core_runtime_global_instance_parameters_ctx_t *modules_etc[ECU_CONFIG_IO_ETC_MAX];
     const ecu_core_runtime_global_instance_parameters_ctx_t *modules_vvt[ECU_CONFIG_IO_VVT_MAX];
