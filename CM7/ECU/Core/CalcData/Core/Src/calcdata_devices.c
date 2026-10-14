@@ -100,10 +100,10 @@ static void calcdata_device_read_wbo2(ecu_core_ctx_t *ctx, ecu_device_instance_t
 
   err = ecu_devices_wbo2_get_data(instance, &data);
   if(err == E_OK) {
-    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.lambda_value;
-    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
-    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.operating_status;
-    device_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_WBO2_READ_PARAM_LAMBDA_VALUE].value = data.lambda_value;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_WBO2_READ_PARAM_LAMBDA_VALUE].valid = true;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_WBO2_READ_PARAM_OPERATING_STATUS].value = data.operating_status;
+    device_ctx->params[ECU_COMMON_READ][ECU_DEVICE_WBO2_READ_PARAM_OPERATING_STATUS].valid = true;
 
   } else {
     for(ecu_runtime_param_index_t i = 0; i < ECU_DEVICE_WBO2_READ_PARAM_MAX; i++) {
