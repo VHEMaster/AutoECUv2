@@ -140,7 +140,7 @@ ITCM_FUNC static error_t timing_calculate_position_from_snapshot_ex(timing_base_
     BREAK_IF_ACTION(snapshot == NULL, err = E_PARAM);
 
     if(data != snapshot) {
-      memcpy(data, snapshot, sizeof(timing_base_data_crankshaft_t));
+      *data = *snapshot;
     }
 
     positions[0] = &data->sensor_data.current.position;
