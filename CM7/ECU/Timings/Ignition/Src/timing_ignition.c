@@ -132,6 +132,8 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   float saturation_time;
 
   float position_cy;
+  float ignition_advance_gr_mean;
+  float ignition_advance_gr_requested;
   float ignition_advance_gr_requested_mean;
   float ignition_advance_gr_accept_vs_requested;
   float ignition_advance_gr_adder;
@@ -149,7 +151,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   float crankshaft_period;
 
   float ignition_advance_gr_cy[ECU_CYLINDER_MAX];
-  float ignition_advance_gr_requested_cy[ECU_CYLINDER_MAX];
 
   time_us_t time_to_saturate;
   time_us_t time_to_ignite;
@@ -262,15 +263,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
           saturation_time = saturation_time_table * saturation_rpm_mult_table;
           runtime_gr->saturation_time = saturation_time;
 
-          ignition_advance_gr_requested_mean = 0;
-          for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-            ignition_advance_gr_requested_cy[cy] = runtime_gr->advance_input_cy[cy] + group_config->advance_add;
-            ignition_advance_gr_requested_mean += ignition_advance_gr_requested_cy[cy];
-            runtime_gr->advance_requested_cy[cy] = ignition_advance_gr_requested_cy[cy];
-          }
-          ignition_advance_gr_requested_mean /= cylinders_count;
-          runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
-
           us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
           us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
@@ -283,12 +275,17 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
             ignition_advance_gr_scale = 0;
           }
 
+          ignition_advance_gr_mean = 0;
+          ignition_advance_gr_requested_mean = 0;
           for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+            ignition_advance_gr_requested = runtime_gr->advance_input_cy[cy] + group_config->advance_add;
+            ignition_advance_gr_requested_mean += ignition_advance_gr_requested;
+            runtime_gr->advance_requested_cy[cy] = ignition_advance_gr_requested;
             slew_adder_valid = false;
             if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && ignition_advance_gr_scale > 0.0f) {
               slew_adder_valid = true;
               ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
-              ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested_cy[cy] - ignition_advance_gr_cy[cy];
+              ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested - ignition_advance_gr_cy[cy];
               if(ignition_advance_gr_accept_vs_requested > 0.0f) {
                 ignition_advance_gr_adder = group_config->advance_slew_rate_earlier;
               } else if(ignition_advance_gr_accept_vs_requested < 0.0f) {
@@ -314,11 +311,16 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
             if(slew_adder_valid) {
               ignition_advance_gr_cy[cy] += ignition_advance_gr_adder;
             } else {
-              ignition_advance_gr_cy[cy] = ignition_advance_gr_requested_cy[cy];
+              ignition_advance_gr_cy[cy] = ignition_advance_gr_requested;
             }
 
             runtime_gr->advance_cy[cy] = ignition_advance_gr_cy[cy];
+            ignition_advance_gr_mean += ignition_advance_gr_cy[cy];
           }
+          ignition_advance_gr_requested_mean /= cylinders_count;
+          ignition_advance_gr_mean /= cylinders_count;
+          runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
+          runtime_gr->advance_mean = ignition_advance_gr_mean;
 
           runtime_gr->initialized = true;
 

@@ -362,7 +362,12 @@ ITCM_FUNC void ckp_signal_regular_60_2_signal(ckp_ctx_t *ctx, ecu_gpio_input_lev
           uspd_count++;
         }
 
-        data.us_per_degree_pulsed = signal_ctx->runtime.uspd_sum / uspd_count;
+        if(uspd_count == CKP_SIGNAL_REGULAR_60_2_USPD_COUNT) {
+          data.us_per_degree_pulsed = signal_ctx->runtime.uspd_sum / CKP_SIGNAL_REGULAR_60_2_USPD_COUNT;
+        } else {
+          data.us_per_degree_pulsed = signal_ctx->runtime.uspd_sum / uspd_count;
+        }
+
         signal_ctx->runtime.uspd_index = uspd_index;
         signal_ctx->runtime.uspd_count = uspd_count;
 
