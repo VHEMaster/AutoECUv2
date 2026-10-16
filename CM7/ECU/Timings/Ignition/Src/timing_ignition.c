@@ -135,6 +135,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   float ignition_advance_gr_requested_mean;
   float ignition_advance_gr_accept_vs_requested;
   float ignition_advance_gr_adder;
+  float ignition_advance_gr_scale;
   float ignition_advance_cy;
   float ignition_advance_cy_add;
   float signal_prepare_advance_gr;
@@ -274,9 +275,17 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
           us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
 
           advance_slew_rate_mode = group_config->advance_slew_rate_mode;
+          if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
+            ignition_advance_gr_scale = time_delta * TIME_S_IN_US;
+          } else if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION) {
+            ignition_advance_gr_scale = time_delta / crankshaft_period;
+          } else {
+            ignition_advance_gr_scale = 0;
+          }
+
           for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
             slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && ignition_advance_gr_scale > 0.0f) {
               slew_adder_valid = true;
               ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
               ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested_cy[cy] - ignition_advance_gr_cy[cy];
@@ -288,14 +297,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
                 ignition_advance_gr_adder = 0.0f;
               }
 
-              if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
-                ignition_advance_gr_adder *= time_delta * TIME_S_IN_US;
-              } else if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION) {
-                ignition_advance_gr_adder *= time_delta / crankshaft_period;
-              } else {
-                ignition_advance_gr_adder = 0.0f;
-                slew_adder_valid = false;
-              }
+              ignition_advance_gr_adder *= ignition_advance_gr_scale;
 
               if(slew_adder_valid) {
                 if(ignition_advance_gr_adder == ignition_advance_gr_adder) {

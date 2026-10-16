@@ -150,6 +150,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   float injection_phase_gr_b[ECU_BANK_MAX];
   float injection_phase_gr_requested;
   float injection_phase_gr_accept_vs_requested;
+  float injection_phase_gr_scale;
   float injection_phase_gr_adder;
   float injection_phase_gr_add_rpm;
   float injection_phase_cy;
@@ -300,17 +301,25 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
           //TODO: implement late phase
 
+          phase_slew_rate = group_config->phase_slew_rate;
+          phase_slew_rate_mode = group_config->phase_slew_rate_mode;
+          if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND) {
+            injection_phase_gr_scale = time_delta * TIME_S_IN_US;
+          } else if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION) {
+            injection_phase_gr_scale = time_delta / crankshaft_period;
+          } else {
+            injection_phase_gr_scale = 0.0f;
+          }
+
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             injection_phase_gr_requested = input_injection_phase_b[b] + group_config->phase_add + injection_phase_gr_add_rpm;
             runtime_gr->phase_requested_banked[b] = injection_phase_gr_requested;
 
             slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && injection_phase_gr_scale > 0.0f) {
               slew_adder_valid = true;
               injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
               injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
-              phase_slew_rate = group_config->phase_slew_rate;
-              phase_slew_rate_mode = group_config->phase_slew_rate_mode;
               if(injection_phase_gr_accept_vs_requested > 0.0f) {
                 injection_phase_gr_adder = phase_slew_rate;
               } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
@@ -319,14 +328,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                 injection_phase_gr_adder = 0.0f;
               }
 
-              if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND) {
-                injection_phase_gr_adder *= time_delta * TIME_S_IN_US;
-              } else if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION) {
-                injection_phase_gr_adder *= time_delta / crankshaft_period;
-              } else {
-                injection_phase_gr_adder = 0.0f;
-                slew_adder_valid = false;
-              }
+              injection_phase_gr_adder *= injection_phase_gr_scale;
 
               if(slew_adder_valid) {
                 if(injection_phase_gr_adder == injection_phase_gr_adder) {
