@@ -110,7 +110,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   uint32_t cylinders_count;
   float banks_count_r;
 
-  sMathInterpolateInput ip_input;
   const injection_config_t *config;
   const injection_config_group_setup_t *group_config;
   const injection_config_group_cylinder_setup_t *cy_config;
@@ -278,21 +277,21 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
         if(process_update_trigger == true)
         {
-          ip_input = math_interpolate_input(power_voltage, group_config->voltage_to_performance_dynamic.input, group_config->voltage_to_performance_dynamic.items);
-          lag_time_gr = math_interpolate_1d(ip_input, group_config->voltage_to_performance_dynamic.output);
+          lag_time_gr = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_performance_dynamic.input,
+              group_config->voltage_to_performance_dynamic.output, group_config->voltage_to_performance_dynamic.items);
           runtime_gr->lag_time = lag_time_gr;
 
           if(group_config->rpm_to_phase_add.items > 0) {
-            ip_input = math_interpolate_input(crankshaft_rpm, group_config->rpm_to_phase_add.input, group_config->rpm_to_phase_add.items);
-            injection_phase_gr_add_rpm = math_interpolate_1d(ip_input, group_config->rpm_to_phase_add.output);
+            injection_phase_gr_add_rpm = math_interpolate_1d_direct(crankshaft_rpm, group_config->rpm_to_phase_add.input,
+                group_config->rpm_to_phase_add.output, group_config->rpm_to_phase_add.items);
           } else {
             injection_phase_gr_add_rpm = 0;
           }
 
           // TODO: IMPLEMENT THAT FEATURE
           if(group_config->enrichment_late_phase_mode > INJECTION_CONFIG_GROUP_LATE_PHASE_MODE_DISABLED) {
-            ip_input = math_interpolate_input(crankshaft_rpm, group_config->enrichment_late_phase.input, group_config->enrichment_late_phase.items);
-            enrichment_late_phase_gr = math_interpolate_1d(ip_input, group_config->enrichment_late_phase.output);
+            enrichment_late_phase_gr = math_interpolate_1d_direct(crankshaft_rpm, group_config->enrichment_late_phase.input,
+                group_config->enrichment_late_phase.output, group_config->enrichment_late_phase.items);
           } else {
             enrichment_late_phase_gr = 0;
           }

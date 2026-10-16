@@ -16,7 +16,7 @@ INLINE sMathInterpolateInput math_interpolate_input(float value, const float *ta
   float val0, val1;
   int find_index = -1;
 
-  if(value != value)
+  if(value != value || size == 0)
     return result;
 
   result.input = value;
@@ -253,6 +253,63 @@ INLINE float math_interpolate(float input_left, float input_mid, float input_rig
     mult = (input_mid - input_left) / (input_right - input_left);
     result = (base_right - base_left) * mult + base_left;
   }
+
+  return result;
+}
+
+INLINE float math_interpolate_1d_direct(float value, const float *input, const float *output, uint32_t size)
+{
+  uint32_t idx0, idx1;
+  float val0, val1;
+  int find_index = -1;
+  float mult, result;
+
+  if(value != value || size == 0)
+    return 0;
+
+  if(size == 1)
+  {
+    idx0 = 0;
+    idx1 = 0;
+    val0 = input[0];
+    val1 = input[0];
+  }
+  else if(value <= input[1])
+  {
+    idx0 = 0;
+    idx1 = 1;
+    val0 = input[idx0];
+    val1 = input[idx1];
+  }
+  else if(value >= input[size - 2])
+  {
+    idx0 = size - 2;
+    idx1 = size - 1;
+    val0 = input[idx0];
+    val1 = input[idx1];
+  }
+  else
+  {
+    find_index = math_binary_search(input, 0, size - 1, value);
+    if(find_index >= 0) {
+      idx0 = find_index;
+      idx1 = find_index + 1;
+      val0 = input[idx0];
+      val1 = input[idx1];
+    } else {
+      idx0 = 0;
+      idx1 = 0;
+      val0 = 0;
+      val1 = 0;
+    }
+  }
+
+  if(val1 != val0)
+    mult = (value - val0) / (val1 - val0);
+  else mult = 1.0f;
+
+
+  result = (output[idx1] - output[idx0]) * mult + output[idx0];
 
   return result;
 }

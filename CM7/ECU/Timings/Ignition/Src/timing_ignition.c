@@ -108,7 +108,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   bool output_valid;
   ecu_bank_t bank_cy;
 
-  sMathInterpolateInput ip_input;
   const ignition_config_t *config;
   const ignition_config_group_setup_t *group_config;
   const timing_base_data_crankshaft_t *crankshaft;
@@ -251,12 +250,12 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
 
         if(process_update_trigger == true)
         {
-          ip_input = math_interpolate_input(power_voltage, group_config->voltage_to_saturation_time.input, group_config->voltage_to_saturation_time.items);
-          saturation_time_table = math_interpolate_1d(ip_input, group_config->voltage_to_saturation_time.output);
+          saturation_time_table = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_saturation_time.input,
+              group_config->voltage_to_saturation_time.output, group_config->voltage_to_saturation_time.items);
           runtime_gr->saturation_time_table = saturation_time_table;
 
-          ip_input = math_interpolate_input(crankshaft->sensor_data.rpm, group_config->rpm_to_saturation_mult.input, group_config->rpm_to_saturation_mult.items);
-          saturation_rpm_mult_table = math_interpolate_1d(ip_input, group_config->rpm_to_saturation_mult.output);
+          saturation_rpm_mult_table = math_interpolate_1d_direct(crankshaft->sensor_data.rpm, group_config->rpm_to_saturation_mult.input,
+              group_config->rpm_to_saturation_mult.output, group_config->rpm_to_saturation_mult.items);
           runtime_gr->saturation_rpm_mult_table = saturation_rpm_mult_table;
 
           saturation_time = saturation_time_table * saturation_rpm_mult_table;

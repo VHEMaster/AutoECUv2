@@ -9,6 +9,7 @@
 #include "math_misc.h"
 #include <float.h>
 
+OPTIMIZE_FAST
 INLINE void math_minmax(const float *array, unsigned int size, float *pmin, float *pmax)
 {
   float min = FLT_MAX;
@@ -30,6 +31,7 @@ INLINE void math_minmax(const float *array, unsigned int size, float *pmin, floa
 
 }
 
+OPTIMIZE_FAST
 INLINE float math_median(const float *array, unsigned int size)
 {
   float value = 0;
@@ -59,6 +61,7 @@ INLINE float math_median(const float *array, unsigned int size)
   return value;
 }
 
+OPTIMIZE_FAST
 INLINE int math_binary_search(const float *array, int start_index, int end_index, float element)
 {
   int iterations = 0;
@@ -74,6 +77,7 @@ INLINE int math_binary_search(const float *array, int start_index, int end_index
   return -1;
 }
 
+OPTIMIZE_FAST
 INLINE float math_calc_air_density_mgcc(float temperature, float pressure)
 {
   const float R = 0.00287052874f;
@@ -82,7 +86,7 @@ INLINE float math_calc_air_density_mgcc(float temperature, float pressure)
   return pressure / (R * temperature);
 }
 
-
+OPTIMIZE_FAST
 INLINE float math_calc_ntc_thermistor(float calibration_temperature, float calibration_resistance, float beta, float resistance)
 {
   float value;

@@ -48,4 +48,6 @@ float math_interpolate_1d_offset(sMathInterpolateInput input, const float *table
 
 float math_interpolate(float input_left, float input_mid, float input_right, float base_left, float base_right);
 
+float math_interpolate_1d_direct(float value, const float *input, const float *output, uint32_t size);
+
 #endif /* INTERPOLATION_H_ */
