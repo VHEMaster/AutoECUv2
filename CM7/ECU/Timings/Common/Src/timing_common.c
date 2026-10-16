@@ -143,10 +143,6 @@ ITCM_FUNC static error_t timing_calculate_position_from_snapshot_ex(timing_base_
       memcpy(data, snapshot, sizeof(timing_base_data_crankshaft_t));
     }
 
-    if(time_recalc) {
-      now = time_now_us();
-    }
-
     positions[0] = &data->sensor_data.current.position;
     positions[1] = &data->sensor_data.previous.position;
 
@@ -172,6 +168,7 @@ ITCM_FUNC static error_t timing_calculate_position_from_snapshot_ex(timing_base_
 
       if(req_ctx == NULL || req_ctx->position_valid) {
         if(time_recalc) {
+          now = time_now_us();
           current = data->sensor_data.current.position;
           previous = data->sensor_data.previous.position;
 
