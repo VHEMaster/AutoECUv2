@@ -301,9 +301,6 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
   cybalance_ctx_t *cybalance_ctx = NULL;
   knockwindow_ctx_t *knockwindow_ctx = NULL;
   const ecu_config_engine_calibration_t *calibration_config = NULL;
-
-  timing_base_cylinder_sequentialed_cylinder_ctx_t *sequentialed;
-  float pos_offset;
   error_t err;
   bool enabled;
   ignition_config_group_mode_t group_mode_ign;
@@ -446,31 +443,9 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
           }
         }
       }
-
-      if(sequential_needed) {
-        for(ecu_cylinder_t cy = 0; cy < calibration_config->cylinders.cylinders_count; cy++) {
-          pos_offset = calibration_config->cylinders.cylinders[cy].pos_offset;
-
-          sequentialed = &ctx->data.sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy];
-          err = timing_calculate_offset_position(ctx,
-              pos_offset, true,
-              &sequentialed->timing_req,
-              &sequentialed->crankshaft_data);
-          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-        }
-      }
-
-      if(semisequential_needed) {
-        for(ecu_cylinder_t cy = 0; cy < calibration_config->cylinders.cylinders_count; cy++) {
-          pos_offset = calibration_config->cylinders.cylinders[cy].pos_offset;
-
-          sequentialed = &ctx->data.sequentialed[TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR].cylinders[cy];
-          err = timing_calculate_offset_position(ctx,
-              pos_offset, false,
-              &sequentialed->timing_req,
-              &sequentialed->crankshaft_data);
-          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-        }
+      if(sequential_needed || semisequential_needed) {
+        err = timing_calculate_cylinders_positions(ctx, sequential_needed, semisequential_needed);
+        BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
       }
     } else {
       ecu_config_set_ignition_enabled(false);
