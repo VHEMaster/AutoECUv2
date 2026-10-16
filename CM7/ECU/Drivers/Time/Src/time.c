@@ -10,23 +10,19 @@
 #include "compiler.h"
 
 volatile time_us_t *g_time_timebase = NULL;
-time_us_t g_time_mask = UINT_MAX;
 
 volatile time_tick_t *g_time_tickbase = NULL;
-time_tick_t g_tick_mask = UINT_MAX;
 
 volatile float g_time_mean_lpf = 0.01f;
 
-void time_init_timebase(volatile time_tick_t *timebase, time_us_t mask)
+void time_init_timebase(volatile time_us_t *timebase)
 {
   g_time_timebase = timebase;
-  g_time_mask = mask;
 }
 
-void time_init_tickbase(volatile time_tick_t *tickbase, time_us_t mask)
+void time_init_tickbase(volatile time_tick_t *tickbase)
 {
   g_time_tickbase = tickbase;
-  g_tick_mask = mask;
 }
 
 ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right)
@@ -65,8 +61,8 @@ ITCM_FUNC OPTIMIZE_FAST INLINE float time_interpolate_value(time_us_t time_left,
       time_delta = time_diff(time_right, time_left);
       time_offset = time_diff(time_mid, time_left);
 
-      if(time_offset > (g_time_mask >> 1)) {
-        time_offset = (g_time_mask + 1) - time_offset;
+      if(time_offset > (TIME_TIMEBASE_MASK >> 1)) {
+        time_offset = (TIME_TIMEBASE_MASK + 1) - time_offset;
         mult = -(float)time_offset / (float)time_delta;
       } else {
         mult = (float)time_offset / (float)time_delta;

@@ -12,9 +12,6 @@
 #include "config_spi.h"
 #include "config_gpio.h"
 
-#define ECU_TICKBASE_MASK   0x03FFFFFF
-#define ECU_TIMEBASE_MASK   0x03FFFFFF
-
 void ecu_config_ll_init(void);
 void ecu_config_init_counter(void);
 void ecu_config_start_counter(void);

@@ -9,6 +9,7 @@
 #define DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_INTERNAL_H_
 
 #include "queuedpulses.h"
+#include "config_hw.h"
 
 #define QUEUEDPULSE_ENTRIES_BITMAP_MAX  UINT_MAX
 
@@ -63,6 +64,17 @@ typedef struct {
 void queuedpulses_internal_tim_enable(queuedpulse_timer_t *timer, uint32_t prd, uint32_t psc);
 void queuedpulses_internal_tim_disable(queuedpulse_timer_t *timer);
 
-time_delta_us_t queuedpulses_internal_calculate_pulse_cplt_time(queuedpulse_entry_t *entry, time_us_t now);
+STATIC_INLINE time_delta_us_t queuedpulses_internal_calculate_pulse_cplt_time(queuedpulse_entry_t *entry, time_us_t now)
+{
+  time_us_t absolute_time = time_add(entry->time, entry->pulse);
+  time_delta_us_t relative_time = time_diff(absolute_time, now);
+
+  /* TODO: probably not needed, but let's keep it... Just in case */
+  if(relative_time >= TIME_TIMEBASE_MASK >> 1) {
+    relative_time = 0;
+  }
+
+  return relative_time;
+}
 
 #endif /* DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_INTERNAL_H_ */

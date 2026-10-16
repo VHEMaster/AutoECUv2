@@ -49,14 +49,14 @@ void ecu_config_ll_init(void)
 
 void ecu_config_init_counter(void)
 {
-  htim2.Init.Period = ECU_TICKBASE_MASK;
-  htim5.Init.Period = ECU_TIMEBASE_MASK;
+  htim2.Init.Period = TIME_TICKBASE_MASK;
+  htim5.Init.Period = TIME_TIMEBASE_MASK;
 
   HAL_TIM_Base_Init(&htim5);
   HAL_TIM_Base_Init(&htim2);
 
-  time_init_tickbase(&htim2.Instance->CNT, ECU_TICKBASE_MASK);
-  time_init_timebase(&htim5.Instance->CNT, ECU_TIMEBASE_MASK);
+  time_init_tickbase(&htim2.Instance->CNT);
+  time_init_timebase(&htim5.Instance->CNT);
 }
 
 void ecu_config_start_counter(void)

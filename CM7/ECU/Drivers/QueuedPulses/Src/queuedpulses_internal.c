@@ -33,17 +33,3 @@ ITCM_FUNC void queuedpulses_internal_tim_disable(queuedpulse_timer_t *timer)
   __HAL_TIM_DISABLE_IT(timer->htim, TIM_IT_UPDATE);
   __HAL_TIM_DISABLE(timer->htim);
 }
-
-
-ITCM_FUNC time_delta_us_t queuedpulses_internal_calculate_pulse_cplt_time(queuedpulse_entry_t *entry, time_us_t now)
-{
-  time_us_t absolute_time = time_add(entry->time, entry->pulse);
-  time_delta_us_t relative_time = time_diff(absolute_time, now);
-
-  /* TODO: probably not needed, but let's keep it... Just in case */
-  if(relative_time >= ECU_TIMEBASE_MASK >> 1) {
-    relative_time = 0;
-  }
-
-  return relative_time;
-}
