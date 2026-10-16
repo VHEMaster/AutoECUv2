@@ -26,7 +26,7 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
               },
               .downstream_list = {
                   {
-                      .enabled = true,
+                      .enabled = false,
                       .msg_id_1_start = 0x100,
                       .msg_id_2_end = 0x1FF,
                       .can_instance = ECU_COMM_CAN_1,

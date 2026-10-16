@@ -109,13 +109,12 @@ error_t knockwindow_get_runtime_data_ptr(knockwindow_ctx_t *ctx, knockwindow_run
 }
 
 OPTIMIZE_FAST
-ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
+ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const timing_base_data_t *timing_base_data)
 {
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
-  const timing_base_data_t *timing_base_data;
   const knockwindow_config_t *config;
   const knockwindow_config_setup_ctx_t *config_setup;
   const knockwindow_config_setup_cylinder_t *cy_config;
@@ -137,11 +136,6 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx)
 
     BREAK_IF(ctx->configured == false);
     BREAK_IF(config->enabled == false);
-
-    // TODO: assign proper instance
-    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
     crankshaft_mode = timing_base_data->crankshaft.mode;
     BREAK_IF(crankshaft_mode < TIMING_CRANKSHAFT_MODE_VALID);
@@ -351,32 +345,33 @@ ITCM_FUNC static void knockwindow_pulsedadc_sampling_cplt_cb_t(void *usrdata, co
   ckp_data_position_t sensordata_previous;
   uint32_t prim;
   time_us_t now;
-  error_t err;
 
-  err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
+  do {
+    BREAK_IF(!setup->runtime.working);
+    BREAK_IF(cy >= ECU_CYLINDER_MAX);
 
-  if(!setup->runtime.working || cy >= ECU_CYLINDER_MAX || err != E_OK) {
-    return;
-  }
+    timing_base_data = setup->timing_base_data;
+    BREAK_IF(timing_base_data == NULL);
 
-  crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
+    crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
 
-  prim = EnterCritical();
-  now = time_now_us();
-  sensordata_current = crankshaft_data->sensor_data.current;
-  sensordata_previous = crankshaft_data->sensor_data.previous;
-  ExitCritical(prim);
+    prim = EnterCritical();
+    now = time_now_us();
+    sensordata_current = crankshaft_data->sensor_data.current;
+    sensordata_previous = crankshaft_data->sensor_data.previous;
+    ExitCritical(prim);
 
-  setup->runtime.position_cplt = time_interpolate_value(
-      sensordata_previous.timestamp, now, sensordata_current.timestamp,
-      sensordata_previous.position, sensordata_current.position);
+    setup->runtime.position_cplt = time_interpolate_value(
+        sensordata_previous.timestamp, now, sensordata_current.timestamp,
+        sensordata_previous.position, sensordata_current.position);
 
-  setup->sampling_cplt_ctx.samples_buffer = cplt_ctx->samples_buffer;
-  setup->sampling_cplt_ctx.samples_count = cplt_ctx->samples_count;
-  setup->sampling_cplt_ctx.time_start = cplt_ctx->time_start;
-  setup->sampling_cplt_ctx.time_cplt = cplt_ctx->time_cplt;
+    setup->sampling_cplt_ctx.samples_buffer = cplt_ctx->samples_buffer;
+    setup->sampling_cplt_ctx.samples_count = cplt_ctx->samples_count;
+    setup->sampling_cplt_ctx.time_start = cplt_ctx->time_start;
+    setup->sampling_cplt_ctx.time_cplt = cplt_ctx->time_cplt;
 
-  setup->runtime.cplt_irq = true;
+    setup->runtime.cplt_irq = true;
+  } while(0);
 }
 
 ITCM_FUNC static void knockwindow_pulsedadc_sampling_error_cb_t(void *usrdata)

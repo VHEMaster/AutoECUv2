@@ -355,38 +355,46 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
     if(ctx->data.crankshaft.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
       ecu_config_set_ignition_enabled(true);
 
-      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_IGNITION, ECU_TIMING_IGNITION_1, &enabled);
-      if(err == E_OK && enabled) {
-        if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_ALWAYS) {
-          ignition_update_trigger = true;
-        } else if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
-          ignition_update_trigger = !process_update_trigger_counter_1of2;
-        } else if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
-          ignition_update_trigger = process_update_trigger_counter_1of2;
+      if(ignition_ctx != NULL) {
+        err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_IGNITION, ECU_TIMING_IGNITION_1, &enabled);
+        if(err == E_OK && enabled) {
+          if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_ALWAYS) {
+            ignition_update_trigger = true;
+          } else if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
+            ignition_update_trigger = !process_update_trigger_counter_1of2;
+          } else if(ignition_ctx->config.process_update_trigger == IGNITION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
+            ignition_update_trigger = process_update_trigger_counter_1of2;
+          }
         }
       }
 
-      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_INJECTION, ECU_TIMING_INJECTION_1, &enabled);
-      if(err == E_OK && enabled) {
-        if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_ALWAYS) {
-          injection_update_trigger = true;
-        } else if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
-          injection_update_trigger = !process_update_trigger_counter_1of2;
-        } else if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
-          injection_update_trigger = process_update_trigger_counter_1of2;
+      if(injection_ctx != NULL) {
+        err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_INJECTION, ECU_TIMING_INJECTION_1, &enabled);
+        if(err == E_OK && enabled) {
+          if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_ALWAYS) {
+            injection_update_trigger = true;
+          } else if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
+            injection_update_trigger = !process_update_trigger_counter_1of2;
+          } else if(injection_ctx->config.process_update_trigger == INJECTION_CONFIG_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
+            injection_update_trigger = process_update_trigger_counter_1of2;
+          }
         }
       }
 
-      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_CYBALANCE, ECU_TIMING_CYBALANCE_1, &enabled);
-      if(err == E_OK && enabled) {
-        cybalance_update_trigger = true;
-        sequential_needed = true;
+      if(cybalance_ctx != NULL) {
+        err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_CYBALANCE, ECU_TIMING_CYBALANCE_1, &enabled);
+        if(err == E_OK && enabled) {
+          cybalance_update_trigger = true;
+          sequential_needed = true;
+        }
       }
 
-      err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_KNOCKWINDOW, ECU_TIMING_KNOCKWINDOW_1, &enabled);
-      if(err == E_OK && enabled) {
-        knockwindow_update_trigger = true;
-        sequential_needed = true;
+      if(knockwindow_ctx != NULL) {
+        err = ecu_timings_get_timing_enabled(ECU_TIMING_TYPE_KNOCKWINDOW, ECU_TIMING_KNOCKWINDOW_1, &enabled);
+        if(err == E_OK && enabled) {
+          knockwindow_update_trigger = true;
+          sequential_needed = true;
+        }
       }
 
       if(ignition_update_trigger) {
@@ -492,16 +500,16 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
     }
 
     if(ignition_update_trigger) {
-      ignition_signal_update_callback(ignition_ctx);
+      ignition_signal_update_callback(ignition_ctx, &ctx->data);
     }
     if(injection_update_trigger) {
-      injection_signal_update_callback(injection_ctx);
+      injection_signal_update_callback(injection_ctx, &ctx->data);
     }
     if(cybalance_update_trigger) {
-      cybalance_signal_update_callback(cybalance_ctx);
+      cybalance_signal_update_callback(cybalance_ctx, &ctx->data);
     }
     if(knockwindow_update_trigger) {
-      knockwindow_signal_update_callback(knockwindow_ctx);
+      knockwindow_signal_update_callback(knockwindow_ctx, &ctx->data);
     }
   } while(0);
 

@@ -88,7 +88,7 @@ error_t injection_get_runtime_data_ptr(injection_ctx_t *ctx, injection_runtime_c
 }
 
 OPTIMIZE_FAST
-ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
+ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timing_base_data_t *timing_base_data)
 {
   error_t err;
   time_us_t now, last;
@@ -118,7 +118,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
   const timing_base_data_crankshaft_t *crankshaft;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
-  const timing_base_data_t *timing_base_data;
 
   float signal_prepare_advance;
   ignition_runtime_ctx_t *runtime_ignition = NULL;
@@ -205,11 +204,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx)
   do {
     BREAK_IF(ctx->configured == false);
     BREAK_IF(ctx->config.enabled == false);
-
-    // TODO: assign proper instance
-    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
     // TODO: assign proper instance
     err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &runtime_ignition);

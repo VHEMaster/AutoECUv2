@@ -106,6 +106,6 @@ error_t knockwindow_reset(knockwindow_ctx_t *ctx);
 
 error_t knockwindow_get_runtime_data_ptr(knockwindow_ctx_t *ctx, knockwindow_runtime_ctx_t **runtime_data);
 
-void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx);
+void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const timing_base_data_t *timing_base_data);
 
 #endif /* TIMINGS_KNOCK_INC_TIMING_KNOCKWINDOW_H_ */

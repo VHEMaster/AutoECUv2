@@ -85,6 +85,6 @@ error_t ignition_reset(ignition_ctx_t *ctx);
 
 error_t ignition_get_runtime_data_ptr(ignition_ctx_t *ctx, ignition_runtime_ctx_t **runtime_data);
 
-void ignition_signal_update_callback(ignition_ctx_t *ctx);
+void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing_base_data_t *timing_base_data);
 
 #endif /* CORE_CORE_INC_CORE_TIMING_IGNITION_H_ */

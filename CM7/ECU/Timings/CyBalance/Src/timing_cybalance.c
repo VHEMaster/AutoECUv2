@@ -86,13 +86,12 @@ error_t cybalance_get_runtime_data_ptr(cybalance_ctx_t *ctx, cybalance_runtime_c
 }
 
 OPTIMIZE_FAST
-ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
+ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx, const timing_base_data_t *timing_base_data)
 {
   error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
-  const timing_base_data_t *timing_base_data;
   const cybalance_config_t *config;
   cybalance_runtime_ctx_t *runtime;
   cybalance_runtime_cylinder_ctx_t *runtime_cy;
@@ -110,11 +109,6 @@ ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx)
 
     BREAK_IF(ctx->configured == false);
     BREAK_IF(config->enabled == false);
-
-    // TODO: assign proper instance
-    err = ecu_timings_base_get_data_ptr(ECU_TIMING_BASE_1, &timing_base_data);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(timing_base_data == NULL, err = E_FAULT);
 
     ctx->timing_base_data = timing_base_data;
 

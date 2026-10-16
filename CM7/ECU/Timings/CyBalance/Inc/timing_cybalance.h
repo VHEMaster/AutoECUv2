@@ -55,6 +55,6 @@ error_t cybalance_reset(cybalance_ctx_t *ctx);
 
 error_t cybalance_get_runtime_data_ptr(cybalance_ctx_t *ctx, cybalance_runtime_ctx_t **runtime_data);
 
-void cybalance_signal_update_callback(cybalance_ctx_t *ctx);
+void cybalance_signal_update_callback(cybalance_ctx_t *ctx, const timing_base_data_t *timing_base_data);
 
 #endif /* CORE_CORE_INC_CORE_TIMING_CYBALANCE_H_ */
