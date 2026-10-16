@@ -9,7 +9,8 @@
 #include "math_misc.h"
 #include "compiler.h"
 
-INLINE sMathInterpolateInput math_interpolate_input(float value, const float *table, uint32_t size)
+OPTIMIZE_FAST
+sMathInterpolateInput math_interpolate_input(float value, const float *table, uint32_t size)
 {
   sMathInterpolateInput result = {0};
   uint32_t idx0, idx1;
@@ -71,7 +72,8 @@ INLINE sMathInterpolateInput math_interpolate_input(float value, const float *ta
   return result;
 }
 
-INLINE float math_interpolate_1d(sMathInterpolateInput input, const float *table)
+OPTIMIZE_FAST
+float math_interpolate_1d(sMathInterpolateInput input, const float *table)
 {
   float result;
   float output[2];
@@ -84,7 +86,8 @@ INLINE float math_interpolate_1d(sMathInterpolateInput input, const float *table
   return result;
 }
 
-INLINE float math_interpolate_1d_ex(sMathInterpolateInput input, const float *table, bool limit)
+OPTIMIZE_FAST
+float math_interpolate_1d_ex(sMathInterpolateInput input, const float *table, bool limit)
 {
   if(limit) {
     input.mult = CLAMP(input.mult, 0.0f, 1.0f);
@@ -93,7 +96,8 @@ INLINE float math_interpolate_1d_ex(sMathInterpolateInput input, const float *ta
   return math_interpolate_1d(input, table);
 }
 
-INLINE float math_interpolate_2d(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+OPTIMIZE_FAST
+float math_interpolate_2d(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
@@ -112,7 +116,8 @@ INLINE float math_interpolate_2d(sMathInterpolateInput input_x, sMathInterpolate
   return result;
 }
 
-INLINE float math_interpolate_2d_ex(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+OPTIMIZE_FAST
+float math_interpolate_2d_ex(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const float (*table)[x_size], bool limit)
 {
   if(limit) {
@@ -123,7 +128,8 @@ INLINE float math_interpolate_2d_ex(sMathInterpolateInput input_x, sMathInterpol
   return math_interpolate_2d(input_x, input_y, x_size, table);
 }
 
-INLINE float math_interpolate_2d_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+OPTIMIZE_FAST
+float math_interpolate_2d_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
@@ -140,7 +146,8 @@ INLINE float math_interpolate_2d_point(sMathInterpolateInput input_x, sMathInter
   return result;
 }
 
-INLINE float math_interpolate_1d_set(sMathInterpolateInput input, float *table, float new_value, float limit_l, float limit_h)
+OPTIMIZE_FAST
+float math_interpolate_1d_set(sMathInterpolateInput input, float *table, float new_value, float limit_l, float limit_h)
 {
   float previous;
   float diff;
@@ -167,7 +174,8 @@ INLINE float math_interpolate_1d_set(sMathInterpolateInput input, float *table, 
   return diff;
 }
 
-INLINE float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+OPTIMIZE_FAST
+float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -202,7 +210,8 @@ INLINE float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpo
   return diff;
 }
 
-INLINE float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+OPTIMIZE_FAST
+float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -228,6 +237,7 @@ INLINE float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathI
   return diff;
 }
 
+OPTIMIZE_FAST
 float math_interpolate_1d_offset(sMathInterpolateInput input, const float *table, uint32_t offset)
 {
   float result;
@@ -242,7 +252,8 @@ float math_interpolate_1d_offset(sMathInterpolateInput input, const float *table
   return result;
 }
 
-INLINE float math_interpolate(float input_left, float input_mid, float input_right, float base_left, float base_right)
+OPTIMIZE_FAST
+float math_interpolate(float input_left, float input_mid, float input_right, float base_left, float base_right)
 {
   float result;
   float mult;
@@ -257,7 +268,8 @@ INLINE float math_interpolate(float input_left, float input_mid, float input_rig
   return result;
 }
 
-INLINE float math_interpolate_1d_direct(float value, const float *input, const float *output, uint32_t size)
+OPTIMIZE_FAST
+ITCM_FUNC float math_interpolate_1d_direct(float value, const float *input, const float *output, uint32_t size)
 {
   uint32_t idx0, idx1;
   float val0, val1;
