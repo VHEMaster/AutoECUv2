@@ -181,17 +181,17 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
   map_data_t map_data_manifold_b[ECU_BANK_MAX];
   map_data_t map_data_fuelramp_b[ECU_BANK_MAX];
-  float ramp_pressure_gr_b[ECU_BANK_MAX];
-  float performance_mult_gr_b[ECU_BANK_MAX];
-  float performance_initial_us_gr_b[ECU_BANK_MAX];
-  float injection_flow_us_gr_b[ECU_BANK_MAX];
-  float injection_mass_us_gr_b[ECU_BANK_MAX];
-  float injection_mass_gr_b[ECU_BANK_MAX];
+  float ramp_pressure_gr;
+  float performance_mult_gr;
+  float performance_initial_us_gr;
+  float injection_flow_us_gr;
+  float injection_mass_us_gr;
+  float injection_mass_gr;
   float injection_time_gr_b[ECU_BANK_MAX];
 
-  float injector_input_pressure_gr_b[ECU_BANK_MAX];
-  float injector_output_pressure_gr_b[ECU_BANK_MAX];
-  float injector_pressure_diff_gr_b[ECU_BANK_MAX];
+  float injector_input_pressure_gr;
+  float injector_output_pressure_gr;
+  float injector_pressure_diff_gr;
   float injector_input_pressure_gr_mean;
   float injector_output_pressure_gr_mean;
   float injector_pressure_diff_gr_mean;
@@ -419,71 +419,63 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
             }
           }
 
+          injection_time_gr_mean = 0.0f;
+          injection_phase_gr_mean = 0.0f;
           injector_input_pressure_gr_mean = 0.0f;
           injector_output_pressure_gr_mean = 0.0f;
           injector_pressure_diff_gr_mean = 0.0f;
           for(ecu_bank_t b = 0; b < banks_count; b++) {
             float temp_val = group_config->performance_fuelramp_nominal_pressure;
-            ramp_pressure_gr_b[b] = temp_val;
-            injector_input_pressure_gr_b[b] = temp_val;
-            injector_output_pressure_gr_b[b] = 0.0f;
+            ramp_pressure_gr = temp_val;
+            injector_input_pressure_gr = temp_val;
+            injector_output_pressure_gr = 0.0f;
 
             if(map_data_fuelramp_b[b].valid) {
               temp_val = map_data_fuelramp_b[b].manifold_air_pressure;
               temp_val = CLAMP(temp_val,
                   group_config->performance_fuel_pressure_fuelramp_clamp_min,
                   group_config->performance_fuel_pressure_fuelramp_clamp_max);
-              ramp_pressure_gr_b[b] += temp_val - 1.0f;
-              injector_input_pressure_gr_b[b] += temp_val;
+              ramp_pressure_gr += temp_val - 1.0f;
+              injector_input_pressure_gr += temp_val;
             }
             if(map_data_manifold_b[b].valid) {
               temp_val = map_data_manifold_b[b].manifold_air_pressure;
               temp_val = CLAMP(temp_val,
                   group_config->performance_fuel_pressure_manifold_clamp_min,
                   group_config->performance_fuel_pressure_manifold_clamp_max);
-              ramp_pressure_gr_b[b] -= temp_val - 1.0f;
-              injector_output_pressure_gr_b[b] = temp_val;
+              ramp_pressure_gr -= temp_val - 1.0f;
+              injector_output_pressure_gr = temp_val;
             }
 
-            temp_val = ramp_pressure_gr_b[b];
-            performance_mult_gr_b[b] = fast_sqrt(temp_val / group_config->performance_static_fuel_pressure);
-            injector_pressure_diff_gr_b[b] = temp_val;
+            temp_val = ramp_pressure_gr;
+            performance_mult_gr = fast_sqrt(temp_val / group_config->performance_static_fuel_pressure);
+            injector_pressure_diff_gr = temp_val;
 
-            injector_input_pressure_gr_mean += injector_input_pressure_gr_b[b];
-            injector_output_pressure_gr_mean += injector_output_pressure_gr_b[b];
-            injector_pressure_diff_gr_mean += injector_pressure_diff_gr_b[b];
+            injector_input_pressure_gr_mean += injector_input_pressure_gr;
+            injector_output_pressure_gr_mean += injector_output_pressure_gr;
+            injector_pressure_diff_gr_mean += injector_pressure_diff_gr;
 
-            runtime_gr->injector_input_pressure[b] = injector_input_pressure_gr_b[b];
-            runtime_gr->injector_output_pressure[b] = injector_output_pressure_gr_b[b];
-            runtime_gr->injector_pressure_diff[b] = injector_pressure_diff_gr_b[b];
-          }
-          injector_input_pressure_gr_mean *= banks_count_r;
-          injector_output_pressure_gr_mean *= banks_count_r;
-          injector_pressure_diff_gr_mean *= banks_count_r;
-          runtime_gr->injector_input_pressure_mean = injector_input_pressure_gr_mean;
-          runtime_gr->injector_output_pressure_mean = injector_output_pressure_gr_mean;
-          runtime_gr->injector_pressure_diff_mean = injector_pressure_diff_gr_mean;
+            runtime_gr->injector_input_pressure[b] = injector_input_pressure_gr;
+            runtime_gr->injector_output_pressure[b] = injector_output_pressure_gr;
+            runtime_gr->injector_pressure_diff[b] = injector_pressure_diff_gr;
 
-          injection_time_gr_mean = 0;
-          injection_phase_gr_mean = 0;
-          for(ecu_bank_t b = 0; b < banks_count; b++) {
-            performance_initial_us_gr_b[b] = group_config->performance_static;
-            performance_initial_us_gr_b[b] *= 1.6666667e-5f;
-            performance_initial_us_gr_b[b] *= performance_mult_gr_b[b];
+            performance_initial_us_gr = group_config->performance_static;
+            performance_initial_us_gr *= 1.6666667e-5f;
+            performance_initial_us_gr *= performance_mult_gr;
 
             if(group_config->performance_static_units == INJECTION_CONFIG_GROUP_PERF_UNITS_CC) {
-              injection_flow_us_gr_b[b] = performance_initial_us_gr_b[b];
-              injection_mass_us_gr_b[b] = injection_flow_us_gr_b[b] * group_config->performance_fuel_mass_per_cc * 0.001f;
+              injection_flow_us_gr = performance_initial_us_gr;
+              injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
             } else {
-              injection_mass_us_gr_b[b] = performance_initial_us_gr_b[b];
-              injection_flow_us_gr_b[b] = injection_mass_us_gr_b[b] / group_config->performance_fuel_mass_per_cc * 0.001f;
+              injection_mass_us_gr = performance_initial_us_gr;
+              injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
             }
 
-            injection_mass_gr_b[b] = input_injection_mass_b[b];
+            injection_mass_gr = input_injection_mass_b[b];
 
-            if(injection_mass_gr_b[b] >= group_config->inject_mass_low_threshold) {
-              injection_mass_gr_b[b] -= group_config->inject_mass_reduction;
-              injection_time_gr_b[b] = injection_mass_gr_b[b] / injection_mass_us_gr_b[b];
+            if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
+              injection_mass_gr -= group_config->inject_mass_reduction;
+              injection_time_gr_b[b] = injection_mass_gr / injection_mass_us_gr;
             } else {
               injection_time_gr_b[b] = 0.0f;
             }
@@ -495,10 +487,18 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
             injection_phase_gr_mean += injection_phase_gr_b[b];
             runtime_gr->phase_banked[b] = injection_phase_gr_b[b];
           }
+
           injection_time_gr_mean *= banks_count_r;
           injection_phase_gr_mean *= banks_count_r;
+          injector_input_pressure_gr_mean *= banks_count_r;
+          injector_output_pressure_gr_mean *= banks_count_r;
+          injector_pressure_diff_gr_mean *= banks_count_r;
+
           runtime_gr->time_inject_mean = injection_time_gr_mean;
           runtime_gr->phase_mean = injection_phase_gr_mean;
+          runtime_gr->injector_input_pressure_mean = injector_input_pressure_gr_mean;
+          runtime_gr->injector_output_pressure_mean = injector_output_pressure_gr_mean;
+          runtime_gr->injector_pressure_diff_mean = injector_pressure_diff_gr_mean;
 
           runtime_gr->initialized = true;
 
