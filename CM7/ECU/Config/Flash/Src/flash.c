@@ -38,7 +38,7 @@ error_t flash_init(void)
   return err;
 }
 
-ITCM_FUNC void flash_loop_fast(void)
+void flash_loop_fast(void)
 {
   flash_runtime_ctx_t *ctx = &flash_runtime_ctx;
   error_t err = E_OK;

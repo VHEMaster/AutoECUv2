@@ -29,56 +29,6 @@ void time_init_tickbase(volatile time_tick_t *tickbase, time_us_t mask)
   g_tick_mask = mask;
 }
 
-ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_now_us(void)
-{
-  return *g_time_timebase;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_mask_us(void)
-{
-  return g_time_mask;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_tick_t time_now_tick(void)
-{
-  return *g_time_tickbase;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_tick_t time_tick_mask(void)
-{
-  return g_tick_mask;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_us_t time_diff(time_us_t a, time_us_t b)
-{
-  time_us_t retval;
-
-  retval = a - b;
-  retval &= g_time_mask;
-
-  return retval;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_add(time_us_t time, time_delta_us_t delta)
-{
-  time_us_t retval;
-
-  retval = time + delta;
-  retval &= g_time_mask;
-
-  return retval;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_sub(time_us_t time, time_delta_us_t delta)
-{
-  time_us_t retval;
-
-  retval = time - delta;
-  retval &= g_time_mask;
-
-  return retval;
-}
-
 ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right)
 {
   time_us_t result;
@@ -129,16 +79,6 @@ ITCM_FUNC OPTIMIZE_FAST INLINE float time_interpolate_value(time_us_t time_left,
   }
 
   return result;
-}
-
-ITCM_FUNC OPTIMIZE_FAST INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
-{
-  time_us_t retval;
-
-  retval = a - b;
-  retval &= g_tick_mask;
-
-  return retval;
 }
 
 ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_start(time_msmnt_item_t *item)

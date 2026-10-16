@@ -52,6 +52,7 @@
 
 
 #if __CORTEX_M == (7)
+OPTIMIZE_FAST
 STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
 {
   uintptr_t address = (uintptr_t)buffer;
@@ -62,6 +63,7 @@ STATIC_INLINE void CacheInvalidate(const void * buffer, uint32_t size)
   SCB_InvalidateDCache_by_Addr((uint32_t *)aligned_address, aligned_size);
 }
 
+OPTIMIZE_FAST
 STATIC_INLINE void CacheClean(const void * buffer, uint32_t size)
 {
   uintptr_t address = (uintptr_t)buffer;
@@ -73,7 +75,23 @@ STATIC_INLINE void CacheClean(const void * buffer, uint32_t size)
 }
 #endif
 
-uint32_t EnterCritical(void);
-void ExitCritical(uint32_t prim);
+OPTIMIZE_FAST
+STATIC_INLINE uint32_t EnterCritical(void)
+{
+  uint32_t prim = __get_PRIMASK();
+
+  __disable_irq();
+
+  return prim;
+}
+
+OPTIMIZE_FAST
+STATIC_INLINE void ExitCritical(uint32_t prim)
+{
+  if(!prim) {
+    __enable_irq();
+  }
+}
+
 
 #endif /* COMMON_INC_COMPILER_H_ */
