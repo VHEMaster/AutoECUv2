@@ -76,34 +76,6 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
 }
 
 OPTIMIZE_FAST
-ITCM_FUNC INLINE void timing_position_clamp(float input, bool phased, float *output)
-{
-  float out_value = input;
-
-  do {
-    BREAK_IF(output == NULL);
-
-    if(phased) {
-      while(out_value >= 360.0f) {
-        out_value -= 720.0f;
-      }
-      while(out_value < -360.0f) {
-        out_value += 720.0f;
-      }
-    } else {
-      while(out_value >= 180.0f) {
-        out_value -= 360.0f;
-      }
-      while(out_value < -180.0f) {
-        out_value += 360.0f;
-      }
-    }
-
-    *output = out_value;
-  } while(0);
-}
-
-OPTIMIZE_FAST
 ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data)
 {
   error_t err = E_OK;
