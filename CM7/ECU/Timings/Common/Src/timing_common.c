@@ -107,7 +107,6 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
 {
   error_t err = E_OK;
   float pos, pos_prev, current, previous;
-  timing_base_data_crankshaft_t data_cur;
   time_us_t now;
   uint32_t prim;
   float *positions[2];
@@ -119,17 +118,17 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
     BREAK_IF_ACTION(data == NULL, err = E_PARAM);
 
     prim = EnterCritical();
-    data_cur = ctx->data.crankshaft;
+    *data = ctx->data.crankshaft;
     ExitCritical(prim);
 
     if(time_recalc) {
       now = time_now_us();
     }
 
-    positions[0] = &data_cur.sensor_data.current.position;
-    positions[1] = &data_cur.sensor_data.previous.position;
+    positions[0] = &data->sensor_data.current.position;
+    positions[1] = &data->sensor_data.previous.position;
 
-    if(data_cur.mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+    if(data->mode != TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
       phased_internal = false;
     } else if(req_ctx != NULL && req_ctx->phased == false && ctx->config.phased_only == false) {
       phased_internal = false;
@@ -145,14 +144,14 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
       }
     }
 
-    pos = data_cur.sensor_data.current.position;
+    pos = data->sensor_data.current.position;
 
-    if(data_cur.valid && data_cur.mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+    if(data->valid && data->mode >= TIMING_CRANKSHAFT_MODE_VALID) {
 
       if(req_ctx == NULL || req_ctx->position_valid) {
         if(time_recalc) {
-          current = data_cur.sensor_data.current.position;
-          previous = data_cur.sensor_data.previous.position;
+          current = data->sensor_data.current.position;
+          previous = data->sensor_data.previous.position;
 
           if(current < previous) {
             if(phased_internal) {
@@ -163,9 +162,9 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
           }
 
           pos = time_interpolate_value(
-              data_cur.sensor_data.previous.timestamp,
+              data->sensor_data.previous.timestamp,
               now,
-              data_cur.sensor_data.current.timestamp,
+              data->sensor_data.current.timestamp,
               previous,
               current);
 
@@ -179,12 +178,12 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
             pos = pos_prev;
           }
 
-          if(phased && !phased_internal && data_cur.mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+          if(phased && !phased_internal && data->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
             if(pos > 90.0f) {
               req_ctx->phased = true;
               phased_internal = true;
             }
-          } else if(req_ctx->phased && !phased_internal && data_cur.mode < TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+          } else if(req_ctx->phased && !phased_internal && data->mode < TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
             pos_temp = req_ctx->position_prev;
             if(pos_temp > 90.0f || pos_temp <= -180.0f) {
               req_ctx->phased = false;
@@ -207,13 +206,13 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
           }
         }
       } else {
-        pos = data_cur.sensor_data.current.position;
+        pos = data->sensor_data.current.position;
       }
 
       //Check for NaNs
       if(pos != pos) {
         ctx->diag.crankshaft.bits.pos_calc_nan = true;
-        data_cur.valid = false;
+        data->valid = false;
         pos = 0.0f;
       }
 
@@ -223,9 +222,9 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
       }
 
       if(!phased_internal) {
-        data_cur.mode = MIN(data_cur.mode, TIMING_CRANKSHAFT_MODE_VALID);
-      } else if(data_cur.mode > TIMING_CRANKSHAFT_MODE_VALID) {
-        data_cur.mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
+        data->mode = MIN(data->mode, TIMING_CRANKSHAFT_MODE_VALID);
+      } else if(data->mode > TIMING_CRANKSHAFT_MODE_VALID) {
+        data->mode = TIMING_CRANKSHAFT_MODE_VALID_PHASED;
       }
 
     } else {
@@ -236,12 +235,9 @@ ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, fl
       }
     }
 
-    data_cur.sensor_data.current_position = pos;
-    data_cur.pos_phased = pos;
+    data->sensor_data.current_position = pos;
+    data->pos_phased = pos;
 
-    if(data != NULL) {
-      *data = data_cur;
-    }
   } while(0);
 
   return err;
