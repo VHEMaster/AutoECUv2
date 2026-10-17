@@ -27,7 +27,7 @@ typedef struct {
     bool supported;
     obd2_config_mode_01_linkage_source_t source;
 
-    ecu_config_parameter_id_t common_ids[4];
+    ecu_config_parameter_id_t common_ids[6];
 }obd2_config_mode_01_linkage_parameter_t;
 
 typedef struct {

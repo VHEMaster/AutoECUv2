@@ -227,15 +227,16 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
               } else if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) {
                 md1->prefix_byte = 0;
                 for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
-                  err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
-                  if(err == E_OK) {
-                    md1->prefix_byte |= 1u << i;
-                    md1->value[i].flt = param_value.value;
-                    md1->value[i].raw = roundf(param_value.value);
+                  if(param_cfg->common_ids[i].bitfield.supported) {
+                    err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
+                    if(err == E_OK) {
+                      md1->prefix_byte |= 1u << i;
+                      md1->value[i].flt = param_value.value;
+                      md1->value[i].raw = roundf(param_value.value);
+                    }
                   }
                 }
               }
-
               if(obd2_pid_type_item_has_prefix[dtype]) {
                 BREAK_IF_ACTION(ctx->downstream_data_len + 1 > OBD2_DATA_LENGTH_MAX, response_too_long = true);
                 ctx->downstream_data[ctx->downstream_data_len++] = md1->prefix_byte;

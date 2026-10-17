@@ -419,7 +419,42 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_IAT,
+                            .instance = ECU_SENSOR_IAT_1,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                    {
+
+                    },
+                    {
+
+                    },
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_IAT,
+                            .instance = ECU_SENSOR_IAT_2,
+                            .parameter = ECU_SENSOR_READ_PARAM_DATA,
+                        },
+                    },
+                    {
+
+                    },
+                    {
+
+                    },
+                },
             }, // OBD2_PID_01_IAT_SENSORS_1_2
             {
                 .supported = false,
@@ -480,6 +515,12 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                             .parameter = ECU_SENSOR_READ_PARAM_DATA,
                         },
                     },
+                },
+            }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1
+            {
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
                     {
                         .bitfield = {
                             .supported = true,
@@ -491,9 +532,6 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                         },
                     },
                 },
-            }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B1
-            {
-                .supported = false,
             }, // OBD2_PID_01_EXHAUST_GAS_TEMP_B2
             {
                 .supported = false,
