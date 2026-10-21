@@ -51,6 +51,8 @@ typedef struct {
     pulsedadc_sampling_cplt_cb_t sampling_cplt_cb;
     pulsedadc_sampling_error_cb_t sampling_error_cb;
     void *callback_usrdata;
+
+    bool cache_handling;
 }pulsedadc_init_ctx_t;
 
 typedef struct {

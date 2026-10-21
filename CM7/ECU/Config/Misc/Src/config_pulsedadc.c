@@ -45,6 +45,8 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
             .sampling_cplt_cb = ecu_devices_pulsedadc_sampling_cplt_cb,
             .sampling_error_cb = ecu_devices_pulsedadc_sampling_error_cb,
             .callback_usrdata = &ecu_devices_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_1],
+
+            .cache_handling = true,
         },
     },
     {
@@ -65,6 +67,8 @@ static RAM_SECTION ecu_devices_pulsedadc_ctx_t ecu_devices_pulsedadc_ctx[ECU_DEV
             .sampling_cplt_cb = ecu_devices_pulsedadc_sampling_cplt_cb,
             .sampling_error_cb = ecu_devices_pulsedadc_sampling_error_cb,
             .callback_usrdata = &ecu_devices_pulsedadc_ctx[ECU_DEVICE_PULSEDADC_2],
+
+            .cache_handling = true,
         },
     }
 };

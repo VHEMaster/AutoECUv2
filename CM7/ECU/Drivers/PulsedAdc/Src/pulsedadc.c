@@ -136,7 +136,9 @@ ITCM_FUNC error_t pulsedadc_stop(pulsedadc_ctx_t *ctx)
 
     status = HAL_ADC_Stop_DMA(ctx->init.hadc);
 
-    CacheInvalidate(ctx->samples_buffer, ctx->current_samples * sizeof(*ctx->samples_buffer));
+    if(ctx->init.cache_handling) {
+      CacheInvalidate(ctx->samples_buffer, ctx->current_samples * sizeof(*ctx->samples_buffer));
+    }
 
     ctx->status = PULSEDADC_STATUS_IDLE;
 
@@ -193,7 +195,10 @@ void pulsedadc_adc_dma_cplt(pulsedadc_ctx_t *ctx)
     ctx->sampling_cplt_ctx.time_cplt = time_now_us();
 
     HAL_HRTIM_SimpleBaseStop(ctx->init.hhrtim, ctx->init.hrtim_index);
-    CacheInvalidate(ctx->samples_buffer, ctx->target_samples * sizeof(*ctx->samples_buffer));
+
+    if(ctx->init.cache_handling) {
+      CacheInvalidate(ctx->samples_buffer, ctx->target_samples * sizeof(*ctx->samples_buffer));
+    }
 
     ctx->current_samples = ctx->target_samples;
 
