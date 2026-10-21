@@ -11,7 +11,8 @@
 #include "common.h"
 #include "time.h"
 
-#define PULSEDADC_SAMPLES_ALL   (0u)
+#define PULSEDADC_SAMPLES_ALL             (0u)
+#define PULSEDADC_SAMPLES_MINIMUM_SIZE    (16u)
 
 typedef struct pulsedadc_sampling_cplt_ctx_tag pulsedadc_sampling_cplt_ctx_t;
 

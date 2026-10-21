@@ -19,6 +19,7 @@ error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ct
     BREAK_IF_ACTION(ctx == NULL || init_ctx == NULL || init_ctx->hadc == NULL || init_ctx->hhrtim == NULL, err = E_PARAM);
     BREAK_IF_ACTION(init_ctx->samples_buffer == NULL, err = E_PARAM);
     BREAK_IF_ACTION(((uintptr_t)init_ctx->samples_buffer & (ALIGNMENT_CACHE - 1u)), err = E_PARAM);
+    BREAK_IF_ACTION(init_ctx->samples_buffer_size < PULSEDADC_SAMPLES_MINIMUM_SIZE, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(pulsedadc_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(pulsedadc_init_ctx_t));
@@ -36,6 +37,10 @@ error_t pulsedadc_init(pulsedadc_ctx_t *ctx, const pulsedadc_init_ctx_t *init_ct
     ctx->current_samples = 0;
     ctx->status = PULSEDADC_STATUS_IDLE;
     ctx->ready = true;
+
+    if(ctx->init.cache_handling) {
+      CacheClean(ctx->samples_buffer, ctx->init.samples_buffer_size * sizeof(*ctx->samples_buffer));
+    }
 
   } while(0);
 
@@ -60,6 +65,9 @@ ITCM_FUNC error_t pulsedadc_prepare(pulsedadc_ctx_t *ctx, uint16_t samples)
 
     if(samples == PULSEDADC_SAMPLES_ALL) {
       samples = ctx->init.samples_buffer_size;
+    }
+    if(samples < PULSEDADC_SAMPLES_MINIMUM_SIZE) {
+      samples = PULSEDADC_SAMPLES_MINIMUM_SIZE;
     }
 
     if(ctx->init.ring_buffer == true && ctx->current_samples > 0) {
