@@ -221,7 +221,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_16,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS_PEDAL_POSITION,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -861,7 +861,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_48,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS_PEDAL_POSITION,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -921,7 +921,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_51,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS_PEDAL_POSITION,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -931,7 +931,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                     .data_2d = {
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_3,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS_PEDAL_POSITION,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
