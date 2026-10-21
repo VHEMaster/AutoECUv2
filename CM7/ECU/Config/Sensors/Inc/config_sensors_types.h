@@ -13,7 +13,6 @@
 #define ECU_SENSOR_NONE               (255)
 
 #define ECU_SENSOR_INSTANCE_MAX       (4)
-#define ECU_SENSOR_READ_PARAM_DATA    (0)
 
 #define ECU_SENSORS_MAX (     \
     ECU_SENSOR_CKP_MAX      + \

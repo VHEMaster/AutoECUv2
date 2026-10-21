@@ -11,6 +11,9 @@
 
 #include "config_global.h"
 
+// TODO: remove me
+#define ECU_SENSOR_READ_PARAM_DATA (0)
+
 typedef struct ecu_comm_obd2_ctx_tag ecu_comm_obd2_ctx_t;
 
 static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
@@ -376,7 +379,20 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_LT_O2_TRIM_B1_S2_S4_S6
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_APS,
+                            .instance = ECU_SENSOR_APS_1,
+                            .parameter = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_ST_O2_TRIM_B2_S2_S4_S6
             {
                 .supported = false,
