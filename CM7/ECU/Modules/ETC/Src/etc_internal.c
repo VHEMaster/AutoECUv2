@@ -42,6 +42,11 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->diag.bits.tps_handle_error = true;
     }
 
+    if(ctx->tps_data.valid != true) {
+      ctx->diag.bits.tps_validity_error = true;
+      enabled = false;
+    }
+
     ctx->position_prev = ctx->position_current;
     ctx->position_current = ctx->tps_data.position_unfiltered;
     ctx->current_speed = (ctx->position_current - ctx->position_prev) / ((float)time_delta * 0.000001f);
@@ -89,19 +94,6 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
     math_pid_set_koffs(&ctx->pid_position, &ctx->config.pid_position);
     math_pid_set_koffs(&ctx->pid_speed, &ctx->config.pid_speed);
-
-    if(power_voltage < 5.0f) {
-      ctx->diag.bits.pwr_undervoltage = true;
-    } else {
-      ctx->diag.bits.pwr_undervoltage = false;
-    }
-
-    if(power_voltage > 18.0f) {
-      ctx->diag.bits.pwr_overvoltage = true;
-      enabled = false;
-    } else {
-      ctx->diag.bits.pwr_overvoltage = false;
-    }
 
     if(enabled == false) {
       ctx->data.active = false;

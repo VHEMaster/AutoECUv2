@@ -134,19 +134,19 @@ static void calcdata_module_read_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t 
 {
   error_t err;
   etc_data_t data;
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance].params[ECU_COMMON_READ];
 
   err = ecu_modules_etc_get_data(instance, &data);
   if(err == E_OK) {
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.enabled;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_POS_CURRENT].value = data.current_position;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_POS_CURRENT].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_POS_TARGET].value = data.target_position;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_ETC_READ_PARAM_POS_TARGET].valid = true;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_ENABLED].value = data.enabled;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_ENABLED].valid = true;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_POS_CURRENT].value = data.current_position;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_POS_CURRENT].valid = true;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_POS_TARGET].value = data.target_position;
+    params_rd_ctx[ECU_MODULE_ETC_READ_PARAM_POS_TARGET].valid = true;
   } else {
     for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_ETC_READ_PARAM_MAX; i++) {
-      module_ctx->params[ECU_COMMON_READ][i].valid = false;
+      params_rd_ctx[i].valid = false;
     }
   }
 }
@@ -155,23 +155,23 @@ static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t 
 {
   error_t err;
   vvt_data_t data;
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance].params[ECU_COMMON_READ];
 
   err = ecu_modules_vvt_get_data(instance, &data);
   if(err == E_OK) {
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_ENABLED].value = data.enabled;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_ENABLED].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_POS_CURRENT].value = data.pos_current;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_POS_CURRENT].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_POS_TARGET].value = data.pos_target;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_POS_TARGET].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_CURRENT].value = data.dutycycle_current;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_CURRENT].valid = true;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_TARGET].value = data.dutycycle_target;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_TARGET].valid = true;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_ENABLED].value = data.enabled;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_ENABLED].valid = true;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_POS_CURRENT].value = data.pos_current;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_POS_CURRENT].valid = true;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_POS_TARGET].value = data.pos_target;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_POS_TARGET].valid = true;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_CURRENT].value = data.dutycycle_current;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_CURRENT].valid = true;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_TARGET].value = data.dutycycle_target;
+    params_rd_ctx[ECU_MODULE_VVT_READ_PARAM_DUTYCYCLE_TARGET].valid = true;
   } else {
     for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_VVT_READ_PARAM_MAX; i++) {
-      module_ctx->params[ECU_COMMON_READ][i].valid = false;
+      params_rd_ctx[i].valid = false;
     }
   }
 }
@@ -180,166 +180,184 @@ static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instan
 {
   error_t err;
   ignpower_data_t data;
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance].params[ECU_COMMON_READ];
 
   err = ecu_modules_ignpower_get_data(instance, &data);
   if(err == E_OK) {
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING].value = (data.crankshaft_operating || data.components_operating) ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
-    module_ctx->params[ECU_COMMON_READ][ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING].valid = true;
+    params_rd_ctx[ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING].value = (data.crankshaft_operating || data.components_operating) ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
+    params_rd_ctx[ECU_MODULE_IGNPOWER_READ_PARAM_OPERATING].valid = true;
   } else {
     for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_IGNPOWER_READ_PARAM_MAX; i++) {
-      module_ctx->params[ECU_COMMON_READ][i].valid = false;
+      params_rd_ctx[i].valid = false;
     }
   }
 }
 
 static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid) {
-      (void)ecu_modules_etc_set_enabled(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-      module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid = false;
+  if(params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid) {
+      (void)ecu_modules_etc_set_enabled(instance, params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+      params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid) {
-      (void)ecu_modules_etc_set_target_position(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].value);
-      module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid = false;
+  if(params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid) {
+      (void)ecu_modules_etc_set_target_position(instance, params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].value);
+      params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid = false;
   }
 }
 
 static void calcdata_module_write_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_ENABLED].valid) {
-    (void)ecu_modules_vvt_set_enabled(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_ENABLED].valid = false;
+  if(params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_ENABLED].valid) {
+    (void)ecu_modules_vvt_set_enabled(instance, params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_ENABLED].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid) {
-    (void)ecu_modules_vvt_set_target_position(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].value);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid = false;
+  if(params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid) {
+    (void)ecu_modules_vvt_set_target_position(instance, params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].value);
+    params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].valid) {
-    (void)ecu_modules_vvt_set_target_dutycycle(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].value);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].valid = false;
+  if(params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].valid) {
+    (void)ecu_modules_vvt_set_target_dutycycle(instance, params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].value);
+    params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_DUTYCYCLE_TARGET].valid = false;
   }
 }
 
 static void calcdata_module_write_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].valid) {
-    (void)ecu_modules_coolingfan_activate_trigger(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].valid = false;
+  if(params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].valid) {
+    (void)ecu_modules_coolingfan_activate_trigger(instance, params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_ACTIVATE_TRIGGER].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].valid) {
-    (void)ecu_modules_coolingfan_emergency_trigger(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-        module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].valid = false;
+  if(params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].valid) {
+    (void)ecu_modules_coolingfan_emergency_trigger(instance, params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+        params_wr_ctx[ECU_MODULE_COOLINGFAN_WRITE_PARAM_EMERGENCY_TRIGGER].valid = false;
   }
 }
 
 static void calcdata_module_write_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].valid) {
-    (void)ecu_modules_ignpower_set_operating(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].valid = false;
+  if(params_wr_ctx[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].valid) {
+    (void)ecu_modules_ignpower_set_operating(instance, params_wr_ctx[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    params_wr_ctx[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING_TRIGGER_SIGNAL].valid) {
+  if(params_wr_ctx[ECU_MODULE_IGNPOWER_WRITE_PARAM_OPERATING_TRIGGER_SIGNAL].valid) {
     (void)ecu_modules_ignpower_trigger_operating_signal(instance);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid = false;
+    params_wr_ctx[ECU_MODULE_VVT_WRITE_PARAM_POS_TARGET].valid = false;
   }
 }
 
 static void calcdata_module_write_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].valid) {
-    (void)ecu_modules_indication_manual_set(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].valid = false;
+  if(params_wr_ctx[ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].valid) {
+    (void)ecu_modules_indication_manual_set(instance, params_wr_ctx[ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    params_wr_ctx[ECU_MODULE_INDICATION_WRITE_PARAM_SET_MANUAL_ENGAGED].valid = false;
   }
 }
 
 static void calcdata_module_write_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance].params[ECU_COMMON_WRITE];
 
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].valid) {
-    (void)ecu_modules_wgcv_set_enabled(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].valid = false;
+  if(params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].valid) {
+    (void)ecu_modules_wgcv_set_enabled(instance, params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+    params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_ENABLED].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].valid) {
-    (void)ecu_modules_wgcv_set_target_boost(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].value);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].valid = false;
+  if(params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].valid) {
+    (void)ecu_modules_wgcv_set_target_boost(instance, params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].value);
+    params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_BOOST].valid = false;
   }
-  if(module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid) {
-    (void)ecu_modules_wgcv_set_dutycycle(instance, module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].value);
-    module_ctx->params[ECU_COMMON_WRITE][ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid = false;
+  if(params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid) {
+    (void)ecu_modules_wgcv_set_dutycycle(instance, params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].value);
+    params_wr_ctx[ECU_MODULE_WGCV_WRITE_PARAM_TARGET_DUTYCYCLE].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance].params[ECU_COMMON_WRITE];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_ETC_READ_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_READ][i].valid = false;
+    params_rd_ctx[i].valid = false;
   }
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_ETC_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_VVT][instance].params[ECU_COMMON_WRITE];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_VVT_READ_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_READ][i].valid = false;
+    params_rd_ctx[i].valid = false;
   }
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_VVT_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_coolingfan(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_COOLINGFAN][instance].params[ECU_COMMON_WRITE];
+
+  for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_COOLINGFAN_READ_PARAM_MAX; i++) {
+    params_rd_ctx[i].valid = false;
+  }
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_COOLINGFAN_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_ignpower(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_IGNPOWER][instance].params[ECU_COMMON_WRITE];
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_IGNPOWER_READ_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_READ][i].valid = false;
+    params_rd_ctx[i].valid = false;
   }
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_IGNPOWER_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_indication(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_INDICATION][instance].params[ECU_COMMON_WRITE];
+
+  for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_INDICATION_READ_PARAM_MAX; i++) {
+    params_rd_ctx[i].valid = false;
+  }
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_INDICATION_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }
 
 static void calcdata_module_invalidate_wgcv(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_global_instance_parameters_ctx_t *module_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance].params[ECU_COMMON_READ];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_WGCV][instance].params[ECU_COMMON_WRITE];
+
+  for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_WGCV_READ_PARAM_MAX; i++) {
+    params_rd_ctx[i].valid = false;
+  }
 
   for(ecu_runtime_param_index_t i = 0; i < ECU_MODULE_WGCV_WRITE_PARAM_MAX; i++) {
-    module_ctx->params[ECU_COMMON_WRITE][i].valid = false;
+    params_wr_ctx[i].valid = false;
   }
 }

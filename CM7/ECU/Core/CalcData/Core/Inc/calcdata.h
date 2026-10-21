@@ -21,14 +21,15 @@ typedef struct {
     ecu_bank_t bank;
 }ecu_core_calcdata_calc_type_ctx_t;
 
-typedef void (*ecu_core_calcdata_sensor_read_func_t)(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata, ecu_core_runtime_value_ctx_t *result);
+typedef void (*ecu_core_calcdata_sensor_proc_func_t)(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata);
 typedef void (*ecu_core_calcdata_module_proc_func_t)(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 typedef void (*ecu_core_calcdata_device_proc_func_t)(ecu_core_ctx_t *ctx, ecu_device_instance_t instance, void *userdata);
 typedef void (*ecu_core_calcdata_timing_proc_func_t)(ecu_core_ctx_t *ctx, void *userdata);
 
 typedef struct {
     ecu_sensor_instance_t max;
-    ecu_core_calcdata_sensor_read_func_t func_read;
+    ecu_core_calcdata_sensor_proc_func_t func_read;
+    ecu_core_calcdata_sensor_proc_func_t func_invalidate;
     void *userdata;
 }ecu_core_calcdata_sensor_ctx_t;
 

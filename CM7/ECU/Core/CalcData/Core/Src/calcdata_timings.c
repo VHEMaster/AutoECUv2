@@ -75,7 +75,7 @@ void core_calcdata_timings_write(ecu_core_ctx_t *ctx)
 static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1].params[ECU_COMMON_READ];
   ignition_runtime_ctx_t *dst_ctx;
   ecu_timing_ignition_read_params_t param_index;
   ecu_timing_ignition_read_params_t param_index_base_gr;
@@ -93,19 +93,19 @@ static void calcdata_timing_read_ignition(ecu_core_ctx_t *ctx, void *userdata)
       param_index_base_gr_cy = param_index_base_gr + ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_START + ((ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_END - ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_START + 1) * cy);
 
       param_index = param_index_base_gr_cy + ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_ADVANCE - ECU_TIMING_IGNITION_READ_PARAM_GR1_CY1_START;
-      timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].advance_cy[cy];
-      timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+      params_rd_ctx[param_index].value = dst_ctx->groups[i].advance_cy[cy];
+      params_rd_ctx[param_index].valid = true;
     }
     param_index = param_index_base_gr + ECU_TIMING_IGNITION_READ_PARAM_GR1_SATURATION_TIME - ECU_TIMING_IGNITION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].saturation_time;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].saturation_time;
+    params_rd_ctx[param_index].valid = true;
   }
 }
 
 static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1].params[ECU_COMMON_READ];
   injection_runtime_ctx_t *dst_ctx;
   ecu_timing_injection_write_params_t param_index;
   ecu_timing_injection_write_params_t param_index_base;
@@ -120,47 +120,47 @@ static void calcdata_timing_read_injection(ecu_core_ctx_t *ctx, void *userdata)
     param_index_base = ECU_TIMING_INJECTION_READ_PARAM_GR1_START + ((ECU_TIMING_INJECTION_READ_PARAM_GR1_END - ECU_TIMING_INJECTION_READ_PARAM_GR1_START + 1) * i);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_PHASE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].phase_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].phase_mean;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_LAG_TIME - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].lag_time;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].lag_time;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_TIME_INJECT_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].time_inject_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].time_inject_mean;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_DUTYCYCLE_MAX - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].dutycycle_max;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].dutycycle_max;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_DUTYCYCLE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].dutycycle_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].dutycycle_mean;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_ENRICHMENT_LATE_PHASE - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].enrichment_late_phase;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].enrichment_late_phase;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_INPUT_PRESSURE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].injector_input_pressure_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].injector_input_pressure_mean;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_OUTPUT_PRESSURE_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].injector_output_pressure_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].injector_output_pressure_mean;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base + ECU_TIMING_INJECTION_READ_PARAM_GR1_INJECTOR_PRESSURE_DIFF_MEAN - ECU_TIMING_INJECTION_READ_PARAM_GR1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->groups[i].injector_pressure_diff_mean;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->groups[i].injector_pressure_diff_mean;
+    params_rd_ctx[param_index].valid = true;
   }
 }
 
 static void calcdata_timing_read_cybalance(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1].params[ECU_COMMON_READ];
   cybalance_runtime_ctx_t *dst_ctx;
   ecu_timing_cybalance_read_params_t param_index;
   ecu_timing_cybalance_read_params_t param_index_base_cy;
@@ -175,19 +175,19 @@ static void calcdata_timing_read_cybalance(ecu_core_ctx_t *ctx, void *userdata)
     param_index_base_cy = ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START + ((ECU_TIMING_CYBALANCE_READ_PARAM_CY1_END - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START + 1) * cy);
 
     param_index = param_index_base_cy + ECU_TIMING_CYBALANCE_READ_PARAM_CY1_BALANCE - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->cylinders[cy].balance_value;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->cylinders[cy].balance_value;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = param_index_base_cy + ECU_TIMING_CYBALANCE_READ_PARAM_CY1_BALANCE_NORMALIZED - ECU_TIMING_CYBALANCE_READ_PARAM_CY1_START;
-    timing_ctx->params[ECU_COMMON_READ][param_index].value = dst_ctx->cylinders[cy].normalized_value;
-    timing_ctx->params[ECU_COMMON_READ][param_index].valid = true;
+    params_rd_ctx[param_index].value = dst_ctx->cylinders[cy].normalized_value;
+    params_rd_ctx[param_index].valid = true;
   }
 }
 
 static void calcdata_timing_read_knockwindow(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1].params[ECU_COMMON_READ];
   knockwindow_runtime_ctx_t *dst_ctx;
 
   // TODO: assign proper instance
@@ -197,14 +197,14 @@ static void calcdata_timing_read_knockwindow(ecu_core_ctx_t *ctx, void *userdata
   }
 
   // TODO: nothing to do
-  (void)timing_ctx;
+  (void)params_rd_ctx;
   (void)dst_ctx;
 }
 
 static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_IGNITION][ECU_TIMING_IGNITION_1].params[ECU_COMMON_WRITE];
   ignition_runtime_ctx_t *dst_ctx;
   ignition_runtime_input_ctx_t *input_ctx;
   ecu_timing_ignition_write_params_t param_index;
@@ -221,16 +221,16 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
     param_index_base = ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + ((ECU_TIMING_IGNITION_WRITE_PARAM_B1_END - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START + 1) * b);
 
     param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->allowed.value = params_wr_ctx[param_index].value;
       input_ctx->allowed.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
     param_index = param_index_base + ECU_TIMING_IGNITION_WRITE_PARAM_B1_ADVANCE - ECU_TIMING_IGNITION_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->ignition_advance.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->ignition_advance.value = params_wr_ctx[param_index].value;
       input_ctx->ignition_advance.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
   }
 }
@@ -238,7 +238,7 @@ static void calcdata_timing_write_ignition(ecu_core_ctx_t *ctx, void *userdata)
 static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_INJECTION][ECU_TIMING_INJECTION_1].params[ECU_COMMON_WRITE];
   injection_runtime_ctx_t *dst_ctx;
   injection_runtime_input_ctx_t *input_ctx;
   ecu_timing_injection_write_params_t param_index;
@@ -255,24 +255,24 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
     param_index_base = ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + ((ECU_TIMING_INJECTION_WRITE_PARAM_B1_END - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START + 1) * b);
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->allowed.value = params_wr_ctx[param_index].value;
       input_ctx->allowed.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_MASS - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->injection_mass.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->injection_mass.value = params_wr_ctx[param_index].value;
       input_ctx->injection_mass.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_INJECTION_WRITE_PARAM_B1_INJECTION_PHASE - ECU_TIMING_INJECTION_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->injection_phase.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->injection_phase.value = params_wr_ctx[param_index].value;
       input_ctx->injection_phase.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
   }
 }
@@ -280,7 +280,7 @@ static void calcdata_timing_write_injection(ecu_core_ctx_t *ctx, void *userdata)
 static void calcdata_timing_write_cybalance(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_CYBALANCE][ECU_TIMING_CYBALANCE_1].params[ECU_COMMON_WRITE];
   cybalance_runtime_ctx_t *dst_ctx;
 
   // TODO: assign proper instance
@@ -290,14 +290,14 @@ static void calcdata_timing_write_cybalance(ecu_core_ctx_t *ctx, void *userdata)
   }
 
   // TODO: nothing to do
-  (void)timing_ctx;
+  (void)params_wr_ctx;
   (void)dst_ctx;
 }
 
 static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdata)
 {
   error_t err;
-  ecu_core_runtime_global_instance_parameters_ctx_t *timing_ctx = &CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_KNOCKWINDOW][ECU_TIMING_KNOCKWINDOW_1];
+  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).timings[ECU_TIMING_TYPE_KNOCKWINDOW][ECU_TIMING_KNOCKWINDOW_1].params[ECU_COMMON_WRITE];
   knockwindow_runtime_ctx_t *dst_ctx;
   knockwindow_runtime_input_ctx_t *input_ctx;
   ecu_timing_knockwindow_write_params_t param_index;
@@ -314,24 +314,24 @@ static void calcdata_timing_write_knockwindow(ecu_core_ctx_t *ctx, void *userdat
     param_index_base = ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START + ((ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_END - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START + 1) * b);
 
     param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->allowed.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->allowed.value = params_wr_ctx[param_index].value;
       input_ctx->allowed.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_KNOCK_WINDOW_START - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->knock_window_start.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->knock_window_start.value = params_wr_ctx[param_index].value;
       input_ctx->knock_window_start.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
 
     param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_KNOCK_WINDOW_END - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
-    if(timing_ctx->params[ECU_COMMON_WRITE][param_index].valid) {
-      input_ctx->knock_window_end.value = timing_ctx->params[ECU_COMMON_WRITE][param_index].value;
+    if(params_wr_ctx[param_index].valid) {
+      input_ctx->knock_window_end.value = params_wr_ctx[param_index].value;
       input_ctx->knock_window_end.valid = true;
-      timing_ctx->params[ECU_COMMON_WRITE][param_index].valid = false;
+      params_wr_ctx[param_index].valid = false;
     }
   }
 }
