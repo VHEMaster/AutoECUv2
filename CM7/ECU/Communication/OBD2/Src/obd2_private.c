@@ -27,6 +27,7 @@ static const uint8_t obd2_pid_type_item_length[OBD2_PID_TYPE_MAX] = {
     1, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES
     2, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS
     2, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
+    2, // OBD2_PID_TYPE_SIGNED_SINGLE_WORD
 };
 
 static const uint8_t obd2_pid_type_item_count[OBD2_PID_TYPE_MAX] = {
@@ -48,6 +49,7 @@ static const uint8_t obd2_pid_type_item_count[OBD2_PID_TYPE_MAX] = {
     6, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES
     2, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS
     4, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
+    1, // OBD2_PID_TYPE_SIGNED_SINGLE_WORD
 };
 
 static const bool obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
@@ -69,6 +71,7 @@ static const bool obd2_pid_type_item_isfloat[OBD2_PID_TYPE_MAX] = {
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
+    true, // OBD2_PID_TYPE_SIGNED_SINGLE_WORD
 };
 
 static const bool obd2_pid_type_item_has_prefix[OBD2_PID_TYPE_MAX] = {
@@ -90,6 +93,7 @@ static const bool obd2_pid_type_item_has_prefix[OBD2_PID_TYPE_MAX] = {
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS
     true, // OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS
+    false, // OBD2_PID_TYPE_SIGNED_SINGLE_WORD
 };
 
 static void obd2_sid_current_data(obd2_ctx_t *ctx);
@@ -180,6 +184,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
   uint8_t dlen;
   obd2_mode1_pid_type_t dtype;
   obd2_mode1_data_t *md1;
+  uint8_t items_count;
   float raw;
   const obd2_config_mode_01_linkage_parameter_t *param_cfg;
   ecu_core_runtime_value_ctx_t param_value;
@@ -196,6 +201,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
 
         if(param_cfg->supported && dtype != OBD2_PID_TYPE_UNDEFINED) {
           md1 = &ctx->mode1_data[pid];
+          items_count = obd2_pid_type_item_count[dtype];
 
           switch(pid) {
             case OBD2_PID_01_SUPPORTED_01_20:
@@ -226,7 +232,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
                 // TODO: probably, implement
               } else if(param_cfg->source == OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) {
                 md1->prefix_byte = 0;
-                for(int i = 0; i < obd2_pid_type_item_count[dtype]; i++) {
+                for(int i = 0; i < items_count; i++) {
                   if(param_cfg->common_ids[i].bitfield.supported) {
                     err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
                     if(err == E_OK) {
@@ -394,6 +400,8 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
         case OBD2_PID_09_CALID_MESSAGE_COUNT:
         case OBD2_PID_09_CVN_MESSAGE_COUNT:
         case OBD2_PID_09_IUPR_MESSAGE_COUNT:
+        case OBD2_PID_09_ECU_NAME_MESSAGE_COUNT:
+        case OBD2_PID_09_ENGINE_SERIAL_MESSAGE_COUNT:
           ctx->downstream_data[ctx->downstream_data_len++] = pid;
           ctx->downstream_data[ctx->downstream_data_len++] = ctx->mode9_data[pid + 1].count;
           break;
@@ -402,8 +410,8 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
         case OBD2_PID_09_CVN:
         case OBD2_PID_09_IUPR_SPARK:
         case OBD2_PID_09_ECU_NAME:
-        case OBD2_PID_09_HARDWARE_NUMBER:
-        case OBD2_PID_09_VIN_DUPLICATE_FRAME:
+        case OBD2_PID_09_IUPR_COMPRESSION:
+        case OBD2_PID_09_ENGINE_SERIAL:
           if(idx - 1u < ctx->mode9_data[pid].count) {
             ctx->downstream_data[ctx->downstream_data_len++] = pid;
             ctx->downstream_data[ctx->downstream_data_len++] = idx;

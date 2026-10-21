@@ -15,10 +15,10 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_RAW_DUAL_BYTES }, // OBD2_PID_01_FUEL_SYSTEM_STATUS (0x03)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_CALCULATED_ENGINE_LOAD (0x04)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -40.0f } } }, // OBD2_PID_01_COOLANT_TEMPERATURE (0x05)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_FUEL_TRIM_B1 (0x06)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_FUEL_TRIM_B1 (0x07)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_FUEL_TRIM_B2 (0x08)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_FUEL_TRIM_B2 (0x09)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_FUEL_TRIM_B1 (0x06)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_FUEL_TRIM_B1 (0x07)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_FUEL_TRIM_B2 (0x08)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_FUEL_TRIM_B2 (0x09)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 3.0f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_PRESSURE (0x0A)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_INTAKE_MANIFOLD_PRESSURE (0x0B)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.25f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_RPM (0x0C)
@@ -38,7 +38,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 1.0f/200.0f, .offset = 0.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_O2_SENSOR7_V_AND_STFT (0x1A)
   { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 1.0f/200.0f, .offset = 0.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_O2_SENSOR8_V_AND_STFT (0x1B)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_OBD2_STANDARDS_IN_USE (0x1C)
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_WORD }, // OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS (0x1D)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS (0x1D)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_AUX_INPUT_STATUS (0x1E)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_RUNTIME_SINCE_ENGINE_START (0x1F)
 
@@ -46,21 +46,21 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_DISTANCE_WITH_MIL_ON (0x21)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.079f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_RAIL_PRESS_REL_TO_MANIF (0x22)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 10.0f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_RAIL_PRESSURE_DIRECT (0x23)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S1_EQUIV_RATIO_AND_VOLT (0x24)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S2_EQUIV_RATIO_AND_VOLT (0x25)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S3_EQUIV_RATIO_AND_VOLT (0x26)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S4_EQUIV_RATIO_AND_VOLT (0x27)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S5_EQUIV_RATIO_AND_VOLT (0x28)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S6_EQUIV_RATIO_AND_VOLT (0x29)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S7_EQUIV_RATIO_AND_VOLT (0x2A)
-  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S8_EQUIV_RATIO_AND_VOLT (0x2B)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S1_EQUIV_RATIO_AND_VOLT (0x24)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S2_EQUIV_RATIO_AND_VOLT (0x25)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S3_EQUIV_RATIO_AND_VOLT (0x26)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S4_EQUIV_RATIO_AND_VOLT (0x27)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S5_EQUIV_RATIO_AND_VOLT (0x28)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S6_EQUIV_RATIO_AND_VOLT (0x29)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S7_EQUIV_RATIO_AND_VOLT (0x2A)
+  { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 8.0f/65536.0f, .offset = 0.0f } } }, // OBD2_PID_01_O2_S8_EQUIV_RATIO_AND_VOLT (0x2B)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_COMMANDED_EGR (0x2C)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_EGR_ERROR (0x2D)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_COMMANDED_EVAP_PURGE (0x2E)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_LEVEL_INPUT (0x2F)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_WARMUPS_SINCE_DTC_CLEAR (0x30)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_DISTANCE_SINCE_DTC_CLEAR (0x31)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.25f, .offset = 0.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABS_LEGACY (0x32)
+  { .type = OBD2_PID_TYPE_SIGNED_SINGLE_WORD, .gain_offset = { { .gain = 0.25f, .offset = 0.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE (0x32)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_BAROMETRIC_PRESSURE (0x33)
   { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/256.0f, .offset = -128.0f } } }, // OBD2_PID_01_O2_S1_CURRENT_AND_EQUIV (0x34)
   { .type = OBD2_PID_TYPE_DUAL_WORDS, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f }, { .gain = 1.0f/256.0f, .offset = -128.0f } } }, // OBD2_PID_01_O2_S2_CURRENT_AND_EQUIV (0x35)
@@ -77,7 +77,7 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
 
   { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_41_60 (0x40)
   { .type = OBD2_PID_TYPE_RAW_QUAD_BYTES }, // OBD2_PID_01_MONITOR_STATUS_THIS_DRIVE_CYCLE (0x41)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.001f, .offset = 0.0f } } }, // OBD2_PID_01_ONTROL_MODULE_VOLTAGE (0x42)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.001f, .offset = 0.0f } } }, // OBD2_PID_01_CONTROL_MODULE_VOLTAGE (0x42)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_ABSOLUTE_LOAD_VALUE (0x43)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/32768.0f, .offset = 0.0f } } }, // OBD2_PID_01_COMMANDED_EQUIV_RATIO (0x44)
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_RELATIVE_THROTTLE_POS (0x45)
@@ -90,21 +90,21 @@ static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_COMMANDED_THROTTLE_ACTUATOR (0x4C)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_TIME_WITH_MIL_ON (0x4D)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_TIME_SINCE_DTC_CLEAR (0x4E)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.01f, .offset = 0.0f } } }, // OBD2_PID_01_MAX_MAF_SINCE_DTC_CLEAR (0x4F)
-  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_FUEL_TYPE (0x50)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_ETHANOL_FUEL_PERCENT (0x51)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/200.0f, .offset = -8192.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABSOLUTE (0x52)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.25f, .offset = -8192.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT (0x53)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B1_S1_S3_S5 (0x54)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B1_S1_S3_S5 (0x55)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B2_S1_S3_S5 (0x56)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B2_S1_S3_S5 (0x57)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B1_S2_S4_S6 (0x58)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B1_S2_S4_S6 (0x59)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B2_S2_S4_S6 (0x5A)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B2_S2_S4_S6 (0x5B)
-  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 10.0f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE (0x5C)
-  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_RELATIVE_ACCELERATOR_POS (0x5D)
+  { .type = OBD2_PID_TYPE_QUAD_BYTES, .gain_offset = { { .gain = 1.0f, .offset = 0.0f }, { .gain = 1.0f, .offset = 0.0f }, { .gain = 1.0f, .offset = 0.0f }, { .gain = 10.0f, .offset = 0.0f } } }, // OBD2_PID_01_MAX_VALUES_EQUIV_O2_MAP (0x4F)
+  { .type = OBD2_PID_TYPE_QUAD_BYTES, .gain_offset = { { .gain = 10.0f, .offset = 0.0f }, { .gain = 1.0f, .offset = 0.0f }, { .gain = 1.0f, .offset = 0.0f }, { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_MAX_MAF_AIR_FLOW_RATE (0x50)
+  { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_FUEL_TYPE (0x51)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_ETHANOL_FUEL_PERCENT (0x52)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/200.0f, .offset = 0.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABSOLUTE (0x53)
+  { .type = OBD2_PID_TYPE_SIGNED_SINGLE_WORD, .gain_offset = { { .gain = 1.0f, .offset = 0.0f } } }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT (0x54)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B1_B3 (0x55)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B1_B3 (0x56)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_ST_O2_TRIM_B2_B4 (0x57)
+  { .type = OBD2_PID_TYPE_DUAL_BYTES, .gain_offset = { { .gain = 100.0f/128.0f, .offset = -100.0f }, { .gain = 100.0f/128.0f, .offset = -100.0f } } }, // OBD2_PID_01_LT_O2_TRIM_B2_B4 (0x58)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 10.0f, .offset = 0.0f } } }, // OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE (0x59)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_RELATIVE_ACCELERATOR_POS (0x5A)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 100.0f/255.0f, .offset = 0.0f } } }, // OBD2_PID_01_HYBRID_BATTERY_CHARGE (0x5B)
+  { .type = OBD2_PID_TYPE_SINGLE_BYTE, .gain_offset = { { .gain = 1.0f, .offset = -40.0f } } }, // OBD2_PID_01_ENGINE_OIL_TEMPERATURE (0x5C)
+  { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 1.0f/128.0f, .offset = -210.0f } } }, // OBD2_PID_01_FUEL_INJECTION_TIMING (0x5D)
   { .type = OBD2_PID_TYPE_SINGLE_WORD, .gain_offset = { { .gain = 0.05f, .offset = 0.0f } } }, // OBD2_PID_01_ENGINE_FUEL_RATE (0x5E)
   { .type = OBD2_PID_TYPE_RAW_SINGLE_BYTE }, // OBD2_PID_01_EMISSION_REQUIREMENTS_DESIGN (0x5F)
 
@@ -194,40 +194,27 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
 
     ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
 
+    static const uint8_t vin[17] = "VIN01234567890123";
+    static const uint8_t calid_1[16] = "v1.23.45.678";
+    static const uint8_t ecu_name[20] = "ECM\0-AutoECUv2";
+
     pid = OBD2_PID_09_VIN;
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"VIN0123456789012";
-    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
+    ctx->mode9_data[pid].value[0] = vin;
+    ctx->mode9_data[pid].length[0] = sizeof(vin);
 
     pid = OBD2_PID_09_CALID;
     ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid - 1].supported = true;
-    ctx->mode9_data[pid].count = 2;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"v1.23.45.678";
-    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
-    ctx->mode9_data[pid].value[1] = (const uint8_t *)"v7.89.01.234";
-    ctx->mode9_data[pid].length[1] = strlen((const char *)ctx->mode9_data[pid].value[1]);
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = calid_1;
+    ctx->mode9_data[pid].length[0] = sizeof(calid_1);
 
     pid = OBD2_PID_09_ECU_NAME;
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"AutoECUv2";
-    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
-
-    pid = OBD2_PID_09_HARDWARE_NUMBER;
-    ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"HW v1.0.0";
-    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
-
-    pid = OBD2_PID_09_VIN_DUPLICATE_FRAME;
-    ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = (const uint8_t *)"VD10123456789012";
-    ctx->mode9_data[pid].length[0] = strlen((const char *)ctx->mode9_data[pid].value[0]);
-
-
+    ctx->mode9_data[pid].value[0] = ecu_name;
+    ctx->mode9_data[pid].length[0] = sizeof(ecu_name);
 
     ctx->initialized = true;
 

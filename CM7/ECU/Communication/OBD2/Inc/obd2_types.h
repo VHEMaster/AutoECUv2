@@ -66,7 +66,7 @@ typedef enum
   OBD2_PID_01_O2_SENSOR7_V_AND_STFT            = 0x1A,  // O2 B2S3: voltage + STFT
   OBD2_PID_01_O2_SENSOR8_V_AND_STFT            = 0x1B,  // O2 B2S4: voltage + STFT
   OBD2_PID_01_OBD2_STANDARDS_IN_USE            = 0x1C,  // OBD standards this vehicle conforms to (enum)
-  OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS        = 0x1D,  // O2 sensors present (up to 4 banks), 2-byte bitmask
+  OBD2_PID_01_O2_SENSORS_PRESENT_4BANKS        = 0x1D,  // O2 sensors present (up to 4 banks), 1-byte bitmask
   OBD2_PID_01_AUX_INPUT_STATUS                 = 0x1E,  // Auxiliary input status (bitfield)
   OBD2_PID_01_RUNTIME_SINCE_ENGINE_START       = 0x1F,  // Run time since engine start (s)
 
@@ -89,7 +89,7 @@ typedef enum
   OBD2_PID_01_FUEL_LEVEL_INPUT                 = 0x2F,  // Fuel level input (%)
   OBD2_PID_01_WARMUPS_SINCE_DTC_CLEAR          = 0x30,  // Number of warm-ups since DTC clear
   OBD2_PID_01_DISTANCE_SINCE_DTC_CLEAR         = 0x31,  // Distance since DTC clear (km)
-  OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABS_LEGACY   = 0x32,  // Evap system vapor pressure (legacy format, Pa)
+  OBD2_PID_01_EVAP_VAPOR_PRESSURE              = 0x32,  // EVAP pressure (Pa, signed, 0.25 Pa per bit)
   OBD2_PID_01_BAROMETRIC_PRESSURE              = 0x33,  // Barometric pressure (kPa)
   OBD2_PID_01_O2_S1_CURRENT_AND_EQUIV          = 0x34,  // Wideband O2 B1S1: λ and current (mA)
   OBD2_PID_01_O2_S2_CURRENT_AND_EQUIV          = 0x35,  // Wideband O2 B1S2: λ and current (mA)
@@ -120,21 +120,21 @@ typedef enum
   OBD2_PID_01_COMMANDED_THROTTLE_ACTUATOR      = 0x4C,  // Commanded throttle actuator (%)
   OBD2_PID_01_TIME_WITH_MIL_ON                 = 0x4D,  // Time run with MIL on (min)
   OBD2_PID_01_TIME_SINCE_DTC_CLEAR             = 0x4E,  // Time since DTCs cleared (min)
-  OBD2_PID_01_MAX_MAF_SINCE_DTC_CLEAR          = 0x4F,  // Maximum value for MAF since DTC clear (g/s)
-  OBD2_PID_01_FUEL_TYPE                        = 0x50,  // Fuel type (enum)
-  OBD2_PID_01_ETHANOL_FUEL_PERCENT             = 0x51,  // Ethanol fuel % (%)
-  OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABSOLUTE     = 0x52,  // Evap system vapor pressure (absolute, kPa)
-  OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT          = 0x53,  // Evap system vapor pressure (alternate, Pa signed)
-  OBD2_PID_01_ST_O2_TRIM_B1_S1_S3_S5           = 0x54,  // Short-term secondary O2 trim (A: B1/B3) (%)
-  OBD2_PID_01_LT_O2_TRIM_B1_S1_S3_S5           = 0x55,  // Long-term  secondary O2 trim (A: B1/B3) (%)
-  OBD2_PID_01_ST_O2_TRIM_B2_S1_S3_S5           = 0x56,  // Short-term secondary O2 trim (A: B2/B4) (%)
-  OBD2_PID_01_LT_O2_TRIM_B2_S1_S3_S5           = 0x57,  // Long-term  secondary O2 trim (A: B2/B4) (%)
-  OBD2_PID_01_ST_O2_TRIM_B1_S2_S4_S6           = 0x58,  // Short-term secondary O2 trim (B1S2/S4/S6) (%)
-  OBD2_PID_01_LT_O2_TRIM_B1_S2_S4_S6           = 0x59,  // Long-term  secondary O2 trim (B1S2/S4/S6) (%)
-  OBD2_PID_01_ST_O2_TRIM_B2_S2_S4_S6           = 0x5A,  // Short-term secondary O2 trim (B2S2/S4/S6) (%)
-  OBD2_PID_01_LT_O2_TRIM_B2_S2_S4_S6           = 0x5B,  // Long-term  secondary O2 trim (B2S2/S4/S6) (%)
-  OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE           = 0x5C,  // Fuel rail absolute pressure (kPa)
-  OBD2_PID_01_RELATIVE_ACCELERATOR_POS         = 0x5D,  // Relative accelerator pedal position (%)
+  OBD2_PID_01_MAX_VALUES_EQUIV_O2_MAP          = 0x4F,  // Scaling maxima: lambda, O2 voltage/current, MAP (4 bytes)
+  OBD2_PID_01_MAX_MAF_AIR_FLOW_RATE            = 0x50,  // MAF scaling maximum (10 g/s per bit), three reserved bytes
+  OBD2_PID_01_FUEL_TYPE                        = 0x51,  // Fuel type (enum)
+  OBD2_PID_01_ETHANOL_FUEL_PERCENT             = 0x52,  // Alcohol fuel percentage (%)
+  OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABSOLUTE     = 0x53,  // Absolute EVAP pressure (kPa, unsigned)
+  OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT          = 0x54,  // EVAP pressure (Pa, signed, wider range than PID 0x32)
+  OBD2_PID_01_ST_O2_TRIM_B1_B3                 = 0x55,  // Secondary short-term trim: A=Bank 1, optional B=Bank 3 (%)
+  OBD2_PID_01_LT_O2_TRIM_B1_B3                 = 0x56,  // Secondary long-term trim: A=Bank 1, optional B=Bank 3 (%)
+  OBD2_PID_01_ST_O2_TRIM_B2_B4                 = 0x57,  // Secondary short-term trim: A=Bank 2, optional B=Bank 4 (%)
+  OBD2_PID_01_LT_O2_TRIM_B2_B4                 = 0x58,  // Secondary long-term trim: A=Bank 2, optional B=Bank 4 (%)
+  OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE           = 0x59,  // Fuel rail absolute pressure (kPa)
+  OBD2_PID_01_RELATIVE_ACCELERATOR_POS         = 0x5A,  // Relative accelerator pedal position (%)
+  OBD2_PID_01_HYBRID_BATTERY_CHARGE            = 0x5B,  // Hybrid/EV battery remaining charge (%)
+  OBD2_PID_01_ENGINE_OIL_TEMPERATURE           = 0x5C,  // Engine oil temperature (degrees C)
+  OBD2_PID_01_FUEL_INJECTION_TIMING            = 0x5D,  // Fuel injection timing (degrees)
   OBD2_PID_01_ENGINE_FUEL_RATE                 = 0x5E,  // Engine fuel rate (L/h)
   OBD2_PID_01_EMISSION_REQUIREMENTS_DESIGN     = 0x5F,  // Emission requirements to which vehicle is designed (enum)
 
@@ -147,10 +147,10 @@ typedef enum
   OBD2_PID_01_AUX_IO_SUPPORTED                 = 0x65, // Supported auxiliary I/O (bitfield/word)
   OBD2_PID_01_MAF_SENSOR_A_B                   = 0x66, // MAF sensor A & B (prefix + two words)
   OBD2_PID_01_COOLANT_TEMP_SENSORS_1_2         = 0x67, // Coolant temperature sensors 1 & 2 (prefix + two bytes)
-  OBD2_PID_01_IAT_SENSORS_1_2                  = 0x68, // Intake air temperature sensors 1 & 2 (prefix + two bytes)
-  OBD2_PID_01_EGR_ACT_CMD_ERR                  = 0x69, // EGR commanded/actual/error (implementation-specific)
-  OBD2_PID_01_DIESEL_INTAKE_AIR_FLOW_CTRL      = 0x6A, // Diesel intake air flow control (implementation-specific)
-  OBD2_PID_01_EGR_TEMPERATURE                  = 0x6B, // EGR temperature (implementation-specific)
+  OBD2_PID_01_IAT_SENSORS_1_2                  = 0x68, // Intake air temperatures, two banks (prefix + six bytes)
+  OBD2_PID_01_EGR_ACT_CMD_ERR                  = 0x69, // EGR commanded/actual/error (standard grouped data)
+  OBD2_PID_01_DIESEL_INTAKE_AIR_FLOW_CTRL      = 0x6A, // Diesel intake air flow control (standard grouped data)
+  OBD2_PID_01_EGR_TEMPERATURE                  = 0x6B, // EGR temperature (standard grouped data)
   OBD2_PID_01_THROTTLE_ACT_CTRL_REL_POS        = 0x6C, // Throttle actuator control relative position (%)
   OBD2_PID_01_FUEL_PRESSURE_CONTROL_SYS        = 0x6D, // Fuel pressure control system status/values
   OBD2_PID_01_INJECTION_PRESSURE_CONTROL_SYS   = 0x6E, // Injection pressure control system status/values
@@ -181,20 +181,19 @@ typedef enum
   OBD2_PID_09_VIN_MESSAGE_COUNT              = 0x01,  // N/A (count)
   OBD2_PID_09_VIN                            = 0x02,  // N/A (17 ASCII chars)
   OBD2_PID_09_CALID_MESSAGE_COUNT            = 0x03,  // N/A (count)
-  OBD2_PID_09_CALID                          = 0x04,  // N/A (ASCII string ≤16)
+  OBD2_PID_09_CALID                          = 0x04,  // 16 ASCII bytes per calibration ID (zero padded)
   OBD2_PID_09_CVN_MESSAGE_COUNT              = 0x05,  // N/A (count)
   OBD2_PID_09_CVN                            = 0x06,  // N/A (4-byte checksum value)
   OBD2_PID_09_IUPR_MESSAGE_COUNT             = 0x07,  // N/A (count)
   OBD2_PID_09_IUPR_SPARK                     = 0x08,  // N/A (structured counters)
-  OBD2_PID_09_ECU_NAME                       = 0x09,  // N/A (ASCII)
-  OBD2_PID_09_HARDWARE_NUMBER                = 0x0A,  // N/A (ASCII / OEM-specific)
-  OBD2_PID_09_OBD2_COMPLIANCE                = 0x0B,  // N/A (enum)
-  OBD2_PID_09_RESERVED_0x0C                  = 0x0C,  // N/A
-  OBD2_PID_09_RESERVED_0x0D                  = 0x0D,  // N/A
-  OBD2_PID_09_RESERVED_0x0E                  = 0x0E,  // N/A
-  OBD2_PID_09_RESERVED_0x0F                  = 0x0F,  // N/A
-  OBD2_PID_09_VIN_DUPLICATE_FRAME            = 0x10,  // N/A (legacy VIN frame)
-  OBD2_PID_09_SUPPORTED_21_40                = 0x20,  // N/A (bitmask)
+  OBD2_PID_09_ECU_NAME_MESSAGE_COUNT         = 0x09,  // ECU name message count
+  OBD2_PID_09_ECU_NAME                       = 0x0A,  // 20 bytes: 4-char acronym, '-', 15-char name (zero padded)
+  OBD2_PID_09_IUPR_COMPRESSION               = 0x0B,  // In-use performance tracking, compression ignition
+  OBD2_PID_09_ENGINE_SERIAL_MESSAGE_COUNT    = 0x0C,  // Engine serial number message count
+  OBD2_PID_09_ENGINE_SERIAL                  = 0x0D,  // Engine serial number (17 ASCII bytes)
+  OBD2_PID_09_RESERVED_0x0E                  = 0x0E,
+  OBD2_PID_09_RESERVED_0x0F                  = 0x0F,
+  OBD2_PID_09_RESERVED_0x10                  = 0x10,
 
   OBD2_PID_09_RESERVED_0x11                  = 0x11,  // N/A
   OBD2_PID_09_RESERVED_0x12                  = 0x12,  // N/A
@@ -212,9 +211,9 @@ typedef enum
   OBD2_PID_09_RESERVED_0x1E                  = 0x1E,  // N/A
   OBD2_PID_09_RESERVED_0x1F                  = 0x1F,  // N/A
 
-  OBD2_PID_09_MANUFACTURER_DEFINED_START     = 0x30,  // N/A
-  OBD2_PID_09_MANUFACTURER_DEFINED_END       = 0x7F,  // N/A
-  OBD2_PID_09_MAX
+  OBD2_PID_09_SUPPORTED_21_40                = 0x20,  // Supported InfoTypes [0x21-0x40]
+
+  OBD2_PID_09_MAX = 0x80
 }obd2_pid_mode_09_t;
 
 typedef enum
@@ -255,32 +254,30 @@ typedef struct
 
 typedef enum
 {
-  OBD2_FUEL_CLOSED_LOOP_O2        = 0x01,
-  OBD2_FUEL_OPEN_LOOP_COLD        = 0x02,
+  OBD2_FUEL_OPEN_LOOP_NOT_READY   = 0x01,
+  OBD2_FUEL_CLOSED_LOOP_O2        = 0x02,
   OBD2_FUEL_OPEN_LOOP_LOAD        = 0x04,
   OBD2_FUEL_OPEN_LOOP_FAILURE     = 0x08,
-  OBD2_FUEL_CLOSED_LOOP_OTHER     = 0x10
+  OBD2_FUEL_CLOSED_LOOP_O2_FAULT  = 0x10
 }obd2_fuel_status_t;
 
 typedef enum
 {
-  OBD2_SEC_AIR_UPSTREAM_CAT       = 0,
-  OBD2_SEC_AIR_DOWNSTREAM_CAT     = 1,
-  OBD2_SEC_AIR_FROM_ATMOSPHERE    = 2,
-  OBD2_SEC_AIR_OFF                = 3,
-  OBD2_SEC_AIR_NOT_PRESENT        = 4
+  OBD2_SEC_AIR_UPSTREAM_CAT       = 0x01,
+  OBD2_SEC_AIR_DOWNSTREAM_CAT     = 0x02,
+  OBD2_SEC_AIR_ATMOSPHERE_OFF     = 0x04,
 }obd2_secondary_air_t;
 
 typedef enum
 {
-  OBD2_STD_NONE                   = 0,
   OBD2_STD_OBD_II_CARB            = 1,
   OBD2_STD_OBD_EPA                = 2,
   OBD2_STD_OBD_OBDII              = 3,
+  OBD2_STD_NOT_COMPLIANT          = 5,
   OBD2_STD_EOBD                   = 6,
   OBD2_STD_EOBD_OBDII             = 7,
   OBD2_STD_JOBD                   = 10,
-  OBD2_STD_HD_OBD_DIESEL          = 17
+  OBD2_STD_EMD                    = 17
 }obd2_standard_t;
 
 typedef struct
@@ -291,6 +288,7 @@ typedef struct
 
 typedef enum
 {
+  OBD2_FUEL_UNAVAILABLE           = 0,
   OBD2_FUEL_GASOLINE              = 1,
   OBD2_FUEL_METHANOL              = 2,
   OBD2_FUEL_ETHANOL               = 3,
@@ -306,10 +304,14 @@ typedef enum
   OBD2_FUEL_BIFUEL_CNG            = 13,
   OBD2_FUEL_BIFUEL_PROPANE        = 14,
   OBD2_FUEL_BIFUEL_ELECTRIC       = 15,
+  OBD2_FUEL_BIFUEL_ELECTRIC_COMBUSTION = 16,
   OBD2_FUEL_HYBRID_GASOLINE       = 17,
+  OBD2_FUEL_HYBRID_ETHANOL        = 18,
   OBD2_FUEL_HYBRID_DIESEL         = 19,
   OBD2_FUEL_HYBRID_ELECTRIC       = 20,
-  OBD2_FUEL_HYDROGEN              = 24
+  OBD2_FUEL_HYBRID_MIXED          = 21,
+  OBD2_FUEL_HYBRID_REGENERATIVE   = 22,
+  OBD2_FUEL_BIFUEL_DIESEL         = 23
 }obd2_fuel_type_t;
 
 typedef enum
@@ -332,6 +334,7 @@ typedef enum
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_SEXTUPLE_BYTES,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_DUAL_WORDS,
   OBD2_PID_TYPE_PREFIX_BYTE_PLUS_QUAD_WORDS,
+  OBD2_PID_TYPE_SIGNED_SINGLE_WORD,
   OBD2_PID_TYPE_MAX
 }obd2_mode1_pid_type_t;
 

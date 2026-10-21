@@ -259,7 +259,7 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
             }, // OBD2_PID_01_DISTANCE_SINCE_DTC_CLEAR
             {
                 .supported = false,
-            }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ABS_LEGACY
+            }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE
             {
                 .supported = false,
             }, // OBD2_PID_01_BAROMETRIC_PRESSURE
@@ -328,10 +328,36 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                 .supported = false,
             }, // OBD2_PID_01_ABS_THROTTLE_POS_C
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_APS,
+                            .instance = ECU_SENSOR_APS_1,
+                            .parameter = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION_RAW_A,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_ACCEL_PEDAL_POS_D
             {
-                .supported = false,
+                .supported = true,
+                .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
+                .common_ids = {
+                    {
+                        .bitfield = {
+                            .supported = true,
+                            .entity = ECU_COMMON_ENTITY_SENSOR,
+                            .read_write = ECU_COMMON_READ,
+                            .type = ECU_SENSOR_TYPE_APS,
+                            .instance = ECU_SENSOR_APS_1,
+                            .parameter = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION_RAW_B,
+                        },
+                    },
+                },
             }, // OBD2_PID_01_ACCEL_PEDAL_POS_E
             {
                 .supported = false,
@@ -347,7 +373,10 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
             }, // OBD2_PID_01_TIME_SINCE_DTC_CLEAR
             {
                 .supported = false,
-            }, // OBD2_PID_01_MAX_MAF_SINCE_DTC_CLEAR
+            }, // OBD2_PID_01_MAX_VALUES_EQUIV_O2_MAP
+            {
+                .supported = false,
+            }, // OBD2_PID_01_MAX_MAF_AIR_FLOW_RATE
             {
                 .supported = false,
             }, // OBD2_PID_01_FUEL_TYPE
@@ -362,22 +391,19 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
             }, // OBD2_PID_01_EVAP_VAPOR_PRESSURE_ALT
             {
                 .supported = false,
-            }, // OBD2_PID_01_ST_O2_TRIM_B1_S1_S3_S5
+            }, // OBD2_PID_01_ST_O2_TRIM_B1_B3
             {
                 .supported = false,
-            }, // OBD2_PID_01_LT_O2_TRIM_B1_S1_S3_S5
+            }, // OBD2_PID_01_LT_O2_TRIM_B1_B3
             {
                 .supported = false,
-            }, // OBD2_PID_01_ST_O2_TRIM_B2_S1_S3_S5
+            }, // OBD2_PID_01_ST_O2_TRIM_B2_B4
             {
                 .supported = false,
-            }, // OBD2_PID_01_LT_O2_TRIM_B2_S1_S3_S5
+            }, // OBD2_PID_01_LT_O2_TRIM_B2_B4
             {
                 .supported = false,
-            }, // OBD2_PID_01_ST_O2_TRIM_B1_S2_S4_S6
-            {
-                .supported = false,
-            }, // OBD2_PID_01_LT_O2_TRIM_B1_S2_S4_S6
+            }, // OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE
             {
                 .supported = true,
                 .source = OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON,
@@ -393,16 +419,16 @@ static const obd2_config_t ecu_comm_obd2_config_default = {
                         },
                     },
                 },
-            }, // OBD2_PID_01_ST_O2_TRIM_B2_S2_S4_S6
-            {
-                .supported = false,
-            }, // OBD2_PID_01_LT_O2_TRIM_B2_S2_S4_S6
-            {
-                .supported = false,
-            }, // OBD2_PID_01_FUEL_RAIL_ABS_PRESSURE
-            {
-                .supported = false,
             }, // OBD2_PID_01_RELATIVE_ACCELERATOR_POS
+            {
+                .supported = false,
+            }, // OBD2_PID_01_HYBRID_BATTERY_CHARGE
+            {
+                .supported = false,
+            }, // OBD2_PID_01_ENGINE_OIL_TEMPERATURE
+            {
+                .supported = false,
+            }, // OBD2_PID_01_FUEL_INJECTION_TIMING
             {
                 .supported = false,
             }, // OBD2_PID_01_ENGINE_FUEL_RATE
