@@ -108,7 +108,7 @@ void calcdata_outputs_stepper(ecu_core_ctx_t *ctx)
       pid_rpm = &stepper_bank_ctx->pid_rpm;
       pid_maf = &stepper_bank_ctx->pid_maf;
 
-      (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP, &input_rpm);
+      (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM, &input_rpm);
 
       (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STEPPER_IDLEVALVE_STARTUP_POS, &stepper_stepper_startup_pos);
       (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_STEPPER_IDLEVALVE_IDLE_TARGET_POS, &stepper_idle_target_pos);

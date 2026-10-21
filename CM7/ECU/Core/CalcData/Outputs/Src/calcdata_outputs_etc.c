@@ -125,7 +125,7 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
       pid_rpm = &etc_bank_ctx->pid_rpm;
       pid_maf = &etc_bank_ctx->pid_maf;
 
-      (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP, &input_rpm);
+      (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM, &input_rpm);
       (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_APS_PEDAL_POSITION, &input_aps);
 
       (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_ETC_STOPPED_POS, &etc_stopped_pos);

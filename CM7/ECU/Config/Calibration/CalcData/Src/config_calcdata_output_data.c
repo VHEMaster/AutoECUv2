@@ -21,7 +21,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_2,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
@@ -73,7 +73,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_0,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
@@ -88,7 +88,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_1,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
@@ -109,7 +109,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_32X32_2,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
@@ -133,7 +133,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_0,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
@@ -157,7 +157,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_2D_16X16_1,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
@@ -521,7 +521,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = false,
                         .table_index = ECU_CONFIG_TABLE_1D_16_30,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3,
                         },
                     },
@@ -541,7 +541,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_54,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -935,7 +935,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -972,7 +972,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_53,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -1052,7 +1052,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_59,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -1072,7 +1072,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_60,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },

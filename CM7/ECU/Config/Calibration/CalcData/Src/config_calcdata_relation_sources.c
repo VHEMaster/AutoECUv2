@@ -38,7 +38,7 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                     .table_index = ECU_CONFIG_TABLE_1D_16_31,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM
         {
             .variations = 1,
             .variants = {

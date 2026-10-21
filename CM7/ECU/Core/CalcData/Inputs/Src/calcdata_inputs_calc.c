@@ -124,7 +124,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
 
   t_rpm_idle_flag = true;
   for(ecu_bank_t b = 0; b < banks_count; b++) {
-    rpm_val = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP].value;
+    rpm_val = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM].value;
     rpm_thr_flag_l = NULL;
     rpm_thr_flag_h = NULL;
     for(ecu_config_calcdata_output_varianted_index_t v = 0;
@@ -399,7 +399,7 @@ void calcdata_inputs_calc_mass_air_flow(ecu_core_ctx_t *ctx)
 
     inputs = ctx->runtime.banked.source.banks[b].inputs;
 
-    input_ckp_rpm = &inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP].value;
+    input_ckp_rpm = &inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM].value;
     input_cycle_charge = &inputs[CALCDATA_RELATION_INPUT_SOURCE_CALC_CYCLE_CHARGE].value;
 
     if(input_ckp_rpm->valid && input_cycle_charge->valid) {
@@ -426,7 +426,7 @@ void calcdata_inputs_calc_idle_target_rpm_deviation(ecu_core_ctx_t *ctx)
   float value;
 
   for(ecu_bank_t b = 0; b < banks_count; b++) {
-    (void)core_calcdata_proc_get_input_ptr(ctx, b, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP, &input_rpm);
+    (void)core_calcdata_proc_get_input_ptr(ctx, b, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_CKP_RPM, &input_rpm);
     (void)core_calcdata_proc_get_output_ptr(ctx, b, CALCDATA_OUTPUT_IDLE_TARGET_RPM, &input_idle_target_rpm);
 
     if(input_idle_target_rpm->valid && input_rpm->valid) {
