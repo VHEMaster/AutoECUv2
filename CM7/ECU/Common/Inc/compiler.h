@@ -47,9 +47,16 @@
 #define RETURN_IF(condition, errcode)                   { if((condition)) { return (errcode); } }
 #define CONTINUE_IF(condition)                          { if((condition)) { continue; } }
 
-#define ATOMIC_TRY_LOCK(var, val) (__atomic_exchange_n(&var, val, __ATOMIC_ACQUIRE) == 0u)
-#define ATOMIC_RELEASE(var, val) (__atomic_store_n(&var, val, __ATOMIC_RELEASE))
+#define ATOMIC_TRY_LOCK(var, val) (__atomic_exchange_n(&(var), (val), __ATOMIC_ACQUIRE) == 0u)
+#define ATOMIC_RELEASE(var, val) (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
 
+#undef HAS_BIT
+#undef SET_BIT
+#undef RESET_BIT
+
+#define HAS_BIT(field, bit)       (((field) & (bit)) == (bit))
+#define SET_BIT(field, bit)       ((field) |= (bit))
+#define RESET_BIT(field, bit)     ((field) &= ~(bit))
 
 #if __CORTEX_M == (7)
 OPTIMIZE_FAST

@@ -88,7 +88,6 @@ error_t cybalance_get_runtime_data_ptr(cybalance_ctx_t *ctx, cybalance_runtime_c
 OPTIMIZE_FAST
 ITCM_FUNC void cybalance_signal_update_callback(cybalance_ctx_t *ctx, const timing_base_data_t *timing_base_data)
 {
-  error_t err;
   timing_base_crankshaft_mode_t crankshaft_mode;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data;
