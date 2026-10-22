@@ -119,7 +119,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   const timing_base_data_crankshaft_t *crankshaft;
   const ecu_config_engine_calibration_t *calibration_config;
   const timing_base_data_crankshaft_t *crankshaft_data_cy;
-  const timing_base_data_crankshaft_t *crankshaft_data_mode_req;
 
   float signal_prepare_advance;
   ignition_runtime_ctx_t *runtime_ignition = NULL;
@@ -150,7 +149,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
 
   float position_cy;
-  float position_cy_mode_req;
   float injection_phase_gr_b[ECU_BANK_MAX];
   float injection_phase_gr_requested;
   float injection_phase_gr_accept_vs_requested;
@@ -556,13 +554,11 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                 if(sequentialed_mode_cy != sequentialed_mode_req) {
                   if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE) {
                     sequentialed_mode_cy = sequentialed_mode_req;
-
+                    needtoclear_cy = true;
+                  } else if(sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR &&
+                      sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
                     // TODO: maybe implement handover here?
-                    if(sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR &&
-                        sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
-                      sequentialed_mode_cy = sequentialed_mode_req;
-                    }
-
+                    sequentialed_mode_cy = sequentialed_mode_req;
                     needtoclear_cy = true;
                   }
                 }
@@ -588,9 +584,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                     bank_cy = calibration_config->cylinders.cylinders[cy].bank;
                     injection_phase_cy = injection_phase_gr_b[bank_cy] + injection_phase_cy_add;
                     crankshaft_data_cy = &timing_base_data->sequentialed[sequentialed_mode_cy].cylinders[cy].crankshaft_data;
-                    crankshaft_data_mode_req = &timing_base_data->sequentialed[sequentialed_mode_req].cylinders[cy].crankshaft_data;
                     position_cy = crankshaft_data_cy->sensor_data.current_position;
-                    position_cy_mode_req = crankshaft_data_mode_req->sensor_data.current_position;
                     output_valid = false;
 
                     if(runtime_ignition != NULL) {
@@ -713,8 +707,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                             runtime_cy->scheduled = false;
 
                             if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR &&
-                                sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEQUENTIAL &&
-                                crankshaft_data_mode_req->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+                                sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
                               timing_position_clamp(injection_phase_gr_b[bank_cy] +
                                   injection_phase_cy_add -
                                   crankshaft->sensor_data.current.position -
