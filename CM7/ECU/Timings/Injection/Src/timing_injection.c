@@ -715,7 +715,10 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                             if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR &&
                                 sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEQUENTIAL &&
                                 crankshaft_data_mode_req->mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-                              timing_position_clamp(injection_phase_gr_b[bank_cy] + injection_phase_cy_add - position_cy_mode_req,
+                              timing_position_clamp(injection_phase_gr_b[bank_cy] +
+                                  injection_phase_cy_add -
+                                  crankshaft->sensor_data.current.position -
+                                  calibration_config->cylinders.cylinders[cy].pos_offset,
                                   true, &phase_distance);
 
                               if(fabsf(phase_distance) < 90.0f) {
