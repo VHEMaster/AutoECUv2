@@ -556,6 +556,13 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                 if(sequentialed_mode_cy != sequentialed_mode_req) {
                   if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE) {
                     sequentialed_mode_cy = sequentialed_mode_req;
+
+                    // TODO: maybe implement handover here?
+                    if(sequentialed_mode_req == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR &&
+                        sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
+                      sequentialed_mode_cy = sequentialed_mode_req;
+                    }
+
                     needtoclear_cy = true;
                   }
                 }
