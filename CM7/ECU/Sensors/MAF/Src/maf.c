@@ -205,7 +205,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
             ctx->diag.bits.level_low = true;
             data_valid = false;
           }
-          ctx->data.input_voltage = input_value;
+          ctx->data.input_value = input_value;
         } else if(ctx->config.signal_mode == MAF_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
 
@@ -243,7 +243,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
             data_valid = false;
           }
 
-          ctx->data.input_frequency = input_value;
+          ctx->data.input_value = input_value;
         } else {
           input_value = 0.0f;
           data_valid = false;

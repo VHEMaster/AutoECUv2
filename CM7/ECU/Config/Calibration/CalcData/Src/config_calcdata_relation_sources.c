@@ -164,7 +164,7 @@ static const ecu_config_calcdata_relation_input_varianted_items_t cfg_relation_s
                     .table_index = ECU_CONFIG_TABLE_NONE,
                 }, //CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V3
             },
-        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF
+        }, //CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF_MASSAIRFLOW
         {
             .variations = 2,
             .variants = {

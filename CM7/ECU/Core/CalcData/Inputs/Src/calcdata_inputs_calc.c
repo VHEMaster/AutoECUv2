@@ -94,7 +94,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
       break;
     case CALCDATA_IDLE_POS_FLAG_MODE_MAF:
       for(ecu_bank_t b = 0; b < banks_count; b++) {
-        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF].value;
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF_MASSAIRFLOW].value;
       }
       break;
     case CALCDATA_IDLE_POS_FLAG_MODE_NONE:

@@ -309,7 +309,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
   ecu_core_runtime_value_ctx_t *dest_ptr;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_MAF_PRIMARY;
-  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF;
+  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAF_MASSAIRFLOW;
   ecu_sensor_maf_t maf_current;
   uint32_t banks_per_maf = 0;
 
@@ -334,7 +334,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_maf(ecu_core_ctx_
   src = ctx->runtime.banked.raw.banks[bank].sensors_maf[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_MAF_READ_PARAM_DATA];
+    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_MAF_READ_PARAM_MASSAIRFLOW];
     dest_ptr->value = src_read->value / banks_per_maf;
     dest_ptr->valid = src_read->valid;
   } else {
