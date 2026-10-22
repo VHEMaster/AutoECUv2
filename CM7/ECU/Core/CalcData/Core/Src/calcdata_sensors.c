@@ -286,15 +286,26 @@ static void calcdata_sensor_read_iat(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
   error_t err;
   iat_data_t data;
   ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[ECU_SENSOR_TYPE_IAT][instance].params[ECU_COMMON_READ];
-  ecu_runtime_param_index_t param_index = ECU_SENSOR_IAT_READ_PARAM_DATA;
+  ecu_runtime_param_index_t param_index;
 
   err = ecu_sensors_iat_get_value(instance, &data);
-  if(err == E_OK && data.valid) {
+  if(err == E_OK) {
+    param_index = ECU_SENSOR_IAT_READ_PARAM_TEMPERATURE;
+    params_rd_ctx[param_index].value = data.temperature;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_IAT_READ_PARAM_INPUT_VALUE;
+    params_rd_ctx[param_index].value = data.input_value;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_IAT_READ_PARAM_TRUSTED;
+    params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    params_rd_ctx[param_index].valid = false;
+    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+      params_rd_ctx[param_index].valid = false;
+    }
   }
-  params_rd_ctx[param_index].value = data.temperature;
 }
 
 static void calcdata_sensor_read_maf(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata)

@@ -279,14 +279,14 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_iat(ecu_core_ctx_
   ecu_core_runtime_value_ctx_t *dest_ptr;
   ecu_config_io_iat_t type;
 
-  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_IAT;
+  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_IAT_TEMPERATURE;
 
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
 
   for(type = 0; type < ECU_CONFIG_IO_IAT_MAX; type++) {
     src = ctx->runtime.banked.raw.banks[bank].sensors_iat[type];
     if(src != NULL) {
-      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_IAT_READ_PARAM_DATA];
+      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_IAT_READ_PARAM_TEMPERATURE];
       if(src_read->valid) {
         ctx->runtime.banked.source.banks[bank].data_iat.active_type = type;
       }
