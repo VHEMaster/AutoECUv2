@@ -161,7 +161,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ops(ecu_core_ctx_
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_OPS_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -180,7 +180,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ots(ecu_core_ctx_
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_OTS_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -199,7 +199,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_vss(ecu_core_ctx_
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_VSS_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -224,7 +224,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     for(dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN_CAMSGAFT_REL_POSITION;
         dest_index <= CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX_CAMSGAFT_REL_POSITION; dest_index++) {
       dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
-      memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+      *dest_ptr = *src_read;
     }
   } else {
     dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN_CAMSGAFT_REL_POSITION;
@@ -233,7 +233,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     src = src_array[instance];
     if(src != NULL) {
       src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION];
-      memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+      *dest_ptr = *src_read;
     } else {
       memset(dest_ptr, 0, sizeof(*dest_ptr));
     }
@@ -244,7 +244,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
     src = src_array[instance];
     if(src != NULL) {
       src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION];
-      memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+      *dest_ptr = *src_read;
     } else {
       memset(dest_ptr, 0, sizeof(*dest_ptr));
     }
@@ -259,14 +259,14 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_egt(ecu_core_ctx_
   ecu_core_runtime_value_ctx_t *dest_ptr;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_EGT_PRIMARY;
-  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT;
+  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_EGT_TEMPERATURE;
 
   src = ctx->runtime.banked.raw.banks[bank].sensors_egt[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
 
   if(src != NULL) {
-    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_TEMPERATURE];
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -295,7 +295,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_iat(ecu_core_ctx_
   }
 
   if(type < ECU_CONFIG_IO_IAT_MAX && src_read != NULL) {
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -355,7 +355,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_map(ecu_core_ctx_
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_MAP_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }
@@ -374,7 +374,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_DATA];
-    memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
+    *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }

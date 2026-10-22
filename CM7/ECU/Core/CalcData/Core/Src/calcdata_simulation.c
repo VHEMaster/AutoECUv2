@@ -34,10 +34,10 @@ void core_calcdata_simulation(ecu_core_ctx_t *ctx)
     value = &params->sensors[ECU_SENSOR_TYPE_TPS][ECU_SENSOR_TPS_1].params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_DATA];
     value->value = 28.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_1].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_DATA];
+    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_1].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_TEMPERATURE];
     value->value = 700.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_2].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_DATA];
+    value = &params->sensors[ECU_SENSOR_TYPE_EGT][ECU_SENSOR_EGT_2].params[ECU_COMMON_READ][ECU_SENSOR_EGT_READ_PARAM_TEMPERATURE];
     value->value = 720.0f; value->valid = true;
 
     value = &params->sensors[ECU_SENSOR_TYPE_APS][ECU_SENSOR_APS_1].params[ECU_COMMON_READ][ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION];
