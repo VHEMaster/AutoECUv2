@@ -421,15 +421,39 @@ static void calcdata_sensor_read_tps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
   error_t err;
   tps_data_t data;
   ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[ECU_SENSOR_TYPE_TPS][instance].params[ECU_COMMON_READ];
-  ecu_runtime_param_index_t param_index = ECU_SENSOR_TPS_READ_PARAM_DATA;
+  ecu_runtime_param_index_t param_index;
 
   err = ecu_sensors_tps_get_value(instance, &data);
-  if(err == E_OK && data.valid) {
-    params_rd_ctx[param_index].valid = true;
+  if(err == E_OK && data.data_valid) {
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION;
+    params_rd_ctx[param_index].value = data.position;
+    params_rd_ctx[param_index].valid = data.position_valid;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_UNFILTERED;
+    params_rd_ctx[param_index].value = data.position_unfiltered;
+    params_rd_ctx[param_index].valid = data.data_valid;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_RAW_A;
+    params_rd_ctx[param_index].value = data.positions_raw[0];
+    params_rd_ctx[param_index].valid = data.data_valid;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_RAW_B;
+    params_rd_ctx[param_index].value = data.positions_raw[1];
+    params_rd_ctx[param_index].valid = data.data_valid;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_VOLTAGE_A;
+    params_rd_ctx[param_index].value = data.voltages[0];
+    params_rd_ctx[param_index].valid = data.data_valid;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_VOLTAGE_B;
+    params_rd_ctx[param_index].value = data.voltages[1];
+    params_rd_ctx[param_index].valid = data.data_valid;
+
   } else {
-    params_rd_ctx[param_index].valid = false;
+    for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
+      params_rd_ctx[param_index].valid = false;
+    }
   }
-  params_rd_ctx[param_index].value = data.position;
 }
 
 static void calcdata_sensor_read_vss(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata)

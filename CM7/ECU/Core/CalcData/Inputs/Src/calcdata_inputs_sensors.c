@@ -368,12 +368,12 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_tps(ecu_core_ctx_
   ecu_core_runtime_value_ctx_t *dest_ptr;
 
   ecu_config_io_instance_t instance = ECU_CONFIG_IO_TPS_PRIMARY;
-  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS;
+  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS_THROTTLE_POSITION;
 
   src = ctx->runtime.banked.raw.banks[bank].sensors_tps[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
-    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_DATA];
+    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION];
     *dest_ptr = *src_read;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));

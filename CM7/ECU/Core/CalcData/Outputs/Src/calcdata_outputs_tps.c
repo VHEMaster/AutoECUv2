@@ -51,7 +51,7 @@ void calcdata_outputs_tps(ecu_core_ctx_t *ctx)
       tps_idle_ignition_influence = &ctx->runtime.banked.misc.banks[bank].ignition.idle_tps_influence;
 
       if(tps_used) {
-        (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS, &input_tps);
+        (void)core_calcdata_proc_get_input_ptr(ctx, bank, CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS_THROTTLE_POSITION, &input_tps);
         (void)core_calcdata_proc_get_output_ptr(ctx, bank, CALCDATA_OUTPUT_IDLE_TPS_IGNITION_CTRL, &tps_ignition_ctrl);
 
         if(input_tps->valid && tps_ignition_ctrl->valid) {

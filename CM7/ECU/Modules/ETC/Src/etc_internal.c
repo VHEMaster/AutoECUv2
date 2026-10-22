@@ -42,8 +42,11 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->diag.bits.tps_handle_error = true;
     }
 
-    if(ctx->tps_data.valid != true) {
-      ctx->diag.bits.tps_validity_error = true;
+    if(ctx->tps_data.data_valid != true) {
+      ctx->diag.bits.tps_data_validity_error = true;
+      enabled = false;
+    } else if(ctx->tps_data.position_valid != true) {
+      ctx->diag.bits.tps_pos_validity_error = true;
       enabled = false;
     }
 

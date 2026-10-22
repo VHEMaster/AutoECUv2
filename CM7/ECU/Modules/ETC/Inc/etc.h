@@ -33,7 +33,8 @@ typedef union {
     uint32_t data;
     struct {
         bool tps_handle_error : 1;
-        bool tps_validity_error : 1;
+        bool tps_data_validity_error : 1;
+        bool tps_pos_validity_error : 1;
         bool tps_diag_error : 1;
         bool motor_handle_error : 1;
         bool motor_pwm_error : 1;

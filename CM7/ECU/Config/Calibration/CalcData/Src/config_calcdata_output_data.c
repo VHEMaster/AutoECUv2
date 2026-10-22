@@ -92,7 +92,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                         .source_y = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS_THROTTLE_POSITION,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V2,
                         },
                     },

@@ -79,7 +79,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
   switch(ctx_cal_calcdata->setup.idle.pos_flag_mode) {
     case CALCDATA_IDLE_POS_FLAG_MODE_TPS:
       for(ecu_bank_t b = 0; b < banks_count; b++) {
-        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS].value;
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_TPS_THROTTLE_POSITION].value;
       }
       break;
     case CALCDATA_IDLE_POS_FLAG_MODE_APS:

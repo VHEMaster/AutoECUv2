@@ -118,7 +118,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
   float pos_max = -FLT_MAX;
   bool signal_failed;
   uint8_t signals_ok;
-  bool data_valid = false;
+  bool position_valid = false;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -132,14 +132,14 @@ void tps_loop_slow(tps_ctx_t *ctx)
       }
 
       if(ctx->started == true) {
-        data_valid = true;
+        position_valid = true;
         ctx->signal_poll_time = now;
 
         for(int i = 0; i < ctx->config.signals_used_count; i++) {
           signal_cfg = &ctx->config.signals[i];
 
           err = input_get_value(ctx->input_ids[i], &input_analog_value, NULL);
-          BREAK_IF(err != E_OK && err != E_AGAIN);
+          BREAK_IF_ACTION(err != E_OK && err != E_AGAIN, ctx->data.data_valid = false);
           err = E_OK;
 
           signal_failed = false;
@@ -147,14 +147,14 @@ void tps_loop_slow(tps_ctx_t *ctx)
             if(i == 0) ctx->diag.bits.signal1_level_high = true;
             else if(i == 1) ctx->diag.bits.signal2_level_high = true;
             signal_failed = true;
-            data_valid = false;
+            position_valid = false;
           }
 
           if(ctx->data.voltages[i] < signal_cfg->voltage_low_thr) {
             if(i == 0) ctx->diag.bits.signal1_level_low = true;
             else if(i == 1) ctx->diag.bits.signal2_level_low = true;
             signal_failed = true;
-            data_valid = false;
+            position_valid = false;
           }
 
           pos_raw = ctx->data.voltages[i] - signal_cfg->voltage_pos_min;
@@ -166,7 +166,7 @@ void tps_loop_slow(tps_ctx_t *ctx)
           ctx->signal_failed[i] = signal_failed;
           ctx->data.active[i] = !signal_failed;
         }
-        BREAK_IF(err != E_OK);
+        BREAK_IF_ACTION(err != E_OK, ctx->data.data_valid = false);
 
         imbalance = 0;
         pos_unfiltered = 0;
@@ -188,9 +188,12 @@ void tps_loop_slow(tps_ctx_t *ctx)
           imbalance = pos_max - pos_min;
           if(imbalance > ctx->config.signals_position_imbalance_max) {
             ctx->diag.bits.signals_imbalance = true;
-            data_valid = false;
+            position_valid = false;
           }
+        } else {
+          position_valid = false;
         }
+
         ctx->data.position_imbalance = imbalance;
         ctx->data.position_unfiltered = pos_unfiltered;
 
@@ -207,12 +210,14 @@ void tps_loop_slow(tps_ctx_t *ctx)
 
         ctx->data.position = pos;
         ctx->poll_delta = time_delta;
-        ctx->data.valid = data_valid;
+        ctx->data.position_valid = position_valid;
+        ctx->data.data_valid = true;
       } else if(time_diff(now, ctx->startup_time) > ctx->config.boot_time) {
         ctx->started = true;
       }
     } else {
-      ctx->data.valid = false;
+      ctx->data.data_valid = false;
+      ctx->data.position_valid = false;
       ctx->signal_poll_time = now;
       ctx->startup_time = now;
       ctx->data.position_imbalance = 0;
