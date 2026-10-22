@@ -251,8 +251,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
 
         if(signal_mode_cfg != NULL) {
           if(ctx->config.calc_mode == MAF_CALC_MODE_TABLE_REF_VALUE) {
-            interpolate_input = math_interpolate_input(input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.items);
-            ctx->data.mass_air_flow = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            ctx->data.mass_air_flow = math_interpolate_1d_direct(ctx->data.input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.output, signal_mode_cfg->table.items);
           } else if(ctx->config.calc_mode == MAF_CALC_MODE_TABLE_VALUE) {
             value_div_step = input_value / signal_mode_cfg->input_step;
             interpolate_input.input = input_value;
