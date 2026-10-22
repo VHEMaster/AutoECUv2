@@ -194,7 +194,7 @@ static void calcdata_sensor_read_ckp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.validity >= CKP_DATA_VALID ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_CKP_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -205,15 +205,26 @@ static void calcdata_sensor_read_cmp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
   error_t err;
   cmp_data_t data;
   ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[ECU_SENSOR_TYPE_CMP][instance].params[ECU_COMMON_READ];
-  ecu_runtime_param_index_t param_index = ECU_SENSOR_CMP_READ_PARAM_DATA;
+  ecu_runtime_param_index_t param_index;
 
   err = ecu_sensors_cmp_get_value(instance, &data);
-  if(err == E_OK && data.validity == CMP_DATA_VALID) {
+  if(err == E_OK) {
+    param_index = ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_ABS_POSITION;
+    params_rd_ctx[param_index].value = data.position_absolute;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION;
+    params_rd_ctx[param_index].value = data.position_relative;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_CKP_READ_PARAM_INSYNC;
+    params_rd_ctx[param_index].value = data.validity >= CMP_DATA_VALID ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    params_rd_ctx[param_index].valid = false;
+    for(param_index = 0; param_index < ECU_SENSOR_CMP_READ_PARAM_MAX; param_index++) {
+      params_rd_ctx[param_index].valid = false;
+    }
   }
-  params_rd_ctx[param_index].value = data.position;
 }
 
 static void calcdata_sensor_read_ect(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata)

@@ -71,7 +71,8 @@ typedef enum {
 }cmp_data_validity_t;
 
 typedef struct cmp_data_tag {
-    float position;
+    float position_absolute;
+    float position_relative;
     cmp_data_validity_t validity;
     bool sync_at_odd_rev;
 }cmp_data_t;

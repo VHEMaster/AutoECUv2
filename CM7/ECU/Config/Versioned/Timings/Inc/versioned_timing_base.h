@@ -32,9 +32,8 @@ typedef struct {
     bool enabled;
     bool use_for_phased_sync;
     ecu_sensor_cmp_t cmp_instance;
-    float pos_relative;
-    float pos_min;
-    float pos_max;
+    float pos_rel_min;
+    float pos_rel_max;
 }timing_base_config_camshaft_t;
 
 typedef struct {

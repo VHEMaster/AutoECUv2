@@ -29,6 +29,7 @@ typedef enum {
 }cmp_config_signal_polarity_t;
 
 typedef struct {
+    float position_absolute_offset;
     float pulse_edge_pos_min;
     float pulse_edge_pos_max;
     float pulse_width_min;

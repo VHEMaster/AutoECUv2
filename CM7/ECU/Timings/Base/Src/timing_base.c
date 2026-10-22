@@ -263,17 +263,17 @@ ITCM_FUNC void timing_base_cmp_signal_update(timing_base_ctx_t *ctx, ecu_sensor_
           }
         }
 
-        camshaft->pos_absolute = camshaft->sensor_data.position;
-        camshaft->pos_relative = camshaft->pos_absolute - camshaft_config->pos_relative;
+        camshaft->pos_absolute = camshaft->sensor_data.position_absolute;
+        camshaft->pos_relative = camshaft->sensor_data.position_relative;
 
         if(camshaft->pos_relative >= 180.0f) {
           camshaft->pos_relative -= 360.0f;
         } else if(camshaft->pos_relative < -180.0f) {
           camshaft->pos_relative += 360.0f;
         }
-        if(camshaft->pos_relative > camshaft_config->pos_max) {
+        if(camshaft->pos_relative > camshaft_config->pos_rel_max) {
           ctx->diag.camshafts[cmp_instance].bits.pos_too_late = true;
-        } else if(camshaft->pos_relative < camshaft_config->pos_min) {
+        } else if(camshaft->pos_relative < camshaft_config->pos_rel_min) {
           ctx->diag.camshafts[cmp_instance].bits.pos_too_early = true;
         }
         camshaft->valid = true;

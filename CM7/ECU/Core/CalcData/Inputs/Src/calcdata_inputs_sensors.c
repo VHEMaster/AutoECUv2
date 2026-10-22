@@ -220,30 +220,30 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked_cmp(ecu_core_ctx_
   instance = ECU_CONFIG_IO_CMP_SOHC;
   src = src_array[instance];
   if(src != NULL) {
-    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_DATA];
-    for(dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN;
-        dest_index <= CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX; dest_index++) {
+    src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION];
+    for(dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN_CAMSGAFT_REL_POSITION;
+        dest_index <= CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX_CAMSGAFT_REL_POSITION; dest_index++) {
       dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
       memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
     }
   } else {
-    dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN;
+    dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_IN_CAMSGAFT_REL_POSITION;
     dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
     instance = ECU_CONFIG_IO_CMP_DOHC_INTAKE;
     src = src_array[instance];
     if(src != NULL) {
-      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_DATA];
+      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION];
       memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
     } else {
       memset(dest_ptr, 0, sizeof(*dest_ptr));
     }
 
-    dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX;
+    dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_CMP_EX_CAMSGAFT_REL_POSITION;
     dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
     instance = ECU_CONFIG_IO_CMP_DOHC_EXHAUST;
     src = src_array[instance];
     if(src != NULL) {
-      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_DATA];
+      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_CMP_READ_PARAM_CAMSHAFT_REL_POSITION];
       memcpy(dest_ptr, src_read, sizeof(*dest_ptr));
     } else {
       memset(dest_ptr, 0, sizeof(*dest_ptr));

@@ -149,7 +149,8 @@ ITCM_FUNC void cmp_signal_singlepulse_signal(cmp_ctx_t *ctx, ecu_gpio_input_leve
             desync_needed = true;
           }
           signal_ctx->runtime.pulse_width = pulse_width;
-          data.position = pulse_width * 0.5f + signal_ctx->runtime.pulse_edge_pos[0];
+          data.position_absolute = pulse_width * 0.5f + signal_ctx->runtime.pulse_edge_pos[0];
+          data.position_relative = data.position_absolute - cfg_ctx->position_absolute_offset;
           if(signal_ctx->runtime.is_synchronized) {
             if(signal_ctx->runtime.sync_rev_odd != ckp_data.odd_rev) {
               ctx->diag.bits.extra_signal = true;

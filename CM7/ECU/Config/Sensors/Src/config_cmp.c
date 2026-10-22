@@ -32,6 +32,7 @@ static const cmp_config_t ecu_sensors_cmp_config_default = {
     .boot_time = 100 * TIME_US_IN_MS,
     .signal_ref_types_config = {
         .singlepulse = {
+            .position_absolute_offset = -105.8f,
             .pulse_edge_pos_min = -140,
             .pulse_edge_pos_max = -60,
             .pulse_width_min = 50,
