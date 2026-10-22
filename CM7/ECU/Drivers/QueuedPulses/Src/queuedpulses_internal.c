@@ -16,9 +16,13 @@ ITCM_FUNC void queuedpulses_internal_tim_enable(queuedpulse_timer_t *timer, uint
     psc <<= 1;
   }
 
+  if(prd < 2u) {
+    prd = 2u;
+  }
+
   timer->htim->Instance->PSC = psc - 1;
   timer->htim->Instance->ARR = prd - 1;
-  timer->htim->Instance->EGR |= 1;
+  timer->htim->Instance->EGR = TIM_EGR_UG;
 
   __HAL_TIM_CLEAR_FLAG(timer->htim, TIM_FLAG_UPDATE);
   __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
@@ -32,4 +36,5 @@ ITCM_FUNC void queuedpulses_internal_tim_disable(queuedpulse_timer_t *timer)
 {
   __HAL_TIM_DISABLE_IT(timer->htim, TIM_IT_UPDATE);
   __HAL_TIM_DISABLE(timer->htim);
+  __HAL_TIM_CLEAR_IT(timer->htim, TIM_IT_UPDATE);
 }

@@ -180,11 +180,11 @@ ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bo
 
     now = time_now_us();
     diff = time_diff(now, entry->time);
-    if(diff + 1 >= prd) {
+    if(diff + 1u >= prd) {
       if(allowed_to_loop) {
         err = E_AGAIN;
       } else {
-        queuedpulses_internal_tim_enable(timer, 1, psc);
+        queuedpulses_internal_tim_enable(timer, 1u, psc);
       }
     } else {
       prd -= diff;
@@ -408,6 +408,72 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex(output_id_t output, time_delta_us_t pu
     ExitCritical(prim);
 
   } while(0);
+
+  return err;
+}
+
+ITCM_FUNC error_t queuedpulses_reset_output(output_id_t output)
+{
+  error_t err;
+  queuedpulse_output_t *out;
+  queuedpulse_timer_t *timer;
+  queuedpulse_entry_t *entry;
+  queuedpulse_entry_t **link;
+  time_delta_us_t remaining;
+  uint32_t prim;
+  bool head_removed = false;
+
+  if(output < 0 || output >= OUTPUTS_CHS_MAX) {
+    return E_PARAM;
+  }
+
+  prim = EnterCritical();
+  out = &queuedpulse_ctx.outputs[output];
+  timer = out->timer;
+
+  if(timer != NULL) {
+    if(timer->entry_assigned->output_assigned == out) {
+      head_removed = true;
+      queuedpulses_internal_tim_disable(timer);
+    }
+
+    link = &timer->entry_assigned;
+    while((entry = *link) != NULL) {
+      if(entry->output_assigned == out) {
+        *link = entry->next;
+
+        queuedpulse_ctx.queue.entries_bitmap &= ~(1u << entry->id);
+        entry->next = NULL;
+        entry->out_seq_next = NULL;
+        entry->output_assigned = NULL;
+        entry->timer = NULL;
+        entry->time = 0u;
+        entry->pulse = 0u;
+        entry->value_on = 0;
+      } else {
+        link = &entry->next;
+      }
+    }
+
+    if(head_removed) {
+      entry = timer->entry_assigned;
+      if(entry != NULL) {
+        timer->output_assigned = entry->output_assigned;
+        remaining = queuedpulses_internal_calculate_pulse_cplt_time(entry, time_now_us());
+        queuedpulses_internal_tim_enable(timer, remaining, timer->prescaler_default);
+      } else {
+        timer->output_assigned = NULL;
+        queuedpulse_ctx.timers_bitmap &= ~(1u << timer->id);
+      }
+    }
+  }
+
+  out->queue_entry = NULL;
+  out->timer = NULL;
+  err = output_set_value(out->id, out->value_off);
+  out->value_cur = out->value_off;
+
+  ExitCritical(prim);
 
   return err;
 }
