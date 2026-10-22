@@ -89,7 +89,7 @@ void calcdata_inputs_calc_runup_flag(ecu_core_ctx_t *ctx)
       break;
     case CALCDATA_IDLE_POS_FLAG_MODE_MAP:
       for(ecu_bank_t b = 0; b < banks_count; b++) {
-        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP].value;
+        idle_pos_value[b] = &ctx_source->banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_BANKED_MAP_PRESSURE].value;
       }
       break;
     case CALCDATA_IDLE_POS_FLAG_MODE_MAF:

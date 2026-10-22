@@ -28,9 +28,8 @@ typedef union {
 }map_diag_t;
 
 typedef struct {
-    float input_frequency;
-    float input_voltage;
-    float manifold_air_pressure;
+    float input_value;
+    float pressure;
     bool valid;
 }map_data_t;
 

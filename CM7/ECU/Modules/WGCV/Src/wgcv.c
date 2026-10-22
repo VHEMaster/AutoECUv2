@@ -145,7 +145,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
         if(err != E_OK && err != E_AGAIN) {
           ctx->diag.bits.map_handle_error = true;
         } else if(err == E_OK) {
-          ctx->data.actual_boost = ctx->map_data.manifold_air_pressure - ctx->config.sensor_map_atmospheric_pressure;
+          ctx->data.actual_boost = ctx->map_data.pressure - ctx->config.sensor_map_atmospheric_pressure;
           ctx->actual_boost_updated = true;
         }
 

@@ -83,7 +83,7 @@ static const signals_config_t ecu_comm_signals_default_config[ECU_COMM_SIGNALS_M
                   .parameter_id = { .bitfield = {
                       .supported = true, .entity = ECU_COMMON_ENTITY_SENSOR,
                       .type = ECU_SENSOR_TYPE_MAP, .instance = ECU_SENSOR_MAP_1,
-                      .read_write = ECU_COMMON_READ, .parameter = ECU_SENSOR_MAP_READ_PARAM_DATA,
+                      .read_write = ECU_COMMON_READ, .parameter = ECU_SENSOR_MAP_READ_PARAM_PRESSURE,
                   }},
               },
               {

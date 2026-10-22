@@ -205,7 +205,7 @@ void map_loop_slow(map_ctx_t *ctx)
             ctx->diag.bits.level_low = true;
             data_valid = false;
           }
-          ctx->data.input_voltage = input_value;
+          ctx->data.input_value = input_value;
         } else if(ctx->config.signal_mode == MAP_SIGNAL_MODE_FREQUENCY) {
           signal_mode_cfg = &ctx->config.signal_frequency_to_value;
 
@@ -243,7 +243,7 @@ void map_loop_slow(map_ctx_t *ctx)
             data_valid = false;
           }
 
-          ctx->data.input_frequency = input_value;
+          ctx->data.input_value = input_value;
         } else {
           input_value = 0.0f;
           data_valid = false;
@@ -252,7 +252,7 @@ void map_loop_slow(map_ctx_t *ctx)
         if(signal_mode_cfg != NULL) {
           if(ctx->config.calc_mode == MAP_CALC_MODE_TABLE_REF_VALUE) {
             interpolate_input = math_interpolate_input(input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.items);
-            ctx->data.manifold_air_pressure = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            ctx->data.pressure = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == MAP_CALC_MODE_TABLE_VALUE) {
             value_div_step = input_value / signal_mode_cfg->input_step;
             interpolate_input.input = input_value;
@@ -262,14 +262,14 @@ void map_loop_slow(map_ctx_t *ctx)
             interpolate_input.indexes[0] = CLAMP(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
             interpolate_input.indexes[1] = CLAMP(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
 
-            ctx->data.manifold_air_pressure = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            ctx->data.pressure = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == MAP_CALC_MODE_OFFSET_GAIN) {
-            ctx->data.manifold_air_pressure = input_value * signal_mode_cfg->gain + signal_mode_cfg->offset;
+            ctx->data.pressure = input_value * signal_mode_cfg->gain + signal_mode_cfg->offset;
           } else {
-            ctx->data.manifold_air_pressure = 0;
+            ctx->data.pressure = 0;
           }
         } else {
-          ctx->data.manifold_air_pressure = 0;
+          ctx->data.pressure = 0;
           data_valid = false;
         }
         ctx->data.valid = data_valid;

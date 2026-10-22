@@ -28,7 +28,7 @@ void core_calcdata_simulation(ecu_core_ctx_t *ctx)
     value = &params->sensors[ECU_SENSOR_TYPE_MAF][ECU_SENSOR_MAF_1].params[ECU_COMMON_READ][ECU_SENSOR_MAF_READ_PARAM_DATA];
     value->value = 250.0f; value->valid = true;
 
-    value = &params->sensors[ECU_SENSOR_TYPE_MAP][ECU_SENSOR_MAP_1].params[ECU_COMMON_READ][ECU_SENSOR_MAP_READ_PARAM_DATA];
+    value = &params->sensors[ECU_SENSOR_TYPE_MAP][ECU_SENSOR_MAP_1].params[ECU_COMMON_READ][ECU_SENSOR_MAP_READ_PARAM_PRESSURE];
     value->value = 0.880f; value->valid = true;
 
     value = &params->sensors[ECU_SENSOR_TYPE_TPS][ECU_SENSOR_TPS_1].params[ECU_COMMON_READ][ECU_SENSOR_TPS_READ_PARAM_DATA];
