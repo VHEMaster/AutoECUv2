@@ -63,6 +63,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
   err = ecu_timings_base_get_data(ECU_TIMING_BASE_1, &timing_data);
   if(err != E_OK) {
     BREAKPOINT(0);
+    return;
   }
 
   turning_flag = timing_data.crankshaft.sensor_data.validity >= CKP_DATA_VALID;

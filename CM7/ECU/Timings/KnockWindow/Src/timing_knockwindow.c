@@ -127,6 +127,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
   time_float_delta_us_t window_delta;
   ecu_bank_t bank_cy;
   time_us_t now;
+  bool continue_flag;
 
   uint32_t cylinders_count;
   float window_start, window_end, window_start_advanced, window_prepare, window_overflow, uspd;
@@ -138,8 +139,6 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
     BREAK_IF(config->enabled == false);
 
     crankshaft_mode = timing_base_data->crankshaft.mode;
-    BREAK_IF(crankshaft_mode < TIMING_CRANKSHAFT_MODE_VALID);
-
     calibration_config = ctx->init.calibration_config;
     cylinders_count = calibration_config->cylinders.cylinders_count;
 
@@ -157,28 +156,34 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
       setup_runtime = &setup->runtime;
 
       for(ecu_cylinder_t i = 0, cy; i < cylinders_count; i++) {
+        continue_flag = false;
         cy_config = &config_setup->cylinders_supported[i];
-
         cy = cy_config->cy;
 
         CONTINUE_IF(cy_config->enabled == false && setup_runtime->cylinder_occupied != cy);
 
         bank_cy = calibration_config->cylinders.cylinders[cy].bank;
         inputs = &runtime->input_banked[bank_cy];
-        CONTINUE_IF(inputs->allowed.valid != true);
-        CONTINUE_IF(inputs->allowed.value != ECU_RUNTIME_PARAMETER_TRUE);
+        crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
+        runtime_cy = &setup_runtime->cylinder[cy];
 
-        CONTINUE_IF(inputs->knock_window_start.valid != true);
-        CONTINUE_IF(inputs->knock_window_end.valid != true);
+        if(crankshaft_mode < TIMING_CRANKSHAFT_MODE_VALID) {
+          continue_flag = true;
+        }
+
+        if(inputs->allowed.valid != true || inputs->allowed.value != ECU_RUNTIME_PARAMETER_TRUE) {
+          continue_flag = true;
+        }
+
+        if(inputs->knock_window_start.valid != true || inputs->knock_window_end.valid != true) {
+          continue_flag = true;
+        }
 
         window_start = -inputs->knock_window_start.value;
         window_end = -inputs->knock_window_end.value;
         window_start_advanced = window_start - config->window_start_advance;
         window_prepare = window_start_advanced - config->window_prepare_advance;
         window_overflow = window_end + config->window_overflow_threshold;
-
-        crankshaft_data = &timing_base_data->sequentialed[TIMING_RUNTIME_CYLINDER_SEQUENTIAL].cylinders[cy].crankshaft_data;
-        runtime_cy = &setup_runtime->cylinder[cy];
 
         if(runtime_cy->state == KNOCKWINDOW_STATE_SYNC) {
           if(crankshaft_data->valid &&
@@ -188,7 +193,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
           }
         } else if(runtime_cy->state == KNOCKWINDOW_STATE_WAITING) {
           if(setup_runtime->working == false) {
-            if(crankshaft_data->valid == true) {
+            if(crankshaft_data->valid == true && continue_flag == false) {
               if(crankshaft_data->sensor_data.current.position >= window_prepare && crankshaft_data->sensor_data.current.position < window_end) {
                 if(crankshaft_data->sensor_data.current.position < window_start_advanced) {
                   uspd = crankshaft_data->sensor_data.us_per_degree_pulsed;
@@ -207,7 +212,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
                   err = pulsedadc_prepare(setup->pulsedadc_ctx, samples_requested);
                   if(err == E_OVERFLOW) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                    break;
+                    continue;
                   } else if(err != E_OK) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
                     // TODO: error handling
@@ -223,12 +228,12 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
               }
             } else {
               runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-              break;
+              continue;
             }
           }
         } else if(setup_runtime->working == true && setup_runtime->cylinder_occupied == cy) {
           if(runtime_cy->state == KNOCKWINDOW_STATE_PREPARED) {
-            if(crankshaft_data->valid == true) {
+            if(crankshaft_data->valid == true && continue_flag == false) {
               if(crankshaft_data->sensor_data.current.position >= window_start_advanced) {
                 if(crankshaft_data->sensor_data.current.position < window_end) {
                   now = time_now_us();
@@ -273,10 +278,12 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
                 setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
                 setup->sampling_cplt_ctx.setup_index = s;
 
-                knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
+                if(continue_flag == false) {
+                  knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
 
-                if(ctx->init.callback != NULL) {
-                  ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                  if(ctx->init.callback != NULL) {
+                    ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                  }
                 }
               }
 
@@ -289,7 +296,7 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
               setup_runtime->error_irq = false;
               setup_runtime->cylinder_occupied = ECU_CYLINDER_MAX;
               setup_runtime->working = false;
-            } else if(crankshaft_data->sensor_data.current.position >= window_overflow) {
+            } else if(crankshaft_data->sensor_data.current.position >= window_overflow || continue_flag == true) {
               err = pulsedadc_get_samples(setup->pulsedadc_ctx, &setup->sampling_cplt_ctx.samples_buffer, &setup->sampling_cplt_ctx.samples_count);
               if(err != E_OK) {
                 setup->sampling_cplt_ctx.samples_buffer = NULL;
@@ -315,10 +322,12 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
                 setup->sampling_cplt_ctx.cylinder = setup_runtime->cylinder_occupied;
                 setup->sampling_cplt_ctx.setup_index = s;
 
-                knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
+                if(continue_flag == false) {
+                  knockwindow_buffer_normalize(setup_runtime, &setup->sampling_cplt_ctx);
 
-                if(ctx->init.callback != NULL) {
-                  ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                  if(ctx->init.callback != NULL) {
+                    ctx->init.callback(ctx->init.callback_usrdata, &setup->sampling_cplt_ctx);
+                  }
                 }
               }
 
