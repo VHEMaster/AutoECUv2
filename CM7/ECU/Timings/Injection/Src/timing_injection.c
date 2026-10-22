@@ -253,481 +253,495 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
         input_injection_mass_b[b] = runtime->input_banked[b].injection_mass.value;
         input_valid_b[b] &= runtime->input_banked[b].injection_phase.valid;
         input_valid_b[b] &= runtime->input_banked[b].injection_mass.valid;
-        input_valid &= input_valid_b[b];
       } else {
         input_injection_phase_b[b] = 360.0f;
         input_injection_mass_b[b] = 0.0f;
       }
+      input_valid &= input_valid_b[b];
     }
     runtime->signal_prepare_advance = signal_prepare_advance;
 
     for(injection_config_group_t gr = 0; gr < INJECTION_CONFIG_GROUP_MAX; gr++) {
       group_config = &config->groups[gr];
       runtime_gr = &runtime->groups[gr];
-      if(group_config->enabled && input_valid) {
-        process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
-        process_update_trigger_counter_gr_1of2 = process_update_trigger_counter_gr & 1;
+      if(group_config->enabled) {
+        if(input_valid) {
+          process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
+          process_update_trigger_counter_gr_1of2 = process_update_trigger_counter_gr & 1;
 
-        if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
-          process_update_trigger = true;
-        } else if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
-          process_update_trigger = process_update_trigger_counter_gr_1of2 == 0;
-        } else if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
-          process_update_trigger = process_update_trigger_counter_gr_1of2 == 1;
-        }
-
-        if(process_update_trigger == true)
-        {
-          lag_time_gr = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_performance_dynamic.input,
-              group_config->voltage_to_performance_dynamic.output, group_config->voltage_to_performance_dynamic.items);
-          runtime_gr->lag_time = lag_time_gr;
-
-          if(group_config->rpm_to_phase_add.items > 0) {
-            injection_phase_gr_add_rpm = math_interpolate_1d_direct(crankshaft_rpm, group_config->rpm_to_phase_add.input,
-                group_config->rpm_to_phase_add.output, group_config->rpm_to_phase_add.items);
-          } else {
-            injection_phase_gr_add_rpm = 0;
+          if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
+            process_update_trigger = true;
+          } else if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_1ST) {
+            process_update_trigger = process_update_trigger_counter_gr_1of2 == 0;
+          } else if(group_config->process_update_trigger == INJECTION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF2_2ND) {
+            process_update_trigger = process_update_trigger_counter_gr_1of2 == 1;
           }
 
-          // TODO: IMPLEMENT THAT FEATURE
-          if(group_config->enrichment_late_phase_mode > INJECTION_CONFIG_GROUP_LATE_PHASE_MODE_DISABLED) {
-            enrichment_late_phase_gr = math_interpolate_1d_direct(crankshaft_rpm, group_config->enrichment_late_phase.input,
-                group_config->enrichment_late_phase.output, group_config->enrichment_late_phase.items);
-          } else {
-            enrichment_late_phase_gr = 0;
-          }
+          if(process_update_trigger == true)
+          {
+            lag_time_gr = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_performance_dynamic.input,
+                group_config->voltage_to_performance_dynamic.output, group_config->voltage_to_performance_dynamic.items);
+            runtime_gr->lag_time = lag_time_gr;
 
-          runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
+            if(group_config->rpm_to_phase_add.items > 0) {
+              injection_phase_gr_add_rpm = math_interpolate_1d_direct(crankshaft_rpm, group_config->rpm_to_phase_add.input,
+                  group_config->rpm_to_phase_add.output, group_config->rpm_to_phase_add.items);
+            } else {
+              injection_phase_gr_add_rpm = 0;
+            }
 
-          //TODO: implement late phase
+            // TODO: IMPLEMENT THAT FEATURE
+            if(group_config->enrichment_late_phase_mode > INJECTION_CONFIG_GROUP_LATE_PHASE_MODE_DISABLED) {
+              enrichment_late_phase_gr = math_interpolate_1d_direct(crankshaft_rpm, group_config->enrichment_late_phase.input,
+                  group_config->enrichment_late_phase.output, group_config->enrichment_late_phase.items);
+            } else {
+              enrichment_late_phase_gr = 0;
+            }
 
-          phase_slew_rate = group_config->phase_slew_rate;
-          phase_slew_rate_mode = group_config->phase_slew_rate_mode;
-          if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND) {
-            injection_phase_gr_scale = time_delta * TIME_S_IN_US;
-          } else if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION) {
-            injection_phase_gr_scale = time_delta / crankshaft_period;
-          } else {
-            injection_phase_gr_scale = 0.0f;
-          }
+            runtime_gr->enrichment_late_phase = enrichment_late_phase_gr;
 
-          for(ecu_bank_t b = 0; b < banks_count; b++) {
-            injection_phase_gr_requested = input_injection_phase_b[b] + group_config->phase_add + injection_phase_gr_add_rpm;
-            runtime_gr->phase_requested_banked[b] = injection_phase_gr_requested;
+            //TODO: implement late phase
 
-            slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && injection_phase_gr_scale > 0.0f) {
-              slew_adder_valid = true;
-              injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
-              injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
-              if(injection_phase_gr_accept_vs_requested > 0.0f) {
-                injection_phase_gr_adder = phase_slew_rate;
-              } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
-                injection_phase_gr_adder = -phase_slew_rate;
-              } else {
-                injection_phase_gr_adder = 0.0f;
+            phase_slew_rate = group_config->phase_slew_rate;
+            phase_slew_rate_mode = group_config->phase_slew_rate_mode;
+            if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_SECOND) {
+              injection_phase_gr_scale = time_delta * TIME_S_IN_US;
+            } else if(phase_slew_rate_mode == INJECTION_CONFIG_GROUP_PHASE_SLEW_RATE_MODE_BY_REVOLUTION) {
+              injection_phase_gr_scale = time_delta / crankshaft_period;
+            } else {
+              injection_phase_gr_scale = 0.0f;
+            }
+
+            for(ecu_bank_t b = 0; b < banks_count; b++) {
+              injection_phase_gr_requested = input_injection_phase_b[b] + group_config->phase_add + injection_phase_gr_add_rpm;
+              runtime_gr->phase_requested_banked[b] = injection_phase_gr_requested;
+
+              slew_adder_valid = false;
+              if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && injection_phase_gr_scale > 0.0f) {
+                slew_adder_valid = true;
+                injection_phase_gr_b[b] = runtime_gr->phase_banked[b];
+                injection_phase_gr_accept_vs_requested = injection_phase_gr_requested - injection_phase_gr_b[b];
+                if(injection_phase_gr_accept_vs_requested > 0.0f) {
+                  injection_phase_gr_adder = phase_slew_rate;
+                } else if(injection_phase_gr_accept_vs_requested < 0.0f) {
+                  injection_phase_gr_adder = -phase_slew_rate;
+                } else {
+                  injection_phase_gr_adder = 0.0f;
+                }
+
+                injection_phase_gr_adder *= injection_phase_gr_scale;
+
+                if(slew_adder_valid) {
+                  if(injection_phase_gr_adder == injection_phase_gr_adder) {
+                    if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
+                        (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
+                      injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
+                    }
+                  } else {
+                    slew_adder_valid = false;
+                  }
+                }
               }
-
-              injection_phase_gr_adder *= injection_phase_gr_scale;
 
               if(slew_adder_valid) {
-                if(injection_phase_gr_adder == injection_phase_gr_adder) {
-                  if((injection_phase_gr_accept_vs_requested > 0.0f && injection_phase_gr_adder > injection_phase_gr_accept_vs_requested) ||
-                      (injection_phase_gr_accept_vs_requested < 0.0f && injection_phase_gr_adder < injection_phase_gr_accept_vs_requested)) {
-                    injection_phase_gr_adder = injection_phase_gr_accept_vs_requested;
-                  }
-                } else {
-                  slew_adder_valid = false;
-                }
+                injection_phase_gr_b[b] += injection_phase_gr_adder;
+              } else {
+                injection_phase_gr_b[b] = injection_phase_gr_requested;
               }
             }
 
-            if(slew_adder_valid) {
-              injection_phase_gr_b[b] += injection_phase_gr_adder;
-            } else {
-              injection_phase_gr_b[b] = injection_phase_gr_requested;
+
+            for(ecu_bank_t b = 0; b < banks_count; b++) {
+              map_data_manifold_b[b].valid = false;
+              map_data_fuelramp_b[b].valid = false;
             }
-          }
 
-
-          for(ecu_bank_t b = 0; b < banks_count; b++) {
-            map_data_manifold_b[b].valid = false;
-            map_data_fuelramp_b[b].valid = false;
-          }
-
-          if(group_config->performance_fuel_pressure_manifold_source == INJECTION_CONFIG_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
-            map_type_manifold = group_config->performance_fuel_pressure_manifold_io_type;
-            map_instances_manifold[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_manifold];
-            if(map_instances_manifold[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
-              for(ecu_bank_t b = 0; b < banks_count; b++) {
-                map_instances_manifold[b] = banked_config->banks[b].common.sensor_map[map_type_manifold];
-                if(map_instances_manifold[b] < ECU_SENSOR_MAP_MAX) {
-                  err = ecu_sensors_map_get_value(map_instances_manifold[b], &map_data_manifold_b[b]);
-                  if(err != E_OK) {
+            if(group_config->performance_fuel_pressure_manifold_source == INJECTION_CONFIG_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+              map_type_manifold = group_config->performance_fuel_pressure_manifold_io_type;
+              map_instances_manifold[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_manifold];
+              if(map_instances_manifold[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
+                for(ecu_bank_t b = 0; b < banks_count; b++) {
+                  map_instances_manifold[b] = banked_config->banks[b].common.sensor_map[map_type_manifold];
+                  if(map_instances_manifold[b] < ECU_SENSOR_MAP_MAX) {
+                    err = ecu_sensors_map_get_value(map_instances_manifold[b], &map_data_manifold_b[b]);
+                    if(err != E_OK) {
+                      // TODO: error flag
+                    }
+                  } else {
+                    // TODO: error flag
+                  }
+                }
+              } else {
+                if(map_instances_manifold[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
+                  err = ecu_sensors_map_get_value(map_instances_manifold[ECU_BANK_1], &map_data_manifold_b[ECU_BANK_1]);
+                  if(err == E_OK) {
+                    for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
+                      map_instances_manifold[b] = map_instances_manifold[ECU_BANK_1];
+                      map_data_manifold_b[b] = map_data_manifold_b[ECU_BANK_1];
+                    }
+                  } else {
                     // TODO: error flag
                   }
                 } else {
                   // TODO: error flag
                 }
               }
-            } else {
-              if(map_instances_manifold[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
-                err = ecu_sensors_map_get_value(map_instances_manifold[ECU_BANK_1], &map_data_manifold_b[ECU_BANK_1]);
-                if(err == E_OK) {
-                  for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
-                    map_instances_manifold[b] = map_instances_manifold[ECU_BANK_1];
-                    map_data_manifold_b[b] = map_data_manifold_b[ECU_BANK_1];
+            }
+
+            if(group_config->performance_fuel_pressure_fuelramp_source == INJECTION_CONFIG_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
+              map_type_fuelramp = group_config->performance_fuel_pressure_fuelramp_io_type;
+              map_instances_fuelramp[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_fuelramp];
+              if(map_instances_fuelramp[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
+                for(ecu_bank_t b = 0; b < banks_count; b++) {
+                  map_instances_fuelramp[b] = banked_config->banks[b].common.sensor_map[map_type_fuelramp];
+                  if(map_instances_fuelramp[b] < ECU_SENSOR_MAP_MAX) {
+                    err = ecu_sensors_map_get_value(map_instances_fuelramp[b], &map_data_fuelramp_b[b]);
+                    if(err != E_OK) {
+                      // TODO: error flag
+                    }
+                  } else {
+                    // TODO: error flag
                   }
-                } else {
-                  // TODO: error flag
                 }
               } else {
-                // TODO: error flag
-              }
-            }
-          }
-
-          if(group_config->performance_fuel_pressure_fuelramp_source == INJECTION_CONFIG_GROUP_PERF_PRESSURE_SOURCE_RELATIVE_MAP) {
-            map_type_fuelramp = group_config->performance_fuel_pressure_fuelramp_io_type;
-            map_instances_fuelramp[ECU_BANK_1] = banked_config->global.common.sensor_map[map_type_fuelramp];
-            if(map_instances_fuelramp[ECU_BANK_1] >= ECU_SENSOR_MAP_MAX) {
-              for(ecu_bank_t b = 0; b < banks_count; b++) {
-                map_instances_fuelramp[b] = banked_config->banks[b].common.sensor_map[map_type_fuelramp];
-                if(map_instances_fuelramp[b] < ECU_SENSOR_MAP_MAX) {
-                  err = ecu_sensors_map_get_value(map_instances_fuelramp[b], &map_data_fuelramp_b[b]);
-                  if(err != E_OK) {
+                if(map_instances_fuelramp[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
+                  err = ecu_sensors_map_get_value(map_instances_fuelramp[ECU_BANK_1], &map_data_fuelramp_b[ECU_BANK_1]);
+                  if(err == E_OK) {
+                    for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
+                      map_instances_fuelramp[b] = map_instances_fuelramp[ECU_BANK_1];
+                      map_data_fuelramp_b[b] = map_data_fuelramp_b[ECU_BANK_1];
+                    }
+                  } else {
                     // TODO: error flag
                   }
                 } else {
                   // TODO: error flag
                 }
               }
-            } else {
-              if(map_instances_fuelramp[ECU_BANK_1] < ECU_SENSOR_MAP_MAX) {
-                err = ecu_sensors_map_get_value(map_instances_fuelramp[ECU_BANK_1], &map_data_fuelramp_b[ECU_BANK_1]);
-                if(err == E_OK) {
-                  for(ecu_bank_t b = ECU_BANK_2; b < banks_count; b++) {
-                    map_instances_fuelramp[b] = map_instances_fuelramp[ECU_BANK_1];
-                    map_data_fuelramp_b[b] = map_data_fuelramp_b[ECU_BANK_1];
-                  }
-                } else {
-                  // TODO: error flag
-                }
-              } else {
-                // TODO: error flag
+            }
+
+            injection_time_gr_mean = 0.0f;
+            injection_phase_gr_mean = 0.0f;
+            injector_input_pressure_gr_mean = 0.0f;
+            injector_output_pressure_gr_mean = 0.0f;
+            injector_pressure_diff_gr_mean = 0.0f;
+            for(ecu_bank_t b = 0; b < banks_count; b++) {
+              float temp_val = group_config->performance_fuelramp_nominal_pressure;
+              ramp_pressure_gr = temp_val;
+              injector_input_pressure_gr = temp_val;
+              injector_output_pressure_gr = 0.0f;
+
+              if(map_data_fuelramp_b[b].valid) {
+                temp_val = map_data_fuelramp_b[b].pressure;
+                temp_val = CLAMP(temp_val,
+                    group_config->performance_fuel_pressure_fuelramp_clamp_min,
+                    group_config->performance_fuel_pressure_fuelramp_clamp_max);
+                ramp_pressure_gr += temp_val - 1.0f;
+                injector_input_pressure_gr += temp_val;
               }
-            }
-          }
+              if(map_data_manifold_b[b].valid) {
+                temp_val = map_data_manifold_b[b].pressure;
+                temp_val = CLAMP(temp_val,
+                    group_config->performance_fuel_pressure_manifold_clamp_min,
+                    group_config->performance_fuel_pressure_manifold_clamp_max);
+                ramp_pressure_gr -= temp_val - 1.0f;
+                injector_output_pressure_gr = temp_val;
+              }
 
-          injection_time_gr_mean = 0.0f;
-          injection_phase_gr_mean = 0.0f;
-          injector_input_pressure_gr_mean = 0.0f;
-          injector_output_pressure_gr_mean = 0.0f;
-          injector_pressure_diff_gr_mean = 0.0f;
-          for(ecu_bank_t b = 0; b < banks_count; b++) {
-            float temp_val = group_config->performance_fuelramp_nominal_pressure;
-            ramp_pressure_gr = temp_val;
-            injector_input_pressure_gr = temp_val;
-            injector_output_pressure_gr = 0.0f;
+              temp_val = ramp_pressure_gr;
+              performance_mult_gr = fast_sqrt(temp_val / group_config->performance_static_fuel_pressure);
+              injector_pressure_diff_gr = temp_val;
 
-            if(map_data_fuelramp_b[b].valid) {
-              temp_val = map_data_fuelramp_b[b].pressure;
-              temp_val = CLAMP(temp_val,
-                  group_config->performance_fuel_pressure_fuelramp_clamp_min,
-                  group_config->performance_fuel_pressure_fuelramp_clamp_max);
-              ramp_pressure_gr += temp_val - 1.0f;
-              injector_input_pressure_gr += temp_val;
-            }
-            if(map_data_manifold_b[b].valid) {
-              temp_val = map_data_manifold_b[b].pressure;
-              temp_val = CLAMP(temp_val,
-                  group_config->performance_fuel_pressure_manifold_clamp_min,
-                  group_config->performance_fuel_pressure_manifold_clamp_max);
-              ramp_pressure_gr -= temp_val - 1.0f;
-              injector_output_pressure_gr = temp_val;
-            }
+              injector_input_pressure_gr_mean += injector_input_pressure_gr;
+              injector_output_pressure_gr_mean += injector_output_pressure_gr;
+              injector_pressure_diff_gr_mean += injector_pressure_diff_gr;
 
-            temp_val = ramp_pressure_gr;
-            performance_mult_gr = fast_sqrt(temp_val / group_config->performance_static_fuel_pressure);
-            injector_pressure_diff_gr = temp_val;
+              runtime_gr->injector_input_pressure[b] = injector_input_pressure_gr;
+              runtime_gr->injector_output_pressure[b] = injector_output_pressure_gr;
+              runtime_gr->injector_pressure_diff[b] = injector_pressure_diff_gr;
 
-            injector_input_pressure_gr_mean += injector_input_pressure_gr;
-            injector_output_pressure_gr_mean += injector_output_pressure_gr;
-            injector_pressure_diff_gr_mean += injector_pressure_diff_gr;
+              performance_initial_us_gr = group_config->performance_static;
+              performance_initial_us_gr *= 1.6666667e-5f;
+              performance_initial_us_gr *= performance_mult_gr;
 
-            runtime_gr->injector_input_pressure[b] = injector_input_pressure_gr;
-            runtime_gr->injector_output_pressure[b] = injector_output_pressure_gr;
-            runtime_gr->injector_pressure_diff[b] = injector_pressure_diff_gr;
-
-            performance_initial_us_gr = group_config->performance_static;
-            performance_initial_us_gr *= 1.6666667e-5f;
-            performance_initial_us_gr *= performance_mult_gr;
-
-            if(group_config->performance_static_units == INJECTION_CONFIG_GROUP_PERF_UNITS_CC) {
-              injection_flow_us_gr = performance_initial_us_gr;
-              injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
-            } else {
-              injection_mass_us_gr = performance_initial_us_gr;
-              injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
-            }
-
-            injection_mass_gr = input_injection_mass_b[b];
-
-            if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
-              injection_mass_gr -= group_config->inject_mass_reduction;
-              injection_time_gr_b[b] = injection_mass_gr / injection_mass_us_gr;
-            } else {
-              injection_time_gr_b[b] = 0.0f;
-            }
-
-            if(injection_time_gr_b[b] < 0.0f) {
-              injection_time_gr_b[b] = 0.0f;
-            }
-            injection_time_gr_mean += injection_time_gr_b[b];
-            injection_phase_gr_mean += injection_phase_gr_b[b];
-            runtime_gr->phase_banked[b] = injection_phase_gr_b[b];
-          }
-
-          injection_time_gr_mean *= banks_count_r;
-          injection_phase_gr_mean *= banks_count_r;
-          injector_input_pressure_gr_mean *= banks_count_r;
-          injector_output_pressure_gr_mean *= banks_count_r;
-          injector_pressure_diff_gr_mean *= banks_count_r;
-
-          runtime_gr->time_inject_mean = injection_time_gr_mean;
-          runtime_gr->phase_mean = injection_phase_gr_mean;
-          runtime_gr->injector_input_pressure_mean = injector_input_pressure_gr_mean;
-          runtime_gr->injector_output_pressure_mean = injector_output_pressure_gr_mean;
-          runtime_gr->injector_pressure_diff_mean = injector_pressure_diff_gr_mean;
-
-          runtime_gr->initialized = true;
-
-          switch(config->uspd_source) {
-            default:
-            case INJECTION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
-              us_per_degree = us_per_degree_pulsed;
-              break;
-            case INJECTION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
-              us_per_degree = us_per_degree_revolution;
-              break;
-          }
-
-          needtoclear = false;
-          sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
-
-          group_mode = group_config->mode;
-          if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
-            if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
-                group_mode == INJECTION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
-              sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-            } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
-                group_mode == INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_ONLY) {
-              sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
-            } else if(group_mode == INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-              if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-                sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+              if(group_config->performance_static_units == INJECTION_CONFIG_GROUP_PERF_UNITS_CC) {
+                injection_flow_us_gr = performance_initial_us_gr;
+                injection_mass_us_gr = injection_flow_us_gr * group_config->performance_fuel_mass_per_cc * 0.001f;
               } else {
+                injection_mass_us_gr = performance_initial_us_gr;
+                injection_flow_us_gr = injection_mass_us_gr / group_config->performance_fuel_mass_per_cc * 0.001f;
+              }
+
+              injection_mass_gr = input_injection_mass_b[b];
+
+              if(injection_mass_gr >= group_config->inject_mass_low_threshold) {
+                injection_mass_gr -= group_config->inject_mass_reduction;
+                injection_time_gr_b[b] = injection_mass_gr / injection_mass_us_gr;
+              } else {
+                injection_time_gr_b[b] = 0.0f;
+              }
+
+              if(injection_time_gr_b[b] < 0.0f) {
+                injection_time_gr_b[b] = 0.0f;
+              }
+              injection_time_gr_mean += injection_time_gr_b[b];
+              injection_phase_gr_mean += injection_phase_gr_b[b];
+              runtime_gr->phase_banked[b] = injection_phase_gr_b[b];
+            }
+
+            injection_time_gr_mean *= banks_count_r;
+            injection_phase_gr_mean *= banks_count_r;
+            injector_input_pressure_gr_mean *= banks_count_r;
+            injector_output_pressure_gr_mean *= banks_count_r;
+            injector_pressure_diff_gr_mean *= banks_count_r;
+
+            runtime_gr->time_inject_mean = injection_time_gr_mean;
+            runtime_gr->phase_mean = injection_phase_gr_mean;
+            runtime_gr->injector_input_pressure_mean = injector_input_pressure_gr_mean;
+            runtime_gr->injector_output_pressure_mean = injector_output_pressure_gr_mean;
+            runtime_gr->injector_pressure_diff_mean = injector_pressure_diff_gr_mean;
+
+            runtime_gr->initialized = true;
+
+            switch(config->uspd_source) {
+              default:
+              case INJECTION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
+                us_per_degree = us_per_degree_pulsed;
+                break;
+              case INJECTION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
+                us_per_degree = us_per_degree_revolution;
+                break;
+            }
+
+            needtoclear = false;
+            sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
+
+            group_mode = group_config->mode;
+            if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+              if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
+                  group_mode == INJECTION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
                 sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+              } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
+                  group_mode == INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_ONLY) {
+                sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+              } else if(group_mode == INJECTION_CONFIG_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+                  sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+                } else {
+                  sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+                }
+              } else {
+                needtoclear = true;
               }
             } else {
               needtoclear = true;
             }
-          } else {
-            needtoclear = true;
-          }
 
-          if(runtime_gr->sequentialed_mode != sequentialed_mode) {
-            runtime_gr->sequentialed_mode = sequentialed_mode;
-            needtoclear = true;
-          }
+            if(runtime_gr->sequentialed_mode != sequentialed_mode) {
+              runtime_gr->sequentialed_mode = sequentialed_mode;
+              needtoclear = true;
+            }
 
-          dutycycle_gr_max = 0;
-          dutycycle_gr_mean = 0;
-          dutycycle_gr_count = 0;
+            dutycycle_gr_max = 0;
+            dutycycle_gr_mean = 0;
+            dutycycle_gr_count = 0;
 
-          if(!needtoclear) {
+            if(!needtoclear) {
 
-            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-              cy_config = &group_config->cylinders[cy];
-              runtime_cy = &runtime_gr->cylinders[cy];
-              if(!cy_config->disabled) {
+              for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+                cy_config = &group_config->cylinders[cy];
+                runtime_cy = &runtime_gr->cylinders[cy];
+                if(!cy_config->disabled) {
 
-                injection_phase_cy_add = cy_config->phase_add;
+                  injection_phase_cy_add = cy_config->phase_add;
 
-                cy_opposite = calibration_config->cylinders.cylinders[cy].cy_opposed;
-                if(cy_opposite < ECU_CYLINDER_MAX && cy != cy_opposite &&
-                    sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR) {
-                  if(cy_opposite > cy && !group_config->cylinders[cy_opposite].disabled) {
-                    injection_phase_cy_add = MIN(injection_phase_cy_add, group_config->cylinders[cy_opposite].phase_add);
-                  } else if(group_config->cylinders[cy_opposite].output_pin == group_config->cylinders[cy].output_pin) {
-                    if(runtime_cy->initialized) {
-                      memset(runtime_cy, 0, sizeof(*runtime_cy));
+                  cy_opposite = calibration_config->cylinders.cylinders[cy].cy_opposed;
+                  if(cy_opposite < ECU_CYLINDER_MAX && cy != cy_opposite &&
+                      sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR) {
+                    if(cy_opposite > cy && !group_config->cylinders[cy_opposite].disabled) {
+                      injection_phase_cy_add = MIN(injection_phase_cy_add, group_config->cylinders[cy_opposite].phase_add);
+                    } else if(group_config->cylinders[cy_opposite].output_pin == group_config->cylinders[cy].output_pin) {
+                      if(runtime_cy->initialized) {
+                        memset(runtime_cy, 0, sizeof(*runtime_cy));
+                      }
+                      continue;
                     }
-                    continue;
                   }
-                }
 
-                bank_cy = calibration_config->cylinders.cylinders[cy].bank;
-                injection_phase_cy = injection_phase_gr_b[bank_cy] + injection_phase_cy_add;
-                crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
-                position_cy = crankshaft_data->sensor_data.current_position;
-                output_valid = false;
+                  bank_cy = calibration_config->cylinders.cylinders[cy].bank;
+                  injection_phase_cy = injection_phase_gr_b[bank_cy] + injection_phase_cy_add;
+                  crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
+                  position_cy = crankshaft_data->sensor_data.current_position;
+                  output_valid = false;
 
-                if(runtime_ignition != NULL) {
-                  ignition_acceptance_cy = &runtime_ignition->cylinders[cy].ignition_acceptance;
-                } else {
-                  ignition_acceptance_cy = NULL;
-                }
+                  if(runtime_ignition != NULL) {
+                    ignition_acceptance_cy = &runtime_ignition->cylinders[cy].ignition_acceptance;
+                  } else {
+                    ignition_acceptance_cy = NULL;
+                  }
 
-                lag_time_cy = lag_time_gr;
-                lag_time_cy *= cy_config->performance_dynamic_mul;
-                lag_time_cy += cy_config->performance_dynamic_add;
+                  lag_time_cy = lag_time_gr;
+                  lag_time_cy *= cy_config->performance_dynamic_mul;
+                  lag_time_cy += cy_config->performance_dynamic_add;
 
-                injection_time_cy = injection_time_gr_b[bank_cy];
-                injection_time_cy *= cy_config->performance_static_mul;
-                dutycycle_period = crankshaft->sensor_data.period;
+                  injection_time_cy = injection_time_gr_b[bank_cy];
+                  injection_time_cy *= cy_config->performance_static_mul;
+                  dutycycle_period = crankshaft->sensor_data.period;
 
-                if(injection_time_cy > 0.0f) {
+                  if(injection_time_cy > 0.0f) {
+                    if(sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
+                      injection_time_cy *= group_config->performance_static_seq_mul;
+                      injection_time_cy += group_config->performance_static_seq_add;
+                      injection_time_cy += cy_config->performance_static_add;
+                      dutycycle_period *= 2.0f;
+                    } else {
+                      injection_time_cy *= group_config->performance_static_semiseq_mul;
+                      injection_time_cy += group_config->performance_static_semiseq_add;
+                      injection_time_cy += cy_config->performance_static_add;
+                      injection_time_cy *= 0.5f;
+                    }
+                  }
+
+                  if(injection_time_cy > 0.0f) {
+                    pulse_time_cy = lag_time_cy + injection_time_cy;
+                    dutycycle_cy = pulse_time_cy / dutycycle_period;
+                  } else {
+                    pulse_time_cy = 0.0f;
+                    dutycycle_cy = 0.0f;
+                  }
+
+                  if(dutycycle_cy > dutycycle_gr_max) {
+                    dutycycle_gr_max = dutycycle_cy;
+                  }
+                  dutycycle_gr_mean += dutycycle_cy;
+                  dutycycle_gr_count++;
+
                   if(sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
-                    injection_time_cy *= group_config->performance_static_seq_mul;
-                    injection_time_cy += group_config->performance_static_seq_add;
-                    injection_time_cy += cy_config->performance_static_add;
-                    dutycycle_period *= 2.0f;
+                    degrees_per_cycle = 720.0f;
                   } else {
-                    injection_time_cy *= group_config->performance_static_semiseq_mul;
-                    injection_time_cy += group_config->performance_static_semiseq_add;
-                    injection_time_cy += cy_config->performance_static_add;
-                    injection_time_cy *= 0.5f;
+                    degrees_per_cycle = 360.0f;
                   }
-                }
+                  runtime_cy->degrees_per_cycle = degrees_per_cycle;
+                  signal_prepare_advance_cy = signal_prepare_advance;
 
-                if(injection_time_cy > 0.0f) {
-                  pulse_time_cy = lag_time_cy + injection_time_cy;
-                  dutycycle_cy = pulse_time_cy / dutycycle_period;
-                } else {
-                  pulse_time_cy = 0.0f;
-                  dutycycle_cy = 0.0f;
-                }
-
-                if(dutycycle_cy > dutycycle_gr_max) {
-                  dutycycle_gr_max = dutycycle_cy;
-                }
-                dutycycle_gr_mean += dutycycle_cy;
-                dutycycle_gr_count++;
-
-                if(sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
-                  degrees_per_cycle = 720.0f;
-                } else {
-                  degrees_per_cycle = 360.0f;
-                }
-                runtime_cy->degrees_per_cycle = degrees_per_cycle;
-                signal_prepare_advance_cy = signal_prepare_advance;
-
-                if(group_config->phase_mode == INJECTION_CONFIG_GROUP_PHASE_MODE_ENDING) {
-                  signal_prepare_advance_cy += pulse_time_cy / us_per_degree;
-                }
-
-                while(injection_phase_cy > degrees_per_cycle * 0.5f) {
-                  injection_phase_cy -= degrees_per_cycle;
-                }
-
-                if(position_cy < injection_phase_cy) {
-                  degrees_before_inject_cur = -position_cy + injection_phase_cy;
-                } else {
-                  degrees_before_inject_cur = degrees_per_cycle - position_cy + injection_phase_cy;
-                }
-                degrees_before_inject_prev = runtime_cy->degrees_before_inject;
-
-                if(runtime_cy->initialized) {
-                  if(degrees_before_inject_cur - degrees_before_inject_prev > 0.0f &&
-                      degrees_before_inject_cur - degrees_before_inject_prev < 180.0f) {
-                    degrees_before_inject_cur = degrees_before_inject_prev;
+                  if(group_config->phase_mode == INJECTION_CONFIG_GROUP_PHASE_MODE_ENDING) {
+                    signal_prepare_advance_cy += pulse_time_cy / us_per_degree;
                   }
 
-                  if(!runtime_cy->scheduled && !runtime_cy->injected) {
-                    degrees_before_prepare = degrees_before_inject_cur - signal_prepare_advance_cy;
-                    if(degrees_before_prepare < 0.0f) {
-                      runtime_cy->phase = injection_phase_cy;
-                      runtime_cy->time_lag = lag_time_cy;
-                      runtime_cy->time_inject = injection_time_cy;
+                  while(injection_phase_cy > degrees_per_cycle * 0.5f) {
+                    injection_phase_cy -= degrees_per_cycle;
+                  }
 
-                      if(dutycycle_cy > group_config->dutycycle_warning) {
-                        // TODO: warning!
-                      }
-                      if(dutycycle_cy > group_config->dutycycle_limit) {
-                        runtime_cy->dutycycle_limit_flag = true;
-                        // TODO: Limit warning!
-                        if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF) {
-                          pulse_time_cy = 0;
-                        } else if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP) {
-                          pulse_time_cy = dutycycle_period * group_config->dutycycle_limit;
-                        }
-                      } else {
-                        runtime_cy->dutycycle_limit_flag = false;
-                      }
+                  if(position_cy < injection_phase_cy) {
+                    degrees_before_inject_cur = -position_cy + injection_phase_cy;
+                  } else {
+                    degrees_before_inject_cur = degrees_per_cycle - position_cy + injection_phase_cy;
+                  }
+                  degrees_before_inject_prev = runtime_cy->degrees_before_inject;
 
-                      runtime_cy->time_pulse = pulse_time_cy;
-                      runtime_cy->dutycycle = dutycycle_cy;
-
-                      if(pulse_time_cy) {
-                        time_to_activate = crankshaft_data->sensor_data.current.timestamp +
-                            roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
-                        time_to_inject = time_to_activate + pulse_time_cy;
-
-                        err = timing_pulse_schedule(cy_config->output_pin,
-                            time_to_activate, time_to_inject,
-                            TIMING_LATE_POLICY_KEEP_WIDTH);
-                        BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-                      }
-
-                      runtime_cy->scheduled = true;
-
-                      if(runtime_ignition != NULL && ignition_acceptance_cy != NULL) {
-                        *ignition_acceptance_cy = runtime_ignition->input_banked[bank_cy].ignition_advance;
-                      }
+                  if(runtime_cy->initialized) {
+                    if(degrees_before_inject_cur - degrees_before_inject_prev > 0.0f &&
+                        degrees_before_inject_cur - degrees_before_inject_prev < 180.0f) {
+                      degrees_before_inject_cur = degrees_before_inject_prev;
                     }
-                  } else {
-                    if(degrees_before_inject_prev - degrees_before_inject_cur < -90.0f) {
-                      if(runtime_cy->scheduled) {
-                        runtime_cy->injected = true;
-                        runtime_cy->scheduled = false;
+
+                    if(!runtime_cy->scheduled && !runtime_cy->injected) {
+                      degrees_before_prepare = degrees_before_inject_cur - signal_prepare_advance_cy;
+                      if(degrees_before_prepare < 0.0f) {
+                        runtime_cy->phase = injection_phase_cy;
+                        runtime_cy->time_lag = lag_time_cy;
+                        runtime_cy->time_inject = injection_time_cy;
+
+                        if(dutycycle_cy > group_config->dutycycle_warning) {
+                          // TODO: warning!
+                        }
+                        if(dutycycle_cy > group_config->dutycycle_limit) {
+                          runtime_cy->dutycycle_limit_flag = true;
+                          // TODO: Limit warning!
+                          if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF) {
+                            pulse_time_cy = 0;
+                          } else if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP) {
+                            pulse_time_cy = dutycycle_period * group_config->dutycycle_limit;
+                          }
+                        } else {
+                          runtime_cy->dutycycle_limit_flag = false;
+                        }
+
+                        runtime_cy->time_pulse = pulse_time_cy;
+                        runtime_cy->dutycycle = dutycycle_cy;
+
+                        if(pulse_time_cy) {
+                          time_to_activate = crankshaft_data->sensor_data.current.timestamp +
+                              roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
+                          time_to_inject = time_to_activate + pulse_time_cy;
+
+                          err = timing_pulse_schedule(cy_config->output_pin,
+                              time_to_activate, time_to_inject,
+                              TIMING_LATE_POLICY_KEEP_WIDTH);
+                          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                        }
+
+                        runtime_cy->scheduled = true;
+
+                        if(runtime_ignition != NULL && ignition_acceptance_cy != NULL) {
+                          *ignition_acceptance_cy = runtime_ignition->input_banked[bank_cy].ignition_advance;
+                        }
                       }
                     } else {
-                      runtime_cy->injected = false;
+                      if(degrees_before_inject_prev - degrees_before_inject_cur < -90.0f) {
+                        if(runtime_cy->scheduled) {
+                          runtime_cy->injected = true;
+                          runtime_cy->scheduled = false;
+                        }
+                      } else {
+                        runtime_cy->injected = false;
+                      }
                     }
+                  } else {
+                    runtime_cy->initialized = true;
+                    runtime_cy->scheduled = false;
+                    runtime_cy->injected = true;
+                  }
+
+                  runtime_cy->degrees_before_inject = degrees_before_inject_cur;
+
+                  if(output_valid) {
+                    err = ecu_config_gpio_output_write(cy_config->output_pin, output_value);
+                    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
                   }
                 } else {
-                  runtime_cy->initialized = true;
-                  runtime_cy->scheduled = false;
-                  runtime_cy->injected = true;
-                }
-
-                runtime_cy->degrees_before_inject = degrees_before_inject_cur;
-
-                if(output_valid) {
-                  err = ecu_config_gpio_output_write(cy_config->output_pin, output_value);
-                  BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-                }
-              } else {
-                if(runtime_cy->initialized) {
-                  memset(runtime_cy, 0, sizeof(*runtime_cy));
+                  if(runtime_cy->initialized) {
+                    memset(runtime_cy, 0, sizeof(*runtime_cy));
+                  }
                 }
               }
+            } else {
+              for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+                runtime_cy = &runtime_gr->cylinders[cy];
+                memset(runtime_cy, 0, sizeof(*runtime_cy));
+              }
             }
-          } else {
-            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-              runtime_cy = &runtime_gr->cylinders[cy];
-              memset(runtime_cy, 0, sizeof(*runtime_cy));
+
+            if(dutycycle_gr_count > 0) {
+              dutycycle_gr_mean /= dutycycle_gr_count;
+            }
+            runtime_gr->dutycycle_mean = dutycycle_gr_mean;
+            runtime_gr->dutycycle_max = dutycycle_gr_max;
+
+            runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
+          }
+        } else {
+          if(runtime_gr->initialized) {
+            memset(runtime_gr, 0, sizeof(*runtime_gr));
+          }
+          for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+            if(group_config->cylinders[cy].disabled == false) {
+              err = timing_pulse_clean(group_config->cylinders[cy].output_pin);
+              if(err != E_OK) {
+                // TODO: error handling
+              }
             }
           }
-
-          if(dutycycle_gr_count > 0) {
-            dutycycle_gr_mean /= dutycycle_gr_count;
-          }
-          runtime_gr->dutycycle_mean = dutycycle_gr_mean;
-          runtime_gr->dutycycle_max = dutycycle_gr_max;
-
-          runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
         }
       } else {
         if(runtime_gr->initialized) {

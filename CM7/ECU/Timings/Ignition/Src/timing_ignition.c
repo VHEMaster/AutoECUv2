@@ -236,249 +236,263 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
     for(ignition_config_group_t gr = 0; gr < IGNITION_CONFIG_GROUP_MAX; gr++) {
       group_config = &config->groups[gr];
       runtime_gr = &runtime->groups[gr];
-      if(group_config->enabled && input_valid) {
-        process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
-        process_update_trigger_counter_gr_1of3 = process_update_trigger_counter_gr % 3;
+      if(group_config->enabled) {
+        if(input_valid) {
+          process_update_trigger_counter_gr = runtime->process_update_trigger_counter;
+          process_update_trigger_counter_gr_1of3 = process_update_trigger_counter_gr % 3;
 
-        if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
-          process_update_trigger = true;
-        } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_1ST) {
-          process_update_trigger = process_update_trigger_counter_gr_1of3 == 0;
-        } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_2ND) {
-          process_update_trigger = process_update_trigger_counter_gr_1of3 == 1;
-        } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_3RD) {
-          process_update_trigger = process_update_trigger_counter_gr_1of3 == 2;
-        }
-
-        if(process_update_trigger == true)
-        {
-          saturation_time_table = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_saturation_time.input,
-              group_config->voltage_to_saturation_time.output, group_config->voltage_to_saturation_time.items);
-          runtime_gr->saturation_time_table = saturation_time_table;
-
-          saturation_rpm_mult_table = math_interpolate_1d_direct(crankshaft->sensor_data.rpm, group_config->rpm_to_saturation_mult.input,
-              group_config->rpm_to_saturation_mult.output, group_config->rpm_to_saturation_mult.items);
-          runtime_gr->saturation_rpm_mult_table = saturation_rpm_mult_table;
-
-          saturation_time = saturation_time_table * saturation_rpm_mult_table;
-          runtime_gr->saturation_time = saturation_time;
-
-          us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
-          us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
-
-          advance_slew_rate_mode = group_config->advance_slew_rate_mode;
-          if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
-            ignition_advance_gr_scale = time_delta * TIME_S_IN_US;
-          } else if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION) {
-            ignition_advance_gr_scale = time_delta / crankshaft_period;
-          } else {
-            ignition_advance_gr_scale = 0;
+          if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_ALWAYS) {
+            process_update_trigger = true;
+          } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_1ST) {
+            process_update_trigger = process_update_trigger_counter_gr_1of3 == 0;
+          } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_2ND) {
+            process_update_trigger = process_update_trigger_counter_gr_1of3 == 1;
+          } else if(group_config->process_update_trigger == IGNITION_CONFIG_GROUP_PROCESS_UPDATE_TRIGGER_1OF3_3RD) {
+            process_update_trigger = process_update_trigger_counter_gr_1of3 == 2;
           }
 
-          ignition_advance_gr_mean = 0;
-          ignition_advance_gr_requested_mean = 0;
-          for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-            ignition_advance_gr_requested = runtime_gr->advance_input_cy[cy] + group_config->advance_add;
-            ignition_advance_gr_requested_mean += ignition_advance_gr_requested;
-            runtime_gr->advance_requested_cy[cy] = ignition_advance_gr_requested;
-            slew_adder_valid = false;
-            if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && ignition_advance_gr_scale > 0.0f) {
-              slew_adder_valid = true;
-              ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
-              ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested - ignition_advance_gr_cy[cy];
-              if(ignition_advance_gr_accept_vs_requested > 0.0f) {
-                ignition_advance_gr_adder = group_config->advance_slew_rate_earlier;
-              } else if(ignition_advance_gr_accept_vs_requested < 0.0f) {
-                ignition_advance_gr_adder = -group_config->advance_slew_rate_later;
-              } else {
-                ignition_advance_gr_adder = 0.0f;
-              }
+          if(process_update_trigger == true)
+          {
+            saturation_time_table = math_interpolate_1d_direct(power_voltage, group_config->voltage_to_saturation_time.input,
+                group_config->voltage_to_saturation_time.output, group_config->voltage_to_saturation_time.items);
+            runtime_gr->saturation_time_table = saturation_time_table;
 
-              ignition_advance_gr_adder *= ignition_advance_gr_scale;
+            saturation_rpm_mult_table = math_interpolate_1d_direct(crankshaft->sensor_data.rpm, group_config->rpm_to_saturation_mult.input,
+                group_config->rpm_to_saturation_mult.output, group_config->rpm_to_saturation_mult.items);
+            runtime_gr->saturation_rpm_mult_table = saturation_rpm_mult_table;
 
-              if(slew_adder_valid) {
-                if(ignition_advance_gr_adder == ignition_advance_gr_adder) {
-                  if((ignition_advance_gr_accept_vs_requested > 0.0f && ignition_advance_gr_adder > ignition_advance_gr_accept_vs_requested) ||
-                      (ignition_advance_gr_accept_vs_requested < 0.0f && ignition_advance_gr_adder < ignition_advance_gr_accept_vs_requested)) {
-                    ignition_advance_gr_adder = ignition_advance_gr_accept_vs_requested;
-                  }
+            saturation_time = saturation_time_table * saturation_rpm_mult_table;
+            runtime_gr->saturation_time = saturation_time;
+
+            us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
+            us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
+
+            advance_slew_rate_mode = group_config->advance_slew_rate_mode;
+            if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
+              ignition_advance_gr_scale = time_delta * TIME_S_IN_US;
+            } else if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_REVOLUTION) {
+              ignition_advance_gr_scale = time_delta / crankshaft_period;
+            } else {
+              ignition_advance_gr_scale = 0;
+            }
+
+            ignition_advance_gr_mean = 0;
+            ignition_advance_gr_requested_mean = 0;
+            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+              ignition_advance_gr_requested = runtime_gr->advance_input_cy[cy] + group_config->advance_add;
+              ignition_advance_gr_requested_mean += ignition_advance_gr_requested;
+              runtime_gr->advance_requested_cy[cy] = ignition_advance_gr_requested;
+              slew_adder_valid = false;
+              if(runtime_gr->initialized && crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID && ignition_advance_gr_scale > 0.0f) {
+                slew_adder_valid = true;
+                ignition_advance_gr_cy[cy] = runtime_gr->advance_cy[cy];
+                ignition_advance_gr_accept_vs_requested = ignition_advance_gr_requested - ignition_advance_gr_cy[cy];
+                if(ignition_advance_gr_accept_vs_requested > 0.0f) {
+                  ignition_advance_gr_adder = group_config->advance_slew_rate_earlier;
+                } else if(ignition_advance_gr_accept_vs_requested < 0.0f) {
+                  ignition_advance_gr_adder = -group_config->advance_slew_rate_later;
                 } else {
-                  slew_adder_valid = false;
+                  ignition_advance_gr_adder = 0.0f;
+                }
+
+                ignition_advance_gr_adder *= ignition_advance_gr_scale;
+
+                if(slew_adder_valid) {
+                  if(ignition_advance_gr_adder == ignition_advance_gr_adder) {
+                    if((ignition_advance_gr_accept_vs_requested > 0.0f && ignition_advance_gr_adder > ignition_advance_gr_accept_vs_requested) ||
+                        (ignition_advance_gr_accept_vs_requested < 0.0f && ignition_advance_gr_adder < ignition_advance_gr_accept_vs_requested)) {
+                      ignition_advance_gr_adder = ignition_advance_gr_accept_vs_requested;
+                    }
+                  } else {
+                    slew_adder_valid = false;
+                  }
                 }
               }
-            }
 
-            if(slew_adder_valid) {
-              ignition_advance_gr_cy[cy] += ignition_advance_gr_adder;
-            } else {
-              ignition_advance_gr_cy[cy] = ignition_advance_gr_requested;
-            }
-
-            runtime_gr->advance_cy[cy] = ignition_advance_gr_cy[cy];
-            ignition_advance_gr_mean += ignition_advance_gr_cy[cy];
-          }
-          ignition_advance_gr_requested_mean /= cylinders_count;
-          ignition_advance_gr_mean /= cylinders_count;
-          runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
-          runtime_gr->advance_mean = ignition_advance_gr_mean;
-
-          runtime_gr->initialized = true;
-
-          switch(config->uspd_source) {
-            default:
-            case IGNITION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
-              us_per_degree = us_per_degree_pulsed;
-              break;
-            case IGNITION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
-              us_per_degree = us_per_degree_revolution;
-              break;
-          }
-
-          signal_prepare_advance_gr = signal_prepare_advance;
-          signal_prepare_advance_gr += saturation_time / us_per_degree;
-
-          needtoclear = false;
-          distributor = false;
-          sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
-
-          group_mode = group_config->mode;
-          if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
-            if(group_mode == IGNITION_CONFIG_GROUP_MODE_DISTRIBUTOR) {
-              distributor = true;
-              sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-            } else if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
-                group_mode == IGNITION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
-              sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
-            } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
-                group_mode == IGNITION_CONFIG_GROUP_MODE_SEQUENTIAL_ONLY) {
-              sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
-            } else if(group_mode == IGNITION_CONFIG_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
-              if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
-                sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+              if(slew_adder_valid) {
+                ignition_advance_gr_cy[cy] += ignition_advance_gr_adder;
               } else {
+                ignition_advance_gr_cy[cy] = ignition_advance_gr_requested;
+              }
+
+              runtime_gr->advance_cy[cy] = ignition_advance_gr_cy[cy];
+              ignition_advance_gr_mean += ignition_advance_gr_cy[cy];
+            }
+            ignition_advance_gr_requested_mean /= cylinders_count;
+            ignition_advance_gr_mean /= cylinders_count;
+            runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
+            runtime_gr->advance_mean = ignition_advance_gr_mean;
+
+            runtime_gr->initialized = true;
+
+            switch(config->uspd_source) {
+              default:
+              case IGNITION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
+                us_per_degree = us_per_degree_pulsed;
+                break;
+              case IGNITION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
+                us_per_degree = us_per_degree_revolution;
+                break;
+            }
+
+            signal_prepare_advance_gr = signal_prepare_advance;
+            signal_prepare_advance_gr += saturation_time / us_per_degree;
+
+            needtoclear = false;
+            distributor = false;
+            sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
+
+            group_mode = group_config->mode;
+            if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID) {
+              if(group_mode == IGNITION_CONFIG_GROUP_MODE_DISTRIBUTOR) {
+                distributor = true;
                 sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+              } else if(crankshaft_mode >= TIMING_CRANKSHAFT_MODE_VALID &&
+                  group_mode == IGNITION_CONFIG_GROUP_MODE_SEMISEQUENTIAL_ONLY) {
+                sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+              } else if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED &&
+                  group_mode == IGNITION_CONFIG_GROUP_MODE_SEQUENTIAL_ONLY) {
+                sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+              } else if(group_mode == IGNITION_CONFIG_GROUP_MODE_SEQUENTIAL_AND_SEMISEQUENTIAL) {
+                if(crankshaft_mode == TIMING_CRANKSHAFT_MODE_VALID_PHASED) {
+                  sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEQUENTIAL;
+                } else {
+                  sequentialed_mode = TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR;
+                }
+              } else {
+                needtoclear = true;
               }
             } else {
               needtoclear = true;
             }
-          } else {
-            needtoclear = true;
-          }
 
-          if(runtime_gr->sequentialed_mode != sequentialed_mode ||
-              runtime_gr->distributor != distributor) {
-            runtime_gr->sequentialed_mode = sequentialed_mode;
-            runtime_gr->distributor = distributor;
-            needtoclear = true;
-          }
+            if(runtime_gr->sequentialed_mode != sequentialed_mode ||
+                runtime_gr->distributor != distributor) {
+              runtime_gr->sequentialed_mode = sequentialed_mode;
+              runtime_gr->distributor = distributor;
+              needtoclear = true;
+            }
 
-          //TODO: IMPLEMENT THE DISTRIBUTOR
-          if(distributor) {
-            needtoclear = true;
-          }
+            //TODO: IMPLEMENT THE DISTRIBUTOR
+            if(distributor) {
+              needtoclear = true;
+            }
 
-          if(!needtoclear) {
-            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-              bank_cy = calibration_config->cylinders.cylinders[cy].bank;
-              runtime_cy = &runtime_gr->cylinders[cy];
-              ignition_acceptance_gr_cy = &runtime_cy->ignition_acceptance;
-              if(!group_config->cylinders[cy].disabled) {
-                ignition_advance_cy_add = group_config->cylinders[cy].advance_add;
+            if(!needtoclear) {
+              for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+                bank_cy = calibration_config->cylinders.cylinders[cy].bank;
+                runtime_cy = &runtime_gr->cylinders[cy];
+                ignition_acceptance_gr_cy = &runtime_cy->ignition_acceptance;
+                if(!group_config->cylinders[cy].disabled) {
+                  ignition_advance_cy_add = group_config->cylinders[cy].advance_add;
 
-                cy_opposite = calibration_config->cylinders.cylinders[cy].cy_opposed;
-                if(cy_opposite < ECU_CYLINDER_MAX && cy != cy_opposite &&
-                    sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR) {
-                  if(cy_opposite > cy && !group_config->cylinders[cy_opposite].disabled) {
-                    ignition_advance_cy_add = MIN(ignition_advance_cy_add, group_config->cylinders[cy_opposite].advance_add);
-                  } else if(group_config->cylinders[cy_opposite].output_pin == group_config->cylinders[cy].output_pin) {
-                    if(runtime_cy->initialized) {
-                      memset(runtime_cy, 0, sizeof(*runtime_cy));
-                    }
-                    continue;
-                  }
-                }
-
-                ignition_advance_cy = ignition_advance_gr_cy[cy];
-                ignition_advance_cy += ignition_advance_cy_add;
-                crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
-                position_cy = crankshaft_data->sensor_data.current_position;
-                output_valid = false;
-
-                runtime_cy->position = position_cy;
-                runtime_cy->advance = ignition_advance_cy;
-                if(sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
-                  runtime_cy->degrees_per_cycle = 720.0f;
-                } else {
-                  runtime_cy->degrees_per_cycle = 360.0f;
-                }
-
-                if(position_cy < -ignition_advance_cy) {
-                  degrees_before_ignite_cur = -position_cy - ignition_advance_cy;
-                } else {
-                  degrees_before_ignite_cur = runtime_cy->degrees_per_cycle - position_cy - ignition_advance_cy;
-                }
-                degrees_before_ignite_prev = runtime_cy->degrees_before_ignite;
-
-                if(runtime_cy->initialized) {
-                  if(degrees_before_ignite_cur - degrees_before_ignite_prev > 0.0f &&
-                      degrees_before_ignite_cur - degrees_before_ignite_prev < 180.0f) {
-                    degrees_before_ignite_cur = degrees_before_ignite_prev;
-                  }
-
-                  if(!runtime_cy->scheduled && !runtime_cy->ignited) {
-                    degrees_before_prepare = degrees_before_ignite_cur - signal_prepare_advance_gr;
-                    if(degrees_before_prepare < 0.0f) {
-                      time_to_saturate = crankshaft_data->sensor_data.current.timestamp +
-                          roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
-                      time_to_ignite = time_to_saturate + saturation_time;
-
-                      if(input_allowed_b[bank_cy]) {
-                        err = timing_pulse_schedule(group_config->cylinders[cy].output_pin,
-                            time_to_saturate, time_to_ignite,
-                            TIMING_LATE_POLICY_KEEP_END);
-                        BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                  cy_opposite = calibration_config->cylinders.cylinders[cy].cy_opposed;
+                  if(cy_opposite < ECU_CYLINDER_MAX && cy != cy_opposite &&
+                      sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEMISEQUENTIAL_DISTRIBUTOR) {
+                    if(cy_opposite > cy && !group_config->cylinders[cy_opposite].disabled) {
+                      ignition_advance_cy_add = MIN(ignition_advance_cy_add, group_config->cylinders[cy_opposite].advance_add);
+                    } else if(group_config->cylinders[cy_opposite].output_pin == group_config->cylinders[cy].output_pin) {
+                      if(runtime_cy->initialized) {
+                        memset(runtime_cy, 0, sizeof(*runtime_cy));
                       }
-                      ignition_acceptance_gr_cy->valid = false;
-                      runtime_cy->scheduled = true;
+                      continue;
                     }
+                  }
+
+                  ignition_advance_cy = ignition_advance_gr_cy[cy];
+                  ignition_advance_cy += ignition_advance_cy_add;
+                  crankshaft_data = &timing_base_data->sequentialed[sequentialed_mode].cylinders[cy].crankshaft_data;
+                  position_cy = crankshaft_data->sensor_data.current_position;
+                  output_valid = false;
+
+                  runtime_cy->position = position_cy;
+                  runtime_cy->advance = ignition_advance_cy;
+                  if(sequentialed_mode == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
+                    runtime_cy->degrees_per_cycle = 720.0f;
                   } else {
-                    if(degrees_before_ignite_prev - degrees_before_ignite_cur < -90.0f) {
-                      if(runtime_cy->scheduled) {
-                        runtime_cy->ignited = true;
-                        runtime_cy->scheduled = false;
+                    runtime_cy->degrees_per_cycle = 360.0f;
+                  }
+
+                  if(position_cy < -ignition_advance_cy) {
+                    degrees_before_ignite_cur = -position_cy - ignition_advance_cy;
+                  } else {
+                    degrees_before_ignite_cur = runtime_cy->degrees_per_cycle - position_cy - ignition_advance_cy;
+                  }
+                  degrees_before_ignite_prev = runtime_cy->degrees_before_ignite;
+
+                  if(runtime_cy->initialized) {
+                    if(degrees_before_ignite_cur - degrees_before_ignite_prev > 0.0f &&
+                        degrees_before_ignite_cur - degrees_before_ignite_prev < 180.0f) {
+                      degrees_before_ignite_cur = degrees_before_ignite_prev;
+                    }
+
+                    if(!runtime_cy->scheduled && !runtime_cy->ignited) {
+                      degrees_before_prepare = degrees_before_ignite_cur - signal_prepare_advance_gr;
+                      if(degrees_before_prepare < 0.0f) {
+                        time_to_saturate = crankshaft_data->sensor_data.current.timestamp +
+                            roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
+                        time_to_ignite = time_to_saturate + saturation_time;
+
+                        if(input_allowed_b[bank_cy]) {
+                          err = timing_pulse_schedule(group_config->cylinders[cy].output_pin,
+                              time_to_saturate, time_to_ignite,
+                              TIMING_LATE_POLICY_KEEP_END);
+                          BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                        }
+                        ignition_acceptance_gr_cy->valid = false;
+                        runtime_cy->scheduled = true;
                       }
                     } else {
-                      runtime_cy->ignited = false;
+                      if(degrees_before_ignite_prev - degrees_before_ignite_cur < -90.0f) {
+                        if(runtime_cy->scheduled) {
+                          runtime_cy->ignited = true;
+                          runtime_cy->scheduled = false;
+                        }
+                      } else {
+                        runtime_cy->ignited = false;
+                      }
                     }
+
+                  } else {
+                    runtime_cy->initialized = true;
+                    runtime_cy->scheduled = false;
+                    runtime_cy->ignited = true;
                   }
 
+                  runtime_cy->degrees_before_ignite = degrees_before_ignite_cur;
+
+                  if(output_valid) {
+                    err = ecu_config_gpio_output_write(group_config->cylinders[cy].output_pin, output_value);
+                    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+                    ignition_acceptance_gr_cy->valid = false;
+                  }
                 } else {
-                  runtime_cy->initialized = true;
-                  runtime_cy->scheduled = false;
-                  runtime_cy->ignited = true;
-                }
-
-                runtime_cy->degrees_before_ignite = degrees_before_ignite_cur;
-
-                if(output_valid) {
-                  err = ecu_config_gpio_output_write(group_config->cylinders[cy].output_pin, output_value);
-                  BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
-                  ignition_acceptance_gr_cy->valid = false;
-                }
-              } else {
-                if(runtime_cy->initialized) {
-                  memset(runtime_cy, 0, sizeof(*runtime_cy));
+                  if(runtime_cy->initialized) {
+                    memset(runtime_cy, 0, sizeof(*runtime_cy));
+                  }
                 }
               }
+            } else {
+              for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+                runtime_cy = &runtime_gr->cylinders[cy];
+                memset(runtime_cy, 0, sizeof(*runtime_cy));
+              }
             }
-          } else {
-            for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
-              runtime_cy = &runtime_gr->cylinders[cy];
-              memset(runtime_cy, 0, sizeof(*runtime_cy));
+          }
+          runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
+        } else {
+          if(runtime_gr->initialized) {
+            memset(runtime_gr, 0, sizeof(*runtime_gr));
+          }
+          for(ecu_cylinder_t cy = 0; cy < cylinders_count; cy++) {
+            if(group_config->cylinders[cy].disabled == false) {
+              err = timing_pulse_clean(group_config->cylinders[cy].output_pin);
+              if(err != E_OK) {
+                // TODO: error handling
+              }
             }
           }
         }
-        runtime->process_update_trigger_counter = process_update_trigger_counter_gr + 1;
       } else {
         if(runtime_gr->initialized) {
           memset(runtime_gr, 0, sizeof(*runtime_gr));

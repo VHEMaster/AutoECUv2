@@ -453,7 +453,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
       for(ignition_config_group_t gr = 0; gr < IGNITION_CONFIG_GROUP_MAX; gr++) {
         if(ignition_ctx->config.groups[gr].enabled) {
           for(ecu_cylinder_t cy = 0; cy < calibration_config->cylinders.cylinders_count; cy++) {
-            err = ecu_config_gpio_output_write(ignition_ctx->config.groups[gr].cylinders[cy].output_pin, 0);
+            err = timing_pulse_clean(ignition_ctx->config.groups[gr].cylinders[cy].output_pin);
             BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
           }
         }
@@ -462,7 +462,7 @@ ITCM_FUNC void timing_base_signal_update_cb(void *usrdata, const timing_base_dat
       for(injection_config_group_t gr = 0; gr < INJECTION_CONFIG_GROUP_MAX; gr++) {
         if(injection_ctx->config.groups[gr].enabled) {
           for(ecu_cylinder_t cy = 0; cy < calibration_config->cylinders.cylinders_count; cy++) {
-            err = ecu_config_gpio_output_write(injection_ctx->config.groups[gr].cylinders[cy].output_pin, 0);
+            err = timing_pulse_clean(injection_ctx->config.groups[gr].cylinders[cy].output_pin);
             BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
           }
         }

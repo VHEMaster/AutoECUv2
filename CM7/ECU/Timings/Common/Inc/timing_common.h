@@ -18,6 +18,7 @@ typedef enum {
 }timing_late_policy_t;
 
 error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end, timing_late_policy_t late_policy);
+error_t timing_pulse_clean(ecu_gpio_output_pin_t output_pin);
 
 error_t timing_calculate_current_position(timing_base_ctx_t *ctx, float offset, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data);
 error_t timing_calculate_offset_position(timing_base_ctx_t *ctx, float offset, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data);

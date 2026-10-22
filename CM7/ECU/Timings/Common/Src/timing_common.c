@@ -76,6 +76,25 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
 }
 
 OPTIMIZE_FAST
+ITCM_FUNC error_t timing_pulse_clean(ecu_gpio_output_pin_t output_pin)
+{
+  output_id_t pin;
+  error_t err;
+
+  do {
+
+    err = ecu_config_gpio_output_get_id(output_pin, &pin);
+    BREAK_IF(err != E_OK);
+
+    err = queuedpulses_reset_output(pin);
+    BREAK_IF(err != E_OK);
+
+  } while(0);
+
+  return err;
+}
+
+OPTIMIZE_FAST
 ITCM_FUNC static error_t timing_calculate_position_ex(timing_base_ctx_t *ctx, float offset, bool time_recalc, bool phased, timing_base_req_t *req_ctx, timing_base_data_crankshaft_t *data)
 {
   error_t err = E_OK;
