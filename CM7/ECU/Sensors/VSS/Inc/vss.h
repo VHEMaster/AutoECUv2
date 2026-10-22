@@ -20,6 +20,7 @@ typedef union {
     uint32_t data;
     struct {
         bool speed_too_high : 1;
+        // TODO: implement plausibility check
     }bits;
 }vss_diag_t;
 

@@ -279,7 +279,7 @@ static void calcdata_sensor_read_egt(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_EGT_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -306,7 +306,7 @@ static void calcdata_sensor_read_iat(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_IAT_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -333,7 +333,7 @@ static void calcdata_sensor_read_maf(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_MAF_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -360,7 +360,7 @@ static void calcdata_sensor_read_map(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_MAP_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -387,7 +387,7 @@ static void calcdata_sensor_read_ops(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_OPS_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -414,7 +414,7 @@ static void calcdata_sensor_read_ots(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_ECT_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_OTS_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -458,7 +458,7 @@ static void calcdata_sensor_read_tps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].valid = true;
 
   } else {
-    for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
+    for(param_index = 0; param_index < ECU_SENSOR_TPS_READ_PARAM_MAX; param_index++) {
       params_rd_ctx[param_index].valid = false;
     }
   }
@@ -469,15 +469,26 @@ static void calcdata_sensor_read_vss(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
   error_t err;
   vss_data_t data;
   ecu_core_runtime_value_ctx_t *params_rd_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).sensors[ECU_SENSOR_TYPE_VSS][instance].params[ECU_COMMON_READ];
-  ecu_runtime_param_index_t param_index = ECU_SENSOR_VSS_READ_PARAM_DATA;
+  ecu_runtime_param_index_t param_index;
 
   err = ecu_sensors_vss_get_value(instance, &data);
-  if(err == E_OK && data.valid) {
+  if(err == E_OK) {
+    param_index = ECU_SENSOR_VSS_READ_PARAM_SPEED;
+    params_rd_ctx[param_index].value = data.speed;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_VSS_READ_PARAM_PULSES_PER_SECOND;
+    params_rd_ctx[param_index].value = data.pulses_per_second;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_VSS_READ_PARAM_TRUSTED;
+    params_rd_ctx[param_index].value = data.valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
-    params_rd_ctx[param_index].valid = false;
+    for(param_index = 0; param_index < ECU_SENSOR_VSS_READ_PARAM_MAX; param_index++) {
+      params_rd_ctx[param_index].valid = false;
+    }
   }
-  params_rd_ctx[param_index].value = data.speed;
 }
 
 static void calcdata_sensor_invalidate_aps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t instance, void *userdata)
