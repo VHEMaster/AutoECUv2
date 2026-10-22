@@ -191,7 +191,7 @@ static void calcdata_sensor_read_ckp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_CKP_READ_PARAM_INSYNC;
-    params_rd_ctx[param_index].value = data.validity >= CKP_DATA_VALID;
+    params_rd_ctx[param_index].value = data.validity >= CKP_DATA_VALID ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
     for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
