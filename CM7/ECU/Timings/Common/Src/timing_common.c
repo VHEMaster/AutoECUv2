@@ -143,14 +143,12 @@ ITCM_FUNC static error_t timing_calculate_position_from_snapshot_ex(timing_base_
       phased_internal = false;
     }
 
-    if(offset != 0.0f) {
-      for(int i = 0; i < ITEMSOF(positions); i++) {
-        pos_temp = *positions[i];
-        pos_temp += offset;
-        timing_position_clamp(pos_temp, phased_internal, &pos_temp);
+    for(int i = 0; i < ITEMSOF(positions); i++) {
+      pos_temp = *positions[i];
+      pos_temp += offset;
+      timing_position_clamp(pos_temp, phased_internal, &pos_temp);
 
-        *positions[i] = pos_temp;
-      }
+      *positions[i] = pos_temp;
     }
 
     pos = data->sensor_data.current.position;
