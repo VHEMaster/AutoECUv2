@@ -207,7 +207,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
   crankshaft = &crankshaft_data.sensor_data;
 
   for(ecu_bank_t b = 0; b < banks_count; b++) {
-    ect_value[b] = &ctx->runtime.banked.source.banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT].value;
+    ect_value[b] = &ctx->runtime.banked.source.banks[b].inputs[CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE].value;
     data_iat[b] = &ctx->runtime.banked.source.banks[b].data_iat;
 
     iat_type[b] = data_iat[b]->active_type;

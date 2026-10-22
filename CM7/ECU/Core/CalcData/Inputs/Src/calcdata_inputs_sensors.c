@@ -104,7 +104,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
   uint32_t value_count;
 
   ecu_config_io_instance_t instances_count = ECU_CONFIG_IO_ECT_MAX;
-  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT;
+  ecu_config_calcdata_relation_input_source_index_t dest_index = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE;
   ecu_config_calcdata_setup_ect_calc_model_t calc_model = ctx->calibration->calcdata.setup.ect_model.calc_model;
   float rms_min = ctx->calibration->calcdata.setup.ect_model.rms_min;
   float tempval;
@@ -116,7 +116,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_ect(ecu_core_ctx_
   for(ecu_config_io_ect_t instance = 0; instance < instances_count; instance++) {
     src = ctx->runtime.banked.raw.global.sensors_ect[instance];
     if(src != NULL) {
-      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_ECT_READ_PARAM_DATA];
+      src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_ECT_READ_PARAM_TEMPERATURE];
       if(src_read->valid) {
         dest_value.valid = true;
         if(calc_model == CALCDATA_ECT_CALC_MODEL_MAXIMAL) {

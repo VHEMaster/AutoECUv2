@@ -181,7 +181,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_14,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -201,7 +201,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_15,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -241,7 +241,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_17,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -261,7 +261,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_18,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -281,7 +281,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_19,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -301,7 +301,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_20,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -321,7 +321,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_55,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -341,7 +341,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_21,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -361,7 +361,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_22,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -381,7 +381,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_23,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -401,7 +401,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_24,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -421,7 +421,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_25,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -441,7 +441,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_26,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -461,7 +461,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_27,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -481,7 +481,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_28,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -501,7 +501,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_29,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -881,7 +881,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_49,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -901,7 +901,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_50,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -952,7 +952,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_52,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -992,7 +992,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_56,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -1012,7 +1012,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_57,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
@@ -1032,7 +1032,7 @@ static const ecu_config_calcdata_output_data_varianted_items_t cfg_output_data =
                         .interpolation_limit = true,
                         .table_index = ECU_CONFIG_TABLE_1D_16_58,
                         .source_x = {
-                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT,
+                            .source = CALCDATA_RELATION_INPUT_SOURCE_SENSOR_GLOBAL_ECT_TEMPERATURE,
                             .variant = CALCDATA_RELATION_INPUT_VARIANTED_ITEM_V1,
                         },
                     },
