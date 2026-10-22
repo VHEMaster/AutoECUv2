@@ -51,6 +51,7 @@ void calcdata_outputs_knockwindow(ecu_core_ctx_t *ctx)
       output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
     } else {
       param_index = param_index_base + ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_ALLOWED - ECU_TIMING_KNOCKWINDOW_WRITE_PARAM_B1_START;
+      output_ptr->params[ECU_COMMON_WRITE][param_index].value = ECU_RUNTIME_PARAMETER_FALSE;
       output_ptr->params[ECU_COMMON_WRITE][param_index].valid = true;
     }
   }

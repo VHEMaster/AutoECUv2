@@ -222,7 +222,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
 
   for(ecu_bank_t b = 0; b < banks_count; b++) {
     data_iat_valid = false;
-    if(iat_config[b] != NULL) {
+    if(iat_config[b] != NULL && iat_value[b] != NULL && iat_config[b] != NULL) {
 
       bank_ctx = &ctx->runtime.banked.source.banks[b];
       calc_variant = iat_config[b]->alpha_blending.calc_variant;
@@ -272,10 +272,10 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
         output_value.value = BLEND(ect_value[b]->value, iat_value[b]->value, blending);
         output_value.valid = true;
       } else {
-        memcpy(&output_value, iat_value[b], sizeof(output_value));
+        output_value = *iat_value[b];
       }
     } else {
-      memcpy(&output_value, iat_value[b], sizeof(output_value));
+      memset(&output_value, 0u, sizeof(output_value));
     }
     data_iat[b]->blending_valid = data_iat_valid;
 

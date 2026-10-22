@@ -113,6 +113,17 @@ static error_t signals_validate_message_layout(const signals_config_message_desc
     BREAK_IF_ACTION(message == NULL || signals == NULL, err = E_PARAM);
     BREAK_IF_ACTION(message->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
 
+    BREAK_IF_ACTION(message->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
+    if(message->has_crc) {
+      BREAK_IF_ACTION(message->crc_byte_pos >= message->message_len, err = E_PARAM);
+    }
+    if(message->has_counter) {
+      BREAK_IF_ACTION(message->counter_byte_pos >= message->message_len, err = E_PARAM);
+    }
+    if(message->has_crc && message->has_counter) {
+      BREAK_IF_ACTION(message->crc_byte_pos == message->counter_byte_pos, err = E_PARAM);
+    }
+
     if(message->has_crc) {
       BREAK_IF_ACTION(message->crc_byte_pos >= message->message_len, err = E_PARAM);
       occupied[message->crc_byte_pos] = 0xFFu;
@@ -192,16 +203,9 @@ error_t signals_config_build(signals_ctx_t *ctx)
       message_config = &config->messages_lists.downstream_list[i];
       CONTINUE_IF(message_config->enabled != true);
 
-      RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
-      if(message_config->has_crc) {
-        RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
-      }
-      if(message_config->has_counter) {
-        RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
-      }
-      if(message_config->has_crc && message_config->has_counter) {
-        RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
-      }
+      err = signals_validate_message_layout(message_config, config->signals_lists.downstream_list,
+          ITEMSOF(config->signals_lists.downstream_list));
+      BREAK_IF(err != E_OK);
 
       message_runtime = &ctx->runtime.messages_downstream.messages[ctx->runtime.messages_downstream.messages_used];
       message_runtime->used = true;
@@ -237,25 +241,14 @@ error_t signals_config_build(signals_ctx_t *ctx)
     }
     BREAK_IF(err != E_OK);
 
-    err = signals_validate_message_layout(message_config, config->signals_lists.downstream_list,
-        ITEMSOF(config->signals_lists.downstream_list));
-    BREAK_IF(err != E_OK);
-
     for(uint32_t i = 0; i < ITEMSOF(config->messages_lists.upstream_list); i++) {
       RETURN_IF(ctx->runtime.messages_upstream.messages_used >= ITEMSOF(config->messages_lists.upstream_list), E_PARAM);
       message_config = &config->messages_lists.upstream_list[i];
       CONTINUE_IF(message_config->enabled != true);
 
-      RETURN_IF(message_config->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, E_PARAM);
-      if(message_config->has_crc) {
-        RETURN_IF(message_config->crc_byte_pos >= message_config->message_len, E_PARAM);
-      }
-      if(message_config->has_counter) {
-        RETURN_IF(message_config->counter_byte_pos >= message_config->message_len, E_PARAM);
-      }
-      if(message_config->has_crc && message_config->has_counter) {
-        RETURN_IF(message_config->crc_byte_pos == message_config->counter_byte_pos, E_PARAM);
-      }
+      err = signals_validate_message_layout(message_config, config->signals_lists.upstream_list,
+          ITEMSOF(config->signals_lists.upstream_list));
+      BREAK_IF(err != E_OK);
 
       message_runtime = &ctx->runtime.messages_upstream.messages[ctx->runtime.messages_upstream.messages_used];
       message_runtime->used = true;
@@ -291,10 +284,6 @@ error_t signals_config_build(signals_ctx_t *ctx)
       BREAK_IF(err != E_OK);
       ctx->runtime.messages_upstream.messages_used++;
     }
-    BREAK_IF(err != E_OK);
-
-    err = signals_validate_message_layout(message_config, config->signals_lists.upstream_list,
-        ITEMSOF(config->signals_lists.upstream_list));
     BREAK_IF(err != E_OK);
 
   } while(0);

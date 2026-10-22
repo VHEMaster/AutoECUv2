@@ -207,7 +207,8 @@ ITCM_FUNC void knockwindow_signal_update_callback(knockwindow_ctx_t *ctx, const 
                   err = pulsedadc_prepare(setup->pulsedadc_ctx, samples_requested);
                   if(err == E_OVERFLOW) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
-                  } else  if(err != E_OK) {
+                    break;
+                  } else if(err != E_OK) {
                     runtime_cy->state = KNOCKWINDOW_STATE_SYNC;
                     // TODO: error handling
                     break;

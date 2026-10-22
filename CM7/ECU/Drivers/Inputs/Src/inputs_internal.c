@@ -88,25 +88,28 @@ ITCM_FUNC error_t inputs_internal_channel_poll(input_ch_ctx_t *ch, input_polling
         val = val_ret;
       }
     }
-    if(ch->debounce_time) {
-      valtime = ch->value_time;
-      if(val != val_ret) {
-        if(time_diff(now, valtime) >= ch->debounce_time) {
-          ch->value_change_time = now;
+
+    if(err == E_OK) {
+      if(ch->debounce_time) {
+        valtime = ch->value_time;
+        if(val != val_ret) {
+          if(time_diff(now, valtime) >= ch->debounce_time) {
+            ch->value_change_time = now;
+            ch->value_time = now;
+            val_ret = val;
+            irq_gen = true;
+          }
+        } else {
           ch->value_time = now;
-          val_ret = val;
-          irq_gen = true;
         }
       } else {
+        if(val != val_ret) {
+            ch->value_change_time = now;
+            val_ret = val;
+            irq_gen = true;
+        }
         ch->value_time = now;
       }
-    } else {
-      if(val != val_ret) {
-          ch->value_change_time = now;
-          val_ret = val;
-          irq_gen = true;
-      }
-      ch->value_time = now;
     }
   }
 
