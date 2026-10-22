@@ -24,11 +24,12 @@ typedef struct {
     float degrees_per_cycle;
     float degrees_before_inject;
     float dutycycle;
+
+    timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
 }injection_runtime_group_cylinder_ctx_t;
 
 typedef struct {
     bool initialized;
-    timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
 
     float phase_banked[ECU_BANK_MAX];
     float phase_requested_banked[ECU_BANK_MAX];
