@@ -221,7 +221,7 @@ static void calcdata_sensor_read_cmp(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
     params_rd_ctx[param_index].value = data.position_relative;
     params_rd_ctx[param_index].valid = true;
 
-    param_index = ECU_SENSOR_CKP_READ_PARAM_INSYNC;
+    param_index = ECU_SENSOR_CMP_READ_PARAM_INSYNC;
     params_rd_ctx[param_index].value = data.validity >= CMP_DATA_VALID ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
     params_rd_ctx[param_index].valid = true;
   } else {
