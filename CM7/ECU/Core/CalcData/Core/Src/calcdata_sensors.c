@@ -148,27 +148,31 @@ static void calcdata_sensor_read_aps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
   if(err == E_OK && data.data_valid) {
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION;
     params_rd_ctx[param_index].value = data.position;
-    params_rd_ctx[param_index].valid = data.position_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION_UNFILTERED;
     params_rd_ctx[param_index].value = data.position_unfiltered;
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION_RAW_A;
     params_rd_ctx[param_index].value = data.positions_raw[0];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION_RAW_B;
     params_rd_ctx[param_index].value = data.positions_raw[1];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_VOLTAGE_A;
     params_rd_ctx[param_index].value = data.voltages[0];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_APS_READ_PARAM_PEDAL_VOLTAGE_B;
     params_rd_ctx[param_index].value = data.voltages[1];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_APS_READ_PARAM_TRUSTED;
+    params_rd_ctx[param_index].value = data.position_valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
+    params_rd_ctx[param_index].valid = true;
 
   } else {
     for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
@@ -431,23 +435,27 @@ static void calcdata_sensor_read_tps(ecu_core_ctx_t *ctx, ecu_sensor_instance_t 
 
     param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_UNFILTERED;
     params_rd_ctx[param_index].value = data.position_unfiltered;
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_RAW_A;
     params_rd_ctx[param_index].value = data.positions_raw[0];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_POSITION_RAW_B;
     params_rd_ctx[param_index].value = data.positions_raw[1];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_VOLTAGE_A;
     params_rd_ctx[param_index].value = data.voltages[0];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
 
     param_index = ECU_SENSOR_TPS_READ_PARAM_THROTTLE_VOLTAGE_B;
     params_rd_ctx[param_index].value = data.voltages[1];
-    params_rd_ctx[param_index].valid = data.data_valid;
+    params_rd_ctx[param_index].valid = true;
+
+    param_index = ECU_SENSOR_TPS_READ_PARAM_TRUSTED;
+    params_rd_ctx[param_index].value = data.position_valid ? ECU_RUNTIME_PARAMETER_TRUE : ECU_RUNTIME_PARAMETER_FALSE;
+    params_rd_ctx[param_index].valid = true;
 
   } else {
     for(param_index = 0; param_index < ECU_SENSOR_APS_READ_PARAM_MAX; param_index++) {
