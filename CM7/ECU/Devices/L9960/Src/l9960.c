@@ -11,15 +11,7 @@
 #include "l9960_internal.h"
 #include "compiler.h"
 
-ITCM_FUNC static void l9960_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
-{
-  l9960_ctx_t *ctx = (l9960_ctx_t *)spi_slave->usrdata;
-
-  //TODO: is it really needed?
-  (void)ctx;
-}
-
-ITCM_FUNC error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
+error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
 
@@ -37,9 +29,6 @@ ITCM_FUNC error_t l9960_init(l9960_ctx_t *ctx, const l9960_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(ctx->init.spi_slave, L9960_SPI_MODE);
-    BREAK_IF(err != E_OK);
-
-    err = spi_slave_configure_callback(ctx->init.spi_slave, l9960_cplt_cb);
     BREAK_IF(err != E_OK);
 
     ctx->ready = true;

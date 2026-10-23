@@ -10,14 +10,6 @@
 #include "l9966_fsm.h"
 #include "compiler.h"
 
-static void l9966_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
-{
-  l9966_ctx_t *ctx = (l9966_ctx_t *)spi_slave->usrdata;
-
-  //TODO: is it really needed?
-  (void)ctx;
-}
-
 error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -44,9 +36,6 @@ error_t l9966_init(l9966_ctx_t *ctx, const l9966_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(ctx->init.spi_slave, L9966_SPI_MODE);
-    BREAK_IF(err != E_OK);
-
-    err = spi_slave_configure_callback(ctx->init.spi_slave, l9966_cplt_cb);
     BREAK_IF(err != E_OK);
 
     ctx->ready = true;

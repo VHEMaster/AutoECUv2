@@ -90,7 +90,7 @@ error_t max31855_reset(max31855_ctx_t *ctx)
   return err;
 }
 
-ITCM_FUNC  void max31855_loop_slow(max31855_ctx_t *ctx)
+void max31855_loop_slow(max31855_ctx_t *ctx)
 {
   time_us_t now;
   error_t err = E_OK;

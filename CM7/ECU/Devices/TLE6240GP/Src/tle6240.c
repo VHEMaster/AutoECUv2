@@ -10,14 +10,6 @@
 #include "compiler.h"
 #include <string.h>
 
-static void tle6240_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
-{
-  tle6240_ctx_t *ctx = (tle6240_ctx_t *)spi_slave->usrdata;
-
-  //TODO: is it really needed?
-  (void)ctx;
-}
-
 error_t tle6240_init(tle6240_ctx_t *ctx, const tle6240_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -47,9 +39,6 @@ error_t tle6240_init(tle6240_ctx_t *ctx, const tle6240_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(ctx->init.spi_slave, TLE6240_SPI_MODE);
-    BREAK_IF(err != E_OK);
-
-    err = spi_slave_configure_callback(ctx->init.spi_slave, tle6240_cplt_cb);
     BREAK_IF(err != E_OK);
 
     ctx->ready = true;

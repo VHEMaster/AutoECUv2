@@ -71,6 +71,9 @@ SECTIONS
     . = ALIGN(4);
     _sitcm_func = .;        /* create a global symbol at data start */
     __itcm_func_start__ = _sitcm_func;
+    LONG(0xDEADBEEF);
+    . = ALIGN(4);
+    
     *(.itcm_func)        /* .itcm_func sections */
     *(.itcm_func*)       /* .itcm_func* sections */
     

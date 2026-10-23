@@ -12,14 +12,6 @@
 #include "cj125_internal.h"
 #include "compiler.h"
 
-static void cj125_cplt_cb(spi_slave_t *spi_slave, error_t errorcode)
-{
-  cj125_ctx_t *ctx = (cj125_ctx_t *)spi_slave->usrdata;
-
-  //TODO: is it really needed?
-  (void)ctx;
-}
-
 error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -42,9 +34,6 @@ error_t cj125_init(cj125_ctx_t *ctx, const cj125_init_ctx_t *init_ctx)
     BREAK_IF(err != E_OK);
 
     err = spi_slave_configure_mode(ctx->init.spi_slave, CJ125_SPI_MODE);
-    BREAK_IF(err != E_OK);
-
-    err = spi_slave_configure_callback(ctx->init.spi_slave, cj125_cplt_cb);
     BREAK_IF(err != E_OK);
 
     ctx->data.ampfactor = CJ125_AF_17;
