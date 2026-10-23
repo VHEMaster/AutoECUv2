@@ -9,7 +9,7 @@
 **                      1024Kbytes FLASH
 **                       800Kbytes RAM
 **
-**                Set heap size, stack size and stack location according
+**                Set stack size and stack location according
 **                to application requirements.
 **
 **                Set memory bank area and size if external memory is used.
@@ -38,7 +38,6 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(DTCMRAM) + LENGTH(DTCMRAM); /* end of "DTCMRAM" Ram type memory */
 
-_Min_Heap_Size = 0x800; /* required amount of heap  */
 _Min_Stack_Size = 0x4000; /* required amount of stack */
 
 /* Memories definition */
@@ -140,35 +139,6 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .preinit_array (READONLY) :
-  {
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP (*(.preinit_array*))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
-    . = ALIGN(4);
-  } >FLASH
-
-  .init_array (READONLY) :
-  {
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array*))
-    PROVIDE_HIDDEN (__init_array_end = .);
-    . = ALIGN(4);
-  } >FLASH
-
-  .fini_array (READONLY) :
-  {
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP (*(SORT(.fini_array.*)))
-    KEEP (*(.fini_array*))
-    PROVIDE_HIDDEN (__fini_array_end = .);
-    . = ALIGN(4);
-  } >FLASH
-
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -201,16 +171,6 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >DTCMRAM
-
-  /* User_heap section, used to check that there is enough "RAM" Ram  type memory left */
-  ._user_heap (NOLOAD) :
-  {
-    . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
-    . = ALIGN(8);
-  } >RAM_D1
 
   /* User_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_stack (NOLOAD) :
