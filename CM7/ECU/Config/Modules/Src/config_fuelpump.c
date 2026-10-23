@@ -22,7 +22,6 @@ static void ecu_modules_fuelpump_ignpower_signal_update_cb(void *usrdata, bool i
 
 static const fuelpump_config_t ecu_modules_fuelpump_config_default = {
     .trigger_source = FUELPUMP_CONFIG_TRIGGER_CRANKSHAFT,
-    .sensor_ckp = ECU_SENSOR_CKP_1,
     .module_ignpower = ECU_MODULE_IGNPOWER_1,
     .ckp_trigger = FUELPUMP_CONFIG_CKP_TRIGGER_DETECTED,
 
@@ -38,13 +37,13 @@ static const fuelpump_config_t ecu_modules_fuelpump_config_default = {
 static RAM_SECTION ecu_modules_fuelpump_ctx_t ecu_modules_fuelpump_ctx[ECU_MODULE_FUELPUMP_MAX] = {
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_fuelpump_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_fuelpump_config_default,
     },
@@ -85,6 +84,13 @@ error_t ecu_modules_fuelpump_init(ecu_module_fuelpump_t instance, fuelpump_ctx_t
     fuelpump_ctx->config_default.output_drive_pin = ecu_sensors_fuelpump_output_drive_pin_default[instance];
     fuelpump_ctx->config_default.input_control_pin = ecu_sensors_fuelpump_input_control_pin_default[instance];
     fuelpump_ctx->config_default.input_trigger_pin = ecu_sensors_fuelpump_input_trigger_pin_default[instance];
+
+    if(fuelpump_ctx->init.sensor_ckp < ECU_SENSOR_CKP_MAX) {
+      err = ecu_sensors_get_ckp_ctx(fuelpump_ctx->init.sensor_ckp, &fuelpump_ctx->init.ckp_ctx);
+      BREAK_IF(err != E_OK);
+    } else {
+      fuelpump_ctx->init.ckp_ctx = NULL;
+    }
 
     err = fuelpump_init(fuelpump_ctx->ctx, &fuelpump_ctx->init);
     BREAK_IF(err != E_OK);

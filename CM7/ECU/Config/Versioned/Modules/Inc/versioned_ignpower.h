@@ -20,8 +20,6 @@ typedef enum {
 typedef struct {
     bool enabled;
 
-    ecu_sensor_ckp_t sensor_ckp;
-
     ecu_gpio_input_pin_t input_signal_pin;
     ecu_gpio_output_pin_t output_relay_pin;
 

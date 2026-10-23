@@ -40,7 +40,6 @@ typedef struct {
 
     fuelpump_config_trigger_t trigger_source;
 
-    ecu_sensor_ckp_t sensor_ckp;
     ecu_module_ignpower_t module_ignpower;
     fuelpump_config_ckp_trigger_t ckp_trigger;
 

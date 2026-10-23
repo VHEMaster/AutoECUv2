@@ -13,6 +13,7 @@
 #include "config_gpio.h"
 #include "config_sensors.h"
 #include "time.h"
+#include "ckp.h"
 
 typedef union {
     uint32_t data;
@@ -45,7 +46,8 @@ typedef struct {
 }indication_data_t;
 
 typedef struct {
-    uint32_t dummy;
+    ecu_sensor_ckp_t sensor_ckp;
+    ckp_ctx_t *ckp_ctx;
 }indication_init_ctx_t;
 
 typedef struct {
@@ -60,7 +62,7 @@ typedef struct {
 
     indication_diag_t diag;
     indication_data_t data;
-    float ckp_rpm;
+    ckp_data_t ckp_data;
 
     output_id_t output_pin;
     time_us_t periodic_last;

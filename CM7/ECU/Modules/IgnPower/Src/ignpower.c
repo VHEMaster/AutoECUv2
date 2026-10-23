@@ -9,6 +9,8 @@
 #include "compiler.h"
 #include <string.h>
 
+static void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data);
+
 error_t ignpower_init(ignpower_ctx_t *ctx, const ignpower_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -133,6 +135,13 @@ void ignpower_loop_slow(ignpower_ctx_t *ctx)
     if(ctx->configured) {
       now = time_now_us();
 
+      if(ctx->init.ckp_ctx != NULL) {
+        err = ckp_get_value(ctx->init.ckp_ctx, &ctx->ckp_data);
+        if(err == E_OK) {
+          ignpower_ckp_signal_update(ctx, &ctx->ckp_data);
+        }
+      }
+
       input_bool = ctx->data.ignpower_active;
       err = input_get_value(ctx->input_signal_pin, &input_value, NULL);
       if(err == E_OK) {
@@ -227,22 +236,7 @@ void ignpower_loop_slow(ignpower_ctx_t *ctx)
   }
 }
 
-void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  do {
-    BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
-
-    if(data->validity < CKP_DATA_DETECTED) {
-      ctx->data.crankshaft_operating = false;
-    } else if(data->validity >= CKP_DATA_SYNCHRONIZED) {
-      ctx->data.crankshaft_operating = true;
-    }
-
-  } while(0);
-}
-
-ITCM_FUNC void ignpower_components_trigger_operating_signal(ignpower_ctx_t *ctx)
+void ignpower_components_trigger_operating_signal(ignpower_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
@@ -311,4 +305,19 @@ error_t ignpower_get_diag(ignpower_ctx_t *ctx, ignpower_diag_t *diag)
   } while(0);
 
   return err;
+}
+
+static void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data)
+{
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
+
+    if(data->validity < CKP_DATA_DETECTED) {
+      ctx->data.crankshaft_operating = false;
+    } else if(data->validity >= CKP_DATA_SYNCHRONIZED) {
+      ctx->data.crankshaft_operating = true;
+    }
+
+  } while(0);
 }

@@ -12,6 +12,7 @@
 #include "versioned_ignpower.h"
 #include "config_gpio.h"
 #include "time.h"
+#include "ckp.h"
 
 typedef void (*ignpower_signal_update_cb_t)(void *usrdata, bool ignpower_active);
 
@@ -39,6 +40,9 @@ typedef struct {
 }ignpower_data_t;
 
 typedef struct {
+    ecu_sensor_ckp_t sensor_ckp;
+    ckp_ctx_t *ckp_ctx;
+
     ignpower_signal_update_cb_t signal_update_cb;
     void *signal_update_usrdata;
 }ignpower_init_ctx_t;
@@ -59,6 +63,7 @@ typedef struct {
 
     ignpower_diag_t diag;
     ignpower_data_t data;
+    ckp_data_t ckp_data;
 
     input_id_t input_signal_pin;
     output_id_t output_relay_pin;

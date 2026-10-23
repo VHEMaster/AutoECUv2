@@ -34,7 +34,6 @@ typedef enum {
 typedef struct {
     bool enabled;
 
-    ecu_sensor_ckp_t sensor_ckp;
     ecu_module_ignpower_t module_ignpower;
     coolingfan_config_ckp_trigger_t ckp_trigger;
 

@@ -21,7 +21,6 @@ typedef struct {
 static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active);
 
 static const coolingfan_config_t ecu_modules_coolingfan_config_default = {
-    .sensor_ckp = ECU_SENSOR_CKP_1,
     .module_ignpower = ECU_MODULE_IGNPOWER_1,
     .ckp_trigger = COOLINGFAN_CONFIG_CKP_TRIGGER_DETECTED,
 
@@ -38,13 +37,13 @@ static const coolingfan_config_t ecu_modules_coolingfan_config_default = {
 static RAM_SECTION ecu_modules_coolingfan_ctx_t ecu_modules_coolingfan_ctx[ECU_MODULE_COOLINGFAN_MAX] = {
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_coolingfan_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_coolingfan_config_default,
     },
@@ -87,6 +86,13 @@ error_t ecu_modules_coolingfan_init(ecu_module_coolingfan_t instance, coolingfan
     }
     coolingfan_ctx->config_default.input_control_pin = ecu_sensors_coolingfan_input_control_pin_default[instance];
     coolingfan_ctx->config_default.input_force_pin = ecu_sensors_coolingfan_input_force_pin_default[instance];
+
+    if(coolingfan_ctx->init.sensor_ckp < ECU_SENSOR_CKP_MAX) {
+      err = ecu_sensors_get_ckp_ctx(coolingfan_ctx->init.sensor_ckp, &coolingfan_ctx->init.ckp_ctx);
+      BREAK_IF(err != E_OK);
+    } else {
+      coolingfan_ctx->init.ckp_ctx = NULL;
+    }
 
     err = coolingfan_init(coolingfan_ctx->ctx, &coolingfan_ctx->init);
     BREAK_IF(err != E_OK);

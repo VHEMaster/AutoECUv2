@@ -9,6 +9,8 @@
 #include "compiler.h"
 #include <string.h>
 
+static void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data);
+
 error_t indication_init(indication_ctx_t *ctx, const indication_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -104,6 +106,13 @@ void indication_loop_slow(indication_ctx_t *ctx)
 
   if(ctx->ready) {
     if(ctx->configured) {
+      if(ctx->init.ckp_ctx != NULL) {
+        err = ckp_get_value(ctx->init.ckp_ctx, &ctx->ckp_data);
+        if(err == E_OK) {
+          indication_ckp_signal_update(ctx, &ctx->ckp_data);
+        }
+      }
+
       now = time_now_us();
 
       if(ctx->config.trigger_source == INDICATION_CONFIG_TRIGGER_CRANKSHAFT && ctx->data.ckp_triggered) {
@@ -157,27 +166,6 @@ void indication_loop_slow(indication_ctx_t *ctx)
       }
     }
   }
-}
-
-void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  do {
-    BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
-
-    if(data->validity >= CKP_DATA_DETECTED) {
-      ctx->ckp_rpm = data->rpm;
-    } else {
-      ctx->ckp_rpm = 0;
-    }
-
-    if(ctx->ckp_rpm >= ctx->config.ckp_rpm_min && ctx->ckp_rpm < ctx->config.ckp_rpm_max) {
-      ctx->data.ckp_triggered = true;
-    } else {
-      ctx->data.ckp_triggered = false;
-    }
-
-  } while(0);
 }
 
 void indication_ignpower_update(indication_ctx_t *ctx, bool ignpower_on)
@@ -304,4 +292,19 @@ error_t indication_force_set(indication_ctx_t *ctx, bool force_enabled)
   } while(0);
 
   return err;
+}
+
+static void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data)
+{
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
+
+    if(ctx->ckp_data.rpm >= ctx->config.ckp_rpm_min && ctx->ckp_data.rpm < ctx->config.ckp_rpm_max) {
+      ctx->data.ckp_triggered = true;
+    } else {
+      ctx->data.ckp_triggered = false;
+    }
+
+  } while(0);
 }

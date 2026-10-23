@@ -22,7 +22,6 @@ static void ecu_modules_indication_ignpower_signal_update_cb(void *usrdata, bool
 
 static const indication_config_t ecu_modules_indication_config_default = {
     .trigger_source = INDICATION_CONFIG_TRIGGER_CRANKSHAFT,
-    .sensor_ckp = ECU_SENSOR_CKP_1,
     .module_ignpower = ECU_MODULE_IGNPOWER_1,
     .ignpower_off_disables = true,
 
@@ -34,37 +33,37 @@ static const indication_config_t ecu_modules_indication_config_default = {
 static RAM_SECTION ecu_modules_indication_ctx_t ecu_modules_indication_ctx[ECU_MODULE_INDICATION_MAX] = {
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
     {
       .init = {
-
+          .sensor_ckp = ECU_SENSOR_CKP_1,
       },
       .config_default = ecu_modules_indication_config_default,
     },
@@ -101,6 +100,13 @@ error_t ecu_modules_indication_init(ecu_module_indication_t instance, indication
 
     indication_ctx->config_default.enabled = ecu_sensors_indication_enabled_default[instance];
     indication_ctx->config_default.output_pin = ecu_sensors_indication_output_pin_default[instance];
+
+    if(indication_ctx->init.sensor_ckp < ECU_SENSOR_CKP_MAX) {
+      err = ecu_sensors_get_ckp_ctx(indication_ctx->init.sensor_ckp, &indication_ctx->init.ckp_ctx);
+      BREAK_IF(err != E_OK);
+    } else {
+      indication_ctx->init.ckp_ctx = NULL;
+    }
 
     err = indication_init(indication_ctx->ctx, &indication_ctx->init);
     BREAK_IF(err != E_OK);

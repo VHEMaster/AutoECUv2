@@ -27,7 +27,6 @@ typedef struct {
 }ecu_modules_ignpower_ctx_t;
 
 static const ignpower_config_t ecu_modules_ignpower_config_default = {
-    .sensor_ckp = ECU_SENSOR_CKP_1,
     .input_debounce_off_to_on = 100 * TIME_US_IN_MS,
     .input_debounce_on_to_off = 100 * TIME_US_IN_MS,
     .components_operating_trigger = true,
@@ -75,6 +74,13 @@ error_t ecu_modules_ignpower_init(ecu_module_ignpower_t instance, ignpower_ctx_t
     ignpower_ctx->config_default.enabled = ecu_modules_ignpower_enabled_default[instance];
     ignpower_ctx->config_default.input_signal_pin = ecu_modules_ignpower_input_signal_pin_default[instance];
     ignpower_ctx->config_default.output_relay_pin = ecu_modules_ignpower_output_relay_pin_default[instance];
+
+    if(ignpower_ctx->init.sensor_ckp < ECU_SENSOR_CKP_MAX) {
+      err = ecu_sensors_get_ckp_ctx(ignpower_ctx->init.sensor_ckp, &ignpower_ctx->init.ckp_ctx);
+      BREAK_IF(err != E_OK);
+    } else {
+      ignpower_ctx->init.ckp_ctx = NULL;
+    }
 
     err = ignpower_init(ignpower_ctx->ctx, &ignpower_ctx->init);
     BREAK_IF(err != E_OK);

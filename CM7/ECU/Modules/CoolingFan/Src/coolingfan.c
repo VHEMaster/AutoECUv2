@@ -9,6 +9,8 @@
 #include "compiler.h"
 #include <string.h>
 
+static void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data);
+
 error_t coolingfan_init(coolingfan_ctx_t *ctx, const coolingfan_init_ctx_t *init_ctx)
 {
   error_t err = E_OK;
@@ -153,6 +155,13 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
 
   if(ctx->ready) {
     if(ctx->configured) {
+      if(ctx->init.ckp_ctx != NULL) {
+        err = ckp_get_value(ctx->init.ckp_ctx, &ctx->ckp_data);
+        if(err == E_OK) {
+          coolingfan_ckp_signal_update(ctx, &ctx->ckp_data);
+        }
+      }
+
       ckp_last_time = ctx->ckp_last_time;
       now = time_now_us();
 
@@ -193,7 +202,7 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
       }
 
       if(ctx->data.ignpower_on && ctx->data.ckp_detected &&
-          ctx->ckp_rpm > 0.0f && ctx->ckp_rpm < ctx->config.crankshaft_rpm_min) {
+          ctx->ckp_data.rpm > 0.0f && ctx->ckp_data.rpm < ctx->config.crankshaft_rpm_min) {
         ctx->data.working = false;
       }
 
@@ -262,42 +271,6 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
       }
     }
   }
-}
-
-void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  time_us_t now;
-
-  do {
-    BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
-
-    now = time_now_us();
-
-    if(data->validity < CKP_DATA_DETECTED) {
-      ctx->data.ckp_triggered = false;
-      ctx->data.ckp_detected = false;
-    } else {
-      ctx->data.ckp_detected = true;
-
-      if(ctx->config.ckp_trigger == COOLINGFAN_CONFIG_CKP_TRIGGER_DETECTED && data->validity >= CKP_DATA_DETECTED) {
-        ctx->data.ckp_triggered = true;
-      } else if(ctx->config.ckp_trigger == COOLINGFAN_CONFIG_CKP_TRIGGER_SYNCHRONIZED && data->validity >= CKP_DATA_SYNCHRONIZED) {
-        ctx->data.ckp_triggered = true;
-      }
-
-      if(ctx->data.ckp_triggered) {
-        ctx->ckp_last_time = now;
-      }
-    }
-
-    if(data->validity >= CKP_DATA_DETECTED) {
-      ctx->ckp_rpm = data->rpm;
-    } else {
-      ctx->ckp_rpm = 0;
-    }
-
-  } while(0);
 }
 
 void coolingfan_ignpower_update(coolingfan_ctx_t *ctx, bool ignpower_on)
@@ -403,4 +376,34 @@ error_t coolingfan_force_set(coolingfan_ctx_t *ctx, bool force_enabled)
   } while(0);
 
   return err;
+}
+
+static void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data)
+{
+  time_us_t now;
+
+  do {
+    BREAK_IF(ctx == NULL);
+    BREAK_IF(ctx->configured == false);
+
+    now = time_now_us();
+
+    if(data->validity < CKP_DATA_DETECTED) {
+      ctx->data.ckp_triggered = false;
+      ctx->data.ckp_detected = false;
+    } else {
+      ctx->data.ckp_detected = true;
+
+      if(ctx->config.ckp_trigger == COOLINGFAN_CONFIG_CKP_TRIGGER_DETECTED && data->validity >= CKP_DATA_DETECTED) {
+        ctx->data.ckp_triggered = true;
+      } else if(ctx->config.ckp_trigger == COOLINGFAN_CONFIG_CKP_TRIGGER_SYNCHRONIZED && data->validity >= CKP_DATA_SYNCHRONIZED) {
+        ctx->data.ckp_triggered = true;
+      }
+
+      if(ctx->data.ckp_triggered) {
+        ctx->ckp_last_time = now;
+      }
+    }
+
+  } while(0);
 }

@@ -29,7 +29,6 @@ typedef struct {
 
     indication_config_trigger_t trigger_source;
 
-    ecu_sensor_ckp_t sensor_ckp;
     ecu_module_ignpower_t module_ignpower;
     ecu_gpio_output_pin_t output_pin;
     bool ignpower_off_disables;

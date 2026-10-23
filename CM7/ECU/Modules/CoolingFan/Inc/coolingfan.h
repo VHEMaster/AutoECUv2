@@ -13,6 +13,7 @@
 #include "config_gpio.h"
 #include "config_sensors.h"
 #include "time.h"
+#include "ckp.h"
 
 typedef union {
     uint32_t data;
@@ -40,7 +41,8 @@ typedef struct {
 }coolingfan_data_t;
 
 typedef struct {
-    uint32_t dummy;
+    ecu_sensor_ckp_t sensor_ckp;
+    ckp_ctx_t *ckp_ctx;
 }coolingfan_init_ctx_t;
 
 typedef struct {
@@ -63,7 +65,7 @@ typedef struct {
 
     coolingfan_diag_t diag;
     coolingfan_data_t data;
-    float ckp_rpm;
+    ckp_data_t ckp_data;
 
     output_id_t output_drive_pin[COOLINGFAN_CONFIG_DRIVE_PIN_TYPE_MAX];
     input_id_t input_control_pin;
