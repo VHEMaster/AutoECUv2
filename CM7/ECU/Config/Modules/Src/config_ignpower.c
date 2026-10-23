@@ -12,7 +12,6 @@
 #include "compiler.h"
 
 static void ecu_modules_ignpower_signal_update_cb(void *usrdata, bool ignpower_active);
-static void ecu_modules_ignpower_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 
 
 typedef struct {
@@ -117,11 +116,6 @@ error_t ecu_modules_ignpower_configure(ecu_module_ignpower_t instance, const ign
     BREAK_IF_ACTION(instance >= ECU_MODULE_IGNPOWER_MAX || config == NULL, err = E_PARAM);
 
     ignpower_ctx = &ecu_modules_ignpower_ctx[instance];
-
-    if(config->enabled) {
-      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_ignpower_ckp_signal_update_cb, ignpower_ctx);
-      BREAK_IF(err != E_OK);
-    }
 
     err = ignpower_configure(ignpower_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -269,8 +263,7 @@ error_t ecu_modules_ignpower_register_cb(ecu_module_ignpower_t instance, ignpowe
   return err;
 }
 
-
-ITCM_FUNC static void ecu_modules_ignpower_signal_update_cb(void *usrdata, bool ignpower_active)
+static void ecu_modules_ignpower_signal_update_cb(void *usrdata, bool ignpower_active)
 {
   ecu_modules_ignpower_ctx_t *ctx = (ecu_modules_ignpower_ctx_t *)usrdata;
   ecu_modules_ignpower_cb_t *cb;
@@ -283,19 +276,4 @@ ITCM_FUNC static void ecu_modules_ignpower_signal_update_cb(void *usrdata, bool 
       break;
     }
   }
-}
-
-ITCM_FUNC static void ecu_modules_ignpower_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  ecu_modules_ignpower_ctx_t *module_ctx = (ecu_modules_ignpower_ctx_t *)usrdata;
-  ignpower_ctx_t *ctx;
-
-  do {
-    BREAK_IF(module_ctx == NULL);
-    ctx = module_ctx->ctx;
-    BREAK_IF(ctx == NULL);
-
-    ignpower_ckp_signal_update(ctx, data, diag);
-
-  } while(0);
 }

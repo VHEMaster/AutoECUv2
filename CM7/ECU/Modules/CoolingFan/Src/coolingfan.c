@@ -264,7 +264,7 @@ void coolingfan_loop_slow(coolingfan_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
+void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   time_us_t now;
 

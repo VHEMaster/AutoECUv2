@@ -78,7 +78,6 @@ error_t coolingfan_init(coolingfan_ctx_t *ctx, const coolingfan_init_ctx_t *init
 error_t coolingfan_configure(coolingfan_ctx_t *ctx, const coolingfan_config_t *config);
 error_t coolingfan_reset(coolingfan_ctx_t *ctx);
 
-void coolingfan_ckp_signal_update(coolingfan_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
 void coolingfan_ignpower_update(coolingfan_ctx_t *ctx, bool ignpower_on);
 
 error_t coolingfan_get_data(coolingfan_ctx_t *ctx, coolingfan_data_t *data);

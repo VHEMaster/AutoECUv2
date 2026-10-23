@@ -73,8 +73,6 @@ error_t ignpower_init(ignpower_ctx_t *ctx, const ignpower_init_ctx_t *init_ctx);
 error_t ignpower_configure(ignpower_ctx_t *ctx, const ignpower_config_t *config);
 error_t ignpower_reset(ignpower_ctx_t *ctx);
 
-
-void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
 error_t ignpower_is_active(ignpower_ctx_t *ctx, bool *ignpower_active);
 
 error_t ignpower_get_data(ignpower_ctx_t *ctx, ignpower_data_t *data);

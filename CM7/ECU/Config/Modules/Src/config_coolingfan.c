@@ -18,7 +18,6 @@ typedef struct {
     coolingfan_ctx_t *ctx;
 }ecu_modules_coolingfan_ctx_t;
 
-static void ecu_modules_coolingfan_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag);
 static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active);
 
 static const coolingfan_config_t ecu_modules_coolingfan_config_default = {
@@ -130,9 +129,6 @@ error_t ecu_modules_coolingfan_configure(ecu_module_coolingfan_t instance, const
     coolingfan_ctx = &ecu_modules_coolingfan_ctx[instance];
 
     if(config->enabled) {
-      err = ecu_sensors_ckp_register_cb(config->sensor_ckp, ecu_modules_coolingfan_ckp_signal_update_cb, coolingfan_ctx);
-      BREAK_IF(err != E_OK);
-
       err = ecu_modules_ignpower_register_cb(config->module_ignpower, ecu_modules_coolingfan_ignpower_signal_update_cb, coolingfan_ctx);
       BREAK_IF(err != E_OK);
     }
@@ -269,22 +265,7 @@ error_t ecu_modules_coolingfan_get_diag(ecu_module_coolingfan_t instance, coolin
   return err;
 }
 
-ITCM_FUNC static void ecu_modules_coolingfan_ckp_signal_update_cb(void *usrdata, const ckp_data_t *data, const ckp_diag_t *diag)
-{
-  ecu_modules_coolingfan_ctx_t *module_ctx = (ecu_modules_coolingfan_ctx_t *)usrdata;
-  coolingfan_ctx_t *ctx;
-
-  do {
-    BREAK_IF(module_ctx == NULL);
-    ctx = module_ctx->ctx;
-    BREAK_IF(ctx == NULL);
-
-    coolingfan_ckp_signal_update(ctx, data, diag);
-
-  } while(0);
-}
-
-ITCM_FUNC static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active)
+static void ecu_modules_coolingfan_ignpower_signal_update_cb(void *usrdata, bool ignpower_active)
 {
   ecu_modules_coolingfan_ctx_t *module_ctx = (ecu_modules_coolingfan_ctx_t *)usrdata;
   coolingfan_ctx_t *ctx;

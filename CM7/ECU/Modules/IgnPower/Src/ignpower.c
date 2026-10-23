@@ -227,7 +227,7 @@ void ignpower_loop_slow(ignpower_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
+void ignpower_ckp_signal_update(ignpower_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   do {
     BREAK_IF(ctx == NULL);

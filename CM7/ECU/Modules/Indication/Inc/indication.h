@@ -71,7 +71,6 @@ error_t indication_init(indication_ctx_t *ctx, const indication_init_ctx_t *init
 error_t indication_configure(indication_ctx_t *ctx, const indication_config_t *config);
 error_t indication_reset(indication_ctx_t *ctx);
 
-void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
 void indication_ignpower_update(indication_ctx_t *ctx, bool ignpower_on);
 
 error_t indication_get_data(indication_ctx_t *ctx, indication_data_t *data);

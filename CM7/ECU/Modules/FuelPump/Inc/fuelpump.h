@@ -83,7 +83,6 @@ error_t fuelpump_init(fuelpump_ctx_t *ctx, const fuelpump_init_ctx_t *init_ctx);
 error_t fuelpump_configure(fuelpump_ctx_t *ctx, const fuelpump_config_t *config);
 error_t fuelpump_reset(fuelpump_ctx_t *ctx);
 
-void fuelpump_ckp_signal_update(fuelpump_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag);
 void fuelpump_ignpower_update(fuelpump_ctx_t *ctx, bool ignpower_on);
 
 error_t fuelpump_get_data(fuelpump_ctx_t *ctx, fuelpump_data_t *data);

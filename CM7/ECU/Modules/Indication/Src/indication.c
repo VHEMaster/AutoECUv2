@@ -159,7 +159,7 @@ void indication_loop_slow(indication_ctx_t *ctx)
   }
 }
 
-ITCM_FUNC void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
+void indication_ckp_signal_update(indication_ctx_t *ctx, const ckp_data_t *data, const ckp_diag_t *diag)
 {
   do {
     BREAK_IF(ctx == NULL);
