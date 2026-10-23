@@ -109,10 +109,10 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_MDMA_Init();
-  MX_IWDG2_Init();
+  //MX_GPIO_Init();
+  //MX_DMA_Init();
+  //MX_MDMA_Init();
+  //MX_IWDG2_Init();
   /* USER CODE BEGIN 2 */
   __HAL_DBGMCU_FREEZE_IWDG1();
   __HAL_DBGMCU_FREEZE2_IWDG2();
