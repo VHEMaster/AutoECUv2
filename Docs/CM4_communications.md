@@ -159,6 +159,8 @@ python3 Tools/build_firmware.py --core CM7 --configuration Debug
 python3 Tools/build_firmware.py --core CM4 --configuration Release
 python3 Tools/build_firmware.py --core CM7 --configuration Release
 python3 Tests/run_ipc_tests.py
+python3 Tests/run_ipc_tests.py --optimization Ofast
+python3 Tests/run_ipc_tests.py --sanitize
 python3 Tools/check_dualcore.py --configuration Debug
 python3 Tools/check_dualcore.py --configuration Release
 ```
@@ -166,14 +168,23 @@ python3 Tools/check_dualcore.py --configuration Release
 The build helper reads source entries, linked resources, include paths, defines
 and optimization settings from the checked-in CubeIDE projects. Debug uses `-Og`;
 Release uses `-Ofast`. Set `ARM_CC` or pass `--cc` for a custom compiler path.
-ELF files and maps go under `build/`. Host tests compile the production transport
-and both sides of the production parameter bridge with small platform adapters.
+ELF files and maps go under `build/`. Host tests compile the production transport, both sides of the production
+parameter bridge, the real Signals codec/FIFO/timeout handlers, the real OBD2
+handlers and their CM4 configuration backends with small platform adapters.
+The default host optimization is `-O2`; `--sanitize` enables AddressSanitizer and
+UndefinedBehaviorSanitizer. Restricted debugger environments may require
+`ASAN_OPTIONS=detect_leaks=0` because LeakSanitizer cannot inspect their process tree.
 
 Validated with GNU Arm GCC 13.2.1: both complete images link in Debug and Release.
 Host coverage includes both RPC directions, full queues, copied inputs, propagated
 errors, maximum payload, response capacity, 10,000 slot reuses, 4,000 concurrent RPC calls, 200,000 concurrent
 value transfers, ID resolution, bidirectional value/validity transfer, first
-snapshot gating, stale data, TIM5 wrap, invalid IDs, stale echo suppression, and reconfiguration of write ownership.
+snapshot gating, stale data, TIM5 wrap, invalid IDs, stale echo suppression, and reconfiguration of write ownership. Additional regression coverage checks
+application-before-ack ordering, delayed invalidations, concurrent publication
+timestamps, and full 512-entry registry operation, and the actual CM7 parameter RPC read/write/error handlers. Integration coverage runs real
+Signals CAN decode/encode, timeout/reset/disable/reconfiguration and OBD2 PID 0C
+byte generation, live RPM updates, last-valid fallback, initial snapshot gating
+and reset.
 
 Hardware validation remains necessary: boot with both images, OBD2/ISO-TP traffic
 under engine ISR load, CAN routing in both directions, reconfiguration during

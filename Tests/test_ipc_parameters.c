@@ -116,5 +116,40 @@ int main(void)
   publish_during_clock_read = true;
   cm4_poll();
   assert(cm4_get_ptr(id,&local) == E_OK && local->valid && local->value == 321);
-  printf("Parameter bridge tests passed: subscription, resolution, initial snapshot, bidirectional values/validity, stale data, timer wrap, invalid id, no shared application pointers\n");
+  comm_ipc_parameter_rpc_t request = {.parameter_id = id.id}, response;
+  uint32_t length = sizeof(response);
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_READ,&request,sizeof(request),&response,&length) == E_AGAIN);
+  ipc_rpc_service(0,comm_ipc_dispatch);
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_READ,&request,sizeof(request),&response,&length) == E_OK);
+  assert(length == sizeof(response) && response.value.value == engine.value && response.value.valid == engine.valid);
+  request.value.value = 789;request.value.valid = false;
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_WRITE,&request,sizeof(request),NULL,NULL) == E_AGAIN);
+  ipc_rpc_service(0,comm_ipc_dispatch);
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_WRITE,&request,sizeof(request),NULL,NULL) == E_OK);
+  assert(engine.value == 789 && !engine.valid);
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_READ,&request,1,NULL,NULL) == E_AGAIN);
+  ipc_rpc_service(0,comm_ipc_dispatch);
+  assert(ipc_rpc_call(1,COMM_IPC_PARAMETER_READ,&request,1,NULL,NULL) == E_PARAM);
+  assert(ipc_rpc_call(1,0x8000ffffu,&request,sizeof(request),NULL,NULL) == E_AGAIN);
+  ipc_rpc_service(0,comm_ipc_dispatch);
+  assert(ipc_rpc_call(1,0x8000ffffu,&request,sizeof(request),NULL,NULL) == E_NOTSUPPORT);
+  engine.valid = true;
+  ecu_config_parameter_id_t extra = {.bitfield = {
+    .supported = true,.entity = ECU_COMMON_ENTITY_SENSOR,.parameter = 2
+  }};
+  unsigned next = 0;
+  while(g_ipc.parameter_count < IPC_PARAMETER_MAX) {
+    extra.bitfield.type = next & 255u;
+    extra.bitfield.instance = next >> 8;
+    assert(cm4_get_ptr(extra,&local) == E_AGAIN);
+    ++next;
+  }
+  extra.bitfield.type = next & 255u;
+  extra.bitfield.instance = next >> 8;
+  assert(cm4_get_ptr(extra,&local) == E_OVERFLOW);
+  assert(cm4_get_ptr(id,&local) == E_OK); /* Existing subscriptions remain usable. */
+  for(unsigned i = 0; i < 2u * IPC_PARAMETER_MAX / 32u; ++i) exchange();
+  --next;extra.bitfield.type = next & 255u;extra.bitfield.instance = next >> 8;
+  assert(cm4_get_ptr(extra,&local) == E_OK && local->valid);
+  printf("Parameter bridge tests passed: subscription, resolution, initial snapshot, bidirectional values/validity, stale data, timer wrap, invalid id, delayed invalidation, apply-before-ack, reconfiguration, concurrent timestamps, full 512-entry registry, real CM7 RPC read/write/error handlers\n");
 }

@@ -6,7 +6,6 @@
  */
 
 #include "config_signals.h"
-#include "config_extern.h"
 
 #include "common.h"
 #include "comm_ipc.h"
