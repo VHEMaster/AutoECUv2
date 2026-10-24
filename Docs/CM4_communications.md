@@ -138,7 +138,9 @@ published only after that engine update is complete. Delayed invalidations are
 always applied; a valid publication older than 100 ms invalidates the previous
 engine state without replacing its numeric value with a stale sample. Freshness is sampled after observing each publication, rather than against the
 poll's entry timestamp, so a concurrent fresh publication cannot look like a
-wrapped old timestamp. Downstream mirrors
+wrapped old timestamp. CM7 timestamps engine snapshots in the same short critical
+section as the value copy; time spent preempted before capture does not age a new
+snapshot artificially. Downstream mirrors
 become invalid after 100 ms without a fresh engine snapshot; upstream validity
 continues to follow the configured Signals message timeout. OBD2 value reads
 return `E_NOTRDY` for invalid mirrors instead of treating them as fresh values.

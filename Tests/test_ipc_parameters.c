@@ -112,6 +112,7 @@ int main(void)
   publish_during_lookup = true;
   cm7_poll();
   assert(engine.valid && engine.value == 123);
+  assert(g_ipc.parameters[0].from_cm7.timestamp == test_now);
   cm4_poll(); /* Drain prior engine snapshots before injecting the next one. */
   publish_during_clock_read = true;
   cm4_poll();

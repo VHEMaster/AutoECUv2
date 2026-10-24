@@ -157,8 +157,9 @@ void comm_ipc_parameters_poll(void)
     }
     uint32_t prim = EnterCritical();
     ecu_core_runtime_value_ctx_t snapshot = *parameter;
+    uint32_t captured_at = time_now_us();
     ExitCritical(prim);
-    (void)ipc_value_publish(&item->from_cm7, snapshot.value, snapshot.valid, now);
+    (void)ipc_value_publish(&item->from_cm7, snapshot.value, snapshot.valid, captured_at);
   }
 }
 #endif
