@@ -44,7 +44,10 @@ int main(void)
   assert(cm4_get_value(id,&value) == E_NOTRDY);
   local->value = 77;local->valid = true;assert(cm4_write(local) == E_OK);cm4_poll();
   assert(comm_ipc_parameters_release_writes() == E_AGAIN);
-  cm7_poll();assert(comm_ipc_parameters_release_writes() == E_OK);
+  cm7_poll();assert(comm_ipc_parameters_release_writes() == E_AGAIN);
+  cm4_poll();cm7_poll();
+  assert(comm_ipc_parameters_release_writes() == E_OK);
+  assert(!engine.valid);
   assert(cm4_get_ptr(id,&local) == E_AGAIN);
   engine.value = 88;engine.valid = true;cm4_poll();exchange();exchange();
   assert(cm4_get_ptr(id,&local) == E_OK && local->value == 88);
@@ -78,5 +81,14 @@ int main(void)
   expect_write_pending = true;
   cm7_poll();
   assert(!expect_write_pending && engine.valid && engine.value == 77);
+  /* Removing an upstream source must invalidate its last engine value and
+   * discard any engine echo queued before that invalidation. */
+  assert(comm_ipc_parameters_release_writes() == E_AGAIN);
+  cm4_poll();cm7_poll();
+  assert(comm_ipc_parameters_release_writes() == E_OK);
+  assert(!engine.valid);
+  assert(cm4_get_ptr(id,&local) == E_AGAIN);
+  exchange();
+  assert(cm4_get_ptr(id,&local) == E_OK && !local->valid);
   printf("Parameter bridge tests passed: subscription, resolution, initial snapshot, bidirectional values/validity, stale data, timer wrap, invalid id, no shared application pointers\n");
 }

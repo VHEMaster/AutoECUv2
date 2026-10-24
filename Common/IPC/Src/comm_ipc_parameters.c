@@ -8,6 +8,7 @@
 static ecu_core_runtime_value_ctx_t mirror[IPC_PARAMETER_MAX];
 static bool dirty[IPC_PARAMETER_MAX];
 static bool written[IPC_PARAMETER_MAX];
+static bool releasing[IPC_PARAMETER_MAX];
 static bool received[IPC_PARAMETER_MAX];
 static uint32_t updated[IPC_PARAMETER_MAX];
 static uint32_t cursor;
@@ -67,13 +68,25 @@ error_t comm_ipc_parameters_release_writes(void)
   bool pending = false;
   for(uint32_t i = 0; i < count; ++i) {
     if(!written[i]) continue;
-    dirty[i] = false;
-    if(ipc_load(&g_ipc.parameters[i].from_cm4.pending)) pending = true;
+    if(!releasing[i]) {
+      /* Revoke the old source explicitly; merely dropping its dirty flag
+       * would leave its last engine value valid after reconfiguration. */
+      mirror[i].valid = false;
+      dirty[i] = true;
+      releasing[i] = true;
+    }
+    if(dirty[i] || ipc_load(&g_ipc.parameters[i].from_cm4.pending)) pending = true;
   }
   if(pending) return E_AGAIN;
   for(uint32_t i = 0; i < count; ++i) {
     if(!written[i]) continue;
+    /* CM7 acknowledges only after applying the invalidation. Drain an
+     * older queued echo before accepting another authoritative snapshot. */
+    float unused_value; uint32_t unused_valid, unused_timestamp;
+    (void)ipc_value_consume(&g_ipc.parameters[i].from_cm7,
+        &unused_value, &unused_valid, &unused_timestamp);
     written[i] = false;
+    releasing[i] = false;
     received[i] = false;
     mirror[i].valid = false;
   }

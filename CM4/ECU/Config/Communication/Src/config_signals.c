@@ -95,7 +95,16 @@ error_t ecu_comm_signals_reset(ecu_comm_signals_t instance)
 
     signals_ctx = &ecu_comm_signals_ctx[instance];
 
-    err = signals_reset(signals_ctx->ctx);
+    BREAK_IF_ACTION(signals_ctx->ctx == NULL || !signals_ctx->ctx->initialized, err = E_INVALACT);
+    if(signals_ctx->ctx->configured) {
+      err = signals_reset(signals_ctx->ctx);
+      BREAK_IF(err != E_OK);
+      signals_loop_comm(signals_ctx->ctx);
+    }
+    /* Retrying an asynchronous reset must not re-arm the protocol reset. */
+    err = comm_ipc_parameters_release_writes();
+    BREAK_IF(err != E_OK);
+    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_SIGNALS, instance, false);
 
   } while(0);
 

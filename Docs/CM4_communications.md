@@ -128,9 +128,11 @@ context.
 
 Signals upstream writes and invalidations mark their local values dirty. A busy
 mailbox retains the latest dirty value for a later pass; engine snapshots cannot
-roll those values back. Reconfiguring Signals stops its old runtime, waits for
-outstanding value publications to be acknowledged, and releases the old local
-write ownership before rebuilding parameter links. CM7 applies incoming values by the same configured
+roll those values back. Reconfiguring or resetting Signals stops its old runtime, waits for
+outstanding value publications to be acknowledged, publishes an explicit
+invalidation for each old upstream source, and waits for CM7 to apply it before
+releasing local write ownership and rebuilding parameter links. Queued engine
+echoes from the old ownership period are discarded. CM7 applies incoming values by the same configured
 parameter ID used by the former single-core implementation. Acknowledgement is
 published only after that engine update is complete. Delayed invalidations are
 always applied; a valid publication older than 100 ms invalidates the previous
