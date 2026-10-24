@@ -11,6 +11,7 @@ p.add_argument('-j', type=int, default=4)
 a = p.parse_args()
 project = ROOT/a.core
 out = (a.output or ROOT/'build'/a.configuration/a.core).resolve(); out.mkdir(parents=True,exist_ok=True)
+(out/(a.core+'.elf')).unlink(missing_ok=True)
 xml = ET.parse(project/'.cproject')
 configs = xml.findall('.//cconfiguration')
 config = next(c for c in configs if c.find('.//configuration').get('name') == 'Build_'+a.configuration)
@@ -24,7 +25,7 @@ for opt in compiler.findall('option'):
         includes.extend(str((project/'Debug'/v.get('value').replace('${workspace_loc:/${ProjName}}',str(project))).resolve()) for v in opt.findall('listOptionValue'))
     if opt.get('valueType') == 'definedSymbols':
         defines.extend(v.get('value') for v in opt.findall('listOptionValue'))
-flags = ['-mcpu=cortex-m'+('4' if a.core=='CM4' else '7'),'-mthumb','-mfpu=fpv4-sp-d16' if a.core=='CM4' else '-mfpu=fpv5-d16','-mfloat-abi=hard','-std=gnu11',optimization,'-g3','-ffunction-sections','-fdata-sections','-fcommon','-Wall','-Wno-unused-function']
+flags = ['-mcpu=cortex-m'+('4' if a.core=='CM4' else '7'),'-mthumb','-mfpu=fpv4-sp-d16' if a.core=='CM4' else '-mfpu=fpv5-d16','-mfloat-abi=hard','-std=gnu11',optimization,'-g3','-ffunction-sections','-fdata-sections','-Wall','-Wno-unused-function']
 flags += ['-I'+v for v in dict.fromkeys(includes)] + ['-D'+v for v in defines]
 links = ET.parse(project/'.project').findall('.//linkedResources/link')
 sources = set()
@@ -55,5 +56,5 @@ if fail: sys.exit(1)
 elf = out/(a.core+'.elf')
 cmd = [a.cc,*flags,'-T'+str(project/'STM32H745IITX_FLASH.ld'),'-Wl,--gc-sections','-Wl,-Map='+str(out/(a.core+'.map')),'--specs=nano.specs','--specs=nosys.specs','-Wl,--start-group',*objects,'-lm','-lc','-Wl,--end-group','-o',str(elf)]
 if subprocess.run(cmd).returncode: sys.exit(1)
-subprocess.run([a.cc.replace('gcc','size'),str(elf)],check=True)
+subprocess.run([str(pathlib.Path(a.cc).with_name(pathlib.Path(a.cc).name.replace('gcc','size'))),str(elf)],check=True)
 print('Built',elf,'from',len(sources),'sources')

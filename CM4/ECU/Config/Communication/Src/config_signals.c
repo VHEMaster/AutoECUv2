@@ -9,6 +9,7 @@
 #include "config_extern.h"
 
 #include "common.h"
+#include "comm_ipc.h"
 
 typedef struct ecu_comm_signals_ctx_tag ecu_comm_signals_ctx_t;
 
@@ -68,6 +69,10 @@ error_t ecu_comm_signals_configure(ecu_comm_signals_t instance, const signals_co
     BREAK_IF_ACTION(instance >= ECU_COMM_SIGNALS_MAX || config == NULL, err = E_PARAM);
 
     signals_ctx = &ecu_comm_signals_ctx[instance];
+
+    signals_ctx->ctx->configured = false;
+    err = comm_ipc_parameters_release_writes();
+    BREAK_IF(err != E_OK);
 
     err = signals_configure(signals_ctx->ctx, config);
     BREAK_IF(err != E_OK);

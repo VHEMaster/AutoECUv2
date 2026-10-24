@@ -34,7 +34,7 @@
   */
 #define HAL_MODULE_ENABLED
 
-  #define HAL_ADC_MODULE_ENABLED
+  /* #define HAL_ADC_MODULE_ENABLED   */
 #define HAL_FDCAN_MODULE_ENABLED
 /* #define HAL_FMAC_MODULE_ENABLED   */
 /* #define HAL_CEC_MODULE_ENABLED   */
@@ -42,7 +42,7 @@
 /* #define HAL_CORDIC_MODULE_ENABLED   */
 #define HAL_CRC_MODULE_ENABLED
 /* #define HAL_CRYP_MODULE_ENABLED   */
-#define HAL_DAC_MODULE_ENABLED
+/* #define HAL_DAC_MODULE_ENABLED   */
 /* #define HAL_DCMI_MODULE_ENABLED   */
 /* #define HAL_DMA2D_MODULE_ENABLED   */
 /* #define HAL_ETH_MODULE_ENABLED   */
@@ -53,7 +53,7 @@
 /* #define HAL_SRAM_MODULE_ENABLED   */
 /* #define HAL_SDRAM_MODULE_ENABLED   */
 /* #define HAL_HASH_MODULE_ENABLED   */
-#define HAL_HRTIM_MODULE_ENABLED
+/* #define HAL_HRTIM_MODULE_ENABLED   */
 /* #define HAL_HSEM_MODULE_ENABLED   */
 /* #define HAL_GFXMMU_MODULE_ENABLED   */
 /* #define HAL_JPEG_MODULE_ENABLED   */
@@ -65,7 +65,7 @@
 #define HAL_IWDG_MODULE_ENABLED
 /* #define HAL_LPTIM_MODULE_ENABLED   */
 /* #define HAL_LTDC_MODULE_ENABLED   */
-#define HAL_QSPI_MODULE_ENABLED
+/* #define HAL_QSPI_MODULE_ENABLED   */
 /* #define HAL_RAMECC_MODULE_ENABLED   */
 /* #define HAL_RNG_MODULE_ENABLED   */
 #define HAL_RTC_MODULE_ENABLED
@@ -73,7 +73,7 @@
 /* #define HAL_SD_MODULE_ENABLED   */
 /* #define HAL_MMC_MODULE_ENABLED   */
 /* #define HAL_SPDIFRX_MODULE_ENABLED   */
-#define HAL_SPI_MODULE_ENABLED
+/* #define HAL_SPI_MODULE_ENABLED   */
 /* #define HAL_SWPMI_MODULE_ENABLED   */
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
@@ -171,7 +171,7 @@
 #define  USE_SD_TRANSCEIVER           0U               /*!< use uSD Transceiver */
 #define  USE_SPI_CRC	              0U               /*!< use CRC in SPI */
 
-#define  USE_HAL_ADC_REGISTER_CALLBACKS     1U /* ADC register callback disabled     */
+#define  USE_HAL_ADC_REGISTER_CALLBACKS     0U /* ADC register callback disabled     */
 #define  USE_HAL_CEC_REGISTER_CALLBACKS     0U /* CEC register callback disabled     */
 #define  USE_HAL_COMP_REGISTER_CALLBACKS    0U /* COMP register callback disabled    */
 #define  USE_HAL_CORDIC_REGISTER_CALLBACKS  0U /* CORDIC register callback disabled  */
@@ -205,7 +205,7 @@
 #define  USE_HAL_OSPI_REGISTER_CALLBACKS    0U /* OSPI register callback disabled    */
 #define  USE_HAL_OTFDEC_REGISTER_CALLBACKS  0U /* OTFDEC register callback disabled  */
 #define  USE_HAL_PCD_REGISTER_CALLBACKS     0U /* PCD register callback disabled     */
-#define  USE_HAL_QSPI_REGISTER_CALLBACKS    1U /* QSPI register callback disabled    */
+#define  USE_HAL_QSPI_REGISTER_CALLBACKS    0U /* QSPI register callback disabled    */
 #define  USE_HAL_RNG_REGISTER_CALLBACKS     0U /* RNG register callback disabled     */
 #define  USE_HAL_RTC_REGISTER_CALLBACKS     0U /* RTC register callback disabled     */
 #define  USE_HAL_SAI_REGISTER_CALLBACKS     0U /* SAI register callback disabled     */
@@ -213,11 +213,11 @@
 #define  USE_HAL_SMARTCARD_REGISTER_CALLBACKS  0U /* SMARTCARD register callback disabled */
 #define  USE_HAL_SPDIFRX_REGISTER_CALLBACKS 0U /* SPDIFRX register callback disabled */
 #define  USE_HAL_SMBUS_REGISTER_CALLBACKS   0U /* SMBUS register callback disabled   */
-#define  USE_HAL_SPI_REGISTER_CALLBACKS     1U /* SPI register callback disabled     */
+#define  USE_HAL_SPI_REGISTER_CALLBACKS     0U /* SPI register callback disabled     */
 #define  USE_HAL_SWPMI_REGISTER_CALLBACKS   0U /* SWPMI register callback disabled   */
-#define  USE_HAL_TIM_REGISTER_CALLBACKS     1U /* TIM register callback disabled     */
+#define  USE_HAL_TIM_REGISTER_CALLBACKS     0U /* TIM register callback disabled     */
 #define  USE_HAL_UART_REGISTER_CALLBACKS    1U /* UART register callback disabled    */
-#define  USE_HAL_USART_REGISTER_CALLBACKS   1U /* USART register callback disabled   */
+#define  USE_HAL_USART_REGISTER_CALLBACKS   0U /* USART register callback disabled   */
 #define  USE_HAL_WWDG_REGISTER_CALLBACKS    0U /* WWDG register callback disabled    */
 
 /* ########################### Ethernet Configuration ######################### */

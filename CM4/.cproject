@@ -64,73 +64,9 @@
 									<listOptionValue builtIn="false" value="../../CM4/ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM4/ECU/Drivers/Time/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM4/ECU/MiddleLayer/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Calibration/CalcData/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Calibration/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Devices/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Hardware/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Misc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Modules/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Sensors/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Timings/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Devices/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Modules/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Runtime/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Sensors/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Timings/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Inputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Outputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/PowerModing/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/CJ125/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/L9960/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/L9966/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/MAX31855/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/TLE4729G/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/TLE6240GP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Crc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Gpio/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Inputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Outputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/PulsedAdc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/QueuedPulses/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Spi/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Time/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/MiddleLayer/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/CoolingFan/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/ETC/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/FuelPump/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/IgnPower/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/Indication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/VVT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/WGCV/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/APS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/CKP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/CMP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/ECT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/EGT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/IAT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/MAF/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/MAP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/OPS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/OTS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/TPS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/VSS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Base/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/CyBalance/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Ignition/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Injection/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/KnockWindow/Inc"/>
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
@@ -234,73 +170,9 @@
 									<listOptionValue builtIn="false" value="../../CM4/ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM4/ECU/Drivers/Time/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM4/ECU/MiddleLayer/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Calibration/CalcData/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Calibration/Misc/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Devices/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Global/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Hardware/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Misc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Modules/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Sensors/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Timings/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Devices/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Modules/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Runtime/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Sensors/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Config/Versioned/Timings/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Inputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/CalcData/Outputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/Communication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Core/PowerModing/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/CJ125/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/L9960/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/L9966/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/MAX31855/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/TLE4729G/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Devices/TLE6240GP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Crc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Flash/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Gpio/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Inputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Outputs/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/PulsedAdc/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/QueuedPulses/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Spi/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Drivers/Time/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/MiddleLayer/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/CoolingFan/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/ETC/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/FuelPump/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/IgnPower/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/Indication/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/VVT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Modules/WGCV/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/APS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/CKP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/CMP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/ECT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/EGT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/IAT/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/MAF/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/MAP/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/OPS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/OTS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/TPS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Sensors/VSS/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Base/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Common/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/CyBalance/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Ignition/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/Injection/Inc"/>
-									<listOptionValue builtIn="false" value="../../CM7/ECU/Timings/KnockWindow/Inc"/>
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>

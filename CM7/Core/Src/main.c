@@ -249,16 +249,7 @@ int main(void)
   __HAL_RCC_D2SRAM3_CLK_ENABLE();
   ipc_initialize();
   __DSB();
-  HAL_HSEM_FastTake(HSEM_ID_0);
-  /*Release HSEM in order to notify the CPU2(CM4)*/
-  HAL_HSEM_Release(HSEM_ID_0,0);
-  /* wait until CPU2 wakes up from stop mode */
-  timeout = 0xFFFF;
-  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
-  if ( timeout < 0 )
-  {
-    Error_Handler();
-  }
+  /* Release CM4 after CM7 peripheral/application initialization below. */
 #endif
   /* USER CODE END Boot_Mode_Sequence_2 */
 
@@ -301,6 +292,17 @@ int main(void)
   MX_HRTIM_Init();
   /* USER CODE BEGIN 2 */
   middlelayer_init();
+
+  HAL_HSEM_FastTake(HSEM_ID_0);
+  /*Release HSEM in order to notify the CPU2(CM4)*/
+  HAL_HSEM_Release(HSEM_ID_0,0);
+  /* wait until CPU2 wakes up from stop mode */
+  timeout = 0xFFFF;
+  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
+  if ( timeout < 0 )
+  {
+    Error_Handler();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -14,5 +14,6 @@ typedef struct {
 void comm_ipc_parameters_poll(void);
 /* CM4 local value pointers are stable; only copied values cross the boundary. */
 error_t comm_ipc_parameter_write(ecu_core_runtime_value_ctx_t *parameter);
+error_t comm_ipc_parameters_release_writes(void);
 error_t comm_ipc_dispatch(uint32_t key, void *payload, uint32_t *length);
 #endif

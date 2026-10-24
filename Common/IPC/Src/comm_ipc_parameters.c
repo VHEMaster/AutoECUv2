@@ -58,6 +58,27 @@ error_t comm_ipc_parameter_write(ecu_core_runtime_value_ctx_t *parameter)
   }
   return E_PARAM;
 }
+/* Called after stopping Signals and before rebuilding its parameter links.
+ * Acknowledge existing publications before relinquishing CM4 ownership. */
+error_t comm_ipc_parameters_release_writes(void)
+{
+  uint32_t count = ipc_load(&g_ipc.parameter_count);
+  if(count > IPC_PARAMETER_MAX) return E_FAULT;
+  bool pending = false;
+  for(uint32_t i = 0; i < count; ++i) {
+    if(!written[i]) continue;
+    dirty[i] = false;
+    if(ipc_load(&g_ipc.parameters[i].from_cm4.pending)) pending = true;
+  }
+  if(pending) return E_AGAIN;
+  for(uint32_t i = 0; i < count; ++i) {
+    if(!written[i]) continue;
+    written[i] = false;
+    received[i] = false;
+    mirror[i].valid = false;
+  }
+  return E_OK;
+}
 void comm_ipc_parameters_poll(void)
 {
   uint32_t count = ipc_load(&g_ipc.parameter_count);

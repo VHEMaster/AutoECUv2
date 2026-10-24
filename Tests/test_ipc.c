@@ -29,6 +29,28 @@ static void *consumer(void *unused)
   }
   return NULL;
 }
+static unsigned rpc_clients_done;
+static void *rpc_client(void *arg)
+{
+  uint32_t key = 1000u + (uint32_t)(uintptr_t)arg;
+  for(unsigned i = 0; i < 2000; ++i) {
+    unsigned char input[4] = {(unsigned char)i, (unsigned char)(i>>8), 123, 45};
+    unsigned char output[4]; uint32_t n = sizeof(output);
+    error_t err;
+    do { err = ipc_rpc_call(0,key,input,sizeof(input),output,&n); } while(err == E_AGAIN);
+    assert(err == E_OK && n == sizeof(output));
+    input[0] ^= 0x55;
+    assert(!memcmp(input,output,sizeof(input)));
+  }
+  __atomic_add_fetch(&rpc_clients_done,1u,__ATOMIC_RELEASE);
+  return NULL;
+}
+static void *rpc_server(void *unused)
+{
+  (void)unused;
+  while(__atomic_load_n(&rpc_clients_done,__ATOMIC_ACQUIRE) != 2u) ipc_rpc_service(1,echo);
+  return NULL;
+}
 int main(void)
 {
   ipc_initialize();
@@ -62,9 +84,22 @@ int main(void)
     ipc_rpc_service(1-i%2,echo);
     assert(ipc_rpc_call(i%2,7,input,3,NULL,NULL) == E_OK);
   }
+  static unsigned char large[IPC_RPC_BYTES], received[IPC_RPC_BYTES];
+  for(unsigned i = 0; i < IPC_RPC_BYTES; ++i) large[i] = (unsigned char)i;
+  n = sizeof(received);
+  assert(ipc_rpc_call(0,123,large,sizeof(large),received,&n) == E_AGAIN);
+  ipc_rpc_service(1,echo);
+  assert(ipc_rpc_call(0,123,large,sizeof(large),received,&n) == E_OK);
+  large[0] ^= 0x55;
+  assert(n == sizeof(large) && !memcmp(large,received,sizeof(large)));
   pthread_t p,c;
   assert(!pthread_create(&p,NULL,producer,NULL));
   assert(!pthread_create(&c,NULL,consumer,NULL));
   pthread_join(p,NULL);pthread_join(c,NULL);
-  printf("IPC tests passed: bidirectional RPC, full queues, copied payloads, errors, 10000 reuses, 200000 concurrent snapshots; shared bytes=%zu\n",sizeof(g_ipc));
+  pthread_t client1,client2,server;
+  assert(!pthread_create(&server,NULL,rpc_server,NULL));
+  assert(!pthread_create(&client1,NULL,rpc_client,(void *)(uintptr_t)1));
+  assert(!pthread_create(&client2,NULL,rpc_client,(void *)(uintptr_t)2));
+  pthread_join(client1,NULL);pthread_join(client2,NULL);pthread_join(server,NULL);
+  printf("IPC tests passed: bidirectional RPC, full queues, copied payloads, errors, 10000 reuses, 4000 concurrent RPC calls, 200000 concurrent snapshots; shared bytes=%zu\n",sizeof(g_ipc));
 }

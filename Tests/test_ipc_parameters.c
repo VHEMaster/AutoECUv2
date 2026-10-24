@@ -6,6 +6,7 @@ uint32_t test_now;
 static ecu_core_runtime_value_ctx_t engine = {.value = 1234, .valid = true};
 void cm4_poll(void);
 void cm7_poll(void);
+error_t comm_ipc_parameters_release_writes(void);
 error_t cm4_write(ecu_core_runtime_value_ctx_t *);
 error_t cm4_get_ptr(ecu_config_parameter_id_t, ecu_core_runtime_value_ctx_t **);
 error_t cm4_get_value(ecu_config_parameter_id_t, ecu_core_runtime_value_ctx_t *);
@@ -33,6 +34,12 @@ int main(void)
   cm4_poll();cm7_poll();cm4_poll();assert(engine.value == 99 && local->value == 99);
   local->valid = false;assert(cm4_write(local) == E_OK);cm4_poll();cm7_poll();assert(!engine.valid);
   assert(cm4_get_value(id,&value) == E_NOTRDY);
+  local->value = 77;local->valid = true;assert(cm4_write(local) == E_OK);cm4_poll();
+  assert(comm_ipc_parameters_release_writes() == E_AGAIN);
+  cm7_poll();assert(comm_ipc_parameters_release_writes() == E_OK);
+  assert(cm4_get_ptr(id,&local) == E_AGAIN);
+  engine.value = 88;engine.valid = true;cm4_poll();exchange();exchange();
+  assert(cm4_get_ptr(id,&local) == E_OK && local->value == 88);
   /* Freshness timestamps use the same wrap as the hardware TIM5 counter. */
   id.bitfield.parameter = 1;
   assert(cm4_get_ptr(id,&local) == E_AGAIN);
