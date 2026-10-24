@@ -3,6 +3,18 @@
 #include <assert.h>
 #include <stdio.h>
 uint32_t test_now;
+static bool publish_during_lookup;
+static bool publish_during_clock_read;
+uint32_t test_time_now_us(void)
+{
+  uint32_t captured = test_now;
+  if(publish_during_clock_read) {
+    publish_during_clock_read = false;
+    test_now += 10;
+    assert(ipc_value_publish(&g_ipc.parameters[0].from_cm7,321,true,test_now) == E_OK);
+  }
+  return captured;
+}
 static bool expect_write_pending;
 void test_enter_critical(void)
 {
@@ -20,6 +32,11 @@ error_t cm4_get_ptr(ecu_config_parameter_id_t, ecu_core_runtime_value_ctx_t **);
 error_t cm4_get_value(ecu_config_parameter_id_t, ecu_core_runtime_value_ctx_t *);
 error_t engine_get_ptr(ecu_config_parameter_id_t id, ecu_core_runtime_value_ctx_t **p)
 {
+  if(publish_during_lookup) {
+    publish_during_lookup = false;
+    test_now += 10;
+    assert(ipc_value_publish(&g_ipc.parameters[0].from_cm4,123,true,test_now) == E_OK);
+  }
   if(id.bitfield.parameter == 255) return E_PARAM;
   *p = &engine; return E_OK;
 }
@@ -90,5 +107,14 @@ int main(void)
   assert(cm4_get_ptr(id,&local) == E_AGAIN);
   exchange();
   assert(cm4_get_ptr(id,&local) == E_OK && !local->valid);
+  /* A peer may publish after the poll captured its entry timestamp. */
+  test_now = 1000;
+  publish_during_lookup = true;
+  cm7_poll();
+  assert(engine.valid && engine.value == 123);
+  cm4_poll(); /* Drain prior engine snapshots before injecting the next one. */
+  publish_during_clock_read = true;
+  cm4_poll();
+  assert(cm4_get_ptr(id,&local) == E_OK && local->valid && local->value == 321);
   printf("Parameter bridge tests passed: subscription, resolution, initial snapshot, bidirectional values/validity, stale data, timer wrap, invalid id, no shared application pointers\n");
 }

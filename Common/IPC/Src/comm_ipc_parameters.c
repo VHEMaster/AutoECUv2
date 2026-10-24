@@ -111,7 +111,9 @@ void comm_ipc_parameters_poll(void)
       }
       updated[i] = timestamp;
     }
-    if(!written[i] && time_diff(now, updated[i]) > PARAMETER_STALE_US) mirror[i].valid = false;
+    /* Sample after consuming the publication: a peer timestamp can be newer
+     * than this poll's entry time without being stale. */
+    if(!written[i] && time_diff(time_now_us(), updated[i]) > PARAMETER_STALE_US) mirror[i].valid = false;
     if(dirty[i] && ipc_value_publish(&item->from_cm4, mirror[i].value,
         mirror[i].valid, now) == E_OK) dirty[i] = false;
   }
@@ -143,7 +145,7 @@ void comm_ipc_parameters_poll(void)
     }
     float value; uint32_t valid, timestamp;
     if(ipc_value_peek(&item->from_cm4, &value, &valid, &timestamp) == E_OK) {
-      bool fresh = time_diff(now, timestamp) <= PARAMETER_STALE_US;
+      bool fresh = time_diff(time_now_us(), timestamp) <= PARAMETER_STALE_US;
       uint32_t prim = EnterCritical();
       /* A stale publication cannot keep an old engine value valid. Timeout
        * invalidations remain authoritative even if CM7 was delayed. */
