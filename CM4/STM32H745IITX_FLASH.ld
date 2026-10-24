@@ -44,12 +44,22 @@ _Min_Stack_Size = 0x4000; /* required amount of stack */
 MEMORY
 {
 FLASH (rx)     : ORIGIN = 0x08100000, LENGTH = 1024K
-RAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 288K
+RAM (xrw)      : ORIGIN = 0x30000000, LENGTH = 128K
+IPC_RAM (rw)  : ORIGIN = 0x30020000, LENGTH = 128K
 }
 
 /* Define output sections */
 SECTIONS
 {
+  .ipc_shared (NOLOAD) :
+  {
+    . = ALIGN(32);
+    __ipc_start__ = .;
+    KEEP(*(.ipc_shared))
+    __ipc_end__ = .;
+  } >IPC_RAM
+  ASSERT(SIZEOF(.ipc_shared) <= LENGTH(IPC_RAM), "IPC SRAM overflow")
+
   /* The startup code goes first into FLASH */
   .isr_vector :
   {

@@ -46,7 +46,8 @@ MEMORY
   RAM_D1 (xrw)   : ORIGIN = 0x24000000, LENGTH =  512K
   FLASH  (rx)    : ORIGIN = 0x08000000, LENGTH = 1024K    /* Memory is divided. Actual start is 0x08000000 and actual length is 2048K */
   DTCMRAM (xrw)  : ORIGIN = 0x20000000, LENGTH = 128K
-  RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K
+  /* SRAM1 is owned exclusively by CM4; SRAM2 is shared IPC. */
+  IPC_RAM (rw)   : ORIGIN = 0x30020000, LENGTH = 128K
   RAM_D3 (xrw)   : ORIGIN = 0x38000000, LENGTH = 64K
   ITCMRAM (xrw)  : ORIGIN = 0x00000000, LENGTH = 64K
 }
@@ -54,6 +55,15 @@ MEMORY
 /* Sections */
 SECTIONS
 {
+  .ipc_shared (NOLOAD) :
+  {
+    . = ALIGN(32);
+    __ipc_start__ = .;
+    KEEP(*(.ipc_shared))
+    __ipc_end__ = .;
+  } >IPC_RAM
+  ASSERT(SIZEOF(.ipc_shared) <= LENGTH(IPC_RAM), "IPC SRAM overflow")
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {

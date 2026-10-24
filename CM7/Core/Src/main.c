@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "ipc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -170,6 +171,16 @@ static void MPU_Config(void)
  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
  HAL_MPU_ConfigRegion(&MPU_InitStruct);
+ /* SRAM2 is shared Normal, noncacheable, shareable, execute-never memory.
+  * Region 1 overrides the default cacheable SRAM mapping. */
+ MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+ MPU_InitStruct.BaseAddress = 0x30020000u;
+ MPU_InitStruct.Size = MPU_REGION_SIZE_128KB;
+ MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+ MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+ MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+ MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+ HAL_MPU_ConfigRegion(&MPU_InitStruct);
  /* Enables the MPU */
  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 
@@ -233,6 +244,10 @@ int main(void)
 #if 0
   __HAL_RCC_HSEM_CLK_ENABLE();
   /*Take HSEM */
+  __HAL_RCC_D2SRAM1_CLK_ENABLE();
+  __HAL_RCC_D2SRAM2_CLK_ENABLE();
+  __HAL_RCC_D2SRAM3_CLK_ENABLE();
+  ipc_initialize();
   HAL_HSEM_FastTake(HSEM_ID_0);
   /*Release HSEM in order to notify the CPU2(CM4)*/
   HAL_HSEM_Release(HSEM_ID_0,0);
