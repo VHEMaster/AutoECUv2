@@ -13,6 +13,13 @@ error_t comm_ipc_dispatch(uint32_t key, void *payload, uint32_t *length)
   uint32_t instance = (key >> 8) & 255u;
   uint32_t method = key >> 16;
   error_t err = E_PARAM;
+  /* These routines previously ran above FDCAN's IRQ priority on CM7.
+   * Keep callback tables and protocol contexts coherent during foreground
+   * reconfiguration; SysTick priority 0 remains available to HAL timeouts. */
+  uint32_t saved_basepri = __get_BASEPRI();
+  __set_BASEPRI_MAX(8u << (8u - __NVIC_PRIO_BITS));
+  __DSB();
+  __ISB();
   switch(type) {
     case ECU_COMM_TYPE_CAN:
       if(instance >= ECU_COMM_CAN_MAX) break;
@@ -69,6 +76,9 @@ error_t comm_ipc_dispatch(uint32_t key, void *payload, uint32_t *length)
     ecu_comm_loop_comm();
     ecu_comm_loop_main();
   }
+  __set_BASEPRI(saved_basepri);
+  __DSB();
+  __ISB();
   *length = 0;
   return err;
 }

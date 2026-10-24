@@ -104,6 +104,7 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   SystemCoreClockUpdate();
   HAL_Init();
+  if(HAL_InitTick(0u) != HAL_OK) Error_Handler();
 
   /* USER CODE BEGIN Init */
 

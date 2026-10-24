@@ -248,6 +248,7 @@ int main(void)
   __HAL_RCC_D2SRAM2_CLK_ENABLE();
   __HAL_RCC_D2SRAM3_CLK_ENABLE();
   ipc_initialize();
+  __DSB();
   HAL_HSEM_FastTake(HSEM_ID_0);
   /*Release HSEM in order to notify the CPU2(CM4)*/
   HAL_HSEM_Release(HSEM_ID_0,0);
