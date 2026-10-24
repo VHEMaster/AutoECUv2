@@ -3,6 +3,14 @@
 #include <assert.h>
 #include <stdio.h>
 uint32_t test_now;
+static bool expect_write_pending;
+void test_enter_critical(void)
+{
+  if(expect_write_pending) {
+    assert(ipc_load(&g_ipc.parameters[0].from_cm4.pending) == 1u);
+    expect_write_pending = false;
+  }
+}
 static ecu_core_runtime_value_ctx_t engine = {.value = 1234, .valid = true};
 void cm4_poll(void);
 void cm7_poll(void);
@@ -51,5 +59,24 @@ int main(void)
   assert(cm4_get_ptr(id,&local) == E_AGAIN);exchange();
   assert(cm4_get_ptr(id,&local) == E_PARAM);
   assert(g_ipc.parameter_count == 3);
+  id.bitfield.parameter = 0;
+  assert(cm4_get_ptr(id,&local) == E_OK);
+  engine.valid = true;
+  local->valid = false;
+  assert(cm4_write(local) == E_OK);cm4_poll();
+  test_now += 100001u;
+  cm7_poll();
+  assert(!engine.valid); /* Delayed invalidation must never be dropped. */
+  engine.valid = true;engine.value = 55;
+  local->valid = true;local->value = 66;
+  assert(cm4_write(local) == E_OK);cm4_poll();
+  test_now += 100001u;
+  cm7_poll();
+  assert(!engine.valid && engine.value == 55); /* Reject stale payload and revoke old validity. */
+  local->valid = true;local->value = 77;
+  assert(cm4_write(local) == E_OK);cm4_poll();
+  expect_write_pending = true;
+  cm7_poll();
+  assert(!expect_write_pending && engine.valid && engine.value == 77);
   printf("Parameter bridge tests passed: subscription, resolution, initial snapshot, bidirectional values/validity, stale data, timer wrap, invalid id, no shared application pointers\n");
 }

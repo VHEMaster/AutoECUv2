@@ -89,12 +89,17 @@ error_t ipc_value_publish(ipc_value_t *mailbox, float value, uint32_t valid, uin
   ipc_store(&mailbox->pending, 1u);
   return E_OK;
 }
-error_t ipc_value_consume(ipc_value_t *mailbox, float *value, uint32_t *valid, uint32_t *timestamp)
+error_t ipc_value_peek(ipc_value_t *mailbox, float *value, uint32_t *valid, uint32_t *timestamp)
 {
   if(!ipc_load(&mailbox->pending)) return E_AGAIN;
   *value = mailbox->value;
   *valid = mailbox->valid;
   *timestamp = mailbox->timestamp;
-  ipc_store(&mailbox->pending, 0u);
   return E_OK;
+}
+error_t ipc_value_consume(ipc_value_t *mailbox, float *value, uint32_t *valid, uint32_t *timestamp)
+{
+  error_t err = ipc_value_peek(mailbox, value, valid, timestamp);
+  if(err == E_OK) ipc_store(&mailbox->pending, 0u);
+  return err;
 }

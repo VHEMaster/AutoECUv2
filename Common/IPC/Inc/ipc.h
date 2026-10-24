@@ -64,5 +64,8 @@ typedef error_t (*ipc_rpc_handler_t)(uint32_t key, void *payload, uint32_t *leng
 void ipc_rpc_service(unsigned int core, ipc_rpc_handler_t handler);
 /* Explicit bounded backpressure for value mailboxes. */
 error_t ipc_value_publish(ipc_value_t *mailbox, float value, uint32_t valid, uint32_t timestamp);
+/* Peek retains ownership until the consumer explicitly stores pending = 0.
+ * Use it when acknowledgement must follow an application-side update. */
+error_t ipc_value_peek(ipc_value_t *mailbox, float *value, uint32_t *valid, uint32_t *timestamp);
 error_t ipc_value_consume(ipc_value_t *mailbox, float *value, uint32_t *valid, uint32_t *timestamp);
 #endif

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "errors.h"
 typedef struct { float value; bool valid; } ecu_core_runtime_value_ctx_t;
-static inline uint32_t EnterCritical(void) { return 0; }
+extern void test_enter_critical(void);
+static inline uint32_t EnterCritical(void) { test_enter_critical(); return 0; }
 static inline void ExitCritical(uint32_t prim) { (void)prim; }
 #endif

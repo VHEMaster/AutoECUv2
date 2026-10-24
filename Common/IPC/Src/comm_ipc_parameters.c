@@ -129,15 +129,16 @@ void comm_ipc_parameters_poll(void)
       continue;
     }
     float value; uint32_t valid, timestamp;
-    if(ipc_value_consume(&item->from_cm4, &value, &valid, &timestamp) == E_OK) {
-      /* The configured parameter id is the same authority used by the original
-       * Signals implementation. Apply valid and invalid writes alike. */
-      if(time_diff(now, timestamp) <= PARAMETER_STALE_US) {
-        uint32_t prim = EnterCritical();
-        parameter->value = value;
-        parameter->valid = valid != 0;
-        ExitCritical(prim);
-      }
+    if(ipc_value_peek(&item->from_cm4, &value, &valid, &timestamp) == E_OK) {
+      bool fresh = time_diff(now, timestamp) <= PARAMETER_STALE_US;
+      uint32_t prim = EnterCritical();
+      /* A stale publication cannot keep an old engine value valid. Timeout
+       * invalidations remain authoritative even if CM7 was delayed. */
+      if(!valid || fresh) parameter->value = value;
+      parameter->valid = valid != 0 && fresh;
+      ExitCritical(prim);
+      /* Publish the acknowledgement only after the engine update completed. */
+      ipc_store(&item->from_cm4.pending, 0u);
     }
     uint32_t prim = EnterCritical();
     ecu_core_runtime_value_ctx_t snapshot = *parameter;

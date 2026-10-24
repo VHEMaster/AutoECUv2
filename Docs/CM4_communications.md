@@ -131,7 +131,10 @@ mailbox retains the latest dirty value for a later pass; engine snapshots cannot
 roll those values back. Reconfiguring Signals stops its old runtime, waits for
 outstanding value publications to be acknowledged, and releases the old local
 write ownership before rebuilding parameter links. CM7 applies incoming values by the same configured
-parameter ID used by the former single-core implementation. Downstream mirrors
+parameter ID used by the former single-core implementation. Acknowledgement is
+published only after that engine update is complete. Delayed invalidations are
+always applied; a valid publication older than 100 ms invalidates the previous
+engine state without replacing its numeric value with a stale sample. Downstream mirrors
 become invalid after 100 ms without a fresh engine snapshot; upstream validity
 continues to follow the configured Signals message timeout. OBD2 value reads
 return `E_NOTRDY` for invalid mirrors instead of treating them as fresh values.
