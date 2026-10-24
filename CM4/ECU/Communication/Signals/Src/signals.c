@@ -82,7 +82,9 @@ void signals_loop_comm(signals_ctx_t *ctx)
     BREAK_IF(ctx->configured == false);
 
     if(ctx->reset_trigger) {
-      memset(ctx, 0u, sizeof(signals_ctx_t));
+      memset(&ctx->runtime, 0u, sizeof(ctx->runtime));
+      ctx->configured = false;
+      ctx->reset_trigger = false;
       return;
     }
 

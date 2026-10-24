@@ -33,7 +33,7 @@ void middlelayer_comm_loop_comm(void)
   ecu_comm_loop_comm();
 }
 
-void middlelayer_comm_init(void)
+error_t middlelayer_comm_init(void)
 {
   error_t err = E_OK;
   void *comm_ctx;
@@ -129,4 +129,5 @@ void middlelayer_comm_init(void)
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
   } while(0);
+  return err;
 }

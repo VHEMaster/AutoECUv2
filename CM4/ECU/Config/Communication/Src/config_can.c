@@ -273,7 +273,7 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_call
 
     err = can_register_err_callback(can_ctx->ctx, ecu_comm_can_err_callback, cb);
     if(err == E_OK) {
-      can_ctx->rx_callbacks_count = ++cb_count;
+      can_ctx->err_callbacks_count = ++cb_count;
     }
 
   } while(0);

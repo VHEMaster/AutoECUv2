@@ -139,12 +139,12 @@ void comm_hw_init(void)
   MX_FDCAN1_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
-  HAL_NVIC_SetPriority(DMA1_Stream0__IRQn, 8, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream0__IRQn);
-  HAL_NVIC_SetPriority(DMA1_Stream1__IRQn, 8, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream1__IRQn);
-  HAL_NVIC_SetPriority(DMA1_Stream4__IRQn, 8, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream4__IRQn);
-  HAL_NVIC_SetPriority(DMA1_Stream5__IRQn, 8, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream5__IRQn);
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 8, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 8, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 8, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 8, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 }

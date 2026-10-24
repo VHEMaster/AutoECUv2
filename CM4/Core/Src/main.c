@@ -18,6 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "comm_ipc.h"
+#include "middlelayer_comm.h"
+#include "time.h"
+void comm_hw_init(void);
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -98,6 +102,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  SystemCoreClockUpdate();
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -114,6 +119,12 @@ int main(void)
   //MX_MDMA_Init();
   //MX_IWDG2_Init();
   /* USER CODE BEGIN 2 */
+  if(ipc_load(&g_ipc.abi) != IPC_ABI || !ipc_load(&g_ipc.cm7_ready)) Error_Handler();
+  time_init_timebase(&TIM5->CNT);
+  time_init_tickbase(&TIM2->CNT);
+  comm_hw_init();
+  if(middlelayer_comm_init() != E_OK) Error_Handler();
+  ipc_store(&g_ipc.cm4_ready, 1u);
   __HAL_DBGMCU_FREEZE_IWDG1();
   __HAL_DBGMCU_FREEZE2_IWDG2();
   /* USER CODE END 2 */
@@ -125,6 +136,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    comm_ipc_parameters_poll();
+    ipc_rpc_service(1u, comm_ipc_dispatch);
+    middlelayer_comm_loop_comm();
+    middlelayer_comm_loop_main();
+    static time_us_t slow_last;
+    time_us_t now = time_now_us();
+    if(time_diff(now, slow_last) >= 1000u) {
+      slow_last = now;
+      middlelayer_comm_loop_slow();
+    }
+    ipc_store(&g_ipc.cm4_heartbeat, now);
   }
   /* USER CODE END 3 */
 }

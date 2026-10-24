@@ -79,7 +79,7 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
 
   core_loop_fast();
 
-  ecu_config_swi_poll();
+
 
   TIME_MSMT_STOP(&ml_loop_time_msmt.fast);
 

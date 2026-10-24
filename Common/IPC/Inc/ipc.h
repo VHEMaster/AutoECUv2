@@ -8,7 +8,7 @@
 #define IPC_RPC_SLOTS 2u
 #define IPC_RPC_BYTES 16384u
 #define IPC_PARAMETER_MAX 512u
-#define IPC_SHARED_BYTES (128u * 1024u)
+#define IPC_SHARED_BYTES (96u * 1024u)
 
 typedef enum { IPC_FREE, IPC_BUILDING, IPC_REQUEST, IPC_REPLY } ipc_state_t;
 typedef struct {
@@ -28,6 +28,8 @@ typedef struct {
 } ipc_value_t;
 typedef struct {
   uint32_t id;
+  uint32_t resolved;
+  int32_t resolve_result;
   ipc_value_t from_cm7;
   ipc_value_t from_cm4;
 } ipc_parameter_t;
@@ -54,7 +56,8 @@ void ipc_store(uint32_t *value, uint32_t data);
 /* Each key identifies one outstanding operation. Retry with unchanged input
  * until a terminal result is returned. E_AGAIN never means completion. Calls
  * copy their arguments; no caller pointers or callbacks enter shared memory.
- * Full queues return E_AGAIN without accepting the operation. */
+ * Full queues or a preempted producer return E_AGAIN without accepting the
+ * operation. One logical caller owns each key until it collects its reply. */
 error_t ipc_rpc_call(unsigned int core, uint32_t key, const void *request,
     uint32_t length, void *response, uint32_t *response_length);
 typedef error_t (*ipc_rpc_handler_t)(uint32_t key, void *payload, uint32_t *length);

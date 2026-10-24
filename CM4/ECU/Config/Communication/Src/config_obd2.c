@@ -8,8 +8,9 @@
 #include <string.h>
 #include "config_obd2.h"
 #include "compiler.h"
+#include "config_common.h"
 
-#include "config_global.h"
+
 
 // TODO: remove me
 #define ECU_SENSOR_READ_PARAM_DATA (0)
@@ -84,6 +85,20 @@ error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *c
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
+    /* Resolve and populate subscriptions before accepting diagnostic traffic. */
+    if(config->enabled && config->mode_01_linkage.supported) {
+      for(unsigned p = 0; p < OBD2_PID_01_MAX; ++p) {
+        const obd2_config_mode_01_linkage_parameter_t *param = &config->mode_01_linkage.parameters[p];
+        if(!param->supported || param->source != OBD2_CONFIG_MODE_01_LINKAGE_SOURCE_COMMON) continue;
+        for(unsigned i = 0; i < ITEMSOF(param->common_ids); ++i) {
+          if(!param->common_ids[i].bitfield.supported) continue;
+          ecu_core_runtime_value_ctx_t *value;
+          error_t result = ecu_config_common_get_parameter_ptr_by_id(param->common_ids[i], &value);
+          if(result != E_OK && (err == E_OK || err == E_AGAIN)) err = result;
+        }
+      }
+      BREAK_IF(err != E_OK);
+    }
     err = obd2_configure(obd2_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 

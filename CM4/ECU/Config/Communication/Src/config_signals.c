@@ -7,7 +7,7 @@
 
 #include "config_signals.h"
 #include "config_extern.h"
-#include "config_global.h"
+
 #include "common.h"
 
 typedef struct ecu_comm_signals_ctx_tag ecu_comm_signals_ctx_t;

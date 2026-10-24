@@ -171,11 +171,11 @@ static void MPU_Config(void)
  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
 
  HAL_MPU_ConfigRegion(&MPU_InitStruct);
- /* SRAM2 is shared Normal, noncacheable, shareable, execute-never memory.
+ /* D2 SRAM is Normal, noncacheable, shareable, execute-never memory.
   * Region 1 overrides the default cacheable SRAM mapping. */
  MPU_InitStruct.Number = MPU_REGION_NUMBER1;
- MPU_InitStruct.BaseAddress = 0x30020000u;
- MPU_InitStruct.Size = MPU_REGION_SIZE_128KB;
+ MPU_InitStruct.BaseAddress = 0x30000000u;
+ MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;
  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
@@ -197,7 +197,7 @@ int main(void)
 
   /* USER CODE END 1 */
   /* USER CODE BEGIN Boot_Mode_Sequence_0 */
-#if 0
+#if 1
   int32_t timeout;
 #endif
   /* USER CODE END Boot_Mode_Sequence_0 */
@@ -213,7 +213,7 @@ int main(void)
 
   /* USER CODE BEGIN Boot_Mode_Sequence_1 */
   /* Wait until CPU2 boots and enters in stop mode or timeout*/
-#if 0
+#if 1
   timeout = 0xFFFF;
   while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
   if ( timeout < 0 )
@@ -241,7 +241,7 @@ int main(void)
   /* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
   HSEM notification */
   /*HW semaphore Clock enable*/
-#if 0
+#if 1
   __HAL_RCC_HSEM_CLK_ENABLE();
   /*Take HSEM */
   __HAL_RCC_D2SRAM1_CLK_ENABLE();

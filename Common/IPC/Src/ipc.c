@@ -18,7 +18,7 @@ void ipc_initialize(void)
   ipc_store(&g_ipc.cm7_ready, 1u);
 }
 
-error_t ipc_rpc_call(unsigned int core, uint32_t key, const void *request,
+static error_t ipc_rpc_call_locked(unsigned int core, uint32_t key, const void *request,
     uint32_t length, void *response, uint32_t *response_length)
 {
   ipc_rpc_slot_t *free_slot = NULL;
@@ -42,14 +42,26 @@ error_t ipc_rpc_call(unsigned int core, uint32_t key, const void *request,
     return result;
   }
   if(!free_slot) return E_AGAIN;
-  /* This API has one producer context per core. The integration invokes it
-   * only from the configuration FSM (CM7) / foreground (CM4). */
+  /* The local nonblocking producer guard serializes slot reservations. */
   free_slot->key = key;
   ipc_store(&free_slot->state, IPC_BUILDING);
   free_slot->length = length;
   if(length) memcpy(free_slot->payload, request, length);
   ipc_store(&free_slot->state, IPC_REQUEST);
   return E_AGAIN;
+}
+
+/* A preempting caller observes busy and retries; no interrupt masking and no
+ * lock waiting is needed even while copying a full configuration object. */
+static uint32_t client_busy[2];
+error_t ipc_rpc_call(unsigned int core, uint32_t key, const void *request,
+    uint32_t length, void *response, uint32_t *response_length)
+{
+  if(core > 1u) return E_PARAM;
+  if(__atomic_exchange_n(&client_busy[core], 1u, __ATOMIC_ACQUIRE)) return E_AGAIN;
+  error_t result = ipc_rpc_call_locked(core, key, request, length, response, response_length);
+  __atomic_store_n(&client_busy[core], 0u, __ATOMIC_RELEASE);
+  return result;
 }
 
 void ipc_rpc_service(unsigned int core, ipc_rpc_handler_t handler)

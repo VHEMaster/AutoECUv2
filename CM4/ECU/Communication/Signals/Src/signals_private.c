@@ -6,6 +6,7 @@
  */
 
 #include "config_comm.h"
+#include "comm_ipc.h"
 #include "config_common.h"
 #include "signals_private.h"
 
@@ -564,6 +565,7 @@ static error_t signals_handle_upstream_message(signals_runtime_messages_fifo_ite
       value.value = signal->value.phy_value;
       if(signal->parameter_ptr != NULL) {
         *signal->parameter_ptr = value;
+        (void)comm_ipc_parameter_write(signal->parameter_ptr);
       }
       signal = signal->next;
     }
@@ -892,6 +894,7 @@ static error_t signals_invalidate_upstream_message(signals_runtime_message_ctx_t
     while(signal != NULL) {
       if(signal->parameter_ptr != NULL) {
         signal->parameter_ptr->valid = false;
+        (void)comm_ipc_parameter_write(signal->parameter_ptr);
       }
       signal = signal->next;
     }
