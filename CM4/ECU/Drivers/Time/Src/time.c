@@ -1,0 +1,179 @@
+/*
+ * time.c
+ *
+ *  Created on: Mar 20, 2024
+ *      Author: VHEMaster
+ */
+
+#include <limits.h>
+#include "time.h"
+#include "compiler.h"
+
+volatile time_us_t *g_time_timebase = NULL;
+
+volatile time_tick_t *g_time_tickbase = NULL;
+
+volatile float g_time_mean_lpf = 0.01f;
+
+void time_init_timebase(volatile time_us_t *timebase)
+{
+  g_time_timebase = timebase;
+}
+
+void time_init_tickbase(volatile time_tick_t *tickbase)
+{
+  g_time_tickbase = tickbase;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right)
+{
+  time_us_t result;
+  time_delta_us_t time_delta = time_diff(time_right, time_left);
+  int32_t time_adder;
+
+  float mult;
+
+  if(input_right != input_left) {
+    mult = (input_mid - input_left) / (input_right - input_left);
+    time_adder = roundf(time_delta * mult);
+
+    if(time_adder >= 0) {
+      result = time_add(time_left, (time_delta_us_t)time_adder);
+    } else {
+      result = time_sub(time_left, (time_delta_us_t)(-time_adder));
+    }
+  } else {
+    result = time_add(time_left, time_delta >> 1);
+  }
+
+  return result;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE float time_interpolate_value(time_us_t time_left, time_us_t time_mid, time_us_t time_right, float value_left, float value_right)
+{
+  float result;
+  time_delta_us_t time_delta;
+  time_delta_us_t time_offset;
+
+  float mult;
+
+  if(time_right != time_left) {
+      time_delta = time_diff(time_right, time_left);
+      time_offset = time_diff(time_mid, time_left);
+
+      if(time_offset > (TIME_TIMEBASE_MASK >> 1)) {
+        time_offset = (TIME_TIMEBASE_MASK + 1) - time_offset;
+        mult = -(float)time_offset / (float)time_delta;
+      } else {
+        mult = (float)time_offset / (float)time_delta;
+      }
+
+
+      result = (value_right - value_left) * mult + value_left;
+  } else {
+      result = (value_left + value_right) * 0.5f;
+  }
+
+  return result;
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_start(time_msmnt_item_t *item)
+{
+  const time_tick_t tick = time_now_tick();
+
+  item->period = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
+
+  item->reduce_us = 0;
+  item->last_tick = time_now_tick();
+}
+
+ITCM_FUNC OPTIMIZE_FAST INLINE void time_msmt_stop(time_msmnt_item_t *item)
+{
+  const time_tick_t tick = time_now_tick();
+  const time_float_delta_us_t load_tick_nr = time_tick_diff(tick, item->last_tick) * TIME_US_IN_TICK;
+  const time_float_delta_us_t load_tick = load_tick_nr - item->reduce_us;
+  const float mean_blend = g_time_mean_lpf;
+
+  if(item->load_max < load_tick || item->load_max == 0) {
+    item->load_max = load_tick;
+  }
+  if(item->load_min > load_tick || item->load_min == 0) {
+    item->load_min = load_tick;
+  }
+  if(item->load_mean == 0.0f) {
+    item->load_mean = load_tick;
+  } else{
+    item->load_mean = BLEND(item->load_mean, load_tick, mean_blend);
+  }
+
+  item->load_last_nr = load_tick_nr;
+  item->load_last = load_tick;
+}
+
+typedef struct {
+    uint32_t bitmap;
+    time_msmnt_item_t *items[32];
+}time_msmnt_nested_protection_t;
+
+static time_msmnt_nested_protection_t time_msmnt_nested_protection_ctx = {0};
+
+ITCM_FUNC OPTIMIZE_FAST void time_msmt_start_nested_protected(time_msmnt_item_np_t *item)
+{
+  uint32_t prim = EnterCritical();
+  uint32_t bitmap = time_msmnt_nested_protection_ctx.bitmap;
+  uint32_t pos = 32 - __CLZ(bitmap);
+  uint32_t mask = 1u << (pos);
+
+  bitmap |= mask;
+  item->bitmap_mask = mask;
+  item->array_pos = pos;
+  time_msmnt_nested_protection_ctx.bitmap = bitmap;
+  time_msmnt_nested_protection_ctx.items[pos] = &item->generic;
+
+  time_msmt_start(&item->generic);
+  ExitCritical(prim);
+}
+
+ITCM_FUNC OPTIMIZE_FAST void time_msmt_stop_nested_protected(time_msmnt_item_np_t *item)
+{
+  uint32_t prim = EnterCritical();
+  time_msmt_stop(&item->generic);
+  const time_float_delta_us_t reduce_us = item->generic.reduce_us;
+  const float mean_blend = g_time_mean_lpf;
+
+  if(item->reduce_us_mean == 0.0f) {
+    item->reduce_us_mean = reduce_us;
+  } else{
+    item->reduce_us_mean = BLEND(item->reduce_us_mean, reduce_us, mean_blend);
+  }
+
+  uint32_t bitmap = time_msmnt_nested_protection_ctx.bitmap;
+  uint32_t mask = item->bitmap_mask;
+  uint32_t pos = item->array_pos;
+  time_float_delta_us_t load_last;
+  time_float_delta_us_t load_last_nr;
+
+  bitmap &= ~mask;
+  time_msmnt_nested_protection_ctx.bitmap = bitmap;
+  time_msmnt_nested_protection_ctx.items[pos] = NULL;
+
+  load_last = item->generic.load_last;
+  load_last_nr = item->generic.load_last_nr;
+  for(uint32_t i = 0; i < pos; i++) {
+    time_msmnt_nested_protection_ctx.items[i]->reduce_us += load_last;
+  }
+
+  if(item->load_mean_reduced == 0.0f) {
+    item->load_mean_reduced = load_last;
+  } else{
+    item->load_mean_reduced = BLEND(item->load_mean_reduced, load_last, mean_blend);
+  }
+
+  if(item->load_mean_nreduced == 0.0f) {
+    item->load_mean_nreduced = load_last_nr;
+  } else{
+    item->load_mean_nreduced = BLEND(item->load_mean_nreduced, load_last_nr, mean_blend);
+  }
+
+  ExitCritical(prim);
+}

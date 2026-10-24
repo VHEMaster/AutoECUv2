@@ -1,0 +1,149 @@
+/*
+ * time.h
+ *
+ *  Created on: Mar 17, 2024
+ *      Author: VHEMaster
+ */
+
+#ifndef DRIVERS_TIME_INC_TIME_H_
+#define DRIVERS_TIME_INC_TIME_H_
+
+#include <stdint.h>
+#include "compiler.h"
+
+#define TIME_TICKBASE_MASK   0x03FFFFFF
+#define TIME_TIMEBASE_MASK   0x03FFFFFF
+
+#define TIME_NOW    time_now_us
+
+#define TIME_US_IN_MS   (1000u)
+#define TIME_MS_IN_S    (1000u)
+#define TIME_US_IN_S    (TIME_US_IN_MS * TIME_MS_IN_S)
+
+#define TIME_S_IN_US    (1.0f / TIME_US_IN_S)
+#define TIME_S_IN_MS    (1.0f / TIME_MS_IN_S)
+#define TIME_MS_IN_US   (1.0f / TIME_US_IN_MS)
+
+#define TIME_US_IN_TICK (0.0125f)
+
+#define TIME_MSMT_TYPE        time_msmnt_item_np_t
+#define TIME_MSMT_START(x)    time_msmt_start_nested_protected(x)
+#define TIME_MSMT_STOP(x)     time_msmt_stop_nested_protected(x)
+
+typedef uint32_t time_tick_t;
+typedef uint32_t time_us_t;
+typedef uint32_t time_ms_t;
+typedef uint32_t time_s_t;
+typedef float time_float_us_t;
+typedef float time_float_ms_t;
+typedef float time_float_s_t;
+
+typedef uint32_t time_delta_tick_t;
+typedef uint32_t time_delta_us_t;
+typedef uint32_t time_delta_ms_t;
+typedef uint32_t time_delta_s_t;
+typedef float time_float_delta_us_t;
+typedef float time_float_delta_ms_t;
+typedef float time_float_delta_s_t;
+
+typedef struct {
+    time_float_delta_us_t reduce_us;
+    time_float_delta_us_t load_last_nr;
+
+    time_tick_t last_tick;
+    time_float_delta_us_t period;
+
+    time_float_delta_us_t load_last;
+    time_float_delta_us_t load_min;
+    time_float_delta_us_t load_max;
+    time_float_delta_us_t load_mean;
+}time_msmnt_item_t;
+
+typedef struct {
+    time_msmnt_item_t generic;
+    uint32_t bitmap_mask;
+    uint32_t array_pos;
+
+    time_float_delta_us_t reduce_us_mean;
+    time_float_delta_us_t load_mean_nreduced;
+    time_float_delta_us_t load_mean_reduced;
+}time_msmnt_item_np_t;
+
+extern volatile time_us_t *g_time_timebase;
+extern volatile time_tick_t *g_time_tickbase;
+
+void time_init_timebase(volatile time_us_t *timebase);
+time_us_t time_interpolate_time(float input_left, float input_mid, float input_right, time_us_t time_left, time_us_t time_right);
+float time_interpolate_value(time_us_t time_left, time_us_t time_mid, time_us_t time_right, float value_left, float value_right);
+
+void time_init_tickbase(volatile time_tick_t *tickbase);
+
+void time_msmt_start(time_msmnt_item_t *item);
+void time_msmt_stop(time_msmnt_item_t *item);
+
+void time_msmt_start_nested_protected(time_msmnt_item_np_t *item);
+void time_msmt_stop_nested_protected(time_msmnt_item_np_t *item);
+
+
+STATIC_INLINE time_us_t time_now_us(void)
+{
+  return *g_time_timebase;
+}
+
+STATIC_INLINE time_us_t time_mask_us(void)
+{
+  return TIME_TIMEBASE_MASK;
+}
+
+STATIC_INLINE time_tick_t time_now_tick(void)
+{
+  return *g_time_tickbase;
+}
+
+STATIC_INLINE time_tick_t time_tick_mask(void)
+{
+  return TIME_TICKBASE_MASK;
+}
+
+STATIC_INLINE time_delta_us_t time_diff(time_us_t a, time_us_t b)
+{
+  time_us_t retval;
+
+  retval = a - b;
+  retval &= TIME_TIMEBASE_MASK;
+
+  return retval;
+}
+
+STATIC_INLINE time_delta_tick_t time_tick_diff(time_tick_t a, time_tick_t b)
+{
+  time_us_t retval;
+
+  retval = a - b;
+  retval &= TIME_TICKBASE_MASK;
+
+  return retval;
+}
+
+
+STATIC_INLINE time_us_t time_add(time_us_t time, time_delta_us_t delta)
+{
+  time_us_t retval;
+
+  retval = time + delta;
+  retval &= TIME_TIMEBASE_MASK;
+
+  return retval;
+}
+
+STATIC_INLINE time_us_t time_sub(time_us_t time, time_delta_us_t delta)
+{
+  time_us_t retval;
+
+  retval = time - delta;
+  retval &= TIME_TIMEBASE_MASK;
+
+  return retval;
+}
+
+#endif /* DRIVERS_TIME_INC_TIME_H_ */

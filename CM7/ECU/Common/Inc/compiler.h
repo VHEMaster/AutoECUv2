@@ -22,15 +22,20 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-#define ALIGNMENT_CACHE           (__SCB_DCACHE_LINE_SIZE)
+#define ALIGNMENT_CACHE           (32u)
 
 #define STATIC_INLINE             __attribute__((always_inline)) static inline
 #define INLINE                    __attribute__((always_inline)) inline
 #define ALIGNED(x)                __attribute__((aligned(x)))
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
 #define BUFFER_DMA                __attribute__((section(".dmabss")))
+#if defined(CORE_CM4)
+#define RAM_SECTION
+#define ITCM_FUNC
+#else
 #define RAM_SECTION               __attribute__((section(".ramdata")))
 #define ITCM_FUNC                 __attribute__((section(".itcm_func")))
+#endif
 #define OPTIMIZE(flag)            __attribute__((optimize(flag)))
 #define OPTIMIZE_FAST             OPTIMIZE("Ofast")
 #define OPTIMIZE_SIZE             OPTIMIZE("Os")
