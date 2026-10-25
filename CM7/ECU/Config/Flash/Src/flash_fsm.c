@@ -69,6 +69,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           if(ctx->cmd_dupl_index >= 2) {
             if(ctx->cmd_request == FLASH_CMD_READ) {
               err = E_BADVALUE;
+              // TODO: better handling
             } else if(ctx->cmd_request == FLASH_CMD_WRITE) {
               err = E_OK;
             }
@@ -204,6 +205,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           continue;
         } else if(ctx->dma_ctx->section_header.section_type != ctx->cmd_section_type || ctx->dma_ctx->section_header.section_index != ctx->cmd_section_index) {
           ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
+          // TODO: better handling
           continue;
         }
         if(err != E_AGAIN) {

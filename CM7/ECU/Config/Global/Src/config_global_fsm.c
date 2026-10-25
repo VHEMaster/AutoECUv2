@@ -655,9 +655,11 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
   HAL_StatusTypeDef status;
   const ecu_config_generic_config_t *req_config;
   uint32_t addr;
+  time_us_t now;
 
   while(true) {
     err = E_AGAIN;
+    now = time_now_us();
 
     switch(ctx->fsm_operation) {
       case ECU_CONFIG_FSM_OPERATION_CONDITION:
@@ -830,6 +832,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             (uint32_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
             ctx->op_req_ctx.data_dma_length / ctx->op_req_ctx.data_dma_datasize);
         if(status == HAL_OK) {
+          ctx->cmd_timestamp = now;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL;
           continue;
         } else {
@@ -858,6 +861,39 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         } else if(err != E_AGAIN) {
           ctx->op_req_errcode_internal = err;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+        } else if(time_diff(now, ctx->cmd_timestamp) > ECU_CONFIG_DOUBLEBUFFER_TIMEOUT) {
+          ctx->op_req_errcode_internal = E_TIMEOUT;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT;
+          // TODO: better handling
+          continue;
+        }
+        break;
+      case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT:
+        ctx->dma_errode = E_AGAIN;
+        status = HAL_DMA_Abort_IT(ctx->hdma);
+        if(status == HAL_OK) {
+          ctx->cmd_timestamp = now;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT_WAIT;
+          continue;
+        } else {
+          err = E_TIMEOUT;
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+          // TODO: better handling
+        }
+        break;
+
+      case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT_WAIT:
+        err = ctx->dma_errode;
+        if(err != E_AGAIN) {
+          ctx->op_req_errcode_internal = E_TIMEOUT;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+          // TODO: better handling
+        } else if(time_diff(now, ctx->cmd_timestamp) > ECU_CONFIG_DOUBLEBUFFER_TIMEOUT) {
+          ctx->op_req_errcode_internal = E_TIMEOUT;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+          // TODO: better handling
+          continue;
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_REQUEST:

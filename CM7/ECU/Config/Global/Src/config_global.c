@@ -900,6 +900,15 @@ static void ecu_config_dma_err_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
+static void ecu_config_dma_abort_cb(DMA_HandleTypeDef *hdma)
+{
+  ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
+
+  if(ctx->hdma == hdma) {
+    ctx->dma_errode = E_ABORTED;
+  }
+}
+
 error_t ecu_config_global_init(void)
 {
   error_t err = E_OK;
@@ -1079,6 +1088,8 @@ error_t ecu_config_global_init(void)
     status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, ecu_config_dma_clpt_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
     status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ERROR_CB_ID, ecu_config_dma_err_cb);
+    BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ABORT_CB_ID, ecu_config_dma_abort_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     ctx->global_ready = true;

@@ -9,6 +9,7 @@
 #define CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_
 
 #include "common.h"
+#include "time.h"
 
 #include "flash.h"
 #include "config_calcdata.h"
@@ -72,7 +73,8 @@
 #include "config_engine.h"
 #include "config_common.h"
 
-#define ECU_CONFIG_ITEM_VERSIONS_MAX     (4)
+#define ECU_CONFIG_ITEM_VERSIONS_MAX      (4)
+#define ECU_CONFIG_DOUBLEBUFFER_TIMEOUT   (10 * TIME_US_IN_MS)
 
 typedef uint32_t ecu_config_item_type_t;
 typedef uint32_t ecu_index_type_t;
@@ -305,6 +307,8 @@ typedef enum {
   ECU_CONFIG_FSM_OPERATION_DEFINE,
   ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ,
   ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL,
+  ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT,
+  ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT_WAIT,
   ECU_CONFIG_FSM_OPERATION_REQUEST,
   ECU_CONFIG_FSM_OPERATION_TRANSLATE_ACQUIRE,
   ECU_CONFIG_FSM_OPERATION_TRANSLATE_CHECK,
@@ -413,6 +417,8 @@ typedef struct {
     ecu_config_timing_type_t process_timing_type;
     ecu_config_comm_type_t process_comm_type;
     ecu_device_instance_t process_instance;
+
+    time_us_t cmd_timestamp;
 }ecu_config_global_runtime_ctx_t;
 
 error_t ecu_config_global_init(void);
