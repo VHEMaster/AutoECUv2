@@ -27,6 +27,8 @@ extern ecu_config_global_engine_double_t ecu_config_global_engine_double;
 
 static ecu_config_global_runtime_ctx_t ecu_config_global_runtime_ctx = {0};
 
+static const bool ecu_config_global_load_default_at_startup = false;
+
 static const ecu_config_device_config_t ecu_config_global_flash_config = {
     .device_type = ECU_DEVICE_TYPE_FLASH,
     .instances_count = ECU_DEVICE_FLASH_MAX,
@@ -966,7 +968,7 @@ error_t ecu_config_global_init(void)
         BREAK_IF_ACTION((ctx->devices_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
         BREAK_IF_ACTION(ctx->devices_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->devices_config[c].generic.get_default_cfg_func != NULL) {
+        if(ctx->devices_config[c].generic.get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
           err = ctx->devices_config[c].generic.get_default_cfg_func(i, ctx->devices_config[c].generic.data_ptr + ctx->devices_config[c].generic.data_size * i);
         } else {
           memset(ctx->devices_config[c].generic.data_ptr + ctx->devices_config[c].generic.data_size * i,
@@ -986,7 +988,7 @@ error_t ecu_config_global_init(void)
         BREAK_IF_ACTION((ctx->sensors_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
         BREAK_IF_ACTION(ctx->sensors_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->sensors_config[c].generic.get_default_cfg_func != NULL) {
+        if(ctx->sensors_config[c].generic.get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
           err = ctx->sensors_config[c].generic.get_default_cfg_func(i, ctx->sensors_config[c].generic.data_ptr + ctx->sensors_config[c].generic.data_size * i);
         } else {
           memset(ctx->sensors_config[c].generic.data_ptr + ctx->sensors_config[c].generic.data_size * i,
@@ -1006,7 +1008,7 @@ error_t ecu_config_global_init(void)
         BREAK_IF_ACTION((ctx->modules_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
         BREAK_IF_ACTION(ctx->modules_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->modules_config[c].generic.get_default_cfg_func != NULL) {
+        if(ctx->modules_config[c].generic.get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
           err = ctx->modules_config[c].generic.get_default_cfg_func(i, ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i);
         } else {
           memset(ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i,
@@ -1026,7 +1028,7 @@ error_t ecu_config_global_init(void)
         BREAK_IF_ACTION((ctx->timings_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
         BREAK_IF_ACTION(ctx->timings_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->timings_config[c].generic.get_default_cfg_func != NULL) {
+        if(ctx->timings_config[c].generic.get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
           err = ctx->timings_config[c].generic.get_default_cfg_func(i, ctx->timings_config[c].generic.data_ptr + ctx->timings_config[c].generic.data_size * i);
         } else {
           memset(ctx->timings_config[c].generic.data_ptr + ctx->timings_config[c].generic.data_size * i,
@@ -1045,7 +1047,7 @@ error_t ecu_config_global_init(void)
       BREAK_IF_ACTION((ctx->calibrations_config[c].data_size & 0x1F) != 0, err = E_INVALACT);
       BREAK_IF_ACTION(ctx->calibrations_config[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-      if(ctx->calibrations_config[c].get_default_cfg_func != NULL) {
+      if(ctx->calibrations_config[c].get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
         err = ctx->calibrations_config[c].get_default_cfg_func(0, ctx->calibrations_config[c].data_ptr);
       } else {
         memset(ctx->calibrations_config[c].data_ptr,
@@ -1063,7 +1065,7 @@ error_t ecu_config_global_init(void)
       BREAK_IF_ACTION((ctx->runtimes_config[c].data_size & 0x1F) != 0, err = E_INVALACT);
       BREAK_IF_ACTION(ctx->runtimes_config[c].data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-      if(ctx->runtimes_config[c].get_default_cfg_func != NULL) {
+      if(ctx->runtimes_config[c].get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
         err = ctx->runtimes_config[c].get_default_cfg_func(0, ctx->runtimes_config[c].data_ptr);
       } else {
         memset(ctx->runtimes_config[c].data_ptr,
@@ -1082,7 +1084,7 @@ error_t ecu_config_global_init(void)
         BREAK_IF_ACTION((ctx->comms_config[c].generic.data_size & 0x1F) != 0, err = E_INVALACT);
         BREAK_IF_ACTION(ctx->comms_config[c].generic.data_size > section_info->section_length - ECU_FLASH_SECTION_HEADER_LENGTH, err = E_INVALACT);
 
-        if(ctx->comms_config[c].generic.get_default_cfg_func != NULL) {
+        if(ctx->comms_config[c].generic.get_default_cfg_func != NULL && ecu_config_global_load_default_at_startup) {
           err = ctx->comms_config[c].generic.get_default_cfg_func(i, ctx->comms_config[c].generic.data_ptr + ctx->comms_config[c].generic.data_size * i);
         } else {
           memset(ctx->comms_config[c].generic.data_ptr + ctx->comms_config[c].generic.data_size * i,
