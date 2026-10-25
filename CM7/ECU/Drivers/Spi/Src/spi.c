@@ -65,7 +65,7 @@ error_t spi_init(spi_t *spi, const spi_cfg_t *cfg)
     }
 #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
 
-    __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+    ATOMIC_RELEASE(spi->busy, false);
 
     spi->state = SPI_STATE_IDLE;
   } while(0);
@@ -260,7 +260,7 @@ ITCM_FUNC error_t spi_transmit(spi_slave_t *spi_slave, const void *data, uint16_
     if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+        ATOMIC_RELEASE(spi->busy, false);
         break;
       }
 
@@ -347,7 +347,7 @@ ITCM_FUNC error_t spi_receive(spi_slave_t *spi_slave, void *data, uint16_t lengt
     if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+        ATOMIC_RELEASE(spi->busy, false);
         break;
       }
 
@@ -434,7 +434,7 @@ ITCM_FUNC error_t spi_transmit_and_receive(spi_slave_t *spi_slave, const void *t
     if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+        ATOMIC_RELEASE(spi->busy, false);
         break;
       }
 
@@ -464,7 +464,7 @@ ITCM_FUNC error_t spi_transmit_then_receive(spi_slave_t *spi_slave, const void *
     if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+        ATOMIC_RELEASE(spi->busy, false);
         break;
       }
 
@@ -496,7 +496,7 @@ ITCM_FUNC error_t spi_transmit_and_poll(spi_slave_t *spi_slave, const void *tran
     if(spi->state == SPI_STATE_IDLE && ATOMIC_TRY_LOCK(spi->busy, true)) {
       err = spi_private_slave_reconfigure(spi_slave);
       if(err != E_OK) {
-        __atomic_store_n(&spi->busy, false, __ATOMIC_RELEASE);
+        ATOMIC_RELEASE(spi->busy, false);
         break;
       }
 
