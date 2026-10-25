@@ -811,6 +811,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                     ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_limit;
                   }
                   if((ctx->op_req_ctx.data_dma_length & (ctx->op_req_ctx.data_dma_datasize - 1)) != 0 ||
+                      ((uintptr_t)ctx->op_req_ctx.data_ptr & (ctx->op_req_ctx.data_dma_datasize - 1)) != 0 ||
                       ((uintptr_t)ctx->op_req_ctx.final_data_ptr & (ctx->op_req_ctx.data_dma_datasize - 1)) != 0) {
                     err = E_PARAM;
                     ctx->op_req_errcode_internal = err;
@@ -828,8 +829,8 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         ctx->dma_errode = E_AGAIN;
         CacheClean((const void *)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
         CacheClean((const void *)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
-        status = HAL_DMA_Start_IT(ctx->hdma, (uint32_t)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos,
-            (uint32_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
+        status = HAL_DMA_Start_IT(ctx->hdma, (uintptr_t)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos,
+            (uintptr_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
             ctx->op_req_ctx.data_dma_length / ctx->op_req_ctx.data_dma_datasize);
         if(status == HAL_OK) {
           ctx->cmd_timestamp = now;
