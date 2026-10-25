@@ -847,6 +847,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_left;
           if(ctx->op_req_ctx.data_dma_length > ctx->op_req_ctx.data_dma_limit) {
             ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_limit;
+            ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ;
           } else if(ctx->op_req_ctx.data_dma_length == 0) {
             ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
           } else {
