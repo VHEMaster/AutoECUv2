@@ -808,6 +808,11 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                   if(ctx->op_req_ctx.data_dma_length > ctx->op_req_ctx.data_dma_limit) {
                     ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_limit;
                   }
+                  if((ctx->op_req_ctx.data_dma_length & (ctx->op_req_ctx.data_dma_datasize - 1)) != 0) {
+                    err = E_PARAM;
+                    ctx->op_req_errcode_internal = err;
+                    ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
+                  }
                 }
               } else {
                 ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
