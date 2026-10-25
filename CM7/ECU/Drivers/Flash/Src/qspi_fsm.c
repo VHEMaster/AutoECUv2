@@ -22,6 +22,11 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 
     switch(ctx->fsm_io) {
       case QSPI_FSM_IO_INITIAL:
+        if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
+          ctx->data_size = ctx->cmd_ptr->NbData;
+          ctx->data_left = ctx->cmd_ptr->NbData;
+          ctx->cmd_ptr->NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
+        }
         if(ctx->cmd_wren_needed == true) {
           ctx->fsm_io = QSPI_FSM_IO_WREN_REQ;
           continue;
@@ -83,8 +88,8 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
               continue;
             }
           } else {
-            ctx->fsm_io = QSPI_FSM_IO_INITIAL;
-            err = cmd_async_errcode;
+            ctx->fsm_io = QSPI_FSM_IO_REPEAT;
+            continue;
           }
         } else if(cmd_async_errcode == E_AGAIN) {
           if(time_diff(now, ctx->cmd_timestamp) >= QSPI_CMD_TIMEOUT_US) {
@@ -139,8 +144,8 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
               continue;
             }
           } else {
-            ctx->fsm_io = QSPI_FSM_IO_INITIAL;
-            err = cmd_async_errcode;
+            ctx->fsm_io = QSPI_FSM_IO_REPEAT;
+            continue;
           }
         } else if(cmd_async_errcode == E_AGAIN) {
           if(time_diff(now, ctx->cmd_timestamp) >= QSPI_PAYLOAD_TIMEOUT_US) {
@@ -171,8 +176,8 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         break;
       case QSPI_FSM_IO_STATUS_WAIT:
         if(cmd_async_errcode == E_OK) {
-          ctx->fsm_io = QSPI_FSM_IO_INITIAL;
-          err = cmd_async_errcode;
+          ctx->fsm_io = QSPI_FSM_IO_REPEAT;
+          continue;
         } else if(cmd_async_errcode == E_AGAIN) {
           if(time_diff(now, ctx->cmd_timestamp) >= ctx->cmd_poll_timeout) {
             ctx->fsm_io = QSPI_FSM_IO_ABORT_REQ;
@@ -196,6 +201,36 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         if(cmd_async_errcode != E_AGAIN) {
           err = cmd_async_errcode;
         } else if(time_diff(now, ctx->cmd_timestamp) >= QSPI_ABORT_TIMEOUT_US) {
+          err = E_TIMEOUT;
+        }
+        break;
+      case QSPI_FSM_IO_REPEAT:
+        if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
+          ctx->data_left -= ctx->cmd_ptr->NbData;
+          if(ctx->data_left > 0) {
+            if(ctx->cmd_payload_tx != NULL) {
+              ctx->cmd_payload_tx += ctx->cmd_ptr->NbData;
+            }
+            if(ctx->cmd_payload_rx != NULL) {
+              ctx->cmd_payload_rx += ctx->cmd_ptr->NbData;
+            }
+            if(ctx->cmd_ptr->AddressMode != QSPI_ADDRESS_NONE) {
+              ctx->cmd_ptr->Address += ctx->cmd_ptr->NbData;
+            }
+            ctx->cmd_ptr->NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
+
+            if(ctx->cmd_wren_needed == true) {
+              ctx->fsm_io = QSPI_FSM_IO_WREN_REQ;
+            } else {
+              ctx->fsm_io = QSPI_FSM_IO_CMD_REQ;
+            }
+            continue;
+          } else {
+            ctx->fsm_io = QSPI_FSM_IO_INITIAL;
+            err = cmd_async_errcode;
+          }
+        } else {
+          ctx->fsm_io = QSPI_FSM_IO_INITIAL;
           err = cmd_async_errcode;
         }
         break;

@@ -14,11 +14,12 @@
 #define QSPI_STATUS_POLL_INTERVAL     (80 * 5)
 #define QSPI_QUAD_INIT_DELAY_US       (50)
 #define QSPI_CMD_TIMEOUT_US           (100)
-#define QSPI_PAYLOAD_TIMEOUT_US       (200)
+#define QSPI_PAYLOAD_TIMEOUT_US       (10 * TIME_US_IN_MS)
 #define QSPI_ABORT_TIMEOUT_US         (1 * TIME_US_IN_MS)
 
 #define QSPI_BPR_TIMEOUT_US           (1 * TIME_US_IN_MS)
 #define QSPI_BPR_SIZE                 (18)
+#define QSPI_NBDATA_MAX               (64 * 1024)
 
 typedef enum {
   QSPI_STATUS_REG_BUSY = 1,
@@ -147,6 +148,7 @@ typedef enum {
   QSPI_FSM_IO_STATUS_WAIT,
   QSPI_FSM_IO_ABORT_REQ,
   QSPI_FSM_IO_ABORT_WAIT,
+  QSPI_FSM_IO_REPEAT,
   QSPI_FSM_IO_MAX
 }qspi_fsm_io_t;
 
@@ -174,6 +176,8 @@ typedef struct {
     error_t cmd_errcode;
     time_us_t cmd_timestamp;
     bool cmd_uses_dma;
+    uint32_t data_size;
+    uint32_t data_left;
 
     qspi_fsm_init_t fsm_init;
     qspi_fsm_process_t fsm_process;
