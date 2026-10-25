@@ -826,6 +826,10 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         if(status == HAL_OK) {
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL;
           continue;
+        } else {
+          err = E_HAL;
+          ctx->op_req_errcode_internal = err;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_UNLOCK;
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL:
