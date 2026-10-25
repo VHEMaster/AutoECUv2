@@ -695,9 +695,16 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_LOCK:
+        ctx->flash_locked = false;
+        if(ctx->op_request == ECU_CONFIG_OP_DEFAULT) {
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DEFINE;
+          continue;
+        }
+
         err = flash_lock();
         if(err == E_OK) {
           err = E_AGAIN;
+          ctx->flash_locked = true;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DEFINE;
           continue;
         } else if(err != E_AGAIN) {
@@ -898,7 +905,15 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_REQUEST:
-        if(ctx->op_request == ECU_CONFIG_OP_READ) {
+        if(ctx->op_request == ECU_CONFIG_OP_DEFAULT) {
+          if(ctx->op_req_ctx.get_default_cfg_func != NULL) {
+            err = ctx->op_req_ctx.get_default_cfg_func(ctx->op_instance, ctx->op_req_ctx.data_ptr);
+          } else {
+            memset(ctx->op_req_ctx.data_ptr, 0u, ctx->op_req_ctx.data_size);
+            err = E_OK;
+          }
+          ctx->op_version = ctx->op_req_ctx.version_current;
+        } else if(ctx->op_request == ECU_CONFIG_OP_READ) {
           err = flash_section_read(ctx->op_req_ctx.flash_section_type, ctx->op_instance, &ctx->op_version, ctx->op_req_ctx.data_ptr, ctx->op_req_ctx.data_size);
         } else if(ctx->op_request == ECU_CONFIG_OP_WRITE) {
           err = flash_section_write(ctx->op_req_ctx.flash_section_type, ctx->op_instance, ctx->op_version, ctx->op_req_ctx.final_data_ptr, ctx->op_req_ctx.data_size);
@@ -1099,7 +1114,12 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         }
         break;
       case ECU_CONFIG_FSM_OPERATION_UNLOCK:
-        err = flash_unlock();
+        if(ctx->flash_locked) {
+          err = flash_unlock();
+        } else {
+          err = E_OK;
+        }
+
         if(err != E_AGAIN) {
           if(ctx->op_req_errcode_internal != E_AGAIN) {
             err = ctx->op_req_errcode_internal;

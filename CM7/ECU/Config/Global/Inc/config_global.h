@@ -180,6 +180,7 @@ typedef enum {
   ECU_CONFIG_OP_NONE = 0,
   ECU_CONFIG_OP_READ,
   ECU_CONFIG_OP_WRITE,
+  ECU_CONFIG_OP_DEFAULT,
   ECU_CONFIG_OP_MAX,
 }ecu_config_op_t;
 
@@ -390,6 +391,7 @@ typedef struct {
     ecu_instance_t op_req_instance;
     ecu_op_req_ctx_t op_req_ctx;
     qspi_ctx_t *qspi_ctx;
+    bool flash_locked;
 
     ecu_config_type_t op_type_index;
     ecu_index_type_t op_index_max;

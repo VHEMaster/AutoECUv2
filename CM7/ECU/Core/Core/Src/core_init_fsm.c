@@ -32,7 +32,8 @@ void core_init_fsm(ecu_core_ctx_t *ctx)
         }
         break;
       case ECU_CORE_INIT_FSM_READ_FLASH:
-        err = ecu_config_global_operation(ECU_CONFIG_OP_READ, ECU_CONFIG_TYPE_ALL, 0, 0);
+        // TODO: replace ECU_CONFIG_OP_DEFAULT to ECU_CONFIG_OP_READ when ready
+        err = ecu_config_global_operation(ECU_CONFIG_OP_DEFAULT, ECU_CONFIG_TYPE_ALL, 0, 0);
         if(err == E_OK) {
           ctx->fsm_core_init++;
           continue;
