@@ -196,7 +196,7 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         if(cmd_async_errcode != E_AGAIN) {
           err = cmd_async_errcode;
         } else if(time_diff(now, ctx->cmd_timestamp) >= QSPI_ABORT_TIMEOUT_US) {
-          err = E_TIMEOUT;
+          err = cmd_async_errcode;
         }
         break;
       default:

@@ -47,6 +47,13 @@ void qspi_timeout_cb(qspi_ctx_t *ctx)
   }
 }
 
+void qspi_abort_cb(qspi_ctx_t *ctx)
+{
+  if(ctx != NULL && ctx->ready == true) {
+    ctx->cmd_async_errcode = E_ABORTED;
+  }
+}
+
 error_t qspi_init(qspi_ctx_t *ctx, const qspi_init_t *init_ctx)
 {
   error_t err = E_OK;

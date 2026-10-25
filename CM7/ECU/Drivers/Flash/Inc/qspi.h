@@ -196,6 +196,7 @@ void qspi_loop_fast(qspi_ctx_t *ctx);
 void qspi_cplt_cb(qspi_ctx_t *ctx);
 void qspi_err_cb(qspi_ctx_t *ctx);
 void qspi_timeout_cb(qspi_ctx_t *ctx);
+void qspi_abort_cb(qspi_ctx_t *ctx);
 
 error_t qspi_lock(qspi_ctx_t *ctx);
 error_t qspi_unlock(qspi_ctx_t *ctx);

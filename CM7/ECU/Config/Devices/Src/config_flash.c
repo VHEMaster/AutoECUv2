@@ -258,6 +258,20 @@ static void ecu_devices_flash_timeout_cb(QSPI_HandleTypeDef *hqspi)
   }
 }
 
+static void ecu_devices_flash_abort_cb(QSPI_HandleTypeDef *hqspi)
+{
+  ecu_devices_flash_ctx_t *flash_ctx;
+
+  for(int i = 0; i < ECU_DEVICE_FLASH_MAX; i++) {
+    flash_ctx = &ecu_devices_flash_ctx[i];
+
+    if(flash_ctx->init->hqspi == hqspi) {
+      qspi_abort_cb(flash_ctx->ctx);
+      break;
+    }
+  }
+}
+
 error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -279,7 +293,7 @@ error_t ecu_devices_flash_init(ecu_device_flash_t instance, qspi_ctx_t *ctx)
     status = HAL_QSPI_RegisterCallback(flash_ctx->init->hqspi, HAL_QSPI_ERROR_CB_ID, ecu_devices_flash_err_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-    status = HAL_QSPI_RegisterCallback(flash_ctx->init->hqspi, HAL_QSPI_ABORT_CB_ID, ecu_devices_flash_timeout_cb);
+    status = HAL_QSPI_RegisterCallback(flash_ctx->init->hqspi, HAL_QSPI_ABORT_CB_ID, ecu_devices_flash_abort_cb);
     status |= HAL_QSPI_RegisterCallback(flash_ctx->init->hqspi, HAL_QSPI_TIMEOUT_CB_ID, ecu_devices_flash_timeout_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
