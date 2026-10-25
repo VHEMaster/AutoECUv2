@@ -913,6 +913,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
               if(ctx->op_req_ctx.get_default_cfg_func != NULL) {
                 err = ctx->op_req_ctx.get_default_cfg_func(ctx->op_instance, ctx->op_req_ctx.data_ptr);
               } else {
+                memset(ctx->op_req_ctx.data_ptr, 0u, ctx->op_req_ctx.data_size);
                 // TODO: set DTC here?
                 err = E_OK;
               }
@@ -921,6 +922,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                 if(ctx->op_req_ctx.get_default_cfg_func != NULL) {
                   err = ctx->op_req_ctx.get_default_cfg_func(ctx->op_instance, ctx->op_req_ctx.data_ptr);
                 } else {
+                  memset(ctx->op_req_ctx.data_ptr, 0u, ctx->op_req_ctx.data_size);
                   // TODO: set DTC here?
                   err = E_OK;
                 }

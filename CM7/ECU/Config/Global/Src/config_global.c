@@ -968,6 +968,9 @@ error_t ecu_config_global_init(void)
 
         if(ctx->devices_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->devices_config[c].generic.get_default_cfg_func(i, ctx->devices_config[c].generic.data_ptr + ctx->devices_config[c].generic.data_size * i);
+        } else {
+          memset(ctx->devices_config[c].generic.data_ptr + ctx->devices_config[c].generic.data_size * i,
+              0u, ctx->devices_config[c].generic.data_size);
         }
         BREAK_IF(err != E_OK);
       }
@@ -985,6 +988,9 @@ error_t ecu_config_global_init(void)
 
         if(ctx->sensors_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->sensors_config[c].generic.get_default_cfg_func(i, ctx->sensors_config[c].generic.data_ptr + ctx->sensors_config[c].generic.data_size * i);
+        } else {
+          memset(ctx->sensors_config[c].generic.data_ptr + ctx->sensors_config[c].generic.data_size * i,
+              0u, ctx->sensors_config[c].generic.data_size);
         }
         BREAK_IF(err != E_OK);
       }
@@ -1002,6 +1008,9 @@ error_t ecu_config_global_init(void)
 
         if(ctx->modules_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->modules_config[c].generic.get_default_cfg_func(i, ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i);
+        } else {
+          memset(ctx->modules_config[c].generic.data_ptr + ctx->modules_config[c].generic.data_size * i,
+              0u, ctx->modules_config[c].generic.data_size);
         }
         BREAK_IF(err != E_OK);
       }
@@ -1019,6 +1028,9 @@ error_t ecu_config_global_init(void)
 
         if(ctx->timings_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->timings_config[c].generic.get_default_cfg_func(i, ctx->timings_config[c].generic.data_ptr + ctx->timings_config[c].generic.data_size * i);
+        } else {
+          memset(ctx->timings_config[c].generic.data_ptr + ctx->timings_config[c].generic.data_size * i,
+              0u, ctx->timings_config[c].generic.data_size);
         }
         BREAK_IF(err != E_OK);
       }
@@ -1035,6 +1047,9 @@ error_t ecu_config_global_init(void)
 
       if(ctx->calibrations_config[c].get_default_cfg_func != NULL) {
         err = ctx->calibrations_config[c].get_default_cfg_func(0, ctx->calibrations_config[c].data_ptr);
+      } else {
+        memset(ctx->calibrations_config[c].data_ptr,
+            0u, ctx->calibrations_config[c].data_size);
       }
       BREAK_IF(err != E_OK);
     }
@@ -1050,6 +1065,9 @@ error_t ecu_config_global_init(void)
 
       if(ctx->runtimes_config[c].get_default_cfg_func != NULL) {
         err = ctx->runtimes_config[c].get_default_cfg_func(0, ctx->runtimes_config[c].data_ptr);
+      } else {
+        memset(ctx->runtimes_config[c].data_ptr,
+            0u, ctx->runtimes_config[c].data_size);
       }
       BREAK_IF(err != E_OK);
     }
@@ -1066,6 +1084,9 @@ error_t ecu_config_global_init(void)
 
         if(ctx->comms_config[c].generic.get_default_cfg_func != NULL) {
           err = ctx->comms_config[c].generic.get_default_cfg_func(i, ctx->comms_config[c].generic.data_ptr + ctx->comms_config[c].generic.data_size * i);
+        } else {
+          memset(ctx->comms_config[c].generic.data_ptr + ctx->comms_config[c].generic.data_size * i,
+              0u, ctx->comms_config[c].generic.data_size);
         }
         BREAK_IF(err != E_OK);
       }
