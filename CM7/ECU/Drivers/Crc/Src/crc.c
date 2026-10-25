@@ -100,19 +100,15 @@ error_t crc_lock(void)
 {
   crc_ctx_t *ctx = &crc_ctx;
   error_t err = E_OK;
-  uint32_t prim;
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    prim = EnterCritical();
-    if(ctx->locked == true) {
-      err = E_AGAIN;
-    } else {
-      ctx->locked = true;
+    if(ATOMIC_TRY_LOCK(ctx->locked, true) == true) {
       err = E_OK;
+    } else {
+      err = E_AGAIN;
     }
-    ExitCritical(prim);
 
   } while(0);
 
@@ -123,17 +119,14 @@ error_t crc_unlock(void)
 {
   crc_ctx_t *ctx = &crc_ctx;
   error_t err = E_OK;
-  uint32_t prim;
 
   do {
-    prim = EnterCritical();
     if(ctx->locked == false || ctx->cmd_ready != false) {
       err = E_INVALACT;
     } else {
-      ctx->locked = false;
+      ATOMIC_RELEASE(ctx->locked, false);
       err = E_OK;
     }
-    ExitCritical(prim);
 
   } while(0);
 
