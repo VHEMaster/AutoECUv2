@@ -447,7 +447,7 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
         if(ctx->checksum == ctx->dma_ctx->section_header.crc) {
           ctx->fsm_process = FLASH_FSM_SECTION_ADDR;
         } else {
-          ctx->cmd_errcode_internal = err;
+          ctx->cmd_errcode_internal = E_CHECKSUM;
           ctx->fsm_process = FLASH_FSM_FLASH_UNLOCK;
         }
         continue;

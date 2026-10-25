@@ -824,7 +824,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
             (uint32_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
             ctx->op_req_ctx.data_dma_length / ctx->op_req_ctx.data_dma_datasize);
         if(status == HAL_OK) {
-          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
+          ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL;
           continue;
         }
         break;
@@ -858,9 +858,9 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
           err = E_INVALACT;
         }
 
-       if(err == E_OK) {
+       if(err == E_OK || err == E_CHECKSUM || err == E_BADVALUE) {
           if(ctx->op_request == ECU_CONFIG_OP_READ) {
-            if(err == E_BADVALUE) {
+            if(err != E_OK) {
               // TODO: set DTC here?
               if(ctx->op_req_ctx.get_default_cfg_func != NULL) {
                 err = ctx->op_req_ctx.get_default_cfg_func(ctx->op_instance, ctx->op_req_ctx.data_ptr);

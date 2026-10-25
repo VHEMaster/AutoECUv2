@@ -25,6 +25,7 @@ typedef enum {
   E_BADVALUE = -13,
   E_EXISTS = -14,
   E_ABORTED = -15,
+  E_CHECKSUM = -16
 }error_t;
 
 #endif /* COMMON_INC_ERRORS_H_ */
