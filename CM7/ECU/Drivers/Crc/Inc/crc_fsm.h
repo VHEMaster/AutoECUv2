@@ -18,7 +18,9 @@
 typedef enum {
   CRC_FSM_CONDITION = 0,
   CRC_FSM_DMA_REQUEST,
-  CRC_FSM_DMA_WAIT
+  CRC_FSM_DMA_WAIT,
+  CRC_FSM_DMA_WAIT_ABORT,
+  CRC_FSM_DMA_MAX
 }crc_fsm_t;
 
 typedef struct {

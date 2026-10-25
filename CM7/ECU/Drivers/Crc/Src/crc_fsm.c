@@ -22,7 +22,6 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
         if(ctx->ready == true && ctx->cmd_ready == true && ctx->cmd_errcode == E_AGAIN) {
           ctx->cmd_len_left = ctx->cmd_length;
           ctx->cmd_len_cur = ctx->cmd_len_left > CRC_DMA_MAX_LEN ? CRC_DMA_MAX_LEN : ctx->cmd_len_left;
-          ctx->dma_errcode = E_AGAIN;
           ctx->fsm_process = CRC_FSM_DMA_REQUEST;
 
           if(ctx->cmd_reset != false) {
@@ -32,6 +31,7 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
         }
         break;
       case CRC_FSM_DMA_REQUEST:
+        ctx->dma_errcode = E_AGAIN;
         CacheClean((const void *)ctx->cmd_address, ctx->cmd_len_cur);
         status = HAL_DMA_Start_IT(ctx->hdma, ctx->cmd_address, (uint32_t)&ctx->hcrc->Instance->DR, ctx->cmd_len_cur);
         if(status == HAL_OK) {
@@ -63,11 +63,28 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
             continue;
           }
         } else if(err != E_AGAIN) {
-          ctx->cmd_errcode = ctx->dma_errcode;
+          ctx->cmd_errcode = err;
           ctx->fsm_process = CRC_FSM_CONDITION;
         } else if(time_diff(now, ctx->dma_timestamp) >= CRC_DMA_TIMEOUT_US) {
-          ctx->dma_errcode = E_TIMEOUT;
-          continue;
+          ctx->dma_errcode = E_AGAIN;
+          status = HAL_DMA_Abort_IT(ctx->hdma);
+          if(status == HAL_OK) {
+            ctx->dma_timestamp = now;
+            ctx->fsm_process = CRC_FSM_DMA_WAIT_ABORT;
+          } else {
+            ctx->cmd_errcode = E_TIMEOUT;
+            ctx->fsm_process = CRC_FSM_CONDITION;
+          }
+        }
+        break;
+      case CRC_FSM_DMA_WAIT_ABORT:
+        err = ctx->dma_errcode;
+        if(err != E_AGAIN) {
+          ctx->cmd_errcode = E_TIMEOUT;
+          ctx->fsm_process = CRC_FSM_CONDITION;
+        } else if(time_diff(now, ctx->dma_timestamp) >= CRC_DMA_TIMEOUT_US) {
+          ctx->cmd_errcode = E_TIMEOUT;
+          ctx->fsm_process = CRC_FSM_CONDITION;
         }
         break;
       default:
