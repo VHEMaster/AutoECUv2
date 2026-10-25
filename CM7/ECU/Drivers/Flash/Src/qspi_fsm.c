@@ -22,10 +22,10 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
 
     switch(ctx->fsm_io) {
       case QSPI_FSM_IO_INITIAL:
-        if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
-          ctx->data_size = ctx->cmd_ptr->NbData;
-          ctx->data_left = ctx->cmd_ptr->NbData;
-          ctx->cmd_ptr->NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
+        if(ctx->cmd_ctx.DataMode != QSPI_DATA_NONE) {
+          ctx->data_size = ctx->cmd_ctx.NbData;
+          ctx->data_left = ctx->cmd_ctx.NbData;
+          ctx->cmd_ctx.NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
         }
         if(ctx->cmd_wren_needed == true) {
           ctx->fsm_io = QSPI_FSM_IO_WREN_REQ;
@@ -60,9 +60,9 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         break;
       case QSPI_FSM_IO_CMD_REQ:
         ctx->cmd_async_errcode = E_AGAIN;
-        status = HAL_QSPI_Command_IT(ctx->init.hqspi, ctx->cmd_ptr);
+        status = HAL_QSPI_Command_IT(ctx->init.hqspi, &ctx->cmd_ctx);
         if(status == HAL_OK) {
-          if(ctx->cmd_ptr->DataMode == QSPI_DATA_NONE) {
+          if(ctx->cmd_ctx.DataMode == QSPI_DATA_NONE) {
             ctx->fsm_io = QSPI_FSM_IO_CMD_WAIT;
             ctx->cmd_timestamp = now;
           } else {
@@ -75,7 +75,7 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         break;
       case QSPI_FSM_IO_CMD_WAIT:
         if(cmd_async_errcode == E_OK) {
-          if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
+          if(ctx->cmd_ctx.DataMode != QSPI_DATA_NONE) {
             ctx->fsm_io = QSPI_FSM_IO_PAYLOAD_REQ;
             continue;
           } else if(ctx->cmd_status_poll_needed == true) {
@@ -103,13 +103,13 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
       case QSPI_FSM_IO_PAYLOAD_REQ:
         ctx->cmd_async_errcode = E_AGAIN;
         status = HAL_ERROR;
-        if(ctx->init.hqspi->hmdma != NULL && ctx->cmd_ptr->NbData >= 4) {
+        if(ctx->init.hqspi->hmdma != NULL && ctx->cmd_ctx.NbData >= 4) {
           ctx->cmd_uses_dma = true;
           if(ctx->cmd_payload_tx != NULL && ctx->cmd_payload_rx == NULL) {
-            CacheClean(ctx->cmd_payload_tx, ctx->cmd_ptr->NbData);
+            CacheClean(ctx->cmd_payload_tx, ctx->cmd_ctx.NbData);
             status = HAL_QSPI_Transmit_DMA(ctx->init.hqspi, (uint8_t *)ctx->cmd_payload_tx);
           } else if(ctx->cmd_payload_tx == NULL && ctx->cmd_payload_rx != NULL) {
-            CacheClean(ctx->cmd_payload_rx, ctx->cmd_ptr->NbData);
+            CacheClean(ctx->cmd_payload_rx, ctx->cmd_ctx.NbData);
             status = HAL_QSPI_Receive_DMA(ctx->init.hqspi, (uint8_t *)ctx->cmd_payload_rx);
           }
         } else {
@@ -124,14 +124,14 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
           ctx->fsm_io = QSPI_FSM_IO_PAYLOAD_WAIT;
           ctx->cmd_timestamp = now;
         } else {
-          err = E_HAL;
+          ctx->fsm_io = QSPI_FSM_IO_ABORT_REQ;
         }
         break;
       case QSPI_FSM_IO_PAYLOAD_WAIT:
         if(cmd_async_errcode == E_OK) {
           if(ctx->cmd_uses_dma == true) {
             if(ctx->cmd_payload_rx != NULL) {
-              CacheInvalidate(ctx->cmd_payload_rx, ctx->cmd_ptr->NbData);
+              CacheInvalidate(ctx->cmd_payload_rx, ctx->cmd_ctx.NbData);
             }
           }
           if(ctx->cmd_status_poll_needed == true) {
@@ -205,19 +205,19 @@ static error_t qspi_fsm_io(qspi_ctx_t *ctx)
         }
         break;
       case QSPI_FSM_IO_REPEAT:
-        if(ctx->cmd_ptr->DataMode != QSPI_DATA_NONE) {
-          ctx->data_left -= ctx->cmd_ptr->NbData;
+        if(ctx->cmd_ctx.DataMode != QSPI_DATA_NONE) {
+          ctx->data_left -= ctx->cmd_ctx.NbData;
           if(ctx->data_left > 0) {
             if(ctx->cmd_payload_tx != NULL) {
-              ctx->cmd_payload_tx += ctx->cmd_ptr->NbData;
+              ctx->cmd_payload_tx += ctx->cmd_ctx.NbData;
             }
             if(ctx->cmd_payload_rx != NULL) {
-              ctx->cmd_payload_rx += ctx->cmd_ptr->NbData;
+              ctx->cmd_payload_rx += ctx->cmd_ctx.NbData;
             }
-            if(ctx->cmd_ptr->AddressMode != QSPI_ADDRESS_NONE) {
-              ctx->cmd_ptr->Address += ctx->cmd_ptr->NbData;
+            if(ctx->cmd_ctx.AddressMode != QSPI_ADDRESS_NONE) {
+              ctx->cmd_ctx.Address += ctx->cmd_ctx.NbData;
             }
-            ctx->cmd_ptr->NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
+            ctx->cmd_ctx.NbData = ctx->data_left > QSPI_NBDATA_MAX ? QSPI_NBDATA_MAX : ctx->data_left;
 
             if(ctx->cmd_wren_needed == true) {
               ctx->fsm_io = QSPI_FSM_IO_WREN_REQ;
@@ -260,7 +260,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_CONDITION:
         if(ctx->init_request == true && ctx->init_errcode == E_AGAIN) {
           ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST1;
-          ctx->cmd_ptr = &ctx->init.cmd_rstqioq;
+          ctx->cmd_ctx = ctx->init.cmd_rstqioq;
           ctx->cmd_status_poll_needed = false;
           ctx->cmd_wren_needed = false;
           err = E_AGAIN;
@@ -271,7 +271,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_QUAD_RST2;
-          ctx->cmd_ptr = &ctx->init.cmd_rstqios;
+          ctx->cmd_ctx = ctx->init.cmd_rstqios;
           err = E_AGAIN;
           continue;
         } else if(err != E_AGAIN) {
@@ -283,7 +283,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_RESET_EN;
-          ctx->cmd_ptr = &ctx->init.cmd_rsten;
+          ctx->cmd_ctx = ctx->init.cmd_rsten;
           err = E_AGAIN;
           continue;
         } else if(err != E_AGAIN) {
@@ -295,7 +295,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_RESET;
-          ctx->cmd_ptr = &ctx->init.cmd_rst;
+          ctx->cmd_ctx = ctx->init.cmd_rst;
           err = E_AGAIN;
           continue;
         } else if(err != E_AGAIN) {
@@ -307,7 +307,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_JEDEC;
-          ctx->cmd_ptr = &ctx->init.cmd_jid;
+          ctx->cmd_ctx = ctx->init.cmd_jid;
           ctx->cmd_payload_tx = NULL;
           ctx->cmd_payload_rx = &ctx->init.dma_ctx->jedec_quad;
           err = E_AGAIN;
@@ -341,7 +341,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 
           if(err == E_OK) {
             ctx->fsm_init = QSPI_FSM_INIT_QUAD;
-            ctx->cmd_ptr = &ctx->init.cmd_eqio;
+            ctx->cmd_ctx = ctx->init.cmd_eqio;
             ctx->cmd_status_poll_needed = true;
             ctx->cmd_poll_delay = 0;
             ctx->cmd_poll_timeout = QSPI_CMD_TIMEOUT_US;
@@ -370,7 +370,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
       case QSPI_FSM_INIT_QUAD_WAIT:
         if(time_diff(now, ctx->cmd_timestamp) >= QSPI_QUAD_INIT_DELAY_US) {
           ctx->fsm_init = QSPI_FSM_INIT_QJEDEC;
-          ctx->cmd_ptr = &ctx->init.cmd_qjid;
+          ctx->cmd_ctx = ctx->init.cmd_qjid;
           ctx->cmd_payload_tx = NULL;
           ctx->cmd_payload_rx = &ctx->init.dma_ctx->jedec_quad;
           memset(&ctx->init.dma_ctx->jedec_quad, 0, sizeof(ctx->init.dma_ctx->jedec_quad));
@@ -407,7 +407,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
 
           if(err == E_OK) {
             ctx->fsm_init = QSPI_FSM_INIT_CFG;
-            ctx->cmd_ptr = &ctx->init.cmd_wrsr;
+            ctx->cmd_ctx = ctx->init.cmd_wrsr;
             ctx->cmd_payload_tx = ctx->init.dma_ctx->payload_dummy;
             ctx->cmd_payload_rx = NULL;
             ctx->cmd_wren_needed = false;
@@ -429,7 +429,7 @@ static error_t qspi_fsm_init(qspi_ctx_t *ctx)
         err = qspi_fsm_io(ctx);
         if(err == E_OK) {
           ctx->fsm_init = QSPI_FSM_INIT_BPR;
-          ctx->cmd_ptr = &ctx->init.cmd_wbpr;
+          ctx->cmd_ctx = ctx->init.cmd_wbpr;
 
           for(int i = 0; i < QSPI_BPR_SIZE; i++) {
             ctx->bpr.bytes[i] = ctx->init.bpr.bytes[i];

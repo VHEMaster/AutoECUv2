@@ -164,7 +164,7 @@ typedef struct {
     bool memory_mapping_accept;
 
     QSPI_AutoPollingTypeDef cmd_poll;
-    QSPI_CommandTypeDef *cmd_ptr;
+    QSPI_CommandTypeDef cmd_ctx;
     const void *cmd_payload_tx;
     void *cmd_payload_rx;
     bool cmd_ready;

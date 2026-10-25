@@ -161,9 +161,9 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_hsread;
-    ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->NbData = length;
+    ctx->cmd_ctx = ctx->init.cmd_hsread;
+    ctx->cmd_ctx.Address = address;
+    ctx->cmd_ctx.NbData = length;
     ctx->cmd_payload_tx = NULL;
     ctx->cmd_payload_rx = payload;
     ctx->cmd_wren_needed = false;
@@ -192,9 +192,9 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_prog;
-    ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->NbData = length;
+    ctx->cmd_ctx = ctx->init.cmd_prog;
+    ctx->cmd_ctx.Address = address;
+    ctx->cmd_ctx.NbData = length;
     ctx->cmd_payload_tx = payload;
     ctx->cmd_payload_rx = NULL;
     ctx->cmd_wren_needed = true;
@@ -227,8 +227,8 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_se;
-    ctx->cmd_ptr->Address = address;
+    ctx->cmd_ctx = ctx->init.cmd_se;
+    ctx->cmd_ctx.Address = address;
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
@@ -257,8 +257,8 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_be;
-    ctx->cmd_ptr->Address = address;
+    ctx->cmd_ctx = ctx->init.cmd_be;
+    ctx->cmd_ctx.Address = address;
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
@@ -285,7 +285,7 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_ce;
+    ctx->cmd_ctx = ctx->init.cmd_ce;
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
@@ -312,7 +312,7 @@ error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_wbpr;
+    ctx->cmd_ctx = ctx->init.cmd_wbpr;
     for(int i = 0; i < QSPI_BPR_SIZE; i++) {
       ctx->bpr.bytes[i] = bpr->bytes[i];
       ctx->init.dma_ctx->payload_bpr[i * 2] = ctx->bpr.bytes[i];
@@ -349,9 +349,9 @@ error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_rsid;
-    ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->NbData = length;
+    ctx->cmd_ctx = ctx->init.cmd_rsid;
+    ctx->cmd_ctx.Address = address;
+    ctx->cmd_ctx.NbData = length;
     ctx->cmd_payload_tx = NULL;
     ctx->cmd_payload_rx = payload;
     ctx->cmd_wren_needed = false;
@@ -380,9 +380,9 @@ error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, u
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_psid;
-    ctx->cmd_ptr->Address = address;
-    ctx->cmd_ptr->NbData = length;
+    ctx->cmd_ctx = ctx->init.cmd_psid;
+    ctx->cmd_ctx.Address = address;
+    ctx->cmd_ctx.NbData = length;
     ctx->cmd_payload_tx = payload;
     ctx->cmd_payload_rx = NULL;
     ctx->cmd_wren_needed = true;
@@ -410,7 +410,7 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
-    ctx->cmd_ptr = &ctx->init.cmd_lsid;
+    ctx->cmd_ctx = ctx->init.cmd_lsid;
     ctx->cmd_wren_needed = true;
 
     ctx->cmd_status_poll_needed = true;
