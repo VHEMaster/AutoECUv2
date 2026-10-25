@@ -538,7 +538,7 @@ static error_t signals_handle_upstream_message(signals_runtime_messages_fifo_ite
       BREAK_IF(err != E_OK);
 
       if(crc_calculated != crc_received) {
-        err = E_BADRESP;
+        err = E_CHECKSUM;
         // TODO: error handling
         break;
       }
