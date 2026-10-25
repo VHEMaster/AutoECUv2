@@ -421,8 +421,9 @@ error_t flash_fsm(flash_runtime_ctx_t *ctx)
           ctx->fsm_process = FLASH_FSM_WRITE_MEMMAP_DISABLE;
           continue;
         } else if(err != E_AGAIN) {
-          if(ctx->cmd_errcode_internal != E_AGAIN) {
+          if(ctx->cmd_errcode_internal == E_AGAIN) {
             ctx->cmd_errcode_internal = err;
+            // TODO: better handling
           }
           ctx->fsm_process = FLASH_FSM_WRITE_MEMMAP_DISABLE;
           continue;
