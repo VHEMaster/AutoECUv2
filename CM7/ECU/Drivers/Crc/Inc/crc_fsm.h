@@ -33,7 +33,7 @@ typedef struct {
     bool cmd_ready;
     bool cmd_reset;
     error_t cmd_errcode;
-    uint32_t cmd_address;
+    uintptr_t cmd_address;
     uint32_t cmd_length;
     uint32_t cmd_len_cur;
     uint32_t cmd_len_left;

@@ -155,7 +155,7 @@ error_t crc_calculate(crc_checksum_t *crc, const void *payload, uint32_t length,
     BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
 
     if(ctx->cmd_ready == false) {
-      ctx->cmd_address = (uint32_t)payload;
+      ctx->cmd_address = (uintptr_t)payload;
       ctx->cmd_length = length;
       ctx->cmd_reset = reset;
 
