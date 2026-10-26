@@ -83,10 +83,11 @@ error_t crc_init(void)
 
     ctx->hdma->Init.Request = MDMA_REQUEST_SW;
     ctx->hdma->Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-    ctx->hdma->Init.SourceInc = MDMA_SRC_INC_BYTE;
+    ctx->hdma->Init.Endianness = MDMA_LITTLE_BYTE_ENDIANNESS_EXCHANGE | MDMA_LITTLE_HALFWORD_ENDIANNESS_EXCHANGE;
+    ctx->hdma->Init.SourceInc = MDMA_SRC_INC_WORD;
     ctx->hdma->Init.DestinationInc = MDMA_DEST_INC_DISABLE;
-    ctx->hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
-    ctx->hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
+    ctx->hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
+    ctx->hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
 
     status = HAL_MDMA_Init(ctx->hdma);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
