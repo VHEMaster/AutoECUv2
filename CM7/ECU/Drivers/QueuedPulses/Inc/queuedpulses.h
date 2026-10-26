@@ -30,5 +30,8 @@ error_t queuedpulses_enqueue_ex(output_id_t output, time_us_t deadline, output_v
 error_t queuedpulses_reset_output(output_id_t output);
 error_t queuedpulses_reset_all(void);
 
+error_t queuedpulses_schedule(output_id_t output, time_us_t start, time_us_t end,
+    output_value_t value_on, bool keep_width);
+
 
 #endif /* DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_H_ */

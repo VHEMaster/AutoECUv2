@@ -89,6 +89,7 @@ error_t queuedpulses_output_configure(output_id_t output, output_value_t value_o
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
 {
   queuedpulse_timer_t *timer = NULL;
@@ -120,6 +121,7 @@ ITCM_FUNC static void queuedpulses_tim_irq_handler(TIM_HandleTypeDef *htim)
   }
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bool allowed_to_loop)
 {
   error_t err = E_OK;
@@ -133,6 +135,14 @@ ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bo
   out = timer->output_assigned;
   entry = timer->entry_assigned;
 
+  now = time_now_us();
+  remaining = time_diff(entry->pulse_deadline, now);
+  if(remaining != 0u && remaining <= time_mask_2) {
+    queuedpulses_internal_tim_disable(timer);
+    queuedpulses_internal_tim_enable(timer, remaining, timer->prescaler_default);
+    return E_OK;
+  }
+
   if(out != NULL) {
     if(entry->out_seq_next == NULL) {
       value_temp = out->value_off;
@@ -141,6 +151,7 @@ ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bo
         out->value_cur = value_temp;
       }
       out->queue_entry = NULL;
+      out->queue_tail = NULL;
       out->timer = NULL;
     } else {
       value_temp = entry->out_seq_next->value_on;
@@ -181,7 +192,7 @@ ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bo
       remaining = 0u;
     }
 
-    if(remaining <= 1u) {
+    if(remaining == 0u) {
       if(allowed_to_loop) {
         err = E_AGAIN;
       } else {
@@ -198,6 +209,7 @@ ITCM_FUNC static error_t queuedpulses_tim_handler(queuedpulse_timer_t *timer, bo
   return err;
 }
 
+OPTIMIZE_FAST
 ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_us_t deadline)
 {
   error_t err = E_OK;
@@ -208,6 +220,390 @@ ITCM_FUNC error_t queuedpulses_enqueue(output_id_t output, time_us_t deadline)
     out = &queuedpulse_ctx.outputs[output];
 
     err = queuedpulses_enqueue_ex(output, deadline, out->value_on);
+
+  } while(0);
+
+  return err;
+}
+
+OPTIMIZE_FAST
+STATIC_INLINE time_delta_us_t queuedpulses_remaining(time_us_t deadline, time_us_t now)
+{
+  time_delta_us_t delta = time_diff(deadline, now);
+  return delta <= (time_mask_us() >> 1u) ? delta : 0u;
+}
+
+OPTIMIZE_FAST
+ITCM_FUNC static void queuedpulses_insert_pulse(queuedpulse_timer_t *timer,
+    queuedpulse_entry_t *tail, queuedpulse_entry_t *first, queuedpulse_entry_t *last, time_us_t now)
+{
+  queuedpulse_entry_t **link = tail != NULL ? &tail->next : &timer->entry_assigned;
+  time_delta_us_t delta = queuedpulses_remaining(first->pulse_deadline, now);
+
+  while(*link != NULL && queuedpulses_remaining((*link)->pulse_deadline, now) <= delta) {
+    link = &(*link)->next;
+  }
+
+  first->next = *link;
+  *link = first;
+
+  if(first != last) {
+    delta = queuedpulses_remaining(last->pulse_deadline, now);
+    link = &first->next;
+
+    while(*link != NULL && queuedpulses_remaining((*link)->pulse_deadline, now) <= delta) {
+      link = &(*link)->next;
+    }
+
+    last->next = *link;
+    *link = last;
+  }
+}
+
+OPTIMIZE_FAST
+ITCM_FUNC static error_t queuedpulses_schedule_gap_locked(queuedpulse_output_t *out,
+    time_delta_us_t lead, time_delta_us_t end_delta, output_value_t value_on,
+    bool keep_width, time_us_t now, time_delta_us_t width)
+{
+  queuedpulse_timer_t *timer = out->timer;
+  queuedpulse_entry_t *previous = NULL;
+  queuedpulse_entry_t *gap = out->queue_entry;
+  queuedpulse_entry_t *first = NULL, *last = NULL;
+  queuedpulse_entry_t *old_head = timer->entry_assigned;
+  time_delta_us_t begin = 0u, finish, start_delta, limit;
+  const time_delta_us_t max_delay = time_mask_us() >> 1u;
+  uint32_t free, used = 0u, index;
+  bool waiting, reuse_end;
+  error_t err = E_OK;
+
+  do {
+    while(true) {
+      finish = gap != NULL ? queuedpulses_remaining(gap->pulse_deadline, now) : max_delay;
+      if(gap == NULL || gap->value_on == out->value_off) {
+        start_delta = begin;
+        if(!keep_width && previous != NULL && previous->value_on != out->value_off) {
+          start_delta += QUEUEDPULSE_MINIMUM_PULSE_US;
+        }
+        if(start_delta < lead) {
+          start_delta = lead;
+        }
+        limit = finish;
+        if(!keep_width && gap != NULL && gap->out_seq_next != NULL &&
+            gap->out_seq_next->value_on != out->value_off) {
+          limit = finish >= QUEUEDPULSE_MINIMUM_PULSE_US ?
+              finish - QUEUEDPULSE_MINIMUM_PULSE_US : 0u;
+        }
+        if(keep_width) {
+          end_delta = start_delta + width;
+        }
+        BREAK_IF(end_delta <= limit && end_delta > start_delta &&
+            end_delta - start_delta >= QUEUEDPULSE_MINIMUM_PULSE_US);
+        if(gap == NULL || (!keep_width && end_delta <= finish)) {
+          return keep_width ? E_PARAM : E_OK;
+        }
+      }
+      previous = gap;
+      begin = finish;
+      gap = gap->out_seq_next;
+    }
+    BREAK_IF(err != E_OK);
+
+    waiting = start_delta != 0u && !(previous != NULL &&
+        start_delta == queuedpulses_remaining(previous->pulse_deadline, now) &&
+        previous->value_on == value_on);
+    reuse_end = gap != NULL && end_delta == finish;
+
+    free = ~queuedpulse_ctx.queue.entries_bitmap;
+
+    if(waiting) {
+      BREAK_IF_ACTION(free == 0u, err = E_OVERFLOW);
+      index = POSITION_VAL(free);
+      first = &queuedpulse_ctx.queue.entries[index];
+      used = 1u << index;
+      free &= ~used;
+    }
+
+    if(reuse_end) {
+      last = gap;
+    } else {
+      BREAK_IF_ACTION(free == 0u, err = E_OVERFLOW);
+      index = POSITION_VAL(free);
+      last = &queuedpulse_ctx.queue.entries[index];
+      used |= 1u << index;
+    }
+
+    if(start_delta == 0u && out->value_cur != value_on) {
+      err = output_set_value(out->id, value_on);
+      BREAK_IF(err != E_OK);
+      out->value_cur = value_on;
+    }
+
+    if(!reuse_end) {
+      last->timer = timer;
+      last->output_assigned = out;
+      last->pulse_deadline = time_add(now, end_delta);
+      last->out_seq_next = gap;
+    }
+
+    last->value_on = value_on;
+    if(waiting) {
+      first->timer = timer;
+      first->output_assigned = out;
+      first->pulse_deadline = time_add(now, start_delta);
+      first->value_on = out->value_off;
+      first->out_seq_next = last;
+    } else {
+      first = last;
+    }
+
+    if(previous != NULL) {
+      previous->out_seq_next = first;
+    } else {
+      out->queue_entry = first;
+    }
+    if(gap == NULL) {
+      out->queue_tail = last;
+    }
+    if(waiting || !reuse_end) {
+      queuedpulses_insert_pulse(timer, previous, first, reuse_end ? first : last, now);
+    }
+
+    queuedpulse_ctx.queue.entries_bitmap |= used;
+
+    if(timer->entry_assigned != old_head) {
+      queuedpulses_internal_tim_disable(timer);
+
+      timer->output_assigned = timer->entry_assigned->output_assigned;
+
+      queuedpulses_internal_tim_enable(timer,
+          queuedpulses_remaining(timer->entry_assigned->pulse_deadline, time_now_us()),
+          timer->prescaler_default);
+    }
+
+  } while(0);
+
+  return err;
+}
+
+OPTIMIZE_FAST
+ITCM_FUNC static error_t queuedpulses_schedule_locked(queuedpulse_output_t *out,
+    time_us_t start, time_us_t end, output_value_t value_on, bool keep_width,
+    time_us_t now, time_delta_us_t width)
+{
+  queuedpulse_timer_t *timer;
+  queuedpulse_entry_t *tail, *first, *last;
+  time_delta_us_t lead, end_delta, tail_delta;
+  const time_delta_us_t max_delay = time_mask_us() >> 1u;
+  uint32_t free, first_id, last_id, used, index;
+  bool waiting;
+  error_t err = E_OK;
+  output_id_t output = out->id;
+
+  do {
+    if(out->queue_entry == NULL && queuedpulses_remaining(start, now) != 0u &&
+        out->value_cur != out->value_off) {
+      err = output_set_value(output, out->value_off);
+      BREAK_IF(err != E_OK);
+      out->value_cur = out->value_off;
+      now = time_now_us();
+    }
+
+    lead = queuedpulses_remaining(start, now);
+    end_delta = queuedpulses_remaining(end, now);
+
+    if(keep_width) {
+      end_delta = lead + width;
+    } else {
+      BREAK_IF(end_delta == 0u);
+    }
+
+    tail = out->queue_tail;
+    if(tail != NULL) {
+      tail_delta = queuedpulses_remaining(tail->pulse_deadline, now);
+      if(tail_delta > lead) {
+        err = queuedpulses_schedule_gap_locked(out, lead, end_delta, value_on, keep_width, now, width);
+        break;
+      }
+      if(tail_delta != 0u && tail_delta >= lead) {
+        lead = tail_delta;
+        if(keep_width) {
+          end_delta = lead + width;
+        } else {
+          lead += QUEUEDPULSE_MINIMUM_PULSE_US;
+        }
+      }
+    }
+
+    BREAK_IF_ACTION(end_delta > max_delay, err = E_PARAM);
+    BREAK_IF(end_delta <= lead || end_delta - lead < QUEUEDPULSE_MINIMUM_PULSE_US);
+
+    start = time_add(now, lead);
+    end = time_add(now, end_delta);
+
+    waiting = lead != 0u && !(tail != NULL && start == tail->pulse_deadline &&
+        tail->value_on == value_on);
+
+    free = ~queuedpulse_ctx.queue.entries_bitmap;
+    BREAK_IF_ACTION(free == 0u, err = E_OVERFLOW);
+    first_id = POSITION_VAL(free);
+    used = 1u << first_id;
+    last_id = first_id;
+    if(waiting) {
+      free &= ~used;
+      BREAK_IF_ACTION(free == 0u, err = E_OVERFLOW);
+      last_id = POSITION_VAL(free);
+      used |= 1u << last_id;
+    }
+    first = &queuedpulse_ctx.queue.entries[first_id];
+    last = &queuedpulse_ctx.queue.entries[last_id];
+    timer = out->timer;
+    if(timer == NULL) {
+      index = POSITION_VAL(~queuedpulse_ctx.timers_bitmap);
+      if(index >= queuedpulse_ctx.timers_count) {
+        index = queuedpulse_ctx.timer_index_next;
+      }
+      timer = &queuedpulse_ctx.timers[index];
+    }
+
+    if(out->queue_entry == NULL) {
+      output_value_t value = waiting ? out->value_off : value_on;
+      if(out->value_cur != value) {
+        err = output_set_value(output, value);
+        BREAK_IF(err != E_OK);
+        out->value_cur = value;
+      }
+    }
+
+    last->timer = timer;
+    last->output_assigned = out;
+    last->pulse_deadline = end;
+    last->value_on = value_on;
+    last->out_seq_next = NULL;
+    if(waiting) {
+      first->timer = timer;
+      first->output_assigned = out;
+      first->pulse_deadline = start;
+      first->value_on = out->value_off;
+      first->out_seq_next = last;
+    }
+
+    queuedpulses_insert_pulse(timer, tail, first, last, now);
+    if(tail != NULL) {
+      tail->out_seq_next = first;
+    } else {
+      out->queue_entry = first;
+    }
+
+    out->queue_tail = last;
+    out->timer = timer;
+
+    queuedpulse_ctx.queue.entries_bitmap |= used;
+    if((queuedpulse_ctx.timers_bitmap & (1u << timer->id)) != 0u && tail == NULL) {
+      queuedpulse_ctx.timer_index_next = timer->id + 1u;
+      if(queuedpulse_ctx.timer_index_next >= queuedpulse_ctx.timers_count) {
+        queuedpulse_ctx.timer_index_next = 0u;
+      }
+    }
+    queuedpulse_ctx.timers_bitmap |= 1u << timer->id;
+    if(timer->entry_assigned == first) {
+      queuedpulses_internal_tim_disable(timer);
+      timer->output_assigned = out;
+      queuedpulses_internal_tim_enable(timer, queuedpulses_remaining(first->pulse_deadline, time_now_us()),
+          timer->prescaler_default);
+    }
+  } while(0);
+
+  return err;
+}
+
+OPTIMIZE_FAST
+ITCM_FUNC error_t queuedpulses_schedule(output_id_t output, time_us_t start, time_us_t end,
+    output_value_t value_on, bool keep_width)
+{
+  queuedpulse_output_t *out;
+  queuedpulse_timer_t *timer;
+  queuedpulse_entry_t *first, *last;
+  const time_delta_us_t max_delay = time_mask_us() >> 1u;
+  time_delta_us_t width = time_diff(end, start), lead;
+  time_us_t now;
+  uint32_t prim, free, rest, index;
+  bool idle;
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(width < QUEUEDPULSE_MINIMUM_PULSE_US, err = E_OK);
+    BREAK_IF_ACTION(width > max_delay, err = E_PARAM);
+    BREAK_IF_ACTION(output >= OUTPUTS_CHS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(queuedpulse_ctx.timers_count == 0u, err = E_NOTRDY);
+
+    out = &queuedpulse_ctx.outputs[output];
+
+    prim = EnterCritical();
+
+    now = time_now_us();
+    lead = time_diff(start, now);
+
+    BREAK_IF_ACTION(lead <= max_delay && width > max_delay - lead, (ExitCritical(prim), err = E_PARAM));
+
+    if(out->timer == NULL && lead != 0u && lead <= max_delay &&
+        lead + width <= max_delay && out->value_cur == out->value_off) {
+      free = ~queuedpulse_ctx.queue.entries_bitmap;
+      rest = free & (free - 1u);
+      if(rest != 0u) {
+        index = POSITION_VAL(~queuedpulse_ctx.timers_bitmap);
+        idle = index < queuedpulse_ctx.timers_count;
+        if(!idle) {
+          index = queuedpulse_ctx.timer_index_next;
+          queuedpulse_ctx.timer_index_next = index + 1u;
+          if(queuedpulse_ctx.timer_index_next >= queuedpulse_ctx.timers_count) {
+            queuedpulse_ctx.timer_index_next = 0u;
+          }
+        }
+        timer = &queuedpulse_ctx.timers[index];
+        index = POSITION_VAL(free);
+        first = &queuedpulse_ctx.queue.entries[index];
+        index = POSITION_VAL(rest);
+
+        last = &queuedpulse_ctx.queue.entries[index];
+        first->timer = last->timer = timer;
+        first->output_assigned = last->output_assigned = out;
+        first->pulse_deadline = start;
+        first->value_on = out->value_off;
+        first->out_seq_next = last;
+        last->pulse_deadline = end;
+        last->value_on = value_on;
+        last->out_seq_next = NULL;
+
+        if(idle) {
+          first->next = last;
+          last->next = NULL;
+          timer->entry_assigned = first;
+        } else {
+          queuedpulses_insert_pulse(timer, NULL, first, last, now);
+        }
+
+        out->queue_entry = first;
+        out->queue_tail = last;
+        out->timer = timer;
+        queuedpulse_ctx.queue.entries_bitmap = ~(rest & (rest - 1u));
+        queuedpulse_ctx.timers_bitmap |= 1u << timer->id;
+        if(timer->entry_assigned == first) {
+          if(!idle) {
+            queuedpulses_internal_tim_disable(timer);
+          }
+          timer->output_assigned = out;
+          queuedpulses_internal_tim_enable(timer, queuedpulses_remaining(start, time_now_us()),
+              timer->prescaler_default);
+        }
+
+        ExitCritical(prim);
+        break;
+      }
+    }
+
+    err = queuedpulses_schedule_locked(out, start, end, value_on, keep_width, now, width);
+
+    ExitCritical(prim);
 
   } while(0);
 
@@ -312,6 +708,10 @@ ITCM_FUNC error_t queuedpulses_enqueue_ex( output_id_t output, time_us_t deadlin
       }
     }
 
+    if(entry->out_seq_next == NULL) {
+      out->queue_tail = entry;
+    }
+
     timer_immediate_change = previous == NULL;
     if(previous != NULL) {
       previous->next = entry;
@@ -408,6 +808,7 @@ ITCM_FUNC error_t queuedpulses_reset_output(output_id_t output)
   }
 
   out->queue_entry = NULL;
+  out->queue_tail = NULL;
   out->timer = NULL;
   err = output_set_value(out->id, out->value_off);
   out->value_cur = out->value_off;
@@ -431,6 +832,7 @@ ITCM_FUNC error_t queuedpulses_reset_all(void)
   for(int i = 0; i < OUTPUTS_CHS_MAX; i++) {
     out = &queuedpulse_ctx.outputs[i];
     out->queue_entry = NULL;
+    out->queue_tail = NULL;
     out->timer = NULL;
 
     err_tmp = output_set_value(out->id, out->value_off);

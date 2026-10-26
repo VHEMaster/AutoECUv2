@@ -18,62 +18,24 @@ static error_t timing_calculate_position_from_snapshot_ex(timing_base_ctx_t *ctx
 OPTIMIZE_FAST
 ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_us_t pulse_start, time_us_t pulse_end, timing_late_policy_t late_policy)
 {
-  error_t ret = E_OK;
-  time_us_t now;
-  time_us_t time_mask, time_mask_2;
   output_id_t pin;
   error_t err;
-  time_delta_us_t delta;
-  bool start_late;
-
-  // TODO: do the diagnostics of lateness
 
   do {
-    BREAK_IF_ACTION(late_policy >= TIMING_LATE_POLICY_MAX, ret = E_PARAM);
-
-    time_mask = time_mask_us();
-    time_mask_2 = time_mask >> 1;
+    BREAK_IF_ACTION(late_policy >= TIMING_LATE_POLICY_MAX, err = E_PARAM)
 
     err = ecu_config_gpio_output_get_id(output_pin, &pin);
-    BREAK_IF_ACTION(ret == E_OK && err != E_OK, ret = err);
+    BREAK_IF(err != E_OK);
 
-    err = E_OK;
-    now = time_now_us();
-    delta = time_diff(pulse_start, now);
-    if(delta <= time_mask_2) {
-      start_late = false;
-      err = queuedpulses_enqueue_ex(pin, pulse_start, CORE_OUTPUT_INACTIVE);
-    } else {
-      start_late = true;
-      err = output_set_value(pin, CORE_OUTPUT_ACTIVE);
-    }
-    if(ret == E_OK && err != E_OK) {
-      (void)output_set_value(pin, CORE_OUTPUT_INACTIVE);
-      ret = err;
-      break;
-    }
+    pulse_start &= time_mask_us();
+    pulse_end &= time_mask_us();
 
-    err = E_OK;
-    if(start_late == true && late_policy == TIMING_LATE_POLICY_KEEP_WIDTH) {
-      delta = time_diff(now, pulse_start);
-      pulse_end = time_add(pulse_end, delta);
-    }
+    err = queuedpulses_schedule(pin, pulse_start, pulse_end, CORE_OUTPUT_ACTIVE,
+        late_policy == TIMING_LATE_POLICY_KEEP_WIDTH);
 
-    now = time_now_us();
-    delta = time_diff(pulse_end, now);
-    if(delta <= time_mask_2) {
-      err = queuedpulses_enqueue_ex(pin, pulse_end, CORE_OUTPUT_ACTIVE);
-    } else {
-      err = output_set_value(pin, CORE_OUTPUT_INACTIVE);
-    }
-    if(ret == E_OK && err != E_OK) {
-      (void)output_set_value(pin, CORE_OUTPUT_INACTIVE);
-      ret = err;
-      break;
-    }
   } while(0);
 
-  return ret;
+  return err;
 }
 
 OPTIMIZE_FAST

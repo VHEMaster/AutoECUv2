@@ -38,6 +38,7 @@ typedef struct queuedpulse_timer_tag {
 
 typedef struct queuedpulse_output_tag {
     queuedpulse_entry_t *queue_entry;
+    queuedpulse_entry_t *queue_tail;
     queuedpulse_timer_t *timer;
     output_value_t value_on;
     output_value_t value_off;
