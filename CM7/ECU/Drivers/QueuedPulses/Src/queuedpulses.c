@@ -420,6 +420,7 @@ ITCM_FUNC static error_t queuedpulses_schedule_locked(queuedpulse_output_t *out,
     tail = out->queue_tail;
     if(tail != NULL) {
       tail_delta = queuedpulses_remaining(tail->pulse_deadline, now);
+
       if(tail_delta > lead) {
         err = queuedpulses_schedule_gap_locked(out, lead, end_delta, value_on, keep_width, now, width);
         break;
@@ -546,7 +547,7 @@ ITCM_FUNC error_t queuedpulses_schedule(output_id_t output, time_us_t start, tim
     BREAK_IF_ACTION(lead <= max_delay && width > max_delay - lead, (ExitCritical(prim), err = E_PARAM));
 
     if(out->timer == NULL && lead != 0u && lead <= max_delay &&
-        lead + width <= max_delay && out->value_cur == out->value_off) {
+        out->value_cur == out->value_off) {
       free = ~queuedpulse_ctx.queue.entries_bitmap;
       rest = free & (free - 1u);
       if(rest != 0u) {

@@ -434,9 +434,12 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
                         time_to_ignite = time_to_saturate + saturation_time;
 
                         if(input_allowed_b[bank_cy]) {
+                          runtime_cy->time_start = time_now_tick();
                           err = timing_pulse_schedule(group_config->cylinders[cy].output_pin,
                               time_to_saturate, time_to_ignite,
                               TIMING_LATE_POLICY_KEEP_END);
+                          runtime_cy->time_end = time_now_tick();
+                          runtime_cy->time_diff = time_tick_diff(runtime_cy->time_end, runtime_cy->time_start) * TIME_US_IN_TICK;
                           BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
                         }
                         ignition_acceptance_gr_cy->valid = false;

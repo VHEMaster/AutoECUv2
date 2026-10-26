@@ -11,7 +11,7 @@
 #include "queuedpulses.h"
 #include "config_hw.h"
 
-#define QUEUEDPULSE_ENTRIES_BITMAP_MAX  UINT_MAX
+#define QUEUEDPULSE_ENTRIES_BITMAP_MAX UINT_MAX
 
 typedef struct queuedpulse_entry_tag queuedpulse_entry_t;
 typedef struct queuedpulse_timer_tag queuedpulse_timer_t;

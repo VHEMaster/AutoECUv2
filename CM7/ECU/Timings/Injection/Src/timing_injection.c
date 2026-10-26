@@ -688,9 +688,12 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                                 roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
                             time_to_inject = time_to_activate + pulse_time_cy;
 
+                            runtime_cy->time_start = time_now_tick();
                             err = timing_pulse_schedule(cy_config->output_pin,
                                 time_to_activate, time_to_inject,
                                 TIMING_LATE_POLICY_KEEP_WIDTH);
+                            runtime_cy->time_end = time_now_tick();
+                            runtime_cy->time_diff = time_diff(runtime_cy->time_end, runtime_cy->time_start) * TIME_US_IN_TICK;
                             BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
                           }
 

@@ -25,6 +25,10 @@ typedef struct {
     float degrees_before_inject;
     float dutycycle;
 
+    time_tick_t time_start;
+    time_tick_t time_end;
+    float time_diff;
+
     timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
 }injection_runtime_group_cylinder_ctx_t;
 

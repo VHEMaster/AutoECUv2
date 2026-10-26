@@ -21,6 +21,9 @@ typedef struct {
     float degrees_per_cycle;
     float degrees_before_ignite;
     ecu_core_runtime_value_ctx_t ignition_acceptance;
+    time_tick_t time_start;
+    time_tick_t time_end;
+    float time_diff;
 }ignition_runtime_group_cylinder_ctx_t;
 
 typedef struct {
