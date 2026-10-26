@@ -117,7 +117,7 @@ error_t crc_lock(void)
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ATOMIC_TRY_LOCK(ctx->locked, true) == true) {
+    if(ATOMIC_TRY_LOCK(ctx->locked) == true) {
       err = E_OK;
     } else {
       err = E_AGAIN;
@@ -134,10 +134,10 @@ error_t crc_unlock(void)
   error_t err = E_OK;
 
   do {
-    if(ctx->locked == false || ctx->cmd_ready != false) {
+    if(ATOMIC_ISLOCKED(ctx->locked) == false || ctx->cmd_ready != false) {
       err = E_INVALACT;
     } else {
-      ATOMIC_RELEASE(ctx->locked, false);
+      ATOMIC_RELEASE(ctx->locked);
       err = E_OK;
     }
 
@@ -153,7 +153,7 @@ error_t crc_calculate(crc_checksum_t *crc, const void *payload, uint32_t length,
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
 
     if(ctx->cmd_ready == false) {
       ctx->cmd_address = (uintptr_t)payload;

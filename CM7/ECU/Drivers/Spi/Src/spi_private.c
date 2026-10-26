@@ -15,7 +15,7 @@ ITCM_FUNC INLINE void spi_private_slave_reset(spi_slave_t *spi_slave)
   spi->slave_own = NULL;
   spi->poll_scheduled = false;
   spi->errorcode = E_OK;
-  ATOMIC_RELEASE(spi->busy, false);
+  ATOMIC_RELEASE(spi->busy);
 }
 
 ITCM_FUNC INLINE void spi_private_irq_handler(spi_t *spi, error_t errorcode)
@@ -237,7 +237,7 @@ ITCM_FUNC void spi_private_poll_loop(spi_t *spi)
 {
   uint32_t poll_timestamp, now;
 
-  if(spi->busy == true && spi->poll_scheduled == true) {
+  if(ATOMIC_ISLOCKED(spi->busy) == true && spi->poll_scheduled == true) {
     poll_timestamp = spi->poll_startpoint;
     now = time_now_us();
     if(time_diff(now, poll_timestamp) >= spi->poll_period) {

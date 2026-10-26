@@ -32,7 +32,7 @@ typedef struct {
     bool gpio_invert;
     ecu_gpio_output_type_t type;
     void *usrdata;
-    bool locked;
+    ATOMIC_LOCK_TYPE locked;
 }ecu_gpio_output_t;
 
 typedef struct {
@@ -57,7 +57,7 @@ typedef struct {
     bool exti_support;
     bool gpio_invert;
     void *usrdata;
-    bool locked;
+    ATOMIC_LOCK_TYPE locked;
 }ecu_gpio_input_t;
 
 typedef struct {
@@ -881,25 +881,17 @@ error_t ecu_config_gpio_output_init(void)
   do {
     for(int i = 0; i < ITEMSOF(ecu_gpio_setup.outputs_if); i++) {
       ecu_gpio_setup.outputs_if[i].output_if_id = output_if_register(&ecu_gpio_setup.outputs_if[i].cfg, ecu_gpio_setup.outputs_if[i].usrdata);
-      if(ecu_gpio_setup.outputs_if[i].output_if_id < 0) {
-        err = E_FAULT;
-        break;
-      }
+      BREAK_IF_ACTION(ecu_gpio_setup.outputs_if[i].output_if_id < 0, err = E_FAULT);
     }
 
-    if(err != E_OK) {
-      break;
-    }
+    BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ITEMSOF(ecu_gpio_setup.outputs); i++) {
-      ecu_gpio_setup.outputs[i].locked = true;
+      BREAK_IF_ACTION(ATOMIC_TRY_LOCK(ecu_gpio_setup.outputs[i].locked) != true, err = E_FAULT);
       do {
         ecu_gpio_setup.outputs[i].output_pin = i;
         ecu_gpio_setup.outputs[i].output_id = output_ch_register(ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].output_if_id, ecu_gpio_setup.outputs[i].output_ch_id, ecu_gpio_setup.outputs[i].usrdata);
-        if(ecu_gpio_setup.outputs[i].output_id < 0) {
-          err = E_FAULT;
-          break;
-        }
+        BREAK_IF_ACTION(ecu_gpio_setup.outputs[i].output_id < 0, err = E_FAULT);
 
         ecu_gpio_setup.outputs_if[ecu_gpio_setup.outputs[i].if_id].channels[ecu_gpio_setup.outputs[i].output_ch_id] = &ecu_gpio_setup.outputs[i];
 
@@ -912,13 +904,12 @@ error_t ecu_config_gpio_output_init(void)
           }
         }
       } while(0);
-      ecu_gpio_setup.outputs[i].locked = false;
+
+      ATOMIC_RELEASE(ecu_gpio_setup.outputs[i].locked);
       BREAK_IF(err != E_OK);
     }
+    BREAK_IF(err != E_OK);
 
-    if(err != E_OK) {
-      break;
-    }
   } while(0);
 
   return err;
@@ -1029,14 +1020,11 @@ error_t ecu_config_gpio_input_init(void)
     BREAK_IF(err != E_OK);
 
     for(int i = 0; i < ITEMSOF(ecu_gpio_setup.inputs); i++) {
-      ecu_gpio_setup.inputs[i].locked = true;
+      BREAK_IF_ACTION(ATOMIC_TRY_LOCK(ecu_gpio_setup.inputs[i].locked) != true, err = E_FAULT);
       do {
         ecu_gpio_setup.inputs[i].input_pin = i;
         ecu_gpio_setup.inputs[i].input_id = input_ch_register(ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].input_if_id, ecu_gpio_setup.inputs[i].input_ch_id, ecu_gpio_setup.inputs[i].usrdata);
-        if(ecu_gpio_setup.inputs[i].input_id < 0) {
-          err = E_FAULT;
-          break;
-        }
+        BREAK_IF_ACTION(ecu_gpio_setup.inputs[i].input_id < 0, err = E_FAULT);
 
         ecu_gpio_setup.inputs_if[ecu_gpio_setup.inputs[i].if_id].channels[ecu_gpio_setup.inputs[i].input_ch_id] = &ecu_gpio_setup.inputs[i];
 
@@ -1137,7 +1125,7 @@ error_t ecu_config_gpio_input_init(void)
         }
       } while(0);
 
-      ecu_gpio_setup.inputs[i].locked = false;
+      ATOMIC_RELEASE(ecu_gpio_setup.inputs[i].locked);
       BREAK_IF(err != E_OK);
     }
 
@@ -1727,7 +1715,6 @@ error_t ecu_config_gpio_exti_register(uint16_t exti_pin, ecu_gpio_exti_cb_t func
 ITCM_FUNC error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
 {
   error_t err = E_OK;
-  uint32_t prim;
   ecu_gpio_output_t *pin_ctx;
 
   do {
@@ -1735,14 +1722,11 @@ ITCM_FUNC error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
-    prim = EnterCritical();
-    if(pin_ctx->locked == true) {
-      err = E_BUSY;
-    } else {
-      pin_ctx->locked = true;
+    if(ATOMIC_TRY_LOCK(pin_ctx->locked) == true) {
       err = E_OK;
+    } else {
+      err = E_BUSY;
     }
-    ExitCritical(prim);
 
   } while(0);
 
@@ -1752,7 +1736,6 @@ ITCM_FUNC error_t ecu_config_gpio_output_lock(ecu_gpio_output_pin_t pin)
 ITCM_FUNC error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
 {
   error_t err = E_OK;
-  uint32_t prim;
   ecu_gpio_output_t *pin_ctx;
 
   do {
@@ -1760,14 +1743,11 @@ ITCM_FUNC error_t ecu_config_gpio_output_unlock(ecu_gpio_output_pin_t pin)
 
     pin_ctx = &ecu_gpio_setup.outputs[pin];
 
-    prim = EnterCritical();
-    if(pin_ctx->locked == false) {
-      err = E_INVALACT;
-    } else {
-      pin_ctx->locked = false;
+    if(ATOMIC_TRY_RELEASE(pin_ctx->locked)) {
       err = E_OK;
+    } else {
+      err = E_INVALACT;
     }
-    ExitCritical(prim);
 
   } while(0);
 
@@ -1795,7 +1775,6 @@ ITCM_FUNC error_t ecu_config_gpio_output_valid(ecu_gpio_output_pin_t pin, bool *
 ITCM_FUNC error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
 {
   error_t err = E_OK;
-  uint32_t prim;
   ecu_gpio_input_t *pin_ctx;
 
   do {
@@ -1803,14 +1782,11 @@ ITCM_FUNC error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
-    prim = EnterCritical();
-    if(pin_ctx->locked == true) {
-      err = E_BUSY;
-    } else {
-      pin_ctx->locked = true;
+    if(ATOMIC_TRY_LOCK(pin_ctx->locked) == true) {
       err = E_OK;
+    } else {
+      err = E_BUSY;
     }
-    ExitCritical(prim);
 
   } while(0);
 
@@ -1820,7 +1796,6 @@ ITCM_FUNC error_t ecu_config_gpio_input_lock(ecu_gpio_input_pin_t pin)
 ITCM_FUNC error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
 {
   error_t err = E_OK;
-  uint32_t prim;
   ecu_gpio_input_t *pin_ctx;
 
   do {
@@ -1828,15 +1803,11 @@ ITCM_FUNC error_t ecu_config_gpio_input_unlock(ecu_gpio_input_pin_t pin)
 
     pin_ctx = &ecu_gpio_setup.inputs[pin];
 
-    prim = EnterCritical();
-    if(pin_ctx->locked == false) {
-      err = E_INVALACT;
-    } else {
-      pin_ctx->locked = false;
+    if(ATOMIC_TRY_RELEASE(pin_ctx->locked)) {
       err = E_OK;
+    } else {
+      err = E_INVALACT;
     }
-    ExitCritical(prim);
-
   } while(0);
 
   return err;

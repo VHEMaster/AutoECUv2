@@ -61,7 +61,7 @@ typedef struct {
 
 typedef struct {
   spi_cfg_t cfg;
-  bool busy;
+  ATOMIC_LOCK_TYPE busy;
   volatile spi_state_t state;
   spi_op_cplt_cb_t cplt_callback;
   spi_op_cplt_cb_t err_callback;

@@ -27,7 +27,7 @@ typedef struct {
     CRC_HandleTypeDef *hcrc;
     MDMA_HandleTypeDef *hdma;
     bool ready;
-    bool locked;
+    ATOMIC_LOCK_TYPE locked;
     crc_fsm_t fsm_process;
 
     bool cmd_ready;

@@ -9,6 +9,7 @@
 #define COMMON_INC_COMPILER_H_
 
 #include "main.h"
+#include "bool.h"
 
 #define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 #define ITEMSOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
@@ -47,8 +48,16 @@
 #define RETURN_IF(condition, errcode)                   { if((condition)) { return (errcode); } }
 #define CONTINUE_IF(condition)                          { if((condition)) { continue; } }
 
-#define ATOMIC_TRY_LOCK(var, val) (__atomic_exchange_n(&(var), (val), __ATOMIC_ACQUIRE) == 0u)
-#define ATOMIC_RELEASE(var, val) (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
+#define ATOMIC_EXCHANGE_ACQUIRE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_ACQUIRE))
+#define ATOMIC_EXCHANGE_RELEASE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_RELEASE))
+#define ATOMIC_STORE(var, val)              (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
+#define ATOMIC_LOAD(var)                    (__atomic_load_n(&(var), __ATOMIC_RELAXED))
+
+#define ATOMIC_LOCK_TYPE            bool
+#define ATOMIC_TRY_LOCK(var)        (ATOMIC_EXCHANGE_ACQUIRE((var), true) == false)
+#define ATOMIC_TRY_RELEASE(var)     (ATOMIC_EXCHANGE_RELEASE((var), false) == true)
+#define ATOMIC_RELEASE(var)         (ATOMIC_STORE((var), false))
+#define ATOMIC_ISLOCKED(var)        (ATOMIC_LOAD((var)) == true)
 
 #undef HAS_BIT
 #undef SET_BIT

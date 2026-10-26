@@ -61,7 +61,7 @@ error_t flash_lock(void)
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
-    if(ATOMIC_TRY_LOCK(ctx->locked, true) == true) {
+    if(ATOMIC_TRY_LOCK(ctx->locked) == true) {
       err = E_OK;
     } else {
       err = E_AGAIN;
@@ -79,10 +79,10 @@ error_t flash_unlock(void)
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    if(ctx->locked == false || ctx->cmd_request != FLASH_CMD_NONE) {
+    if(ATOMIC_ISLOCKED(ctx->locked) == false || ctx->cmd_request != FLASH_CMD_NONE) {
       err = E_INVALACT;
     } else {
-      ATOMIC_RELEASE(ctx->locked, false);
+      ATOMIC_RELEASE(ctx->locked);
       err = E_OK;
     }
 
@@ -99,7 +99,7 @@ error_t flash_section_read(uint16_t section_type, uint16_t section_index, flash_
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {
@@ -130,7 +130,7 @@ error_t flash_section_write(uint16_t section_type, uint16_t section_index, flash
 
   do {
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
-    BREAK_IF_ACTION(ctx->locked == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_request != FLASH_CMD_NONE && ctx->cmd_request != cmd, err = E_INVALACT);
 
     if(ctx->cmd_request == FLASH_CMD_NONE) {

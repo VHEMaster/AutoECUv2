@@ -74,7 +74,7 @@ typedef struct {
 typedef struct {
     qspi_ctx_t *qspi_ctx;
     bool ready;
-    bool locked;
+    ATOMIC_LOCK_TYPE locked;
 
     flash_cmd_type_t cmd_request;
     error_t cmd_errcode;
