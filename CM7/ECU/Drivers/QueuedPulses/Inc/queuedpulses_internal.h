@@ -20,8 +20,7 @@ typedef struct queuedpulse_output_tag queuedpulse_output_t;
 typedef struct queuedpulse_entry_tag {
     queuedpulse_timer_t *timer;
     queuedpulse_output_t *output_assigned;
-    time_delta_us_t pulse;
-    time_us_t time;
+    time_us_t pulse_deadline;
     queuedpulse_entry_t *next;
     queuedpulse_entry_t *out_seq_next;
     uint32_t id;
@@ -63,18 +62,5 @@ typedef struct {
 
 void queuedpulses_internal_tim_enable(queuedpulse_timer_t *timer, uint32_t prd, uint32_t psc);
 void queuedpulses_internal_tim_disable(queuedpulse_timer_t *timer);
-
-STATIC_INLINE time_delta_us_t queuedpulses_internal_calculate_pulse_cplt_time(queuedpulse_entry_t *entry, time_us_t now)
-{
-  time_us_t absolute_time = time_add(entry->time, entry->pulse);
-  time_delta_us_t relative_time = time_diff(absolute_time, now);
-
-  /* TODO: probably not needed, but let's keep it... Just in case */
-  if(relative_time >= TIME_TIMEBASE_MASK >> 1) {
-    relative_time = 0;
-  }
-
-  return relative_time;
-}
 
 #endif /* DRIVERS_QUEUEDPULSES_INC_QUEUEDPULSES_INTERNAL_H_ */
