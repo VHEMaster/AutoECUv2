@@ -12,8 +12,8 @@
 #include "time.h"
 #include "config_extern.h"
 
-#define CRC_DMA_MAX_LEN       (32768)
-#define CRC_DMA_TIMEOUT_US    (20 * TIME_US_IN_MS)
+#define CRC_DMA_MAX_LEN       (64 * 1024)
+#define CRC_DMA_TIMEOUT_US    (10 * TIME_US_IN_MS)
 
 typedef enum {
   CRC_FSM_CONDITION = 0,
@@ -25,7 +25,7 @@ typedef enum {
 
 typedef struct {
     CRC_HandleTypeDef *hcrc;
-    DMA_HandleTypeDef *hdma;
+    MDMA_HandleTypeDef *hdma;
     bool ready;
     bool locked;
     crc_fsm_t fsm_process;

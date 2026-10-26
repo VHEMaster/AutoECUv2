@@ -380,7 +380,7 @@ typedef struct {
     bool comms_initialized;
     bool core_components_initialized;
 
-    DMA_HandleTypeDef *hdma;
+    MDMA_HandleTypeDef *hdma;
     error_t dma_errode;
 
     ecu_config_op_t op_request;

@@ -57,10 +57,10 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream1;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream2;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream3;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream4;
 
 extern EXTI_HandleTypeDef hexti1;
 

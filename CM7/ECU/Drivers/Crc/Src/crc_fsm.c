@@ -33,7 +33,7 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
       case CRC_FSM_DMA_REQUEST:
         ctx->dma_errcode = E_AGAIN;
         CacheClean((const void *)ctx->cmd_address, ctx->cmd_len_cur);
-        status = HAL_DMA_Start_IT(ctx->hdma, ctx->cmd_address, (uint32_t)&ctx->hcrc->Instance->DR, ctx->cmd_len_cur);
+        status = HAL_MDMA_Start_IT(ctx->hdma, ctx->cmd_address, (uint32_t)&ctx->hcrc->Instance->DR, ctx->cmd_len_cur, 1);
         if(status == HAL_OK) {
           ctx->fsm_process = CRC_FSM_DMA_WAIT;
           ctx->dma_timestamp = now;
@@ -67,7 +67,7 @@ ITCM_FUNC error_t crc_fsm(crc_ctx_t *ctx)
           ctx->fsm_process = CRC_FSM_CONDITION;
         } else if(time_diff(now, ctx->dma_timestamp) >= CRC_DMA_TIMEOUT_US) {
           ctx->dma_errcode = E_AGAIN;
-          status = HAL_DMA_Abort_IT(ctx->hdma);
+          status = HAL_MDMA_Abort_IT(ctx->hdma);
           if(status == HAL_OK) {
             ctx->dma_timestamp = now;
             ctx->fsm_process = CRC_FSM_DMA_WAIT_ABORT;

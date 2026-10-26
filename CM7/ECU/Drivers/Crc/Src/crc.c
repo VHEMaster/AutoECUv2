@@ -29,7 +29,7 @@ ITCM_FUNC static void crc_loop_fast(crc_ctx_t *ctx)
   } while(0);
 }
 
-static void crc_dma_clpt_cb(DMA_HandleTypeDef *hdma)
+static void crc_dma_clpt_cb(MDMA_HandleTypeDef *hdma)
 {
   crc_ctx_t *ctx = &crc_ctx;
 
@@ -38,7 +38,7 @@ static void crc_dma_clpt_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
-static void crc_dma_err_cb(DMA_HandleTypeDef *hdma)
+static void crc_dma_err_cb(MDMA_HandleTypeDef *hdma)
 {
   crc_ctx_t *ctx = &crc_ctx;
 
@@ -47,7 +47,7 @@ static void crc_dma_err_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
-static void crc_dma_abort_cb(DMA_HandleTypeDef *hdma)
+static void crc_dma_abort_cb(MDMA_HandleTypeDef *hdma)
 {
   crc_ctx_t *ctx = &crc_ctx;
 
@@ -66,7 +66,7 @@ error_t crc_init(void)
     memset(ctx, 0u, sizeof(crc_ctx_t));
 
     ctx->hcrc = &hcrc;
-    ctx->hdma = &hdma_memtomem_dma2_stream1;
+    ctx->hdma = &hmdma_memtomem_stream1;
 
     ctx->hcrc->Instance = CRC;
     ctx->hcrc->Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE;
@@ -81,20 +81,21 @@ error_t crc_init(void)
     status = HAL_CRC_Init(ctx->hcrc);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-    ctx->hdma->Init.Request = DMA_REQUEST_MEM2MEM;
-    ctx->hdma->Init.Direction = DMA_MEMORY_TO_MEMORY;
-    ctx->hdma->Init.PeriphInc = DMA_PINC_ENABLE;
-    ctx->hdma->Init.MemInc = DMA_MINC_DISABLE;
-    ctx->hdma->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    ctx->hdma->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    status = HAL_DMA_Init(ctx->hdma);
+    ctx->hdma->Init.Request = MDMA_REQUEST_SW;
+    ctx->hdma->Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
+    ctx->hdma->Init.SourceInc = MDMA_SRC_INC_BYTE;
+    ctx->hdma->Init.DestinationInc = MDMA_DEST_INC_DISABLE;
+    ctx->hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
+    ctx->hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
+
+    status = HAL_MDMA_Init(ctx->hdma);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, crc_dma_clpt_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_CPLT_CB_ID, crc_dma_clpt_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ERROR_CB_ID, crc_dma_err_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_ERROR_CB_ID, crc_dma_err_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ABORT_CB_ID, crc_dma_abort_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_ABORT_CB_ID, crc_dma_abort_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     err = ecu_loop_register_fast((ecu_loop_cb_t)crc_loop_fast, ctx, 0);

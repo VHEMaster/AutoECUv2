@@ -884,7 +884,7 @@ static ecu_config_generic_ctx_t ecu_config_global_calibration_ctx[ECU_CONFIG_CAL
 static ecu_config_generic_ctx_t ecu_config_global_runtimes_ctx[ECU_CONFIG_RUNTIME_TYPE_ALL];
 static ecu_config_executive_ctx_t ecu_config_global_comms_ctx[ECU_CONFIG_COMM_TYPE_ALL];
 
-static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
+static void ecu_config_dma_clpt_cb(MDMA_HandleTypeDef *hdma)
 {
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
 
@@ -893,7 +893,7 @@ static void ecu_config_dma_clpt_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
-static void ecu_config_dma_err_cb(DMA_HandleTypeDef *hdma)
+static void ecu_config_dma_err_cb(MDMA_HandleTypeDef *hdma)
 {
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
 
@@ -902,7 +902,7 @@ static void ecu_config_dma_err_cb(DMA_HandleTypeDef *hdma)
   }
 }
 
-static void ecu_config_dma_abort_cb(DMA_HandleTypeDef *hdma)
+static void ecu_config_dma_abort_cb(MDMA_HandleTypeDef *hdma)
 {
   ecu_config_global_runtime_ctx_t *ctx = &ecu_config_global_runtime_ctx;
 
@@ -1098,21 +1098,23 @@ error_t ecu_config_global_init(void)
 
     ctx->op_req_type = ECU_CONFIG_TYPE_MAX;
 
-    ctx->hdma = &hdma_memtomem_dma2_stream2;
-    ctx->hdma->Init.Request = DMA_REQUEST_MEM2MEM;
-    ctx->hdma->Init.Direction = DMA_MEMORY_TO_MEMORY;
-    ctx->hdma->Init.PeriphInc = DMA_PINC_ENABLE;
-    ctx->hdma->Init.MemInc = DMA_MINC_ENABLE;
-    ctx->hdma->Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    ctx->hdma->Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    status = HAL_DMA_Init(ctx->hdma);
+    ctx->hdma = &hmdma_memtomem_stream2;
+
+    ctx->hdma->Init.Request = MDMA_REQUEST_SW;
+    ctx->hdma->Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
+    ctx->hdma->Init.SourceInc = MDMA_SRC_INC_WORD;
+    ctx->hdma->Init.DestinationInc = MDMA_DEST_INC_WORD;
+    ctx->hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
+    ctx->hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
+
+    status = HAL_MDMA_Init(ctx->hdma);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_CPLT_CB_ID, ecu_config_dma_clpt_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_CPLT_CB_ID, ecu_config_dma_clpt_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ERROR_CB_ID, ecu_config_dma_err_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_ERROR_CB_ID, ecu_config_dma_err_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-    status = HAL_DMA_RegisterCallback(ctx->hdma, HAL_DMA_XFER_ABORT_CB_ID, ecu_config_dma_abort_cb);
+    status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_ABORT_CB_ID, ecu_config_dma_abort_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 
     ctx->global_ready = true;

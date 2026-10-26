@@ -61,13 +61,13 @@ extern DMA_HandleTypeDef hdma_adc2;
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern DAC_HandleTypeDef hdac1;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream2;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream3;
-extern DMA_HandleTypeDef hdma_memtomem_dma2_stream4;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern HRTIM_HandleTypeDef hhrtim;
 extern MDMA_HandleTypeDef hmdma_quadspi_fifo_th;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream1;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream2;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream3;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream4;
 extern QSPI_HandleTypeDef hqspi;
 extern SPI_HandleTypeDef hspi2;
 extern SPI_HandleTypeDef hspi3;
@@ -695,62 +695,6 @@ void TIM7_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA2 stream1 global interrupt.
-  */
-void DMA2_Stream1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream1_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_memtomem_dma2_stream1);
-  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
-
-  /* USER CODE END DMA2_Stream1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA2 stream2 global interrupt.
-  */
-void DMA2_Stream2_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA2_Stream2_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream2_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_memtomem_dma2_stream2);
-  /* USER CODE BEGIN DMA2_Stream2_IRQn 1 */
-
-  /* USER CODE END DMA2_Stream2_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA2 stream3 global interrupt.
-  */
-void DMA2_Stream3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA2_Stream3_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_memtomem_dma2_stream3);
-  /* USER CODE BEGIN DMA2_Stream3_IRQn 1 */
-
-  /* USER CODE END DMA2_Stream3_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA2 stream4 global interrupt.
-  */
-void DMA2_Stream4_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA2_Stream4_IRQn 0 */
-
-  /* USER CODE END DMA2_Stream4_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_memtomem_dma2_stream4);
-  /* USER CODE BEGIN DMA2_Stream4_IRQn 1 */
-
-  /* USER CODE END DMA2_Stream4_IRQn 1 */
-}
-
-/**
   * @brief This function handles FDCAN calibration unit interrupt.
   */
 void FDCAN_CAL_IRQHandler(void)
@@ -898,6 +842,10 @@ void MDMA_IRQHandler(void)
 
   /* USER CODE END MDMA_IRQn 0 */
   HAL_MDMA_IRQHandler(&hmdma_quadspi_fifo_th);
+  HAL_MDMA_IRQHandler(&hmdma_memtomem_stream1);
+  HAL_MDMA_IRQHandler(&hmdma_memtomem_stream2);
+  HAL_MDMA_IRQHandler(&hmdma_memtomem_stream3);
+  HAL_MDMA_IRQHandler(&hmdma_memtomem_stream4);
   /* USER CODE BEGIN MDMA_IRQn 1 */
 
   /* USER CODE END MDMA_IRQn 1 */

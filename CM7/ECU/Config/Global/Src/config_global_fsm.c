@@ -798,19 +798,19 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
                   ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_REQUEST;
                 } else {
                   ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_REQ;
-                  switch(ctx->hdma->Init.MemDataAlignment) {
+                  switch(ctx->hdma->Init.SourceDataSize) {
                     default:
-                    case DMA_MDATAALIGN_BYTE:
+                    case MDMA_SRC_DATASIZE_BYTE:
                       ctx->op_req_ctx.data_dma_datasize = sizeof(uint8_t);
                       break;
-                    case DMA_MDATAALIGN_HALFWORD:
+                    case MDMA_SRC_DATASIZE_HALFWORD:
                       ctx->op_req_ctx.data_dma_datasize = sizeof(uint16_t);
                       break;
-                    case DMA_MDATAALIGN_WORD:
+                    case MDMA_SRC_DATASIZE_WORD:
                       ctx->op_req_ctx.data_dma_datasize = sizeof(uint32_t);
                       break;
                   }
-                  ctx->op_req_ctx.data_dma_limit = 0x10000 * ctx->op_req_ctx.data_dma_datasize - 0x1000;
+                  ctx->op_req_ctx.data_dma_limit = 0x10000;
                   ctx->op_req_ctx.data_dma_left = req_config->data_size;
                   ctx->op_req_ctx.data_dma_length = ctx->op_req_ctx.data_dma_left;
                   ctx->op_req_ctx.data_dma_pos = 0;
@@ -836,9 +836,9 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         ctx->dma_errode = E_AGAIN;
         CacheClean((const void *)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
         CacheClean((const void *)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos, ctx->op_req_ctx.data_dma_length);
-        status = HAL_DMA_Start_IT(ctx->hdma, (uintptr_t)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos,
+        status = HAL_MDMA_Start_IT(ctx->hdma, (uintptr_t)ctx->op_req_ctx.data_ptr + ctx->op_req_ctx.data_dma_pos,
             (uintptr_t)ctx->op_req_ctx.final_data_ptr + ctx->op_req_ctx.data_dma_pos,
-            ctx->op_req_ctx.data_dma_length / ctx->op_req_ctx.data_dma_datasize);
+            ctx->op_req_ctx.data_dma_length, 1);
         if(status == HAL_OK) {
           ctx->cmd_timestamp = now;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_POLL;
@@ -878,7 +878,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         break;
       case ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT:
         ctx->dma_errode = E_AGAIN;
-        status = HAL_DMA_Abort_IT(ctx->hdma);
+        status = HAL_MDMA_Abort_IT(ctx->hdma);
         if(status == HAL_OK) {
           ctx->cmd_timestamp = now;
           ctx->fsm_operation = ECU_CONFIG_FSM_OPERATION_DOUBLEBUFFER_ABORT_WAIT;
@@ -1121,6 +1121,7 @@ static error_t ecu_config_global_fsm_operation(ecu_config_global_runtime_ctx_t *
         }
 
         if(err != E_AGAIN) {
+          ctx->flash_locked = false;
           if(ctx->op_req_errcode_internal != E_AGAIN) {
             err = ctx->op_req_errcode_internal;
           }
