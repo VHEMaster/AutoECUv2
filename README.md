@@ -2,7 +2,7 @@
 
 **Open-source engine control firmware for a custom STM32H745-based ECU.**
 
-AutoECUv2 brings crank-angle scheduling, engine calculations, sensor acquisition, actuator control, and CAN communication into a modular C firmware project. It is an independent automotive engineering project built around dedicated ECU hardware and the STM32H7 platform.
+AutoECUv2 brings crank-angle scheduling, engine calculations, sensor acquisition, actuator control, and Classic CAN / CAN FD communication into a modular C firmware project. It is an independent automotive engineering project built around dedicated ECU hardware and the STM32H7 platform.
 
 The project emphasizes explicit hardware integration, configurable engine behavior, and predictable execution of time-critical work. Its main application currently runs on the Cortex-M7; the repository also contains a Cortex-M4 project for further development of the dual-core platform.
 
@@ -14,9 +14,11 @@ The project emphasizes explicit hardware integration, configurable engine behavi
 - Layered integration of automotive interface ICs, physical sensors, engine calculations, and control modules.
 - Configurable engine calculations with lookup tables, source selection, fallback values, and per-bank/per-cylinder corrections.
 - Electronic throttle, boost-control valve, idle-control, fuel-pump, and cooling-fan logic.
-- CAN signal packing and decoding, routing, ISO-TP transport, and a subset of OBD-II and UDS diagnostics.
-- Versioned configuration structures and external QSPI flash storage with CRC metadata.
-- Foreground, periodic, and event-driven execution, with hardware timers and DMA used where timing or throughput matters.
+- Classic CAN and CAN FD frames up to 64 bytes, configurable signal packing/decoding, and routing in both directions.
+- ISO-TP TX/RX over Classic CAN and CAN FD, plus a subset of OBD-II and UDS diagnostics.
+- Versioned configuration structures, redundant external QSPI flash storage with CRC checks, and default-configuration recovery.
+- Absolute-timestamp output pulse queues, chronological insertion, and configurable late-pulse policies.
+- Foreground, periodic, and event-driven execution, with hardware timers, DMA acquisition, and MDMA-backed memory/CRC transfers.
 
 ## Capabilities and maturity
 
@@ -24,14 +26,17 @@ The project emphasizes explicit hardware integration, configurable engine behavi
 | --- | --- |
 | Engine synchronization | Regular 60-2 and 36-2 crank patterns; single-pulse camshaft decoding. |
 | Ignition | Angle-based scheduling with sequential, semi-sequential, and wasted-spark modes. |
-| Injection | Phased and semi-sequential scheduling, configurable groups, injector lag compensation, and fuel-pressure/per-cylinder corrections. |
+| Injection | Phased and semi-sequential scheduling, phase-aware handover to sequential operation, configurable groups, injector lag compensation, and fuel-pressure/per-cylinder corrections. |
+| Output pulse scheduling | Absolute timestamps, chronological queue insertion, per-output reset, and keep-end / keep-width late policies. |
 | Engine calculations | Configurable MAP/TPS/MAF-based charge calculations, temperature compensation, AFR targets, ignition and injection calculations, and idle-control logic. |
 | Sensors | CKP, CMP, pedal and throttle position, manifold pressure, airflow, intake/coolant/exhaust temperature, vehicle speed, and oil pressure/temperature components. |
 | Actuator modules | Electronic throttle, boost-control valve, fuel pump, cooling fan, ignition power, and indication. Integration and validation are ongoing. |
 | Cylinder balance | Per-cylinder metrics derived from crankshaft timing around combustion events. |
 | Knock acquisition | Crank-angle-triggered ADC sampling windows and DMA buffering. DSP-based knock detection and automatic knock correction are development work. |
-| CAN signals | Configurable scaling and packing/decoding, Intel/Motorola layouts, signed/unsigned values, counters, and CRC support. Outgoing signals are routed; incoming signal routing integration is incomplete. |
-| Diagnostics | ISO-TP transport and selected OBD-II live-data/vehicle-information and UDS read-data services. Broader service coverage is incomplete. |
+| CAN / CAN FD | Configurable arbitration/data bitrates and bit-rate switching; Classic CAN frames up to 8 bytes and CAN FD frames up to 64 bytes. |
+| CAN signals | Configurable scaling and packing/decoding, Intel/Motorola layouts, signed/unsigned values, counters, and CRC support. Router integration includes incoming and outgoing signals with frame-format selection. |
+| Diagnostics | ISO-TP TX/RX for Classic CAN and CAN FD, extended Single Frame and First Frame length encoding, and selected OBD-II live-data/vehicle-information and UDS read-data services. The current ISO-TP payload buffer is limited to 4095 bytes. |
+| Configuration storage | Versioned sections, two flash copies, CRC validation, asynchronous load/save/default operations, and fallback to defaults when stored data cannot be used. |
 | VVT / KWP | Configuration and API groundwork; complete operational behavior is still pending. |
 | Dual-core execution | CM7 hosts the ECU application. CM4 project scaffolding is present; distributed ECU execution is not yet established. |
 
@@ -71,9 +76,37 @@ The ECU application is organized into layers with distinct responsibilities:
 
 Sensor and device data feed the engine calculations. Calculated targets are consumed by actuator modules and timing components, while CKP/CMP events provide the synchronization needed for angle-dependent work. The communication layer exposes selected internal parameters and handles diagnostic requests.
 
-Execution combines a foreground loop, periodic fast/slow/communication processing, and peripheral callbacks. Timer-backed scheduling handles output events; DMA supports acquisition and data transfer. The firmware also includes ITCM placement for selected routines, cache-management helpers, and execution-time measurement utilities.
+Execution combines a foreground loop, periodic fast/slow/communication processing, and peripheral callbacks. Timer-backed scheduling handles output events using absolute deadlines. DMA supports acquisition, while MDMA is used for memory copies and transfers into the hardware CRC unit. CRC processing uses aligned word transfers with byte handling for unaligned prefixes and trailing data. The firmware also includes ITCM placement for selected routines, cache-management helpers, and execution-time measurement utilities.
 
 The central integration point is [MiddleLayer](CM7/ECU/MiddleLayer). For a new contributor, following its initialization and loop calls is a useful way to understand how the layers interact.
+
+### Output scheduling
+
+[QueuedPulses](CM7/ECU/Drivers/QueuedPulses) stores absolute output-event timestamps and inserts events in chronological order. Ignition and injection timing use this layer to schedule pulses, with a per-output reset path for invalid timing inputs.
+
+Late-pulse behavior is selected by policy: **keep end** preserves the requested end time and can shorten the pulse; **keep width** preserves its duration when the start must move. Pulse insertion handles available gaps and existing output activity, including requests that arrive out of timestamp order. Scheduling also checks minimum pulse duration and the representable timer horizon.
+
+Injection timing includes a phase-aware handover from semi-sequential to sequential operation when camshaft synchronization becomes available. Switching modes is coordinated per cylinder rather than applied blindly to every pending event.
+
+## Communication
+
+The communication stack separates the CAN driver, signal encoding, routing, transport, and diagnostic services:
+
+| Component | Current behavior |
+| --- | --- |
+| [CAN driver](CM7/ECU/Drivers/Can) | Classic CAN / CAN FD frame formats, standard/extended identifiers, DLC conversion and validation, configurable nominal/data bitrates, and bit-rate switching. |
+| [Signals](CM7/ECU/Communication/Signals) | Configurable incoming/outgoing signal definitions, scaling, bit layout, counters, CRC, and frame payloads up to 64 bytes for CAN FD. |
+| [Router](CM7/ECU/Communication/Router) | Incoming signal callbacks, outgoing signal dispatch, diagnostic message routing, and matching by configured frame format. |
+| [ISO-TP](CM7/ECU/Communication/ISOTP) | Single Frame and segmented TX/RX, flow control, block size, separation time, sequence checking, timeouts, and error counters. |
+| [OBD-II](CM7/ECU/Communication/OBD2) / [UDS](CM7/ECU/Communication/UDS) | Selected diagnostic services above the transport layer; service coverage remains partial. |
+
+Classic CAN uses payload lengths up to 8 bytes. CAN FD additionally supports 12, 16, 20, 24, 32, 48, and 64 bytes; the driver provides helpers to validate or select a legal frame length. CAN FD support must be enabled in the CAN configuration, and signal, route, and ISO-TP frame formats must match the intended connection.
+
+ISO-TP implements the CAN FD extended Single Frame length field and the extended First Frame length field on both TX and RX paths. **Extended First Frame encoding does not currently mean arbitrary-size transfers:** `ISOTP_PAYLOAD_LEN_MAX` is still **4095 bytes**. Oversized incoming transfers follow the receive-overflow path.
+
+The current default CAN configuration enables CAN FD support with a **500 kbit/s nominal bitrate** and **1 Mbit/s data bitrate**. ISO-TP defaults still select **Classic CAN**. These are separate settings; enabling CAN FD at the controller does not switch every diagnostic connection to CAN FD. See [CAN configuration](CM7/ECU/Config/Communication/Src/config_can.c), [ISO-TP configuration](CM7/ECU/Config/Communication/Src/config_isotp.c), and [routing configuration](CM7/ECU/Config/Communication/Src/config_router.c).
+
+KWP integration remains groundwork. RS-422 transport and distributed communication execution on CM4 are development directions.
 
 ## Repository layout
 
@@ -135,6 +168,10 @@ Configuration is split by responsibility rather than kept in a single monolithic
 | [Communication](CM7/ECU/Config/Communication) | Signal definitions and communication configuration. |
 | [Global](CM7/ECU/Config/Global), [Versioned](CM7/ECU/Config/Versioned), and [Flash](CM7/ECU/Config/Flash) | Configuration structures, stored-data layout, and persistence integration. |
 
+The persistence layer stores configuration sections in two flash copies and checks section metadata and payload CRCs when loading. Its state machines cover loading, saving, restoring defaults, asynchronous transfers, and error/timeout handling. A failed load can fall back to the section's default configuration.
+
+Configuration staging and CRC work use MDMA. CRC transfers handle unaligned addresses and lengths that are not multiples of a word, and the QSPI transfer path supports requests larger than 64 KiB. Review buffer placement, cache handling, and transfer sizes when changing configuration storage.
+
 Defaults are a development starting point and need to match the actual engine, sensors, injectors, actuators, and board. When changing a persistent structure, review its version, size, storage layout, and initialization path together.
 
 ## Contributing
@@ -158,7 +195,9 @@ Areas for further work include:
 
 - Stronger regression coverage for synchronization, output scheduling, configuration validation, and recovery paths.
 - DSP processing of knock-window samples, including filtering and frequency-domain analysis.
-- Completion of VVT control, incoming signal routing, and additional diagnostic services.
+- Completion of VVT control and additional diagnostic services.
+- Broader interoperability and regression testing of Classic CAN / CAN FD, signal routing, and ISO-TP boundary cases.
+- Larger ISO-TP payload buffers and API/storage changes if transfers beyond the current 4095-byte limit are needed.
 - Development of KWP support beyond the current API groundwork.
 - Measured optimization of periodic routines and clearer execution-time budgets.
 - Exploration of CM4 workloads for communication and signal processing.
@@ -172,3 +211,4 @@ AutoECUv2 is distributed under the **GNU General Public License, version 2**. Se
 Bundled third-party components retain their respective license terms; consult their license files and source headers.
 
 Maintained by [VHEMaster](https://github.com/VHEMaster).
+
