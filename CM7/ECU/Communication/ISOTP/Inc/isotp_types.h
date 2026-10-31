@@ -12,9 +12,11 @@
 #include "time.h"
 #include "versioned_isotp.h"
 
-#define ISOTP_PAYLOAD_LEN_MAX   4095u
-#define ISOTP_FRAME_FIFO_LEN    16u
-#define ISOTP_FRAME_LEN         8u
+#define ISOTP_PAYLOAD_LEN_MAX     4095u
+#define ISOTP_FRAME_FIFO_LEN      16u
+#define ISOTP_FRAME_CLASSIC_LEN   CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX
+#define ISOTP_FRAME_FD_LEN        CAN_MESSAGE_FD_PAYLOAD_LEN_MAX
+#define ISOTP_FRAME_LEN           CAN_MESSAGE_PAYLOAD_LEN_MAX
 
 typedef enum {
   ISOTP_OK = 0,
@@ -25,6 +27,7 @@ typedef enum {
   ISOTP_WRONG_SN,
   ISOTP_WRONG_DL,
   ISOTP_INVALID_FS,
+  ISOTP_INVALID_FL,
   ISOTP_RX_OVERFLOW,
   ISOTP_BUFFER_OVERFLOW,
   ISOTP_UNEXPECTED_PDU,
@@ -58,6 +61,8 @@ typedef struct {
 }isotp_init_ctx_t;
 
 typedef struct {
+    can_frame_format_t format;
+    uint8_t length;
     uint8_t payload[ISOTP_FRAME_LEN];
 }isotp_frame_t;
 
@@ -69,7 +74,7 @@ typedef struct {
 
 typedef struct {
     uint8_t payload[ISOTP_PAYLOAD_LEN_MAX];
-    uint16_t length;
+    uint32_t length;
     bool ready;
     uint32_t error_code_counter[ISOTP_MAX];
 }isotp_data_t;

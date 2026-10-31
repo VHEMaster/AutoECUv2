@@ -56,6 +56,7 @@ typedef struct {
     uint16_t downstream_data_len;
 
     struct {
+        isotp_frame_t frame_downstream;
         can_message_t message_downstream;
         bool message_downstream_pending;
 

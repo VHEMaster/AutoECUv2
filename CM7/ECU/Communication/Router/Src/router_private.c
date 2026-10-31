@@ -101,7 +101,7 @@ static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *me
         diag_ctx->config->upstream_phy_msg_id != message->id);
     BREAK_IF(diag_ctx->config->format != message->format);
 
-    err = isotp_frame_write_upstream(diag_ctx->isotp_ctx, (const isotp_frame_t *)message->payload);
+    err = isotp_frame_write_upstream(diag_ctx->isotp_ctx, message);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -132,6 +132,7 @@ static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t 
   const router_config_can_isotp_t *diag_cfg;
   router_diag_isotp_ctx_t *diag_ctx;
   isotp_error_code_t isotp_err;
+  uint32_t minimum_length;
 
   do {
     BREAK_IF(ctx == NULL);
@@ -148,16 +149,27 @@ static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t 
       }
 
       if(diag_ctx->runtime.message_downstream_pending == false) {
-        err = isotp_frame_read_downstream(diag_ctx->isotp_ctx, (isotp_frame_t *)diag_ctx->runtime.message_downstream.payload);
+        err = isotp_frame_read_downstream(diag_ctx->isotp_ctx, &diag_ctx->runtime.frame_downstream);
         if(err != E_OK) {
           BREAK_IF(err == E_AGAIN);
           router_reset_can(diag_ctx);
         }
+        BREAK_IF_ACTION(diag_ctx->runtime.frame_downstream.format != diag_ctx->config->format, err = E_INVALACT);
+
+        err = can_minimum_message_length(diag_ctx->runtime.frame_downstream.format,
+            diag_ctx->runtime.frame_downstream.length, &minimum_length);
+        BREAK_IF(err != E_OK);
+
         diag_ctx->runtime.message_downstream_pending = true;
 
         diag_ctx->runtime.message_downstream.id = diag_cfg->downstream_msg_id;
-        diag_ctx->runtime.message_downstream.len = ISOTP_FRAME_LEN;
+        diag_ctx->runtime.message_downstream.len = minimum_length;
         diag_ctx->runtime.message_downstream.format = diag_ctx->config->format;
+        memcpy(diag_ctx->runtime.message_downstream.payload, diag_ctx->runtime.frame_downstream.payload, diag_ctx->runtime.frame_downstream.length);
+        if(diag_ctx->runtime.frame_downstream.length < minimum_length) {
+          memset(&diag_ctx->runtime.message_downstream.payload[diag_ctx->runtime.frame_downstream.length],
+              0u, minimum_length - diag_ctx->runtime.frame_downstream.length);
+        }
       }
 
       if(diag_ctx->runtime.message_downstream_pending == true) {

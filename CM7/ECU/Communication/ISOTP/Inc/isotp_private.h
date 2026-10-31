@@ -10,7 +10,7 @@
 
 #include "isotp.h"
 
-error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const isotp_frame_t *frame);
+error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const can_message_t *frame);
 error_t isotp_frame_fifo_pull(isotp_frame_fifo_t *fifo, isotp_frame_t *frame);
 
 bool isotp_frame_is_empty(isotp_frame_fifo_t *fifo);

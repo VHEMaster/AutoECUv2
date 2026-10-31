@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "time.h"
+#include "can_types.h"
 
 typedef enum {
   ISOTP_CONFIG_VERSION_V1 = 0,
@@ -19,6 +20,7 @@ typedef enum {
 typedef struct {
     bool enabled;
 
+    can_frame_format_t format;
     time_us_t timeout;
     uint16_t upstream_block_size;
     time_delta_us_t upstream_min_separation_time;

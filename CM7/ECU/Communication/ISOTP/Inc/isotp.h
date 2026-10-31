@@ -14,7 +14,7 @@ error_t isotp_init(isotp_ctx_t *ctx, const isotp_init_ctx_t *init);
 error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config);
 void isotp_loop(isotp_ctx_t *ctx);
 
-error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame);
+error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const can_message_t *message);
 error_t isotp_frame_read_downstream(isotp_ctx_t *ctx, isotp_frame_t *frame);
 
 error_t isotp_data_write_downstream(isotp_ctx_t *ctx, const uint8_t *payload, uint16_t length);

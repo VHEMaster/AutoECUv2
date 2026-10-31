@@ -22,6 +22,7 @@ typedef struct ecu_comm_isotp_ctx_tag {
 }ecu_comm_isotp_ctx_t;
 
 static const isotp_config_t ecu_comm_isotp_config_default = {
+    .format = CAN_FRAME_FORMAT_CLASSIC,
     .timeout = 1000 * TIME_US_IN_MS,
     .upstream_block_size = 20,
     .upstream_min_separation_time = 0,
@@ -150,18 +151,18 @@ static void ecu_comm_isotp_error_callback(isotp_ctx_t *ctx, isotp_error_code_t c
   } while(0);
 }
 
-error_t ecu_comm_isotp_frame_write_upstream(ecu_comm_isotp_t instance, const isotp_frame_t *frame)
+error_t ecu_comm_isotp_frame_write_upstream(ecu_comm_isotp_t instance, const can_message_t *message)
 {
   error_t err = E_OK;
   ecu_comm_isotp_ctx_t *isotp_ctx;
 
   do {
     BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message == NULL, err = E_PARAM);
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
-    err = isotp_frame_write_upstream(isotp_ctx->ctx, frame);
+    err = isotp_frame_write_upstream(isotp_ctx->ctx, message);
 
   } while(0);
 

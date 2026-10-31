@@ -7,14 +7,16 @@
 
 #include "isotp_private.h"
 
-INLINE error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const isotp_frame_t *frame)
+INLINE error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const can_message_t *message)
 {
   error_t err = E_OK;
   uint32_t read, write, cur;
+  isotp_frame_t *dst_frame;
 
   do {
     BREAK_IF_ACTION(fifo == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message->len > ISOTP_FRAME_LEN, err = E_PARAM);
 
     read = fifo->read;
     write = fifo->write;
@@ -27,7 +29,10 @@ INLINE error_t isotp_frame_fifo_push(isotp_frame_fifo_t *fifo, const isotp_frame
     if(write == read) {
       err = E_OVERFLOW;
     } else {
-      memcpy(&fifo->buffer[cur], frame, sizeof(isotp_frame_t));
+      dst_frame = &fifo->buffer[cur];
+      dst_frame->length = message->len;
+      dst_frame->format = message->format;
+      memcpy(dst_frame->payload, message->payload, dst_frame->length);
       fifo->write = write;
     }
 
@@ -40,6 +45,7 @@ INLINE error_t isotp_frame_fifo_pull(isotp_frame_fifo_t *fifo, isotp_frame_t *fr
 {
   error_t err = E_OK;
   uint32_t read, write;
+  isotp_frame_t *src_frame;
 
   do {
     BREAK_IF_ACTION(fifo == NULL, err = E_PARAM);
@@ -51,7 +57,10 @@ INLINE error_t isotp_frame_fifo_pull(isotp_frame_fifo_t *fifo, isotp_frame_t *fr
     if(read == write) {
       err = E_AGAIN;
     } else {
-      memcpy(frame, &fifo->buffer[read], sizeof(isotp_frame_t));
+      src_frame = &fifo->buffer[read];
+      frame->length = src_frame->length;
+      frame->format = src_frame->format;
+      memcpy(frame->payload, src_frame->payload, frame->length);
       if(++read >= ISOTP_FRAME_FIFO_LEN) {
         read = 0;
       }

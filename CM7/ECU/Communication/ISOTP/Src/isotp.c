@@ -45,7 +45,7 @@ error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config)
   return err;
 }
 
-error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame)
+error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const can_message_t *message)
 {
   error_t err = E_OK;
   isotp_frame_fifo_t *frame_fifo;
@@ -53,10 +53,16 @@ error_t isotp_frame_write_upstream(isotp_ctx_t *ctx, const isotp_frame_t *frame)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
-    BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(message->format != ctx->config.format, err = E_PARAM);
+
+    BREAK_IF_ACTION(message->format == CAN_FRAME_FORMAT_CLASSIC && message->len > CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(message->format == CAN_FRAME_FORMAT_FDCAN && message->len > CAN_MESSAGE_FD_PAYLOAD_LEN_MAX, err = E_PARAM);
+
+    BREAK_IF_ACTION(message->len < 1, err = E_PARAM);
 
     frame_fifo = &ctx->frame_fifo_upstream;
-    err = isotp_frame_fifo_push(frame_fifo, frame);
+    err = isotp_frame_fifo_push(frame_fifo, message);
 
   } while(0);
 
@@ -71,7 +77,6 @@ error_t isotp_frame_read_downstream(isotp_ctx_t *ctx, isotp_frame_t *frame)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
-    BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
 
     frame_fifo = &ctx->frame_fifo_downstream;
     err = isotp_frame_fifo_pull(frame_fifo, frame);

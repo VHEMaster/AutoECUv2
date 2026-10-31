@@ -674,3 +674,7 @@ error_t can_validate_message_length(can_frame_format_t format, uint32_t length)
   return can_private_validate_message_length(format, length);
 }
 
+error_t can_minimum_message_length(can_frame_format_t format, uint32_t req_length, uint32_t *length)
+{
+  return can_private_minimum_message_length(format, req_length, length);
+}
