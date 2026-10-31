@@ -81,11 +81,11 @@ typedef struct {
 }isotp_data_t;
 
 typedef struct {
-    uint16_t left;
-    uint16_t pos;
-    uint16_t sn;
-    uint16_t bs;
-    uint16_t bn;
+    uint32_t left;
+    uint32_t pos;
+    uint32_t sn;
+    uint32_t bs;
+    uint32_t bn;
     bool safc;
     time_delta_us_t separation_time;
 }isotp_fc_t;
@@ -112,6 +112,7 @@ typedef struct isotp_ctx_tag {
     bool reset_trigger;
 
     uint32_t frame_len_max;
+    uint32_t frame_rx_dl;
 
 
 }isotp_ctx_t;
