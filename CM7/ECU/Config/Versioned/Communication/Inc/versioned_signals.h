@@ -34,6 +34,7 @@ typedef struct {
 
 typedef struct {
     bool enabled;
+    can_frame_format_t format;
     uint32_t message_id;
     uint8_t message_len;
     time_delta_us_t upstream_timeout;

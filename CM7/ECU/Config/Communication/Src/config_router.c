@@ -27,6 +27,7 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
               .downstream_list = {
                   {
                       .enabled = false,
+                      .format = CAN_FRAME_FORMAT_CLASSIC,
                       .msg_id_1_start = 0x100,
                       .msg_id_2_end = 0x1FF,
                       .can_instance = ECU_COMM_CAN_1,
@@ -39,6 +40,7 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
           .can_isotp = {
               {
                   .enabled = true,
+                  .format = CAN_FRAME_FORMAT_CLASSIC,
                   .can_instance = ECU_COMM_CAN_1,
                   .uds_instance = ECU_COMM_UDS_1,
                   .obd2_instance = ECU_COMM_OBD2_1,

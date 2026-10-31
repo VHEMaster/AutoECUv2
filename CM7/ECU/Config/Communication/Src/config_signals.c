@@ -32,6 +32,7 @@ static const signals_config_t ecu_comm_signals_default_config[ECU_COMM_SIGNALS_M
           .downstream_list = {
               {
                   .enabled = true,
+                  .format = CAN_FRAME_FORMAT_CLASSIC,
                   .message_id = 0x100,
                   .message_len = 8u,
                   .upstream_timeout = 500 * TIME_US_IN_MS,

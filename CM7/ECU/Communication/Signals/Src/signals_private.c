@@ -111,9 +111,13 @@ static error_t signals_validate_message_layout(const signals_config_message_desc
 
   do {
     BREAK_IF_ACTION(message == NULL || signals == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(message->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(message->format >= CAN_FRAME_FORMAT_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(message->format == CAN_FRAME_FORMAT_FDCAN && message->message_len > CAN_MESSAGE_FD_PAYLOAD_LEN_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(message->format == CAN_FRAME_FORMAT_CLASSIC && message->message_len > CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX, err = E_PARAM);
 
-    BREAK_IF_ACTION(message->message_len > CAN_MESSAGE_PAYLOAD_LEN_MAX, err = E_PARAM);
+    err = can_validate_message_length(message->format, message->message_len);
+    BREAK_IF(err != E_OK);
+
     if(message->has_crc) {
       BREAK_IF_ACTION(message->crc_byte_pos >= message->message_len, err = E_PARAM);
     }
@@ -309,7 +313,8 @@ void signals_handle_upstream(signals_ctx_t *ctx)
       if(err == E_OK) {
         for(uint32_t m = 0; m < messages_used; m++) {
           message = &ctx->runtime.messages_upstream.messages[m];
-          if(message->message_config->message_id == working_item->message.id) {
+          if(message->message_config->message_id == working_item->message.id &&
+              message->message_config->format == working_item->message.format) {
             err = signals_handle_upstream_message(working_item, message);
             BREAK_IF(err != E_OK);
 
@@ -418,6 +423,7 @@ static error_t signals_handle_downstream_message(signals_runtime_messages_fifo_i
 
     working_item->message.id = message_config->message_id;
     working_item->message.len = message_config->message_len;
+    working_item->message.format = message_config->format;
     working_item->timestamp = time_now_us();
 
     signal = message->signals_tree;
@@ -501,6 +507,7 @@ static error_t signals_handle_upstream_message(signals_runtime_messages_fifo_ite
 
     BREAK_IF_ACTION(working_item->message.id != message_config->message_id, err = E_BADVALUE);
     BREAK_IF_ACTION(working_item->message.len != message_config->message_len, err = E_BADVALUE);
+    BREAK_IF_ACTION(working_item->message.format != message_config->format, err = E_BADVALUE);
 
     signal = message->signals_tree;
     while(signal != NULL) {

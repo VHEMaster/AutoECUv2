@@ -36,7 +36,10 @@ typedef struct ecu_comm_can_ctx_tag {
 
 static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
   {
+    .fdcan_supported = true,
     .baudrate = CAN_BAUDRATE_500KBPS,
+    .baudrate_brs = CAN_BAUDRATE_1MBPS,
+    .brs_threshold = 12,
     .global_filter = {
         .reject_remote_std = true,
         .reject_remote_ext = true,

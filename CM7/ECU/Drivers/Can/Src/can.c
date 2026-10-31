@@ -8,6 +8,23 @@
 #include "can.h"
 #include "can_private.h"
 
+static const struct {
+    uint32_t prescaler;
+    uint32_t timeseg1;
+    uint32_t timeseg2;
+    uint32_t tdco;
+  } can_baudrate_map[CAN_BAUDRATE_MAX] = {
+    [CAN_BAUDRATE_10MBPS] = { .prescaler = 1, .timeseg1 = 4, .timeseg2 = 3, .tdco = 4 },
+    [CAN_BAUDRATE_8MBPS]  = { .prescaler = 2, .timeseg1 = 2, .timeseg2 = 2, .tdco = 4 },
+    [CAN_BAUDRATE_5MBPS]  = { .prescaler = 2, .timeseg1 = 4, .timeseg2 = 3, .tdco = 8 },
+    [CAN_BAUDRATE_4MBPS]  = { .prescaler = 2, .timeseg1 = 6, .timeseg2 = 3, .tdco = 12 },
+    [CAN_BAUDRATE_2MBPS]  = { .prescaler = 4, .timeseg1 = 6, .timeseg2 = 3, .tdco = 0 },
+    [CAN_BAUDRATE_1MBPS]  = { .prescaler = 8, .timeseg1 = 6, .timeseg2 = 3, .tdco = 0 },
+    [CAN_BAUDRATE_500KBPS] = { .prescaler = 16, .timeseg1 = 6, .timeseg2 = 3, .tdco = 0 },
+    [CAN_BAUDRATE_250KBPS] = { .prescaler = 32, .timeseg1 = 6, .timeseg2 = 3, .tdco = 0 },
+    [CAN_BAUDRATE_125KBPS] = { .prescaler = 32, .timeseg1 = 12, .timeseg2 = 7, .tdco = 0 },
+};
+
 #define CAN_LBK_NORMAL(ctx) HAL_GPIO_WritePin((ctx)->config.lbk_pin.port, (ctx)->config.lbk_pin.pin, GPIO_PIN_RESET)
 #define CAN_LBK_LOOPBACK(ctx) HAL_GPIO_WritePin((ctx)->config.lbk_pin.port, (ctx)->config.lbk_pin.pin, GPIO_PIN_SET)
 
@@ -57,10 +74,13 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
       break;
     }
 
-    ctx->init.handle->Init.NominalTimeSeg1 = 6;
-    ctx->init.handle->Init.NominalTimeSeg2 = 3;
-    ctx->init.handle->Init.DataTimeSeg1 = 6;
-    ctx->init.handle->Init.DataTimeSeg2 = 3;
+    ctx->init.handle->Init.NominalPrescaler = can_baudrate_map[CAN_BAUDRATE_500KBPS].prescaler;
+    ctx->init.handle->Init.NominalTimeSeg1 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg1;
+    ctx->init.handle->Init.NominalTimeSeg2 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg2;
+
+    ctx->init.handle->Init.DataPrescaler = can_baudrate_map[CAN_BAUDRATE_500KBPS].prescaler;
+    ctx->init.handle->Init.DataTimeSeg1 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg1;
+    ctx->init.handle->Init.DataTimeSeg2 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg2;
 
     if(status != HAL_OK) {
       err = E_HAL;
@@ -79,12 +99,16 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
 {
   error_t err = E_OK;
   HAL_StatusTypeDef status = HAL_OK;
+  uint32_t tdco;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(!ctx->initialized, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->baudrate >= CAN_BAUDRATE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->baudrate_brs >= CAN_BAUDRATE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->fdcan_supported == true &&
+        config->baudrate > config->baudrate_brs, err = E_PARAM);
 
     memset(ctx->rx_callbacks, 0, sizeof(ctx->rx_callbacks));
     memset(ctx->err_callbacks, 0, sizeof(ctx->err_callbacks));
@@ -99,26 +123,67 @@ error_t can_configure(can_ctx_t *ctx, const can_config_t *config)
 
     (void)HAL_FDCAN_Stop(ctx->init.handle);
 
-    switch(ctx->config.baudrate) {
-      case CAN_BAUDRATE_1MBPS:
-        ctx->init.handle->Init.NominalPrescaler = 8;
-        break;
-      case CAN_BAUDRATE_500KBPS:
-        ctx->init.handle->Init.NominalPrescaler = 16;
-        break;
-      case CAN_BAUDRATE_250KBPS:
-        ctx->init.handle->Init.NominalPrescaler = 32;
-        break;
-      case CAN_BAUDRATE_125KBPS:
-        ctx->init.handle->Init.NominalPrescaler = 64;
-        break;
-      default:
-        err = E_PARAM;
-        break;
+    ctx->init.handle->Init.NominalPrescaler = can_baudrate_map[ctx->config.baudrate].prescaler;
+    ctx->init.handle->Init.NominalTimeSeg1 = can_baudrate_map[ctx->config.baudrate].timeseg1;
+    ctx->init.handle->Init.NominalTimeSeg2 = can_baudrate_map[ctx->config.baudrate].timeseg2;
+
+    if(config->fdcan_supported) {
+      ctx->init.handle->Init.FrameFormat = FDCAN_FRAME_FD_BRS;
+
+      ctx->init.handle->Init.DataPrescaler = can_baudrate_map[ctx->config.baudrate_brs].prescaler;
+      ctx->init.handle->Init.DataTimeSeg1 = can_baudrate_map[ctx->config.baudrate_brs].timeseg1;
+      ctx->init.handle->Init.DataTimeSeg2 = can_baudrate_map[ctx->config.baudrate_brs].timeseg2;
+      tdco = can_baudrate_map[ctx->config.baudrate_brs].tdco;
+
+      ctx->init.handle->Init.StdFiltersNbr = 16;
+      ctx->init.handle->Init.ExtFiltersNbr = 16;
+      ctx->init.handle->Init.RxFifo0ElmtsNbr = 56;
+      ctx->init.handle->Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_64;
+      ctx->init.handle->Init.RxFifo1ElmtsNbr = 32;
+      ctx->init.handle->Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_64;
+      ctx->init.handle->Init.RxBuffersNbr = 16;
+      ctx->init.handle->Init.RxBufferSize = FDCAN_DATA_BYTES_64;
+      ctx->init.handle->Init.TxFifoQueueElmtsNbr = 32;
+      ctx->init.handle->Init.TxElmtSize = FDCAN_DATA_BYTES_64;
+      ctx->init.handle->Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+      ctx->init.handle->Init.TxEventsNbr = 0;
+      ctx->init.handle->Init.TxBuffersNbr = 0;
+    } else {
+      ctx->init.handle->Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+
+      ctx->init.handle->Init.DataPrescaler = can_baudrate_map[ctx->config.baudrate].prescaler;
+      ctx->init.handle->Init.DataTimeSeg1 = can_baudrate_map[ctx->config.baudrate].timeseg1;
+      ctx->init.handle->Init.DataTimeSeg2 = can_baudrate_map[ctx->config.baudrate].timeseg2;
+      tdco = can_baudrate_map[ctx->config.baudrate].tdco;
+
+      ctx->init.handle->Init.StdFiltersNbr = 16;
+      ctx->init.handle->Init.ExtFiltersNbr = 16;
+      ctx->init.handle->Init.RxFifo0ElmtsNbr = 64;
+      ctx->init.handle->Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
+      ctx->init.handle->Init.RxFifo1ElmtsNbr = 64;
+      ctx->init.handle->Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
+      ctx->init.handle->Init.RxBuffersNbr = 16;
+      ctx->init.handle->Init.RxBufferSize = FDCAN_DATA_BYTES_8;
+      ctx->init.handle->Init.TxFifoQueueElmtsNbr = 32;
+      ctx->init.handle->Init.TxElmtSize = FDCAN_DATA_BYTES_8;
+      ctx->init.handle->Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+      ctx->init.handle->Init.TxEventsNbr = 0;
+      ctx->init.handle->Init.TxBuffersNbr = 0;
     }
 
     status = HAL_FDCAN_Init(ctx->init.handle);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    if(tdco > 0u) {
+      status = HAL_FDCAN_ConfigTxDelayCompensation(ctx->init.handle, tdco, 0u);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+      status = HAL_FDCAN_EnableTxDelayCompensation(ctx->init.handle);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    } else {
+      status = HAL_FDCAN_DisableTxDelayCompensation(ctx->init.handle);
+      BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+    }
 
     status = HAL_FDCAN_ConfigGlobalFilter(ctx->init.handle,
         ctx->config.global_filter.reject_non_matching_std ? FDCAN_REJECT : ctx->config.global_filter.reject_non_matching_std,
@@ -241,7 +306,7 @@ error_t can_tx(can_ctx_t *ctx, const can_message_t *message)
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
     BREAK_IF_ACTION(message == NULL, err = E_PARAM);
 
-    err = can_tx_send_msg(ctx, message);
+    err = can_private_tx_send_msg(ctx, message);
 
   } while(0);
 
@@ -262,7 +327,7 @@ error_t can_rx(can_ctx_t *ctx, can_message_t *message)
     write = ctx->rxfifo.write;
     BREAK_IF_ACTION(read == write, err = E_AGAIN);
 
-    memcpy(message, &ctx->rxfifo.buffer[read], sizeof(can_message_t));
+    *message = ctx->rxfifo.buffer[read];
 
     if(++read >= CAN_RX_FIFO_SIZE) {
       read = 0;
@@ -298,7 +363,7 @@ error_t can_unregister_rx_callback(can_ctx_t *ctx, can_rx_callback_func_t func, 
               if(cb_r->enabled) {
                 cb_l->enabled = false;
                 cb_r->enabled = false;
-                memcpy(cb_l, cb_r, sizeof(can_rx_cb_t));
+                *cb_l = *cb_r;
                 cb_l->enabled = true;
               } else {
                 cb_l->enabled = false;
@@ -345,7 +410,7 @@ error_t can_unregister_err_callback(can_ctx_t *ctx, can_err_callback_func_t func
               if(cb_r->enabled) {
                 cb_l->enabled = false;
                 cb_r->enabled = false;
-                memcpy(cb_l, cb_r, sizeof(can_err_cb_t));
+                *cb_l = *cb_r;
                 cb_l->enabled = true;
               } else {
                 cb_l->enabled = false;
@@ -479,7 +544,7 @@ void can_rx_fifo0_irq(can_ctx_t *ctx, uint32_t fifo_its)
     fifo = FDCAN_RX_FIFO0;
     fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->init.handle, fifo);
     while(fill--) {
-      err = can_rx_get_msg(ctx, fifo);
+      err = can_private_rx_get_msg(ctx, fifo);
       BREAK_IF(err != E_OK);
     }
 
@@ -498,7 +563,7 @@ void can_rx_fifo1_irq(can_ctx_t *ctx, uint32_t fifo_its)
     fifo = FDCAN_RX_FIFO1;
     fill = HAL_FDCAN_GetRxFifoFillLevel(ctx->init.handle, fifo);
     while(fill--) {
-      err = can_rx_get_msg(ctx, fifo);
+      err = can_private_rx_get_msg(ctx, fifo);
       BREAK_IF(err != E_OK);
     }
 
@@ -530,7 +595,7 @@ void can_rx_buffer_irq(can_ctx_t *ctx)
         break;
       }
 
-      err = can_rx_get_msg(ctx, buffer_index);
+      err = can_private_rx_get_msg(ctx, buffer_index);
       BREAK_IF(err != E_OK);
 
       bitmask = 1u << buffer_index_rel;
@@ -602,5 +667,10 @@ error_t can_reset(can_ctx_t *ctx)
   } while(0);
 
   return err;
+}
+
+error_t can_validate_message_length(can_frame_format_t format, uint32_t length)
+{
+  return can_private_validate_message_length(format, length);
 }
 

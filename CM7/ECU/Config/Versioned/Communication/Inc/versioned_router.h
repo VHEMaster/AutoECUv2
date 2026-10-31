@@ -9,6 +9,7 @@
 #define CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_ROUTER_H_
 
 #include "common.h"
+#include "can_types.h"
 #include "config_comm_types.h"
 
 #define ROUTER_SIGNAL_UPSTREAM_LIST_LENGTH    (16u)
@@ -28,6 +29,7 @@ typedef enum {
 
 typedef struct {
     bool enabled;
+    can_frame_format_t format;
     uint32_t msg_id_1_start;
     uint32_t msg_id_2_end;
     ecu_comm_can_t can_instance;
@@ -41,6 +43,7 @@ typedef struct {
 
 typedef struct {
     bool enabled;
+    can_frame_format_t format;
     ecu_comm_can_t can_instance;
     ecu_comm_uds_t uds_instance;
     ecu_comm_obd2_t obd2_instance;

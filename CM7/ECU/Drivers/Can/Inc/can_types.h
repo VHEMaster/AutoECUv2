@@ -10,11 +10,20 @@
 
 #include "common.h"
 
-#define CAN_MESSAGE_PAYLOAD_LEN_MAX   8u
-#define CAN_MESSAGE_EXTENDED_ID_FLAG  0x80000000u
+#define CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX   8u
+#define CAN_MESSAGE_FD_PAYLOAD_LEN_MAX        64u
+#define CAN_MESSAGE_PAYLOAD_LEN_MAX           64u
+#define CAN_MESSAGE_EXTENDED_ID_FLAG          0x80000000u
+
+typedef enum {
+  CAN_FRAME_FORMAT_CLASSIC = 0,
+  CAN_FRAME_FORMAT_FDCAN,
+  CAN_FRAME_FORMAT_MAX
+}can_frame_format_t;
 
 typedef struct {
     uint32_t id;
+    can_frame_format_t format;
     uint8_t len;
     uint8_t payload[CAN_MESSAGE_PAYLOAD_LEN_MAX];
 }can_message_t;

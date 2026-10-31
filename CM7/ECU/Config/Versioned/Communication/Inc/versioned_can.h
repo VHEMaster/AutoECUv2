@@ -18,10 +18,15 @@ typedef enum {
 #define CAN_RX_FILTER_MAX (16)
 
 typedef enum {
-  CAN_BAUDRATE_500KBPS = 0,
-  CAN_BAUDRATE_1MBPS,
+  CAN_BAUDRATE_125KBPS = 0,
   CAN_BAUDRATE_250KBPS,
-  CAN_BAUDRATE_125KBPS,
+  CAN_BAUDRATE_500KBPS,
+  CAN_BAUDRATE_1MBPS,
+  CAN_BAUDRATE_2MBPS,
+  CAN_BAUDRATE_4MBPS,
+  CAN_BAUDRATE_5MBPS,
+  CAN_BAUDRATE_8MBPS,
+  CAN_BAUDRATE_10MBPS,
   CAN_BAUDRATE_MAX,
 }can_baudrate_t;
 
@@ -76,8 +81,11 @@ typedef struct {
 
 typedef struct {
     bool enabled;
+    bool fdcan_supported;
 
     can_baudrate_t baudrate;
+    can_baudrate_t baudrate_brs;
+    uint32_t brs_threshold;
     can_cfg_global_filter_t global_filter;
     can_config_filter_t filter_config[CAN_RX_FILTER_MAX];
     uint32_t align ALIGNED_CACHE;

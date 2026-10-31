@@ -70,7 +70,9 @@ static void router_can_signal_upstream_rx_callback(can_ctx_t *ctx, const can_mes
     BREAK_IF(message->id < config_signal_item->msg_id_1_start ||
         message->id > config_signal_item->msg_id_2_end);
 
-    memcpy(&rx_cb_ctx->message.message, message, sizeof(can_message_t));
+    BREAK_IF(message->format != config_signal_item->format);
+
+    rx_cb_ctx->message.message = *message;
     rx_cb_ctx->message.timestamp = time_now_us();
 
     err = signals_data_write_upstream(signals_ctx, &rx_cb_ctx->message);
@@ -97,6 +99,7 @@ static void router_can_isotp_rx_callback(can_ctx_t *ctx, const can_message_t *me
     BREAK_IF(diag_ctx->router_ctx->configured == false);
     BREAK_IF(diag_ctx->config->upstream_func_msg_id != message->id &&
         diag_ctx->config->upstream_phy_msg_id != message->id);
+    BREAK_IF(diag_ctx->config->format != message->format);
 
     err = isotp_frame_write_upstream(diag_ctx->isotp_ctx, (const isotp_frame_t *)message->payload);
     BREAK_IF(err != E_OK);
@@ -154,6 +157,7 @@ static void router_handle_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t 
 
         diag_ctx->runtime.message_downstream.id = diag_cfg->downstream_msg_id;
         diag_ctx->runtime.message_downstream.len = ISOTP_FRAME_LEN;
+        diag_ctx->runtime.message_downstream.format = diag_ctx->config->format;
       }
 
       if(diag_ctx->runtime.message_downstream_pending == true) {
@@ -508,12 +512,13 @@ static void router_handle_signal_downstream(router_ctx_t *ctx)
 
             if(signal_item->signals_instance == i &&
                 message_id >= signal_item->msg_id_1_start &&
-                message_id <= signal_item->msg_id_2_end) {
+                message_id <= signal_item->msg_id_2_end &&
+                message->message.format == signal_item->format) {
               downstream_can = &ctx->signals.downstream.cans[signal_item->can_instance];
               can_ctx = ctx->signals.can_ctxs[signal_item->can_instance];
               if(can_ctx != NULL) {
                 if(downstream_can->can_message_pending == false) {
-                  memcpy(&downstream_can->message, message, sizeof(signals_runtime_messages_fifo_item_t));
+                  downstream_can->message = *message;
                   downstream_can->can_message_pending = true;
                   downstream_signal->signal_message_pending = false;
                   break_condition = false;
@@ -573,7 +578,8 @@ static error_t router_validate_can_signals_routes(const router_config_can_signal
         BREAK_IF_ACTION(route->signals_instance == previous->signals_instance &&
             route->msg_id_1_start <= previous->msg_id_2_end &&
             previous->msg_id_1_start <= route->msg_id_2_end &&
-            (upstream || route->can_instance != previous->can_instance), err = E_PARAM);
+            (upstream || route->can_instance != previous->can_instance) &&
+            route->format == previous->format, err = E_PARAM);
       }
       BREAK_IF(err != E_OK);
     }

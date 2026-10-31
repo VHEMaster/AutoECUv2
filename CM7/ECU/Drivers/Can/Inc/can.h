@@ -102,4 +102,6 @@ error_t can_register_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, 
 error_t can_unregister_rx_callback(can_ctx_t *ctx, can_rx_callback_func_t func, void *usrdata);
 error_t can_unregister_err_callback(can_ctx_t *ctx, can_err_callback_func_t func, void *usrdata);
 
+error_t can_validate_message_length(can_frame_format_t format, uint32_t length);
+
 #endif /* COMMUNICATION_CAN_INC_CAN_H_ */
