@@ -35,8 +35,15 @@ error_t isotp_configure(isotp_ctx_t *ctx, const isotp_config_t *config)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(config->format >= CAN_FRAME_FORMAT_MAX, err = E_PARAM);
 
     memcpy(&ctx->config, config, sizeof(isotp_config_t));
+
+    if(ctx->config.format == CAN_FRAME_FORMAT_CLASSIC) {
+      ctx->frame_len_max = ISOTP_FRAME_CLASSIC_LEN;
+    } else if(ctx->config.format == CAN_FRAME_FORMAT_FDCAN) {
+      ctx->frame_len_max = ISOTP_FRAME_FD_LEN;
+    }
 
     ctx->configured = ctx->config.enabled;
 

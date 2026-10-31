@@ -33,6 +33,7 @@ typedef enum {
   ISOTP_UNEXPECTED_PDU,
   ISOTP_IGNORED_PDU,
   ISOTP_STMIN_VIOLATION,
+  ISOTP_INTERNAL_FAULT,
   ISOTP_MAX
 }isotp_error_code_t;
 
@@ -109,6 +110,8 @@ typedef struct isotp_ctx_tag {
     isotp_state_t state;
     time_us_t state_time;
     bool reset_trigger;
+
+    uint32_t frame_len_max;
 
 
 }isotp_ctx_t;
