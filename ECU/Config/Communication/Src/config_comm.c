@@ -441,7 +441,7 @@ error_t ecu_comm_get_can_ctx(ecu_comm_can_t instance, can_ctx_t **ctx)
 
 error_t ecu_comm_get_kwp_ctx(ecu_comm_kwp_t instance, kwp_ctx_t **ctx)
 {
-  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_ISOTP, instance, (void**)ctx);
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_KWP, instance, (void**)ctx);
 }
 
 error_t ecu_comm_get_isotp_ctx(ecu_comm_isotp_t instance, isotp_ctx_t **ctx)

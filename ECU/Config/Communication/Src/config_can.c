@@ -348,7 +348,7 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, ecu_comm_can
     err = can_register_err_callback(can_ctx->ctx, ecu_comm_can_err_callback, cb);
 #endif /* CORE_CM4 */
     if(err == E_OK) {
-      can_ctx->rx_callbacks_count = ++cb_count;
+      can_ctx->err_callbacks_count = ++cb_count;
     }
 
   } while(0);
