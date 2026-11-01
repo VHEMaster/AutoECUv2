@@ -7,15 +7,19 @@
 
 #include "config_hw.h"
 #include "main.h"
-#include "config_gpio.h"
 #include "config_extern.h"
 #include "compiler.h"
 #include "time.h"
+
+#ifdef CORE_CM7
+#include "config_gpio.h"
+#endif /* CORE_CM7 */
 
 #define ECU_CONFIG_HW_SWI_COMM_PERIOD_US    (100)
 
 static void ecu_config_trigger_comm_irq(void);
 
+#ifdef CORE_CM7
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   ecu_config_gpio_exti_call(GPIO_Pin);
@@ -29,10 +33,21 @@ INLINE void ecu_config_set_ignition_enabled(bool enabled) {
     IGN_NEN_GPIO_Port->BSRR = IGN_NEN_Pin;
   }
 }
+#endif /* CORE_CM7 */
 
 INLINE void ecu_config_iwgd_refresh(void) {
-  if(hiwdg1.Instance != NULL) {
-    HAL_IWDG_Refresh(&hiwdg1);
+  IWDG_HandleTypeDef *hiwdg = NULL;
+
+#ifdef CORE_CM7
+  hiwdg = &hiwdg1;
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+  hiwdg = &hiwdg2;
+#endif /* CORE_CM4 */
+
+  if(hiwdg != NULL && hiwdg->Instance != NULL) {
+    HAL_IWDG_Refresh(hiwdg);
   }
 }
 
@@ -47,6 +62,7 @@ void ecu_config_ll_init(void)
   __HAL_DBGMCU_FREEZE_FDCAN();
 }
 
+#ifdef CORE_CM7
 void ecu_config_init_counter(void)
 {
   htim2.Init.Period = TIME_TICKBASE_MASK;
@@ -103,3 +119,4 @@ STATIC_INLINE void ecu_config_trigger_comm_irq(void)
     HAL_EXTI_GenerateSWI(&hexti1);
   }
 }
+#endif /* CORE_CM7 */

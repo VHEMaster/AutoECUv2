@@ -234,7 +234,8 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
                 md1->prefix_byte = 0;
                 for(int i = 0; i < items_count; i++) {
                   if(param_cfg->common_ids[i].bitfield.supported) {
-                    err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
+                    //err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
+                    err = E_OK, param_value.value = 0;
                     if(err == E_OK) {
                       md1->prefix_byte |= 1u << i;
                       md1->value[i].flt = param_value.value;
@@ -380,7 +381,6 @@ static void obd2_sid_vehicle_information(obd2_ctx_t *ctx)
     if(pid < OBD2_PID_09_MAX && ctx->mode9_data[pid].supported) {
       switch(pid) {
         case OBD2_PID_09_SUPPORTED_01_20:
-        case OBD2_PID_09_SUPPORTED_21_40:
           dlen = 4;
           ctx->downstream_data[ctx->downstream_data_len++] = pid;
           adder = pid;

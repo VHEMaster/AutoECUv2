@@ -9,21 +9,30 @@
 #include "config_obd2.h"
 #include "compiler.h"
 
+#ifdef CORE_CM7
 #include "config_global.h"
+#endif /* CORE_CM7 */
 
 // TODO: remove me
 #define ECU_SENSOR_READ_PARAM_DATA (0)
 
 typedef struct ecu_comm_obd2_ctx_tag ecu_comm_obd2_ctx_t;
 
+#ifdef CORE_CM4
 static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
+#endif /* CORE_CM4 */
 
 typedef struct ecu_comm_obd2_ctx_tag {
-    obd2_config_t config_default;
+#ifdef CORE_CM7
+    const obd2_config_t *config_default;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
     obd2_init_ctx_t init;
     obd2_ctx_t *ctx;
+#endif /* CORE_CM4 */
 }ecu_comm_obd2_ctx_t;
 
+#ifdef CORE_CM7
 static const obd2_config_t ecu_comm_obd2_config_default = {
     .mode_01_linkage = {
         .supported = true,
@@ -602,31 +611,45 @@ static const bool ecu_comm_obd2_enabled_default[ECU_COMM_OBD2_MAX] = {
     true,
     true
 };
+#endif /* CORE_CM7 */
 
 static RAM_SECTION ecu_comm_obd2_ctx_t ecu_comm_obd2_ctx[ECU_COMM_OBD2_MAX] = {
     {
+#ifdef CORE_CM4
       .init = {
           .error_callback = ecu_comm_obd2_error_callback,
           .callback_userdata = NULL,
       },
-      .config_default = ecu_comm_obd2_config_default,
+#endif /* CORE_CM4 */
+#ifdef CORE_CM7
+      .config_default = &ecu_comm_obd2_config_default,
+#endif /* CORE_CM7 */
     },
     {
+#ifdef CORE_CM4
       .init = {
           .error_callback = ecu_comm_obd2_error_callback,
           .callback_userdata = NULL,
       },
-      .config_default = ecu_comm_obd2_config_default,
+#endif /* CORE_CM4 */
+#ifdef CORE_CM7
+      .config_default = &ecu_comm_obd2_config_default,
+#endif /* CORE_CM7 */
     },
     {
+#ifdef CORE_CM4
       .init = {
           .error_callback = ecu_comm_obd2_error_callback,
           .callback_userdata = NULL,
       },
-      .config_default = ecu_comm_obd2_config_default,
+#endif /* CORE_CM4 */
+#ifdef CORE_CM7
+      .config_default = &ecu_comm_obd2_config_default,
+#endif /* CORE_CM7 */
     },
 };
 
+#ifdef CORE_CM4
 error_t ecu_comm_obd2_init(ecu_comm_obd2_t instance, obd2_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -637,7 +660,6 @@ error_t ecu_comm_obd2_init(ecu_comm_obd2_t instance, obd2_ctx_t *ctx)
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
     obd2_ctx->ctx = ctx;
-    obd2_ctx->config_default.enabled = ecu_comm_obd2_enabled_default[instance];
 
     obd2_ctx->init.callback_userdata = (void *)obd2_ctx;
 
@@ -651,7 +673,9 @@ error_t ecu_comm_obd2_init(ecu_comm_obd2_t instance, obd2_ctx_t *ctx)
 
   return err;
 }
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM7
 error_t ecu_comm_obd2_get_default_config(ecu_comm_obd2_t instance, obd2_config_t *config)
 {
   error_t err = E_OK;
@@ -662,12 +686,14 @@ error_t ecu_comm_obd2_get_default_config(ecu_comm_obd2_t instance, obd2_config_t
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
-    memcpy(config, &obd2_ctx->config_default, sizeof(obd2_config_t));
+    memcpy(config, obd2_ctx->config_default, sizeof(obd2_config_t));
+    config->enabled = ecu_comm_obd2_enabled_default[instance];
 
   } while(0);
 
   return err;
 }
+#endif /* CORE_CM7 */
 
 error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *config)
 {
@@ -679,11 +705,13 @@ error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *c
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
+#ifdef CORE_CM4
     err = obd2_configure(obd2_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_OBD2, instance, obd2_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -700,14 +728,18 @@ error_t ecu_comm_obd2_reset(ecu_comm_obd2_t instance)
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
+#ifdef CORE_CM4
     err = obd2_reset(obd2_ctx->ctx);
+#endif /* CORE_CM4 */
 
   } while(0);
 
   return err;
 }
 
+#ifdef CORE_CM4
 static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata)
 {
   // TODO: IMPLEMENT
 }
+#endif /* CORE_CM4 */

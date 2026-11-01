@@ -12,11 +12,16 @@
 typedef struct ecu_comm_router_ctx_tag ecu_comm_router_ctx_t;
 
 typedef struct ecu_comm_router_ctx_tag {
-  router_config_t config_default;
+#ifdef CORE_CM7
+  const router_config_t *config_default;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
   router_init_ctx_t init;
   router_ctx_t *ctx;
+#endif /* CORE_CM4 */
 }ecu_comm_router_ctx_t;
 
+#ifdef CORE_CM7
 static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX] = {
   {
       .can = {
@@ -66,18 +71,24 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
 static const bool ecu_comm_router_enabled_default[ECU_COMM_ROUTER_MAX] = {
     true,
 };
+#endif /* CORE_CM7 */
 
 static RAM_SECTION ecu_comm_router_ctx_t ecu_comm_router_ctx[ECU_COMM_ROUTER_MAX] = {
     {
+#ifdef CORE_CM4
       .init = {
           .signal_rx_callback = NULL,
           .error_callback = NULL,
           .callback_userdata = NULL,
       },
-      .config_default = ecu_comm_router_default_config[ECU_COMM_ROUTER_1],
+#endif /* CORE_CM4 */
+#ifdef CORE_CM7
+      .config_default = &ecu_comm_router_default_config[ECU_COMM_ROUTER_1],
+#endif /* CORE_CM7 */
     },
 };
 
+#ifdef CORE_CM4
 error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -88,7 +99,6 @@ error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx)
 
     router_ctx = &ecu_comm_router_ctx[instance];
     router_ctx->ctx = ctx;
-    router_ctx->config_default.enabled = ecu_comm_router_enabled_default[instance];
 
     err = router_init(router_ctx->ctx, &router_ctx->init);
     BREAK_IF(err != E_OK);
@@ -100,7 +110,9 @@ error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx)
 
   return err;
 }
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM7
 error_t ecu_comm_router_get_default_config(ecu_comm_router_t instance, router_config_t *config)
 {
   error_t err = E_OK;
@@ -111,12 +123,14 @@ error_t ecu_comm_router_get_default_config(ecu_comm_router_t instance, router_co
 
     router_ctx = &ecu_comm_router_ctx[instance];
 
-    memcpy(config, &router_ctx->config_default, sizeof(router_config_t));
+    memcpy(config, router_ctx->config_default, sizeof(router_config_t));
+    config->enabled = ecu_comm_router_enabled_default[instance];
 
   } while(0);
 
   return err;
 }
+#endif /* CORE_CM7 */
 
 error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_config_t *config)
 {
@@ -128,11 +142,13 @@ error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_confi
 
     router_ctx = &ecu_comm_router_ctx[instance];
 
+#ifdef CORE_CM4
     err = router_configure(router_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_ROUTER, instance, router_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -149,7 +165,9 @@ error_t ecu_comm_router_reset(ecu_comm_router_t instance)
 
     router_ctx = &ecu_comm_router_ctx[instance];
 
+#ifdef CORE_CM4
     err = router_reset(router_ctx->ctx);
+#endif /* CORE_CM4 */
 
   } while(0);
 

@@ -10,9 +10,10 @@
 #include "common.h"
 
 typedef struct ecu_comm_can_ctx_tag ecu_comm_can_ctx_t;
-
+#ifdef CORE_CM4
 static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
 static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata);
+#endif /* CORE_CM4 */
 
 typedef struct {
     uint32_t msg_id_start;
@@ -24,9 +25,13 @@ typedef struct {
 }ecu_comm_can_callback_usrdata_t;
 
 typedef struct ecu_comm_can_ctx_tag {
-  can_config_t config_default;
+#ifdef CORE_CM7
+  const can_config_t *config_default;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
   can_init_ctx_t init;
   can_ctx_t *ctx;
+#endif /* CORE_CM4 */
 
   uint32_t rx_callbacks_count;
   uint32_t err_callbacks_count;
@@ -34,6 +39,7 @@ typedef struct ecu_comm_can_ctx_tag {
   ecu_comm_can_callback_usrdata_t err_callbacks[CAN_ERR_CB_MAX];
 }ecu_comm_can_ctx_t;
 
+#ifdef CORE_CM7
 static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
   {
     .fdcan_supported = true,
@@ -64,17 +70,23 @@ static const can_config_t ecu_comm_can_default_config[ECU_COMM_CAN_MAX] = {
 static const bool ecu_comm_can_enabled_default[ECU_COMM_CAN_MAX] = {
     true,
 };
+#endif /* CORE_CM7 */
 
 static RAM_SECTION ecu_comm_can_ctx_t ecu_comm_can_ctx[ECU_COMM_CAN_MAX] = {
     {
+#ifdef CORE_CM4
       .init = {
           .handle = &hfdcan1,
           .lbk_pin = { .port = FDCAN1_LBK_GPIO_Port, .pin = FDCAN1_LBK_Pin },
       },
-      .config_default = ecu_comm_can_default_config[ECU_COMM_CAN_1],
+#endif /* CORE_CM4 */
+#ifdef CORE_CM7
+      .config_default = &ecu_comm_can_default_config[ECU_COMM_CAN_1],
+#endif /* CORE_CM7 */
     },
 };
 
+#ifdef CORE_CM4
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
 
 #define ECU_CONFIG_CAN_1ARG_CB(interface, type)  \
@@ -133,7 +145,9 @@ ECU_CONFIG_CAN_CB(RxBufferNewMessage, rx_buffer);
 ECU_CONFIG_CAN_CB(Error, error);
 
 #endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM4
 error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -144,7 +158,6 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
 
     can_ctx = &ecu_comm_can_ctx[instance];
     can_ctx->ctx = ctx;
-    can_ctx->config_default.enabled = ecu_comm_can_enabled_default[instance];
 
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
     switch(instance) {
@@ -167,7 +180,9 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
 
   return err;
 }
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM7
 error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_config_t *config)
 {
   error_t err = E_OK;
@@ -178,12 +193,14 @@ error_t ecu_comm_can_get_default_config(ecu_comm_can_t instance, can_config_t *c
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
-    memcpy(config, &can_ctx->config_default, sizeof(can_config_t));
+    memcpy(config, can_ctx->config_default, sizeof(can_config_t));
+    config->enabled = ecu_comm_can_enabled_default[instance];
 
   } while(0);
 
   return err;
 }
+#endif /* CORE_CM7 */
 
 error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *config)
 {
@@ -200,11 +217,13 @@ error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *conf
     can_ctx->rx_callbacks_count = 0;
     can_ctx->err_callbacks_count = 0;
 
+#ifdef CORE_CM4
     err = can_configure(can_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_CAN, instance, can_ctx->ctx->config.enabled);
     BREAK_IF(err != E_OK);
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -221,7 +240,9 @@ error_t ecu_comm_can_reset(ecu_comm_can_t instance)
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM4
     err = can_reset(can_ctx->ctx);
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -238,7 +259,9 @@ error_t ecu_comm_can_transmit(ecu_comm_can_t instance, const can_message_t *mess
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM4
     err = can_tx(can_ctx->ctx, message);
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -255,14 +278,16 @@ error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM4
     err = can_rx(can_ctx->ctx, message);
+#endif /* CORE_CM4 */
 
   } while(0);
 
   return err;
 }
 
-error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id_start, uint32_t msg_id_end, can_rx_callback_func_t func, void *usrdata)
+error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id_start, uint32_t msg_id_end, ecu_comm_can_rx_callback_t func, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_can_ctx_t *can_ctx;
@@ -285,7 +310,9 @@ error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_
     cb->func = func;
     cb->usrdata = usrdata;
 
+#ifdef CORE_CM4
     err = can_register_rx_callback(can_ctx->ctx, msg_id_start, msg_id_end, ecu_comm_can_rx_callback, cb);
+#endif /* CORE_CM4 */
     if(err == E_OK) {
       can_ctx->rx_callbacks_count = ++cb_count;
     }
@@ -295,7 +322,7 @@ error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_
   return err;
 }
 
-error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_callback_func_t func, void *usrdata)
+error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, ecu_comm_can_err_callback_t func, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_can_ctx_t *can_ctx;
@@ -316,7 +343,10 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_call
     cb->func = func;
     cb->usrdata = usrdata;
 
+
+#ifdef CORE_CM4
     err = can_register_err_callback(can_ctx->ctx, ecu_comm_can_err_callback, cb);
+#endif /* CORE_CM4 */
     if(err == E_OK) {
       can_ctx->rx_callbacks_count = ++cb_count;
     }
@@ -326,6 +356,7 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, can_err_call
   return err;
 }
 
+#ifdef CORE_CM4
 static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata)
 {
   ecu_comm_can_callback_usrdata_t *cb = (ecu_comm_can_callback_usrdata_t *)usrdata;
@@ -361,3 +392,4 @@ static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata)
     }
   } while(0);
 }
+#endif /* CORE_CM4 */

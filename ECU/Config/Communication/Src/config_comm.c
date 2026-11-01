@@ -9,6 +9,8 @@
 #include "compiler.h"
 #include "bool.h"
 
+#ifdef CORE_CM4
+
 #define ECU_COMM_MAX (      \
     ECU_COMM_CAN_MAX      + \
     ECU_COMM_KWP_MAX      + \
@@ -466,3 +468,5 @@ error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ct
 {
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_SIGNALS, instance, (void**)ctx);
 }
+
+#endif /* CORE_CM4 */

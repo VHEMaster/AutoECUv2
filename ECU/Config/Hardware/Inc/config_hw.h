@@ -9,8 +9,10 @@
 #define CONFIG_INC_CONFIG_H_
 
 #include "common.h"
-#include "config_spi.h"
+
+#ifdef CORE_CM7
 #include "config_gpio.h"
+#endif /* CORE_CM7 */
 
 void ecu_config_ll_init(void);
 void ecu_config_init_counter(void);

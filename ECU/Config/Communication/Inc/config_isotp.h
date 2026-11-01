@@ -9,9 +9,15 @@
 #define CONFIG_COMMUNICATION_INC_CONFIG_ISOTP_H_
 
 #include "config_comm.h"
+#include "versioned_isotp.h"
+#include "isotp_types.h"
+#ifdef CORE_CM4
 #include "isotp.h"
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM4
 error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx);
+#endif /* CORE_CM4 */
 error_t ecu_comm_isotp_get_default_config(ecu_comm_isotp_t instance, isotp_config_t *config);
 error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t *config);
 error_t ecu_comm_isotp_reset(ecu_comm_isotp_t instance);

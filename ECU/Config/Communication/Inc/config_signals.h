@@ -9,9 +9,14 @@
 #define CONFIG_COMMUNICATION_INC_CONFIG_SIGNALS_H_
 
 #include "config_comm.h"
+#include "versioned_signals.h"
+#ifdef CORE_CM4
 #include "signals.h"
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM4
 error_t ecu_comm_signals_init(ecu_comm_signals_t instance, signals_ctx_t *ctx);
+#endif /* CORE_CM4 */
 error_t ecu_comm_signals_get_default_config(ecu_comm_signals_t instance, signals_config_t *config);
 error_t ecu_comm_signals_configure(ecu_comm_signals_t instance, const signals_config_t *config);
 error_t ecu_comm_signals_reset(ecu_comm_signals_t instance);

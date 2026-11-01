@@ -1,0 +1,61 @@
+/*
+ * nvic_def.h
+ *
+ *  Created on: 1 нояб. 2026 г.
+ *      Author: VHEMaster
+ */
+
+#ifndef INC_NVIC_DEF_H_
+#define INC_NVIC_DEF_H_
+
+#include "stm32h7xx_hal.h"
+
+#define NVIC_PRIO_DMA_M2M_1 5
+#define NVIC_PRIO_DMA_M2M_2 5
+#define NVIC_PRIO_DMA_M2M_3 5
+#define NVIC_PRIO_DMA_M2M_4 5
+
+#define NVIC_PRIO_ADC1 10
+#define NVIC_PRIO_ADC1_DMA 5
+#define NVIC_PRIO_ADC2 10
+#define NVIC_PRIO_ADC2_DMA 5
+#define NVIC_PRIO_UART1 8
+#define NVIC_PRIO_UART1_DMA_TX 8
+#define NVIC_PRIO_UART1_DMA_RX 8
+#define NVIC_PRIO_UART3 8
+#define NVIC_PRIO_UART3_DMA_TX 8
+#define NVIC_PRIO_UART3_DMA_RX 8
+#define NVIC_PRIO_FDCAN_CAL 12
+#define NVIC_PRIO_FDCAN_IRQ1 8
+#define NVIC_PRIO_FDCAN_IRQ2 8
+#define NVIC_PRIO_EXTI_4 3
+#define NVIC_PRIO_EXTI_5_9 3
+#define NVIC_PRIO_EXTI_10_15 3
+#define NVIC_PRIO_SPI2_FLEXIO1 2
+#define NVIC_PRIO_SPI3_FLEXIO2 2
+#define NVIC_PRIO_SPI5_OUTPUTS 5
+#define NVIC_PRIO_SPI6_MISC 5
+#define NVIC_PRIO_TIM1 10
+#define NVIC_PRIO_TIM2 4
+#define NVIC_PRIO_TIM3 10
+#define NVIC_PRIO_TIM4 10
+#define NVIC_PRIO_TIM5 4
+#define NVIC_PRIO_TIM6_SLOW_DAC 10
+#define NVIC_PRIO_EXTI1_COMM 9
+#define NVIC_PRIO_TIM7_FAST 7
+#define NVIC_PRIO_TIM8_CC 4
+#define NVIC_PRIO_TIM8_BRK_TIM12 3
+#define NVIC_PRIO_TIM8_UPD_TIM13 1
+#define NVIC_PRIO_TIM8_TRIG_TIM14 1
+#define NVIC_PRIO_TIM15 4
+#define NVIC_PRIO_TIM16 1
+#define NVIC_PRIO_TIM17 1
+#define NVIC_PRIO_QSPI 6
+#define NVIC_PRIO_MDMA 6
+#define NVIC_PRIO_HSEM1 15
+#define NVIC_PRIO_RAM_ECC 15
+#define NVIC_PRIO_CM4_TO_CM7_EV 15
+#define NVIC_PRIO_CORE_HOLD 15
+#define NVIC_PRIO_FLASH 15
+
+#endif /* INC_NVIC_DEF_H_ */

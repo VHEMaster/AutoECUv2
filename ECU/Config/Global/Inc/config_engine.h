@@ -8,13 +8,17 @@
 #ifndef CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_
 #define CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_
 
+#ifdef CORE_CM7
 #include "versioned_calibration.h"
 #include "versioned_runtime.h"
 #include "versioned_devices.h"
 #include "versioned_modules.h"
 #include "versioned_timings.h"
+#endif /* CORE_CM7 */
+
 #include "versioned_comm.h"
 
+#ifdef CORE_CM7
 typedef struct {
     l9966_config_t flexio[ECU_DEVICE_FLEXIO_MAX];
     l9960_config_t motor[ECU_DEVICE_MOTOR_MAX];
@@ -99,5 +103,6 @@ typedef struct {
 error_t ecu_config_global_get_global_engine_config(const ecu_config_global_engine_t **config);
 error_t ecu_config_global_get_engine_calibration_config(const ecu_config_engine_calibration_t **config);
 error_t ecu_config_global_get_engine_runtime_config(ecu_config_engine_runtime_t **config);
+#endif /* CORE_CM7 */
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_ENGINE_H_ */

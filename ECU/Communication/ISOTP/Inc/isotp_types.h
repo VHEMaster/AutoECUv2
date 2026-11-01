@@ -12,7 +12,7 @@
 #include "time.h"
 #include "versioned_isotp.h"
 
-#define ISOTP_PAYLOAD_LEN_MAX     4095u
+#define ISOTP_PAYLOAD_LEN_MAX     1024u
 #define ISOTP_FRAME_FIFO_LEN      16u
 #define ISOTP_FRAME_CLASSIC_LEN   CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX
 #define ISOTP_FRAME_FD_LEN        CAN_MESSAGE_FD_PAYLOAD_LEN_MAX

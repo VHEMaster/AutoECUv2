@@ -12,10 +12,10 @@
 #include "time.h"
 #include "versioned_uds.h"
 
-#define UDS_DATA_LENGTH_MAX           4095
-#define UDS_ASCII_LENGTH_MAX          64
-#define UDS_RESPONSE_NEGATIVE_CODE    0x7F
-#define UDS_RESPONSE_POSITIVE_OFFSET  0x40
+#define UDS_DATA_LENGTH_MAX           1024u
+#define UDS_ASCII_LENGTH_MAX          64u
+#define UDS_RESPONSE_NEGATIVE_CODE    0x7Fu
+#define UDS_RESPONSE_POSITIVE_OFFSET  0x40u
 #define UDS_DOWNSTREAM_TIMEOUT        (1000 * TIME_US_IN_MS)
 
 typedef enum {

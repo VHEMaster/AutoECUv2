@@ -191,29 +191,8 @@ typedef enum
   OBD2_PID_09_IUPR_COMPRESSION               = 0x0B,  // In-use performance tracking, compression ignition
   OBD2_PID_09_ENGINE_SERIAL_MESSAGE_COUNT    = 0x0C,  // Engine serial number message count
   OBD2_PID_09_ENGINE_SERIAL                  = 0x0D,  // Engine serial number (17 ASCII bytes)
-  OBD2_PID_09_RESERVED_0x0E                  = 0x0E,
-  OBD2_PID_09_RESERVED_0x0F                  = 0x0F,
-  OBD2_PID_09_RESERVED_0x10                  = 0x10,
 
-  OBD2_PID_09_RESERVED_0x11                  = 0x11,  // N/A
-  OBD2_PID_09_RESERVED_0x12                  = 0x12,  // N/A
-  OBD2_PID_09_RESERVED_0x13                  = 0x13,  // N/A
-  OBD2_PID_09_RESERVED_0x14                  = 0x14,  // N/A
-  OBD2_PID_09_RESERVED_0x15                  = 0x15,  // N/A
-  OBD2_PID_09_RESERVED_0x16                  = 0x16,  // N/A
-  OBD2_PID_09_RESERVED_0x17                  = 0x17,  // N/A
-  OBD2_PID_09_RESERVED_0x18                  = 0x18,  // N/A
-  OBD2_PID_09_RESERVED_0x19                  = 0x19,  // N/A
-  OBD2_PID_09_RESERVED_0x1A                  = 0x1A,  // N/A
-  OBD2_PID_09_RESERVED_0x1B                  = 0x1B,  // N/A
-  OBD2_PID_09_RESERVED_0x1C                  = 0x1C,  // N/A
-  OBD2_PID_09_RESERVED_0x1D                  = 0x1D,  // N/A
-  OBD2_PID_09_RESERVED_0x1E                  = 0x1E,  // N/A
-  OBD2_PID_09_RESERVED_0x1F                  = 0x1F,  // N/A
-
-  OBD2_PID_09_SUPPORTED_21_40                = 0x20,  // Supported InfoTypes [0x21-0x40]
-
-  OBD2_PID_09_MAX = 0x80
+  OBD2_PID_09_MAX
 }obd2_pid_mode_09_t;
 
 typedef enum

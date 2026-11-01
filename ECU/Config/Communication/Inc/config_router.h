@@ -9,9 +9,14 @@
 #define CONFIG_COMMUNICATION_INC_CONFIG_ROUTER_H_
 
 #include "config_comm.h"
+#include "versioned_router.h"
+#ifdef CORE_CM4
 #include "router.h"
+#endif /* CORE_CM4 */
 
+#ifdef CORE_CM4
 error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx);
+#endif /* CORE_CM4 */
 error_t ecu_comm_router_get_default_config(ecu_comm_router_t instance, router_config_t *config);
 error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_config_t *config);
 error_t ecu_comm_router_reset(ecu_comm_router_t instance);

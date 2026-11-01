@@ -13,8 +13,6 @@
 #include "gpio.h"
 #include "versioned_can.h"
 
-#define CAN_RX_CB_MAX     (64)
-#define CAN_ERR_CB_MAX    (8)
 #define CAN_RX_FIFO_SIZE  (64)
 
 #if defined(HAL_FDCAN_MODULE_ENABLED)

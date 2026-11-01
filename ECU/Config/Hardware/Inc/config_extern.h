@@ -10,6 +10,7 @@
 
 #include "common.h"
 
+#ifdef CORE_CM7
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 extern DMA_HandleTypeDef hdma_adc1;
@@ -18,8 +19,6 @@ extern DMA_HandleTypeDef hdma_adc2;
 extern CRC_HandleTypeDef hcrc;
 
 extern DAC_HandleTypeDef hdac1;
-
-extern FDCAN_HandleTypeDef hfdcan1;
 
 extern HRTIM_HandleTypeDef hhrtim;
 
@@ -50,17 +49,24 @@ extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
 
+extern MDMA_HandleTypeDef hmdma_memtomem_stream1;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream2;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream3;
+extern MDMA_HandleTypeDef hmdma_memtomem_stream4;
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+extern IWDG_HandleTypeDef hiwdg2;
+#endif /* CORE_CM4 */
+
+extern FDCAN_HandleTypeDef hfdcan1;
+
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
-
-extern MDMA_HandleTypeDef hmdma_memtomem_stream1;
-extern MDMA_HandleTypeDef hmdma_memtomem_stream2;
-extern MDMA_HandleTypeDef hmdma_memtomem_stream3;
-extern MDMA_HandleTypeDef hmdma_memtomem_stream4;
 
 extern EXTI_HandleTypeDef hexti1;
 

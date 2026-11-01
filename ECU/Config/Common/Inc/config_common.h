@@ -9,11 +9,16 @@
 #define CONFIG_COMMON_INC_CONFIG_COMMON_H_
 
 #include "common.h"
+
+#ifdef CORE_CM7
 #include "core.h"
+#endif /* CORE_CM7 */
 
 #include "config_common_types.h"
 
+#ifdef CORE_CM7
 error_t ecu_config_common_init(ecu_core_ctx_t *ctx);
+#endif /* CORE_CM7 */
 
 error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max);
 error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t *type_max);

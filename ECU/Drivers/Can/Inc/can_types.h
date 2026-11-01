@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+#define CAN_RX_CB_MAX     (64)
+#define CAN_ERR_CB_MAX    (8)
+
 #define CAN_MESSAGE_CLASSIC_PAYLOAD_LEN_MAX   8u
 #define CAN_MESSAGE_FD_PAYLOAD_LEN_MAX        64u
 #define CAN_MESSAGE_PAYLOAD_LEN_MAX           64u

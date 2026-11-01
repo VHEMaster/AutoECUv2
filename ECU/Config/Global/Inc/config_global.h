@@ -11,6 +11,7 @@
 #include "common.h"
 #include "time.h"
 
+#ifdef CORE_CM7
 #include "flash.h"
 #include "config_calcdata.h"
 #include "config_devices.h"
@@ -61,6 +62,7 @@
 #include "config_injection.h"
 #include "config_ignition.h"
 #include "config_tables.h"
+#endif /* CORE_CM7 */
 
 #include "config_router.h"
 #include "config_can.h"
@@ -73,6 +75,7 @@
 #include "config_engine.h"
 #include "config_common.h"
 
+#ifdef CORE_CM7
 #define ECU_CONFIG_ITEM_VERSIONS_MAX      (4)
 #define ECU_CONFIG_DOUBLEBUFFER_TIMEOUT   (10 * TIME_US_IN_MS)
 
@@ -438,5 +441,6 @@ error_t ecu_config_global_comm_initialize(void);
 error_t ecu_config_global_flash_erase(void);
 
 error_t ecu_config_global_operation(ecu_config_op_t op, ecu_config_type_t type, ecu_index_type_t index, ecu_instance_t instance);
+#endif /* CORE_CM7 */
 
 #endif /* CONFIG_GLOBAL_INC_CONFIG_GLOBAL_H_ */
