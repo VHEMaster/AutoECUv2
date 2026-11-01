@@ -88,6 +88,8 @@ MDMA_HandleTypeDef hmdma_memtomem_stream3;
 MDMA_HandleTypeDef hmdma_memtomem_stream4;
 
 EXTI_HandleTypeDef hexti1;
+EXTI_HandleTypeDef hexti2;
+EXTI_HandleTypeDef hexti3;
 
 extern uint32_t _sitcm_func[];
 /* USER CODE BEGIN PV */

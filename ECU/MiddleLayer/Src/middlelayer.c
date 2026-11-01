@@ -42,7 +42,7 @@ typedef struct {
 
 static ml_loop_time_msmt_t ml_loop_time_msmt = {0};
 
-static void middlelayer_tim_slow_irq(void *)
+static void middlelayer_tim_slow_irq(void)
 {
   TIME_MSMT_START(&ml_loop_time_msmt.slow);
 
@@ -140,6 +140,8 @@ void middlelayer_init(void)
 {
   ecu_config_ll_init();
 
+  ecu_config_init_swi();
+
 #ifdef CORE_CM7
 
   ecu_config_init_counter();
@@ -162,11 +164,12 @@ void middlelayer_init(void)
 
   ecu_config_start_counter();
 
-  ecu_config_start_periodic_timers((pTIM_CallbackTypeDef)middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
+  ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
 
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
+  ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, NULL);
 
   middlelayer_comm_init();
 

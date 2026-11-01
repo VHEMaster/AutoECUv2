@@ -58,6 +58,9 @@ DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart3_rx;
 DMA_HandleTypeDef hdma_usart3_tx;
 
+EXTI_HandleTypeDef hexti2;
+EXTI_HandleTypeDef hexti3;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -65,6 +68,7 @@ DMA_HandleTypeDef hdma_usart3_tx;
 /* Private function prototypes -----------------------------------------------*/
 static void MX_IWDG2_Init(void);
 static void MX_DMA_Init(void);
+static void MX_GPIO_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
@@ -119,6 +123,7 @@ int main(void)
   /* Initialize all configured peripherals */
 
   MX_DMA_Init();
+  MX_GPIO_Init();
 
   //MX_IWDG2_Init();
   MX_FDCAN1_Init();
@@ -344,6 +349,23 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, NVIC_PRIO_UART3_DMA_TX, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, NVIC_PRIO_EXTI2_COMM, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, NVIC_PRIO_EXTI3_SLOW, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 }
 
 /* USER CODE BEGIN 4 */

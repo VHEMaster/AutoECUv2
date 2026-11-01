@@ -68,6 +68,11 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
 
+#ifdef CORE_CM7
 extern EXTI_HandleTypeDef hexti1;
+#endif /* CORE_CM7 */
+
+extern EXTI_HandleTypeDef hexti2;
+extern EXTI_HandleTypeDef hexti3;
 
 #endif /* CONFIG_EXTERN_H_ */
