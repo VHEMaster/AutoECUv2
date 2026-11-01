@@ -32,10 +32,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#ifndef HSEM_ID_0
-#define HSEM_ID_0 (0U) /* HW semaphore 0*/
-#endif
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -165,40 +161,6 @@ static void MPU_Config(void)
 
 }
 
-static void CM4_WaitFor(void)
-{
-  int32_t timeout;
-
-  /* Wait until CPU2 boots and enters in stop mode or timeout*/
-  timeout = 0xFFFF;
-  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
-  if ( timeout < 0 )
-  {
-    Error_Handler();
-  }
-}
-
-static void CM4_WakeUp(void)
-{
-  int32_t timeout;
-
-  /* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
-  HSEM notification */
-  /*HW semaphore Clock enable*/
-  __HAL_RCC_HSEM_CLK_ENABLE();
-  /*Take HSEM */
-  HAL_HSEM_FastTake(HSEM_ID_0);
-  /*Release HSEM in order to notify the CPU2(CM4)*/
-  HAL_HSEM_Release(HSEM_ID_0,0);
-  /* wait until CPU2 wakes up from stop mode */
-  timeout = 0xFFFF;
-  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
-  if ( timeout < 0 )
-  {
-    Error_Handler();
-  }
-}
-
 /* USER CODE END 0 */
 
 /**
@@ -221,7 +183,6 @@ int main(void)
   SCB_EnableDCache();
 
   /* MCU Configuration--------------------------------------------------------*/
-  CM4_WaitFor();
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -272,7 +233,6 @@ int main(void)
   MX_HRTIM_Init();
   /* USER CODE BEGIN 2 */
   middlelayer_init();
-  CM4_WakeUp();
   /* USER CODE END 2 */
 
   /* Infinite loop */

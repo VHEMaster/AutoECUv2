@@ -80,6 +80,15 @@ void HAL_MspInit(void)
   /* PendSV_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
 
+  /* Peripheral interrupt init */
+  /* HSEM2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(HSEM2_IRQn, NVIC_PRIO_HSEM2, 0);
+  HAL_NVIC_EnableIRQ(HSEM2_IRQn);
+
+  /* CM7_SEV_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(CM7_SEV_IRQn, NVIC_PRIO_CM4_TO_CM7_EV, 0);
+  HAL_NVIC_EnableIRQ(CM7_SEV_IRQn);
+
   /** Enable the VREF clock
   */
   __HAL_RCC_VREF_CLK_ENABLE();

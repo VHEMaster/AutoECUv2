@@ -82,7 +82,7 @@ void HAL_MspInit(void)
   HAL_NVIC_SetPriority(FLASH_IRQn, NVIC_PRIO_FLASH, 0);
   HAL_NVIC_EnableIRQ(FLASH_IRQn);
   /* CM4_SEV_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(CM4_SEV_IRQn, NVIC_PRIO_CM4_TO_CM7_EV, 0);
+  HAL_NVIC_SetPriority(CM4_SEV_IRQn, NVIC_PRIO_CM7_TO_CM4_EV, 0);
   HAL_NVIC_EnableIRQ(CM4_SEV_IRQn);
   /* HSEM1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(HSEM1_IRQn, NVIC_PRIO_HSEM1, 0);

@@ -183,6 +183,46 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles HSEM2 global interrupt.
+  */
+void HSEM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN HSEM2_IRQn 0 */
+
+  /* USER CODE END HSEM2_IRQn 0 */
+  HAL_HSEM_IRQHandler();
+  /* USER CODE BEGIN HSEM2_IRQn 1 */
+
+  /* USER CODE END HSEM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CM7 send event interrupt for CM4.
+  */
+void CM7_SEV_IRQHandler(void)
+{
+  /* USER CODE BEGIN CM7_SEV_IRQn 0 */
+
+  /* USER CODE END CM7_SEV_IRQn 0 */
+  /* USER CODE BEGIN CM7_SEV_IRQn 1 */
+
+  /* USER CODE END CM7_SEV_IRQn 1 */
+}
+
+/**
+  * @brief This function handles Hold core interrupt.
+  */
+void HOLD_CORE_IRQHandler(void)
+{
+  /* USER CODE BEGIN HOLD_CORE_IRQn 0 */
+
+  /* USER CODE END HOLD_CORE_IRQn 0 */
+  /* USER CODE BEGIN HOLD_CORE_IRQn 1 */
+
+  /* USER CODE END HOLD_CORE_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line2 interrupt.
   */
 void EXTI2_IRQHandler(void)
