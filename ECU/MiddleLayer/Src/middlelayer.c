@@ -142,9 +142,9 @@ void middlelayer_init(void)
 
   ecu_config_init_swi();
 
-#ifdef CORE_CM7
-
   ecu_config_init_counter();
+
+#ifdef CORE_CM7
 
   middlelayer_spi_init();
 

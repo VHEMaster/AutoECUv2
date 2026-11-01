@@ -94,19 +94,22 @@ void ecu_config_init_swi(void)
 #endif /* CORE_CM4 */
 }
 
-#ifdef CORE_CM7
 void ecu_config_init_counter(void)
 {
+#ifdef CORE_CM7
   htim2.Init.Period = TIME_TICKBASE_MASK;
   htim5.Init.Period = TIME_TIMEBASE_MASK;
 
   HAL_TIM_Base_Init(&htim5);
   HAL_TIM_Base_Init(&htim2);
 
-  time_init_tickbase(&htim2.Instance->CNT);
-  time_init_timebase(&htim5.Instance->CNT);
+#endif /* CORE_CM7 */
+
+  time_init_tickbase(&TIM2->CNT);
+  time_init_timebase(&TIM5->CNT);
 }
 
+#ifdef CORE_CM7
 void ecu_config_start_counter(void)
 {
   HAL_TIM_Base_Start(&htim2);
