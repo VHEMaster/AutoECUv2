@@ -226,7 +226,8 @@ error_t signals_config_build(signals_ctx_t *ctx)
           RETURN_IF(ctx->runtime.messages_downstream.signals_used >= ITEMSOF(config->signals_lists.downstream_list), E_PARAM);
           signal_runtime = &ctx->runtime.messages_downstream.signal_tree[ctx->runtime.messages_downstream.signals_used];
           signal_runtime->signal_config = signal_config;
-          err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
+          // TODO: COMPLETE
+          //err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
           BREAK_IF(err != E_OK);
           BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
           signal_runtime->parameter_ptr = value;
@@ -271,7 +272,8 @@ error_t signals_config_build(signals_ctx_t *ctx)
           signal_runtime->signal_config = signal_config;
 
           // TODO: assign proper ID to be written by CAN
-          err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
+          // TODO: COMPLETE
+          //err = ecu_config_common_get_parameter_ptr_by_id(signal_config->parameter_id, &value);
           BREAK_IF(err != E_OK);
           BREAK_IF_ACTION(value == NULL, err = E_BADRESP);
           signal_runtime->parameter_ptr = value;

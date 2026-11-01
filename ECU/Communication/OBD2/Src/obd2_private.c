@@ -234,6 +234,7 @@ static void obd2_sid_current_data(obd2_ctx_t *ctx)
                 md1->prefix_byte = 0;
                 for(int i = 0; i < items_count; i++) {
                   if(param_cfg->common_ids[i].bitfield.supported) {
+                    // TODO: COMPLETE
                     //err = ecu_config_common_get_parameter_value_by_id(param_cfg->common_ids[i], &param_value);
                     err = E_OK, param_value.value = 0;
                     if(err == E_OK) {
