@@ -126,8 +126,12 @@ void ecu_config_start_periodic_timers(void (*func_tim_slow_irq_cb)(void), void (
 {
 #ifdef CORE_CM7
   HAL_EXTI_RegisterCallback(&hexti1, HAL_EXTI_COMMON_CB_ID, func_tim_comm_irq_cb);
-  ecu_config_tim_slow_irq_cb_func = func_tim_slow_irq_cb;
+  HAL_EXTI_ClearPending(&hexti1, EXTI_TRIGGER_RISING);
 
+  HAL_NVIC_SetPriority(EXTI1_IRQn, NVIC_PRIO_EXTI1_COMM, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  ecu_config_tim_slow_irq_cb_func = func_tim_slow_irq_cb;
   HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, ecu_config_tim_slow_irq_cb);
   HAL_TIM_RegisterCallback(&htim7, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_fast_irq_cb);
 
@@ -138,6 +142,14 @@ void ecu_config_start_periodic_timers(void (*func_tim_slow_irq_cb)(void), void (
 #ifdef CORE_CM4
   HAL_EXTI_RegisterCallback(&hexti2, HAL_EXTI_COMMON_CB_ID, func_tim_comm_irq_cb);
   HAL_EXTI_RegisterCallback(&hexti3, HAL_EXTI_COMMON_CB_ID, func_tim_slow_irq_cb);
+  HAL_EXTI_ClearPending(&hexti2, EXTI_TRIGGER_RISING);
+  HAL_EXTI_ClearPending(&hexti3, EXTI_TRIGGER_RISING);
+
+  HAL_NVIC_SetPriority(EXTI2_IRQn, NVIC_PRIO_EXTI2_COMM, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI3_IRQn, NVIC_PRIO_EXTI3_SLOW, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 #endif /* CORE_CM4 */
 
 }

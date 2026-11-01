@@ -68,7 +68,6 @@ EXTI_HandleTypeDef hexti3;
 /* Private function prototypes -----------------------------------------------*/
 static void MX_IWDG2_Init(void);
 static void MX_DMA_Init(void);
-static void MX_GPIO_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
@@ -79,7 +78,17 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static void CM7_WaitFor(void)
+{
+  /*
+  Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
+  perform system initialization (system clock config, external memory configuration.. )
+  */
+  HAL_PWREx_ClearPendingEvent();
+  HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
+  /* Clear HSEM flag */
+  __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+}
 /* USER CODE END 0 */
 
 /**
@@ -97,14 +106,8 @@ int main(void)
   __HAL_RCC_HSEM_CLK_ENABLE();
   /* Activate HSEM notification for Cortex-M4*/
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
-  /*
-  Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
-  perform system initialization (system clock config, external memory configuration.. )
-  */
-  HAL_PWREx_ClearPendingEvent();
-  HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
-  /* Clear HSEM flag */
-  __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+
+  CM7_WaitFor();
 
 /* USER CODE END Boot_Mode_Sequence_1 */
   /* MCU Configuration--------------------------------------------------------*/
@@ -123,7 +126,6 @@ int main(void)
   /* Initialize all configured peripherals */
 
   MX_DMA_Init();
-  MX_GPIO_Init();
 
   //MX_IWDG2_Init();
   MX_FDCAN1_Init();
@@ -349,23 +351,6 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, NVIC_PRIO_UART3_DMA_TX, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI2_IRQn, NVIC_PRIO_EXTI2_COMM, 0);
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI3_IRQn, NVIC_PRIO_EXTI3_SLOW, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
