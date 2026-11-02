@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "middlelayer.h"
+#include "multicore_boot.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -198,7 +199,7 @@ int main(void)
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  multicore_boot_clocks_ready();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -231,8 +232,12 @@ int main(void)
   MX_TIM7_Init();
   MX_ADC2_Init();
   MX_HRTIM_Init();
+
   /* USER CODE BEGIN 2 */
   middlelayer_init();
+  multicore_boot_publish(MULTICORE_BOOT_CM7_INIT);
+  multicore_boot_wait(MULTICORE_BOOT_CM4_STARTED);
+  middlelayer_start();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -55,13 +55,23 @@ INLINE void ecu_config_iwgd_refresh(void) {
 
 void ecu_config_ll_init(void)
 {
+#ifdef CORE_CM7
+  __HAL_DBGMCU_FREEZE_TIM2();
   __HAL_DBGMCU_FREEZE_TIM5();
   __HAL_DBGMCU_FREEZE_TIM6();
   __HAL_DBGMCU_FREEZE_TIM7();
   __HAL_DBGMCU_FREEZE_IWDG1();
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+  __HAL_DBGMCU_FREEZE2_TIM2();
+  __HAL_DBGMCU_FREEZE2_TIM5();
+  __HAL_DBGMCU_FREEZE2_TIM6();
+  __HAL_DBGMCU_FREEZE2_TIM7();
   __HAL_DBGMCU_FREEZE2_IWDG2();
 
-  __HAL_DBGMCU_FREEZE_FDCAN();
+  __HAL_DBGMCU_FREEZE2_FDCAN();
+#endif /* CORE_CM4 */
 }
 
 void ecu_config_init_swi(void)
@@ -137,6 +147,8 @@ void ecu_config_start_periodic_timers(void (*func_tim_slow_irq_cb)(void), void (
   HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, ecu_config_tim_100us_irq_cb);
   HAL_TIM_RegisterCallback(&htim7, HAL_TIM_PERIOD_ELAPSED_CB_ID, func_tim_fast_irq_cb);
 
+  __HAL_TIM_CLEAR_FLAG(&htim6, TIM_FLAG_UPDATE);
+  __HAL_TIM_CLEAR_FLAG(&htim7, TIM_FLAG_UPDATE);
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
 #endif /* CORE_CM7 */

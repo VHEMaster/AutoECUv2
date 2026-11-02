@@ -19,11 +19,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "middlelayer.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "middlelayer.h"
+#include "multicore_boot.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,10 +108,12 @@ int main(void)
   MX_FDCAN1_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
-  /* USER CODE BEGIN 2 */
-  __HAL_DBGMCU_FREEZE2_IWDG2();
 
+  /* USER CODE BEGIN 2 */
+  multicore_boot_wait(MULTICORE_BOOT_CM7_INIT);
   middlelayer_init();
+  middlelayer_start();
+  multicore_boot_publish(MULTICORE_BOOT_CM4_STARTED);
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -73,6 +73,9 @@ defined in linker script */
 Reset_Handler:
   ldr   sp, =_estack      /* set stack pointer */
 
+/* Call the multicore init procedures first.*/
+	bl multicore_boot_init
+
 /* Call the clock system initialization function.*/
   bl  SystemInit
 

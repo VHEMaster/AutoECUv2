@@ -49,5 +49,10 @@
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Math</locationURI>
 		</link>
+		<link>
+			<name>Multicore</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Multicore</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

@@ -162,15 +162,22 @@ void middlelayer_init(void)
 
   ecu_config_start_counter();
 
-  ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
+#endif /* CORE_CM7 */
 
+#ifdef CORE_CM4
+  middlelayer_comm_init();
+#endif /* CORE_CM4 */
+}
+
+void middlelayer_start(void)
+{
+
+#ifdef CORE_CM7
+  ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
   ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, NULL);
-
-  middlelayer_comm_init();
-
 #endif /* CORE_CM4 */
 }
 
