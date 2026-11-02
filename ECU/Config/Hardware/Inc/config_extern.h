@@ -57,7 +57,6 @@ extern MDMA_HandleTypeDef hmdma_memtomem_stream4;
 
 #ifdef CORE_CM4
 extern IWDG_HandleTypeDef hiwdg2;
-#endif /* CORE_CM4 */
 
 extern FDCAN_HandleTypeDef hfdcan1;
 
@@ -67,12 +66,10 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
+#endif /* CORE_CM4 */
 
-#ifdef CORE_CM7
 extern EXTI_HandleTypeDef hexti1;
-#endif /* CORE_CM7 */
-
 extern EXTI_HandleTypeDef hexti2;
-extern EXTI_HandleTypeDef hexti3;
+
 
 #endif /* CONFIG_EXTERN_H_ */

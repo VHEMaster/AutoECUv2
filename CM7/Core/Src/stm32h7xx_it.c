@@ -87,6 +87,7 @@ extern TIM_HandleTypeDef htim15;
 extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
 extern EXTI_HandleTypeDef hexti1;
+extern EXTI_HandleTypeDef hexti2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -255,6 +256,20 @@ void EXTI1_IRQHandler(void)
   /* USER CODE BEGIN EXTI1_IRQn 1 */
 
   /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line2 interrupt.
+  */
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
+
+  /* USER CODE END EXTI2_IRQn 0 */
+  HAL_EXTI_IRQHandler(&hexti2);
+  /* USER CODE BEGIN EXTI2_IRQn 2 */
+
+  /* USER CODE END EXTI2_IRQn 2 */
 }
 
 /**

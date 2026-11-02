@@ -86,7 +86,7 @@ void HAL_MspInit(void)
   HAL_NVIC_EnableIRQ(HSEM2_IRQn);
 
   /* CM7_SEV_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(CM7_SEV_IRQn, NVIC_PRIO_CM4_TO_CM7_EV, 0);
+  HAL_NVIC_SetPriority(CM7_SEV_IRQn, NVIC_PRIO_CM7_TO_CM4_EV, 0);
   HAL_NVIC_EnableIRQ(CM7_SEV_IRQn);
 
   /** Enable the VREF clock

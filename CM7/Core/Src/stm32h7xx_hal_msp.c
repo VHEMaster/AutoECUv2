@@ -82,7 +82,7 @@ void HAL_MspInit(void)
   HAL_NVIC_SetPriority(FLASH_IRQn, NVIC_PRIO_FLASH, 0);
   HAL_NVIC_EnableIRQ(FLASH_IRQn);
   /* CM4_SEV_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(CM4_SEV_IRQn, NVIC_PRIO_CM7_TO_CM4_EV, 0);
+  HAL_NVIC_SetPriority(CM4_SEV_IRQn, NVIC_PRIO_CM4_TO_CM7_EV, 0);
   HAL_NVIC_EnableIRQ(CM4_SEV_IRQn);
   /* HSEM1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(HSEM1_IRQn, NVIC_PRIO_HSEM1, 0);
@@ -364,7 +364,7 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* DAC1 interrupt Init */
-    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_PRIO_TIM6_SLOW_DAC, 0);
+    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_PRIO_TIM6_100US_DAC, 0);
     HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
   /* USER CODE BEGIN DAC1_MspInit 1 */
 
@@ -1082,7 +1082,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     /* Peripheral clock enable */
     __HAL_RCC_TIM6_CLK_ENABLE();
     /* TIM6 interrupt Init */
-    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_PRIO_TIM6_SLOW_DAC, 0);
+    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_PRIO_TIM6_100US_DAC, 0);
     HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
   /* USER CODE BEGIN TIM6_MspInit 1 */
 

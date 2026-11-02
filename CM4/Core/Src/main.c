@@ -54,8 +54,8 @@ DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart3_rx;
 DMA_HandleTypeDef hdma_usart3_tx;
 
+EXTI_HandleTypeDef hexti1;
 EXTI_HandleTypeDef hexti2;
-EXTI_HandleTypeDef hexti3;
 
 /* USER CODE BEGIN PV */
 

@@ -22,6 +22,5 @@ void ecu_config_start_periodic_timers(void (*func_tim_slow_irq_cb)(void), void (
 
 void ecu_config_set_ignition_enabled(bool enabled);
 void ecu_config_iwgd_refresh(void);
-void ecu_config_swi_poll(void);
 
 #endif /* CONFIG_INC_CONFIG_H_ */
