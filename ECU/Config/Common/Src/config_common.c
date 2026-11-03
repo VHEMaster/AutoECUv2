@@ -14,6 +14,8 @@
 
 #include "config_global.h"
 
+#define ECU_COMMON_VIRTUAL_OVERALL_COUNT  (ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX + 1)
+
 #if (ECU_DEVICE_TYPE_MAX > ECU_ENTITY_TYPE_MAX)
 #error "ECU_DEVICE_TYPE_MAX is larger than ECU_ENTITY_TYPE_MAX"
 #endif
@@ -58,7 +60,6 @@ typedef struct {
     ecu_entity_config_func_t configure_func;
     ecu_entity_get_type_max_func_t get_type_max_func;
     ecu_entity_get_instance_max_func_t get_instance_max_func;
-    ecu_entity_get_instance_params_read_write_func_t get_instance_params_read_write_funcs[ECU_COMMON_READ_WRITE_MAX];
     ecu_entity_get_type_params_count_read_write_func_t get_type_params_count_read_write_funcs[ECU_COMMON_READ_WRITE_MAX];
 }ecu_config_common_entity_config_t;
 
@@ -82,6 +83,7 @@ typedef struct {
 
 typedef struct {
     ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
+
     uint32_t allocated;
     uint32_t free;
 }ecu_config_common_virtual_ctx_t;
@@ -92,7 +94,12 @@ typedef struct ecu_config_common_ctx_tag {
     ecu_config_common_entity_t entities_count;
     ecu_config_common_entity_ctx_t entities[ECU_COMMON_ENTITY_MAX];
 
+    ecu_config_common_virtual_ctx_t final_source;
     ecu_config_common_virtual_ctx_t virtual_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX];
+
+
+    ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
+    ecu_core_runtime_global_parameters_ctx_t *core_runtime_destinations[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
 }ecu_config_common_ctx_t;
 
 
@@ -102,10 +109,6 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             .configure_func = ecu_config_common_devices,
             .get_type_max_func = ecu_devices_get_type_max,
             .get_instance_max_func = ecu_devices_get_instance_max,
-            .get_instance_params_read_write_funcs = {
-                ecu_devices_get_instance_parameters_read,
-                ecu_devices_get_instance_parameters_write,
-            },
             .get_type_params_count_read_write_funcs = {
                 ecu_devices_get_type_parameters_count_read,
                 ecu_devices_get_type_parameters_count_write,
@@ -115,10 +118,6 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             .configure_func = ecu_config_common_sensors,
             .get_type_max_func = ecu_sensors_get_type_max,
             .get_instance_max_func = ecu_sensors_get_instance_max,
-            .get_instance_params_read_write_funcs = {
-                ecu_sensors_get_instance_parameters_read,
-                ecu_sensors_get_instance_parameters_write,
-            },
             .get_type_params_count_read_write_funcs = {
                 ecu_sensors_get_type_parameters_count_read,
                 ecu_sensors_get_type_parameters_count_write,
@@ -128,10 +127,6 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             .configure_func = ecu_config_common_modules,
             .get_type_max_func = ecu_modules_get_type_max,
             .get_instance_max_func = ecu_modules_get_instance_max,
-            .get_instance_params_read_write_funcs = {
-                ecu_modules_get_instance_parameters_read,
-                ecu_modules_get_instance_parameters_write,
-            },
             .get_type_params_count_read_write_funcs = {
                 ecu_modules_get_type_parameters_count_read,
                 ecu_modules_get_type_parameters_count_write,
@@ -141,10 +136,6 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             .configure_func = ecu_config_common_timings,
             .get_type_max_func = ecu_timings_get_type_max,
             .get_instance_max_func = ecu_timings_get_instance_max,
-            .get_instance_params_read_write_funcs = {
-                ecu_timings_get_instance_parameters_read,
-                ecu_timings_get_instance_parameters_write,
-            },
             .get_type_params_count_read_write_funcs = {
                 ecu_timings_get_type_parameters_count_read,
                 ecu_timings_get_type_parameters_count_write,
@@ -167,8 +158,14 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
     ecu_config_common_ctx.entities_count = ECU_COMMON_ENTITY_MAX;
 
     for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
+      ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.virtual_sources[v];
+      ecu_config_common_ctx.core_runtime_destinations[v] = &ctx->runtime.global.parameters_virtual[v];
       ecu_config_common_ctx.virtual_sources[v].free = ITEMSOF(ecu_config_common_ctx.virtual_sources[v].values);
     }
+
+    ecu_config_common_ctx.common_ctx_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ecu_config_common_ctx.final_source;
+    ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ctx->runtime.global.parameters;
+    ecu_config_common_ctx.final_source.free = ITEMSOF(ecu_config_common_ctx.final_source.values);
 
     for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.entities_count; e++) {
       err = ecu_config_common_ctx.config->entities[e].configure_func(ctx, e);
@@ -258,19 +255,26 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
 {
   error_t err = E_OK;
   ecu_config_common_entity_ctx_t *entity_ctx;
-  const ecu_config_common_entity_config_t *entity_config;
+  ecu_config_common_entity_type_ctx_t *type_ctx;
+  ecu_config_common_entity_instance_ctx_t *instance_ctx;
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
-    BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(params == NULL, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(read_write != ECU_COMMON_READ && read_write != ECU_COMMON_WRITE, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
 
     entity_ctx = &ecu_config_common_ctx.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
-    entity_config = &ecu_config_common_config.entities[entity];
 
-    err = entity_config->get_instance_params_read_write_funcs[read_write](type, instance, params, params_max);
-    BREAK_IF(err != E_OK);
+    type_ctx = &entity_ctx->types[type];
+    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+
+    instance_ctx = &type_ctx->instances[instance];
+    BREAK_IF_ACTION(instance_ctx->parameters == NULL, err = E_FAULT);
+
+    *params_max = instance_ctx->parameters->count[read_write];
+    *params = instance_ctx->parameters->params[read_write];
 
   } while(0);
 
@@ -338,14 +342,13 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
     BREAK_IF_ACTION(instance_ctx->parameters == NULL, err = E_FAULT);
 
     BREAK_IF_ACTION(parameter >= instance_ctx->parameters->count[read_write], err = E_PARAM);
-    memcpy(ptr, &instance_ctx->parameters->params[read_write][parameter], sizeof(instance_ctx->parameters->params[ECU_COMMON_WRITE][parameter]));
+    memcpy(ptr, &instance_ctx->parameters->params[read_write][parameter], sizeof(ecu_core_runtime_value_ctx_t));
 
 
   } while(0);
 
   return err;
 }
-
 
 static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity)
 {
@@ -380,13 +383,13 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
-          err = entity_config->get_instance_params_read_write_funcs[rw](t, i, &parameters->params[rw], &parameters->count[rw]);
+          err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
-          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-            virtual_parameters = &ctx->runtime.global.parameters_virtual[v].devices[t][i];
+          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
+            virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->devices[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
-              virtual_ctx = &ecu_config_common_ctx.virtual_sources[v];
+              virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               if(virtual_ctx->free >= virtual_parameters->count[rw]) {
                 virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
                 virtual_ctx->allocated += virtual_parameters->count[rw];
@@ -445,13 +448,13 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
-          err = entity_config->get_instance_params_read_write_funcs[rw](t, i, &parameters->params[rw], &parameters->count[rw]);
+          err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
-          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-            virtual_parameters = &ctx->runtime.global.parameters_virtual[v].sensors[t][i];
+          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
+            virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->sensors[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
-              virtual_ctx = &ecu_config_common_ctx.virtual_sources[v];
+              virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               if(virtual_ctx->free >= virtual_parameters->count[rw]) {
                 virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
                 virtual_ctx->allocated += virtual_parameters->count[rw];
@@ -510,13 +513,13 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
-          err = entity_config->get_instance_params_read_write_funcs[rw](t, i, &parameters->params[rw], &parameters->count[rw]);
+          err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
-          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-            virtual_parameters = &ctx->runtime.global.parameters_virtual[v].modules[t][i];
+          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
+            virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->modules[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
-              virtual_ctx = &ecu_config_common_ctx.virtual_sources[v];
+              virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               if(virtual_ctx->free >= virtual_parameters->count[rw]) {
                 virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
                 virtual_ctx->allocated += virtual_parameters->count[rw];
@@ -575,13 +578,13 @@ static error_t ecu_config_common_timings(ecu_core_ctx_t *ctx, ecu_config_common_
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
-          err = entity_config->get_instance_params_read_write_funcs[rw](t, i, &parameters->params[rw], &parameters->count[rw]);
+          err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
-          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-            virtual_parameters = &ctx->runtime.global.parameters_virtual[v].timings[t][i];
+          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
+            virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->timings[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
-              virtual_ctx = &ecu_config_common_ctx.virtual_sources[v];
+              virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               if(virtual_ctx->free >= virtual_parameters->count[rw]) {
                 virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
                 virtual_ctx->allocated += virtual_parameters->count[rw];

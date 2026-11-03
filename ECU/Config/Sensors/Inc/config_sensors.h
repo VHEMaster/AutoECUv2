@@ -37,8 +37,6 @@ error_t ecu_sensors_get_sensor_enabled(ecu_sensor_type_t type, ecu_sensor_instan
 
 error_t ecu_sensors_get_type_max(ecu_sensor_type_t *type_max);
 error_t ecu_sensors_get_instance_max(ecu_sensor_type_t type, ecu_sensor_instance_t *instance_max);
-error_t ecu_sensors_get_instance_parameters_read(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **read, ecu_runtime_param_index_t *count);
-error_t ecu_sensors_get_instance_parameters_write(ecu_sensor_type_t type, ecu_sensor_instance_t instance, ecu_core_runtime_value_ctx_t **write, ecu_runtime_param_index_t *count);
 error_t ecu_sensors_get_type_parameters_count_read(ecu_sensor_type_t type, ecu_runtime_param_index_t *count);
 error_t ecu_sensors_get_type_parameters_count_write(ecu_sensor_type_t type, ecu_runtime_param_index_t *count);
 
