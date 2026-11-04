@@ -11,7 +11,7 @@
 #include "main.h"
 #include "bool.h"
 #include "compiler.h"
-#include "types.h"
+#include "ecu_types.h"
 
 #include <stdint.h>
 #include <stddef.h>

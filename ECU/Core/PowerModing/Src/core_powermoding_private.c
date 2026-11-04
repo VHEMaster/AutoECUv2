@@ -8,7 +8,7 @@
 #include "core_powermoding_types.h"
 #include "core_powermoding_private.h"
 #include "common.h"
-#include "types.h"
+#include "ecu_types.h"
 
 void powermoding_switch_standby(ecu_core_ctx_t *ctx)
 {

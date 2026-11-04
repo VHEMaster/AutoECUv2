@@ -1,12 +1,12 @@
 /*
- * types.h
+ * ecu_types.h
  *
  *  Created on: Jun 8, 2024
  *      Author: VHEMaster
  */
 
-#ifndef COMMON_INC_TYPES_H_
-#define COMMON_INC_TYPES_H_
+#ifndef COMMON_INC_ECU_TYPES_H_
+#define COMMON_INC_ECU_TYPES_H_
 
 #define ECU_CAN_MESSAGE_PAYLOAD_LEN   8
 
@@ -35,4 +35,4 @@ typedef enum {
   ECU_CYLINDER_MAX,
 }ecu_cylinder_t;
 
-#endif /* COMMON_INC_TYPES_H_ */
+#endif /* COMMON_INC_ECU_TYPES_H_ */
