@@ -170,54 +170,6 @@ error_t ipc_buffer_reader_read(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint3
   return err;
 }
 
-static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint32_t *p_itemscount)
-{
-  error_t err = E_OK;
-  uint32_t amount = *p_itemscount;
-
-  do {
-    *p_itemscount = 0;
-
-    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
-      BREAK_IF_ACTION(buffer == NULL && amount != 0, err = E_PARAM);
-      BREAK_IF(amount == 0);
-      BREAK_IF_ACTION(ctx->left == 0, err = E_AGAIN);
-
-      err = ipc_buffer_reader_validate(ctx);
-      BREAK_IF(err != E_OK);
-
-      amount = MIN(amount, ctx->left);
-      if(ctx->memcpy_cb == NULL) {
-        ipc_buffer_copy_out(buffer, ctx->memorybuffer, ctx->itemsize,
-            ctx->itemscount, ctx->read, amount);
-      } else {
-        ipc_buffer_copy_begin(&ctx->copy_ctx, (void *)ctx->memorybuffer, buffer,
-            ctx->itemsize, ctx->itemscount, ctx->read, amount, true,
-            ctx->memcpy_cb, ctx->memcpy_usrdata);
-
-        err = ipc_buffer_copy_process(&ctx->copy_ctx);
-        BREAK_IF(err != E_OK);
-      }
-    } else {
-      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer, err = E_PARAM);
-      amount = ctx->copy_ctx.amount;
-
-      err = ipc_buffer_copy_process(&ctx->copy_ctx);
-      BREAK_IF(err != E_OK);
-    }
-
-    err = ipc_buffer_reader_validate(ctx);
-    BREAK_IF(err != E_OK);
-
-    ctx->read = ipc_buffer_advance(ctx->itemscount, ctx->read, amount);
-    ctx->left -= amount;
-    *p_itemscount = amount;
-
-  } while(0);
-
-  return err;
-}
-
 error_t ipc_buffer_reader_cancel(ipc_buffer_reader_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -568,6 +520,54 @@ error_t ipc_buffer_reader_synchronize(ipc_buffer_reader_ctx_t *ctx)
     if(err != E_OK) {
       ctx->synchronized = false;
     }
+  } while(0);
+
+  return err;
+}
+
+static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint32_t *p_itemscount)
+{
+  error_t err = E_OK;
+  uint32_t amount = *p_itemscount;
+
+  do {
+    *p_itemscount = 0;
+
+    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
+      BREAK_IF_ACTION(buffer == NULL && amount != 0, err = E_PARAM);
+      BREAK_IF(amount == 0);
+      BREAK_IF_ACTION(ctx->left == 0, err = E_AGAIN);
+
+      err = ipc_buffer_reader_validate(ctx);
+      BREAK_IF(err != E_OK);
+
+      amount = MIN(amount, ctx->left);
+      if(ctx->memcpy_cb == NULL) {
+        ipc_buffer_copy_out(buffer, ctx->memorybuffer, ctx->itemsize,
+            ctx->itemscount, ctx->read, amount);
+      } else {
+        ipc_buffer_copy_begin(&ctx->copy_ctx, (void *)ctx->memorybuffer, buffer,
+            ctx->itemsize, ctx->itemscount, ctx->read, amount, true,
+            ctx->memcpy_cb, ctx->memcpy_usrdata);
+
+        err = ipc_buffer_copy_process(&ctx->copy_ctx);
+        BREAK_IF(err != E_OK);
+      }
+    } else {
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer, err = E_PARAM);
+      amount = ctx->copy_ctx.amount;
+
+      err = ipc_buffer_copy_process(&ctx->copy_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    err = ipc_buffer_reader_validate(ctx);
+    BREAK_IF(err != E_OK);
+
+    ctx->read = ipc_buffer_advance(ctx->itemscount, ctx->read, amount);
+    ctx->left -= amount;
+    *p_itemscount = amount;
+
   } while(0);
 
   return err;

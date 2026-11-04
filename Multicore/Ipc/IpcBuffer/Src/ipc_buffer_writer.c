@@ -150,50 +150,6 @@ error_t ipc_buffer_writer_write(ipc_buffer_writer_ctx_t *ctx, const void *buffer
   return err;
 }
 
-static error_t ipc_buffer_writer_copy(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount)
-{
-  error_t err = E_OK;
-
-  do {
-    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
-
-    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
-      BREAK_IF_ACTION(itemscount > ctx->left, err = E_OVERFLOW);
-
-      err = ipc_buffer_writer_synchronize(ctx);
-      BREAK_IF(err != E_OK);
-      BREAK_IF(itemscount == 0);
-
-      if(ctx->memcpy_cb == NULL) {
-        ipc_buffer_copy_in(ctx->memorybuffer, buffer, ctx->itemsize,
-            ctx->itemscount, ctx->write, itemscount);
-      } else {
-        ipc_buffer_copy_begin(&ctx->copy_ctx, ctx->memorybuffer, buffer,
-            ctx->itemsize, ctx->itemscount, ctx->write, itemscount, false,
-            ctx->memcpy_cb, ctx->memcpy_usrdata);
-
-        err = ipc_buffer_copy_process(&ctx->copy_ctx);
-        BREAK_IF(err != E_OK);
-      }
-    } else {
-      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer ||
-          itemscount != ctx->copy_ctx.amount, err = E_PARAM);
-
-      err = ipc_buffer_copy_process(&ctx->copy_ctx);
-      BREAK_IF(err != E_OK);
-    }
-
-    err = ipc_buffer_writer_synchronize(ctx);
-    BREAK_IF(err != E_OK);
-
-    ctx->write = ipc_buffer_advance(ctx->itemscount, ctx->write, itemscount);
-    ctx->left -= itemscount;
-
-  } while(0);
-
-  return err;
-}
-
 error_t ipc_buffer_writer_commit(ipc_buffer_writer_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -508,6 +464,50 @@ error_t ipc_buffer_writer_is_empty(ipc_buffer_writer_ctx_t *ctx, bool *p_is_empt
     BREAK_IF(err != E_OK);
 
     err = ipc_fifo_writer_is_empty(&ctx->fifo_ctx, p_is_empty);
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ipc_buffer_writer_copy(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+
+    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
+      BREAK_IF_ACTION(itemscount > ctx->left, err = E_OVERFLOW);
+
+      err = ipc_buffer_writer_synchronize(ctx);
+      BREAK_IF(err != E_OK);
+      BREAK_IF(itemscount == 0);
+
+      if(ctx->memcpy_cb == NULL) {
+        ipc_buffer_copy_in(ctx->memorybuffer, buffer, ctx->itemsize,
+            ctx->itemscount, ctx->write, itemscount);
+      } else {
+        ipc_buffer_copy_begin(&ctx->copy_ctx, ctx->memorybuffer, buffer,
+            ctx->itemsize, ctx->itemscount, ctx->write, itemscount, false,
+            ctx->memcpy_cb, ctx->memcpy_usrdata);
+
+        err = ipc_buffer_copy_process(&ctx->copy_ctx);
+        BREAK_IF(err != E_OK);
+      }
+    } else {
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer ||
+          itemscount != ctx->copy_ctx.amount, err = E_PARAM);
+
+      err = ipc_buffer_copy_process(&ctx->copy_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    err = ipc_buffer_writer_synchronize(ctx);
+    BREAK_IF(err != E_OK);
+
+    ctx->write = ipc_buffer_advance(ctx->itemscount, ctx->write, itemscount);
+    ctx->left -= itemscount;
 
   } while(0);
 
