@@ -9,10 +9,6 @@
 #define IPC_INC_IPC_H_
 
 #include "ipc_types.h"
-#include "ipc_reader.h"
-#include "ipc_writer.h"
-
-
-
+#include "ipc_fifo.h"
 
 #endif /* IPC_INC_IPC_H_ */
