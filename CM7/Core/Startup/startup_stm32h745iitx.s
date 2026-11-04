@@ -74,7 +74,7 @@ Reset_Handler:
   ldr   sp, =_estack      /* set stack pointer */
 
 /* Call the multicore init procedures first.*/
-	bl multicore_boot_init
+	bl  multicore_boot_init
 
 /* Call the clock system initialization function.*/
   bl  SystemInit
@@ -171,6 +171,20 @@ FillZeroRamBss:
 LoopFillZeroRamBss:
   cmp r2, r4
   bcc FillZeroRamBss
+
+/* Zero fill the sharedbss segment. */
+  ldr r2, =_ssharedbss
+  ldr r4, =_esharedbss
+  movs r3, #0
+  b LoopFillZeroSharedBss
+
+FillZeroSharedBss:
+  str  r3, [r2]
+  adds r2, r2, #4
+
+LoopFillZeroSharedBss:
+  cmp r2, r4
+  bcc FillZeroSharedBss
 
 /* Call the application's entry point.*/
   bl  main
