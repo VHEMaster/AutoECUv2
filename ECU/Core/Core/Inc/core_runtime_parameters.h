@@ -16,7 +16,6 @@
 
 typedef struct {
     ecu_runtime_param_index_t count[ECU_COMMON_READ_WRITE_MAX];
-
     ecu_core_runtime_value_ctx_t *params[ECU_COMMON_READ_WRITE_MAX];
 }ecu_core_runtime_global_instance_parameters_ctx_t;
 

@@ -83,9 +83,6 @@ typedef struct {
 
 typedef struct {
     ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
-
-    uint32_t allocated;
-    uint32_t free;
 }ecu_config_common_virtual_ctx_t;
 
 typedef struct ecu_config_common_ctx_tag {
@@ -97,9 +94,11 @@ typedef struct ecu_config_common_ctx_tag {
     ecu_config_common_virtual_ctx_t final_source;
     ecu_config_common_virtual_ctx_t virtual_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX];
 
-
     ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
     ecu_core_runtime_global_parameters_ctx_t *core_runtime_destinations[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
+
+    uint32_t params_allocated;
+    uint32_t params_free;
 }ecu_config_common_ctx_t;
 
 
@@ -160,12 +159,13 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
     for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
       ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.virtual_sources[v];
       ecu_config_common_ctx.core_runtime_destinations[v] = &ctx->runtime.global.parameters_virtual[v];
-      ecu_config_common_ctx.virtual_sources[v].free = ITEMSOF(ecu_config_common_ctx.virtual_sources[v].values);
     }
 
     ecu_config_common_ctx.common_ctx_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ecu_config_common_ctx.final_source;
     ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ctx->runtime.global.parameters;
-    ecu_config_common_ctx.final_source.free = ITEMSOF(ecu_config_common_ctx.final_source.values);
+
+    ecu_config_common_ctx.params_allocated = 0;
+    ecu_config_common_ctx.params_free = ECU_CONFIG_PARAMETERS_MAX;
 
     for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.entities_count; e++) {
       err = ecu_config_common_ctx.config->entities[e].configure_func(ctx, e);
@@ -385,23 +385,21 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
           err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
+          if(ecu_config_common_ctx.params_free < parameters->count[rw]) {
+            err = E_OVERFLOW;
+            BREAKPOINT(0);
+            break;
+          }
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->devices[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
-              if(virtual_ctx->free >= virtual_parameters->count[rw]) {
-                virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
-                virtual_ctx->allocated += virtual_parameters->count[rw];
-                virtual_ctx->free -= virtual_parameters->count[rw];
-              } else {
-                BREAKPOINT(0);
-                err = E_OVERFLOW;
-                break;
-              }
+              virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
             }
           }
-          BREAK_IF(err != E_OK);
+          ecu_config_common_ctx.params_allocated += parameters->count[rw];
+          ecu_config_common_ctx.params_free -= parameters->count[rw];
         }
         BREAK_IF(err != E_OK);
       }
@@ -450,23 +448,21 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
           err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
+          if(ecu_config_common_ctx.params_free < parameters->count[rw]) {
+            err = E_OVERFLOW;
+            BREAKPOINT(0);
+            break;
+          }
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->sensors[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
-              if(virtual_ctx->free >= virtual_parameters->count[rw]) {
-                virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
-                virtual_ctx->allocated += virtual_parameters->count[rw];
-                virtual_ctx->free -= virtual_parameters->count[rw];
-              } else {
-                BREAKPOINT(0);
-                err = E_OVERFLOW;
-                break;
-              }
+              virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
             }
           }
-          BREAK_IF(err != E_OK);
+          ecu_config_common_ctx.params_allocated += parameters->count[rw];
+          ecu_config_common_ctx.params_free -= parameters->count[rw];
         }
         BREAK_IF(err != E_OK);
       }
@@ -515,23 +511,21 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
           err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
+          if(ecu_config_common_ctx.params_free < parameters->count[rw]) {
+            err = E_OVERFLOW;
+            BREAKPOINT(0);
+            break;
+          }
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->modules[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
-              if(virtual_ctx->free >= virtual_parameters->count[rw]) {
-                virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
-                virtual_ctx->allocated += virtual_parameters->count[rw];
-                virtual_ctx->free -= virtual_parameters->count[rw];
-              } else {
-                BREAKPOINT(0);
-                err = E_OVERFLOW;
-                break;
-              }
+              virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
             }
           }
-          BREAK_IF(err != E_OK);
+          ecu_config_common_ctx.params_allocated += parameters->count[rw];
+          ecu_config_common_ctx.params_free -= parameters->count[rw];
         }
         BREAK_IF(err != E_OK);
       }
@@ -580,23 +574,21 @@ static error_t ecu_config_common_timings(ecu_core_ctx_t *ctx, ecu_config_common_
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
           err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
           BREAK_IF(err != E_OK);
+          if(ecu_config_common_ctx.params_free < parameters->count[rw]) {
+            err = E_OVERFLOW;
+            BREAKPOINT(0);
+            break;
+          }
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->timings[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
-              if(virtual_ctx->free >= virtual_parameters->count[rw]) {
-                virtual_parameters->params[rw] = &virtual_ctx->values[virtual_ctx->allocated];
-                virtual_ctx->allocated += virtual_parameters->count[rw];
-                virtual_ctx->free -= virtual_parameters->count[rw];
-              } else {
-                BREAKPOINT(0);
-                err = E_OVERFLOW;
-                break;
-              }
+              virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
             }
           }
-          BREAK_IF(err != E_OK);
+          ecu_config_common_ctx.params_allocated += parameters->count[rw];
+          ecu_config_common_ctx.params_free -= parameters->count[rw];
         }
         BREAK_IF(err != E_OK);
       }
