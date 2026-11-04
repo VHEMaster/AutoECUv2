@@ -8,7 +8,7 @@
 #include "ipc_fifo_writer.h"
 #include "compiler.h"
 
-error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemcount, ipc_fifo_header_ctx_t *header, void *buffer)
+error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, void *buffer)
 {
   error_t err = E_OK;
 
@@ -17,11 +17,11 @@ error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint
     BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
     BREAK_IF_ACTION(header == NULL, err = E_PARAM);
     BREAK_IF_ACTION(itemsize == 0, err = E_PARAM);
-    BREAK_IF_ACTION(itemcount < 2, err = E_PARAM);
+    BREAK_IF_ACTION(itemscount < 2, err = E_PARAM);
 
     ctx->header = header;
     ctx->itemsize = itemsize;
-    ctx->itemcount = itemcount;
+    ctx->itemscount = itemscount;
     ctx->buffer = buffer;
     ctx->read = 0;
     ctx->write = 0;
@@ -51,14 +51,14 @@ error_t ipc_fifo_writer_push(ipc_fifo_writer_ctx_t *ctx, const void *buffer)
 
     do {
       BREAK_IF_ACTION(unique_val != IPC_FIFO_UNIQUE_VAL, err = E_FAULT);
-      BREAK_IF_ACTION(read >= ctx->itemcount, err = E_FAULT);
-      BREAK_IF_ACTION(write >= ctx->itemcount, err = E_FAULT);
+      BREAK_IF_ACTION(read >= ctx->itemscount, err = E_FAULT);
+      BREAK_IF_ACTION(write >= ctx->itemscount, err = E_FAULT);
 
       BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
       cur = write;
       next = write;
 
-      if(++next >= ctx->itemcount) {
+      if(++next >= ctx->itemscount) {
         next = 0;
       }
       BREAK_IF_ACTION(next == read, err = E_OVERFLOW);
@@ -80,32 +80,32 @@ error_t ipc_fifo_writer_push(ipc_fifo_writer_ctx_t *ctx, const void *buffer)
   return err;
 }
 
-error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_elem)
+error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_items)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(p_used_elem == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(p_used_items == NULL, err = E_PARAM);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    *p_used_elem = ipc_fifo_get_used_to_read(ctx->itemcount, ctx->read, ctx->write);
+    *p_used_items = ipc_fifo_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
   return err;
 }
 
-error_t ipc_fifo_writer_get_free(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_free_elem)
+error_t ipc_fifo_writer_get_free(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_free_items)
 {
   error_t err = E_OK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(p_free_elem == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(p_free_items == NULL, err = E_PARAM);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    *p_free_elem = ipc_fifo_get_free_to_write(ctx->itemcount, ctx->read, ctx->write);
+    *p_free_items = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
@@ -122,7 +122,7 @@ error_t ipc_fifo_writer_is_full(ipc_fifo_writer_ctx_t *ctx, bool *p_is_full)
     BREAK_IF_ACTION(p_is_full == NULL, err = E_PARAM);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    free_to_write = ipc_fifo_get_free_to_write(ctx->itemcount, ctx->read, ctx->write);
+    free_to_write = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
     *p_is_full = free_to_write == 0;
 
   } while(0);

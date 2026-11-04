@@ -10,12 +10,12 @@
 
 #include "ipc_fifo_types.h"
 
-error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint32_t itemcount, ipc_fifo_header_ctx_t *header, const void *buffer);
+error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, const void *buffer);
 error_t ipc_fifo_reader_peek(ipc_fifo_reader_ctx_t *ctx, void *buffer);
 error_t ipc_fifo_reader_pull(ipc_fifo_reader_ctx_t *ctx, void *buffer);
 
-error_t ipc_fifo_reader_get_used(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_used_elem);
-error_t ipc_fifo_reader_get_free(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_free_elem);
+error_t ipc_fifo_reader_get_used(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_used_items);
+error_t ipc_fifo_reader_get_free(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_free_items);
 
 error_t ipc_fifo_reader_is_full(ipc_fifo_reader_ctx_t *ctx, bool *p_is_full);
 error_t ipc_fifo_reader_is_empty(ipc_fifo_reader_ctx_t *ctx, bool *p_is_empty);
