@@ -12,6 +12,9 @@
 #include "ipc_private.h"
 #include "compiler.h"
 
+static error_t ipc_buffer_reader_validate(ipc_buffer_reader_ctx_t *ctx);
+static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint32_t *p_itemscount);
+
 error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
     uint32_t itemscount, uint32_t descriptorscount, ipc_buffer_header_ctx_t *header,
     const ipc_buffer_descriptor_t *descriptors, const void *memorybuffer)
@@ -27,6 +30,8 @@ error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
     BREAK_IF_ACTION(itemsize == 0, err = E_PARAM);
     BREAK_IF_ACTION(itemscount < 2, err = E_PARAM);
     BREAK_IF_ACTION(descriptorscount < 2, err = E_PARAM);
+    BREAK_IF_ACTION(itemsize > UINT32_MAX / itemscount, err = E_PARAM);
+    BREAK_IF_ACTION(descriptorscount > UINT32_MAX / sizeof(ipc_buffer_descriptor_t), err = E_PARAM);
 
     memset(ctx, 0u, sizeof(ipc_buffer_reader_ctx_t));
     ctx->header = header;
@@ -45,6 +50,23 @@ error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
     ATOMIC_STORE_RELAXED(ctx->lock, true);
     (void)ipc_buffer_reader_synchronize(ctx);
     ATOMIC_RELEASE(ctx->lock);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx,
+    ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->started != false, err = E_INVALACT);
+
+    ctx->memcpy_cb = memcpy_cb;
+    ctx->memcpy_usrdata = memcpy_usrdata;
 
   } while(0);
 
@@ -123,6 +145,7 @@ error_t ipc_buffer_reader_begin(ipc_buffer_reader_ctx_t *ctx, uint32_t *p_itemsc
     ctx->write = write;
     ctx->size = descriptor.size;
     ctx->left = descriptor.size;
+    ctx->operation = IPC_BUFFER_OPERATION_MANUAL;
     ctx->started = true;
     *p_itemscount = descriptor.size;
   } while(0);
@@ -133,29 +156,61 @@ error_t ipc_buffer_reader_begin(ipc_buffer_reader_ctx_t *ctx, uint32_t *p_itemsc
 error_t ipc_buffer_reader_read(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint32_t *p_itemscount)
 {
   error_t err = E_OK;
-  uint32_t amount;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || p_itemscount == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->operation != IPC_BUFFER_OPERATION_MANUAL, err = E_BUSY);
 
-    amount = *p_itemscount;
+    err = ipc_buffer_reader_transfer(ctx, buffer, p_itemscount);
 
-    BREAK_IF_ACTION(buffer == NULL && amount != 0, err = E_PARAM);
+  } while(0);
 
+  return err;
+}
+
+static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *buffer, uint32_t *p_itemscount)
+{
+  error_t err = E_OK;
+  uint32_t amount = *p_itemscount;
+
+  do {
     *p_itemscount = 0;
 
-    BREAK_IF(amount == 0);
-    BREAK_IF_ACTION(ctx->left == 0, err = E_AGAIN);
-    amount = MIN(amount, ctx->left);
+    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
+      BREAK_IF_ACTION(buffer == NULL && amount != 0, err = E_PARAM);
+      BREAK_IF(amount == 0);
+      BREAK_IF_ACTION(ctx->left == 0, err = E_AGAIN);
 
-    ipc_buffer_copy_out(buffer, ctx->memorybuffer, ctx->itemsize,
-        ctx->itemscount, ctx->read, amount);
+      err = ipc_buffer_reader_validate(ctx);
+      BREAK_IF(err != E_OK);
+
+      amount = MIN(amount, ctx->left);
+      if(ctx->memcpy_cb == NULL) {
+        ipc_buffer_copy_out(buffer, ctx->memorybuffer, ctx->itemsize,
+            ctx->itemscount, ctx->read, amount);
+      } else {
+        ipc_buffer_copy_begin(&ctx->copy_ctx, (void *)ctx->memorybuffer, buffer,
+            ctx->itemsize, ctx->itemscount, ctx->read, amount, true,
+            ctx->memcpy_cb, ctx->memcpy_usrdata);
+
+        err = ipc_buffer_copy_process(&ctx->copy_ctx);
+        BREAK_IF(err != E_OK);
+      }
+    } else {
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer, err = E_PARAM);
+      amount = ctx->copy_ctx.amount;
+
+      err = ipc_buffer_copy_process(&ctx->copy_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    err = ipc_buffer_reader_validate(ctx);
+    BREAK_IF(err != E_OK);
 
     ctx->read = ipc_buffer_advance(ctx->itemscount, ctx->read, amount);
     ctx->left -= amount;
-
     *p_itemscount = amount;
 
   } while(0);
@@ -171,6 +226,7 @@ error_t ipc_buffer_reader_cancel(ipc_buffer_reader_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->copy_ctx.state != IPC_BUFFER_COPY_IDLE, err = E_BUSY);
 
     ctx->read = ATOMIC_LOAD_RELAXED(ctx->header->read);
 
@@ -192,6 +248,10 @@ error_t ipc_buffer_reader_release(ipc_buffer_reader_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->copy_ctx.state != IPC_BUFFER_COPY_IDLE, err = E_BUSY);
+
+    err = ipc_buffer_reader_validate(ctx);
+    BREAK_IF(err != E_OK);
 
     next = ipc_buffer_advance(ctx->itemscount, ctx->read, ctx->left);
 
@@ -214,27 +274,39 @@ static error_t ipc_buffer_reader_copy(ipc_buffer_reader_ctx_t *ctx, void *buffer
 {
   error_t err = E_OK;
   uint32_t capacity, size;
+  ipc_buffer_operation_t operation = consume ?
+      IPC_BUFFER_OPERATION_PULL : IPC_BUFFER_OPERATION_PEEK;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || p_itemscount == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
-
     BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
-    capacity = *p_itemscount;
 
-    err = ipc_buffer_reader_begin(ctx, &size);
-    BREAK_IF(err != E_OK);
-    if(capacity < size) {
-      *p_itemscount = size;
-      (void)ipc_buffer_reader_cancel(ctx);
-      err = E_OVERFLOW;
-      break;
+    if(ctx->started == false) {
+      capacity = *p_itemscount;
+
+      err = ipc_buffer_reader_begin(ctx, &size);
+      BREAK_IF(err != E_OK);
+      if(capacity < size) {
+        *p_itemscount = size;
+        (void)ipc_buffer_reader_cancel(ctx);
+        err = E_OVERFLOW;
+        break;
+      }
+
+      ctx->operation = operation;
+    } else {
+      BREAK_IF_ACTION(ctx->operation != operation, err = E_BUSY);
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer, err = E_PARAM);
     }
-    *p_itemscount = size;
-    err = ipc_buffer_reader_read(ctx, buffer, p_itemscount);
+
+    *p_itemscount = ctx->size;
+    err = ipc_buffer_reader_transfer(ctx, buffer, p_itemscount);
+    BREAK_IF(err == E_AGAIN);
+
     if(err == E_OK && consume) {
       err = ipc_buffer_reader_release(ctx);
-    } else {
+    } else if(ctx->started) {
       (void)ipc_buffer_reader_cancel(ctx);
     }
 
@@ -465,6 +537,7 @@ error_t ipc_buffer_reader_synchronize(ipc_buffer_reader_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->copy_ctx.state != IPC_BUFFER_COPY_IDLE, err = E_BUSY);
 
     err = ipc_fifo_reader_synchronize(&ctx->fifo_ctx);
     BREAK_IF(err != E_OK);
@@ -496,6 +569,40 @@ error_t ipc_buffer_reader_synchronize(ipc_buffer_reader_ctx_t *ctx)
       ctx->synchronized = false;
     }
   } while(0);
+
+  return err;
+}
+
+static error_t ipc_buffer_reader_validate(ipc_buffer_reader_ctx_t *ctx)
+{
+  error_t err = E_OK;
+  uint32_t progress, start, write;
+
+  do {
+    BREAK_IF_ACTION(ctx->header == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(ATOMIC_LOAD_RELAXED(ctx->header->unique_val) != IPC_BUFFER_UNIQUE_VAL, err = E_FAULT);
+    BREAK_IF_ACTION(ATOMIC_LOAD_RELAXED(ctx->header->fifo_header.unique_val) != IPC_FIFO_UNIQUE_VAL, err = E_FAULT);
+    BREAK_IF_ACTION(ctx->size == 0 || ctx->size >= ctx->itemscount ||
+        ctx->left > ctx->size || ctx->read >= ctx->itemscount, err = E_FAULT);
+
+    progress = ctx->size - ctx->left;
+    start = ctx->read >= progress ? ctx->read - progress :
+        ctx->itemscount - (progress - ctx->read);
+
+    BREAK_IF_ACTION(ATOMIC_LOAD_RELAXED(ctx->header->read) != start, err = E_FAULT);
+    BREAK_IF_ACTION(ATOMIC_LOAD_RELAXED(ctx->header->fifo_header.read) != ctx->fifo_ctx.read, err = E_FAULT);
+    BREAK_IF_ACTION(ATOMIC_LOAD(ctx->header->fifo_header.write) >= ctx->fifo_ctx.itemscount, err = E_FAULT);
+    write = ATOMIC_LOAD(ctx->header->write);
+    BREAK_IF_ACTION(write >= ctx->itemscount, err = E_FAULT);
+
+  } while(0);
+
+  if(err != E_OK) {
+    ctx->started = false;
+    ctx->synchronized = false;
+    ctx->size = 0;
+    ctx->left = 0;
+  }
 
   return err;
 }

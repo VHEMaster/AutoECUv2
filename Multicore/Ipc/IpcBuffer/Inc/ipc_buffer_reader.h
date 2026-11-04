@@ -11,6 +11,7 @@
 #include "ipc_buffer_types.h"
 
 error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, uint32_t descriptorscount, ipc_buffer_header_ctx_t *header, const ipc_buffer_descriptor_t *descriptors, const void *memorybuffer);
+error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx, ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata);
 
 error_t ipc_buffer_reader_lock(ipc_buffer_reader_ctx_t *ctx);
 error_t ipc_buffer_reader_unlock(ipc_buffer_reader_ctx_t *ctx);

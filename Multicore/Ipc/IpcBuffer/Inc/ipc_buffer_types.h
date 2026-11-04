@@ -12,6 +12,40 @@
 
 #define IPC_BUFFER_UNIQUE_VAL   (0x5F3759DFu)
 
+typedef enum {
+    IPC_BUFFER_MEMCPY_START = 0,
+    IPC_BUFFER_MEMCPY_POLL
+}ipc_buffer_memcpy_action_t;
+
+typedef error_t (*ipc_buffer_memcpy_cb_t)(void *memory, const void *source,
+    uint32_t bytes, ipc_buffer_memcpy_action_t action, void *usrdata);
+
+typedef enum {
+    IPC_BUFFER_COPY_IDLE = 0,
+    IPC_BUFFER_COPY_START,
+    IPC_BUFFER_COPY_WAIT
+}ipc_buffer_copy_state_t;
+
+typedef enum {
+    IPC_BUFFER_OPERATION_MANUAL = 0,
+    IPC_BUFFER_OPERATION_PUSH,
+    IPC_BUFFER_OPERATION_PEEK,
+    IPC_BUFFER_OPERATION_PULL
+}ipc_buffer_operation_t;
+
+typedef struct {
+    ipc_buffer_copy_state_t state;
+    void *destination[2];
+    const void *source[2];
+    uint32_t bytes[2];
+    uint32_t segment;
+    uint32_t segments;
+    const void *buffer;
+    uint32_t amount;
+    ipc_buffer_memcpy_cb_t memcpy_cb;
+    void *memcpy_usrdata;
+}ipc_buffer_copy_ctx_t;
+
 typedef struct {
     uint32_t offset;
     uint32_t size;
@@ -25,6 +59,10 @@ typedef struct {
 }ipc_buffer_header_ctx_t;
 
 typedef struct {
+    ipc_buffer_operation_t operation;
+    ipc_buffer_memcpy_cb_t memcpy_cb;
+    void *memcpy_usrdata;
+    ipc_buffer_copy_ctx_t copy_ctx;
     uint32_t itemsize;
     uint32_t itemscount;
     uint32_t read;
@@ -42,6 +80,10 @@ typedef struct {
 }ipc_buffer_reader_ctx_t;
 
 typedef struct {
+    ipc_buffer_operation_t operation;
+    ipc_buffer_memcpy_cb_t memcpy_cb;
+    void *memcpy_usrdata;
+    ipc_buffer_copy_ctx_t copy_ctx;
     uint32_t itemsize;
     uint32_t itemscount;
     uint32_t read;

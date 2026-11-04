@@ -12,8 +12,8 @@
 #include "ipc_private.h"
 #include "compiler.h"
 
-
 static error_t ipc_buffer_writer_synchronize(ipc_buffer_writer_ctx_t *ctx);
+static error_t ipc_buffer_writer_copy(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount);
 
 error_t ipc_buffer_writer_init(ipc_buffer_writer_ctx_t *ctx, uint32_t itemsize,
     uint32_t itemscount, uint32_t descriptorscount, ipc_buffer_header_ctx_t *header,
@@ -30,6 +30,8 @@ error_t ipc_buffer_writer_init(ipc_buffer_writer_ctx_t *ctx, uint32_t itemsize,
     BREAK_IF_ACTION(itemsize == 0, err = E_PARAM);
     BREAK_IF_ACTION(itemscount < 2, err = E_PARAM);
     BREAK_IF_ACTION(descriptorscount < 2, err = E_PARAM);
+    BREAK_IF_ACTION(itemsize > UINT32_MAX / itemscount, err = E_PARAM);
+    BREAK_IF_ACTION(descriptorscount > UINT32_MAX / sizeof(ipc_buffer_descriptor_t), err = E_PARAM);
 
     memset(ctx, 0u, sizeof(ipc_buffer_writer_ctx_t));
     ctx->header = header;
@@ -50,6 +52,23 @@ error_t ipc_buffer_writer_init(ipc_buffer_writer_ctx_t *ctx, uint32_t itemsize,
     BREAK_IF(err != E_OK);
 
     ATOMIC_STORE(ctx->header->unique_val, IPC_BUFFER_UNIQUE_VAL);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_buffer_writer_set_memcpy(ipc_buffer_writer_ctx_t *ctx,
+    ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->started != false, err = E_INVALACT);
+
+    ctx->memcpy_cb = memcpy_cb;
+    ctx->memcpy_usrdata = memcpy_usrdata;
 
   } while(0);
 
@@ -106,6 +125,7 @@ error_t ipc_buffer_writer_begin(ipc_buffer_writer_ctx_t *ctx, uint32_t itemscoun
 
     ctx->size = itemscount;
     ctx->left = itemscount;
+    ctx->operation = IPC_BUFFER_OPERATION_MANUAL;
     ctx->started = true;
 
   } while(0);
@@ -119,17 +139,49 @@ error_t ipc_buffer_writer_write(ipc_buffer_writer_ctx_t *ctx, const void *buffer
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->operation != IPC_BUFFER_OPERATION_MANUAL, err = E_BUSY);
 
-    BREAK_IF_ACTION(itemscount > ctx->left, err = E_OVERFLOW);
+    err = ipc_buffer_writer_copy(ctx, buffer, itemscount);
 
-    err = ipc_buffer_writer_synchronize(ctx);
-    BREAK_IF(err != E_OK);
+  } while(0);
 
-    ipc_buffer_copy_in(ctx->memorybuffer, buffer, ctx->itemsize,
-        ctx->itemscount, ctx->write, itemscount);
+  return err;
+}
+
+static error_t ipc_buffer_writer_copy(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+
+    if(ctx->copy_ctx.state == IPC_BUFFER_COPY_IDLE) {
+      BREAK_IF_ACTION(itemscount > ctx->left, err = E_OVERFLOW);
+
+      err = ipc_buffer_writer_synchronize(ctx);
+      BREAK_IF(err != E_OK);
+      BREAK_IF(itemscount == 0);
+
+      if(ctx->memcpy_cb == NULL) {
+        ipc_buffer_copy_in(ctx->memorybuffer, buffer, ctx->itemsize,
+            ctx->itemscount, ctx->write, itemscount);
+      } else {
+        ipc_buffer_copy_begin(&ctx->copy_ctx, ctx->memorybuffer, buffer,
+            ctx->itemsize, ctx->itemscount, ctx->write, itemscount, false,
+            ctx->memcpy_cb, ctx->memcpy_usrdata);
+
+        err = ipc_buffer_copy_process(&ctx->copy_ctx);
+        BREAK_IF(err != E_OK);
+      }
+    } else {
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer ||
+          itemscount != ctx->copy_ctx.amount, err = E_PARAM);
+
+      err = ipc_buffer_copy_process(&ctx->copy_ctx);
+      BREAK_IF(err != E_OK);
+    }
 
     err = ipc_buffer_writer_synchronize(ctx);
     BREAK_IF(err != E_OK);
@@ -151,6 +203,7 @@ error_t ipc_buffer_writer_commit(ipc_buffer_writer_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->copy_ctx.state != IPC_BUFFER_COPY_IDLE, err = E_BUSY);
     BREAK_IF_ACTION(ctx->left > 0, err = E_INVALACT);
 
     err = ipc_buffer_writer_synchronize(ctx);
@@ -184,6 +237,7 @@ error_t ipc_buffer_writer_cancel(ipc_buffer_writer_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->started == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->copy_ctx.state != IPC_BUFFER_COPY_IDLE, err = E_BUSY);
 
     ctx->write = ATOMIC_LOAD_RELAXED(ctx->header->write);
 
@@ -205,14 +259,23 @@ error_t ipc_buffer_writer_push(ipc_buffer_writer_ctx_t *ctx, const void *buffer,
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
 
-    err = ipc_buffer_writer_begin(ctx, itemscount);
-    BREAK_IF(err != E_OK);
+    if(ctx->started == false) {
+      err = ipc_buffer_writer_begin(ctx, itemscount);
+      BREAK_IF(err != E_OK);
 
-    err = ipc_buffer_writer_write(ctx, buffer, itemscount);
+      ctx->operation = IPC_BUFFER_OPERATION_PUSH;
+    } else {
+      BREAK_IF_ACTION(ctx->operation != IPC_BUFFER_OPERATION_PUSH, err = E_BUSY);
+      BREAK_IF_ACTION(buffer != ctx->copy_ctx.buffer ||
+          itemscount != ctx->copy_ctx.amount, err = E_PARAM);
+    }
+
+    err = ipc_buffer_writer_copy(ctx, buffer, itemscount);
+    BREAK_IF(err == E_AGAIN);
+
     if(err == E_OK) {
       err = ipc_buffer_writer_commit(ctx);
     }
-
     if(err != E_OK && ctx->started) {
       (void)ipc_buffer_writer_cancel(ctx);
     }
@@ -260,7 +323,7 @@ error_t ipc_buffer_writer_get_memory_free(ipc_buffer_writer_ctx_t *ctx, uint32_t
     err = ipc_buffer_writer_synchronize(ctx);
     BREAK_IF(err != E_OK);
 
-    used = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->header->write);
+    used = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
     BREAK_IF_ACTION(used >= ctx->itemscount, err = E_FAULT);
 
     *p_free_items = ctx->itemscount - used - 1u;
@@ -328,9 +391,6 @@ error_t ipc_buffer_writer_get_buffers_used(ipc_buffer_writer_ctx_t *ctx, uint32_
 
     err = ipc_fifo_writer_get_used(&ctx->fifo_ctx, &used);
     BREAK_IF(err != E_OK);
-    if(ctx->started) {
-      used++;
-    }
 
     BREAK_IF_ACTION(used >= ctx->fifo_ctx.itemscount, err = E_FAULT);
 
@@ -357,9 +417,6 @@ error_t ipc_buffer_writer_get_buffers_free(ipc_buffer_writer_ctx_t *ctx, uint32_
 
     err = ipc_fifo_writer_get_used(&ctx->fifo_ctx, &used);
     BREAK_IF(err != E_OK);
-    if(ctx->started) {
-      used++;
-    }
 
     BREAK_IF_ACTION(used >= ctx->fifo_ctx.itemscount, err = E_FAULT);
 
