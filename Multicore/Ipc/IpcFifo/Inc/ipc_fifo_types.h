@@ -14,7 +14,7 @@
 #include "errors.h"
 #include "compiler.h"
 
-#define IPC_FIFO_UNIQUE_VAL    (0x1FBD1DF5u)
+#define IPC_FIFO_UNIQUE_VAL     (0x1FBD1DF5u)
 
 typedef struct {
     uint32_t unique_val;

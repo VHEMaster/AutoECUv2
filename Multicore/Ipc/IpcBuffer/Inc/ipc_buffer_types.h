@@ -10,7 +10,7 @@
 
 #include "ipc_fifo_types.h"
 
-#define IPC_BUFFER_UNIQUE_VAL    (0x5F3759DFu)
+#define IPC_BUFFER_UNIQUE_VAL   (0x5F3759DFu)
 
 typedef struct {
     uint32_t offset;
