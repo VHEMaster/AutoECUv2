@@ -168,8 +168,8 @@ error_t ipc_reader_synchronize(ipc_reader_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
     if(ctx->synchronized == true) {
-      ctx->unique_val = ctx->header->unique_val;
-      ctx->read = ctx->header->read;
+      ctx->unique_val = ATOMIC_LOAD_RELAXED(ctx->header->unique_val);
+      ctx->read = ATOMIC_LOAD_RELAXED(ctx->header->read);
       ctx->write = ATOMIC_LOAD(ctx->header->write);
     } else {
       ctx->unique_val = ATOMIC_LOAD(ctx->header->unique_val);

@@ -25,10 +25,11 @@ error_t ipc_writer_init(ipc_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemc
     ctx->buffer = buffer;
     ctx->read = 0;
     ctx->write = 0;
+    ctx->unique_val = IPC_UNIQUE_VAL;
 
     ATOMIC_STORE_RELAXED(ctx->header->read, ctx->read);
     ATOMIC_STORE_RELAXED(ctx->header->write, ctx->write);
-    ATOMIC_STORE(ctx->header->unique_val, IPC_UNIQUE_VAL);
+    ATOMIC_STORE(ctx->header->unique_val, ctx->unique_val);
 
   } while(0);
 
@@ -38,27 +39,41 @@ error_t ipc_writer_init(ipc_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemc
 error_t ipc_writer_push(ipc_writer_ctx_t *ctx, const void *buffer)
 {
   error_t err = E_OK;
-  uint32_t read, write, cur;
+  uint32_t unique_val, read, write, next, cur;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+
+    unique_val = ATOMIC_LOAD_RELAXED(ctx->header->unique_val);
+    write = ATOMIC_LOAD_RELAXED(ctx->header->write);
     read = ATOMIC_LOAD(ctx->header->read);
-    write = ctx->write;
-    cur = write;
 
-    if(++write >= ctx->itemcount) {
-      write = 0;
-    }
-    BREAK_IF_ACTION(write == read, err = E_OVERFLOW);
+    do {
+      BREAK_IF_ACTION(unique_val != IPC_UNIQUE_VAL, err = E_FAULT);
+      BREAK_IF_ACTION(read >= ctx->itemcount, err = E_FAULT);
+      BREAK_IF_ACTION(write >= ctx->itemcount, err = E_FAULT);
 
-    if(buffer != NULL) {
-      memcpy(ctx->buffer + cur * ctx->itemsize, buffer, ctx->itemsize);
-    }
-    ATOMIC_STORE(ctx->header->write, write);
-    ATOMIC_STORE_RELAXED(ctx->header->unique_val, IPC_UNIQUE_VAL);
+      BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+      cur = write;
+      next = write;
+
+      if(++next >= ctx->itemcount) {
+        next = 0;
+      }
+      BREAK_IF_ACTION(next == read, err = E_OVERFLOW);
+
+      if(buffer != NULL) {
+        memcpy(ctx->buffer + cur * ctx->itemsize, buffer, ctx->itemsize);
+      }
+      write = next;
+      ATOMIC_STORE(ctx->header->write, write);
+      ATOMIC_STORE_RELAXED(ctx->header->unique_val, IPC_UNIQUE_VAL);
+    } while(0);
+
     ctx->read = read;
     ctx->write = write;
+    ctx->unique_val = unique_val;
 
   } while(0);
 

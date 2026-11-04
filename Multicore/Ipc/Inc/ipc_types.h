@@ -36,6 +36,7 @@ typedef struct {
 typedef struct {
     uint32_t itemsize;
     uint32_t itemcount;
+    uint32_t unique_val;
     uint32_t read;
     uint32_t write;
     ipc_header_ctx_t *header;
