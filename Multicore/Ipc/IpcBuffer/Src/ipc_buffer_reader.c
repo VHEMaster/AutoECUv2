@@ -9,6 +9,7 @@
 #include "ipc_fifo_reader.h"
 
 #include "ipc_buffer_private.h"
+#include "ipc_private.h"
 #include "compiler.h"
 
 error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
@@ -113,7 +114,7 @@ error_t ipc_buffer_reader_begin(ipc_buffer_reader_ctx_t *ctx, uint32_t *p_itemsc
 
     BREAK_IF_ACTION(read >= ctx->itemscount || write >= ctx->itemscount, err = E_FAULT);
 
-    used = ipc_buffer_get_used_to_read(ctx->itemscount, read, write);
+    used = ipc_get_used_to_read(ctx->itemscount, read, write);
 
     BREAK_IF_ACTION(descriptor.offset != read || descriptor.size == 0 ||
         descriptor.size >= ctx->itemscount || descriptor.size > used, err = E_FAULT);
@@ -264,7 +265,7 @@ error_t ipc_buffer_reader_get_memory_used(ipc_buffer_reader_ctx_t *ctx, uint32_t
     BREAK_IF_ACTION(ctx->started == true, err = E_INVALACT);
     BREAK_IF((err = ipc_buffer_reader_synchronize(ctx)) != E_OK);
 
-    used = ipc_buffer_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
+    used = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
     *p_used_items = used;
 
@@ -285,7 +286,7 @@ error_t ipc_buffer_reader_get_memory_free(ipc_buffer_reader_ctx_t *ctx, uint32_t
     BREAK_IF_ACTION(ctx->started == true, err = E_INVALACT);
     BREAK_IF((err = ipc_buffer_reader_synchronize(ctx)) != E_OK);
 
-    used = ipc_buffer_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
+    used = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
     *p_free_items = ctx->itemscount - used - 1u;
 

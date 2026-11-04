@@ -6,6 +6,7 @@
  */
 
 #include "ipc_fifo_reader.h"
+#include "ipc_private.h"
 #include "compiler.h"
 
 error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, const void *buffer)

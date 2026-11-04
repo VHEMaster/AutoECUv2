@@ -6,6 +6,7 @@
  */
 
 #include "ipc_fifo_writer.h"
+#include "ipc_private.h"
 #include "compiler.h"
 
 error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, void *buffer)
@@ -120,7 +121,7 @@ error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_it
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    *p_used_items = ipc_fifo_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
+    *p_used_items = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
@@ -137,7 +138,7 @@ error_t ipc_fifo_writer_get_free(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_free_it
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    *p_free_items = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
+    *p_free_items = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
@@ -155,7 +156,7 @@ error_t ipc_fifo_writer_is_full(ipc_fifo_writer_ctx_t *ctx, bool *p_is_full)
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-    free_to_write = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
+    free_to_write = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
     *p_is_full = free_to_write == 0;
 
   } while(0);
