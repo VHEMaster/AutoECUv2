@@ -33,7 +33,9 @@ typedef struct {
     ipc_fifo_reader_ctx_t fifo_ctx;
     const void *memorybuffer;
     const ipc_buffer_descriptor_t *descriptors;
-    bool locked;
+    uint32_t unique_val;
+    bool synchronized;
+    bool lock;
     bool started;
     uint32_t size;
     uint32_t left;
@@ -48,7 +50,7 @@ typedef struct {
     ipc_fifo_writer_ctx_t fifo_ctx;
     void *memorybuffer;
     ipc_buffer_descriptor_t *descriptors;
-    bool locked;
+    bool lock;
     bool started;
     uint32_t size;
     uint32_t left;

@@ -19,13 +19,11 @@ error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint
     BREAK_IF_ACTION(itemsize == 0, err = E_PARAM);
     BREAK_IF_ACTION(itemscount < 2, err = E_PARAM);
 
+    memset(ctx, 0u, sizeof(ipc_fifo_reader_ctx_t));
     ctx->header = header;
     ctx->itemsize = itemsize;
     ctx->itemscount = itemscount;
     ctx->buffer = buffer;
-    ctx->read = 0;
-    ctx->write = 0;
-    ctx->synchronized = false;
 
     ATOMIC_STORE_RELAXED(ctx->lock, true);
 
