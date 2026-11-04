@@ -26,8 +26,8 @@ error_t ipc_writer_init(ipc_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemc
     ctx->read = 0;
     ctx->write = 0;
 
-    ATOMIC_STORE(ctx->header->read, ctx->read);
-    ATOMIC_STORE(ctx->header->write, ctx->write);
+    ATOMIC_STORE_RELAXED(ctx->header->read, ctx->read);
+    ATOMIC_STORE_RELAXED(ctx->header->write, ctx->write);
     ATOMIC_STORE(ctx->header->unique_val, IPC_UNIQUE_VAL);
 
   } while(0);
@@ -38,11 +38,27 @@ error_t ipc_writer_init(ipc_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemc
 error_t ipc_writer_push(ipc_writer_ctx_t *ctx, const void *buffer)
 {
   error_t err = E_OK;
+  uint32_t read, write, cur;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+    read = ATOMIC_LOAD(ctx->header->read);
+    write = ctx->write;
+    cur = write;
 
+    if(++write >= ctx->itemcount) {
+      write = 0;
+    }
+    BREAK_IF_ACTION(write == read, err = E_OVERFLOW);
 
+    if(buffer != NULL) {
+      memcpy(ctx->buffer + cur * ctx->itemsize, buffer, ctx->itemsize);
+    }
+    ATOMIC_STORE(ctx->header->write, write);
+    ATOMIC_STORE_RELAXED(ctx->header->unique_val, IPC_UNIQUE_VAL);
+    ctx->read = read;
+    ctx->write = write;
 
   } while(0);
 
@@ -56,6 +72,7 @@ error_t ipc_writer_get_used(ipc_writer_ctx_t *ctx, uint32_t *p_used_elem)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_used_elem == NULL, err = E_PARAM);
+    ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     *p_used_elem = ipc_get_used_to_read(ctx->itemcount, ctx->read, ctx->write);
 
@@ -71,6 +88,7 @@ error_t ipc_writer_get_free(ipc_writer_ctx_t *ctx, uint32_t *p_free_elem)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_free_elem == NULL, err = E_PARAM);
+    ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     *p_free_elem = ipc_get_free_to_write(ctx->itemcount, ctx->read, ctx->write);
 
@@ -82,11 +100,15 @@ error_t ipc_writer_get_free(ipc_writer_ctx_t *ctx, uint32_t *p_free_elem)
 error_t ipc_writer_is_full(ipc_writer_ctx_t *ctx, bool *p_is_full)
 {
   error_t err = E_OK;
+  uint32_t free_to_write;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(p_is_full == NULL, err = E_PARAM);
+    ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-
+    free_to_write = ipc_get_free_to_write(ctx->itemcount, ctx->read, ctx->write);
+    *p_is_full = free_to_write == 0;
 
   } while(0);
 
@@ -99,8 +121,10 @@ error_t ipc_writer_is_empty(ipc_writer_ctx_t *ctx, bool *p_is_empty)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(p_is_empty == NULL, err = E_PARAM);
+    ctx->read = ATOMIC_LOAD(ctx->header->read);
 
-
+    *p_is_empty = ctx->read == ctx->write;
 
   } while(0);
 

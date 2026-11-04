@@ -60,6 +60,7 @@
 #define ATOMIC_EXCHANGE_ACQUIRE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_ACQUIRE))
 #define ATOMIC_EXCHANGE_RELEASE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_RELEASE))
 #define ATOMIC_STORE(var, val)              (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
+#define ATOMIC_STORE_RELAXED(var, val)      (__atomic_store_n(&(var), (val), __ATOMIC_RELAXED))
 #define ATOMIC_LOAD(var)                    (__atomic_load_n(&(var), __ATOMIC_ACQUIRE))
 #define ATOMIC_LOAD_RELAXED(var)            (__atomic_load_n(&(var), __ATOMIC_RELAXED))
 #define ATOMIC_FENCE()                      (__atomic_thread_fence(__ATOMIC_ACQUIRE))
