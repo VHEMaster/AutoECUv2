@@ -10,7 +10,12 @@
 
 #include "ipc_fifo_types.h"
 
-#define IPC_BUFFER_UNIQUE_VAL    (0x1FBD1DF5u)
+#define IPC_BUFFER_UNIQUE_VAL    (0x5F3759DFu)
+
+typedef struct {
+    uint32_t offset;
+    uint32_t size;
+}ipc_buffer_descriptor_t;
 
 typedef struct {
     uint32_t unique_val;
@@ -21,22 +26,32 @@ typedef struct {
 
 typedef struct {
     uint32_t itemsize;
-    uint32_t itemcount;
+    uint32_t itemscount;
     uint32_t read;
     uint32_t write;
     ipc_buffer_header_ctx_t *header;
     ipc_fifo_reader_ctx_t fifo_ctx;
-    const void *buffer;
+    const void *memorybuffer;
+    const ipc_buffer_descriptor_t *descriptors;
+    bool locked;
+    bool started;
+    uint32_t size;
+    uint32_t left;
 }ipc_buffer_reader_ctx_t;
 
 typedef struct {
     uint32_t itemsize;
-    uint32_t itemcount;
+    uint32_t itemscount;
     uint32_t read;
     uint32_t write;
     ipc_buffer_header_ctx_t *header;
     ipc_fifo_writer_ctx_t fifo_ctx;
-    void *buffer;
+    void *memorybuffer;
+    ipc_buffer_descriptor_t *descriptors;
+    bool locked;
+    bool started;
+    uint32_t size;
+    uint32_t left;
 }ipc_buffer_writer_ctx_t;
 
 OPTIMIZE_FAST

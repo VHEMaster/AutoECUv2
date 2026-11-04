@@ -10,15 +10,16 @@
 
 #include "ipc_buffer_types.h"
 
-error_t ipc_buffer_writer_init(ipc_buffer_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemcount, void *buffer);
+error_t ipc_buffer_writer_init(ipc_buffer_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, uint32_t descriptorscount, ipc_buffer_header_ctx_t *header, ipc_buffer_descriptor_t *descriptors, void *memorybuffer);
 
 error_t ipc_buffer_writer_lock(ipc_buffer_writer_ctx_t *ctx);
 error_t ipc_buffer_writer_unlock(ipc_buffer_writer_ctx_t *ctx);
 
-error_t ipc_buffer_writer_push(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemcount);
-error_t ipc_buffer_writer_begin(ipc_buffer_writer_ctx_t *ctx, uint32_t itemcount);
-error_t ipc_buffer_writer_write(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemcount);
+error_t ipc_buffer_writer_push(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount);
+error_t ipc_buffer_writer_begin(ipc_buffer_writer_ctx_t *ctx, uint32_t itemscount);
+error_t ipc_buffer_writer_write(ipc_buffer_writer_ctx_t *ctx, const void *buffer, uint32_t itemscount);
 error_t ipc_buffer_writer_commit(ipc_buffer_writer_ctx_t *ctx);
+error_t ipc_buffer_writer_cancel(ipc_buffer_writer_ctx_t *ctx);
 
 error_t ipc_buffer_writer_get_memory_used(ipc_buffer_writer_ctx_t *ctx, uint32_t *p_used_items);
 error_t ipc_buffer_writer_get_memory_free(ipc_buffer_writer_ctx_t *ctx, uint32_t *p_free_items);
