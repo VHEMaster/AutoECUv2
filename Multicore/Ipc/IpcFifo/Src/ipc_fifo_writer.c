@@ -31,6 +31,36 @@ error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint
     ATOMIC_STORE_RELAXED(ctx->header->write, ctx->write);
     ATOMIC_STORE(ctx->header->unique_val, ctx->unique_val);
 
+    ATOMIC_RELEASE(ctx->lock);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_fifo_writer_lock(ipc_fifo_writer_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_TRY_LOCK(ctx->lock) == false, err = E_AGAIN);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_fifo_writer_unlock(ipc_fifo_writer_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+
+    ATOMIC_RELEASE(ctx->lock);
+
   } while(0);
 
   return err;
@@ -44,6 +74,7 @@ error_t ipc_fifo_writer_push(ipc_fifo_writer_ctx_t *ctx, const void *buffer)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
 
     unique_val = ATOMIC_LOAD_RELAXED(ctx->header->unique_val);
     write = ATOMIC_LOAD_RELAXED(ctx->header->write);
@@ -87,6 +118,7 @@ error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_it
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_used_items == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     *p_used_items = ipc_fifo_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
@@ -103,6 +135,7 @@ error_t ipc_fifo_writer_get_free(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_free_it
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_free_items == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     *p_free_items = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
@@ -120,6 +153,7 @@ error_t ipc_fifo_writer_is_full(ipc_fifo_writer_ctx_t *ctx, bool *p_is_full)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_is_full == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     free_to_write = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
@@ -137,6 +171,7 @@ error_t ipc_fifo_writer_is_empty(ipc_fifo_writer_ctx_t *ctx, bool *p_is_empty)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_is_empty == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
     *p_is_empty = ctx->read == ctx->write;

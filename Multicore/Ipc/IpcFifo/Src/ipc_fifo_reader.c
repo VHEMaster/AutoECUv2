@@ -27,7 +27,39 @@ error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint
     ctx->write = 0;
     ctx->synchronized = false;
 
+    ATOMIC_STORE_RELAXED(ctx->lock, true);
+
     (void)ipc_fifo_reader_synchronize(ctx);
+
+    ATOMIC_RELEASE(ctx->lock);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_fifo_reader_lock(ipc_fifo_reader_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_TRY_LOCK(ctx->lock) == false, err = E_AGAIN);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ipc_fifo_reader_unlock(ipc_fifo_reader_ctx_t *ctx)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+
+    ATOMIC_RELEASE(ctx->lock);
 
   } while(0);
 
@@ -40,6 +72,7 @@ error_t ipc_fifo_reader_peek(ipc_fifo_reader_ctx_t *ctx, void *buffer)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
     BREAK_IF_ACTION(ctx->read == ctx->write, err = E_AGAIN);
 
@@ -59,6 +92,7 @@ error_t ipc_fifo_reader_pull(ipc_fifo_reader_ctx_t *ctx, void *buffer)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
     BREAK_IF_ACTION(ctx->read == ctx->write, err = E_AGAIN);
     read = ctx->read;
@@ -85,6 +119,7 @@ error_t ipc_fifo_reader_is_full(ipc_fifo_reader_ctx_t *ctx, bool *p_is_full)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_is_full == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
     free_to_write = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
@@ -102,6 +137,7 @@ error_t ipc_fifo_reader_is_empty(ipc_fifo_reader_ctx_t *ctx, bool *p_is_empty)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_is_empty == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
     *p_is_empty = ctx->read == ctx->write;
@@ -118,6 +154,7 @@ error_t ipc_fifo_reader_get_used(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_used_it
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_used_items == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
     *p_used_items = ipc_fifo_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
@@ -134,6 +171,7 @@ error_t ipc_fifo_reader_get_free(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_free_it
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_free_items == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
     *p_free_items = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
@@ -150,6 +188,7 @@ error_t ipc_fifo_reader_is_sync(ipc_fifo_reader_ctx_t *ctx, bool *p_is_sync)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(p_is_sync == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
 
     (void)ipc_fifo_reader_synchronize(ctx);
 
@@ -166,6 +205,7 @@ error_t ipc_fifo_reader_synchronize(ipc_fifo_reader_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
 
     if(ctx->synchronized == true) {
       ctx->unique_val = ATOMIC_LOAD_RELAXED(ctx->header->unique_val);

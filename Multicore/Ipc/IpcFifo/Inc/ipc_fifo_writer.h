@@ -11,6 +11,10 @@
 #include "ipc_fifo_types.h"
 
 error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, void *buffer);
+
+error_t ipc_fifo_writer_lock(ipc_fifo_writer_ctx_t *ctx);
+error_t ipc_fifo_writer_unlock(ipc_fifo_writer_ctx_t *ctx);
+
 error_t ipc_fifo_writer_push(ipc_fifo_writer_ctx_t *ctx, const void *buffer);
 
 error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_items);

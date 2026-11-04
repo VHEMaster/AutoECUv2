@@ -11,6 +11,10 @@
 #include "ipc_fifo_types.h"
 
 error_t ipc_fifo_reader_init(ipc_fifo_reader_ctx_t *ctx, uint32_t itemsize, uint32_t itemscount, ipc_fifo_header_ctx_t *header, const void *buffer);
+
+error_t ipc_fifo_reader_lock(ipc_fifo_reader_ctx_t *ctx);
+error_t ipc_fifo_reader_unlock(ipc_fifo_reader_ctx_t *ctx);
+
 error_t ipc_fifo_reader_peek(ipc_fifo_reader_ctx_t *ctx, void *buffer);
 error_t ipc_fifo_reader_pull(ipc_fifo_reader_ctx_t *ctx, void *buffer);
 

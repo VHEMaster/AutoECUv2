@@ -31,6 +31,7 @@ typedef struct {
     ipc_fifo_header_ctx_t *header;
     const void *buffer;
     bool synchronized;
+    bool lock;
 }ipc_fifo_reader_ctx_t;
 
 typedef struct {
@@ -41,6 +42,7 @@ typedef struct {
     uint32_t write;
     ipc_fifo_header_ctx_t *header;
     void *buffer;
+    bool lock;
 }ipc_fifo_writer_ctx_t;
 
 OPTIMIZE_FAST
