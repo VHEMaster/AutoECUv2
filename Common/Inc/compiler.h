@@ -60,13 +60,15 @@
 #define ATOMIC_EXCHANGE_ACQUIRE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_ACQUIRE))
 #define ATOMIC_EXCHANGE_RELEASE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_RELEASE))
 #define ATOMIC_STORE(var, val)              (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
-#define ATOMIC_LOAD(var)                    (__atomic_load_n(&(var), __ATOMIC_RELAXED))
+#define ATOMIC_LOAD(var)                    (__atomic_load_n(&(var), __ATOMIC_ACQUIRE))
+#define ATOMIC_LOAD_RELAXED(var)            (__atomic_load_n(&(var), __ATOMIC_RELAXED))
+#define ATOMIC_FENCE()                      (__atomic_thread_fence(__ATOMIC_ACQUIRE))
 
 #define ATOMIC_LOCK_TYPE            bool
 #define ATOMIC_TRY_LOCK(var)        (ATOMIC_EXCHANGE_ACQUIRE((var), true) == false)
 #define ATOMIC_TRY_RELEASE(var)     (ATOMIC_EXCHANGE_RELEASE((var), false) == true)
 #define ATOMIC_RELEASE(var)         (ATOMIC_STORE((var), false))
-#define ATOMIC_ISLOCKED(var)        (ATOMIC_LOAD((var)) == true)
+#define ATOMIC_ISLOCKED(var)        (ATOMIC_LOAD_RELAXED((var)) == true)
 
 #undef HAS_BIT
 #undef SET_BIT
