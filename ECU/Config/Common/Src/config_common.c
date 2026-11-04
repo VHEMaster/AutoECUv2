@@ -85,14 +85,18 @@ typedef struct {
     ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
 }ecu_config_common_virtual_ctx_t;
 
-typedef struct ecu_config_common_ctx_tag {
-    const ecu_config_common_config_t *config;
-
+typedef struct {
     ecu_config_common_entity_t entities_count;
     ecu_config_common_entity_ctx_t entities[ECU_COMMON_ENTITY_MAX];
 
     ecu_config_common_virtual_ctx_t final_source;
     ecu_config_common_virtual_ctx_t virtual_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX];
+}ecu_config_common_shareable_ctx_t;
+
+typedef struct ecu_config_common_ctx_tag {
+    const ecu_config_common_config_t *config;
+
+    ecu_config_common_shareable_ctx_t shareable;
 
     ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
     ecu_core_runtime_global_parameters_ctx_t *core_runtime_destinations[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
@@ -154,20 +158,20 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
 
     memset(&ecu_config_common_ctx, 0, sizeof(ecu_config_common_ctx_t));
     ecu_config_common_ctx.config = &ecu_config_common_config;
-    ecu_config_common_ctx.entities_count = ECU_COMMON_ENTITY_MAX;
+    ecu_config_common_ctx.shareable.entities_count = ECU_COMMON_ENTITY_MAX;
 
     for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-      ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.virtual_sources[v];
+      ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.shareable.virtual_sources[v];
       ecu_config_common_ctx.core_runtime_destinations[v] = &ctx->runtime.global.parameters_virtual[v];
     }
 
-    ecu_config_common_ctx.common_ctx_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ecu_config_common_ctx.final_source;
+    ecu_config_common_ctx.common_ctx_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ecu_config_common_ctx.shareable.final_source;
     ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ctx->runtime.global.parameters;
 
     ecu_config_common_ctx.params_allocated = 0;
     ecu_config_common_ctx.params_free = ECU_CONFIG_PARAMETERS_MAX;
 
-    for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.entities_count; e++) {
+    for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.shareable.entities_count; e++) {
       err = ecu_config_common_ctx.config->entities[e].configure_func(ctx, e);
       BREAK_IF(err != E_OK);
     }
@@ -184,7 +188,7 @@ error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
   do {
     BREAK_IF_ACTION(entity_max == NULL, err = E_PARAM);
 
-    *entity_max = ecu_config_common_ctx.entities_count;
+    *entity_max = ecu_config_common_ctx.shareable.entities_count;
 
   } while(0);
 
@@ -196,10 +200,10 @@ error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity,
   error_t err = E_OK;
   ecu_config_common_entity_ctx_t *entity_ctx;
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(type_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     *type_max = entity_ctx->types_count;
 
   } while(0);
@@ -214,10 +218,10 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
   ecu_config_common_entity_type_ctx_t *type_ctx;
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -235,11 +239,11 @@ error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_
   const ecu_config_common_entity_config_t *entity_config;
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
     entity_config = &ecu_config_common_config.entities[entity];
 
@@ -262,9 +266,9 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
     BREAK_IF_ACTION(params == NULL, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
     BREAK_IF_ACTION(read_write != ECU_COMMON_READ && read_write != ECU_COMMON_WRITE, err = E_PARAM);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -296,9 +300,9 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 
   do {
     BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -330,9 +334,9 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
 
   do {
     BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -364,7 +368,7 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(entity != ECU_COMMON_ENTITY_DEVICE, err = E_PARAM);
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     entity_config = &ecu_config_common_ctx.config->entities[entity];
 
     err = entity_config->get_type_max_func(&entity_ctx->types_count);
@@ -396,6 +400,7 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
+              virtual_parameters->source_index[rw] = ecu_config_common_ctx.params_allocated;
             }
           }
           ecu_config_common_ctx.params_allocated += parameters->count[rw];
@@ -427,7 +432,7 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(entity != ECU_COMMON_ENTITY_SENSOR, err = E_PARAM);
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     entity_config = &ecu_config_common_ctx.config->entities[entity];
 
     err = entity_config->get_type_max_func(&entity_ctx->types_count);
@@ -459,6 +464,7 @@ static error_t ecu_config_common_sensors(ecu_core_ctx_t *ctx, ecu_config_common_
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
+              virtual_parameters->source_index[rw] = ecu_config_common_ctx.params_allocated;
             }
           }
           ecu_config_common_ctx.params_allocated += parameters->count[rw];
@@ -490,7 +496,7 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(entity != ECU_COMMON_ENTITY_MODULE, err = E_PARAM);
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     entity_config = &ecu_config_common_ctx.config->entities[entity];
 
     err = entity_config->get_type_max_func(&entity_ctx->types_count);
@@ -522,6 +528,7 @@ static error_t ecu_config_common_modules(ecu_core_ctx_t *ctx, ecu_config_common_
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
+              virtual_parameters->source_index[rw] = ecu_config_common_ctx.params_allocated;
             }
           }
           ecu_config_common_ctx.params_allocated += parameters->count[rw];
@@ -553,7 +560,7 @@ static error_t ecu_config_common_timings(ecu_core_ctx_t *ctx, ecu_config_common_
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(entity != ECU_COMMON_ENTITY_TIMING, err = E_PARAM);
-    entity_ctx = &ecu_config_common_ctx.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
     entity_config = &ecu_config_common_ctx.config->entities[entity];
 
     err = entity_config->get_type_max_func(&entity_ctx->types_count);
@@ -585,6 +592,7 @@ static error_t ecu_config_common_timings(ecu_core_ctx_t *ctx, ecu_config_common_
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
               virtual_parameters->params[rw] = &virtual_ctx->values[ecu_config_common_ctx.params_allocated];
+              virtual_parameters->source_index[rw] = ecu_config_common_ctx.params_allocated;
             }
           }
           ecu_config_common_ctx.params_allocated += parameters->count[rw];
