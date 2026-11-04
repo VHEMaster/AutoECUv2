@@ -45,7 +45,7 @@ MEMORY
 {
 	FLASH (rx)     			: ORIGIN = 0x08100000, LENGTH = 1024K
 	RAM (xrw)      			: ORIGIN = 0x10000000, LENGTH = 128K
-	RAM_D2_SHARED (xrw) : ORIGIN = 0x10028000, LENGTH = 160K
+	RAM_D2_SHARED (xrw) : ORIGIN = 0x10020000, LENGTH = 160K
   RAM_D3 (xrw)   			: ORIGIN = 0x38000000, LENGTH = 64K
   BKPSRAM (xrw)  			: ORIGIN = 0x38800000, LENGTH = 4K
 }
@@ -148,6 +148,21 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
+
+  /* Uninitialized data section into "RAM" Ram type memory */
+  . = ALIGN(4);
+  .sharedbss (NOLOAD) :
+  {
+    /* This is used by the startup in order to initialize the .rambss section */
+    _ssharedbss = .;         /* define a global symbol at rambss start */
+    __sharedbss_start__ = _ssharedbss;
+    *(.sharedbss)
+    *(.sharedbss*)
+
+    . = ALIGN(4);
+    _esharedbss = .;         /* define a global symbol at rambss end */
+    __sharedbss_end__ = _esharedbss;
+  } >RAM_D2_SHARED
 
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :

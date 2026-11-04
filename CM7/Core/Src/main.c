@@ -89,6 +89,7 @@ EXTI_HandleTypeDef hexti2;
 EXTI_HandleTypeDef hexti3;
 
 extern uint32_t _sitcm_func[];
+extern uint32_t _ssharedbss[];
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -155,6 +156,34 @@ static void MPU_Config(void)
  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+ HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+ MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+ MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+ MPU_InitStruct.BaseAddress = (uint32_t)_ssharedbss;
+ MPU_InitStruct.Size = MPU_REGION_SIZE_128KB;
+ MPU_InitStruct.SubRegionDisable = 0;
+ MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+ MPU_InitStruct.AccessPermission = MPU_REGION_PRIV_RW;
+ MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+ MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+ MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+ MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;;
+
+ HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+ MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+ MPU_InitStruct.Number = MPU_REGION_NUMBER2;
+ MPU_InitStruct.BaseAddress = (uint32_t)_ssharedbss + 0x20000;
+ MPU_InitStruct.Size = MPU_REGION_SIZE_32KB;
+ MPU_InitStruct.SubRegionDisable = 0;
+ MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+ MPU_InitStruct.AccessPermission = MPU_REGION_PRIV_RW;
+ MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+ MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+ MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+ MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;;
 
  HAL_MPU_ConfigRegion(&MPU_InitStruct);
  /* Enables the MPU */
@@ -1818,7 +1847,7 @@ static void MX_MDMA_Init(void)
   hmdma_memtomem_stream1.Instance = MDMA_Channel1;
   hmdma_memtomem_stream1.Init.Request = MDMA_REQUEST_SW;
   hmdma_memtomem_stream1.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-  hmdma_memtomem_stream1.Init.Priority = MDMA_PRIORITY_LOW;
+  hmdma_memtomem_stream1.Init.Priority = MDMA_PRIORITY_MEDIUM;
   hmdma_memtomem_stream1.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
   hmdma_memtomem_stream1.Init.SourceInc = MDMA_SRC_INC_BYTE;
   hmdma_memtomem_stream1.Init.DestinationInc = MDMA_DEST_INC_BYTE;
@@ -1839,7 +1868,7 @@ static void MX_MDMA_Init(void)
   hmdma_memtomem_stream2.Instance = MDMA_Channel2;
   hmdma_memtomem_stream2.Init.Request = MDMA_REQUEST_SW;
   hmdma_memtomem_stream2.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-  hmdma_memtomem_stream2.Init.Priority = MDMA_PRIORITY_LOW;
+  hmdma_memtomem_stream2.Init.Priority = MDMA_PRIORITY_MEDIUM;
   hmdma_memtomem_stream2.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
   hmdma_memtomem_stream2.Init.SourceInc = MDMA_SRC_INC_BYTE;
   hmdma_memtomem_stream2.Init.DestinationInc = MDMA_DEST_INC_BYTE;
@@ -1860,7 +1889,7 @@ static void MX_MDMA_Init(void)
   hmdma_memtomem_stream3.Instance = MDMA_Channel3;
   hmdma_memtomem_stream3.Init.Request = MDMA_REQUEST_SW;
   hmdma_memtomem_stream3.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-  hmdma_memtomem_stream3.Init.Priority = MDMA_PRIORITY_LOW;
+  hmdma_memtomem_stream3.Init.Priority = MDMA_PRIORITY_MEDIUM;
   hmdma_memtomem_stream3.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
   hmdma_memtomem_stream3.Init.SourceInc = MDMA_SRC_INC_BYTE;
   hmdma_memtomem_stream3.Init.DestinationInc = MDMA_DEST_INC_BYTE;
@@ -1881,7 +1910,7 @@ static void MX_MDMA_Init(void)
   hmdma_memtomem_stream4.Instance = MDMA_Channel4;
   hmdma_memtomem_stream4.Init.Request = MDMA_REQUEST_SW;
   hmdma_memtomem_stream4.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-  hmdma_memtomem_stream4.Init.Priority = MDMA_PRIORITY_LOW;
+  hmdma_memtomem_stream4.Init.Priority = MDMA_PRIORITY_MEDIUM;
   hmdma_memtomem_stream4.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
   hmdma_memtomem_stream4.Init.SourceInc = MDMA_SRC_INC_BYTE;
   hmdma_memtomem_stream4.Init.DestinationInc = MDMA_DEST_INC_BYTE;

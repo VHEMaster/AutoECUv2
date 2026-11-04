@@ -394,6 +394,7 @@ static error_t ecu_config_common_devices(ecu_core_ctx_t *ctx, ecu_config_common_
             BREAKPOINT(0);
             break;
           }
+
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v]->devices[t][i];
             virtual_parameters->count[rw] = parameters->count[rw];

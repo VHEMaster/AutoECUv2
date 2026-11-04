@@ -47,7 +47,7 @@ MEMORY
   
   RAM_D1 (xrw)   			: ORIGIN = 0x24000000, LENGTH =  512K
   RAM_D2 (xrw)   			: ORIGIN = 0x30000000, LENGTH = 128K
-	RAM_D2_SHARED (xrw) : ORIGIN = 0x30028000, LENGTH = 160K
+	RAM_D2_SHARED (xrw) : ORIGIN = 0x30020000, LENGTH = 160K
   RAM_D3 (xrw)   			: ORIGIN = 0x38000000, LENGTH = 64K
   BKPSRAM (xrw)  			: ORIGIN = 0x38800000, LENGTH = 4K
   
@@ -215,6 +215,21 @@ SECTIONS
     _erambss = .;         /* define a global symbol at rambss end */
     __rambss_end__ = _erambss;
   } >RAM_D1
+
+  /* Uninitialized data section into "RAM" Ram type memory */
+  . = ALIGN(4);
+  .sharedbss (NOLOAD) :
+  {
+    /* This is used by the startup in order to initialize the .rambss section */
+    _ssharedbss = .;         /* define a global symbol at rambss start */
+    __sharedbss_start__ = _ssharedbss;
+    *(.sharedbss)
+    *(.sharedbss*)
+
+    . = ALIGN(4);
+    _esharedbss = .;         /* define a global symbol at rambss end */
+    __sharedbss_end__ = _esharedbss;
+  } >RAM_D2_SHARED
 
   /* Used by the startup to initialize data */
   _siramdata = LOADADDR(.ramdata);

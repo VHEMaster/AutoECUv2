@@ -23,21 +23,21 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#define ALIGNED(x)                __attribute__((aligned(x)))
 #ifdef CORE_CM7
 #define ALIGNMENT_CACHE           (__SCB_DCACHE_LINE_SIZE)
-#define ALIGNED(x)                __attribute__((aligned(x)))
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
 #define BUFFER_DMA                __attribute__((section(".dmabss")))
 #define RAM_SECTION               __attribute__((section(".ramdata")))
 #define ITCM_FUNC                 __attribute__((section(".itcm_func")))
 #else /* CORE_CM7 */
 #define ALIGNMENT_CACHE
-#define ALIGNED(x)
 #define ALIGNED_CACHE
 #define BUFFER_DMA
 #define RAM_SECTION
 #define ITCM_FUNC
 #endif
+#define SHARED_SECTION            __attribute__((section(".sharedbss")))
 
 #define STATIC_INLINE             __attribute__((always_inline)) static inline
 #define INLINE                    __attribute__((always_inline)) inline
