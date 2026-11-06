@@ -10,11 +10,11 @@
 
 #include "ipc_fifo_types.h"
 
-#define IPC_TRANSFER_UNIQUE_VAL   (0x1FBD1DF5u)
+#define IPC_TRANSFER_UNIQUE_VAL   (0x408A442Au)
 
 typedef enum {
-    IPC_BUFFER_MEMCPY_START = 0,
-    IPC_BUFFER_MEMCPY_POLL
+    IPC_TRANSFER_MEMCPY_START = 0,
+    IPC_TRANSFER_MEMCPY_POLL
 }ipc_transfer_memcpy_action_t;
 
 typedef error_t (*ipc_transfer_memcpy_cb_t)(void *memory, const void *source,
@@ -23,6 +23,8 @@ typedef error_t (*ipc_transfer_memcpy_cb_t)(void *memory, const void *source,
 typedef enum {
   IPC_TRANSFER_OPERATION_IDLE = 0,
   IPC_TRANSFER_OPERATION_REQUEST,
+  IPC_TRANSFER_OPERATION_REJECT,
+  IPC_TRANSFER_OPERATION_CANCEL,
   IPC_TRANSFER_OPERATION_PROVIDE,
   IPC_TRANSFER_OPERATION_TRANSFER,
   IPC_TRANSFER_OPERATION_COMPLETE,
@@ -37,6 +39,7 @@ typedef struct {
     uint32_t endpoint;
     void *pointer;
     uint32_t requested_size;
+    error_t reject_errcode;
 
 }ipc_transfer_header_ctx_t;
 
@@ -61,6 +64,7 @@ typedef struct {
 
     ipc_transfer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
+    uint32_t memcpy_threshold;
 
     uint32_t unique_val;
     ipc_transfer_operation_t operation;

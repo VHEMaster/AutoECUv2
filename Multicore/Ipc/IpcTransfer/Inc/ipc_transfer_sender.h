@@ -11,13 +11,14 @@
 #include "ipc_transfer_types.h"
 
 error_t ipc_transfer_sender_init(ipc_transfer_sender_ctx_t *ctx, ipc_transfer_header_ctx_t *header);
-error_t ipc_transfer_sender_set_memcpy(ipc_transfer_sender_ctx_t *ctx, ipc_transfer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata);
+error_t ipc_transfer_sender_set_memcpy(ipc_transfer_sender_ctx_t *ctx, uint32_t threshold_bytes, ipc_transfer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata);
 
 error_t ipc_transfer_sender_lock(ipc_transfer_sender_ctx_t *ctx);
 error_t ipc_transfer_sender_unlock(ipc_transfer_sender_ctx_t *ctx);
 
 error_t ipc_transfer_sender_request(ipc_transfer_sender_ctx_t *ctx, uint32_t endpoint, const void *pointer, uint32_t requested_size);
-error_t ipc_transfer_sender_poll(ipc_transfer_sender_ctx_t *ctx);
+error_t ipc_transfer_sender_poll_cplt(ipc_transfer_sender_ctx_t *ctx);
+error_t ipc_transfer_sender_poll_release(ipc_transfer_sender_ctx_t *ctx);
 error_t ipc_transfer_sender_cancel(ipc_transfer_sender_ctx_t *ctx);
 
 #endif /* IPC_INC_IPC_TRANSFER_SENDER_H_ */
