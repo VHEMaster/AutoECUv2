@@ -543,7 +543,7 @@ static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *bu
       BREAK_IF(err != E_OK);
 
       amount = MIN(amount, ctx->left);
-      if(ctx->memcpy_cb == NULL) {
+      if(ctx->memcpy_cb == NULL || ctx->memcpy_threshold > amount * ctx->itemsize) {
         ipc_buffer_copy_out(buffer, ctx->memorybuffer, ctx->itemsize,
             ctx->itemscount, ctx->read, amount);
       } else {

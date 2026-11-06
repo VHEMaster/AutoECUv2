@@ -485,7 +485,7 @@ static error_t ipc_buffer_writer_copy(ipc_buffer_writer_ctx_t *ctx, const void *
       BREAK_IF(err != E_OK);
       BREAK_IF(itemscount == 0);
 
-      if(ctx->memcpy_cb == NULL) {
+      if(ctx->memcpy_cb == NULL || ctx->memcpy_threshold > itemscount * ctx->itemsize) {
         ipc_buffer_copy_in(ctx->memorybuffer, buffer, ctx->itemsize,
             ctx->itemscount, ctx->write, itemscount);
       } else {
