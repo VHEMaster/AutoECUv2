@@ -56,7 +56,7 @@ error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
   return err;
 }
 
-error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx,
+error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx, uint32_t threshold_bytes,
     ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
 {
   error_t err = E_OK;
@@ -67,6 +67,7 @@ error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx,
 
     ctx->memcpy_cb = memcpy_cb;
     ctx->memcpy_usrdata = memcpy_usrdata;
+    ctx->memcpy_threshold = threshold_bytes;
 
   } while(0);
 
@@ -548,7 +549,7 @@ static error_t ipc_buffer_reader_transfer(ipc_buffer_reader_ctx_t *ctx, void *bu
       } else {
         ipc_buffer_copy_begin(&ctx->copy_ctx, (void *)ctx->memorybuffer, buffer,
             ctx->itemsize, ctx->itemscount, ctx->read, amount, true,
-            ctx->memcpy_cb, ctx->memcpy_usrdata);
+            ctx->memcpy_threshold, ctx->memcpy_cb, ctx->memcpy_usrdata);
 
         err = ipc_buffer_copy_process(&ctx->copy_ctx);
         BREAK_IF(err != E_OK);

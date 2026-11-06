@@ -9,7 +9,8 @@
 
 INLINE void ipc_buffer_copy_begin(ipc_buffer_copy_ctx_t *ctx, void *memory,
     const void *buffer, uint32_t itemsize, uint32_t count, uint32_t position,
-    uint32_t amount, bool output, ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
+    uint32_t amount, bool output, uint32_t memcpy_threshold,
+    ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
 {
   uint32_t first = MIN(amount, count - position);
   uint8_t *ring = memory;
@@ -20,6 +21,7 @@ INLINE void ipc_buffer_copy_begin(ipc_buffer_copy_ctx_t *ctx, void *memory,
   ctx->amount = amount;
   ctx->memcpy_cb = memcpy_cb;
   ctx->memcpy_usrdata = memcpy_usrdata;
+  ctx->memcpy_threshold = memcpy_threshold;
   ctx->segments = amount > first ? 2u : 1u;
   ctx->bytes[0] = first * itemsize;
   ctx->bytes[1] = (amount - first) * itemsize;
@@ -50,8 +52,12 @@ INLINE error_t ipc_buffer_copy_process(ipc_buffer_copy_ctx_t *ctx)
     action = ctx->state == IPC_BUFFER_COPY_START ?
         IPC_BUFFER_MEMCPY_START : IPC_BUFFER_MEMCPY_POLL;
 
-    err = ctx->memcpy_cb(ctx->destination[segment], ctx->source[segment],
-        ctx->bytes[segment], action, ctx->memcpy_usrdata);
+    if(ctx->bytes[segment] >= ctx->memcpy_threshold) {
+      err = ctx->memcpy_cb(ctx->destination[segment], ctx->source[segment],
+          ctx->bytes[segment], action, ctx->memcpy_usrdata);
+    } else {
+      err = E_PARAM;
+    }
 
     if(err == E_AGAIN) {
       ctx->state = IPC_BUFFER_COPY_WAIT;

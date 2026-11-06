@@ -44,6 +44,7 @@ typedef struct {
     uint32_t amount;
     ipc_buffer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
+    uint32_t memcpy_threshold;
 }ipc_buffer_copy_ctx_t;
 
 typedef struct {
@@ -62,6 +63,7 @@ typedef struct {
     ipc_buffer_operation_t operation;
     ipc_buffer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
+    uint32_t memcpy_threshold;
     ipc_buffer_copy_ctx_t copy_ctx;
     uint32_t itemsize;
     uint32_t itemscount;
@@ -83,6 +85,7 @@ typedef struct {
     ipc_buffer_operation_t operation;
     ipc_buffer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
+    uint32_t memcpy_threshold;
     ipc_buffer_copy_ctx_t copy_ctx;
     uint32_t itemsize;
     uint32_t itemscount;
