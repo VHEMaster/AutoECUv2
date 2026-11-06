@@ -12,6 +12,11 @@
 
 #define IPC_TRANSFER_UNIQUE_VAL   (0x5F3759DFu)
 
+typedef enum {
+    IPC_BUFFER_MEMCPY_START = 0,
+    IPC_BUFFER_MEMCPY_POLL
+}ipc_transfer_memcpy_action_t;
+
 typedef error_t (*ipc_transfer_memcpy_cb_t)(void *memory, const void *source,
     uint32_t bytes, ipc_transfer_memcpy_action_t action, void *usrdata);
 
@@ -28,7 +33,7 @@ typedef enum {
 typedef struct {
     uint32_t unique_val;
     uint32_t request_cnt;
-    ipc_transfer_receiver_operation_t operation;
+    ipc_transfer_operation_t operation;
     uint32_t endpoint;
     void *pointer;
     uint32_t requested_size;

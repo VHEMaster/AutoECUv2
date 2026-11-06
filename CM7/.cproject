@@ -51,6 +51,7 @@
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/OTS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/OPS/Inc"/>
@@ -219,6 +220,7 @@
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/OTS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/OPS/Inc"/>

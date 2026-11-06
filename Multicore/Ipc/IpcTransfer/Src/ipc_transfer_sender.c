@@ -6,7 +6,6 @@
  */
 
 #include "ipc_transfer_sender.h"
-#include "ipc_fifo_sender.h"
 
 #include "ipc_transfer_private.h"
 #include "ipc_private.h"
