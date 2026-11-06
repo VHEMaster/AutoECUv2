@@ -47,7 +47,6 @@ typedef struct {
     ipc_transfer_header_ctx_t *header;
     bool lock;
 
-    uint32_t unique_val;
     ipc_transfer_operation_t operation;
 
     void *pointer;
@@ -65,11 +64,13 @@ typedef struct {
     ipc_transfer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
     uint32_t memcpy_threshold;
+    bool cancel_pending;
 
     uint32_t unique_val;
     ipc_transfer_operation_t operation;
 
-    void *pointer;
+    const void *pointer;
+    void *destination;
     uint32_t requested_size;
     uint32_t request_cnt;
     uint32_t endpoint;
