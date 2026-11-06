@@ -16,6 +16,8 @@ error_t ipc_transfer_sender_set_memcpy(ipc_transfer_sender_ctx_t *ctx, ipc_trans
 error_t ipc_transfer_sender_lock(ipc_transfer_sender_ctx_t *ctx);
 error_t ipc_transfer_sender_unlock(ipc_transfer_sender_ctx_t *ctx);
 
-
+error_t ipc_transfer_sender_request(ipc_transfer_sender_ctx_t *ctx, uint32_t endpoint, const void *pointer, uint32_t requested_size);
+error_t ipc_transfer_sender_poll(ipc_transfer_sender_ctx_t *ctx);
+error_t ipc_transfer_sender_cancel(ipc_transfer_sender_ctx_t *ctx);
 
 #endif /* IPC_INC_IPC_TRANSFER_SENDER_H_ */
