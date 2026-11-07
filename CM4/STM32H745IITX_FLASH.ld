@@ -156,6 +156,9 @@ SECTIONS
     /* This is used by the startup in order to initialize the .rambss section */
     _ssharedbss = .;         /* define a global symbol at rambss start */
     __sharedbss_start__ = _ssharedbss;
+    __ipc_shared_bus_start__ = ABSOLUTE(. + 0x20000000);
+    KEEP(*(.sharedbss.ipc))
+    ASSERT(ecu_config_ipc_shared == _ssharedbss, "IPC must start at the same D2 SRAM offset on both cores");
     *(.sharedbss)
     *(.sharedbss*)
 
@@ -187,5 +190,3 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
-
-

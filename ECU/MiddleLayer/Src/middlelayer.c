@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "middlelayer.h"
+#include "middlelayer_ipc.h"
 #include "config_hw.h"
 
 #ifdef CORE_CM7
@@ -123,6 +124,8 @@ static void middlelayer_tim_comm_irq(void)
 {
   TIME_MSMT_START(&ml_loop_time_msmt.comm);
 
+  middlelayer_ipc_loop_comm();
+
 #ifdef CORE_CM4
   middlelayer_comm_loop_comm();
 #endif /* CORE_CM4 */
@@ -141,6 +144,8 @@ void middlelayer_init(void)
   ecu_config_init_swi();
 
   ecu_config_init_counter();
+
+  middlelayer_ipc_init();
 
 #ifdef CORE_CM7
 
@@ -171,6 +176,7 @@ void middlelayer_init(void)
 
 void middlelayer_start(void)
 {
+  middlelayer_ipc_start();
 
 #ifdef CORE_CM7
   ecu_config_start_periodic_timers(middlelayer_tim_slow_irq, middlelayer_tim_comm_irq, (pTIM_CallbackTypeDef)middlelayer_tim_fast_irq);
