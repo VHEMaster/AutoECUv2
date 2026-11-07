@@ -223,6 +223,14 @@ SECTIONS
     /* This is used by the startup in order to initialize the .rambss section */
     _ssharedbss = .;         /* define a global symbol at rambss start */
     __sharedbss_start__ = _ssharedbss;
+    
+    *(.sharedbss.fifo_cm7_to_cm4_headers)
+    *(.sharedbss.fifo_cm4_to_cm7_headers)
+    *(.sharedbss.buffer_cm7_to_cm4_headers)
+    *(.sharedbss.buffer_cm4_to_cm7_headers)
+    *(.sharedbss.transfer_cm7_to_cm4_headers)
+    *(.sharedbss.transfer_cm4_to_cm7_headers)
+    
     *(.sharedbss)
     *(.sharedbss*)
 

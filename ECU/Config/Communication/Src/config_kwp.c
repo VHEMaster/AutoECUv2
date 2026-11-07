@@ -100,6 +100,10 @@ error_t ecu_comm_kwp_configure(ecu_comm_kwp_t instance, const kwp_config_t *conf
 
     kwp_ctx = &ecu_comm_kwp_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)kwp_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = kwp_configure(kwp_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -122,6 +126,10 @@ error_t ecu_comm_kwp_reset(ecu_comm_kwp_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_KWP_MAX, err = E_PARAM);
 
     kwp_ctx = &ecu_comm_kwp_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)kwp_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = kwp_reset(kwp_ctx->ctx);

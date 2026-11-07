@@ -38,6 +38,7 @@
 #define ITCM_FUNC
 #endif
 #define SHARED_SECTION            __attribute__((section(".sharedbss")))
+#define SHARED_SECTION_EX(s)      __attribute__((section(".sharedbss." s)))
 
 #define STATIC_INLINE             __attribute__((always_inline)) static inline
 #define INLINE                    __attribute__((always_inline)) inline

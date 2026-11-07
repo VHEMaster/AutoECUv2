@@ -705,6 +705,10 @@ error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *c
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)obd2_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = obd2_configure(obd2_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -727,6 +731,10 @@ error_t ecu_comm_obd2_reset(ecu_comm_obd2_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_OBD2_MAX, err = E_PARAM);
 
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)obd2_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = obd2_reset(obd2_ctx->ctx);

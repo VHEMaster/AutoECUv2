@@ -240,6 +240,10 @@ error_t ecu_comm_can_reset(ecu_comm_can_t instance)
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)can_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = can_reset(can_ctx->ctx);
 #endif /* CORE_CM4 */
@@ -259,6 +263,10 @@ error_t ecu_comm_can_transmit(ecu_comm_can_t instance, const can_message_t *mess
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)can_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = can_tx(can_ctx->ctx, message);
 #endif /* CORE_CM4 */
@@ -277,6 +285,10 @@ error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
     BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX, err = E_PARAM);
 
     can_ctx = &ecu_comm_can_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)can_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = can_rx(can_ctx->ctx, message);

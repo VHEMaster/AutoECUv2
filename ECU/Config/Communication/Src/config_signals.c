@@ -193,6 +193,10 @@ error_t ecu_comm_signals_configure(ecu_comm_signals_t instance, const signals_co
 
     signals_ctx = &ecu_comm_signals_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)signals_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = signals_configure(signals_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -215,6 +219,10 @@ error_t ecu_comm_signals_reset(ecu_comm_signals_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_SIGNALS_MAX, err = E_PARAM);
 
     signals_ctx = &ecu_comm_signals_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)signals_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = signals_reset(signals_ctx->ctx);

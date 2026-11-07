@@ -142,6 +142,10 @@ error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_confi
 
     router_ctx = &ecu_comm_router_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)router_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = router_configure(router_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -164,6 +168,10 @@ error_t ecu_comm_router_reset(ecu_comm_router_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_ROUTER_MAX, err = E_PARAM);
 
     router_ctx = &ecu_comm_router_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)router_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = router_reset(router_ctx->ctx);

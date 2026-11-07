@@ -5,44 +5,78 @@
  *      Author: VHEMaster
  */
 
-#include <string.h>
 #include "middlelayer_ipc.h"
-#include "compiler.h"
 #include "config_ipc.h"
 
-typedef struct {
+#include "config_ipc_fifo_writer.h"
+#include "config_ipc_fifo_reader.h"
+#include "config_ipc_buffer_writer.h"
+#include "config_ipc_buffer_reader.h"
+#include "config_ipc_transfer_sender.h"
+#include "config_ipc_transfer_receiver.h"
 
-}middlelayer_ipc_ctx_t;
-
-static middlelayer_ipc_ctx_t middlelayer_ipc_ctx = {0};
+#include "compiler.h"
 
 void middlelayer_ipc_init(void)
 {
   error_t err = E_OK;
+  void *ipc_ctx;
 
   //TODO: Create DTC of IPC init
   (void)err;
 
-  memset(&middlelayer_ipc_ctx, 0u, sizeof(middlelayer_ipc_ctx));
+  do {
+    err = ecu_ipc_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-}
+    for(int i = 0; i < ECU_IPC_FIFO_WRITER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_FIFO_WRITER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-void middlelayer_ipc_loop_main(void)
-{
-  // Nothing to do here
-}
+      err = ecu_ipc_fifo_writer_init(i, (ipc_fifo_writer_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-void middlelayer_ipc_loop_slow(void)
-{
-  // Nothing to do here
-}
+    for(int i = 0; i < ECU_IPC_FIFO_READER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_FIFO_READER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-void middlelayer_ipc_loop_comm(void)
-{
-  // TODO: implement
-}
+      err = ecu_ipc_fifo_reader_init(i, (ipc_fifo_reader_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
 
-ITCM_FUNC void middlelayer_ipc_loop_fast(void)
-{
- // Nothing to do here
+    for(int i = 0; i < ECU_IPC_BUFFER_WRITER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_BUFFER_WRITER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_buffer_writer_init(i, (ipc_buffer_writer_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+
+    for(int i = 0; i < ECU_IPC_BUFFER_READER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_BUFFER_READER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_buffer_reader_init(i, (ipc_buffer_reader_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+
+    for(int i = 0; i < ECU_IPC_TRANSFER_SENDER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_TRANSFER_SENDER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_transfer_sender_init(i, (ipc_transfer_sender_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+
+    for(int i = 0; i < ECU_IPC_TRANSFER_RECEIVER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_TRANSFER_RECEIVER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_transfer_receiver_init(i, (ipc_transfer_receiver_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+
+  } while(0);
 }

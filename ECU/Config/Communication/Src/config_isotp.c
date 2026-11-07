@@ -126,6 +126,10 @@ error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = isotp_configure(isotp_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -148,6 +152,10 @@ error_t ecu_comm_isotp_reset(ecu_comm_isotp_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_ISOTP_MAX, err = E_PARAM);
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = isotp_reset(isotp_ctx->ctx);
@@ -188,6 +196,10 @@ error_t ecu_comm_isotp_frame_write_upstream(ecu_comm_isotp_t instance, const can
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = isotp_frame_write_upstream(isotp_ctx->ctx, message);
 #endif /* CORE_CM4 */
@@ -207,6 +219,10 @@ error_t ecu_comm_isotp_frame_read_downstream(ecu_comm_isotp_t instance, isotp_fr
     BREAK_IF_ACTION(frame == NULL, err = E_PARAM);
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = isotp_frame_read_downstream(isotp_ctx->ctx, frame);
@@ -228,6 +244,10 @@ error_t ecu_comm_isotp_data_write_downstream(ecu_comm_isotp_t instance, const ui
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = isotp_data_write_downstream(isotp_ctx->ctx, payload, length);
 #endif /* CORE_CM4 */
@@ -248,6 +268,10 @@ error_t ecu_comm_isotp_data_read_upstream(ecu_comm_isotp_t instance, uint8_t *pa
     BREAK_IF_ACTION(length == NULL, err = E_PARAM);
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = isotp_data_read_upstream(isotp_ctx->ctx, payload, length);

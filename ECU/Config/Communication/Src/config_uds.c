@@ -129,6 +129,10 @@ error_t ecu_comm_uds_configure(ecu_comm_uds_t instance, const uds_config_t *conf
 
     uds_ctx = &ecu_comm_uds_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)uds_ctx;
+#endif /* CORE_CM7 */
+
 #ifdef CORE_CM4
     err = uds_configure(uds_ctx->ctx, config);
     BREAK_IF(err != E_OK);
@@ -151,6 +155,10 @@ error_t ecu_comm_uds_reset(ecu_comm_uds_t instance)
     BREAK_IF_ACTION(instance >= ECU_COMM_UDS_MAX, err = E_PARAM);
 
     uds_ctx = &ecu_comm_uds_ctx[instance];
+
+#ifdef CORE_CM7
+    (void)uds_ctx;
+#endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
     err = uds_reset(uds_ctx->ctx);

@@ -54,7 +54,6 @@ static void middlelayer_tim_slow_irq(void)
   middlelayer_sensors_loop_slow();
   middlelayer_modules_loop_slow();
   middlelayer_timings_loop_slow();
-  middlelayer_ipc_loop_slow();
 
   ecu_loop_slow();
 
@@ -81,7 +80,6 @@ ITCM_FUNC static void middlelayer_tim_fast_irq(void *)
   middlelayer_sensors_loop_fast();
   middlelayer_modules_loop_fast();
   middlelayer_timings_loop_fast();
-  middlelayer_ipc_loop_fast();
 
   ecu_loop_fast();
 
@@ -107,7 +105,6 @@ void middlelayer_loop(void)
   middlelayer_sensors_loop_main();
   middlelayer_modules_loop_main();
   middlelayer_timings_loop_main();
-  middlelayer_ipc_loop_main();
 
   ecu_loop_main();
 
