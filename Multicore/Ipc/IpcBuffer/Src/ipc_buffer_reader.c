@@ -241,7 +241,6 @@ static error_t ipc_buffer_reader_copy(ipc_buffer_reader_ctx_t *ctx, void *buffer
       err = ipc_buffer_reader_begin(ctx, &size);
       BREAK_IF(err != E_OK);
       if(capacity < size) {
-        *p_itemscount = size;
         (void)ipc_buffer_reader_cancel(ctx);
         err = E_OVERFLOW;
         break;
