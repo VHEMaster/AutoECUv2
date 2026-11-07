@@ -20,7 +20,7 @@ error_t ipc_fifo_writer_init(ipc_fifo_writer_ctx_t *ctx, uint32_t itemsize, uint
     BREAK_IF_ACTION(itemsize == 0, err = E_PARAM);
     BREAK_IF_ACTION(itemscount < 2, err = E_PARAM);
 
-    memset(ctx, 0u, sizeof(ipc_fifo_reader_ctx_t));
+    memset(ctx, 0u, sizeof(ipc_fifo_writer_ctx_t));
     ctx->header = header;
     ctx->itemsize = itemsize;
     ctx->itemscount = itemscount;
@@ -121,6 +121,9 @@ error_t ipc_fifo_writer_get_used(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_used_it
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
+    BREAK_IF_ACTION(ctx->read >= ctx->itemscount, err = E_FAULT);
+    BREAK_IF_ACTION(ctx->write >= ctx->itemscount, err = E_FAULT);
+
     *p_used_items = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
@@ -137,6 +140,9 @@ error_t ipc_fifo_writer_get_free(ipc_fifo_writer_ctx_t *ctx, uint32_t *p_free_it
     BREAK_IF_ACTION(p_free_items == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
+
+    BREAK_IF_ACTION(ctx->read >= ctx->itemscount, err = E_FAULT);
+    BREAK_IF_ACTION(ctx->write >= ctx->itemscount, err = E_FAULT);
 
     *p_free_items = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
 
@@ -156,6 +162,9 @@ error_t ipc_fifo_writer_is_full(ipc_fifo_writer_ctx_t *ctx, bool *p_is_full)
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
 
+    BREAK_IF_ACTION(ctx->read >= ctx->itemscount, err = E_FAULT);
+    BREAK_IF_ACTION(ctx->write >= ctx->itemscount, err = E_FAULT);
+
     free_to_write = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
     *p_is_full = free_to_write == 0;
 
@@ -173,6 +182,9 @@ error_t ipc_fifo_writer_is_empty(ipc_fifo_writer_ctx_t *ctx, bool *p_is_empty)
     BREAK_IF_ACTION(p_is_empty == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     ctx->read = ATOMIC_LOAD(ctx->header->read);
+
+    BREAK_IF_ACTION(ctx->read >= ctx->itemscount, err = E_FAULT);
+    BREAK_IF_ACTION(ctx->write >= ctx->itemscount, err = E_FAULT);
 
     *p_is_empty = ctx->read == ctx->write;
 
