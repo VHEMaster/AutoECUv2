@@ -121,7 +121,7 @@ error_t ipc_fifo_reader_is_full(ipc_fifo_reader_ctx_t *ctx, bool *p_is_full)
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
-    free_to_write = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
+    free_to_write = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
     *p_is_full = free_to_write == 0;
 
   } while(0);
@@ -156,7 +156,7 @@ error_t ipc_fifo_reader_get_used(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_used_it
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
-    *p_used_items = ipc_fifo_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
+    *p_used_items = ipc_get_used_to_read(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
@@ -173,7 +173,7 @@ error_t ipc_fifo_reader_get_free(ipc_fifo_reader_ctx_t *ctx, uint32_t *p_free_it
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF((err = ipc_fifo_reader_synchronize(ctx)) != E_OK);
 
-    *p_free_items = ipc_fifo_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
+    *p_free_items = ipc_get_free_to_write(ctx->itemscount, ctx->read, ctx->write);
 
   } while(0);
 
