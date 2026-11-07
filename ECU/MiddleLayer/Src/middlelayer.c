@@ -17,7 +17,6 @@
 #include "middlelayer_sensors.h"
 #include "middlelayer_modules.h"
 #include "middlelayer_timings.h"
-#include "middlelayer_ipc.h"
 #include "config_loop.h"
 #include "config_global.h"
 #include "core.h"
@@ -28,6 +27,7 @@
 #include "middlelayer_comm.h"
 #endif /* CORE_CM4 */
 
+#include "middlelayer_ipc.h"
 #include "time.h"
 
 typedef struct {

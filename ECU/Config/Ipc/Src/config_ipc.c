@@ -258,12 +258,12 @@ error_t ecu_ipc_get_buffer_reader_ctx(ecu_ipc_buffer_reader_t instance, ipc_buff
   return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_BUFFER_READER, instance, (void**)ctx);
 }
 
-error_t ecu_ipc_get_transfer_sender_ctx(ecu_ipc_transfer_receiver_t instance, ipc_transfer_sender_ctx_t **ctx)
+error_t ecu_ipc_get_transfer_sender_ctx(ecu_ipc_transfer_sender_t instance, ipc_transfer_sender_ctx_t **ctx)
 {
   return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_TRANSFER_SENDER, instance, (void**)ctx);
 }
 
-error_t ecu_ipc_get_transfer_receiver_ctx(ecu_ipc_transfer_sender_t instance, ipc_transfer_receiver_ctx_t **ctx)
+error_t ecu_ipc_get_transfer_receiver_ctx(ecu_ipc_transfer_receiver_t instance, ipc_transfer_receiver_ctx_t **ctx)
 {
   return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_TRANSFER_RECEIVER, instance, (void**)ctx);
 }
