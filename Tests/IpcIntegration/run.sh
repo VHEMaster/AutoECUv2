@@ -7,13 +7,13 @@ includes="-ITests/IpcIntegration/Include -ICommon/Inc -IECU/Ipc/Inc -IECU/Config
 for module in IpcFifo IpcBuffer IpcTransfer; do
   includes="$includes -IMulticore/Ipc/$module/Inc"
 done
-symbols="ecu_ipc_init ecu_ipc_start ecu_ipc_loop_comm ecu_ipc_buffer_send ecu_ipc_buffer_receive ecu_ipc_transfer_send ecu_ipc_transfer_receive ecu_config_ipc_buffer ecu_config_ipc_transfer middlelayer_ipc_init middlelayer_ipc_start middlelayer_ipc_loop_comm"
+symbols="ecu_ipc_init ecu_ipc_start ecu_ipc_loop_comm ecu_ipc_buffer_send ecu_ipc_buffer_receive ecu_ipc_transfer_send ecu_ipc_transfer_receive ecu_config_ipc_buffer ecu_config_ipc_transfer middlelayer_ipc_init middlelayer_ipc_start middlelayer_ipc_loop_comm ecu_ipc_buffer_fsm ecu_ipc_transfer_fsm"
 for core in 4 7; do
   defs="-DCORE_CM$core"
   for name in $symbols; do
     defs="$defs -D${name}=cm${core}_${name}"
   done
-  for path in ECU/Ipc/Src/ecu_ipc.c ECU/Config/Ipc/Src/config_ipc.c ECU/MiddleLayer/Src/middlelayer_ipc.c; do
+  for path in ECU/Ipc/Src/ecu_ipc.c ECU/Ipc/Src/ecu_ipc_fsm.c ECU/Config/Ipc/Src/config_ipc.c ECU/MiddleLayer/Src/middlelayer_ipc.c; do
     gcc -std=gnu11 -O2 -g -Wall -Wextra -Werror -Wmissing-prototypes "$@" $includes $defs -c "$path" -o "$build_dir/cm${core}_${path##*/}.o"
   done
 done
