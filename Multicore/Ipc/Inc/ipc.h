@@ -10,5 +10,7 @@
 
 #include "ipc_types.h"
 #include "ipc_fifo.h"
+#include "ipc_buffer.h"
+#include "ipc_transfer.h"
 
 #endif /* IPC_INC_IPC_H_ */

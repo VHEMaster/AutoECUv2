@@ -80,6 +80,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Hardware/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Global/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Config/Ipc/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/MiddleLayer/Inc"/>
 								</option>
@@ -193,6 +194,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Hardware/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Global/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Config/Ipc/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/MiddleLayer/Inc"/>
 								</option>
