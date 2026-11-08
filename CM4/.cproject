@@ -57,6 +57,7 @@
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcSharedMemory/Inc"/>
 									<listOptionValue builtIn="false" value="../../Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
@@ -171,6 +172,7 @@
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcSharedMemory/Inc"/>
 									<listOptionValue builtIn="false" value="../../Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>

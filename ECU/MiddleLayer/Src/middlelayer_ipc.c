@@ -8,6 +8,7 @@
 #include "middlelayer_ipc.h"
 #include "config_ipc.h"
 
+#include "config_ipc_sharedmemory.h"
 #include "config_ipc_fifo_writer.h"
 #include "config_ipc_fifo_reader.h"
 #include "config_ipc_buffer_writer.h"
@@ -27,6 +28,15 @@ void middlelayer_ipc_init(void)
 
   do {
     err = ecu_ipc_init();
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_IPC_SHAREDMEMORY_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_SHAREDMEMORY, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_sharedmemory_init(i, (ipc_sharedmemory_ctx_t *) ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
     for(int i = 0; i < ECU_IPC_FIFO_WRITER_MAX; i++) {

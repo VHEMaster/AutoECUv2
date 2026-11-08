@@ -224,20 +224,37 @@ SECTIONS
     _ssharedbss = .;         /* define a global symbol at rambss start */
     __sharedbss_start__ = _ssharedbss;
     
+    . = ALIGN(32);
     *(.sharedbss.fifo_cm7_to_cm4_headers)
+    . = ALIGN(32);
     *(.sharedbss.fifo_cm4_to_cm7_headers)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm7_to_cm4_headers)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm4_to_cm7_headers)
+    . = ALIGN(32);
     *(.sharedbss.transfer_cm7_to_cm4_headers)
+    . = ALIGN(32);
     *(.sharedbss.transfer_cm4_to_cm7_headers)
     
+    . = ALIGN(32);
     *(.sharedbss.fifo_cm7_to_cm4_buffers)
+    . = ALIGN(32);
     *(.sharedbss.fifo_cm4_to_cm7_buffers)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm7_to_cm4_descriptors)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm4_to_cm7_descriptors)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm7_to_cm4_buffers)
+    . = ALIGN(32);
     *(.sharedbss.buffer_cm4_to_cm7_buffers)
+    . = ALIGN(32);
     
+    . = ALIGN(32);
+    *(.sharedbss.sharedmemory)
+    
+    . = ALIGN(32);
     *(.sharedbss)
     *(.sharedbss*)
 

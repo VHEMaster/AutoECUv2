@@ -48,6 +48,7 @@ typedef struct {
     ecu_config_ipc_instance_ctx_t ipc[ECU_IPCS_MAX];
 }ecu_config_ipc_t;
 
+static ipc_sharedmemory_ctx_t ecu_config_sharedmemory_ctx[ECU_IPC_SHAREDMEMORY_MAX];
 static ipc_fifo_writer_ctx_t ecu_config_fifo_writer_ctx[ECU_IPC_FIFO_WRITER_MAX];
 static ipc_fifo_reader_ctx_t ecu_config_fifo_reader_ctx[ECU_IPC_FIFO_READER_MAX];
 static ipc_buffer_writer_ctx_t ecu_config_buffer_writer_ctx[ECU_IPC_BUFFER_WRITER_MAX];
@@ -57,6 +58,9 @@ static ipc_transfer_receiver_ctx_t ecu_config_transfer_receiver_ctx[ECU_IPC_TRAN
 
 static const ecu_config_ipc_config_t ecu_config_ipc = {
     .interfaces = {
+        {
+            .instance_max = ECU_IPC_SHAREDMEMORY_MAX,
+        }, //ECU_IPC_TYPE_SHAREDMEMORY
         {
             .instance_max = ECU_IPC_FIFO_WRITER_MAX,
         }, //ECU_IPC_TYPE_FIFO_WRITER
@@ -77,6 +81,16 @@ static const ecu_config_ipc_config_t ecu_config_ipc = {
         }, //ECU_IPC_TYPE_TRANSFER_RECEIVER
     },
     .ipc = {
+        {
+            .type = ECU_IPC_TYPE_SHAREDMEMORY,
+            .instance = ECU_IPC_SHAREDMEMORY_1,
+            .ctx = &ecu_config_sharedmemory_ctx[ECU_IPC_SHAREDMEMORY_1],
+        },
+        {
+            .type = ECU_IPC_TYPE_SHAREDMEMORY,
+            .instance = ECU_IPC_SHAREDMEMORY_2,
+            .ctx = &ecu_config_sharedmemory_ctx[ECU_IPC_SHAREDMEMORY_2],
+        },
         {
             .type = ECU_IPC_TYPE_FIFO_WRITER,
             .instance = ECU_IPC_FIFO_WRITER_1,
@@ -236,6 +250,11 @@ error_t ecu_ipc_get_instance_max(ecu_ipc_type_t type, ecu_ipc_instance_t *instan
   } while(0);
 
   return err;
+}
+
+error_t ecu_ipc_get_sharedmemory_ctx(ecu_ipc_sharedmemory_t instance, ipc_sharedmemory_ctx_t **ctx)
+{
+  return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_SHAREDMEMORY, instance, (void**)ctx);
 }
 
 error_t ecu_ipc_get_fifo_writer_ctx(ecu_ipc_fifo_writer_t instance, ipc_fifo_writer_ctx_t **ctx)

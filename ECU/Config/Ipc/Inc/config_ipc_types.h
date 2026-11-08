@@ -15,6 +15,7 @@
 #define ECU_IPC_INSTANCE_MAX       (4)
 
 #define ECU_IPCS_MAX (                \
+    ECU_IPC_SHAREDMEMORY_MAX        + \
     ECU_IPC_FIFO_WRITER_MAX         + \
     ECU_IPC_FIFO_READER_MAX         + \
     ECU_IPC_BUFFER_WRITER_MAX       + \
@@ -25,7 +26,8 @@
 typedef uint32_t ecu_ipc_instance_t;
 
 typedef enum {
-  ECU_IPC_TYPE_FIFO_WRITER = 0,
+  ECU_IPC_TYPE_SHAREDMEMORY = 0,
+  ECU_IPC_TYPE_FIFO_WRITER,
   ECU_IPC_TYPE_FIFO_READER,
   ECU_IPC_TYPE_BUFFER_WRITER,
   ECU_IPC_TYPE_BUFFER_READER,
@@ -33,6 +35,12 @@ typedef enum {
   ECU_IPC_TYPE_TRANSFER_RECEIVER,
   ECU_IPC_TYPE_MAX
 }ecu_ipc_type_t;
+
+typedef enum {
+  ECU_IPC_SHAREDMEMORY_1 = 0,
+  ECU_IPC_SHAREDMEMORY_2,
+  ECU_IPC_SHAREDMEMORY_MAX
+}ecu_ipc_sharedmemory_t;
 
 typedef enum {
   ECU_IPC_FIFO_WRITER_1 = 0,
