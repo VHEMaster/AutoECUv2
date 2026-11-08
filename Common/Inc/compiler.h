@@ -11,6 +11,14 @@
 #include "main.h"
 #include "bool.h"
 
+#define CACHE_LINE_SIZE   (32u)
+#ifdef CORE_CM7
+#if __SCB_DCACHE_LINE_SIZE != CACHE_LINE_SIZE
+#error "Cache line size mismatch"
+#endif
+#endif /* CORE_CM7 */
+
+
 #define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 #define ITEMSOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
 #define CLAMP(val,min,max) ((val) < (min) ? (min) : (val) > (max) ? (max) : (val))
@@ -24,15 +32,13 @@
 #endif
 
 #define ALIGNED(x)                __attribute__((aligned(x)))
-#ifdef CORE_CM7
-#define ALIGNMENT_CACHE           (__SCB_DCACHE_LINE_SIZE)
+#define ALIGNMENT_CACHE           (CACHE_LINE_SIZE)
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)
+#ifdef CORE_CM7
 #define BUFFER_DMA                __attribute__((section(".dmabss")))
 #define RAM_SECTION               __attribute__((section(".ramdata")))
 #define ITCM_FUNC                 __attribute__((section(".itcm_func")))
 #else /* CORE_CM7 */
-#define ALIGNMENT_CACHE
-#define ALIGNED_CACHE
 #define BUFFER_DMA
 #define RAM_SECTION
 #define ITCM_FUNC
