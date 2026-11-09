@@ -8,17 +8,10 @@
 #ifndef IPC_INC_IPC_BUFFER_TYPES_H_
 #define IPC_INC_IPC_BUFFER_TYPES_H_
 
+#include "ipc_private.h"
 #include "ipc_fifo_types.h"
 
 #define IPC_BUFFER_UNIQUE_VAL   (0x5F3759DFu)
-
-typedef enum {
-    IPC_BUFFER_MEMCPY_START = 0,
-    IPC_BUFFER_MEMCPY_POLL
-}ipc_buffer_memcpy_action_t;
-
-typedef error_t (*ipc_buffer_memcpy_cb_t)(void *memory, const void *source,
-    uint32_t bytes, ipc_buffer_memcpy_action_t action, void *usrdata);
 
 typedef enum {
     IPC_BUFFER_COPY_IDLE = 0,
@@ -42,7 +35,7 @@ typedef struct {
     uint32_t segments;
     const void *buffer;
     uint32_t amount;
-    ipc_buffer_memcpy_cb_t memcpy_cb;
+    ipc_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
     uint32_t memcpy_threshold;
 }ipc_buffer_copy_ctx_t;
@@ -61,7 +54,7 @@ typedef struct {
 
 typedef struct {
     ipc_buffer_operation_t operation;
-    ipc_buffer_memcpy_cb_t memcpy_cb;
+    ipc_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
     uint32_t memcpy_threshold;
     ipc_buffer_copy_ctx_t copy_ctx;
@@ -83,7 +76,7 @@ typedef struct {
 
 typedef struct {
     ipc_buffer_operation_t operation;
-    ipc_buffer_memcpy_cb_t memcpy_cb;
+    ipc_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
     uint32_t memcpy_threshold;
     ipc_buffer_copy_ctx_t copy_ctx;

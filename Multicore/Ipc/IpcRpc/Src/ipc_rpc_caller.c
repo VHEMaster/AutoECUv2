@@ -29,6 +29,24 @@ error_t ipc_rpc_caller_init(ipc_rpc_caller_ctx_t *ctx, ipc_rpc_header_ctx_t *hea
   return err;
 }
 
+error_t ipc_rpc_caller_set_memcpy(ipc_rpc_caller_ctx_t *ctx, uint32_t threshold_bytes,
+    ipc_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->pending, err = E_INVALACT);
+
+    ctx->memcpy_cb = memcpy_cb;
+    ctx->memcpy_usrdata = memcpy_usrdata;
+    ctx->memcpy_threshold = threshold_bytes;
+
+  } while(0);
+
+  return err;
+}
+
 error_t ipc_rpc_caller_lock(ipc_rpc_caller_ctx_t *ctx)
 {
   error_t err = E_OK;

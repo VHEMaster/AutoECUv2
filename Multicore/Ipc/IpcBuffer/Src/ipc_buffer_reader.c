@@ -57,7 +57,7 @@ error_t ipc_buffer_reader_init(ipc_buffer_reader_ctx_t *ctx, uint32_t itemsize,
 }
 
 error_t ipc_buffer_reader_set_memcpy(ipc_buffer_reader_ctx_t *ctx, uint32_t threshold_bytes,
-    ipc_buffer_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
+    ipc_memcpy_cb_t memcpy_cb, void *memcpy_usrdata)
 {
   error_t err = E_OK;
 

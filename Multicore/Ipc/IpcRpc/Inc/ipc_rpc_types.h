@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "bool.h"
 #include "errors.h"
+#include "ipc_private.h"
 #include "ipc_rpc_defines.h"
 
 #define IPC_RPC_UNIQUE_VAL    (0x52504331u)
@@ -31,9 +32,14 @@ typedef struct {
     void *buffer;
     uint32_t buffer_size;
 
+    ipc_memcpy_cb_t memcpy_cb;
+    void *memcpy_usrdata;
+    uint32_t memcpy_threshold;
+
     ATOMIC_LOCK_TYPE lock;
     bool pending;
     uint32_t request_id;
+
 }ipc_rpc_caller_ctx_t;
 
 typedef struct {

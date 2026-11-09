@@ -12,6 +12,9 @@
 
 error_t ipc_rpc_caller_init(ipc_rpc_caller_ctx_t *ctx, ipc_rpc_header_ctx_t *header, uint32_t buffer_size, void *buffer);
 
+error_t ipc_rpc_caller_set_memcpy(ipc_rpc_caller_ctx_t *ctx, uint32_t threshold_bytes,
+    ipc_memcpy_cb_t memcpy_cb, void *memcpy_usrdata);
+
 error_t ipc_rpc_caller_lock(ipc_rpc_caller_ctx_t *ctx);
 error_t ipc_rpc_caller_unlock(ipc_rpc_caller_ctx_t *ctx);
 
