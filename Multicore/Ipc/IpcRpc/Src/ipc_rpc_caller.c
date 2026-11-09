@@ -36,7 +36,8 @@ error_t ipc_rpc_caller_set_memcpy(ipc_rpc_caller_ctx_t *ctx, uint32_t threshold_
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ctx->pending, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->state != IPC_RPC_CALLER_STATE_IDLE &&
+        ctx->state != IPC_RPC_CALLER_STATE_WAIT_ABORT_ACK, err = E_INVALACT);
 
     ctx->memcpy_cb = memcpy_cb;
     ctx->memcpy_usrdata = memcpy_usrdata;
@@ -68,7 +69,8 @@ error_t ipc_rpc_caller_unlock(ipc_rpc_caller_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->pending, err = E_BUSY);
+    BREAK_IF_ACTION(ctx->state != IPC_RPC_CALLER_STATE_IDLE &&
+        ctx->state != IPC_RPC_CALLER_STATE_WAIT_ABORT_ACK, err = E_BUSY);
 
     ATOMIC_RELEASE(ctx->lock);
 
@@ -80,20 +82,51 @@ error_t ipc_rpc_caller_unlock(ipc_rpc_caller_ctx_t *ctx)
 error_t ipc_rpc_caller_call(ipc_rpc_caller_ctx_t *ctx, uint32_t func_id, uint32_t args_bytes, const void *args)
 {
   error_t err = E_OK;
+  ipc_memcpy_action_t action = IPC_MEMCPY_START;
 
   do {
-    BREAK_IF_ACTION(ctx == NULL || (args_bytes != 0u && args == NULL), err = E_PARAM);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
-    BREAK_IF_ACTION(ctx->pending, err = E_BUSY);
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(args_bytes != 0u && args == NULL, err = E_PARAM);
     BREAK_IF_ACTION(args_bytes > ctx->buffer_size, err = E_OVERFLOW);
-    BREAK_IF_ACTION(ATOMIC_LOAD(ctx->header->response_id) != ctx->request_id, err = E_AGAIN);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+
+    switch(ctx->state) {
+      case IPC_RPC_CALLER_STATE_IDLE:
+      case IPC_RPC_CALLER_STATE_WAIT_ABORT_ACK:
+        BREAK_IF_ACTION(ATOMIC_LOAD(ctx->header->response_id) != ctx->request_id, err = E_AGAIN);
+        break;
+      case IPC_RPC_CALLER_STATE_COPYING:
+        action = IPC_MEMCPY_POLL;
+        break;
+      case IPC_RPC_CALLER_STATE_WAIT_RESPONSE:
+        err = E_BUSY;
+        break;
+      default:
+        err = E_INVALACT;
+        break;
+    }
+    BREAK_IF(err != E_OK);
 
     if(args_bytes != 0u) {
-      memcpy(ctx->buffer, args, args_bytes);
+      if(ctx->memcpy_cb != NULL && args_bytes >= ctx->memcpy_threshold) {
+        if(action == IPC_MEMCPY_START) {
+          ctx->state = IPC_RPC_CALLER_STATE_COPYING;
+        }
+
+        err = ctx->memcpy_cb(ctx->buffer, args, args_bytes, action, ctx->memcpy_usrdata);
+        BREAK_IF(err == E_AGAIN);
+
+        if(err != E_OK) {
+          memcpy(ctx->buffer, args, args_bytes);
+          err = E_OK;
+        }
+      } else {
+        memcpy(ctx->buffer, args, args_bytes);
+      }
     }
 
     ctx->request_id++;
-    ctx->pending = true;
+    ctx->state = IPC_RPC_CALLER_STATE_WAIT_RESPONSE;
     ATOMIC_STORE_RELAXED(ctx->header->aborted, false);
     ATOMIC_STORE_RELAXED(ctx->header->func_id, func_id);
     ATOMIC_STORE_RELAXED(ctx->header->args_bytes, args_bytes);
@@ -107,15 +140,20 @@ error_t ipc_rpc_caller_call(ipc_rpc_caller_ctx_t *ctx, uint32_t func_id, uint32_
 error_t ipc_rpc_caller_poll(ipc_rpc_caller_ctx_t *ctx, error_t *p_ret)
 {
   error_t err = E_OK;
+  error_t ret;
 
   do {
     BREAK_IF_ACTION(ctx == NULL || p_ret == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false || ctx->pending == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->state != IPC_RPC_CALLER_STATE_WAIT_RESPONSE, err = E_INVALACT);
     BREAK_IF_ACTION(ATOMIC_LOAD(ctx->header->response_id) != ctx->request_id, err = E_AGAIN);
 
-    ctx->pending = false;
-    BREAK_IF_ACTION(ATOMIC_LOAD_RELAXED(ctx->header->status) != E_OK, err = E_IPC);
-    *p_ret = ATOMIC_LOAD_RELAXED(ctx->header->ret);
+    ctx->state = IPC_RPC_CALLER_STATE_IDLE;
+    ret = ATOMIC_LOAD_RELAXED(ctx->header->status);
+    BREAK_IF_ACTION(ret != E_OK, err = ret);
+
+    ret = ATOMIC_LOAD_RELAXED(ctx->header->ret);
+    *p_ret = ret;
 
   } while(0);
 
@@ -128,10 +166,12 @@ error_t ipc_rpc_caller_abort(ipc_rpc_caller_ctx_t *ctx)
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false || ctx->pending == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ctx->state == IPC_RPC_CALLER_STATE_COPYING, err = E_BUSY);
+    BREAK_IF_ACTION(ctx->state != IPC_RPC_CALLER_STATE_WAIT_RESPONSE, err = E_INVALACT);
 
     ATOMIC_STORE(ctx->header->aborted, true);
-    ctx->pending = false;
+    ctx->state = IPC_RPC_CALLER_STATE_WAIT_ABORT_ACK;
 
   } while(0);
 

@@ -27,6 +27,13 @@ typedef struct {
     bool aborted;
 }ipc_rpc_header_ctx_t;
 
+typedef enum {
+    IPC_RPC_CALLER_STATE_IDLE = 0,
+    IPC_RPC_CALLER_STATE_COPYING,
+    IPC_RPC_CALLER_STATE_WAIT_RESPONSE,
+    IPC_RPC_CALLER_STATE_WAIT_ABORT_ACK,
+}ipc_rpc_caller_state_t;
+
 typedef struct {
     ipc_rpc_header_ctx_t *header;
     void *buffer;
@@ -37,7 +44,7 @@ typedef struct {
     uint32_t memcpy_threshold;
 
     ATOMIC_LOCK_TYPE lock;
-    bool pending;
+    ipc_rpc_caller_state_t state;
     uint32_t request_id;
 
 }ipc_rpc_caller_ctx_t;
