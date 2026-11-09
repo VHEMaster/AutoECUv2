@@ -156,7 +156,7 @@ typedef struct {
     qspi_init_t init;
     bool ready;
     bool initialized;
-    bool locked;
+    ATOMIC_LOCK_TYPE lock;
     bool init_request;
     error_t init_errcode;
 

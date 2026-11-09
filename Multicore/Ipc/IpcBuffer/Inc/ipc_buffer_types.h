@@ -75,7 +75,7 @@ typedef struct {
     const ipc_buffer_descriptor_t *descriptors;
     uint32_t unique_val;
     bool synchronized;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
     bool started;
     uint32_t size;
     uint32_t left;
@@ -95,7 +95,7 @@ typedef struct {
     ipc_fifo_writer_ctx_t fifo_ctx;
     void *memorybuffer;
     ipc_buffer_descriptor_t *descriptors;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
     bool started;
     uint32_t size;
     uint32_t left;

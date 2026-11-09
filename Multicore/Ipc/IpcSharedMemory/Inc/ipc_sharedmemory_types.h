@@ -16,7 +16,7 @@
 typedef struct {
     uint32_t size;
     void *buffer;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
 }ipc_sharedmemory_ctx_t;
 
 #endif /* IPC_INC_IPC_SHAREDMEMORY_TYPES_H_ */

@@ -111,7 +111,7 @@ error_t qspi_lock(qspi_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false || ctx->initialized == false, err = E_NOTRDY);
 
-    if(ATOMIC_TRY_LOCK(ctx->locked) == true) {
+    if(ATOMIC_TRY_LOCK(ctx->lock) == true) {
       err = E_OK;
     } else {
       err = E_AGAIN;
@@ -130,10 +130,10 @@ error_t qspi_unlock(qspi_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
 
-    if(ATOMIC_ISLOCKED(ctx->locked) == false || ctx->cmd_ready == true) {
+    if(ATOMIC_ISLOCKED(ctx->lock) == false || ctx->cmd_ready == true) {
       err = E_INVALACT;
     } else {
-      ATOMIC_RELEASE(ctx->locked);
+      ATOMIC_RELEASE(ctx->lock);
       err = E_OK;
     }
 
@@ -151,7 +151,7 @@ error_t qspi_fast_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_
     BREAK_IF_ACTION((address + length > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_hsread;
@@ -182,7 +182,7 @@ error_t qspi_page_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, 
     BREAK_IF_ACTION(((address & (ctx->init.prog_page_size - 1)) + length > ctx->init.prog_page_size), err = E_PARAM);
     BREAK_IF_ACTION((address + length > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_prog;
@@ -217,7 +217,7 @@ error_t qspi_sector_erase(qspi_ctx_t *ctx, uint32_t address)
     BREAK_IF_ACTION((address > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION((address & (ctx->init.erase_sector_size - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_se;
@@ -247,7 +247,7 @@ error_t qspi_block_erase(qspi_ctx_t *ctx, uint32_t address)
     BREAK_IF_ACTION((address > ctx->init.flash_size), err = E_PARAM);
     BREAK_IF_ACTION((address & (ctx->init.erase_sector_size - 1)), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_be;
@@ -275,7 +275,7 @@ error_t qspi_chip_erase(qspi_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_ce;
@@ -302,7 +302,7 @@ error_t qspi_write_bpr(qspi_ctx_t *ctx, const qspi_bpr_t *bpr)
   do {
     BREAK_IF_ACTION(ctx == NULL || bpr == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_wbpr;
@@ -339,7 +339,7 @@ error_t qspi_otp_read(qspi_ctx_t *ctx, uint32_t address, void *payload, uint32_t
     BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
     BREAK_IF_ACTION((address + length > ctx->init.otp_size), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_rsid;
@@ -370,7 +370,7 @@ error_t qspi_otp_write(qspi_ctx_t *ctx, uint32_t address, const void *payload, u
     BREAK_IF_ACTION((length & (ctx->init.flash_dies_count - 1)), err = E_PARAM);
     BREAK_IF_ACTION((address + length > ctx->init.otp_size), err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_psid;
@@ -400,7 +400,7 @@ error_t qspi_otp_lock(qspi_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->cmd_ctx = ctx->init.cmd_lsid;
@@ -426,7 +426,7 @@ error_t qspi_sync(qspi_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == false, err = E_INVALACT);
 
     err = ctx->cmd_errcode;
@@ -462,7 +462,7 @@ error_t qspi_memory_mapping_set(qspi_ctx_t *ctx, bool enabled)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->init_errcode != E_OK, err = ctx->init_errcode);
-    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->locked) == false, err = E_INVALACT);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->cmd_ready == true, err = E_INVALACT);
 
     ctx->memory_mapping = enabled;

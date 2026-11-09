@@ -31,7 +31,7 @@ typedef struct {
     ipc_fifo_header_ctx_t *header;
     const void *buffer;
     bool synchronized;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
 }ipc_fifo_reader_ctx_t;
 
 typedef struct {
@@ -42,7 +42,7 @@ typedef struct {
     uint32_t write;
     ipc_fifo_header_ctx_t *header;
     void *buffer;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
 }ipc_fifo_writer_ctx_t;
 
 #endif /* IPC_INC_IPC_FIFO_TYPES_H_ */

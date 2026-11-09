@@ -45,7 +45,7 @@ typedef struct {
 
 typedef struct {
     ipc_transfer_header_ctx_t *header;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
 
     ipc_transfer_operation_t operation;
 
@@ -59,7 +59,7 @@ typedef struct {
 typedef struct {
 
     ipc_transfer_header_ctx_t *header;
-    bool lock;
+    ATOMIC_LOCK_TYPE lock;
 
     ipc_transfer_memcpy_cb_t memcpy_cb;
     void *memcpy_usrdata;
