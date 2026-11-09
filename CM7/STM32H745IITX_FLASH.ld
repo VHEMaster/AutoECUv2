@@ -236,6 +236,10 @@ SECTIONS
     *(.sharedbss.transfer_cm7_to_cm4_headers)
     . = ALIGN(32);
     *(.sharedbss.transfer_cm4_to_cm7_headers)
+    . = ALIGN(32);
+    *(.sharedbss.rpc_cm7_to_cm4_headers)
+    . = ALIGN(32);
+    *(.sharedbss.rpc_cm4_to_cm7_headers)
     
     . = ALIGN(32);
     *(.sharedbss.fifo_cm7_to_cm4_buffers)
@@ -250,6 +254,9 @@ SECTIONS
     . = ALIGN(32);
     *(.sharedbss.buffer_cm4_to_cm7_buffers)
     . = ALIGN(32);
+    *(.sharedbss.rpc_cm7_to_cm4_buffers)
+    . = ALIGN(32);
+    *(.sharedbss.rpc_cm4_to_cm7_buffers)
     
     . = ALIGN(32);
     *(.sharedbss.sharedmemory)

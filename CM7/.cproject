@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Boot/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcRpc/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
@@ -220,6 +221,7 @@
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Boot/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/Inc"/>
+									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcRpc/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcFifo/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcBuffer/Inc"/>
 									<listOptionValue builtIn="false" value="../../Multicore/Ipc/IpcTransfer/Inc"/>
