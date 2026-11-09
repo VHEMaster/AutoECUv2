@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "bool.h"
+#include <stdalign.h>
 
 #define CACHE_LINE_SIZE   (32u)
 #ifdef CORE_CM7
@@ -31,6 +32,7 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#define ALIGNOF(x)                alignof(x)
 #define ALIGNED(x)                __attribute__((aligned(x)))
 #define ALIGNMENT_CACHE           (CACHE_LINE_SIZE)
 #define ALIGNED_CACHE             ALIGNED(ALIGNMENT_CACHE)

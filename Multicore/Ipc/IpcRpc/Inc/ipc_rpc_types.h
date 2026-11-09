@@ -12,7 +12,6 @@
 #include "bool.h"
 #include "errors.h"
 #include "ipc_private.h"
-#include "ipc_rpc_defines.h"
 
 #define IPC_RPC_UNIQUE_VAL    (0x52504331u)
 

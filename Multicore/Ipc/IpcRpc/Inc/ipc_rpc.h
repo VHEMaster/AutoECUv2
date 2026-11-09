@@ -8,6 +8,7 @@
 #ifndef IPC_IPCRPC_INC_IPC_RPC_H_
 #define IPC_IPCRPC_INC_IPC_RPC_H_
 
+#include "ipc_rpc_pack.h"
 #include "ipc_rpc_caller.h"
 #include "ipc_rpc_executor.h"
 
