@@ -55,6 +55,8 @@ static ipc_buffer_writer_ctx_t ecu_config_buffer_writer_ctx[ECU_IPC_BUFFER_WRITE
 static ipc_buffer_reader_ctx_t ecu_config_buffer_reader_ctx[ECU_IPC_BUFFER_READER_MAX];
 static ipc_transfer_sender_ctx_t ecu_config_transfer_sender_ctx[ECU_IPC_TRANSFER_SENDER_MAX];
 static ipc_transfer_receiver_ctx_t ecu_config_transfer_receiver_ctx[ECU_IPC_TRANSFER_RECEIVER_MAX];
+static ipc_rpc_caller_ctx_t ecu_config_rpc_caller_ctx[ECU_IPC_RPC_CALLER_MAX];
+static ipc_rpc_executor_ctx_t ecu_config_rpc_executor_ctx[ECU_IPC_RPC_EXECUTOR_MAX];
 
 static const ecu_config_ipc_config_t ecu_config_ipc = {
     .interfaces = {
@@ -79,6 +81,12 @@ static const ecu_config_ipc_config_t ecu_config_ipc = {
         {
             .instance_max = ECU_IPC_TRANSFER_RECEIVER_MAX,
         }, //ECU_IPC_TYPE_TRANSFER_RECEIVER
+        {
+            .instance_max = ECU_IPC_RPC_CALLER_MAX,
+        }, //ECU_IPC_TYPE_RPC_CALLER
+        {
+            .instance_max = ECU_IPC_RPC_EXECUTOR_MAX,
+        }, //ECU_IPC_TYPE_RPC_EXECUTOR
     },
     .ipc = {
         {
@@ -150,6 +158,16 @@ static const ecu_config_ipc_config_t ecu_config_ipc = {
             .type = ECU_IPC_TYPE_TRANSFER_RECEIVER,
             .instance = ECU_IPC_TRANSFER_RECEIVER_2,
             .ctx = &ecu_config_transfer_receiver_ctx[ECU_IPC_TRANSFER_RECEIVER_2],
+        },
+        {
+            .type = ECU_IPC_TYPE_RPC_CALLER,
+            .instance = ECU_IPC_RPC_CALLER_1,
+            .ctx = &ecu_config_rpc_caller_ctx[ECU_IPC_RPC_CALLER_1],
+        },
+        {
+            .type = ECU_IPC_TYPE_RPC_EXECUTOR,
+            .instance = ECU_IPC_RPC_EXECUTOR_1,
+            .ctx = &ecu_config_rpc_executor_ctx[ECU_IPC_RPC_EXECUTOR_1],
         },
     },
 };
@@ -285,4 +303,14 @@ error_t ecu_ipc_get_transfer_sender_ctx(ecu_ipc_transfer_sender_t instance, ipc_
 error_t ecu_ipc_get_transfer_receiver_ctx(ecu_ipc_transfer_receiver_t instance, ipc_transfer_receiver_ctx_t **ctx)
 {
   return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_TRANSFER_RECEIVER, instance, (void**)ctx);
+}
+
+error_t ecu_ipc_get_rpc_caller_ctx(ecu_ipc_rpc_caller_t instance, ipc_rpc_caller_ctx_t **ctx)
+{
+  return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_RPC_CALLER, instance, (void**)ctx);
+}
+
+error_t ecu_ipc_get_rpc_executor_ctx(ecu_ipc_rpc_executor_t instance, ipc_rpc_executor_ctx_t **ctx)
+{
+  return ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_RPC_EXECUTOR, instance, (void**)ctx);
 }

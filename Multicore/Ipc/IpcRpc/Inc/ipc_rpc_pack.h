@@ -11,7 +11,7 @@
 #include "compiler.h"
 #include "errors.h"
 
-STATIC_INLINE OPTIMIZE_FAST
+STATIC_INLINE
 error_t ipc_rpc_field_pos(uint32_t buffer_length, uint32_t pos,
     uint32_t bytes, uint32_t alignment, uint32_t *p_field_pos)
 {
@@ -35,7 +35,7 @@ error_t ipc_rpc_field_pos(uint32_t buffer_length, uint32_t pos,
   return err;
 }
 
-STATIC_INLINE OPTIMIZE_FAST
+STATIC_INLINE
 error_t ipc_rpc_pack(void *buffer, uint32_t buffer_length,
     const void *field, uint32_t bytes, uint32_t *p_pos, uint32_t alignment)
 {
@@ -60,7 +60,7 @@ error_t ipc_rpc_pack(void *buffer, uint32_t buffer_length,
   return err;
 }
 
-STATIC_INLINE OPTIMIZE_FAST
+STATIC_INLINE
 error_t ipc_rpc_unpack(const void *buffer, uint32_t buffer_length,
     void *field, uint32_t bytes, uint32_t *p_pos, uint32_t alignment)
 {

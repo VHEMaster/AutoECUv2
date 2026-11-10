@@ -15,6 +15,8 @@
 #include "config_ipc_buffer_reader.h"
 #include "config_ipc_transfer_sender.h"
 #include "config_ipc_transfer_receiver.h"
+#include "config_ipc_rpc_caller.h"
+#include "config_ipc_rpc_executor.h"
 
 #include "compiler.h"
 
@@ -89,6 +91,24 @@ void middlelayer_ipc_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_ipc_transfer_receiver_init(i, (ipc_transfer_receiver_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_IPC_RPC_CALLER_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_RPC_CALLER, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_rpc_caller_init(i, (ipc_rpc_caller_ctx_t *)ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_IPC_RPC_EXECUTOR_MAX; i++) {
+      err = ecu_ipc_get_ipc_ctx(ECU_IPC_TYPE_RPC_EXECUTOR, i, &ipc_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_ipc_rpc_executor_init(i, (ipc_rpc_executor_ctx_t *)ipc_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

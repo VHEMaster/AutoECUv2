@@ -21,7 +21,9 @@
     ECU_IPC_BUFFER_WRITER_MAX       + \
     ECU_IPC_BUFFER_READER_MAX       + \
     ECU_IPC_TRANSFER_SENDER_MAX     + \
-    ECU_IPC_TRANSFER_RECEIVER_MAX)
+    ECU_IPC_TRANSFER_RECEIVER_MAX   + \
+    ECU_IPC_RPC_CALLER_MAX          + \
+    ECU_IPC_RPC_EXECUTOR_MAX)
 
 typedef uint32_t ecu_ipc_instance_t;
 
@@ -33,6 +35,8 @@ typedef enum {
   ECU_IPC_TYPE_BUFFER_READER,
   ECU_IPC_TYPE_TRANSFER_SENDER,
   ECU_IPC_TYPE_TRANSFER_RECEIVER,
+  ECU_IPC_TYPE_RPC_CALLER,
+  ECU_IPC_TYPE_RPC_EXECUTOR,
   ECU_IPC_TYPE_MAX
 }ecu_ipc_type_t;
 
@@ -77,6 +81,16 @@ typedef enum {
   ECU_IPC_TRANSFER_RECEIVER_2,
   ECU_IPC_TRANSFER_RECEIVER_MAX
 }ecu_ipc_transfer_receiver_t;
+
+typedef enum {
+  ECU_IPC_RPC_CALLER_1 = 0,
+  ECU_IPC_RPC_CALLER_MAX
+}ecu_ipc_rpc_caller_t;
+
+typedef enum {
+  ECU_IPC_RPC_EXECUTOR_1 = 0,
+  ECU_IPC_RPC_EXECUTOR_MAX
+}ecu_ipc_rpc_executor_t;
 
 typedef void (*ecu_ipc_loop_func_t)(void *ctx);
 
