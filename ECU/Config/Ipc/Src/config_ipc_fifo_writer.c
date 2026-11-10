@@ -8,7 +8,7 @@
 #include "config_ipc_fifo_writer.h"
 #include "compiler.h"
 
-#define ECU_IPC_FIFO_WRITER_BUFFER_SIZE (16u)
+#define ECU_IPC_FIFO_WRITER_BUFFER_SIZE (128u)
 
 #ifdef CORE_CM7
 #define IPC_FIFO_WRITER_HEADER_SECTION SHARED_SECTION_EX("fifo_cm7_to_cm4_headers")

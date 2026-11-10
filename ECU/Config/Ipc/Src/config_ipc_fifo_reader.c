@@ -8,7 +8,7 @@
 #include "config_ipc_fifo_reader.h"
 #include "compiler.h"
 
-#define ECU_IPC_FIFO_READER_BUFFER_SIZE (16u)
+#define ECU_IPC_FIFO_READER_BUFFER_SIZE (128u)
 
 #ifdef CORE_CM7
 #define IPC_FIFO_READER_HEADER_SECTION SHARED_SECTION_EX("fifo_cm4_to_cm7_headers")

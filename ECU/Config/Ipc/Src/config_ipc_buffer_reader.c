@@ -8,8 +8,8 @@
 #include "config_ipc_buffer_reader.h"
 #include "compiler.h"
 
-#define ECU_IPC_BUFFER_READER_BUFFER_SIZE         (1024u)
-#define ECU_IPC_BUFFER_READER_DESCRIPTORS_COUNT   (16u)
+#define ECU_IPC_BUFFER_READER_BUFFER_SIZE         (16384u)
+#define ECU_IPC_BUFFER_READER_DESCRIPTORS_COUNT   (64u)
 
 #ifdef CORE_CM7
 #define IPC_BUFFER_READER_HEADER_SECTION        SHARED_SECTION_EX("buffer_cm4_to_cm7_headers")

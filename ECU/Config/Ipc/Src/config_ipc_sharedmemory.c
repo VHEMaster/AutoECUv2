@@ -8,7 +8,7 @@
 #include "config_ipc_sharedmemory.h"
 #include "compiler.h"
 
-#define ECU_IPC_SHAREDMEMORY_BUFFER_SIZE (1024u)
+#define ECU_IPC_SHAREDMEMORY_BUFFER_SIZE (32768u)
 
 #define IPC_SHAREDMEMORY_BUFFER_SECTION SHARED_SECTION_EX("sharedmemory")
 
