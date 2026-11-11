@@ -14,6 +14,11 @@ typedef error_t (*ipc_rpc_caller_fsm_start_cb_t)(uint32_t *func_id, uint32_t *ar
 typedef error_t (*ipc_rpc_caller_fsm_pack_cb_t)(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
 typedef void (*ipc_rpc_caller_fsm_finish_cb_t)(error_t result, void *usrdata);
 
+typedef error_t (*ipc_rpc_executor_fsm_start_cb_t)(uint32_t func_id, uint32_t *args_count, void *usrdata);
+typedef error_t (*ipc_rpc_executor_fsm_unpack_cb_t)(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+typedef error_t (*ipc_rpc_executor_fsm_execute_cb_t)(void *usrdata);
+typedef void (*ipc_rpc_executor_fsm_finish_cb_t)(void *usrdata);
+
 typedef enum {
   IPC_RPC_CALLER_FSM_IDLE = 0,
   IPC_RPC_CALLER_FSM_START,
@@ -26,6 +31,16 @@ typedef enum {
   IPC_RPC_CALLER_FSM_FINISH,
 }ipc_rpc_caller_fsm_state_t;
 
+typedef enum {
+  IPC_RPC_EXECUTOR_FSM_LOCK = 0,
+  IPC_RPC_EXECUTOR_FSM_IDLE,
+  IPC_RPC_EXECUTOR_FSM_POLL,
+  IPC_RPC_EXECUTOR_FSM_START,
+  IPC_RPC_EXECUTOR_FSM_UNPACK,
+  IPC_RPC_EXECUTOR_FSM_EXECUTE,
+  IPC_RPC_EXECUTOR_FSM_FINISH,
+}ipc_rpc_executor_fsm_state_t;
+
 typedef struct {
     ipc_rpc_caller_fsm_state_t state;
     uint32_t func_id;
@@ -36,5 +51,10 @@ typedef struct {
     uint32_t pos;
     error_t result;
 }ipc_rpc_caller_fsm_ctx_t;
+
+typedef struct {
+    ipc_rpc_executor_fsm_state_t state;
+
+}ipc_rpc_executor_fsm_ctx_t;
 
 #endif /* IPC_IPCRPC_INC_IPC_RPC_FSM_TYPES_H_ */

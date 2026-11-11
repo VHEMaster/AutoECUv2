@@ -10,6 +10,8 @@
 #include "compiler.h"
 #include "bool.h"
 
+#include "config_ipc_rpc_executor.h"
+
 typedef enum {
   ECU_IPC_LOOP_TYPE_MAIN = 0,
   ECU_IPC_LOOP_TYPE_SLOW,
@@ -214,6 +216,13 @@ error_t ecu_ipc_init(void)
   }
 
   return err;
+}
+
+void ecu_ipc_loop(void)
+{
+  for(ecu_ipc_rpc_executor_t i = 0; i < ECU_IPC_RPC_EXECUTOR_MAX; i++) {
+    ecu_ipc_rpc_executor_loop(i);
+  }
 }
 
 error_t ecu_ipc_get_ipc_ctx(ecu_ipc_type_t type, ecu_ipc_instance_t instance, void **ctx)

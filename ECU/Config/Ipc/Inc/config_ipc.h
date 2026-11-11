@@ -22,11 +22,13 @@
 #include "config_ipc_types.h"
 
 error_t ecu_ipc_init(void);
+void ecu_ipc_loop(void);
 
 error_t ecu_ipc_get_ipc_ctx(ecu_ipc_type_t type, ecu_ipc_instance_t instance, void **ctx);
 
 error_t ecu_ipc_get_type_max(ecu_ipc_type_t *type_max);
 error_t ecu_ipc_get_instance_max(ecu_ipc_type_t type, ecu_ipc_instance_t *instance_max);
+
 
 error_t ecu_ipc_get_sharedmemory_ctx(ecu_ipc_sharedmemory_t instance, ipc_sharedmemory_ctx_t **ctx);
 error_t ecu_ipc_get_fifo_writer_ctx(ecu_ipc_fifo_writer_t instance, ipc_fifo_writer_ctx_t **ctx);

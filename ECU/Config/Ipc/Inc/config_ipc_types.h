@@ -115,5 +115,4 @@ typedef enum {
 
 typedef void (*ecu_ipc_loop_func_t)(void *ctx);
 
-
 #endif /* CONFIG_IPC_INC_CONFIG_IPC_TYPES_H_ */

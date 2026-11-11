@@ -132,6 +132,8 @@ static void middlelayer_tim_comm_irq(void)
   core_loop_comm();
 #endif /* CORE_CM7 */
 
+  ecu_ipc_loop();
+
   TIME_MSMT_STOP(&ml_loop_time_msmt.comm);
 }
 
@@ -149,6 +151,8 @@ void middlelayer_init(void)
 
   middlelayer_gpio_init();
 
+  middlelayer_ipc_init();
+
   middlelayer_devices_init();
 
   middlelayer_sensors_init();
@@ -156,8 +160,6 @@ void middlelayer_init(void)
   middlelayer_modules_init();
 
   middlelayer_timings_init();
-
-  middlelayer_ipc_init();
 
   ecu_config_global_init();
 
@@ -168,9 +170,9 @@ void middlelayer_init(void)
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-  middlelayer_comm_init();
-
   middlelayer_ipc_init();
+
+  middlelayer_comm_init();
 #endif /* CORE_CM4 */
 }
 
