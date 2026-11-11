@@ -7,12 +7,13 @@
 
 #include <string.h>
 #include "config_isotp.h"
+#include "ipc_rpc_pack.h"
 #ifdef CORE_CM7
 #include "config_comm_rpc.h"
+#include "config_ipc.h"
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
 #include "config_ipc_rpc_executor.h"
-#include "ipc_rpc_pack.h"
 #endif /* CORE_CM4 */
 #include "compiler.h"
 
@@ -30,6 +31,13 @@ static error_t ecu_comm_isotp_rpc_executor_frame_write_upstream_execute(void *us
 static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
 static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_execute(void *usrdata);
 #endif /* CORE_CM4 */
+
+#ifdef CORE_CM7
+static error_t ecu_comm_isotp_rpc_caller_data_write_downstream_start(uint32_t *func_id, uint32_t *args_count, void *usrdata);
+static error_t ecu_comm_isotp_rpc_caller_data_write_downstream_pack(uint32_t arg_index,
+    void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+
+#endif /* CORE_CM7 */
 
 typedef struct ecu_comm_isotp_ctx_tag {
 #ifdef CORE_CM7
@@ -126,7 +134,7 @@ error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
         ecu_comm_isotp_rpc_executor_frame_write_upstream_unpack, ecu_comm_isotp_rpc_executor_frame_write_upstream_execute, isotp_ctx);
     BREAK_IF(err != E_OK);
 
-    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM, 2u,
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM, 3u,
         ecu_comm_isotp_rpc_executor_data_write_downstream_unpack, ecu_comm_isotp_rpc_executor_data_write_downstream_execute, isotp_ctx);
     BREAK_IF(err != E_OK);
 
@@ -290,9 +298,24 @@ error_t ecu_comm_isotp_data_write_downstream(ecu_comm_isotp_t instance, const ui
 
 #ifdef CORE_CM7
     BREAK_IF_ACTION(length == 0u || length > ISOTP_PAYLOAD_LEN_MAX, err = E_PARAM);
-    /* The executor gets the ISO-TP length from the bytes after the instance. */
-    err = ecu_comm_rpc_call(&isotp_ctx->rpc_data_write_downstream, ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM,
-        instance, payload, length, ALIGNOF(uint8_t));
+    ecu_comm_rpc_ctx_t *rpc_ctx = &isotp_ctx->rpc_data_write_downstream;
+
+    if(rpc_ctx->fsm.state == IPC_RPC_CALLER_FSM_IDLE) {
+      err = ecu_ipc_get_rpc_caller_ctx(ECU_IPC_RPC_CALLER_1, &rpc_ctx->caller);
+      BREAK_IF(err != E_OK);
+      BREAK_IF_ACTION(rpc_ctx->caller == NULL, err = E_FAULT);
+
+      rpc_ctx->instance = instance;
+      rpc_ctx->argument = payload;
+      rpc_ctx->bytes = length;
+    } else {
+      BREAK_IF_ACTION(rpc_ctx->instance != instance || rpc_ctx->argument != payload ||
+          rpc_ctx->bytes != length, err = E_BUSY);
+    }
+
+    err = ipc_rpc_caller_fsm(rpc_ctx->caller, &rpc_ctx->fsm,
+        ecu_comm_isotp_rpc_caller_data_write_downstream_start,
+        ecu_comm_isotp_rpc_caller_data_write_downstream_pack, NULL, rpc_ctx);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -488,7 +511,6 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_unpack(uint32_t
 {
   error_t err = E_OK;
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
-  uint32_t bytes;
 
   do {
     BREAK_IF(isotp_ctx == NULL);
@@ -500,13 +522,13 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_unpack(uint32_t
             p_pos, ALIGNOF(ecu_comm_instance_t));
         break;
       case 1:
-        BREAK_IF_ACTION(*p_pos >= capacity, err = E_PARAM);
-        bytes = capacity - *p_pos;
-        BREAK_IF_ACTION(bytes > ISOTP_PAYLOAD_LEN_MAX, err = E_PARAM);
+        err = ipc_rpc_unpack(buffer, capacity,
+            &isotp_ctx->rpc_length, sizeof(isotp_ctx->rpc_length),
+            p_pos, ALIGNOF(uint16_t));
+        break;
+      case 2:
         err = ipc_rpc_unpack_ptr(buffer, capacity, &isotp_ctx->rpc_pointer,
-            bytes, p_pos, ALIGNOF(uint8_t));
-        BREAK_IF(err != E_OK);
-        isotp_ctx->rpc_length = (uint16_t)bytes;
+            isotp_ctx->rpc_length, p_pos, ALIGNOF(uint8_t));
         break;
       default:
         err = E_PARAM;
@@ -535,3 +557,33 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_execute(void *u
 }
 
 #endif /* CORE_CM4 */
+
+#ifdef CORE_CM7
+static error_t ecu_comm_isotp_rpc_caller_data_write_downstream_start(uint32_t *func_id, uint32_t *args_count, void *usrdata)
+{
+  (void)usrdata;
+  *func_id = ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM;
+  *args_count = 3u;
+
+  return E_OK;
+}
+
+static error_t ecu_comm_isotp_rpc_caller_data_write_downstream_pack(uint32_t arg_index,
+    void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  ecu_comm_rpc_ctx_t *rpc_ctx = usrdata;
+  uint16_t length = (uint16_t)rpc_ctx->bytes;
+
+  switch(arg_index) {
+    case 0:
+      return ipc_rpc_pack(buffer, capacity, &rpc_ctx->instance, sizeof(rpc_ctx->instance),
+          p_pos, ALIGNOF(ecu_comm_instance_t));
+    case 1:
+      return ipc_rpc_pack(buffer, capacity, &length, sizeof(length), p_pos, ALIGNOF(uint16_t));
+    case 2:
+      return ipc_rpc_pack(buffer, capacity, rpc_ctx->argument, length, p_pos, ALIGNOF(uint8_t));
+    default:
+      return E_PARAM;
+  }
+}
+#endif /* CORE_CM7 */
