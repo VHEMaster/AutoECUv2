@@ -9,6 +9,10 @@
 #ifdef CORE_CM7
 #include "config_comm_rpc.h"
 #endif /* CORE_CM7 */
+#ifdef CORE_CM4
+#include "config_ipc_rpc_executor.h"
+#include "ipc_rpc_pack.h"
+#endif /* CORE_CM4 */
 #include "config_extern.h"
 #ifdef CORE_CM7
 #include "config_global.h"
@@ -16,6 +20,13 @@
 #include "common.h"
 
 typedef struct ecu_comm_signals_ctx_tag ecu_comm_signals_ctx_t;
+
+#ifdef CORE_CM4
+static error_t ecu_comm_signals_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_signals_rpc_executor_configure_execute(void *usrdata);
+static error_t ecu_comm_signals_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_signals_rpc_executor_reset_execute(void *usrdata);
+#endif /* CORE_CM4 */
 
 typedef struct ecu_comm_signals_ctx_tag {
 #ifdef CORE_CM7
@@ -26,6 +37,9 @@ typedef struct ecu_comm_signals_ctx_tag {
 #ifdef CORE_CM4
   signals_init_ctx_t init;
   signals_ctx_t *ctx;
+
+    ecu_comm_instance_t rpc_instance;
+    const void *rpc_pointer;
 #endif /* CORE_CM4 */
 }ecu_comm_signals_ctx_t;
 
@@ -162,6 +176,14 @@ error_t ecu_comm_signals_init(ecu_comm_signals_t instance, signals_ctx_t *ctx)
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_SIGNALS, instance, false);
     BREAK_IF(err != E_OK);
 
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_SIGNALS_CONFIGURE, 2u,
+        ecu_comm_signals_rpc_executor_configure_unpack, ecu_comm_signals_rpc_executor_configure_execute, signals_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_SIGNALS_RESET, 1u,
+        ecu_comm_signals_rpc_executor_reset_unpack, ecu_comm_signals_rpc_executor_reset_execute, signals_ctx);
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -239,3 +261,89 @@ error_t ecu_comm_signals_reset(ecu_comm_signals_t instance)
 
   return err;
 }
+
+#ifdef CORE_CM4
+static error_t ecu_comm_signals_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_signals_ctx_t *signals_ctx = usrdata;
+
+  do {
+    BREAK_IF(signals_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity,
+            &signals_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
+        break;
+      case 1:
+        err = ipc_rpc_unpack_ptr(buffer, capacity,
+            &signals_ctx->rpc_pointer, sizeof(signals_config_t),
+            p_pos, ALIGNOF(signals_config_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_signals_rpc_executor_configure_execute(void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_signals_ctx_t *signals_ctx = usrdata;
+
+  do {
+    BREAK_IF(signals_ctx == NULL);
+
+    err = ecu_comm_signals_configure(signals_ctx->rpc_instance, signals_ctx->rpc_pointer);
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_signals_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_signals_ctx_t *signals_ctx = usrdata;
+
+  do {
+    BREAK_IF(signals_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity,
+            &signals_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_signals_rpc_executor_reset_execute(void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_signals_ctx_t *signals_ctx = usrdata;
+
+  do {
+    BREAK_IF(signals_ctx == NULL);
+
+    err = ecu_comm_signals_reset(signals_ctx->rpc_instance);
+
+  } while(0);
+
+  return err;
+}
+
+#endif /* CORE_CM4 */

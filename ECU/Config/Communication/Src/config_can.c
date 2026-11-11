@@ -460,8 +460,8 @@ static error_t ecu_comm_can_rpc_executor_configure_unpack(uint32_t arg_index, co
     switch(arg_index) {
       case 0:
         err = ipc_rpc_unpack(buffer, capacity,
-            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
-            p_pos, ALIGNOF(ecu_comm_can_t));
+            &can_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
         break;
       case 1:
         err = ipc_rpc_unpack_ptr(buffer, capacity,
@@ -504,8 +504,8 @@ static error_t ecu_comm_can_rpc_executor_reset_unpack(uint32_t arg_index, const 
     switch(arg_index) {
       case 0:
         err = ipc_rpc_unpack(buffer, capacity,
-            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
-            p_pos, ALIGNOF(ecu_comm_can_t));
+            &can_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
         break;
       default:
         err = E_PARAM;
@@ -543,8 +543,8 @@ static error_t ecu_comm_can_rpc_executor_transmit_unpack(uint32_t arg_index, con
     switch(arg_index) {
       case 0:
         err = ipc_rpc_unpack(buffer, capacity,
-            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
-            p_pos, ALIGNOF(ecu_comm_can_t));
+            &can_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
         break;
       case 1:
         err = ipc_rpc_unpack_ptr(buffer, capacity,
