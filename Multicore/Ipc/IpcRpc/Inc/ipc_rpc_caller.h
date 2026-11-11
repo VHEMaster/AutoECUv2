@@ -18,6 +18,7 @@ error_t ipc_rpc_caller_set_memcpy(ipc_rpc_caller_ctx_t *ctx, uint32_t threshold_
 error_t ipc_rpc_caller_lock(ipc_rpc_caller_ctx_t *ctx);
 error_t ipc_rpc_caller_unlock(ipc_rpc_caller_ctx_t *ctx);
 
+error_t ipc_rpc_caller_get_args_buffer(ipc_rpc_caller_ctx_t *ctx, uint32_t *p_args_bytes, void **args);
 error_t ipc_rpc_caller_call(ipc_rpc_caller_ctx_t *ctx, uint32_t func_id, uint32_t args_bytes, const void *args);
 error_t ipc_rpc_caller_poll(ipc_rpc_caller_ctx_t *ctx, error_t *p_ret);
 error_t ipc_rpc_caller_abort(ipc_rpc_caller_ctx_t *ctx);

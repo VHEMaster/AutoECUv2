@@ -10,6 +10,7 @@
 
 #include "ipc_rpc_pack.h"
 #include "ipc_rpc_caller.h"
+#include "ipc_rpc_caller_fsm.h"
 #include "ipc_rpc_executor.h"
 
 #endif /* IPC_IPCRPC_INC_IPC_RPC_H_ */

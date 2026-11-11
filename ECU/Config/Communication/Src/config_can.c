@@ -9,11 +9,31 @@
 #include "config_extern.h"
 #include "common.h"
 
+#ifdef CORE_CM7
+#include "ipc_rpc.h"
+#include "config_ipc.h"
+#endif /* CORE_CM7 */
+
 typedef struct ecu_comm_can_ctx_tag ecu_comm_can_ctx_t;
+#ifdef CORE_CM7
+static error_t ecu_comm_can_configure_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata);
+static error_t ecu_comm_can_configure_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_can_reset_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata);
+static error_t ecu_comm_can_reset_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_can_transmit_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata);
+static error_t ecu_comm_can_transmit_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+#endif /* CORE_CM7 */
 #ifdef CORE_CM4
 static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
 static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata);
 #endif /* CORE_CM4 */
+
+typedef enum {
+  ECU_COMM_CAN_RPC_CALLER_FSM_CONFIGURE = 0,
+  ECU_COMM_CAN_RPC_CALLER_FSM_RESET,
+  ECU_COMM_CAN_RPC_CALLER_FSM_TRANSMIT,
+  ECU_COMM_CAN_RPC_CALLER_FSM_MAX
+}ecu_comm_can_rpc_caller_fsm_t;
 
 typedef struct {
     uint32_t msg_id_start;
@@ -25,18 +45,28 @@ typedef struct {
 }ecu_comm_can_callback_usrdata_t;
 
 typedef struct ecu_comm_can_ctx_tag {
+    ecu_comm_can_t instance;
 #ifdef CORE_CM7
   const can_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
   can_init_ctx_t init;
   can_ctx_t *ctx;
-#endif /* CORE_CM4 */
 
   uint32_t rx_callbacks_count;
   uint32_t err_callbacks_count;
   ecu_comm_can_callback_usrdata_t rx_callbacks[CAN_RX_CB_MAX];
   ecu_comm_can_callback_usrdata_t err_callbacks[CAN_ERR_CB_MAX];
+#endif /* CORE_CM4 */
+
+#ifdef CORE_CM7
+  ipc_rpc_caller_ctx_t *rpc_caller_ctx;
+  ipc_rpc_caller_fsm_ctx_t rpc_caller_fsms[ECU_COMM_CAN_RPC_CALLER_FSM_MAX];
+  const can_config_t *rpc_config_ptr;
+  const can_message_t *rpc_transmit_message;
+  can_message_t *rpc_receive_message;
+#endif /* CORE_CM7 */
+
 }ecu_comm_can_ctx_t;
 
 #ifdef CORE_CM7
@@ -157,6 +187,7 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
     BREAK_IF_ACTION(instance >= ECU_COMM_CAN_MAX || ctx == NULL, err = E_PARAM);
 
     can_ctx = &ecu_comm_can_ctx[instance];
+    can_ctx->instance = instance;
     can_ctx->ctx = ctx;
 
 #if (USE_HAL_FDCAN_REGISTER_CALLBACKS == 1UL)
@@ -212,12 +243,32 @@ error_t ecu_comm_can_configure(ecu_comm_can_t instance, const can_config_t *conf
 
     can_ctx = &ecu_comm_can_ctx[instance];
 
+#ifdef CORE_CM7
+    ipc_rpc_caller_fsm_ctx_t *fsm_ctx = &can_ctx->rpc_caller_fsms[ECU_COMM_CAN_RPC_CALLER_FSM_CONFIGURE];
+
+    if(fsm_ctx->state == IPC_RPC_CALLER_FSM_IDLE) {
+      can_ctx->instance = instance;
+      can_ctx->rpc_config_ptr = config;
+      err = ecu_ipc_get_rpc_caller_ctx(ECU_IPC_RPC_CALLER_1, &can_ctx->rpc_caller_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    BREAK_IF_ACTION(can_ctx->rpc_caller_ctx == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(can_ctx->rpc_config_ptr != config, err = E_BUSY);
+
+    err = ipc_rpc_caller_fsm(can_ctx->rpc_caller_ctx, fsm_ctx,
+        ecu_comm_can_configure_rpc_caller_fsm_start_cb,
+        ecu_comm_can_configure_rpc_caller_fsm_pack_cb,
+        NULL, can_ctx);
+    BREAK_IF(err != E_OK);
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
     memset(can_ctx->rx_callbacks, 0, sizeof(can_ctx->rx_callbacks));
     memset(can_ctx->err_callbacks, 0, sizeof(can_ctx->err_callbacks));
     can_ctx->rx_callbacks_count = 0;
     can_ctx->err_callbacks_count = 0;
 
-#ifdef CORE_CM4
     err = can_configure(can_ctx->ctx, config);
     BREAK_IF(err != E_OK);
 
@@ -241,7 +292,21 @@ error_t ecu_comm_can_reset(ecu_comm_can_t instance)
     can_ctx = &ecu_comm_can_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)can_ctx;
+    ipc_rpc_caller_fsm_ctx_t *fsm_ctx = &can_ctx->rpc_caller_fsms[ECU_COMM_CAN_RPC_CALLER_FSM_RESET];
+
+    if(fsm_ctx->state == IPC_RPC_CALLER_FSM_IDLE) {
+      can_ctx->instance = instance;
+      err = ecu_ipc_get_rpc_caller_ctx(ECU_IPC_RPC_CALLER_1, &can_ctx->rpc_caller_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    BREAK_IF_ACTION(can_ctx->rpc_caller_ctx == NULL, err = E_FAULT);
+
+    err = ipc_rpc_caller_fsm(can_ctx->rpc_caller_ctx, fsm_ctx,
+        ecu_comm_can_reset_rpc_caller_fsm_start_cb,
+        ecu_comm_can_reset_rpc_caller_fsm_pack_cb,
+        NULL, can_ctx);
+    BREAK_IF(err != E_OK);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -264,7 +329,23 @@ error_t ecu_comm_can_transmit(ecu_comm_can_t instance, const can_message_t *mess
     can_ctx = &ecu_comm_can_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)can_ctx;
+    ipc_rpc_caller_fsm_ctx_t *fsm_ctx = &can_ctx->rpc_caller_fsms[ECU_COMM_CAN_RPC_CALLER_FSM_TRANSMIT];
+
+    if(fsm_ctx->state == IPC_RPC_CALLER_FSM_IDLE) {
+      can_ctx->instance = instance;
+      can_ctx->rpc_transmit_message = message;
+      err = ecu_ipc_get_rpc_caller_ctx(ECU_IPC_RPC_CALLER_1, &can_ctx->rpc_caller_ctx);
+      BREAK_IF(err != E_OK);
+    }
+
+    BREAK_IF_ACTION(can_ctx->rpc_caller_ctx == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(can_ctx->rpc_transmit_message != message, err = E_BUSY);
+
+    err = ipc_rpc_caller_fsm(can_ctx->rpc_caller_ctx, fsm_ctx,
+        ecu_comm_can_transmit_rpc_caller_fsm_start_cb,
+        ecu_comm_can_transmit_rpc_caller_fsm_pack_cb,
+        NULL, can_ctx);
+    BREAK_IF(err != E_OK);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -288,6 +369,7 @@ error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
 
 #ifdef CORE_CM7
     (void)can_ctx;
+    err = E_NOTSUPPORT;
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -299,6 +381,7 @@ error_t ecu_comm_can_receive(ecu_comm_can_t instance, can_message_t *message)
   return err;
 }
 
+#ifdef CORE_CM4
 error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_id_start, uint32_t msg_id_end, ecu_comm_can_rx_callback_t func, void *usrdata)
 {
   error_t err = E_OK;
@@ -322,9 +405,7 @@ error_t ecu_comm_can_register_rx_callback(ecu_comm_can_t instance, uint32_t msg_
     cb->func = func;
     cb->usrdata = usrdata;
 
-#ifdef CORE_CM4
     err = can_register_rx_callback(can_ctx->ctx, msg_id_start, msg_id_end, ecu_comm_can_rx_callback, cb);
-#endif /* CORE_CM4 */
     if(err == E_OK) {
       can_ctx->rx_callbacks_count = ++cb_count;
     }
@@ -356,9 +437,7 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, ecu_comm_can
     cb->usrdata = usrdata;
 
 
-#ifdef CORE_CM4
     err = can_register_err_callback(can_ctx->ctx, ecu_comm_can_err_callback, cb);
-#endif /* CORE_CM4 */
     if(err == E_OK) {
       can_ctx->err_callbacks_count = ++cb_count;
     }
@@ -368,7 +447,6 @@ error_t ecu_comm_can_register_err_callback(ecu_comm_can_t instance, ecu_comm_can
   return err;
 }
 
-#ifdef CORE_CM4
 static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata)
 {
   ecu_comm_can_callback_usrdata_t *cb = (ecu_comm_can_callback_usrdata_t *)usrdata;
@@ -405,3 +483,100 @@ static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata)
   } while(0);
 }
 #endif /* CORE_CM4 */
+
+#ifdef CORE_CM7
+static error_t ecu_comm_can_configure_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+
+  *func_id = ECU_IPC_RPC_FUNC_CAN_CONFIGURE;
+  *args_count = 2;
+  (void)can_ctx;
+
+  return E_OK;
+}
+
+static error_t ecu_comm_can_configure_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+  error_t err = E_OK;
+
+  switch(arg_index) {
+    case 0:
+      err = ipc_rpc_pack(buffer, capacity, &can_ctx->instance, sizeof(ecu_comm_can_t),
+          p_pos, ALIGNOF(ecu_comm_can_t));
+      break;
+    case 1:
+      err = ipc_rpc_pack(buffer, capacity, can_ctx->rpc_config_ptr, sizeof(can_config_t),
+          p_pos, ALIGNOF(can_config_t));
+      break;
+    default:
+      err = E_PARAM;
+      break;
+  }
+
+  return err;
+}
+
+static error_t ecu_comm_can_reset_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+
+  *func_id = ECU_IPC_RPC_FUNC_CAN_RESET;
+  *args_count = 1;
+  (void)can_ctx;
+
+  return E_OK;
+}
+
+static error_t ecu_comm_can_reset_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+  error_t err = E_OK;
+
+  switch(arg_index) {
+    case 0:
+      err = ipc_rpc_pack(buffer, capacity, &can_ctx->instance, sizeof(ecu_comm_can_t),
+          p_pos, ALIGNOF(ecu_comm_can_t));
+      break;
+    default:
+      err = E_PARAM;
+      break;
+  }
+
+  return err;
+}
+
+static error_t ecu_comm_can_transmit_rpc_caller_fsm_start_cb(uint32_t *func_id, uint32_t *args_count, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+
+  *func_id = ECU_IPC_RPC_FUNC_CAN_TRANSMIT;
+  *args_count = 2;
+  (void)can_ctx;
+
+  return E_OK;
+}
+
+static error_t ecu_comm_can_transmit_rpc_caller_fsm_pack_cb(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  ecu_comm_can_ctx_t *can_ctx = (ecu_comm_can_ctx_t *)usrdata;
+  error_t err = E_OK;
+
+  switch(arg_index) {
+    case 0:
+      err = ipc_rpc_pack(buffer, capacity, &can_ctx->instance, sizeof(ecu_comm_can_t),
+          p_pos, ALIGNOF(ecu_comm_can_t));
+      break;
+    case 1:
+      err = ipc_rpc_pack(buffer, capacity, can_ctx->rpc_transmit_message, sizeof(can_message_t),
+          p_pos, ALIGNOF(can_message_t));
+      break;
+    default:
+      err = E_PARAM;
+      break;
+  }
+
+  return err;
+}
+#endif /* CORE_CM7 */

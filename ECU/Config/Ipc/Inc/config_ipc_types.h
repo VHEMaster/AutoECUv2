@@ -92,6 +92,13 @@ typedef enum {
   ECU_IPC_RPC_EXECUTOR_MAX
 }ecu_ipc_rpc_executor_t;
 
+typedef enum {
+  ECU_IPC_RPC_FUNC_CAN_CONFIGURE = 0,
+  ECU_IPC_RPC_FUNC_CAN_RESET,
+  ECU_IPC_RPC_FUNC_CAN_TRANSMIT,
+  ECU_IPC_RPC_FUNC_MAX,
+}ecu_ipc_rpc_func_t;
+
 typedef void (*ecu_ipc_loop_func_t)(void *ctx);
 
 
