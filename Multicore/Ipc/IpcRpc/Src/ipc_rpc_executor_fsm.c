@@ -85,13 +85,18 @@ void ipc_rpc_executor_fsm(ipc_rpc_executor_ctx_t *executor, ipc_rpc_executor_fsm
         continue;
       case IPC_RPC_EXECUTOR_FSM_EXECUTE:
         if(ATOMIC_LOAD(executor->header->aborted)) {
-          fsm->result = E_ABORTED;
+          err = E_ABORTED;
         } else if(fsm->pos != fsm->args_bytes) {
-          fsm->result = E_PARAM;
+          err = E_PARAM;
         } else {
-          fsm->result = execute(usrdata);
+          err = execute(usrdata);
         }
-        fsm->state = IPC_RPC_EXECUTOR_FSM_FINISH;
+        if(err != E_AGAIN) {
+          fsm->result = err;
+          fsm->state = IPC_RPC_EXECUTOR_FSM_FINISH;
+        } else {
+          break;
+        }
         continue;
       case IPC_RPC_EXECUTOR_FSM_FINISH:
         if(finish != NULL) {
