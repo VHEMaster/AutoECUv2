@@ -83,4 +83,28 @@ error_t ipc_rpc_unpack(const void *buffer, uint32_t buffer_length,
 
   return err;
 }
+
+STATIC_INLINE
+error_t ipc_rpc_unpack_ptr(const void *buffer, uint32_t buffer_length,
+    const void **pointer, uint32_t bytes, uint32_t *p_pos, uint32_t alignment)
+{
+  error_t err = E_OK;
+  uint32_t field_pos;
+
+  do {
+    BREAK_IF_ACTION(buffer == NULL || p_pos == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(bytes != 0u && pointer == NULL, err = E_PARAM);
+
+    err = ipc_rpc_field_pos(buffer_length, *p_pos, bytes, alignment, &field_pos);
+    BREAK_IF(err != E_OK);
+
+    if(bytes != 0u) {
+      *pointer = buffer + field_pos;
+    }
+    *p_pos = field_pos + bytes;
+
+  } while(0);
+
+  return err;
+}
 #endif /* IPC_IPCRPC_INC_IPC_RPC_DEFINES_H_ */

@@ -32,13 +32,15 @@ typedef enum {
 }ipc_rpc_caller_fsm_state_t;
 
 typedef enum {
-  IPC_RPC_EXECUTOR_FSM_LOCK = 0,
-  IPC_RPC_EXECUTOR_FSM_IDLE,
+  IPC_RPC_EXECUTOR_FSM_IDLE = 0,
+  IPC_RPC_EXECUTOR_FSM_LOCK,
   IPC_RPC_EXECUTOR_FSM_POLL,
   IPC_RPC_EXECUTOR_FSM_START,
   IPC_RPC_EXECUTOR_FSM_UNPACK,
   IPC_RPC_EXECUTOR_FSM_EXECUTE,
   IPC_RPC_EXECUTOR_FSM_FINISH,
+  IPC_RPC_EXECUTOR_FSM_REPLY,
+  IPC_RPC_EXECUTOR_FSM_UNLOCK,
 }ipc_rpc_executor_fsm_state_t;
 
 typedef struct {
@@ -54,7 +56,14 @@ typedef struct {
 
 typedef struct {
     ipc_rpc_executor_fsm_state_t state;
-
+    uint32_t func_id;
+    uint32_t args_count;
+    uint32_t arg_index;
+    const void *buffer;
+    uint32_t args_bytes;
+    uint32_t pos;
+    bool callback_pending;
+    error_t result;
 }ipc_rpc_executor_fsm_ctx_t;
 
 #endif /* IPC_IPCRPC_INC_IPC_RPC_FSM_TYPES_H_ */
