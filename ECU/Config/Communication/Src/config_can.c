@@ -12,11 +12,24 @@
 #ifdef CORE_CM7
 #include "config_comm_rpc.h"
 #endif /* CORE_CM7 */
+#ifdef CORE_CM4
+#include "config_ipc_rpc_executor.h"
+#include "ipc_rpc_pack.h"
+#endif /* CORE_CM4 */
 
 typedef struct ecu_comm_can_ctx_tag ecu_comm_can_ctx_t;
 #ifdef CORE_CM4
+
 static void ecu_comm_can_rx_callback(can_ctx_t *ctx, const can_message_t *message, void *usrdata);
 static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata);
+
+static error_t ecu_comm_can_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_can_rpc_executor_configure_execute(void *usrdata);
+static error_t ecu_comm_can_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_can_rpc_executor_reset_execute(void *usrdata);
+static error_t ecu_comm_can_rpc_executor_transmit_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_can_rpc_executor_transmit_execute(void *usrdata);
+
 #endif /* CORE_CM4 */
 
 typedef struct {
@@ -40,6 +53,9 @@ typedef struct ecu_comm_can_ctx_tag {
   uint32_t err_callbacks_count;
   ecu_comm_can_callback_usrdata_t rx_callbacks[CAN_RX_CB_MAX];
   ecu_comm_can_callback_usrdata_t err_callbacks[CAN_ERR_CB_MAX];
+
+  ecu_comm_instance_t rpc_instance;
+  const void *rpc_pointer;
 #endif /* CORE_CM4 */
 
 #ifdef CORE_CM7
@@ -185,6 +201,18 @@ error_t ecu_comm_can_init(ecu_comm_can_t instance, can_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_CAN, instance, false);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_CAN_CONFIGURE, 2u,
+        ecu_comm_can_rpc_executor_configure_unpack, ecu_comm_can_rpc_executor_configure_execute, can_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_CAN_RESET, 1u,
+        ecu_comm_can_rpc_executor_reset_unpack, ecu_comm_can_rpc_executor_reset_execute, can_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_CAN_TRANSMIT, 2u,
+        ecu_comm_can_rpc_executor_transmit_unpack, ecu_comm_can_rpc_executor_transmit_execute, can_ctx);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -420,4 +448,132 @@ static void ecu_comm_can_err_callback(can_ctx_t *ctx, void *usrdata)
     }
   } while(0);
 }
+
+static error_t ecu_comm_can_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity,
+            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
+            p_pos, ALIGNOF(ecu_comm_can_t));
+        break;
+      case 1:
+        err = ipc_rpc_unpack_ptr(buffer, capacity,
+            &can_ctx->rpc_pointer, sizeof(can_config_t),
+            p_pos, ALIGNOF(can_config_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_can_rpc_executor_configure_execute(void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    err = ecu_comm_can_configure(can_ctx->rpc_instance, can_ctx->rpc_pointer);
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_can_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity,
+            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
+            p_pos, ALIGNOF(ecu_comm_can_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_can_rpc_executor_reset_execute(void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    err = ecu_comm_can_reset(can_ctx->rpc_instance);
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_can_rpc_executor_transmit_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity,
+            &can_ctx->rpc_instance, sizeof(ecu_comm_can_t),
+            p_pos, ALIGNOF(ecu_comm_can_t));
+        break;
+      case 1:
+        err = ipc_rpc_unpack_ptr(buffer, capacity,
+            &can_ctx->rpc_pointer, sizeof(can_message_t),
+            p_pos, ALIGNOF(can_message_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_can_rpc_executor_transmit_execute(void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_can_ctx_t *can_ctx = usrdata;
+
+  do {
+    BREAK_IF(can_ctx == NULL);
+
+    err = ecu_comm_can_transmit(can_ctx->rpc_instance, can_ctx->rpc_pointer);
+
+  } while(0);
+
+  return err;
+}
+
 #endif /* CORE_CM4 */
