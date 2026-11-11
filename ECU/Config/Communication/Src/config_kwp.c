@@ -6,6 +6,9 @@
  */
 
 #include "config_kwp.h"
+#ifdef CORE_CM7
+#include "config_comm_rpc.h"
+#endif /* CORE_CM7 */
 #include "config_extern.h"
 #include "common.h"
 
@@ -13,6 +16,8 @@ typedef struct ecu_comm_kwp_ctx_tag ecu_comm_kwp_ctx_t;
 
 typedef struct ecu_comm_kwp_ctx_tag {
 #ifdef CORE_CM7
+    ecu_comm_rpc_ctx_t rpc_configure;
+    ecu_comm_rpc_ctx_t rpc_reset;
   const kwp_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -101,7 +106,8 @@ error_t ecu_comm_kwp_configure(ecu_comm_kwp_t instance, const kwp_config_t *conf
     kwp_ctx = &ecu_comm_kwp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)kwp_ctx;
+    err = ecu_comm_rpc_call(&kwp_ctx->rpc_configure, ECU_IPC_RPC_FUNC_KWP_CONFIGURE,
+        instance, config, sizeof(*config), ALIGNOF(kwp_config_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -128,7 +134,8 @@ error_t ecu_comm_kwp_reset(ecu_comm_kwp_t instance)
     kwp_ctx = &ecu_comm_kwp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)kwp_ctx;
+    err = ecu_comm_rpc_call(&kwp_ctx->rpc_reset, ECU_IPC_RPC_FUNC_KWP_RESET,
+        instance, NULL, 0u, 1u);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4

@@ -7,6 +7,9 @@
 
 #include <string.h>
 #include "config_uds.h"
+#ifdef CORE_CM7
+#include "config_comm_rpc.h"
+#endif /* CORE_CM7 */
 #include "compiler.h"
 
 typedef struct ecu_comm_uds_ctx_tag ecu_comm_uds_ctx_t;
@@ -17,6 +20,8 @@ static void ecu_comm_uds_error_callback(uds_ctx_t *ctx, uds_error_code_t code, v
 
 typedef struct ecu_comm_uds_ctx_tag {
 #ifdef CORE_CM7
+    ecu_comm_rpc_ctx_t rpc_configure;
+    ecu_comm_rpc_ctx_t rpc_reset;
     const uds_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -130,7 +135,8 @@ error_t ecu_comm_uds_configure(ecu_comm_uds_t instance, const uds_config_t *conf
     uds_ctx = &ecu_comm_uds_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)uds_ctx;
+    err = ecu_comm_rpc_call(&uds_ctx->rpc_configure, ECU_IPC_RPC_FUNC_UDS_CONFIGURE,
+        instance, config, sizeof(*config), ALIGNOF(uds_config_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -157,7 +163,8 @@ error_t ecu_comm_uds_reset(ecu_comm_uds_t instance)
     uds_ctx = &ecu_comm_uds_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)uds_ctx;
+    err = ecu_comm_rpc_call(&uds_ctx->rpc_reset, ECU_IPC_RPC_FUNC_UDS_RESET,
+        instance, NULL, 0u, 1u);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4

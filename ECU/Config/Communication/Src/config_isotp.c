@@ -7,6 +7,9 @@
 
 #include <string.h>
 #include "config_isotp.h"
+#ifdef CORE_CM7
+#include "config_comm_rpc.h"
+#endif /* CORE_CM7 */
 #include "compiler.h"
 
 typedef struct ecu_comm_isotp_ctx_tag ecu_comm_isotp_ctx_t;
@@ -17,6 +20,10 @@ static void ecu_comm_isotp_error_callback(isotp_ctx_t *ctx, isotp_error_code_t c
 
 typedef struct ecu_comm_isotp_ctx_tag {
 #ifdef CORE_CM7
+    ecu_comm_rpc_ctx_t rpc_configure;
+    ecu_comm_rpc_ctx_t rpc_reset;
+    ecu_comm_rpc_ctx_t rpc_frame_write_upstream;
+    ecu_comm_rpc_ctx_t rpc_data_write_downstream;
     const isotp_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -127,7 +134,8 @@ error_t ecu_comm_isotp_configure(ecu_comm_isotp_t instance, const isotp_config_t
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
+    err = ecu_comm_rpc_call(&isotp_ctx->rpc_configure, ECU_IPC_RPC_FUNC_ISOTP_CONFIGURE,
+        instance, config, sizeof(*config), ALIGNOF(isotp_config_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -154,7 +162,8 @@ error_t ecu_comm_isotp_reset(ecu_comm_isotp_t instance)
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
+    err = ecu_comm_rpc_call(&isotp_ctx->rpc_reset, ECU_IPC_RPC_FUNC_ISOTP_RESET,
+        instance, NULL, 0u, 1u);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -197,7 +206,8 @@ error_t ecu_comm_isotp_frame_write_upstream(ecu_comm_isotp_t instance, const can
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
+    err = ecu_comm_rpc_call(&isotp_ctx->rpc_frame_write_upstream, ECU_IPC_RPC_FUNC_ISOTP_FRAME_WRITE_UPSTREAM,
+        instance, message, sizeof(*message), ALIGNOF(can_message_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -222,6 +232,7 @@ error_t ecu_comm_isotp_frame_read_downstream(ecu_comm_isotp_t instance, isotp_fr
 
 #ifdef CORE_CM7
     (void)isotp_ctx;
+    err = E_NOTSUPPORT;
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -245,7 +256,10 @@ error_t ecu_comm_isotp_data_write_downstream(ecu_comm_isotp_t instance, const ui
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
+    BREAK_IF_ACTION(length == 0u || length > ISOTP_PAYLOAD_LEN_MAX, err = E_PARAM);
+    /* The executor gets the ISO-TP length from the bytes after the instance. */
+    err = ecu_comm_rpc_call(&isotp_ctx->rpc_data_write_downstream, ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM,
+        instance, payload, length, ALIGNOF(uint8_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -271,6 +285,7 @@ error_t ecu_comm_isotp_data_read_upstream(ecu_comm_isotp_t instance, uint8_t *pa
 
 #ifdef CORE_CM7
     (void)isotp_ctx;
+    err = E_NOTSUPPORT;
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -293,8 +308,15 @@ error_t ecu_comm_isotp_get_error_flag(ecu_comm_isotp_t instance, isotp_error_cod
 
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
+#ifdef CORE_CM7
+    (void)isotp_ctx;
+    err = E_NOTSUPPORT;
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
     *code = isotp_ctx->error_flag;
     isotp_ctx->error_flag = ISOTP_OK;
+#endif /* CORE_CM4 */
 
   } while(0);
 

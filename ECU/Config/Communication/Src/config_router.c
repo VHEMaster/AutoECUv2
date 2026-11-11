@@ -6,6 +6,9 @@
  */
 
 #include "config_router.h"
+#ifdef CORE_CM7
+#include "config_comm_rpc.h"
+#endif /* CORE_CM7 */
 #include "config_extern.h"
 #include "common.h"
 
@@ -13,6 +16,8 @@ typedef struct ecu_comm_router_ctx_tag ecu_comm_router_ctx_t;
 
 typedef struct ecu_comm_router_ctx_tag {
 #ifdef CORE_CM7
+    ecu_comm_rpc_ctx_t rpc_configure;
+    ecu_comm_rpc_ctx_t rpc_reset;
   const router_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -143,7 +148,8 @@ error_t ecu_comm_router_configure(ecu_comm_router_t instance, const router_confi
     router_ctx = &ecu_comm_router_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)router_ctx;
+    err = ecu_comm_rpc_call(&router_ctx->rpc_configure, ECU_IPC_RPC_FUNC_ROUTER_CONFIGURE,
+        instance, config, sizeof(*config), ALIGNOF(router_config_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -170,7 +176,8 @@ error_t ecu_comm_router_reset(ecu_comm_router_t instance)
     router_ctx = &ecu_comm_router_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)router_ctx;
+    err = ecu_comm_rpc_call(&router_ctx->rpc_reset, ECU_IPC_RPC_FUNC_ROUTER_RESET,
+        instance, NULL, 0u, 1u);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4

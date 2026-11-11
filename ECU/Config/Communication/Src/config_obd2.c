@@ -7,6 +7,9 @@
 
 #include <string.h>
 #include "config_obd2.h"
+#ifdef CORE_CM7
+#include "config_comm_rpc.h"
+#endif /* CORE_CM7 */
 #include "compiler.h"
 
 #ifdef CORE_CM7
@@ -24,6 +27,8 @@ static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code
 
 typedef struct ecu_comm_obd2_ctx_tag {
 #ifdef CORE_CM7
+    ecu_comm_rpc_ctx_t rpc_configure;
+    ecu_comm_rpc_ctx_t rpc_reset;
     const obd2_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -706,7 +711,8 @@ error_t ecu_comm_obd2_configure(ecu_comm_obd2_t instance, const obd2_config_t *c
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)obd2_ctx;
+    err = ecu_comm_rpc_call(&obd2_ctx->rpc_configure, ECU_IPC_RPC_FUNC_OBD2_CONFIGURE,
+        instance, config, sizeof(*config), ALIGNOF(obd2_config_t));
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -733,7 +739,8 @@ error_t ecu_comm_obd2_reset(ecu_comm_obd2_t instance)
     obd2_ctx = &ecu_comm_obd2_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)obd2_ctx;
+    err = ecu_comm_rpc_call(&obd2_ctx->rpc_reset, ECU_IPC_RPC_FUNC_OBD2_RESET,
+        instance, NULL, 0u, 1u);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
