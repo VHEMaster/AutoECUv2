@@ -36,6 +36,7 @@ void ipc_rpc_executor_fsm(ipc_rpc_executor_ctx_t *executor, ipc_rpc_executor_fsm
             &fsm->resp_capacity, &fsm->resp);
         BREAK_IF(err != E_OK);
         fsm->resp_count = 0u;
+        fsm->result = E_OK;
         fsm->resp_index = 0u;
         fsm->resp_bytes = 0u;
         fsm->args_count = 0u;
@@ -94,7 +95,7 @@ void ipc_rpc_executor_fsm(ipc_rpc_executor_ctx_t *executor, ipc_rpc_executor_fsm
         } else if(fsm->pos != fsm->args_bytes) {
           err = E_PARAM;
         } else {
-          err = execute(&fsm->resp_count, usrdata);
+          err = execute(&fsm->resp_count, &fsm->result, usrdata);
         }
         fsm->callback_pending = err == E_AGAIN;
         BREAK_IF(fsm->callback_pending);
@@ -102,10 +103,10 @@ void ipc_rpc_executor_fsm(ipc_rpc_executor_ctx_t *executor, ipc_rpc_executor_fsm
         if(ATOMIC_LOAD(executor->header->aborted)) {
           err = E_ABORTED;
         }
-        if(err == E_ABORTED) {
+        if(err != E_OK) {
+          fsm->result = err;
           fsm->resp_count = 0u;
         }
-        fsm->result = err;
         fsm->state = fsm->resp_count != 0u
             ? IPC_RPC_EXECUTOR_FSM_PACK_RESPONSE : IPC_RPC_EXECUTOR_FSM_FINISH;
         continue;

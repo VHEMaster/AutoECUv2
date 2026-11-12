@@ -22,9 +22,9 @@ typedef struct ecu_comm_uds_ctx_tag ecu_comm_uds_ctx_t;
 static void ecu_comm_uds_error_callback(uds_ctx_t *ctx, uds_error_code_t code, void *userdata);
 
 static error_t ecu_comm_uds_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
 static error_t ecu_comm_uds_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
 #endif /* CORE_CM4 */
 
 typedef struct ecu_comm_uds_ctx_tag {
@@ -233,7 +233,7 @@ static error_t ecu_comm_uds_rpc_executor_configure_unpack(uint32_t arg_index, co
   return err;
 }
 
-static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata)
+static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
@@ -242,6 +242,10 @@ static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_coun
     BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_uds_configure(uds_ctx->rpc_instance, uds_ctx->rpc_pointer);
+    if(err != E_AGAIN) {
+      *p_result = err;
+      err = E_OK;
+    }
 
   } while(0);
 
@@ -272,7 +276,7 @@ static error_t ecu_comm_uds_rpc_executor_reset_unpack(uint32_t arg_index, const 
   return err;
 }
 
-static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata)
+static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
@@ -281,6 +285,10 @@ static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, v
     BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_uds_reset(uds_ctx->rpc_instance);
+    if(err != E_AGAIN) {
+      *p_result = err;
+      err = E_OK;
+    }
 
   } while(0);
 

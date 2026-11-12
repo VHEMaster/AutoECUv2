@@ -134,7 +134,6 @@ error_t ecu_comm_rpc_read(ecu_comm_rpc_ctx_t *ctx, ecu_ipc_rpc_func_t func,
 
     err = ipc_rpc_caller_fsm(ctx->caller, &ctx->fsm, ecu_comm_rpc_start, ecu_comm_rpc_pack,
         ecu_comm_rpc_read_unpack, NULL, ctx);
-    BREAK_IF_ACTION(err == E_NOTRDY, err = E_AGAIN);
     BREAK_IF(err != E_OK);
     BREAK_IF_ACTION(ctx->fsm.arg_index != (response_length != NULL ? 2u : 1u), err = E_BADRESP);
 

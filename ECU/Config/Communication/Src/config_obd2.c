@@ -29,9 +29,9 @@ typedef struct ecu_comm_obd2_ctx_tag ecu_comm_obd2_ctx_t;
 static void ecu_comm_obd2_error_callback(obd2_ctx_t *ctx, obd2_error_code_t code, void *userdata);
 
 static error_t ecu_comm_obd2_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
 static error_t ecu_comm_obd2_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
 #endif /* CORE_CM4 */
 
 typedef struct ecu_comm_obd2_ctx_tag {
@@ -809,7 +809,7 @@ static error_t ecu_comm_obd2_rpc_executor_configure_unpack(uint32_t arg_index, c
   return err;
 }
 
-static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata)
+static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
@@ -818,6 +818,10 @@ static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_cou
     BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_obd2_configure(obd2_ctx->rpc_instance, obd2_ctx->rpc_pointer);
+    if(err != E_AGAIN) {
+      *p_result = err;
+      err = E_OK;
+    }
 
   } while(0);
 
@@ -848,7 +852,7 @@ static error_t ecu_comm_obd2_rpc_executor_reset_unpack(uint32_t arg_index, const
   return err;
 }
 
-static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata)
+static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
@@ -857,6 +861,10 @@ static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, 
     BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_obd2_reset(obd2_ctx->rpc_instance);
+    if(err != E_AGAIN) {
+      *p_result = err;
+      err = E_OK;
+    }
 
   } while(0);
 
