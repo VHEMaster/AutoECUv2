@@ -20,9 +20,9 @@ typedef struct ecu_comm_router_ctx_tag ecu_comm_router_ctx_t;
 
 #ifdef CORE_CM4
 static error_t ecu_comm_router_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_router_rpc_executor_configure_execute(void *usrdata);
+static error_t ecu_comm_router_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata);
 static error_t ecu_comm_router_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_router_rpc_executor_reset_execute(void *usrdata);
+static error_t ecu_comm_router_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata);
 #endif /* CORE_CM4 */
 
 typedef struct ecu_comm_router_ctx_tag {
@@ -126,11 +126,11 @@ error_t ecu_comm_router_init(ecu_comm_router_t instance, router_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ROUTER_CONFIGURE, 2u,
-        ecu_comm_router_rpc_executor_configure_unpack, ecu_comm_router_rpc_executor_configure_execute, router_ctx);
+        ecu_comm_router_rpc_executor_configure_unpack, ecu_comm_router_rpc_executor_configure_execute, NULL, router_ctx);
     BREAK_IF(err != E_OK);
 
     err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ROUTER_RESET, 1u,
-        ecu_comm_router_rpc_executor_reset_unpack, ecu_comm_router_rpc_executor_reset_execute, router_ctx);
+        ecu_comm_router_rpc_executor_reset_unpack, ecu_comm_router_rpc_executor_reset_execute, NULL, router_ctx);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -241,7 +241,7 @@ static error_t ecu_comm_router_rpc_executor_configure_unpack(uint32_t arg_index,
   return err;
 }
 
-static error_t ecu_comm_router_rpc_executor_configure_execute(void *usrdata)
+static error_t ecu_comm_router_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_router_ctx_t *router_ctx = usrdata;
@@ -280,7 +280,7 @@ static error_t ecu_comm_router_rpc_executor_reset_unpack(uint32_t arg_index, con
   return err;
 }
 
-static error_t ecu_comm_router_rpc_executor_reset_execute(void *usrdata)
+static error_t ecu_comm_router_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_router_ctx_t *router_ctx = usrdata;

@@ -57,7 +57,7 @@ error_t ecu_comm_rpc_call(ecu_comm_rpc_ctx_t *ctx, ecu_ipc_rpc_func_t func,
           ctx->argument != argument || ctx->bytes != bytes || ctx->alignment != alignment, err = E_BUSY);
     }
 
-    err = ipc_rpc_caller_fsm(ctx->caller, &ctx->fsm, ecu_comm_rpc_start, ecu_comm_rpc_pack, NULL, ctx);
+    err = ipc_rpc_caller_fsm(ctx->caller, &ctx->fsm, ecu_comm_rpc_start, ecu_comm_rpc_pack, NULL, NULL, ctx);
 
   } while(0);
 

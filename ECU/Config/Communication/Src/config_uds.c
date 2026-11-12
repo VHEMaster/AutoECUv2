@@ -22,9 +22,9 @@ typedef struct ecu_comm_uds_ctx_tag ecu_comm_uds_ctx_t;
 static void ecu_comm_uds_error_callback(uds_ctx_t *ctx, uds_error_code_t code, void *userdata);
 
 static error_t ecu_comm_uds_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_uds_rpc_executor_configure_execute(void *usrdata);
+static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata);
 static error_t ecu_comm_uds_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
-static error_t ecu_comm_uds_rpc_executor_reset_execute(void *usrdata);
+static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata);
 #endif /* CORE_CM4 */
 
 typedef struct ecu_comm_uds_ctx_tag {
@@ -111,11 +111,11 @@ error_t ecu_comm_uds_init(ecu_comm_uds_t instance, uds_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_UDS_CONFIGURE, 2u,
-        ecu_comm_uds_rpc_executor_configure_unpack, ecu_comm_uds_rpc_executor_configure_execute, uds_ctx);
+        ecu_comm_uds_rpc_executor_configure_unpack, ecu_comm_uds_rpc_executor_configure_execute, NULL, uds_ctx);
     BREAK_IF(err != E_OK);
 
     err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_UDS_RESET, 1u,
-        ecu_comm_uds_rpc_executor_reset_unpack, ecu_comm_uds_rpc_executor_reset_execute, uds_ctx);
+        ecu_comm_uds_rpc_executor_reset_unpack, ecu_comm_uds_rpc_executor_reset_execute, NULL, uds_ctx);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -233,7 +233,7 @@ static error_t ecu_comm_uds_rpc_executor_configure_unpack(uint32_t arg_index, co
   return err;
 }
 
-static error_t ecu_comm_uds_rpc_executor_configure_execute(void *usrdata)
+static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_count, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
@@ -272,7 +272,7 @@ static error_t ecu_comm_uds_rpc_executor_reset_unpack(uint32_t arg_index, const 
   return err;
 }
 
-static error_t ecu_comm_uds_rpc_executor_reset_execute(void *usrdata)
+static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, void *usrdata)
 {
   error_t err = E_OK;
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;

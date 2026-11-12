@@ -24,7 +24,9 @@
 static error_t ecu_ipc_rpc_executor_start(uint32_t func_id, uint32_t *args_count, void *usrdata);
 static error_t ecu_ipc_rpc_executor_unpack(uint32_t arg_index, const void *buffer,
     uint32_t bytes, uint32_t *pos, void *usrdata);
-static error_t ecu_ipc_rpc_executor_execute(void *usrdata);
+static error_t ecu_ipc_rpc_executor_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_ipc_rpc_executor_pack(uint32_t arg_index, void *resp,
+    uint32_t resp_capacity, uint32_t *pos, void *usrdata);
 static void ecu_ipc_rpc_executor_finish(void *usrdata);
 
 static IPC_RPC_EXECUTOR_HEADER_SECTION
@@ -37,6 +39,7 @@ typedef struct {
     uint32_t args_count;
     ipc_rpc_executor_fsm_unpack_cb_t unpack;
     ipc_rpc_executor_fsm_execute_cb_t execute;
+    ipc_rpc_executor_fsm_pack_cb_t pack;
 
     void *usrdata;
 }ecu_ipc_rpc_executor_func_ctx_t;
@@ -96,7 +99,8 @@ error_t ecu_ipc_rpc_executor_init(ecu_ipc_rpc_executor_t instance, ipc_rpc_execu
 }
 
 error_t ecu_ipc_rpc_executor_register_func(ecu_ipc_rpc_executor_t instance, uint32_t func_id, uint32_t args_count,
-    ipc_rpc_executor_fsm_unpack_cb_t unpack, ipc_rpc_executor_fsm_execute_cb_t execute, void *usrdata)
+    ipc_rpc_executor_fsm_unpack_cb_t unpack, ipc_rpc_executor_fsm_execute_cb_t execute,
+    ipc_rpc_executor_fsm_pack_cb_t pack, void *usrdata)
 {
   error_t err = E_OK;
   ecu_ipc_rpc_executor_ctx_t *ipc_ctx;
@@ -113,6 +117,7 @@ error_t ecu_ipc_rpc_executor_register_func(ecu_ipc_rpc_executor_t instance, uint
     func->args_count = args_count;
     func->unpack = unpack;
     func->execute = execute;
+    func->pack = pack;
     func->usrdata = usrdata;
 
   } while(0);
@@ -132,7 +137,7 @@ void ecu_ipc_rpc_executor_loop(ecu_ipc_rpc_executor_t instance)
     if(ipc_ctx->ctx != NULL) {
       (void)ipc_rpc_executor_fsm(ipc_ctx->ctx, &ipc_ctx->fsm,
           ecu_ipc_rpc_executor_start, ecu_ipc_rpc_executor_unpack,
-          ecu_ipc_rpc_executor_execute, ecu_ipc_rpc_executor_finish, ipc_ctx);
+          ecu_ipc_rpc_executor_execute, ecu_ipc_rpc_executor_pack, ecu_ipc_rpc_executor_finish, ipc_ctx);
     }
 
   } while(0);
@@ -164,13 +169,23 @@ static error_t ecu_ipc_rpc_executor_unpack(uint32_t arg_index, const void *buffe
   return func->unpack(arg_index, buffer, bytes, pos, func->usrdata);
 }
 
-static error_t ecu_ipc_rpc_executor_execute(void *usrdata)
+static error_t ecu_ipc_rpc_executor_execute(uint32_t *p_resp_count, void *usrdata)
 {
   ecu_ipc_rpc_executor_ctx_t *ipc_ctx = usrdata;
   const ecu_ipc_rpc_executor_func_ctx_t *func = ipc_ctx->func;
 
   RETURN_IF(func->execute == NULL, E_INVALACT);
-  return func->execute(func->usrdata);
+  return func->execute(p_resp_count, func->usrdata);
+}
+
+static error_t ecu_ipc_rpc_executor_pack(uint32_t arg_index, void *resp,
+    uint32_t resp_capacity, uint32_t *pos, void *usrdata)
+{
+  ecu_ipc_rpc_executor_ctx_t *ipc_ctx = usrdata;
+  const ecu_ipc_rpc_executor_func_ctx_t *func = ipc_ctx->func;
+
+  RETURN_IF(func->pack == NULL, E_INVALACT);
+  return func->pack(arg_index, resp, resp_capacity, pos, func->usrdata);
 }
 
 static void ecu_ipc_rpc_executor_finish(void *usrdata)

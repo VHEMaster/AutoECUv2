@@ -10,7 +10,7 @@
 
 error_t ipc_rpc_caller_fsm(ipc_rpc_caller_ctx_t *caller, ipc_rpc_caller_fsm_ctx_t *fsm,
     ipc_rpc_caller_fsm_start_cb_t start, ipc_rpc_caller_fsm_pack_cb_t pack,
-    ipc_rpc_caller_fsm_finish_cb_t finish, void *usrdata)
+    ipc_rpc_caller_fsm_unpack_cb_t unpack, ipc_rpc_caller_fsm_finish_cb_t finish, void *usrdata)
 {
   error_t err;
   uint32_t pos;
@@ -95,9 +95,12 @@ error_t ipc_rpc_caller_fsm(ipc_rpc_caller_ctx_t *caller, ipc_rpc_caller_fsm_ctx_
         }
         continue;
       case IPC_RPC_CALLER_FSM_POLL:
-        err = ipc_rpc_caller_poll(caller, &fsm->result);
+        err = ipc_rpc_caller_poll(caller, &fsm->result, &fsm->resp_count, &fsm->resp_bytes, &fsm->resp);
         if(err == E_OK) {
-          fsm->state = IPC_RPC_CALLER_FSM_UNLOCK;
+          fsm->arg_index = 0u;
+          fsm->pos = 0u;
+          fsm->state = unpack != NULL && fsm->resp_count != 0u
+              ? IPC_RPC_CALLER_FSM_UNPACK_RESPONSE : IPC_RPC_CALLER_FSM_UNLOCK;
         } else if(err != E_AGAIN) {
           fsm->result = E_IPC;
           fsm->state = IPC_RPC_CALLER_FSM_UNLOCK;
@@ -105,7 +108,30 @@ error_t ipc_rpc_caller_fsm(ipc_rpc_caller_ctx_t *caller, ipc_rpc_caller_fsm_ctx_
           return err;
         }
         continue;
+      case IPC_RPC_CALLER_FSM_UNPACK_RESPONSE:
+        pos = fsm->pos;
+        err = unpack(fsm->arg_index, fsm->result, fsm->resp, fsm->resp_bytes, &pos, usrdata);
+        RETURN_IF(err == E_AGAIN, err);
+        if(err == E_OK && (pos < fsm->pos || pos > fsm->resp_bytes)) {
+          err = E_PARAM;
+        }
+        if(err != E_OK) {
+          fsm->result = err;
+          fsm->state = IPC_RPC_CALLER_FSM_UNLOCK;
+        } else {
+          fsm->pos = pos;
+          if(++fsm->arg_index == fsm->resp_count) {
+            if(fsm->pos != fsm->resp_bytes) {
+              fsm->result = E_PARAM;
+            }
+            fsm->state = IPC_RPC_CALLER_FSM_UNLOCK;
+          }
+        }
+        continue;
       case IPC_RPC_CALLER_FSM_UNLOCK:
+        fsm->resp = NULL;
+        fsm->resp_bytes = 0u;
+        fsm->resp_count = 0u;
         err = ipc_rpc_caller_unlock(caller);
         if(err == E_OK) {
           fsm->state = IPC_RPC_CALLER_FSM_FINISH;

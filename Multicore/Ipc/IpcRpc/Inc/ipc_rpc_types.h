@@ -13,7 +13,8 @@
 #include "errors.h"
 #include "ipc_private.h"
 
-#define IPC_RPC_UNIQUE_VAL    (0x52504331u)
+#define IPC_RPC_UNIQUE_VAL           (0x52504333u)
+#define IPC_RPC_RESPONSE_ALIGNMENT  (32u)
 
 typedef struct {
     uint32_t unique_val;
@@ -24,6 +25,8 @@ typedef struct {
     error_t status;
     error_t ret;
     bool aborted;
+    uint32_t resp_bytes;
+    uint32_t resp_count;
 }ipc_rpc_header_ctx_t;
 
 typedef enum {
@@ -45,17 +48,19 @@ typedef struct {
     ATOMIC_LOCK_TYPE lock;
     ipc_rpc_caller_state_t state;
     uint32_t request_id;
+    uint32_t args_bytes;
 
 }ipc_rpc_caller_ctx_t;
 
 typedef struct {
     ipc_rpc_header_ctx_t *header;
-    const void *buffer;
+    void *buffer;
     uint32_t buffer_size;
 
     ATOMIC_LOCK_TYPE lock;
     bool pending;
     uint32_t request_id;
+    uint32_t resp_capacity;
 }ipc_rpc_executor_ctx_t;
 
 #endif /* IPC_IPCRPC_INC_IPC_RPC_TYPES_H_ */

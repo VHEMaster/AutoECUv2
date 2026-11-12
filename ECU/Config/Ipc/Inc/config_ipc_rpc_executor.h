@@ -14,7 +14,8 @@
 
 error_t ecu_ipc_rpc_executor_init(ecu_ipc_rpc_executor_t instance, ipc_rpc_executor_ctx_t *ctx);
 error_t ecu_ipc_rpc_executor_register_func(ecu_ipc_rpc_executor_t instance, uint32_t func_id, uint32_t args_count,
-    ipc_rpc_executor_fsm_unpack_cb_t unpack, ipc_rpc_executor_fsm_execute_cb_t execute, void *usrdata);
+    ipc_rpc_executor_fsm_unpack_cb_t unpack, ipc_rpc_executor_fsm_execute_cb_t execute,
+    ipc_rpc_executor_fsm_pack_cb_t pack, void *usrdata);
 
 void ecu_ipc_rpc_executor_loop(ecu_ipc_rpc_executor_t instance);
 

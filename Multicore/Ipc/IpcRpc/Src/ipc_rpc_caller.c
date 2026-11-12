@@ -6,6 +6,7 @@
  */
 
 #include "ipc_rpc_caller.h"
+#include "ipc_rpc_private.h"
 #include <string.h>
 
 error_t ipc_rpc_caller_init(ipc_rpc_caller_ctx_t *ctx, ipc_rpc_header_ctx_t *header, uint32_t buffer_size, void *buffer)
@@ -145,6 +146,7 @@ error_t ipc_rpc_caller_call(ipc_rpc_caller_ctx_t *ctx, uint32_t func_id, uint32_
     }
 
     ctx->request_id++;
+    ctx->args_bytes = args_bytes;
     ctx->state = IPC_RPC_CALLER_STATE_WAIT_RESPONSE;
     ATOMIC_STORE_RELAXED(ctx->header->aborted, false);
     ATOMIC_STORE_RELAXED(ctx->header->func_id, func_id);
@@ -156,13 +158,16 @@ error_t ipc_rpc_caller_call(ipc_rpc_caller_ctx_t *ctx, uint32_t func_id, uint32_
   return err;
 }
 
-error_t ipc_rpc_caller_poll(ipc_rpc_caller_ctx_t *ctx, error_t *p_ret)
+error_t ipc_rpc_caller_poll(ipc_rpc_caller_ctx_t *ctx, error_t *p_ret,
+    uint32_t *p_resp_count, uint32_t *p_resp_bytes, const void **p_resp)
 {
   error_t err = E_OK;
   error_t ret;
+  uint32_t resp_count, resp_bytes, resp_capacity;
 
   do {
-    BREAK_IF_ACTION(ctx == NULL || p_ret == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx == NULL || p_ret == NULL || p_resp_count == NULL ||
+        p_resp_bytes == NULL || p_resp == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock) == false, err = E_INVALACT);
     BREAK_IF_ACTION(ctx->state != IPC_RPC_CALLER_STATE_WAIT_RESPONSE, err = E_INVALACT);
     BREAK_IF_ACTION(ATOMIC_LOAD(ctx->header->response_id) != ctx->request_id, err = E_AGAIN);
@@ -171,8 +176,18 @@ error_t ipc_rpc_caller_poll(ipc_rpc_caller_ctx_t *ctx, error_t *p_ret)
     ret = ATOMIC_LOAD_RELAXED(ctx->header->status);
     BREAK_IF_ACTION(ret != E_OK, err = ret);
 
-    ret = ATOMIC_LOAD_RELAXED(ctx->header->ret);
-    *p_ret = ret;
+    resp_count = ATOMIC_LOAD_RELAXED(ctx->header->resp_count);
+    resp_bytes = ATOMIC_LOAD_RELAXED(ctx->header->resp_bytes);
+    resp_capacity = ipc_rpc_response_capacity(ctx->buffer, ctx->buffer_size, ctx->args_bytes);
+    BREAK_IF_ACTION(resp_bytes > resp_capacity, err = E_OVERFLOW);
+
+    BREAK_IF_ACTION(resp_count == 0u && resp_bytes != 0u, err = E_PARAM);
+    BREAK_IF_ACTION(resp_count != 0u && resp_capacity == 0u, err = E_OVERFLOW);
+
+    *p_ret = ATOMIC_LOAD_RELAXED(ctx->header->ret);
+    *p_resp_count = resp_count;
+    *p_resp_bytes = resp_bytes;
+    *p_resp = resp_count != 0u ? (const uint8_t *)ctx->buffer + (ctx->buffer_size - resp_capacity) : NULL;
 
   } while(0);
 
