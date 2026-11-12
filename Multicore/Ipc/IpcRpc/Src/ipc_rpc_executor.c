@@ -60,7 +60,8 @@ error_t ipc_rpc_executor_unlock(ipc_rpc_executor_ctx_t *ctx)
   return err;
 }
 
-error_t ipc_rpc_executor_poll(ipc_rpc_executor_ctx_t *ctx, uint32_t *p_func_id, uint32_t *p_args_bytes, const void **args,
+error_t ipc_rpc_executor_poll(ipc_rpc_executor_ctx_t *ctx, uint32_t *p_func_id,
+    uint32_t *p_args_bytes, const void **args,
     uint32_t *p_resp_capacity, void **p_resp)
 {
   error_t err = E_OK;

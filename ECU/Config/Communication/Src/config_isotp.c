@@ -30,6 +30,12 @@ static error_t ecu_comm_isotp_rpc_executor_frame_write_upstream_unpack(uint32_t 
 static error_t ecu_comm_isotp_rpc_executor_frame_write_upstream_execute(uint32_t *p_resp_count, void *usrdata);
 static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
 static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_pack(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_execute(uint32_t *p_resp_count, void *usrdata);
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_pack(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
+
 #endif /* CORE_CM4 */
 
 #ifdef CORE_CM7
@@ -45,6 +51,8 @@ typedef struct ecu_comm_isotp_ctx_tag {
     ecu_comm_rpc_ctx_t rpc_reset;
     ecu_comm_rpc_ctx_t rpc_frame_write_upstream;
     ecu_comm_rpc_ctx_t rpc_data_write_downstream;
+    ecu_comm_rpc_ctx_t rpc_frame_read_downstream;
+    ecu_comm_rpc_ctx_t rpc_data_read_upstream;
     const isotp_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
@@ -53,6 +61,8 @@ typedef struct ecu_comm_isotp_ctx_tag {
 
     ecu_comm_instance_t rpc_instance;
     const void *rpc_pointer;
+    uint8_t rpc_payload[ISOTP_PAYLOAD_LEN_MAX];
+    isotp_frame_t rpc_frame;
     uint16_t rpc_length;
 #endif /* CORE_CM4 */
 
@@ -136,6 +146,14 @@ error_t ecu_comm_isotp_init(ecu_comm_isotp_t instance, isotp_ctx_t *ctx)
 
     err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ISOTP_DATA_WRITE_DOWNSTREAM, 3u,
         ecu_comm_isotp_rpc_executor_data_write_downstream_unpack, ecu_comm_isotp_rpc_executor_data_write_downstream_execute, NULL, isotp_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ISOTP_FRAME_READ_DOWNSTREAM, 1u,
+        ecu_comm_isotp_rpc_executor_reset_unpack, ecu_comm_isotp_rpc_executor_frame_read_downstream_execute, ecu_comm_isotp_rpc_executor_frame_read_downstream_pack, isotp_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_ipc_rpc_executor_register_func(ECU_IPC_RPC_EXECUTOR_1, ECU_IPC_RPC_FUNC_ISOTP_DATA_READ_UPSTREAM, 2u,
+        ecu_comm_isotp_rpc_executor_data_read_upstream_unpack, ecu_comm_isotp_rpc_executor_data_read_upstream_execute, ecu_comm_isotp_rpc_executor_data_read_upstream_pack, isotp_ctx);
     BREAK_IF(err != E_OK);
 
   } while(0);
@@ -272,8 +290,8 @@ error_t ecu_comm_isotp_frame_read_downstream(ecu_comm_isotp_t instance, isotp_fr
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
-    err = E_NOTSUPPORT;
+    err = ecu_comm_rpc_read(&isotp_ctx->rpc_frame_read_downstream, ECU_IPC_RPC_FUNC_ISOTP_FRAME_READ_DOWNSTREAM,
+        instance, frame, sizeof(isotp_frame_t), ALIGNOF(isotp_frame_t), NULL);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -340,8 +358,8 @@ error_t ecu_comm_isotp_data_read_upstream(ecu_comm_isotp_t instance, uint8_t *pa
     isotp_ctx = &ecu_comm_isotp_ctx[instance];
 
 #ifdef CORE_CM7
-    (void)isotp_ctx;
-    err = E_NOTSUPPORT;
+    err = ecu_comm_rpc_read(&isotp_ctx->rpc_data_read_upstream, ECU_IPC_RPC_FUNC_ISOTP_DATA_READ_UPSTREAM,
+        instance, payload, 0u, ALIGNOF(uint8_t), length);
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
@@ -548,8 +566,123 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_execute(uint32_
   do {
     BREAK_IF(isotp_ctx == NULL);
 
-    err = ecu_comm_isotp_data_write_downstream(isotp_ctx->rpc_instance,
-        isotp_ctx->rpc_pointer, isotp_ctx->rpc_length);
+    err = ecu_comm_isotp_data_write_downstream(isotp_ctx->rpc_instance, isotp_ctx->rpc_pointer, isotp_ctx->rpc_length);
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_execute(uint32_t *p_resp_count, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
+
+  do {
+    BREAK_IF(isotp_ctx == NULL);
+
+    err = ecu_comm_isotp_frame_read_downstream(isotp_ctx->rpc_instance, &isotp_ctx->rpc_frame);
+    BREAK_IF_ACTION(err == E_AGAIN, err = E_NOTRDY);
+
+    if(err == E_OK) {
+      *p_resp_count = 1u;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_pack(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
+
+  do {
+    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(arg_index != 0u, err = E_PARAM);
+
+    err = ipc_rpc_pack(buffer, capacity, &isotp_ctx->rpc_frame, sizeof(isotp_frame_t),
+        p_pos, ALIGNOF(isotp_frame_t));
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
+
+  do {
+    BREAK_IF(isotp_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_unpack(buffer, capacity, &isotp_ctx->rpc_instance, sizeof(ecu_comm_instance_t),
+            p_pos, ALIGNOF(ecu_comm_instance_t));
+        break;
+      case 1:
+        err = ipc_rpc_unpack(buffer, capacity, &isotp_ctx->rpc_length, sizeof(isotp_ctx->rpc_length),
+            p_pos, ALIGNOF(uint16_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_execute(uint32_t *p_resp_count, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
+
+  do {
+    BREAK_IF(isotp_ctx == NULL);
+
+    if(isotp_ctx->rpc_length > sizeof(isotp_ctx->rpc_payload)) {
+      isotp_ctx->rpc_length = sizeof(isotp_ctx->rpc_payload);
+    }
+
+    err = ecu_comm_isotp_data_read_upstream(isotp_ctx->rpc_instance,
+        isotp_ctx->rpc_payload, &isotp_ctx->rpc_length);
+    BREAK_IF_ACTION(err == E_AGAIN, err = E_NOTRDY);
+
+    if(err == E_OK) {
+      *p_resp_count = 2u;
+    }
+
+  } while(0);
+
+  return err;
+}
+
+static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_pack(uint32_t arg_index, void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata)
+{
+  error_t err = E_OK;
+  ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
+
+  do {
+    BREAK_IF(isotp_ctx == NULL);
+
+    switch(arg_index) {
+      case 0:
+        err = ipc_rpc_pack(buffer, capacity, &isotp_ctx->rpc_length, sizeof(isotp_ctx->rpc_length),
+            p_pos, ALIGNOF(uint16_t));
+        break;
+      case 1:
+        err = ipc_rpc_pack(buffer, capacity, isotp_ctx->rpc_payload, isotp_ctx->rpc_length,
+            p_pos, ALIGNOF(uint8_t));
+        break;
+      default:
+        err = E_PARAM;
+        break;
+    }
 
   } while(0);
 

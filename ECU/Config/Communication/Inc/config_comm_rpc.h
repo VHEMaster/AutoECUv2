@@ -19,9 +19,20 @@ typedef struct {
     const void *argument;
     uint32_t bytes;
     uint32_t alignment;
+
+    void *response;
+    uint32_t response_bytes;
+    uint32_t response_alignment;
+    uint16_t *response_length;
+    uint16_t read_capacity;
+    uint16_t read_length;
 }ecu_comm_rpc_ctx_t;
 
 error_t ecu_comm_rpc_call(ecu_comm_rpc_ctx_t *ctx, ecu_ipc_rpc_func_t func,
     ecu_comm_instance_t instance, const void *argument, uint32_t bytes, uint32_t alignment);
+
+error_t ecu_comm_rpc_read(ecu_comm_rpc_ctx_t *ctx, ecu_ipc_rpc_func_t func,
+    ecu_comm_instance_t instance, void *response, uint32_t response_bytes,
+    uint32_t response_alignment, uint16_t *response_length);
 
 #endif /* CONFIG_COMMUNICATION_INC_CONFIG_COMM_RPC_H_ */
