@@ -218,7 +218,7 @@ static error_t ecu_comm_router_rpc_executor_configure_unpack(uint32_t arg_index,
   ecu_comm_router_ctx_t *router_ctx = usrdata;
 
   do {
-    BREAK_IF(router_ctx == NULL);
+    BREAK_IF_ACTION(router_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -247,7 +247,7 @@ static error_t ecu_comm_router_rpc_executor_configure_execute(uint32_t *p_resp_c
   ecu_comm_router_ctx_t *router_ctx = usrdata;
 
   do {
-    BREAK_IF(router_ctx == NULL);
+    BREAK_IF_ACTION(router_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_router_configure(router_ctx->rpc_instance, router_ctx->rpc_pointer);
 
@@ -262,7 +262,7 @@ static error_t ecu_comm_router_rpc_executor_reset_unpack(uint32_t arg_index, con
   ecu_comm_router_ctx_t *router_ctx = usrdata;
 
   do {
-    BREAK_IF(router_ctx == NULL);
+    BREAK_IF_ACTION(router_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -286,7 +286,7 @@ static error_t ecu_comm_router_rpc_executor_reset_execute(uint32_t *p_resp_count
   ecu_comm_router_ctx_t *router_ctx = usrdata;
 
   do {
-    BREAK_IF(router_ctx == NULL);
+    BREAK_IF_ACTION(router_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_router_reset(router_ctx->rpc_instance);
 

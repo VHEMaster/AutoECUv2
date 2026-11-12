@@ -463,7 +463,7 @@ static error_t ecu_comm_can_rpc_executor_configure_unpack(uint32_t arg_index, co
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -492,7 +492,7 @@ static error_t ecu_comm_can_rpc_executor_configure_execute(uint32_t *p_resp_coun
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_can_configure(can_ctx->rpc_instance, can_ctx->rpc_pointer);
 
@@ -507,7 +507,7 @@ static error_t ecu_comm_can_rpc_executor_reset_unpack(uint32_t arg_index, const 
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -531,7 +531,7 @@ static error_t ecu_comm_can_rpc_executor_reset_execute(uint32_t *p_resp_count, v
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_can_reset(can_ctx->rpc_instance);
 
@@ -546,7 +546,7 @@ static error_t ecu_comm_can_rpc_executor_transmit_unpack(uint32_t arg_index, con
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -575,7 +575,7 @@ static error_t ecu_comm_can_rpc_executor_transmit_execute(uint32_t *p_resp_count
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_can_transmit(can_ctx->rpc_instance, can_ctx->rpc_pointer);
 
@@ -590,7 +590,7 @@ static error_t ecu_comm_can_rpc_executor_receive_execute(uint32_t *p_resp_count,
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_can_receive(can_ctx->rpc_instance, &can_ctx->rpc_message);
     BREAK_IF_ACTION(err == E_AGAIN, err = E_NOTRDY);
@@ -610,7 +610,7 @@ static error_t ecu_comm_can_rpc_executor_receive_pack(uint32_t arg_index, void *
   ecu_comm_can_ctx_t *can_ctx = usrdata;
 
   do {
-    BREAK_IF(can_ctx == NULL);
+    BREAK_IF_ACTION(can_ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(arg_index != 0u, err = E_PARAM);
 
     err = ipc_rpc_pack(buffer, capacity, &can_ctx->rpc_message, sizeof(can_message_t),

@@ -786,7 +786,7 @@ static error_t ecu_comm_obd2_rpc_executor_configure_unpack(uint32_t arg_index, c
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
 
   do {
-    BREAK_IF(obd2_ctx == NULL);
+    BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -815,7 +815,7 @@ static error_t ecu_comm_obd2_rpc_executor_configure_execute(uint32_t *p_resp_cou
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
 
   do {
-    BREAK_IF(obd2_ctx == NULL);
+    BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_obd2_configure(obd2_ctx->rpc_instance, obd2_ctx->rpc_pointer);
 
@@ -830,7 +830,7 @@ static error_t ecu_comm_obd2_rpc_executor_reset_unpack(uint32_t arg_index, const
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
 
   do {
-    BREAK_IF(obd2_ctx == NULL);
+    BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -854,7 +854,7 @@ static error_t ecu_comm_obd2_rpc_executor_reset_execute(uint32_t *p_resp_count, 
   ecu_comm_obd2_ctx_t *obd2_ctx = usrdata;
 
   do {
-    BREAK_IF(obd2_ctx == NULL);
+    BREAK_IF_ACTION(obd2_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_obd2_reset(obd2_ctx->rpc_instance);
 

@@ -269,7 +269,7 @@ static error_t ecu_comm_signals_rpc_executor_configure_unpack(uint32_t arg_index
   ecu_comm_signals_ctx_t *signals_ctx = usrdata;
 
   do {
-    BREAK_IF(signals_ctx == NULL);
+    BREAK_IF_ACTION(signals_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -298,7 +298,7 @@ static error_t ecu_comm_signals_rpc_executor_configure_execute(uint32_t *p_resp_
   ecu_comm_signals_ctx_t *signals_ctx = usrdata;
 
   do {
-    BREAK_IF(signals_ctx == NULL);
+    BREAK_IF_ACTION(signals_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_signals_configure(signals_ctx->rpc_instance, signals_ctx->rpc_pointer);
 
@@ -313,7 +313,7 @@ static error_t ecu_comm_signals_rpc_executor_reset_unpack(uint32_t arg_index, co
   ecu_comm_signals_ctx_t *signals_ctx = usrdata;
 
   do {
-    BREAK_IF(signals_ctx == NULL);
+    BREAK_IF_ACTION(signals_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -337,7 +337,7 @@ static error_t ecu_comm_signals_rpc_executor_reset_execute(uint32_t *p_resp_coun
   ecu_comm_signals_ctx_t *signals_ctx = usrdata;
 
   do {
-    BREAK_IF(signals_ctx == NULL);
+    BREAK_IF_ACTION(signals_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_signals_reset(signals_ctx->rpc_instance);
 

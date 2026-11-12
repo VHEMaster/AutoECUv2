@@ -210,7 +210,7 @@ static error_t ecu_comm_uds_rpc_executor_configure_unpack(uint32_t arg_index, co
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
 
   do {
-    BREAK_IF(uds_ctx == NULL);
+    BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -239,7 +239,7 @@ static error_t ecu_comm_uds_rpc_executor_configure_execute(uint32_t *p_resp_coun
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
 
   do {
-    BREAK_IF(uds_ctx == NULL);
+    BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_uds_configure(uds_ctx->rpc_instance, uds_ctx->rpc_pointer);
 
@@ -254,7 +254,7 @@ static error_t ecu_comm_uds_rpc_executor_reset_unpack(uint32_t arg_index, const 
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
 
   do {
-    BREAK_IF(uds_ctx == NULL);
+    BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -278,7 +278,7 @@ static error_t ecu_comm_uds_rpc_executor_reset_execute(uint32_t *p_resp_count, v
   ecu_comm_uds_ctx_t *uds_ctx = usrdata;
 
   do {
-    BREAK_IF(uds_ctx == NULL);
+    BREAK_IF_ACTION(uds_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_uds_reset(uds_ctx->rpc_instance);
 

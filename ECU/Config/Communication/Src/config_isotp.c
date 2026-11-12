@@ -404,7 +404,7 @@ static error_t ecu_comm_isotp_rpc_executor_configure_unpack(uint32_t arg_index, 
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -433,7 +433,7 @@ static error_t ecu_comm_isotp_rpc_executor_configure_execute(uint32_t *p_resp_co
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_isotp_configure(isotp_ctx->rpc_instance, isotp_ctx->rpc_pointer);
 
@@ -448,7 +448,7 @@ static error_t ecu_comm_isotp_rpc_executor_reset_unpack(uint32_t arg_index, cons
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -472,7 +472,7 @@ static error_t ecu_comm_isotp_rpc_executor_reset_execute(uint32_t *p_resp_count,
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_isotp_reset(isotp_ctx->rpc_instance);
 
@@ -487,7 +487,7 @@ static error_t ecu_comm_isotp_rpc_executor_frame_write_upstream_unpack(uint32_t 
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -516,7 +516,7 @@ static error_t ecu_comm_isotp_rpc_executor_frame_write_upstream_execute(uint32_t
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_isotp_frame_write_upstream(isotp_ctx->rpc_instance, isotp_ctx->rpc_pointer);
 
@@ -531,7 +531,7 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_unpack(uint32_t
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -564,7 +564,7 @@ static error_t ecu_comm_isotp_rpc_executor_data_write_downstream_execute(uint32_
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_isotp_data_write_downstream(isotp_ctx->rpc_instance, isotp_ctx->rpc_pointer, isotp_ctx->rpc_length);
 
@@ -579,7 +579,7 @@ static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_execute(uint32_
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_isotp_frame_read_downstream(isotp_ctx->rpc_instance, &isotp_ctx->rpc_frame);
     BREAK_IF_ACTION(err == E_AGAIN, err = E_NOTRDY);
@@ -599,7 +599,7 @@ static error_t ecu_comm_isotp_rpc_executor_frame_read_downstream_pack(uint32_t a
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(arg_index != 0u, err = E_PARAM);
 
     err = ipc_rpc_pack(buffer, capacity, &isotp_ctx->rpc_frame, sizeof(isotp_frame_t),
@@ -616,7 +616,7 @@ static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_unpack(uint32_t ar
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -643,7 +643,7 @@ static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_execute(uint32_t *
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     if(isotp_ctx->rpc_length > sizeof(isotp_ctx->rpc_payload)) {
       isotp_ctx->rpc_length = sizeof(isotp_ctx->rpc_payload);
@@ -668,7 +668,7 @@ static error_t ecu_comm_isotp_rpc_executor_data_read_upstream_pack(uint32_t arg_
   ecu_comm_isotp_ctx_t *isotp_ctx = usrdata;
 
   do {
-    BREAK_IF(isotp_ctx == NULL);
+    BREAK_IF_ACTION(isotp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:

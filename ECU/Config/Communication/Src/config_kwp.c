@@ -176,7 +176,7 @@ static error_t ecu_comm_kwp_rpc_executor_configure_unpack(uint32_t arg_index, co
   ecu_comm_kwp_ctx_t *kwp_ctx = usrdata;
 
   do {
-    BREAK_IF(kwp_ctx == NULL);
+    BREAK_IF_ACTION(kwp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -205,7 +205,7 @@ static error_t ecu_comm_kwp_rpc_executor_configure_execute(uint32_t *p_resp_coun
   ecu_comm_kwp_ctx_t *kwp_ctx = usrdata;
 
   do {
-    BREAK_IF(kwp_ctx == NULL);
+    BREAK_IF_ACTION(kwp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_kwp_configure(kwp_ctx->rpc_instance, kwp_ctx->rpc_pointer);
 
@@ -220,7 +220,7 @@ static error_t ecu_comm_kwp_rpc_executor_reset_unpack(uint32_t arg_index, const 
   ecu_comm_kwp_ctx_t *kwp_ctx = usrdata;
 
   do {
-    BREAK_IF(kwp_ctx == NULL);
+    BREAK_IF_ACTION(kwp_ctx == NULL, err = E_PARAM);
 
     switch(arg_index) {
       case 0:
@@ -244,7 +244,7 @@ static error_t ecu_comm_kwp_rpc_executor_reset_execute(uint32_t *p_resp_count, v
   ecu_comm_kwp_ctx_t *kwp_ctx = usrdata;
 
   do {
-    BREAK_IF(kwp_ctx == NULL);
+    BREAK_IF_ACTION(kwp_ctx == NULL, err = E_PARAM);
 
     err = ecu_comm_kwp_reset(kwp_ctx->rpc_instance);
 
