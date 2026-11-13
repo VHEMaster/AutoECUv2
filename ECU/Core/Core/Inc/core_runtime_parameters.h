@@ -21,8 +21,8 @@ typedef struct {
 }ecu_core_runtime_global_instance_parameters_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_global_instance_parameters_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
     ecu_core_runtime_global_instance_parameters_ctx_t devices[ECU_DEVICE_TYPE_MAX][ECU_DEVICE_INSTANCE_MAX];
+    ecu_core_runtime_global_instance_parameters_ctx_t sensors[ECU_SENSOR_TYPE_MAX][ECU_SENSOR_INSTANCE_MAX];
     ecu_core_runtime_global_instance_parameters_ctx_t modules[ECU_MODULE_TYPE_MAX][ECU_MODULE_INSTANCE_MAX];
     ecu_core_runtime_global_instance_parameters_ctx_t timings[ECU_TIMING_TYPE_MAX][ECU_TIMING_INSTANCE_MAX];
 }ecu_core_runtime_global_parameters_ctx_t;

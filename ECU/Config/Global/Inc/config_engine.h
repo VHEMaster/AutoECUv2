@@ -19,6 +19,7 @@
 #include "versioned_comm.h"
 
 #ifdef CORE_CM7
+
 typedef struct {
     l9966_config_t flexio[ECU_DEVICE_FLEXIO_MAX];
     l9960_config_t motor[ECU_DEVICE_MOTOR_MAX];
