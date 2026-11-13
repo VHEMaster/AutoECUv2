@@ -14,8 +14,6 @@
 
 #include "config_global.h"
 
-#define ECU_COMMON_VIRTUAL_OVERALL_COUNT  (ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX + 1)
-
 #if (ECU_DEVICE_TYPE_MAX > ECU_ENTITY_TYPE_MAX)
 #error "ECU_DEVICE_TYPE_MAX is larger than ECU_ENTITY_TYPE_MAX"
 #endif
@@ -82,26 +80,32 @@ typedef struct {
 }ecu_config_common_virtual_ctx_t;
 
 typedef struct {
+
+}ecu_config_common_shareable_layout_ctx_t;
+
+typedef struct {
+    ecu_config_common_shareable_layout_ctx_t shareable_layout;
+    ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
+}ecu_config_common_shareable_ctx_t;
+
+typedef struct {
     ecu_config_common_entity_t entities_count;
     ecu_config_common_entity_ctx_t entities[ECU_COMMON_ENTITY_MAX];
-
-    ecu_config_common_virtual_ctx_t final_source;
-    ecu_config_common_virtual_ctx_t virtual_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX];
-}ecu_config_common_shareable_ctx_t;
+}ecu_config_common_layout_t;
 
 typedef struct ecu_config_common_ctx_tag {
     const ecu_config_common_config_t *config;
 
+    ecu_config_common_layout_t layout;
+
     ecu_config_common_shareable_ctx_t shareable;
 
-    ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_VIRTUAL_OVERALL_COUNT];
-    ecu_core_runtime_global_instance_parameters_ctx_t *core_runtime_final_destinations[ECU_COMMON_ENTITY_MAX];
-    ecu_core_runtime_global_instance_parameters_ctx_t *core_runtime_destinations[ECU_COMMON_VIRTUAL_OVERALL_COUNT][ECU_COMMON_ENTITY_MAX];
+    ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_OVERALL_SOURCE_MAX];
+    ecu_core_runtime_global_instance_parameters_ctx_t *core_runtime_destinations[ECU_COMMON_OVERALL_SOURCE_MAX][ECU_COMMON_ENTITY_MAX];
 
     uint32_t params_allocated;
     uint32_t params_free;
 }ecu_config_common_ctx_t;
-
 
 static const ecu_config_common_config_t ecu_config_common_config = {
     .entities = {
@@ -155,31 +159,27 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
 
     memset(&ecu_config_common_ctx, 0, sizeof(ecu_config_common_ctx_t));
     ecu_config_common_ctx.config = &ecu_config_common_config;
-    ecu_config_common_ctx.shareable.entities_count = ECU_COMMON_ENTITY_MAX;
+    ecu_config_common_ctx.layout.entities_count = ECU_COMMON_ENTITY_MAX;
 
-    for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX; v++) {
-      ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.shareable.virtual_sources[v];
-      ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_DEVICE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].devices;
-      ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_SENSOR] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].sensors;
-      ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_MODULE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].modules;
-      ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_TIMING] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].timings;
+    for(ecu_config_common_overall_source_t v = 0; v < ECU_COMMON_OVERALL_SOURCE_MAX; v++) {
+      ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.shareable.sources[v];
+      if(v != ECU_COMMON_OVERALL_SOURCE_FINAL) {
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_DEVICE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].devices;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_SENSOR] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].sensors;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_MODULE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].modules;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_TIMING] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters_virtual[v].timings;
+      } else {
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_DEVICE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.devices;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_SENSOR] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.sensors;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_MODULE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.modules;
+        ecu_config_common_ctx.core_runtime_destinations[v][ECU_COMMON_ENTITY_TIMING] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.timings;
+      }
     }
-
-    ecu_config_common_ctx.common_ctx_sources[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX] = &ecu_config_common_ctx.shareable.final_source;
-    ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX][ECU_COMMON_ENTITY_DEVICE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.devices;
-    ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX][ECU_COMMON_ENTITY_SENSOR] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.sensors;
-    ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX][ECU_COMMON_ENTITY_MODULE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.modules;
-    ecu_config_common_ctx.core_runtime_destinations[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_MAX][ECU_COMMON_ENTITY_TIMING] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.timings;
-
-    ecu_config_common_ctx.core_runtime_final_destinations[ECU_COMMON_ENTITY_DEVICE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.devices;
-    ecu_config_common_ctx.core_runtime_final_destinations[ECU_COMMON_ENTITY_SENSOR] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.sensors;
-    ecu_config_common_ctx.core_runtime_final_destinations[ECU_COMMON_ENTITY_MODULE] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.modules;
-    ecu_config_common_ctx.core_runtime_final_destinations[ECU_COMMON_ENTITY_TIMING] = (ecu_core_runtime_global_instance_parameters_ctx_t *)ctx->runtime.global.parameters.timings;
 
     ecu_config_common_ctx.params_allocated = 0;
     ecu_config_common_ctx.params_free = ECU_CONFIG_PARAMETERS_MAX;
 
-    for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.shareable.entities_count; e++) {
+    for(ecu_config_common_entity_t e = 0; e < ecu_config_common_ctx.layout.entities_count; e++) {
       err = ecu_config_common_entity(ctx, e);
       BREAK_IF(err != E_OK);
     }
@@ -196,7 +196,7 @@ error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
   do {
     BREAK_IF_ACTION(entity_max == NULL, err = E_PARAM);
 
-    *entity_max = ecu_config_common_ctx.shareable.entities_count;
+    *entity_max = ecu_config_common_ctx.layout.entities_count;
 
   } while(0);
 
@@ -208,10 +208,10 @@ error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity,
   error_t err = E_OK;
   ecu_config_common_entity_ctx_t *entity_ctx;
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(type_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     *type_max = entity_ctx->types_count;
 
   } while(0);
@@ -226,10 +226,10 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
   ecu_config_common_entity_type_ctx_t *type_ctx;
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -247,11 +247,11 @@ error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_
   const ecu_config_common_entity_config_t *entity_config;
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
     entity_config = &ecu_config_common_config.entities[entity];
 
@@ -274,9 +274,9 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
     BREAK_IF_ACTION(params == NULL, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
     BREAK_IF_ACTION(read_write != ECU_COMMON_READ && read_write != ECU_COMMON_WRITE, err = E_PARAM);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -308,9 +308,9 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 
   do {
     BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -342,9 +342,9 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
 
   do {
     BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.shareable.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
@@ -375,7 +375,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    entity_ctx = &ecu_config_common_ctx.shareable.entities[entity];
+    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
     entity_config = &ecu_config_common_ctx.config->entities[entity];
 
     err = entity_config->get_type_max_func(&entity_ctx->types_count);
@@ -391,7 +391,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
 
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
-        parameters = &ecu_config_common_ctx.core_runtime_final_destinations[entity][t * entity_config->instance_limit + i];
+        parameters = &ecu_config_common_ctx.core_runtime_destinations[ECU_COMMON_OVERALL_SOURCE_FINAL][entity][t * entity_config->instance_limit + i];
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
@@ -403,7 +403,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
             break;
           }
 
-          for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
+          for(ecu_config_common_overall_source_t v = 0; v < ECU_COMMON_OVERALL_SOURCE_MAX; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v][entity][t * entity_config->instance_limit + i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {

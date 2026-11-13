@@ -28,6 +28,15 @@ typedef uint32_t ecu_config_common_entity_instance_t;
 typedef uint32_t ecu_config_common_entity_parameter_t;
 
 typedef enum {
+  ECU_COMMON_OVERALL_SOURCE_SIMULATED = 0,
+  ECU_COMMON_OVERALL_SOURCE_DIAG,
+  ECU_COMMON_OVERALL_SOURCE_EXTERNAL,
+  ECU_COMMON_OVERALL_SOURCE_INTERNAL,
+  ECU_COMMON_OVERALL_SOURCE_FINAL,
+  ECU_COMMON_OVERALL_SOURCE_MAX,
+}ecu_config_common_overall_source_t;
+
+typedef enum {
   ECU_COMMON_ENTITY_DEVICE = 0,
   ECU_COMMON_ENTITY_SENSOR,
   ECU_COMMON_ENTITY_MODULE,
