@@ -391,8 +391,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
 
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
-        parameters = ecu_config_common_ctx.core_runtime_final_destinations[entity];
-        parameters = &((ecu_core_runtime_global_instance_parameters_ctx_t (*)[entity_config->instance_limit])parameters)[t][i];
+        parameters = &ecu_config_common_ctx.core_runtime_final_destinations[entity][t * entity_config->instance_limit + i];
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
@@ -405,8 +404,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
           }
 
           for(ecu_core_runtime_parameters_virtual_source_t v = 0; v < ECU_COMMON_VIRTUAL_OVERALL_COUNT; v++) {
-            virtual_parameters = ecu_config_common_ctx.core_runtime_destinations[v][entity];
-            virtual_parameters = &((ecu_core_runtime_global_instance_parameters_ctx_t (*)[entity_config->instance_limit])virtual_parameters)[t][i];
+            virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v][entity][t * entity_config->instance_limit + i];
             virtual_parameters->count[rw] = parameters->count[rw];
             if(virtual_parameters->count[rw] > 0) {
               virtual_ctx = ecu_config_common_ctx.common_ctx_sources[v];
