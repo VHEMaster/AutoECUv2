@@ -80,10 +80,6 @@ typedef struct {
 }ecu_config_common_virtual_ctx_t;
 
 typedef struct {
-
-}ecu_config_common_shareable_layout_ctx_t;
-
-typedef struct {
     ecu_config_common_shareable_layout_ctx_t shareable_layout;
     ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
 }ecu_config_common_shareable_ctx_t;
@@ -98,6 +94,7 @@ typedef struct ecu_config_common_ctx_tag {
 
     ecu_config_common_layout_t layout;
 
+    ecu_config_common_shareable_layout_ctx_t shareable_layout;
     ecu_config_common_shareable_ctx_t shareable;
 
     ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_OVERALL_SOURCE_MAX];
