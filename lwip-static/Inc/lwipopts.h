@@ -64,7 +64,7 @@
 /*----- Default Value for LWIP_ARP: 1 ---*/
 #define LWIP_ARP 0
 /*----- Value in opt.h for LWIP_ETHERNET: LWIP_ARP || PPPOE_SUPPORT -*/
-#define LWIP_ETHERNET 1
+#define LWIP_ETHERNET 0
 /*----- Value in opt.h for LWIP_DNS_SECURE: (LWIP_DNS_SECURE_RAND_XID | LWIP_DNS_SECURE_NO_MULTIPLE_OUTSTANDING | LWIP_DNS_SECURE_RAND_SRC_PORT) -*/
 #define LWIP_DNS_SECURE 7
 /*----- Default Value for TCP_TTL: 255 ---*/
@@ -87,6 +87,8 @@
 #define RECV_BUFSIZE_DEFAULT 2000000000
 /*----- Default Value for PPP_SUPPORT: 0 ---*/
 #define PPP_SUPPORT 1
+/*----- Default Value for PPP_SERVER: 0 ---*/
+#define PPP_SERVER 1
 /*----- Default Value for MEMP_NUM_PPPOE_INTERFACES: 1 ---*/
 #define MEMP_NUM_PPPOE_INTERFACES 0
 /*----- Default Value for MEMP_NUM_PPPOL2TP_INTERFACES: 1 ---*/
@@ -94,15 +96,7 @@
 /*----- Default Value for VJ_SUPPORT: 1 ---*/
 #define VJ_SUPPORT 0
 /*----- Value in opt.h for LWIP_STATS: 1 -----*/
-#define LWIP_STATS 0
-/*----- Value in opt.h for CHECKSUM_GEN_UDP: 1 -----*/
-#define CHECKSUM_GEN_UDP 0
-/*----- Value in opt.h for CHECKSUM_GEN_ICMP6: 1 -----*/
-#define CHECKSUM_GEN_ICMP6 0
-/*----- Value in opt.h for CHECKSUM_CHECK_UDP: 1 -----*/
-#define CHECKSUM_CHECK_UDP 0
-/*----- Value in opt.h for CHECKSUM_CHECK_ICMP6: 1 -----*/
-#define CHECKSUM_CHECK_ICMP6 0
+#define LWIP_STATS 1
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
 
