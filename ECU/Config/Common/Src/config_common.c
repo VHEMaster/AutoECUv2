@@ -187,6 +187,7 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
     ecu_config_common_ctx.layout.entities_count = ECU_COMMON_ENTITY_MAX;
     ecu_config_common_ctx.shareable.layout.sources_count = ECU_COMMON_OVERALL_SOURCE_MAX;
     ecu_config_common_ctx.shareable.layout.sources_limit = ECU_COMMON_OVERALL_SOURCE_MAX;
+    ecu_config_common_ctx.shareable.layout.source_capacity = ECU_CONFIG_PARAMETERS_MAX;
     ecu_config_common_ctx.shareable.layout.source.entity_limit = ECU_COMMON_ENTITY_MAX;
     ecu_config_common_ctx.shareable.layout.source.entity_count = ecu_config_common_ctx.layout.entities_count;
 
@@ -268,15 +269,22 @@ void ecu_config_common_ipc_loop(void)
   } while(0);
 }
 
-#ifdef CORE_CM7
 error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
 {
   error_t err = E_OK;
+  ecu_config_common_shareable_ctx_t *shareable;
+
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
   do {
     BREAK_IF_ACTION(entity_max == NULL, err = E_PARAM);
 
-    *entity_max = ecu_config_common_ctx.layout.entities_count;
+    *entity_max = shareable->layout.source.entity_count;
 
   } while(0);
 
@@ -286,13 +294,22 @@ error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
 error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t *type_max)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
+
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(type_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    *type_max = entity_ctx->types_count;
+    entity_ctx = &shareable->layout.source.entities[entity];
+    *type_max = entity_ctx->type_count;
 
   } while(0);
 
@@ -302,18 +319,26 @@ error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity,
 error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t *instance_max)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  ecu_config_common_entity_type_ctx_t *type_ctx;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_layout_type_ctx_t *type_ctx;
+
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(instance_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+    entity_ctx = &shareable->layout.source.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
-    *instance_max = type_ctx->instances_count;
+    *instance_max = type_ctx->instance_count;
 
   } while(0);
 
@@ -323,20 +348,29 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
 error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_read_write_t read_write, ecu_runtime_param_index_t *params_max)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  const ecu_config_common_entity_config_t *entity_config;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_layout_type_ctx_t *type_ctx;
+
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
   do {
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
-    entity_config = &ecu_config_common_config.entities[entity];
+    entity_ctx = &shareable->layout.source.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
 
-    err = entity_config->get_type_params_count_read_write_funcs[read_write](type, params_max);
-    BREAK_IF(err != E_OK);
+    type_ctx = &entity_ctx->types[type];
+
+    *params_max = type_ctx->readwrite[read_write].params_count;
+
 
   } while(0);
 
@@ -346,27 +380,44 @@ error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_
 error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_entity_t entity, ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t instance, ecu_config_common_read_write_t read_write, ecu_core_runtime_value_ctx_t **params, ecu_runtime_param_index_t *params_max)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  ecu_config_common_entity_type_ctx_t *type_ctx;
-  ecu_config_common_entity_instance_ctx_t *instance_ctx;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_layout_type_ctx_t *type_ctx;
+  ecu_config_common_shareable_layout_instance_ctx_t *instance_ctx;
+  uint32_t param_first_index;
+  ecu_config_common_overall_source_t source = ECU_COMMON_OVERALL_SOURCE_FINAL;
+
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
   do {
-    BREAK_IF_ACTION(params == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(source >= shareable->layout.sources_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
+    BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
     BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(read_write != ECU_COMMON_READ && read_write != ECU_COMMON_WRITE, err = E_PARAM);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+    entity_ctx = &shareable->layout.source.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
-    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= type_ctx->instance_count, err = E_PARAM);
 
     instance_ctx = &type_ctx->instances[instance];
-    BREAK_IF_ACTION(instance_ctx->parameters == NULL, err = E_FAULT);
+    param_first_index = instance_ctx->readwrite[read_write].param_first_index;
 
-    *params_max = instance_ctx->parameters->count[read_write];
-    *params = instance_ctx->parameters->params[read_write];
+    *params_max = type_ctx->readwrite[read_write].params_count;
+
+#ifdef CORE_CM7
+    *params = &shareable->sources[ECU_COMMON_OVERALL_SOURCE_FINAL].values[param_first_index];
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+    *params = &shareable->values[source * shareable->layout.sources_limit + param_first_index];
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -376,9 +427,12 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
 error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, ecu_core_runtime_value_ctx_t **ptr)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  ecu_config_common_entity_type_ctx_t *type_ctx;
-  ecu_config_common_entity_instance_ctx_t *instance_ctx;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_layout_type_ctx_t *type_ctx;
+  ecu_config_common_shareable_layout_instance_ctx_t *instance_ctx;
+  uint32_t param_first_index;
+  ecu_config_common_overall_source_t source = ECU_COMMON_OVERALL_SOURCE_FINAL;
 
   ecu_config_common_entity_parameter_t parameter = id.bitfield.parameter;
   ecu_config_common_entity_instance_t instance = id.bitfield.instance;
@@ -386,21 +440,37 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
   ecu_config_common_read_write_t read_write = id.bitfield.read_write;
   ecu_config_common_entity_t entity = id.bitfield.entity;
 
-  do {
-    BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+  do {
+    BREAK_IF_ACTION(source >= shareable->layout.sources_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
+    BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
+
+    entity_ctx = &shareable->layout.source.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
-    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= type_ctx->instance_count, err = E_PARAM);
 
     instance_ctx = &type_ctx->instances[instance];
-    BREAK_IF_ACTION(instance_ctx->parameters == NULL, err = E_FAULT);
+    param_first_index = instance_ctx->readwrite[read_write].param_first_index;
+    BREAK_IF_ACTION(param_first_index >= shareable->layout.source_capacity, err = E_FAULT);
 
-    BREAK_IF_ACTION(parameter >= instance_ctx->parameters->count[read_write], err = E_PARAM);
-    *ptr = &instance_ctx->parameters->params[read_write][parameter];
+    BREAK_IF_ACTION(parameter >= type_ctx->readwrite[read_write].params_count, err = E_PARAM);
+
+#ifdef CORE_CM7
+    *ptr = &shareable->sources[ECU_COMMON_OVERALL_SOURCE_FINAL].values[param_first_index + parameter];
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+    *ptr = &shareable->values[source * shareable->layout.sources_limit + param_first_index + parameter];
+#endif /* CORE_CM4 */
 
   } while(0);
 
@@ -410,9 +480,12 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id, ecu_core_runtime_value_ctx_t *ptr)
 {
   error_t err = E_OK;
-  ecu_config_common_entity_ctx_t *entity_ctx;
-  ecu_config_common_entity_type_ctx_t *type_ctx;
-  ecu_config_common_entity_instance_ctx_t *instance_ctx;
+  ecu_config_common_shareable_ctx_t *shareable;
+  ecu_config_common_shareable_layout_entity_ctx_t *entity_ctx;
+  ecu_config_common_shareable_layout_type_ctx_t *type_ctx;
+  ecu_config_common_shareable_layout_instance_ctx_t *instance_ctx;
+  uint32_t param_first_index, param_index;
+  ecu_config_common_overall_source_t source = ECU_COMMON_OVERALL_SOURCE_FINAL;
 
   ecu_config_common_entity_parameter_t parameter = id.bitfield.parameter;
   ecu_config_common_entity_instance_t instance = id.bitfield.instance;
@@ -420,28 +493,46 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
   ecu_config_common_read_write_t read_write = id.bitfield.read_write;
   ecu_config_common_entity_t entity = id.bitfield.entity;
 
-  do {
-    BREAK_IF_ACTION(id.bitfield.supported != true, err = E_NOTSUPPORT);
-    BREAK_IF_ACTION(entity >= ecu_config_common_ctx.layout.entities_count, err = E_PARAM);
+#ifdef CORE_CM7
+  shareable = &ecu_config_common_ctx.shareable;
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+  shareable = ecu_config_common_ctx.sharedmemory;
+#endif /* CORE_CM4 */
 
-    entity_ctx = &ecu_config_common_ctx.layout.entities[entity];
-    BREAK_IF_ACTION(type >= entity_ctx->types_count, err = E_PARAM);
+  do {
+    BREAK_IF_ACTION(ptr == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(source >= shareable->layout.sources_count, err = E_PARAM);
+    BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
+    BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
+
+    entity_ctx = &shareable->layout.source.entities[entity];
+    BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
 
     type_ctx = &entity_ctx->types[type];
-    BREAK_IF_ACTION(instance >= type_ctx->instances_count, err = E_PARAM);
+    BREAK_IF_ACTION(instance >= type_ctx->instance_count, err = E_PARAM);
 
     instance_ctx = &type_ctx->instances[instance];
-    BREAK_IF_ACTION(instance_ctx->parameters == NULL, err = E_FAULT);
+    param_first_index = instance_ctx->readwrite[read_write].param_first_index;
+    BREAK_IF_ACTION(param_first_index >= shareable->layout.source_capacity, err = E_FAULT);
 
-    BREAK_IF_ACTION(parameter >= instance_ctx->parameters->count[read_write], err = E_PARAM);
-    memcpy(ptr, &instance_ctx->parameters->params[read_write][parameter], sizeof(ecu_core_runtime_value_ctx_t));
+    BREAK_IF_ACTION(parameter >= type_ctx->readwrite[read_write].params_count, err = E_PARAM);
+    param_index = param_first_index + parameter;
 
+    BREAK_IF_ACTION(param_index >= shareable->layout.source_capacity, err = E_PARAM);
+
+#ifdef CORE_CM7
+    *ptr = shareable->sources[ECU_COMMON_OVERALL_SOURCE_FINAL].values[param_index];
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+    *ptr = shareable->values[source * shareable->layout.sources_limit + param_index];
+#endif /* CORE_CM4 */
 
   } while(0);
 
   return err;
 }
-#endif /* CORE_CM7 */
 
 #ifdef CORE_CM7
 static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity)
@@ -456,7 +547,8 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
   ecu_config_common_virtual_ctx_t *virtual_ctx;
   ecu_config_common_shareable_layout_entity_ctx_t *shareable_entity;
   ecu_config_common_shareable_layout_type_ctx_t *shareable_type;
-  ecu_config_common_shareable_layout_readwrite_ctx_t *shareable_readwrite;
+  ecu_config_common_shareable_layout_type_readwrite_ctx_t *shareable_type_readwrite;
+  ecu_config_common_shareable_layout_instance_readwrite_ctx_t *shareable_instance_readwrite;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -496,9 +588,11 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
             break;
           }
 
-          shareable_readwrite = &shareable_type->instances[i].readwrite[rw];
-          shareable_readwrite->params_count = parameters->count[rw];
-          shareable_readwrite->param_first_index = ecu_config_common_ctx.params_allocated;
+          shareable_instance_readwrite = &shareable_type->instances[i].readwrite[rw];
+          shareable_type_readwrite = &shareable_type->readwrite[rw];
+
+          shareable_type_readwrite->params_count = parameters->count[rw];
+          shareable_instance_readwrite->param_first_index = ecu_config_common_ctx.params_allocated;
 
           for(ecu_config_common_overall_source_t v = 0; v < ECU_COMMON_OVERALL_SOURCE_MAX; v++) {
             virtual_parameters = &ecu_config_common_ctx.core_runtime_destinations[v][entity][t * entity_config->instance_limit + i];

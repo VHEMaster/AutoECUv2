@@ -44,17 +44,21 @@ typedef enum {
 }ecu_config_common_entity_t;
 
 typedef struct {
-    ecu_runtime_param_index_t params_count;
     uint32_t param_first_index;
-}ecu_config_common_shareable_layout_readwrite_ctx_t;
+}ecu_config_common_shareable_layout_instance_readwrite_ctx_t;
 
 typedef struct {
-    ecu_config_common_shareable_layout_readwrite_ctx_t readwrite[ECU_COMMON_READ_WRITE_MAX];
+    ecu_runtime_param_index_t params_count;
+}ecu_config_common_shareable_layout_type_readwrite_ctx_t;
+
+typedef struct {
+    ecu_config_common_shareable_layout_instance_readwrite_ctx_t readwrite[ECU_COMMON_READ_WRITE_MAX];
 }ecu_config_common_shareable_layout_instance_ctx_t;
 
 typedef struct {
     ecu_config_common_entity_instance_t instance_limit;
     ecu_config_common_entity_instance_t instance_count;
+    ecu_config_common_shareable_layout_type_readwrite_ctx_t readwrite[ECU_COMMON_READ_WRITE_MAX];
     ecu_config_common_shareable_layout_instance_ctx_t instances[ECU_ENTITY_INSTANCE_MAX];
 }ecu_config_common_shareable_layout_type_ctx_t;
 
@@ -65,6 +69,7 @@ typedef struct {
 }ecu_config_common_shareable_layout_entity_ctx_t;
 
 typedef struct {
+
     ecu_config_common_entity_t entity_limit;
     ecu_config_common_entity_t entity_count;
     ecu_config_common_shareable_layout_entity_ctx_t entities[ECU_COMMON_ENTITY_MAX];
@@ -73,6 +78,7 @@ typedef struct {
 typedef struct {
     ecu_config_common_overall_source_t sources_limit;
     ecu_config_common_overall_source_t sources_count;
+    ecu_config_common_entity_parameter_t source_capacity;
     ecu_config_common_shareable_layout_source_ctx_t source;
 }ecu_config_common_shareable_layout_ctx_t;
 
