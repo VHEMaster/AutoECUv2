@@ -574,14 +574,22 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
       shareable_type->instance_limit = ECU_ENTITY_INSTANCE_MAX;
       shareable_type->instance_count = type_ctx->instances_count;
 
+      for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
+        shareable_type_readwrite = &shareable_type->readwrite[rw];
+        err = entity_config->get_type_params_count_read_write_funcs[rw](t, &shareable_type_readwrite->params_count);
+        BREAK_IF(err != E_OK);
+      }
+      BREAK_IF(err != E_OK);
+
       for(ecu_config_common_entity_instance_t i = 0; i < type_ctx->instances_count; i++) {
         instance_ctx = &type_ctx->instances[i];
         parameters = &ecu_config_common_ctx.core_runtime_destinations[ECU_COMMON_OVERALL_SOURCE_FINAL][entity][t * entity_config->instance_limit + i];
         instance_ctx->parameters = parameters;
 
         for(ecu_config_common_read_write_t rw = 0; rw < ECU_COMMON_READ_WRITE_MAX; rw++) {
-          err = entity_config->get_type_params_count_read_write_funcs[rw](t, &parameters->count[rw]);
-          BREAK_IF(err != E_OK);
+          shareable_type_readwrite = &shareable_type->readwrite[rw];
+          parameters->count[rw] = shareable_type_readwrite->params_count;
+
           if(ecu_config_common_ctx.params_free < parameters->count[rw]) {
             err = E_OVERFLOW;
             BREAKPOINT(0);
@@ -589,9 +597,6 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
           }
 
           shareable_instance_readwrite = &shareable_type->instances[i].readwrite[rw];
-          shareable_type_readwrite = &shareable_type->readwrite[rw];
-
-          shareable_type_readwrite->params_count = parameters->count[rw];
           shareable_instance_readwrite->param_first_index = ecu_config_common_ctx.params_allocated;
 
           for(ecu_config_common_overall_source_t v = 0; v < ECU_COMMON_OVERALL_SOURCE_MAX; v++) {
