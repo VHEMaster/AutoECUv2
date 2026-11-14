@@ -90,18 +90,20 @@ typedef struct {
 
 typedef struct {
     ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
+    uint64_t align ALIGNED_CACHE;
 }ecu_config_common_virtual_ctx_t;
 #endif /* CORE_CM7 */
 
 typedef struct {
     ecu_config_common_shareable_layout_ctx_t layout;
 #ifdef CORE_CM7
-    ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
+    ALIGNED_CACHE ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
-    ecu_core_runtime_value_ctx_t values[0];
+    ALIGNED_CACHE ecu_core_runtime_value_ctx_t values[0];
 #endif /* CORE_CM4 */
-}ecu_config_common_shareable_ctx_t;
+    uint64_t align ALIGNED_CACHE;
+}ecu_config_common_shareable_ctx_t ALIGNED_CACHE;
 
 typedef struct {
     ecu_ipc_sharedmemory_t sharedmemory_index;
@@ -189,6 +191,7 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
     memset(&ecu_config_common_ctx, 0, sizeof(ecu_config_common_ctx_t));
     ecu_config_common_ctx.config = &ecu_config_common_config;
     ecu_config_common_ctx.layout.entities_count = ECU_COMMON_ENTITY_MAX;
+    ecu_config_common_ctx.shareable.layout.source_stride_bytes = sizeof(ecu_config_common_ctx.shareable.sources[0]);
     ecu_config_common_ctx.shareable.layout.sources_count = ECU_COMMON_OVERALL_SOURCE_MAX;
     ecu_config_common_ctx.shareable.layout.sources_limit = ECU_COMMON_OVERALL_SOURCE_MAX;
     ecu_config_common_ctx.shareable.layout.source_capacity = ECU_CONFIG_PARAMETERS_MAX;
@@ -218,9 +221,6 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
       BREAK_IF(err != E_OK);
     }
 
-    err = ecu_config_common_mdma_init();
-    BREAK_IF(err != E_OK);
-
   } while(0);
 
   return err;
@@ -249,7 +249,17 @@ void ecu_config_common_ipc_init(void)
     BREAK_IF_ACTION(ecu_config_common_ctx.sharedmemory_bytes < sizeof(ecu_config_common_shareable_ctx_t), err = E_FAULT);
 
 #ifdef CORE_CM7
-    memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    do {
+      err = ecu_config_common_mdma_init();
+      BREAK_IF(err != E_OK);
+
+      CacheClean(&ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+      err = ecu_config_common_mdma_copy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    } while(0);
+
+    if(err != E_OK) {
+      memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    }
 #endif /* CORE_CM7 */
 
     ecu_config_common_ctx.ipc_initialized = true;
@@ -269,8 +279,8 @@ void ecu_config_common_ipc_loop(void)
     BREAK_IF(ecu_config_common_ctx.ipc_initialized != true);
 
 #ifdef CORE_CM7
-    CacheClean(&ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
-    err = ecu_config_common_mdma_copy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    CacheClean(&ecu_config_common_ctx.shareable.sources, sizeof(ecu_config_common_ctx.shareable.sources));
+    err = ecu_config_common_mdma_copy(ecu_config_common_ctx.sharedmemory->sources, &ecu_config_common_ctx.shareable.sources, sizeof(ecu_config_common_ctx.shareable.sources));
     if(err != E_OK) {
       // TODO: do we readlly need this?
       //memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
@@ -436,7 +446,7 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *params = &shareable->values[source * shareable->layout.source_capacity + param_first_index];
+    *params = &((ecu_core_runtime_value_ctx_t *)((void *)shareable->values + source * shareable->layout.source_stride_bytes))[param_first_index];
 #endif /* CORE_CM4 */
 
   } while(0);
@@ -490,7 +500,7 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *ptr = &shareable->values[source * shareable->layout.source_capacity + param_first_index + parameter];
+    *ptr = &((ecu_core_runtime_value_ctx_t *)((void *)shareable->values + source * shareable->layout.source_stride_bytes))[param_first_index + parameter];
 #endif /* CORE_CM4 */
 
   } while(0);
@@ -548,7 +558,7 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *ptr = shareable->values[source * shareable->layout.source_capacity + param_index];
+    *ptr = ((ecu_core_runtime_value_ctx_t *)((void *)shareable->values + source * shareable->layout.source_stride_bytes))[param_index];
 #endif /* CORE_CM4 */
 
   } while(0);

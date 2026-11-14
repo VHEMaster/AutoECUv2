@@ -31,10 +31,10 @@ error_t ecu_config_common_mdma_init(void)
     ecu_config_common_mdma_ctx.hdma->Init.Request = MDMA_REQUEST_SW;
     ecu_config_common_mdma_ctx.hdma->Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
     ecu_config_common_mdma_ctx.hdma->Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
-    ecu_config_common_mdma_ctx.hdma->Init.SourceInc = MDMA_SRC_INC_WORD;
-    ecu_config_common_mdma_ctx.hdma->Init.DestinationInc = MDMA_DEST_INC_WORD;
-    ecu_config_common_mdma_ctx.hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
-    ecu_config_common_mdma_ctx.hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
+    ecu_config_common_mdma_ctx.hdma->Init.SourceInc = MDMA_SRC_INC_DOUBLEWORD;
+    ecu_config_common_mdma_ctx.hdma->Init.DestinationInc = MDMA_DEST_INC_DOUBLEWORD;
+    ecu_config_common_mdma_ctx.hdma->Init.SourceDataSize = MDMA_SRC_DATASIZE_DOUBLEWORD;
+    ecu_config_common_mdma_ctx.hdma->Init.DestDataSize = MDMA_DEST_DATASIZE_DOUBLEWORD;
 
     status = HAL_MDMA_Init(ecu_config_common_mdma_ctx.hdma);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
