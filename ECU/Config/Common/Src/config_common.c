@@ -255,6 +255,12 @@ void ecu_config_common_ipc_init(void)
 
       CacheClean(&ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
       err = ecu_config_common_mdma_copy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+      BREAK_IF(err != E_OK);
+
+      do {
+        err = ecu_config_common_mdma_poll();
+      } while(err == E_AGAIN);
+
     } while(0);
 
     if(err != E_OK) {

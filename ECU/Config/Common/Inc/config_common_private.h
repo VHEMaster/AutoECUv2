@@ -12,5 +12,6 @@
 
 error_t ecu_config_common_mdma_init(void);
 error_t ecu_config_common_mdma_copy(void *dst, const void *src, uint32_t bytes);
+error_t ecu_config_common_mdma_poll(void);
 
 #endif /* CONFIG_COMMON_INC_CONFIG_COMMON_PRIVATE_H_ */

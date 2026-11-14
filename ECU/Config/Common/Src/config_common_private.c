@@ -74,6 +74,19 @@ error_t ecu_config_common_mdma_copy(void *dst, const void *src, uint32_t bytes)
   return err;
 }
 
+error_t ecu_config_common_mdma_poll(void)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ecu_config_common_mdma_ctx.initialized != true, err = E_NOTRDY);
+    err = ATOMIC_LOAD(ecu_config_common_mdma_ctx.dma_errcode);
+
+  } while(0);
+
+  return err;
+}
+
 static void ecu_config_common_mdma_cplt_cb(MDMA_HandleTypeDef *hdma)
 {
   ATOMIC_STORE(ecu_config_common_mdma_ctx.dma_errcode, E_OK);
