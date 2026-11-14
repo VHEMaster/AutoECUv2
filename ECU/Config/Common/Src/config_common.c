@@ -395,9 +395,9 @@ error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_
 #endif /* CORE_CM4 */
 
   do {
+    BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
     BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
 
     entity_ctx = &shareable->layout.source.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
@@ -431,10 +431,11 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
 #endif /* CORE_CM4 */
 
   do {
+    BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(params == NULL, err = E_PARAM);
     BREAK_IF_ACTION(source >= shareable->layout.sources_count, err = E_PARAM);
     BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
-    BREAK_IF_ACTION(params_max == NULL, err = E_PARAM);
 
     entity_ctx = &shareable->layout.source.entities[entity];
     BREAK_IF_ACTION(type >= entity_ctx->type_count, err = E_PARAM);
@@ -485,6 +486,7 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 #endif /* CORE_CM4 */
 
   do {
+    BREAK_IF_ACTION(ptr == NULL, err = E_PARAM);
     BREAK_IF_ACTION(source >= shareable->layout.sources_count, err = E_PARAM);
     BREAK_IF_ACTION(entity >= shareable->layout.source.entity_count, err = E_PARAM);
     BREAK_IF_ACTION(read_write >= ECU_COMMON_READ_WRITE_MAX, err = E_PARAM);
