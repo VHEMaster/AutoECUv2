@@ -20,6 +20,10 @@
 #include "config_ipc.h"
 
 #ifdef CORE_CM7
+#include "config_common_private.h"
+#endif /* CORE_CM7 */
+
+#ifdef CORE_CM7
 #if (ECU_DEVICE_TYPE_MAX > ECU_ENTITY_TYPE_MAX)
 #error "ECU_DEVICE_TYPE_MAX is larger than ECU_ENTITY_TYPE_MAX"
 #endif
@@ -213,6 +217,10 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
       err = ecu_config_common_entity(ctx, e);
       BREAK_IF(err != E_OK);
     }
+
+    err = ecu_config_common_mdma_init();
+    BREAK_IF(err != E_OK);
+
   } while(0);
 
   return err;
@@ -260,12 +268,19 @@ void ecu_config_common_ipc_loop(void)
   do {
     BREAK_IF(ecu_config_common_ctx.ipc_initialized != true);
 
-    // TODO: replace to MDMA transaction in 32-bit WORD mode
-    (void)err;
 #ifdef CORE_CM7
     CacheClean(&ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
-    memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    err = ecu_config_common_mdma_copy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    if(err != E_OK) {
+      // TODO: do we readlly need this?
+      //memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    }
 #endif /* CORE_CM7 */
+
+#ifdef CORE_CM4
+    (void)err;
+#endif /* CORE_CM4 */
+
   } while(0);
 }
 
