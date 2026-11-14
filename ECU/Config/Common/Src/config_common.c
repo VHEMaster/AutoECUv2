@@ -278,6 +278,7 @@ error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -301,6 +302,7 @@ error_t ecu_config_common_get_entity_type_max(ecu_config_common_entity_t entity,
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -327,6 +329,7 @@ error_t ecu_config_common_get_entity_type_instance_max(ecu_config_common_entity_
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -356,6 +359,7 @@ error_t ecu_config_common_get_entity_type_params_count(ecu_config_common_entity_
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -391,6 +395,7 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -416,7 +421,7 @@ error_t ecu_config_common_get_entity_type_instance_params(ecu_config_common_enti
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *params = &shareable->values[source * shareable->layout.sources_limit + param_first_index];
+    *params = &shareable->values[source * shareable->layout.source_capacity + param_first_index];
 #endif /* CORE_CM4 */
 
   } while(0);
@@ -444,6 +449,7 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -469,7 +475,7 @@ error_t ecu_config_common_get_parameter_ptr_by_id(ecu_config_parameter_id_t id, 
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *ptr = &shareable->values[source * shareable->layout.sources_limit + param_first_index + parameter];
+    *ptr = &shareable->values[source * shareable->layout.source_capacity + param_first_index + parameter];
 #endif /* CORE_CM4 */
 
   } while(0);
@@ -497,6 +503,7 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
   shareable = &ecu_config_common_ctx.shareable;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+  RETURN_IF(ecu_config_common_ctx.ipc_initialized != true, E_NOTRDY);
   shareable = ecu_config_common_ctx.sharedmemory;
 #endif /* CORE_CM4 */
 
@@ -526,7 +533,7 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    *ptr = shareable->values[source * shareable->layout.sources_limit + param_index];
+    *ptr = shareable->values[source * shareable->layout.source_capacity + param_index];
 #endif /* CORE_CM4 */
 
   } while(0);
