@@ -7,13 +7,19 @@
 
 #include "config_common.h"
 
+#ifdef CORE_CM7
 #include "config_devices.h"
 #include "config_sensors.h"
 #include "config_modules.h"
 #include "config_timings.h"
+#endif /* CORE_CM7 */
 
 #include "config_global.h"
 
+#include "ipc_sharedmemory.h"
+#include "config_ipc.h"
+
+#ifdef CORE_CM7
 #if (ECU_DEVICE_TYPE_MAX > ECU_ENTITY_TYPE_MAX)
 #error "ECU_DEVICE_TYPE_MAX is larger than ECU_ENTITY_TYPE_MAX"
 #endif
@@ -49,17 +55,15 @@ typedef error_t (*ecu_entity_get_instance_max_func_t)(ecu_config_common_entity_t
 typedef error_t (*ecu_entity_get_instance_max_func_t)(ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t *instance_max);
 typedef error_t (*ecu_entity_get_instance_params_read_write_func_t)(ecu_config_common_entity_type_t type, ecu_config_common_entity_instance_t instance, ecu_core_runtime_value_ctx_t **params, ecu_runtime_param_index_t *count);
 typedef error_t (*ecu_entity_get_type_params_count_read_write_func_t)(ecu_config_common_entity_type_t type, ecu_runtime_param_index_t *count);
+#endif /* CORE_CM7 */
 
+#ifdef CORE_CM7
 typedef struct {
     ecu_config_common_entity_instance_t instance_limit;
     ecu_entity_get_type_max_func_t get_type_max_func;
     ecu_entity_get_instance_max_func_t get_instance_max_func;
     ecu_entity_get_type_params_count_read_write_func_t get_type_params_count_read_write_funcs[ECU_COMMON_READ_WRITE_MAX];
 }ecu_config_common_entity_config_t;
-
-typedef struct {
-    ecu_config_common_entity_config_t entities[ECU_COMMON_ENTITY_MAX];
-}ecu_config_common_config_t;
 
 typedef struct {
     ecu_core_runtime_global_instance_parameters_ctx_t *parameters;
@@ -76,25 +80,41 @@ typedef struct {
 }ecu_config_common_entity_ctx_t;
 
 typedef struct {
-    ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
-}ecu_config_common_virtual_ctx_t;
-
-typedef struct {
-    ecu_config_common_shareable_layout_ctx_t shareable_layout;
-    ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
-}ecu_config_common_shareable_ctx_t;
-
-typedef struct {
     ecu_config_common_entity_t entities_count;
     ecu_config_common_entity_ctx_t entities[ECU_COMMON_ENTITY_MAX];
 }ecu_config_common_layout_t;
 
+typedef struct {
+    ecu_core_runtime_value_ctx_t values[ECU_CONFIG_PARAMETERS_MAX];
+}ecu_config_common_virtual_ctx_t;
+#endif /* CORE_CM7 */
+
+typedef struct {
+    ecu_config_common_shareable_layout_ctx_t layout;
+#ifdef CORE_CM7
+    ecu_config_common_virtual_ctx_t sources[ECU_COMMON_OVERALL_SOURCE_MAX];
+#endif /* CORE_CM7 */
+#ifdef CORE_CM4
+    ecu_core_runtime_value_ctx_t values[0];
+#endif /* CORE_CM4 */
+}ecu_config_common_shareable_ctx_t;
+
+typedef struct {
+    ecu_ipc_sharedmemory_t sharedmemory_index;
+#ifdef CORE_CM7
+    ecu_config_common_entity_config_t entities[ECU_COMMON_ENTITY_MAX];
+#endif /* CORE_CM7 */
+}ecu_config_common_config_t;
+
 typedef struct ecu_config_common_ctx_tag {
     const ecu_config_common_config_t *config;
+    ipc_sharedmemory_ctx_t *ipc_ctx;
+    ecu_config_common_shareable_ctx_t *sharedmemory;
+    uint32_t sharedmemory_bytes;
 
+#ifdef CORE_CM7
     ecu_config_common_layout_t layout;
 
-    ecu_config_common_shareable_layout_ctx_t shareable_layout;
     ecu_config_common_shareable_ctx_t shareable;
 
     ecu_config_common_virtual_ctx_t *common_ctx_sources[ECU_COMMON_OVERALL_SOURCE_MAX];
@@ -102,9 +122,15 @@ typedef struct ecu_config_common_ctx_tag {
 
     uint32_t params_allocated;
     uint32_t params_free;
+#endif /* CORE_CM7 */
+
+    bool ipc_initialized;
 }ecu_config_common_ctx_t;
 
 static const ecu_config_common_config_t ecu_config_common_config = {
+    .sharedmemory_index = ECU_IPC_SHAREDMEMORY_1,
+
+#ifdef CORE_CM7
     .entities = {
         {
             .instance_limit = ECU_DEVICE_INSTANCE_MAX,
@@ -143,10 +169,12 @@ static const ecu_config_common_config_t ecu_config_common_config = {
             },
         }, // ECU_COMMON_ENTITY_TIMING
     },
+#endif /* CORE_CM7 */
 };
 
 static RAM_SECTION ecu_config_common_ctx_t ecu_config_common_ctx;
 
+#ifdef CORE_CM7
 error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -157,9 +185,10 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
     memset(&ecu_config_common_ctx, 0, sizeof(ecu_config_common_ctx_t));
     ecu_config_common_ctx.config = &ecu_config_common_config;
     ecu_config_common_ctx.layout.entities_count = ECU_COMMON_ENTITY_MAX;
-    ecu_config_common_ctx.shareable_layout.sources_count = ECU_COMMON_OVERALL_SOURCE_MAX;
-    ecu_config_common_ctx.shareable_layout.source.entity_limit = ECU_COMMON_ENTITY_MAX;
-    ecu_config_common_ctx.shareable_layout.source.entity_count = ecu_config_common_ctx.layout.entities_count;
+    ecu_config_common_ctx.shareable.layout.sources_count = ECU_COMMON_OVERALL_SOURCE_MAX;
+    ecu_config_common_ctx.shareable.layout.sources_limit = ECU_COMMON_OVERALL_SOURCE_MAX;
+    ecu_config_common_ctx.shareable.layout.source.entity_limit = ECU_COMMON_ENTITY_MAX;
+    ecu_config_common_ctx.shareable.layout.source.entity_count = ecu_config_common_ctx.layout.entities_count;
 
     for(ecu_config_common_overall_source_t v = 0; v < ECU_COMMON_OVERALL_SOURCE_MAX; v++) {
       ecu_config_common_ctx.common_ctx_sources[v] = &ecu_config_common_ctx.shareable.sources[v];
@@ -183,12 +212,63 @@ error_t ecu_config_common_init(ecu_core_ctx_t *ctx)
       err = ecu_config_common_entity(ctx, e);
       BREAK_IF(err != E_OK);
     }
-
   } while(0);
 
   return err;
 }
+#endif /* CORE_CM7 */
 
+void ecu_config_common_ipc_init(void)
+{
+  error_t err = E_OK;
+
+  do {
+#ifdef CORE_CM4
+    memset(&ecu_config_common_ctx, 0, sizeof(ecu_config_common_ctx_t));
+    ecu_config_common_ctx.config = &ecu_config_common_config;
+#endif /* CORE_CM4 */
+
+    err = ecu_ipc_get_sharedmemory_ctx(ecu_config_common_ctx.config->sharedmemory_index, &ecu_config_common_ctx.ipc_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ipc_sharedmemory_lock(ecu_config_common_ctx.ipc_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ipc_sharedmemory_get_buffer(ecu_config_common_ctx.ipc_ctx, (void **)&ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.sharedmemory_bytes);
+    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(ecu_config_common_ctx.sharedmemory == NULL, err = E_FAULT);
+    BREAK_IF_ACTION(ecu_config_common_ctx.sharedmemory_bytes < sizeof(ecu_config_common_shareable_ctx_t), err = E_FAULT);
+
+#ifdef CORE_CM7
+    memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+#endif /* CORE_CM7 */
+
+    ecu_config_common_ctx.ipc_initialized = true;
+
+  } while(0);
+
+  if(err != E_OK) {
+    BREAKPOINT(0);
+  }
+}
+
+void ecu_config_common_ipc_loop(void)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF(ecu_config_common_ctx.ipc_initialized != true);
+
+    // TODO: replace to MDMA transaction in 32-bit WORD mode
+    (void)err;
+#ifdef CORE_CM7
+    CacheClean(&ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+    memcpy(ecu_config_common_ctx.sharedmemory, &ecu_config_common_ctx.shareable, sizeof(ecu_config_common_shareable_ctx_t));
+#endif /* CORE_CM7 */
+  } while(0);
+}
+
+#ifdef CORE_CM7
 error_t ecu_config_common_get_entity_max(ecu_config_common_entity_t *entity_max)
 {
   error_t err = E_OK;
@@ -361,7 +441,9 @@ error_t ecu_config_common_get_parameter_value_by_id(ecu_config_parameter_id_t id
 
   return err;
 }
+#endif /* CORE_CM7 */
 
+#ifdef CORE_CM7
 static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_entity_t entity)
 {
   error_t err = E_OK;
@@ -385,7 +467,7 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
     BREAK_IF(err != E_OK);
     BREAK_IF_ACTION(entity_ctx->types_count > ECU_ENTITY_TYPE_MAX, err = E_FAULT);
 
-    shareable_entity = &ecu_config_common_ctx.shareable_layout.source.entities[entity];
+    shareable_entity = &ecu_config_common_ctx.shareable.layout.source.entities[entity];
     shareable_entity->type_limit = ECU_ENTITY_TYPE_MAX;
     shareable_entity->type_count = entity_ctx->types_count;
 
@@ -441,3 +523,4 @@ static error_t ecu_config_common_entity(ecu_core_ctx_t *ctx, ecu_config_common_e
 
   return err;
 }
+#endif /* CORE_CM7 */

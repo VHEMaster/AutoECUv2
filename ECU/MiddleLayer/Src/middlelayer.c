@@ -18,10 +18,11 @@
 #include "middlelayer_modules.h"
 #include "middlelayer_timings.h"
 #include "config_loop.h"
-#include "config_global.h"
 #include "core.h"
 #include "spi.h"
 #endif /* CORE_CM7 */
+
+#include "config_global.h"
 
 #ifdef CORE_CM4
 #include "middlelayer_comm.h"
@@ -65,6 +66,8 @@ static void middlelayer_tim_slow_irq(void)
 #ifdef CORE_CM4
   middlelayer_comm_loop_slow();
 #endif /* CORE_CM4 */
+
+  ecu_config_common_ipc_loop();
 
   TIME_MSMT_STOP(&ml_loop_time_msmt.slow);
 }
@@ -165,12 +168,16 @@ void middlelayer_init(void)
 
   core_init();
 
+  ecu_config_common_ipc_init();
+
   ecu_config_start_counter();
 
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
   middlelayer_ipc_init();
+
+  ecu_config_common_ipc_init();
 
   middlelayer_comm_init();
 #endif /* CORE_CM4 */

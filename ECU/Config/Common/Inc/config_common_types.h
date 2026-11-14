@@ -71,6 +71,7 @@ typedef struct {
 }ecu_config_common_shareable_layout_source_ctx_t;
 
 typedef struct {
+    ecu_config_common_overall_source_t sources_limit;
     ecu_config_common_overall_source_t sources_count;
     ecu_config_common_shareable_layout_source_ctx_t source;
 }ecu_config_common_shareable_layout_ctx_t;
