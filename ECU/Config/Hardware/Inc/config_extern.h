@@ -66,6 +66,8 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
+extern DMA_HandleTypeDef hdma_m2m_stream2;
+extern DMA_HandleTypeDef hdma_m2m_stream3;
 #endif /* CORE_CM4 */
 
 extern EXTI_HandleTypeDef hexti1;

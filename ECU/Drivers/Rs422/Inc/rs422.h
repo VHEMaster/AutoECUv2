@@ -17,11 +17,15 @@ typedef void (*rs422_callback_func_t)(rs422_ctx_t *ctx, void *usrdata);
 
 typedef struct {
     UART_HandleTypeDef *handle;
+    DMA_HandleTypeDef *hdma;
+    uint32_t dma_copy_threshold;
+    uint32_t dma_tx_threshold;
 
     void *buffer_rx;
     uint32_t buffer_rx_size;
 
-    uint32_t dma_tx_threshold;
+    void *buffer_tx;
+    uint32_t buffer_tx_size;
 
     pUART_CallbackTypeDef tx_cplt_cb;
     pUART_CallbackTypeDef rx_halfcplt_cb;
@@ -36,6 +40,7 @@ typedef struct {
 typedef struct rs422_ctx_tag {
     rs422_config_t config;
     rs422_init_ctx_t init;
+    bool tx_process_lock;
 
     bool initialized;
     bool configured;
@@ -43,13 +48,16 @@ typedef struct rs422_ctx_tag {
     uint32_t rx_read_pointer;
     uint32_t rx_write_pointer;
     uint32_t rx_half_size;
-    error_t tx_errcode;
+
+    uint32_t tx_read_pointer;
+    uint32_t tx_write_pointer;
+    uint32_t tx_dma_length;
     bool tx_busy;
 
-    uint32_t rx_errors;
+    error_t tx_errcode;
 
-    const void *tx_buffer;
-    uint32_t tx_length;
+    uint32_t tx_errors;
+    uint32_t rx_errors;
 
 }rs422_ctx_t;
 

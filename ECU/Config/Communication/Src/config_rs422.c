@@ -21,8 +21,10 @@ typedef struct ecu_comm_rs422_ctx_tag ecu_comm_rs422_ctx_t;
 #ifdef CORE_CM4
 
 #define ECU_COMM_RS422_BUFFER_RX_SIZE   (2048u)
+#define ECU_COMM_RS422_BUFFER_TX_SIZE   (8192u)
 
 static uint8_t ecu_comm_rs422_buffer_rx[ECU_COMM_RS422_BUFFER_RX_SIZE];
+static uint8_t ecu_comm_rs422_buffer_tx[ECU_COMM_RS422_BUFFER_TX_SIZE];
 
 static error_t ecu_comm_rs422_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
 static error_t ecu_comm_rs422_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
@@ -67,8 +69,13 @@ static RAM_SECTION ecu_comm_rs422_ctx_t ecu_comm_rs422_ctx[ECU_COMM_RS422_MAX] =
 #ifdef CORE_CM4
       .init = {
           .handle = &huart1,
+          .hdma = &hdma_m2m_stream2,
+          .dma_copy_threshold = 256u,
+          .dma_tx_threshold = 4u,
           .buffer_rx = ecu_comm_rs422_buffer_rx,
           .buffer_rx_size = ECU_COMM_RS422_BUFFER_RX_SIZE,
+          .buffer_tx = ecu_comm_rs422_buffer_tx,
+          .buffer_tx_size = ECU_COMM_RS422_BUFFER_TX_SIZE,
       },
 #endif /* CORE_CM4 */
 #ifdef CORE_CM7

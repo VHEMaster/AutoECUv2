@@ -6,6 +6,7 @@
  */
 
 #include "rs422.h"
+#include "rs422_private.h"
 
 error_t rs422_init(rs422_ctx_t *ctx, const rs422_init_ctx_t *init_ctx)
 {
@@ -19,7 +20,13 @@ error_t rs422_init(rs422_ctx_t *ctx, const rs422_init_ctx_t *init_ctx)
     memset(ctx, 0u, sizeof(rs422_ctx_t));
     memcpy(&ctx->init, init_ctx, sizeof(rs422_init_ctx_t));
 
-    BREAK_IF_ACTION(ctx->init.handle == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->init.handle == NULL || ctx->init.buffer_rx == NULL ||
+        ctx->init.buffer_tx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(ctx->init.buffer_tx_size < 2u || ctx->init.buffer_tx_size > UINT16_MAX,
+        err = E_PARAM);
+    BREAK_IF_ACTION(ctx->init.buffer_rx_size < 2u || ctx->init.buffer_rx_size > UINT16_MAX,
+        err = E_PARAM);
+    BREAK_IF_ACTION((ctx->init.buffer_rx_size & 1u) != 0u, err = E_PARAM);
 
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1UL)
     status = HAL_OK;
@@ -88,8 +95,11 @@ error_t rs422_configure(rs422_ctx_t *ctx, const rs422_config_t *config)
 
       ATOMIC_STORE_RELAXED(ctx->rx_write_pointer, 0u);
       ATOMIC_STORE_RELAXED(ctx->rx_read_pointer, 0u);
-      ATOMIC_STORE_RELAXED(ctx->rx_errors, 0u);
+      ATOMIC_STORE_RELAXED(ctx->tx_read_pointer, 0u);
+      ATOMIC_STORE_RELAXED(ctx->tx_write_pointer, 0u);
       ATOMIC_STORE(ctx->tx_errcode, E_OK);
+      ctx->tx_errors = false;
+      ctx->rx_errors = false;
       ctx->tx_busy = false;
 
       status = HAL_UART_Receive_DMA(ctx->init.handle, ctx->init.buffer_rx, ctx->init.buffer_rx_size);
@@ -114,9 +124,12 @@ error_t rs422_reset(rs422_ctx_t *ctx)
 
     (void)HAL_UART_Abort(ctx->init.handle);
 
-    ATOMIC_STORE_RELAXED(ctx->tx_errcode, E_OK);
     ATOMIC_STORE_RELAXED(ctx->rx_write_pointer, 0u);
-    ATOMIC_STORE(ctx->rx_read_pointer, 0u);
+    ATOMIC_STORE_RELAXED(ctx->rx_read_pointer, 0u);
+    ATOMIC_STORE_RELAXED(ctx->tx_read_pointer, 0u);
+    ATOMIC_STORE_RELAXED(ctx->tx_write_pointer, 0u);
+    ATOMIC_STORE(ctx->tx_errcode, E_OK);
+    ctx->tx_errors = 0;
     ctx->rx_errors = 0;
     ctx->tx_busy = false;
 
@@ -133,7 +146,7 @@ void rs422_loop_main(rs422_ctx_t *ctx)
   do {
     BREAK_IF(ctx == NULL);
 
-    // TODO: is it anything to do here?
+    rs422_private_tx_process(ctx);
 
   } while(0);
 }
@@ -182,7 +195,6 @@ void rs422_tx_cplt_irq(rs422_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
-
     ATOMIC_STORE(ctx->tx_errcode, E_OK);
 
   } while(0);
@@ -194,7 +206,7 @@ void rs422_error_irq(rs422_ctx_t *ctx)
     BREAK_IF(ctx == NULL);
 
     ctx->rx_errors++;
-    ATOMIC_STORE(ctx->tx_errcode, E_IO);
+
     ATOMIC_STORE(ctx->rx_write_pointer, 0u);
     ATOMIC_STORE(ctx->rx_read_pointer, 0u);
     (void)HAL_UART_Receive_DMA(ctx->init.handle, ctx->init.buffer_rx, ctx->init.buffer_rx_size);
@@ -204,39 +216,7 @@ void rs422_error_irq(rs422_ctx_t *ctx)
 
 error_t rs422_tx(rs422_ctx_t *ctx, const void *buffer, uint32_t length)
 {
-  error_t err = E_OK;
-  HAL_StatusTypeDef status = HAL_OK;
-
-  do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(length == 0u, err = E_OK);
-    BREAK_IF_ACTION(buffer == NULL, err = E_PARAM);
-
-    if(ctx->tx_busy == false) {
-      ctx->tx_errcode = E_AGAIN;
-      ctx->tx_buffer = buffer;
-      ctx->tx_length = length;
-      if(length < ctx->init.dma_tx_threshold) {
-        status = HAL_UART_Transmit_IT(ctx->init.handle, buffer, length);
-        BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-      } else {
-        status = HAL_UART_Transmit_DMA(ctx->init.handle, buffer, length);
-        BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
-      }
-      ctx->tx_busy = true;
-      err = E_AGAIN;
-    } else {
-      BREAK_IF_ACTION(ctx->tx_buffer != buffer || ctx->tx_length != length, err = E_AGAIN);
-
-      err = ctx->tx_errcode;
-      if(err != E_AGAIN) {
-        ctx->tx_busy = false;
-      }
-    }
-
-  } while(0);
-
-  return err;
+  return rs422_private_tx_write(ctx, buffer, length);
 }
 
 error_t rs422_rx(rs422_ctx_t *ctx, void *buffer, uint32_t *p_length)
