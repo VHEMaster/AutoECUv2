@@ -79,6 +79,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/CMP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Modules/VVT/Inc"/>
@@ -169,7 +170,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 					</sourceEntries>
@@ -251,6 +252,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/CMP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/CKP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Crc/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Modules/ETC/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Modules/VVT/Inc"/>
@@ -341,7 +343,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 					</sourceEntries>

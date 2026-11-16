@@ -70,6 +70,8 @@
 #define ATOMIC_EXCHANGE_RELEASE(var, val)   (__atomic_exchange_n(&(var), (val), __ATOMIC_RELEASE))
 #define ATOMIC_STORE(var, val)              (__atomic_store_n(&(var), (val), __ATOMIC_RELEASE))
 #define ATOMIC_STORE_RELAXED(var, val)      (__atomic_store_n(&(var), (val), __ATOMIC_RELAXED))
+#define ATOMIC_PRE_INCREMENT(var, val)      (__atomic_add_fetch(&(var), (val), __ATOMIC_SEQ_CST))
+#define ATOMIC_POST_INCREMENT(var, val)     (__atomic_fetch_add(&(var), (val), __ATOMIC_SEQ_CST))
 #define ATOMIC_LOAD(var)                    (__atomic_load_n(&(var), __ATOMIC_ACQUIRE))
 #define ATOMIC_LOAD_RELAXED(var)            (__atomic_load_n(&(var), __ATOMIC_RELAXED))
 #define ATOMIC_FENCE()                      (__atomic_thread_fence(__ATOMIC_ACQUIRE))
@@ -128,6 +130,22 @@ STATIC_INLINE void ExitCritical(uint32_t prim)
   if(!prim) {
     __enable_irq();
   }
+}
+
+STATIC_INLINE uint32_t GetUsedToRead(uint32_t size, uint32_t read, uint32_t write)
+{
+  if (write >= read) {
+    return write - read;
+  } else {
+    return size - (read - write);
+  }
+}
+
+STATIC_INLINE uint32_t GetFreeToWrite(uint32_t size, uint32_t read, uint32_t write)
+{
+  uint32_t used = GetUsedToRead(size, read, write);
+
+  return size - used - 1;
 }
 
 

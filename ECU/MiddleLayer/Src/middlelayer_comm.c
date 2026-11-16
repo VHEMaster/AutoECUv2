@@ -15,6 +15,7 @@
 #include "config_obd2.h"
 #include "config_router.h"
 #include "config_signals.h"
+#include "config_rs422.h"
 
 #include "compiler.h"
 
@@ -124,6 +125,18 @@ void middlelayer_comm_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_SIGNALS, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_COMM_RS422_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_RS422, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_rs422_init(i, (rs422_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_RS422, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

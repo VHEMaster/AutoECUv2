@@ -71,6 +71,7 @@
 #include "config_uds.h"
 #include "config_obd2.h"
 #include "config_signals.h"
+#include "config_rs422.h"
 
 #include "config_engine.h"
 #include "config_common.h"
@@ -163,6 +164,7 @@ typedef enum {
   ECU_CONFIG_COMM_TYPE_OBD2,
   ECU_CONFIG_COMM_TYPE_ROUTER,
   ECU_CONFIG_COMM_TYPE_SIGNALS,
+  ECU_CONFIG_COMM_TYPE_RS422,
   ECU_CONFIG_COMM_TYPE_ALL,
   ECU_CONFIG_COMM_TYPE_MAX
 }ecu_config_comm_type_t;
