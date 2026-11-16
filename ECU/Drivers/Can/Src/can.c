@@ -74,6 +74,12 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
       break;
     }
 
+    if(status != HAL_OK) {
+      err = E_HAL;
+      break;
+    }
+#endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
+
     ctx->init.handle->Init.NominalPrescaler = can_baudrate_map[CAN_BAUDRATE_500KBPS].prescaler;
     ctx->init.handle->Init.NominalTimeSeg1 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg1;
     ctx->init.handle->Init.NominalTimeSeg2 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg2;
@@ -81,12 +87,6 @@ error_t can_init(can_ctx_t *ctx, const can_init_ctx_t *init_ctx)
     ctx->init.handle->Init.DataPrescaler = can_baudrate_map[CAN_BAUDRATE_500KBPS].prescaler;
     ctx->init.handle->Init.DataTimeSeg1 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg1;
     ctx->init.handle->Init.DataTimeSeg2 = can_baudrate_map[CAN_BAUDRATE_500KBPS].timeseg2;
-
-    if(status != HAL_OK) {
-      err = E_HAL;
-      break;
-    }
-#endif /* USE_HAL_FDCAN_REGISTER_CALLBACKS */
 
     ctx->initialized = true;
 
