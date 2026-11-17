@@ -85,6 +85,7 @@ typedef struct {
     obd2_config_t obd2[ECU_COMM_OBD2_MAX];
     signals_config_t signals[ECU_COMM_SIGNALS_MAX];
     rs422_config_t rs422[ECU_COMM_RS422_MAX];
+    lwip_config_t lwip[ECU_COMM_LWIP_MAX];
 
 }ecu_config_engine_comm_t;
 

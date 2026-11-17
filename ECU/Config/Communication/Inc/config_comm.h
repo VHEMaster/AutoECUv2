@@ -18,6 +18,7 @@
 #include "router.h"
 #include "signals.h"
 #include "rs422.h"
+#include "lwip.h"
 #endif /* CORE_CM4 */
 
 #include "config_comm_types.h"
@@ -45,6 +46,7 @@ error_t ecu_comm_get_obd2_ctx(ecu_comm_obd2_t instance, obd2_ctx_t **ctx);
 error_t ecu_comm_get_router_ctx(ecu_comm_router_t instance, router_ctx_t **ctx);
 error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ctx);
 error_t ecu_comm_get_rs422_ctx(ecu_comm_rs422_t instance, rs422_ctx_t **ctx);
+error_t ecu_comm_get_lwip_ctx(ecu_comm_lwip_t instance, lwip_ctx_t **ctx);
 #endif /* CORE_CM4 */
 
 #endif /* CONFIG_COMMUNICATION_INC_CONFIG_COMM_H_ */

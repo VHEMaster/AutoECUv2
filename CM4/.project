@@ -3,6 +3,7 @@
 	<name>AutoECUv2_CM4</name>
 	<comment></comment>
 	<projects>
+		<project>lwip-static_CM4</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
