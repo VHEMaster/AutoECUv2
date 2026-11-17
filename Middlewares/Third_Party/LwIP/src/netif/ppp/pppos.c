@@ -40,6 +40,7 @@
 #include "lwip/err.h"
 #include "lwip/pbuf.h"
 #include "lwip/sys.h"
+#include "lwip/timeouts.h"
 #include "lwip/memp.h"
 #include "lwip/netif.h"
 #include "lwip/snmp.h"
@@ -74,6 +75,10 @@ static void pppos_input_free_current_packet(pppos_pcb *pppos);
 static void pppos_input_drop(pppos_pcb *pppos);
 static err_t pppos_output_append(pppos_pcb *pppos, err_t err, struct pbuf *nb, u8_t c, u8_t accm, u16_t *fcs);
 static err_t pppos_output_last(pppos_pcb *pppos, err_t err, struct pbuf *nb, u16_t *fcs);
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+static u8_t pppos_clientserver_input(pppos_pcb *pppos, u8_t c);
+static void pppos_clientserver_retry(void *arg);
+#endif
 
 /* Callbacks structure for PPP core */
 static const struct link_callbacks pppos_callbacks = {
@@ -165,6 +170,92 @@ ppp_get_fcs(u8_t byte)
 #define PPPOS_UNPROTECT(lev)
 #endif /* PPP_INPROC_IRQ_SAFE */
 
+
+
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+/* Windows Direct Cable pre-PPP handshake; leave the PPP framing FSM intact. */
+#define PPPOS_CLIENTSERVER_RETRY_MS      25u
+
+#define PPPOS_CLIENTSERVER_INACTIVE     0u
+#define PPPOS_CLIENTSERVER_WAIT_CLIENT  1u
+#define PPPOS_CLIENTSERVER_SEND_REPLY   2u
+#define PPPOS_CLIENTSERVER_WAIT_PPP     3u
+
+#if PPP_INPROC_IRQ_SAFE
+#error "PPPOS_CLIENTSERVER_SUPPORT requires PPP_INPROC_IRQ_SAFE=0 (core-context input)"
+#endif
+
+static void
+pppos_clientserver_send(pppos_pcb *pppos)
+{
+  static const u8_t response[] = "CLIENTSERVER";
+  u32_t remaining;
+  u32_t written;
+
+  if (!pppos->open || pppos->clientserver_state != PPPOS_CLIENTSERVER_SEND_REPLY) {
+    return;
+  }
+
+  remaining = (sizeof(response) - 1u) - pppos->clientserver_sent;
+  written = pppos->output_cb(pppos->ppp, response + pppos->clientserver_sent,
+                            remaining, pppos->ppp->ctx_cb);
+  if (written > remaining) {
+    written = remaining;
+  }
+  pppos->clientserver_sent += (u8_t)written;
+
+  if (pppos->clientserver_sent == sizeof(response) - 1u) {
+    pppos->clientserver_state = PPPOS_CLIENTSERVER_WAIT_PPP;
+  } else {
+    /* Retry a busy TX FIFO without blocking the lwIP/PPPoS input path. */
+    sys_timeout(PPPOS_CLIENTSERVER_RETRY_MS, pppos_clientserver_retry, pppos);
+  }
+}
+
+static void
+pppos_clientserver_retry(void *arg)
+{
+  pppos_clientserver_send((pppos_pcb *)arg);
+}
+
+/* Return 1 for pre-PPP bytes and 0 for a normal PPP opening flag. */
+static u8_t
+pppos_clientserver_input(pppos_pcb *pppos, u8_t c)
+{
+  static const u8_t request[] = "CLIENT";
+
+  if (pppos->clientserver_state == PPPOS_CLIENTSERVER_INACTIVE) {
+    return 0;
+  }
+
+  /* Also accept standard clients that begin directly with LCP. */
+  if (pppos->clientserver_state != PPPOS_CLIENTSERVER_SEND_REPLY && c == PPP_FLAG) {
+    pppos->clientserver_state = PPPOS_CLIENTSERVER_INACTIVE;
+    pppos->clientserver_match = 0u;
+    return 0;
+  }
+
+  /* Windows waits for the full reply before transmitting PPP frames. */
+  if (pppos->clientserver_state == PPPOS_CLIENTSERVER_SEND_REPLY) {
+    return 1;
+  }
+
+  if (c == request[pppos->clientserver_match]) {
+    pppos->clientserver_match++;
+  } else {
+    pppos->clientserver_match = c == request[0] ? 1u : 0u;
+  }
+
+  if (pppos->clientserver_match == sizeof(request) - 1u) {
+    pppos->clientserver_match = 0u;
+    pppos->clientserver_sent = 0u;
+    pppos->clientserver_state = PPPOS_CLIENTSERVER_SEND_REPLY;
+    pppos_clientserver_send(pppos);
+  }
+
+  return 1;
+}
+#endif /* PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT */
 
 /*
  * Create a new PPP connection using the given serial I/O device.
@@ -322,6 +413,9 @@ pppos_connect(ppp_pcb *ppp, void *ctx)
   pppos_input_free_current_packet(pppos);
 #endif /* PPP_INPROC_IRQ_SAFE */
 
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  sys_untimeout(pppos_clientserver_retry, pppos);
+#endif
   /* reset PPPoS control block to its initial state */
   memset(&pppos->last_xmit, 0, sizeof(pppos_pcb) - offsetof(pppos_pcb, last_xmit));
 
@@ -354,6 +448,9 @@ pppos_listen(ppp_pcb *ppp, void *ctx)
   pppos_input_free_current_packet(pppos);
 #endif /* PPP_INPROC_IRQ_SAFE */
 
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  sys_untimeout(pppos_clientserver_retry, pppos);
+#endif
   /* reset PPPoS control block to its initial state */
   memset(&pppos->last_xmit, 0, sizeof(pppos_pcb) - offsetof(pppos_pcb, last_xmit));
 
@@ -366,6 +463,10 @@ pppos_listen(ppp_pcb *ppp, void *ctx)
   PPPOS_PROTECT(lev);
   pppos->open = 1;
   PPPOS_UNPROTECT(lev);
+
+#if PPPOS_CLIENTSERVER_SUPPORT
+  pppos->clientserver_state = PPPOS_CLIENTSERVER_WAIT_CLIENT;
+#endif
 
   /*
    * Wait for something to happen.
@@ -384,6 +485,11 @@ pppos_disconnect(ppp_pcb *ppp, void *ctx)
   PPPOS_PROTECT(lev);
   pppos->open = 0;
   PPPOS_UNPROTECT(lev);
+
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  sys_untimeout(pppos_clientserver_retry, pppos);
+  pppos->clientserver_state = PPPOS_CLIENTSERVER_INACTIVE;
+#endif
 
   /* If PPP_INPROC_IRQ_SAFE is used we cannot call
    * pppos_input_free_current_packet() here because
@@ -408,6 +514,9 @@ pppos_destroy(ppp_pcb *ppp, void *ctx)
   pppos_input_free_current_packet(pppos);
 #endif /* PPP_INPROC_IRQ_SAFE */
 
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  sys_untimeout(pppos_clientserver_retry, pppos);
+#endif
   LWIP_MEMPOOL_FREE(PPPOS_PCB, pppos);
   return ERR_OK;
 }
@@ -502,6 +611,12 @@ pppos_input(ppp_pcb *ppp, const void *s, int l)
   PPPDEBUG(LOG_DEBUG, ("pppos_input[%d]: got %d bytes\n", ppp->netif->num, l));
   while (l-- > 0) {
     cur_char = *s_u8++;
+
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+    if (pppos_clientserver_input(pppos, cur_char)) {
+      continue;
+    }
+#endif
 
     PPPOS_PROTECT(lev);
     escaped = ESCAPE_P(pppos->in_accm, cur_char);

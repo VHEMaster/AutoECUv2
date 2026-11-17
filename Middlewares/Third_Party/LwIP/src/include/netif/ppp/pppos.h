@@ -94,6 +94,11 @@ struct pppos_pcb_s {
   u16_t in_fcs;                    /* Input Frame Check Sequence value. */
   u8_t in_state;                   /* The input process state. */
   u8_t in_escaped;                 /* Escape next character. */
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  u8_t clientserver_state;         /* Windows Direct Cable handshake state. */
+  u8_t clientserver_match;         /* Bytes of "CLIENT" received. */
+  u8_t clientserver_sent;          /* Bytes of "CLIENTSERVER" accepted for TX. */
+#endif
 };
 
 /* Create a new PPPoS session. */

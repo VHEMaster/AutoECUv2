@@ -98,6 +98,9 @@
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
 
+/* Windows Direct Cable handshake: 0=disabled, 1=enabled. */
+#define PPPOS_CLIENTSERVER_SUPPORT 1
+
 /* Use fixed-size, statically allocated memory pools instead of lwIP heap. */
 #define MEM_LIBC_MALLOC                 0
 #define MEMP_MEM_MALLOC                 0
