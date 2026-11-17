@@ -18,6 +18,9 @@ typedef enum {
 typedef struct {
     bool enabled;
 
+    uint8_t ip_addr_our[4];
+    uint8_t ip_addr_his[4];
+
     uint32_t align ALIGNED_CACHE;
 }lwipdrv_config_v1_t ALIGNED_CACHE;
 

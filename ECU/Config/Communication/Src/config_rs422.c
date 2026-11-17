@@ -20,7 +20,7 @@
 typedef struct ecu_comm_rs422_ctx_tag ecu_comm_rs422_ctx_t;
 #ifdef CORE_CM4
 
-#define ECU_COMM_RS422_BUFFER_RX_SIZE   (2048u)
+#define ECU_COMM_RS422_BUFFER_RX_SIZE   (4096u)
 #define ECU_COMM_RS422_BUFFER_TX_SIZE   (8192u)
 
 static uint8_t ecu_comm_rs422_buffer_rx[ECU_COMM_RS422_BUFFER_RX_SIZE];
@@ -55,7 +55,7 @@ typedef struct ecu_comm_rs422_ctx_tag {
 #ifdef CORE_CM7
 static const rs422_config_t ecu_comm_rs422_default_config[ECU_COMM_RS422_MAX] = {
   {
-    .baudrate = 960000,
+    .baudrate = 115200,
   }, //ECU_RS422_IF_1
 };
 

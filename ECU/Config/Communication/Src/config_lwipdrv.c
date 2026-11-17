@@ -32,8 +32,8 @@ typedef struct ecu_comm_lwipdrv_ctx_tag {
   const lwipdrv_config_t *config_default;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
-  lwipdrv_init_ctx_t init;
-  lwipdrv_ctx_t *ctx;
+    lwipdrv_init_ctx_t init;
+    lwipdrv_ctx_t *ctx;
 
     ecu_comm_instance_t rpc_instance;
     const void *rpc_pointer;
@@ -43,7 +43,8 @@ typedef struct ecu_comm_lwipdrv_ctx_tag {
 #ifdef CORE_CM7
 static const lwipdrv_config_t ecu_comm_lwipdrv_default_config[ECU_COMM_LWIPDRV_MAX] = {
   {
-
+      .ip_addr_our = { 10, 77, 0, 2 },
+      .ip_addr_his = { 10, 77, 0, 1 },
   }, //ECU_LWIPDRV_IF_1
 };
 
@@ -56,7 +57,7 @@ static RAM_SECTION ecu_comm_lwipdrv_ctx_t ecu_comm_lwipdrv_ctx[ECU_COMM_LWIPDRV_
     {
 #ifdef CORE_CM4
       .init = {
-
+          .rs422_instance = ECU_COMM_RS422_1,
       },
 #endif /* CORE_CM4 */
 #ifdef CORE_CM7
@@ -76,6 +77,9 @@ error_t ecu_comm_lwipdrv_init(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t *ctx)
 
     lwipdrv_ctx = &ecu_comm_lwipdrv_ctx[instance];
     lwipdrv_ctx->ctx = ctx;
+
+    err = ecu_comm_get_rs422_ctx(lwipdrv_ctx->init.rs422_instance, &lwipdrv_ctx->init.rs422_ctx);
+    BREAK_IF(err != E_OK);
 
     err = lwipdrv_init(lwipdrv_ctx->ctx, &lwipdrv_ctx->init);
     BREAK_IF(err != E_OK);

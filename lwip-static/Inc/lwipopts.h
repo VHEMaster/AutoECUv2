@@ -57,8 +57,6 @@
 #define SYS_LIGHTWEIGHT_PROT 0
 /*----- Value in opt.h for MEM_ALIGNMENT: 1 -----*/
 #define MEM_ALIGNMENT 4
-/*----- Default Value for H7 devices: 0x30004000 -----*/
-#define LWIP_RAM_HEAP_POINTER 0x30004000
 /*----- Value supported for H7 devices: 1 -----*/
 #define LWIP_SUPPORT_CUSTOM_PBUF 1
 /*----- Default Value for LWIP_ARP: 1 ---*/
@@ -99,6 +97,14 @@
 #define LWIP_STATS 1
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
+
+/* Use fixed-size, statically allocated memory pools instead of lwIP heap. */
+#define MEM_LIBC_MALLOC                 0
+#define MEMP_MEM_MALLOC                 0
+#define MEM_USE_POOLS                   1
+#define MEMP_USE_CUSTOM_POOLS           1
+#define MEM_USE_POOLS_TRY_BIGGER_POOL   1
+#define MEM_SIZE                        0
 
 /* USER CODE END 1 */
 
