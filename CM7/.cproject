@@ -68,7 +68,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Router/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/UDS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/KWP/Inc"/>
-									<listOptionValue builtIn="false" value="../../ECU/Communication/LwIP/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Communication/LwIPDrv/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/MAP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/MAF/Inc"/>
@@ -242,7 +242,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Router/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/UDS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/KWP/Inc"/>
-									<listOptionValue builtIn="false" value="../../ECU/Communication/LwIP/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Communication/LwIPDrv/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/TPS/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/MAP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Sensors/MAF/Inc"/>

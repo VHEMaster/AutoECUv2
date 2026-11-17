@@ -1,13 +1,13 @@
 /*
- * lwip.c
+ * lwipdrv.c
  *
  *  Created on: 17 нояб. 2026 г.
  *      Author: VHEMaster
  */
 
-#include "lwip.h"
+#include "lwipdrv.h"
 
-error_t lwip_init(lwip_ctx_t *ctx, const lwip_init_ctx_t *init)
+error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
 {
   error_t err = E_OK;
 
@@ -15,8 +15,8 @@ error_t lwip_init(lwip_ctx_t *ctx, const lwip_init_ctx_t *init)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(init == NULL, err = E_PARAM);
 
-    memset(ctx, 0u, sizeof(lwip_ctx_t));
-    memcpy(&ctx->init, init, sizeof(lwip_init_ctx_t));
+    memset(ctx, 0u, sizeof(lwipdrv_ctx_t));
+    memcpy(&ctx->init, init, sizeof(lwipdrv_init_ctx_t));
 
     ctx->initialized = true;
 
@@ -25,7 +25,7 @@ error_t lwip_init(lwip_ctx_t *ctx, const lwip_init_ctx_t *init)
   return err;
 }
 
-error_t lwip_configure(lwip_ctx_t *ctx, const lwip_config_t *config)
+error_t lwipdrv_configure(lwipdrv_ctx_t *ctx, const lwipdrv_config_t *config)
 {
   error_t err = E_OK;
 
@@ -34,7 +34,7 @@ error_t lwip_configure(lwip_ctx_t *ctx, const lwip_config_t *config)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
-    memcpy(&ctx->config, config, sizeof(lwip_config_t));
+    memcpy(&ctx->config, config, sizeof(lwipdrv_config_t));
 
     ctx->configured = ctx->config.enabled;
 
@@ -43,7 +43,7 @@ error_t lwip_configure(lwip_ctx_t *ctx, const lwip_config_t *config)
   return err;
 }
 
-error_t lwip_reset(lwip_ctx_t *ctx)
+error_t lwipdrv_reset(lwipdrv_ctx_t *ctx)
 {
   error_t err = E_OK;
 
@@ -58,7 +58,7 @@ error_t lwip_reset(lwip_ctx_t *ctx)
   return err;
 }
 
-void lwip_loop_slow(lwip_ctx_t *ctx)
+void lwipdrv_loop_slow(lwipdrv_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
@@ -67,7 +67,7 @@ void lwip_loop_slow(lwip_ctx_t *ctx)
   } while(0);
 }
 
-void lwip_loop_comm(lwip_ctx_t *ctx)
+void lwipdrv_loop_comm(lwipdrv_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);
@@ -76,7 +76,7 @@ void lwip_loop_comm(lwip_ctx_t *ctx)
   } while(0);
 }
 
-void lwip_loop_main(lwip_ctx_t *ctx)
+void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
 {
   do {
     BREAK_IF(ctx == NULL);

@@ -20,7 +20,7 @@
     ECU_COMM_ROUTER_MAX   + \
     ECU_COMM_SIGNALS_MAX  + \
     ECU_COMM_RS422_MAX    + \
-    ECU_COMM_LWIP_MAX)
+    ECU_COMM_LWIPDRV_MAX)
 
 typedef enum {
   ECU_COMM_LOOP_TYPE_MAIN = 0,
@@ -77,7 +77,7 @@ static RAM_SECTION obd2_ctx_t ecu_config_obd2_ctx[ECU_COMM_OBD2_MAX] = {0};
 static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0};
 static RAM_SECTION signals_ctx_t ecu_config_signals_ctx[ECU_COMM_SIGNALS_MAX] = {0};
 static RAM_SECTION rs422_ctx_t ecu_config_rs422_ctx[ECU_COMM_RS422_MAX] = {0};
-static RAM_SECTION lwip_ctx_t ecu_config_lwip_ctx[ECU_COMM_LWIP_MAX] = {0};
+static RAM_SECTION lwipdrv_ctx_t ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_MAX] = {0};
 
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
@@ -130,11 +130,11 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .instance_max = ECU_COMM_RS422_MAX,
         }, //ECU_COMM_TYPE_RS422
         {
-            .loop_slow = (ecu_comm_loop_func_t)lwip_loop_slow,
-            .loop_main = (ecu_comm_loop_func_t)lwip_loop_main,
-            .loop_comm = (ecu_comm_loop_func_t)lwip_loop_comm,
-            .instance_max = ECU_COMM_LWIP_MAX,
-        }, //ECU_COMM_TYPE_LWIP
+            .loop_slow = (ecu_comm_loop_func_t)lwipdrv_loop_slow,
+            .loop_main = (ecu_comm_loop_func_t)lwipdrv_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)lwipdrv_loop_comm,
+            .instance_max = ECU_COMM_LWIPDRV_MAX,
+        }, //ECU_COMM_TYPE_LWIPDRV
     },
     .comm = {
         {
@@ -203,9 +203,9 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .ctx = &ecu_config_rs422_ctx[ECU_COMM_RS422_1],
         },
         {
-            .type = ECU_COMM_TYPE_LWIP,
-            .instance = ECU_COMM_LWIP_1,
-            .ctx = &ecu_config_lwip_ctx[ECU_COMM_LWIP_1],
+            .type = ECU_COMM_TYPE_LWIPDRV,
+            .instance = ECU_COMM_LWIPDRV_1,
+            .ctx = &ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_1],
         },
     },
 };
@@ -500,9 +500,9 @@ error_t ecu_comm_get_rs422_ctx(ecu_comm_rs422_t instance, rs422_ctx_t **ctx)
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_RS422, instance, (void**)ctx);
 }
 
-error_t ecu_comm_get_lwip_ctx(ecu_comm_lwip_t instance, lwip_ctx_t **ctx)
+error_t ecu_comm_get_lwipdrv_ctx(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t **ctx)
 {
-  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_LWIP, instance, (void**)ctx);
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_LWIPDRV, instance, (void**)ctx);
 }
 
 #endif /* CORE_CM4 */

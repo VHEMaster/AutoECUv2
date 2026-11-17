@@ -16,7 +16,7 @@
 #include "config_router.h"
 #include "config_signals.h"
 #include "config_rs422.h"
-#include "config_lwip.h"
+#include "config_lwipdrv.h"
 
 #include "compiler.h"
 
@@ -142,14 +142,14 @@ void middlelayer_comm_init(void)
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-    for(int i = 0; i < ECU_COMM_LWIP_MAX; i++) {
-      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_LWIP, i, &comm_ctx);
+    for(int i = 0; i < ECU_COMM_LWIPDRV_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_LWIPDRV, i, &comm_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_comm_lwip_init(i, (lwip_ctx_t *)comm_ctx);
+      err = ecu_comm_lwipdrv_init(i, (lwipdrv_ctx_t *)comm_ctx);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
-      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_LWIP, i, true);
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_LWIPDRV, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));

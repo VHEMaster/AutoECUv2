@@ -24,7 +24,7 @@ typedef enum {
   ECU_COMM_TYPE_ROUTER,
   ECU_COMM_TYPE_SIGNALS,
   ECU_COMM_TYPE_RS422,
-  ECU_COMM_TYPE_LWIP,
+  ECU_COMM_TYPE_LWIPDRV,
   ECU_COMM_TYPE_MAX
 }ecu_comm_type_t;
 
@@ -74,9 +74,9 @@ typedef enum {
 }ecu_comm_rs422_t;
 
 typedef enum {
-  ECU_COMM_LWIP_1 = 0,
-  ECU_COMM_LWIP_MAX
-}ecu_comm_lwip_t;
+  ECU_COMM_LWIPDRV_1 = 0,
+  ECU_COMM_LWIPDRV_MAX
+}ecu_comm_lwipdrv_t;
 
 typedef union {
     uint32_t word;
