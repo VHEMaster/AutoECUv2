@@ -76,5 +76,6 @@ void rs422_error_irq(rs422_ctx_t *ctx);
 
 error_t rs422_tx(rs422_ctx_t *ctx, const void *buffer, uint32_t length);
 error_t rs422_rx(rs422_ctx_t *ctx, void *buffer, uint32_t *p_length);
+error_t rs422_rx_nocopy(rs422_ctx_t *ctx, const void **p_buffer, uint32_t *p_length);
 
 #endif /* DRIVERS_RS422_INC_RS422_H_ */
