@@ -6,6 +6,7 @@
  */
 
 #include "lwipdrv.h"
+#include "time.h"
 
 static uint32_t lwipdrv_ppp_output_cb(ppp_pcb *pcb, const void *data, uint32_t len, void *arg)
 {
@@ -48,8 +49,9 @@ int rand(void)
   state ^= state << 13u;
   state ^= state >> 17u;
   state ^= state << 5u;
+  state ^= time_now_tick();
 
-  return state ^ HAL_GetTick();
+  return state & RAND_MAX;
 }
 
 error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
