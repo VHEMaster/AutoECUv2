@@ -108,6 +108,7 @@
 #define MEMP_USE_CUSTOM_POOLS           1
 #define MEM_USE_POOLS_TRY_BIGGER_POOL   1
 #define MEM_SIZE                        0
+#define PBUF_POOL_SIZE                  8
 
 /* USER CODE END 1 */
 

@@ -23,14 +23,9 @@
 
 LWIP_MALLOC_MEMPOOL_START
 
-/* Small control packets and TCP header buffers. */
 LWIP_MALLOC_MEMPOOL(8, 128)
 LWIP_MALLOC_MEMPOOL(8, 256)
-
-/* Full TCP MSS, PPPoS framing and simultaneous queued TCP segments. */
-LWIP_MALLOC_MEMPOOL(24, 768)
-
-/* Occasional larger PBUF_RAM allocations (up to 2048 bytes). */
-LWIP_MALLOC_MEMPOOL(4, 2048)
+LWIP_MALLOC_MEMPOOL(8, 768)
+LWIP_MALLOC_MEMPOOL(1, 2048)
 
 LWIP_MALLOC_MEMPOOL_END
