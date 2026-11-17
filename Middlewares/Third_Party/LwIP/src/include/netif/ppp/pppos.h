@@ -73,6 +73,9 @@ struct pppos_pcb_s {
   /* -- below are data that will NOT be cleared between two sessions */
   ppp_pcb *ppp;                    /* PPP PCB */
   pppos_output_cb_fn output_cb;    /* PPP serial output callback */
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  u8_t clientserver_was_listener;   /* Preserve listen mode across sessions. */
+#endif
 
   /* -- below are data that will be cleared between two sessions
    *

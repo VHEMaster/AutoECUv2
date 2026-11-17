@@ -407,11 +407,14 @@ pppos_connect(ppp_pcb *ppp, void *ctx)
 {
   pppos_pcb *pppos = (pppos_pcb *)ctx;
   PPPOS_DECL_PROTECT(lev);
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  pppos->clientserver_was_listener = 0u;
+#endif
 
-#if PPP_INPROC_IRQ_SAFE
-  /* input pbuf left over from last session? */
+#if PPP_INPROC_IRQ_SAFE || (PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT)
+  /* Free incomplete PPP input before starting another session. */
   pppos_input_free_current_packet(pppos);
-#endif /* PPP_INPROC_IRQ_SAFE */
+#endif /* PPP_INPROC_IRQ_SAFE || PPPOS_CLIENTSERVER_SUPPORT */
 
 #if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
   sys_untimeout(pppos_clientserver_retry, pppos);
@@ -442,11 +445,14 @@ pppos_listen(ppp_pcb *ppp, void *ctx)
 {
   pppos_pcb *pppos = (pppos_pcb *)ctx;
   PPPOS_DECL_PROTECT(lev);
+#if PPPOS_CLIENTSERVER_SUPPORT
+  pppos->clientserver_was_listener = 1u;
+#endif
 
-#if PPP_INPROC_IRQ_SAFE
-  /* input pbuf left over from last session? */
+#if PPP_INPROC_IRQ_SAFE || (PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT)
+  /* Free incomplete PPP input before starting another session. */
   pppos_input_free_current_packet(pppos);
-#endif /* PPP_INPROC_IRQ_SAFE */
+#endif /* PPP_INPROC_IRQ_SAFE || PPPOS_CLIENTSERVER_SUPPORT */
 
 #if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
   sys_untimeout(pppos_clientserver_retry, pppos);
@@ -596,6 +602,17 @@ pppos_input(ppp_pcb *ppp, const void *s, int l)
   PPPOS_DECL_PROTECT(lev);
 #if !PPP_INPROC_IRQ_SAFE
   LWIP_ASSERT_CORE_LOCKED();
+#endif
+
+#if PPP_SERVER && PPPOS_CLIENTSERVER_SUPPORT
+  /* Recover the previous serial listener after an unexpected PPP failure. */
+  if (pppos->clientserver_was_listener &&
+      ppp->phase == PPP_PHASE_DEAD &&
+      ppp->err_code != PPPERR_USER) {
+    if (ppp_listen(ppp) != ERR_OK) {
+      return;
+    }
+  }
 #endif
 
   /* Don't even bother parsing data if we are disconnected.
