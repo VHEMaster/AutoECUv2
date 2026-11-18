@@ -28,6 +28,8 @@ typedef struct {
     uint8_t vin[17];
     uint8_t eid[6];
     uint8_t gid[6];
+    uint32_t anouncement_amount;
+    time_delta_us_t anouncement_period;
     time_delta_us_t initial_timeout;
     time_delta_us_t inactivity_timeout;
     time_delta_us_t alive_timeout;

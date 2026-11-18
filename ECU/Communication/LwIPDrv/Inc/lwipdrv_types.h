@@ -11,6 +11,7 @@
 #include "common.h"
 
 #include "rs422.h"
+#include "doip_lwip.h"
 #include "versioned_lwipdrv.h"
 #include "config_comm_types.h"
 
@@ -26,6 +27,7 @@ typedef struct lwipdrv_ctx_tag lwipdrv_ctx_t;
 typedef struct {
     ecu_comm_rs422_t rs422_instance;
     rs422_ctx_t *rs422_ctx;
+    doip_ctx_t *doip_ctx;
 }lwipdrv_init_ctx_t;
 
 typedef struct {
@@ -36,6 +38,8 @@ typedef struct {
     ip4_addr_t addr_his;
 
     bool link_up;
+    bool restart_pending;
+    bool close_pending;
 
 }lwipdrv_lwip_ctx_t;
 
@@ -48,6 +52,7 @@ typedef struct lwipdrv_ctx_tag {
     bool reset_trigger;
 
     lwipdrv_lwip_ctx_t lwip;
+    doip_lwip_ctx_t doip;
 
 }lwipdrv_ctx_t;
 
