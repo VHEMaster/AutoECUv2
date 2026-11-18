@@ -148,6 +148,15 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM
 
+  /* Communication contexts are explicitly cleared by router_init/doip_init. */
+  .commbss (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.commbss)
+    *(.commbss*)
+    . = ALIGN(32);
+  } >RAM_D3
+
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .sharedbss (NOLOAD) :

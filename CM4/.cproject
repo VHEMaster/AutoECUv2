@@ -69,6 +69,7 @@
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/ISOTP/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Communication/DoIP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/OBD2/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Signals/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Router/Inc"/>
@@ -202,6 +203,7 @@
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/ISOTP/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Communication/DoIP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/OBD2/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Signals/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/Router/Inc"/>

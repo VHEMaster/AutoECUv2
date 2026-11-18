@@ -86,6 +86,7 @@ typedef struct {
     signals_config_t signals[ECU_COMM_SIGNALS_MAX];
     rs422_config_t rs422[ECU_COMM_RS422_MAX];
     lwipdrv_config_t lwipdrv[ECU_COMM_LWIPDRV_MAX];
+    doip_config_t doip[ECU_COMM_DOIP_MAX];
 
 }ecu_config_engine_comm_t;
 
