@@ -849,6 +849,11 @@ static const ecu_config_device_config_t ecu_config_global_comms_config[ECU_CONFI
                   .version = ROUTER_CONFIG_VERSION_V1,
                   .size = sizeof(router_config_v1_t),
                   .translate_func = NULL,
+              },
+              {
+                  .version = ROUTER_CONFIG_VERSION_V2,
+                  .size = sizeof(router_config_v2_t),
+                  .translate_func = ecu_comm_router_translate_v1_to_v2,
               }
           },
       }

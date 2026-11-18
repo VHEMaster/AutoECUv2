@@ -607,6 +607,9 @@ error_t router_configure_diag(router_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
 
+    err = router_configure_doip(ctx);
+    BREAK_IF(err != E_OK);
+
     err = router_configure_diag_io(ctx);
     BREAK_IF(err != E_OK);
 
@@ -703,6 +706,7 @@ void router_handle_diag(router_ctx_t *ctx)
 
     router_handle_diag_io(ctx);
     router_handle_diag_protocols(ctx);
+    router_handle_doip(ctx);
 
   } while(0);
 }

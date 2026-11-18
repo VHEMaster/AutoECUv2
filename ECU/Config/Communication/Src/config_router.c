@@ -76,6 +76,13 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
 
               }, //ECU_COMM_ISOTP_2
           },
+          .doip = {
+              {
+                  .enabled = true,
+                  .uds_instance = ECU_COMM_UDS_3,
+                  .obd2_instance = ECU_COMM_OBD2_3,
+              }, //ECU_COMM_DOIP_1
+          },
           .kwp = {
               {
                   .enabled = true,
@@ -304,3 +311,43 @@ static error_t ecu_comm_router_rpc_executor_reset_execute(uint32_t *p_resp_count
 }
 
 #endif /* CORE_CM4 */
+
+#ifdef CORE_CM7
+error_t ecu_comm_router_translate_v1_to_v2(const void *src, void *dest, uint32_t dest_bytes)
+{
+  error_t err = E_OK;
+  const router_config_v1_t *previous = src;
+  router_config_t *config = dest;
+
+  do {
+    BREAK_IF_ACTION(src == NULL || dest == NULL || dest_bytes != sizeof(router_config_t), err = E_PARAM);
+
+    err = ecu_comm_router_get_default_config(ECU_COMM_ROUTER_1, config);
+    BREAK_IF(err != E_OK);
+
+    config->enabled = previous->enabled;
+    config->can = previous->can;
+    memcpy(config->diagnostics.can_isotp, previous->diagnostics.can_isotp, sizeof(previous->diagnostics.can_isotp));
+    memcpy(config->diagnostics.kwp, previous->diagnostics.kwp, sizeof(previous->diagnostics.kwp));
+
+    /* Keep custom legacy diagnostic ownership intact during migration. */
+    for(uint32_t i = 0; i < ECU_COMM_ISOTP_MAX; i++) {
+      if(previous->diagnostics.can_isotp[i].enabled &&
+          (previous->diagnostics.can_isotp[i].uds_instance == ECU_COMM_UDS_3 ||
+              previous->diagnostics.can_isotp[i].obd2_instance == ECU_COMM_OBD2_3)) {
+        config->diagnostics.doip[ECU_COMM_DOIP_1].enabled = false;
+      }
+    }
+    for(uint32_t i = 0; i < ECU_COMM_KWP_MAX; i++) {
+      if(previous->diagnostics.kwp[i].enabled &&
+          (previous->diagnostics.kwp[i].uds_instance == ECU_COMM_UDS_3 ||
+              previous->diagnostics.kwp[i].obd2_instance == ECU_COMM_OBD2_3)) {
+        config->diagnostics.doip[ECU_COMM_DOIP_1].enabled = false;
+      }
+    }
+
+  } while(0);
+
+  return err;
+}
+#endif /* CORE_CM7 */

@@ -15,6 +15,7 @@
 #include "can.h"
 #include "kwp.h"
 #include "isotp.h"
+#include "doip.h"
 #include "uds.h"
 #include "obd2.h"
 #include "router.h"
@@ -78,7 +79,33 @@ typedef struct {
     router_ctx_t *router_ctx;
 }router_diag_kwp_ctx_t;
 
+typedef enum {
+  ROUTER_DOIP_STATE_IDLE = 0,
+  ROUTER_DOIP_STATE_UPSTREAM,
+  ROUTER_DOIP_STATE_RESPONSE,
+  ROUTER_DOIP_STATE_DOWNSTREAM,
+  ROUTER_DOIP_STATE_RESET
+}router_doip_state_t;
+
 typedef struct {
+    bool active;
+    const router_config_doip_t *config;
+    doip_ctx_t *doip_ctx;
+    uds_ctx_t *uds_ctx;
+    obd2_ctx_t *obd2_ctx;
+    doip_message_t message;
+    router_doip_state_t state;
+    bool obd2;
+    bool response_pending;
+    time_us_t request_time;
+    uint8_t upstream_data[DOIP_PAYLOAD_LEN_MAX];
+    uint16_t upstream_data_len;
+    uint8_t downstream_data[DOIP_PAYLOAD_LEN_MAX];
+    uint16_t downstream_data_len;
+}router_diag_doip_ctx_t;
+
+typedef struct {
+    router_diag_doip_ctx_t doip_ctx[ECU_COMM_DOIP_MAX];
     router_diag_isotp_ctx_t isotp_ctx[ECU_COMM_ISOTP_MAX];
     router_diag_kwp_ctx_t kwp_ctx[ECU_COMM_KWP_MAX];
 

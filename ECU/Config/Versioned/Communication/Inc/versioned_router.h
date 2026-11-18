@@ -17,6 +17,7 @@
 
 typedef enum {
   ROUTER_CONFIG_VERSION_V1 = 0,
+  ROUTER_CONFIG_VERSION_V2,
   ROUTER_CONFIG_VERSION_MAX
 }router_config_versions_t;
 
@@ -67,7 +68,28 @@ typedef struct {
     router_config_can_isotp_t can_isotp[ECU_COMM_ISOTP_MAX];
     router_config_kwp_t kwp[ECU_COMM_KWP_MAX];
 
+}router_config_diag_v1_t;
+
+typedef struct {
+    bool enabled;
+    ecu_comm_uds_t uds_instance;
+    ecu_comm_obd2_t obd2_instance;
+}router_config_doip_t;
+
+typedef struct {
+    router_config_can_isotp_t can_isotp[ECU_COMM_ISOTP_MAX];
+    router_config_kwp_t kwp[ECU_COMM_KWP_MAX];
+    router_config_doip_t doip[ECU_COMM_DOIP_MAX];
 }router_config_diag_t;
+
+typedef struct {
+    bool enabled;
+
+    router_config_can_t can;
+    router_config_diag_v1_t diagnostics;
+
+    uint32_t align ALIGNED_CACHE;
+}router_config_v1_t ALIGNED_CACHE;
 
 typedef struct {
     bool enabled;
@@ -76,8 +98,8 @@ typedef struct {
     router_config_diag_t diagnostics;
 
     uint32_t align ALIGNED_CACHE;
-}router_config_v1_t ALIGNED_CACHE;
+}router_config_v2_t ALIGNED_CACHE;
 
-typedef router_config_v1_t router_config_t;
+typedef router_config_v2_t router_config_t;
 
 #endif /* CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_ROUTER_H_ */
