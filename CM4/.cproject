@@ -220,6 +220,9 @@
 									<listOptionValue builtIn="false" value="../../ECU/Config/Ipc/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/MiddleLayer/Inc"/>
+									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/LwIP/system"/>
+									<listOptionValue builtIn="false" value="../../Middlewares/Third_Party/LwIP/src/include"/>
+									<listOptionValue builtIn="false" value="../../lwip-static/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.497832225" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
