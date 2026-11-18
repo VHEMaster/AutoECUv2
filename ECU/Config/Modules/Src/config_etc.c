@@ -23,8 +23,8 @@ static const etc_config_t ecu_modules_etc_config_default = {
 
     .pid_position = {
         .Kp = 150.0,
-        .Ki = 50.0,
-        .Kd = 0.30f,
+        .Ki = 0.0f,
+        .Kd = 0.80f,
     },
     .pid_speed = {
         .Kp = 0.003f,
