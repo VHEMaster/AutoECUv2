@@ -130,6 +130,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
         dutycycle = fast_sqrt(dutycycle);
       }
       voltage = dutycycle * power_voltage;
+      ctx->data.dutycycle = dutycycle;
 
       if(fabsf(ctx->position_current - target) < ctx->config.motor_reach_threshold) {
         ctx->pos_reach_time = now;
