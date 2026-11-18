@@ -9,6 +9,8 @@
 #include "config_global.h"
 
 #define CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx) ((ctx)->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL])
+#define CALCDATA_GLOBAL_MODULE_PARAMETERS_WRITE(ctx, module, instance) ((ctx)->runtime.global.parameters.modules[ECU_MODULE_TYPE_##module][(instance)].params[ECU_COMMON_WRITE])
+
 
 static void calcdata_module_read_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
 static void calcdata_module_read_vvt(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata);
@@ -195,15 +197,17 @@ static void calcdata_module_read_ignpower(ecu_core_ctx_t *ctx, ecu_module_instan
 
 static void calcdata_module_write_etc(ecu_core_ctx_t *ctx, ecu_module_instance_t instance, void *userdata)
 {
-  ecu_core_runtime_value_ctx_t *params_wr_ctx = CALCDATA_GLOBAL_PARAMETERS_VIRTUAL_INTERNAL(ctx).modules[ECU_MODULE_TYPE_ETC][instance].params[ECU_COMMON_WRITE];
+  ecu_core_runtime_value_ctx_t *param_wr_ctx;
 
-  if(params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid) {
-      (void)ecu_modules_etc_set_enabled(instance, params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
-      params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid = false;
+  param_wr_ctx = &CALCDATA_GLOBAL_MODULE_PARAMETERS_WRITE(ctx, ETC, instance)[ECU_MODULE_ETC_WRITE_PARAM_ENABLED];
+  if(param_wr_ctx->valid) {
+      (void)ecu_modules_etc_set_enabled(instance, param_wr_ctx->value > ECU_RUNTIME_PARAMETER_FALSE ? true : false);
+      param_wr_ctx->valid = false;
   }
-  if(params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid) {
-      (void)ecu_modules_etc_set_target_position(instance, params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].value);
-      params_wr_ctx[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid = false;
+  param_wr_ctx = &CALCDATA_GLOBAL_MODULE_PARAMETERS_WRITE(ctx, ETC, instance)[ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET];
+  if(param_wr_ctx->valid) {
+      (void)ecu_modules_etc_set_target_position(instance, param_wr_ctx->value);
+      param_wr_ctx->valid = false;
   }
 }
 
