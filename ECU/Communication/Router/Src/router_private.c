@@ -21,9 +21,11 @@ static void router_handle_signal_downstream(router_ctx_t *ctx);
 
 static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance);
 static void router_handle_diag_protocol_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance);
+static void router_handle_diag_protocol_doip(router_ctx_t *ctx, ecu_comm_doip_t instance);
 static void router_handle_diag_protocols(router_ctx_t *ctx);
 
 static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance);
+static error_t router_configure_diag_io_doip(router_ctx_t *ctx, ecu_comm_doip_t instance);
 static error_t router_configure_diag_io_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance);
 static error_t router_configure_diag_io(router_ctx_t *ctx);
 static error_t router_validate_can_signals_routes(const router_config_can_signals_list_item_t *items, uint32_t count, bool upstream);
@@ -206,6 +208,11 @@ static void router_handle_diag_protocols(router_ctx_t *ctx)
       router_handle_diag_protocol_kwp(ctx, i);
     }
   }
+  for(ecu_comm_doip_t i = 0; i < ECU_COMM_DOIP_MAX; i++) {
+    if(ctx->diag.doip_ctx[i].active) {
+      router_handle_diag_protocol_doip(ctx, i);
+    }
+  }
 }
 
 static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance)
@@ -311,6 +318,16 @@ static void router_handle_diag_protocol_isotp(router_ctx_t *ctx, ecu_comm_isotp_
 static void router_handle_diag_protocol_kwp(router_ctx_t *ctx, ecu_comm_kwp_t instance)
 {
   // TODO: IMPLEMENT
+}
+
+static void router_handle_diag_protocol_doip(router_ctx_t *ctx, ecu_comm_doip_t instance)
+{
+  do {
+    BREAK_IF(ctx == NULL);
+
+    router_handle_doip(ctx, instance);
+
+  } while(0);
 }
 
 static error_t router_configure_diag_io_can_isotp(router_ctx_t *ctx, ecu_comm_isotp_t instance)
@@ -434,6 +451,20 @@ static error_t router_configure_diag_io_kwp(router_ctx_t *ctx, ecu_comm_kwp_t in
   return err;
 }
 
+static error_t router_configure_diag_io_doip(router_ctx_t *ctx, ecu_comm_doip_t instance)
+{
+  error_t err = E_OK;
+
+  do {
+    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
+
+    err = router_configure_doip(ctx, instance);
+
+  } while(0);
+
+  return err;
+}
+
 static error_t router_configure_diag_io(router_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -443,6 +474,12 @@ static error_t router_configure_diag_io(router_ctx_t *ctx)
 
     for(ecu_comm_isotp_t i = 0; i < ECU_COMM_ISOTP_MAX; i++) {
       err = router_configure_diag_io_can_isotp(ctx, i);
+      BREAK_IF(err != E_OK);
+    }
+    BREAK_IF(err != E_OK);
+
+    for(ecu_comm_doip_t i = 0; i < ECU_COMM_DOIP_MAX; i++) {
+      err = router_configure_diag_io_doip(ctx, i);
       BREAK_IF(err != E_OK);
     }
     BREAK_IF(err != E_OK);

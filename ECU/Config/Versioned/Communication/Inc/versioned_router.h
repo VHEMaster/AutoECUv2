@@ -64,10 +64,17 @@ typedef struct {
 }router_config_can_t;
 
 typedef struct {
+    bool enabled;
+    ecu_comm_uds_t uds_instance;
+    ecu_comm_obd2_t obd2_instance;
+}router_config_doip_t;
+
+typedef struct {
     router_config_can_isotp_t can_isotp[ECU_COMM_ISOTP_MAX];
     router_config_kwp_t kwp[ECU_COMM_KWP_MAX];
-
+    router_config_doip_t doip[ECU_COMM_DOIP_MAX];
 }router_config_diag_t;
+
 
 typedef struct {
     bool enabled;

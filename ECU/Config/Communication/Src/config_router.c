@@ -76,6 +76,13 @@ static const router_config_t ecu_comm_router_default_config[ECU_COMM_ROUTER_MAX]
 
               }, //ECU_COMM_ISOTP_2
           },
+          .doip = {
+              {
+                  .enabled = true,
+                  .uds_instance = ECU_COMM_UDS_3,
+                  .obd2_instance = ECU_COMM_OBD2_3,
+              }, //ECU_COMM_DOIP_1
+          },
           .kwp = {
               {
                   .enabled = true,

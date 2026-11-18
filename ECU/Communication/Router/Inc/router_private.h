@@ -16,4 +16,7 @@ error_t router_configure_signals(router_ctx_t *ctx);
 void router_handle_diag(router_ctx_t *ctx);
 void router_handle_signals(router_ctx_t *ctx);
 
+error_t router_configure_doip(router_ctx_t *ctx, ecu_comm_doip_t instance);
+void router_handle_doip(router_ctx_t *ctx, ecu_comm_doip_t instance);
+
 #endif /* COMMUNICATION_ROUTER_INC_ROUTER_PRIVATE_H_ */
