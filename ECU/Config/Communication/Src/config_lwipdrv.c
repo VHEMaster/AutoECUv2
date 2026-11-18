@@ -81,6 +81,9 @@ error_t ecu_comm_lwipdrv_init(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t *ctx)
     err = ecu_comm_get_rs422_ctx(lwipdrv_ctx->init.rs422_instance, &lwipdrv_ctx->init.rs422_ctx);
     BREAK_IF(err != E_OK);
 
+    err = ecu_comm_get_doip_ctx(ECU_COMM_DOIP_1, &lwipdrv_ctx->init.doip_ctx);
+    BREAK_IF(err != E_OK);
+
     err = lwipdrv_init(lwipdrv_ctx->ctx, &lwipdrv_ctx->init);
     BREAK_IF(err != E_OK);
 

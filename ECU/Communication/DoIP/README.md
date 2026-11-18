@@ -37,3 +37,31 @@ Public APIs are declared in Inc/doip.h. Length parameters are capacities on inpu
 and byte counts on success. Stream reception additionally returns the consumed
 byte count; the caller retains and retries the unconsumed suffix. Peeking TX data
 does not remove it: consume exactly the bytes accepted by the transport.
+
+## AutoECUv2 integration
+
+Default endpoint: 10.77.0.2:13400 over the existing PPPoS connection. Logical
+ECU address: 0x1000; tester range: 0x0E00..0x0FFF; functional address: 0xE400.
+Router uses UDS_3 and OBD2_3, serializing requests from the TCP testers through
+these protocol instances. CAN/KWP routes cannot share those instances. The Router
+configuration is version 2; version 1 configurations are translated preserving
+existing routes. A legacy configuration already using instance 3 leaves the new
+DoIP route disabled rather than taking ownership away from its old transport.
+
+LWIPDRV owns the raw TCP/UDP adapter and calls it from its main loop. All raw API
+calls stay in this context. Receive pbuf chains are retained until consumed;
+ERR_MEM leaves ownership with lwIP. TCP writes use COPY and only successful bytes
+are removed from the DoIP queue. Listener allocation/bind failures are retried.
+PPP reset/reconfiguration waits for the old PPP state machine to reach DEAD
+before listening again. Link loss closes diagnostic sockets and invalidates reply
+routes. SO_REUSE permits listener restart while previous sockets are in TIME_WAIT.
+
+CM4's Router and DoIP contexts reside in `.commbss` in SRAM4 at 0x38000000.
+This is a NOLOAD section: router_init() and doip_init() explicitly clear their
+entire contexts before use. Shared IPC SRAM layout is unchanged. Clean-rebuild
+lwip-static_CM4 with CM4 because LWIP_UDP and SO_REUSE are enabled for this adapter.
+
+The wire profile excludes TLS, OEM routing activation and Ethernet activation-line
+handling. PPP peer unicast is used for announcements; discovery broadcast behavior
+on a system PPP adapter depends on the host routing configuration. Direct access
+to the known ECU IP does not require discovery.

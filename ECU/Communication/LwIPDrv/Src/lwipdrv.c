@@ -28,6 +28,9 @@ static void lwipdrv_ppp_link_cb(ppp_pcb *pcb, int status, void *arg)
   lwipdrv_ctx_t *ctx = arg;
 
   ctx->lwip.link_up = status == PPPERR_NONE;
+  if(status != PPPERR_NONE && ctx->configured) {
+    ctx->lwip.restart_pending = true;
+  }
 
   (void)pcb;
 }
@@ -72,6 +75,8 @@ error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
         lwipdrv_ppp_output_cb, lwipdrv_ppp_link_cb, ctx);
     BREAK_IF_ACTION(ctx->lwip.ppp == NULL, err = E_FAULT);
 
+    doip_lwip_init(&ctx->doip, ctx->init.doip_ctx, &ctx->lwip.ppp_netif);
+
     ctx->initialized = true;
 
   } while(0);
@@ -82,38 +87,61 @@ error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
 error_t lwipdrv_configure(lwipdrv_ctx_t *ctx, const lwipdrv_config_t *config)
 {
   error_t err = E_OK;
-  err_t lwip_err;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
-    if(ctx->configured) {
-      (void)ppp_close(ctx->lwip.ppp, 0u);
-    }
-
     memcpy(&ctx->config, config, sizeof(lwipdrv_config_t));
+    ctx->configured = ctx->config.enabled;
+    ctx->reset_trigger = true;
 
-    BREAK_IF_ACTION(ctx->config.enabled == false, err = E_OK);
+  } while(0);
+
+  return err;
+}
+
+static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
+{
+  err_t err;
+
+  do {
+    if(ctx->reset_trigger) {
+      ctx->reset_trigger = false;
+      ctx->lwip.restart_pending = true;
+      ctx->lwip.close_pending = false;
+      ctx->lwip.link_up = false;
+      doip_lwip_stop(&ctx->doip);
+    }
+    BREAK_IF(!ctx->lwip.restart_pending);
+
+    if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD) {
+      if(!ctx->lwip.close_pending) {
+        (void)ppp_close(ctx->lwip.ppp, 0u);
+        ctx->lwip.close_pending = true;
+      }
+      break;
+    }
+    ctx->lwip.close_pending = false;
+    if(!ctx->configured) {
+      ctx->lwip.restart_pending = false;
+      break;
+    }
 
     IP4_ADDR(&ctx->lwip.addr_our, ctx->config.ip_addr_our[0], ctx->config.ip_addr_our[1], ctx->config.ip_addr_our[2], ctx->config.ip_addr_our[3]);
     IP4_ADDR(&ctx->lwip.addr_his, ctx->config.ip_addr_his[0], ctx->config.ip_addr_his[1], ctx->config.ip_addr_his[2], ctx->config.ip_addr_his[3]);
     ppp_set_ipcp_ouraddr(ctx->lwip.ppp, &ctx->lwip.addr_our);
     ppp_set_ipcp_hisaddr(ctx->lwip.ppp, &ctx->lwip.addr_his);
-
     ppp_set_silent(ctx->lwip.ppp, true);
 
-    lwip_err = ppp_listen(ctx->lwip.ppp);
-    BREAK_IF_ACTION(lwip_err != ERR_OK, err = E_FAULT);
+    err = ppp_listen(ctx->lwip.ppp);
+    BREAK_IF(err != ERR_OK);
 
     ppp_set_default(ctx->lwip.ppp);
-
-    ctx->configured = ctx->config.enabled;
+    ctx->lwip.restart_pending = false;
 
   } while(0);
-
-  return err;
 }
 
 error_t lwipdrv_reset(lwipdrv_ctx_t *ctx)
@@ -157,7 +185,9 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
 
   do {
     BREAK_IF(ctx == NULL);
-    BREAK_IF(ctx->configured == false);
+    BREAK_IF(ctx->initialized == false);
+
+    lwipdrv_ppp_restart(ctx);
 
     sys_check_timeouts();
 
@@ -166,6 +196,8 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
     if(err == E_OK && bytes > 0u) {
       pppos_input(ctx->lwip.ppp, buffer, bytes);
     }
+
+    doip_lwip_loop(&ctx->doip, ctx->configured && ctx->lwip.link_up && !ctx->lwip.restart_pending);
 
   } while(0);
 }

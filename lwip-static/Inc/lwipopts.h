@@ -48,7 +48,7 @@
 /*----- Default value in ETH configuration GUI in CubeMx: 1524 -----*/
 #define ETH_RX_BUFFER_SIZE 1536
 /*----- Default Value for LWIP_UDP: 1 ---*/
-#define LWIP_UDP 0
+#define LWIP_UDP 1
 /*----- Default Value for MEMP_NUM_TCP_PCB: 5 ---*/
 #define MEMP_NUM_TCP_PCB 16
 /*----- Value in opt.h for NO_SYS: 0 -----*/
@@ -97,6 +97,9 @@
 #define LWIP_STATS 1
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
+
+/* Allow the DoIP listener to restart while previous connections are in TIME_WAIT. */
+#define SO_REUSE 1
 
 /* Windows Direct Cable handshake: 0=disabled, 1=enabled. */
 #define PPPOS_CLIENTSERVER_SUPPORT 1
