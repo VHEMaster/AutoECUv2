@@ -20,21 +20,21 @@ static const tps_config_t ecu_sensors_tps_config_default = {
     .signals_used_count = 2,
     .signals = {
         {
-            .voltage_pos_min = 0.485f,
-            .voltage_pos_max = 4.682f,
+            .voltage_pos_min = 0.482f,
+            .voltage_pos_max = 4.642f,
 
             .voltage_low_thr = 0.40f,
             .voltage_high_thr = 4.76f,
         },
         {
-            .voltage_pos_min = 4.524f,
+            .voltage_pos_min = 4.484f,
             .voltage_pos_max = 0.328f,
 
             .voltage_low_thr = 0.26f,
             .voltage_high_thr = 4.60f,
         },
     },
-    .signals_position_imbalance_max = 0.5f,
+    .signals_position_imbalance_max = 1.0f,
     .position_min = 0.0f,
     .position_max = 107.0f,
 

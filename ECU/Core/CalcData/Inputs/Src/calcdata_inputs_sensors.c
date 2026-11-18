@@ -60,6 +60,7 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_banked(ecu_core_ctx_t *c
 STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_t *ctx, ecu_bank_t bank)
 {
   const ecu_core_runtime_global_instance_parameters_ctx_t *src;
+  const ecu_core_runtime_value_ctx_t *src_trusted;
   const ecu_core_runtime_value_ctx_t *src_read;
   ecu_core_runtime_value_ctx_t *dest_ptr;
 
@@ -69,8 +70,10 @@ STATIC_INLINE void core_calcdata_inputs_process_sensors_global_aps(ecu_core_ctx_
   src = ctx->runtime.banked.raw.global.sensors_aps[instance];
   dest_ptr = &ctx->runtime.banked.source.banks[bank].inputs[dest_index].value;
   if(src != NULL) {
+    src_trusted = &src->params[ECU_COMMON_READ][ECU_SENSOR_APS_READ_PARAM_TRUSTED];
     src_read = &src->params[ECU_COMMON_READ][ECU_SENSOR_APS_READ_PARAM_PEDAL_POSITION];
-    *dest_ptr = *src_read;
+    dest_ptr->value = src_read->value;
+    dest_ptr->valid = src_read->valid && src_trusted->valid && src_trusted->value == ECU_RUNTIME_PARAMETER_TRUE;
   } else {
     memset(dest_ptr, 0, sizeof(*dest_ptr));
   }

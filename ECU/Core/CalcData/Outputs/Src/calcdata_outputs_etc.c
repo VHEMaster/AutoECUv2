@@ -28,6 +28,8 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
   bool runup_flag = ctx->runtime.global.misc.runup_flag;
   bool idle_flag = ctx->runtime.global.misc.idle_flag;
 
+  ecu_core_runtime_global_instance_parameters_ctx_t *output_ptr;
+
   const ecu_config_calcdata_setup_idle_t *setup_idle;
   ecu_core_runtime_banked_etc_bank_ctx_t *etc_bank_ctx;
 
@@ -268,21 +270,21 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
   }
 
   for(ecu_module_etc_t module = 0; module < ECU_MODULE_ETC_MAX; module++) {
-    if(output_etc_pos[module].valid && output_etc_pos_values_count[module] > 0) {
-      err = ecu_modules_etc_set_enabled(module, true);
-      if(err != E_OK) {
-        //TODO: error flag
-      }
+    output_ptr = &ctx->runtime.global.parameters_virtual[ECU_CORE_RUNTIME_PARAMS_VIRT_SOURCE_INTERNAL].modules[ECU_MODULE_TYPE_ETC][module];
 
+    if(output_etc_pos[module].valid && output_etc_pos_values_count[module] > 0) {
       target_pos = output_etc_pos[module].value;
       target_pos /= output_etc_pos_values_count[module];
-      err = ecu_modules_etc_set_target_position(module, target_pos);
-      if(err != E_OK) {
-        //TODO: error flag
-      }
+
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].value = target_pos;
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_POS_TARGET].valid = true;
+
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value = ECU_RUNTIME_PARAMETER_TRUE;
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid = true;
 
     } else {
-      (void)ecu_modules_etc_set_enabled(module, false);
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].value = ECU_RUNTIME_PARAMETER_FALSE;
+      output_ptr->params[ECU_COMMON_WRITE][ECU_MODULE_ETC_WRITE_PARAM_ENABLED].valid = true;
     }
   }
 
