@@ -20,7 +20,8 @@
     ECU_COMM_ROUTER_MAX   + \
     ECU_COMM_SIGNALS_MAX  + \
     ECU_COMM_RS422_MAX    + \
-    ECU_COMM_LWIPDRV_MAX)
+    ECU_COMM_LWIPDRV_MAX  + \
+    ECU_COMM_DOIP_MAX)
 
 typedef enum {
   ECU_COMM_LOOP_TYPE_MAIN = 0,
@@ -78,6 +79,7 @@ static RAM_SECTION router_ctx_t ecu_config_router_ctx[ECU_COMM_ROUTER_MAX] = {0}
 static RAM_SECTION signals_ctx_t ecu_config_signals_ctx[ECU_COMM_SIGNALS_MAX] = {0};
 static RAM_SECTION rs422_ctx_t ecu_config_rs422_ctx[ECU_COMM_RS422_MAX] = {0};
 static RAM_SECTION lwipdrv_ctx_t ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_MAX] = {0};
+static RAM_D3_SECTION doip_ctx_t ecu_config_doip_ctx[ECU_COMM_DOIP_MAX] = {0};
 
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
@@ -135,6 +137,12 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .loop_comm = (ecu_comm_loop_func_t)lwipdrv_loop_comm,
             .instance_max = ECU_COMM_LWIPDRV_MAX,
         }, //ECU_COMM_TYPE_LWIPDRV
+        {
+            .loop_slow = (ecu_comm_loop_func_t)NULL,
+            .loop_main = (ecu_comm_loop_func_t)doip_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)NULL,
+            .instance_max = ECU_COMM_DOIP_MAX,
+        }, //ECU_COMM_TYPE_DOIP
     },
     .comm = {
         {
@@ -206,6 +214,11 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .type = ECU_COMM_TYPE_LWIPDRV,
             .instance = ECU_COMM_LWIPDRV_1,
             .ctx = &ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_DOIP,
+            .instance = ECU_COMM_DOIP_1,
+            .ctx = &ecu_config_doip_ctx[ECU_COMM_DOIP_1],
         },
     },
 };
@@ -503,6 +516,11 @@ error_t ecu_comm_get_rs422_ctx(ecu_comm_rs422_t instance, rs422_ctx_t **ctx)
 error_t ecu_comm_get_lwipdrv_ctx(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t **ctx)
 {
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_LWIPDRV, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_doip_ctx(ecu_comm_doip_t instance, doip_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_DOIP, instance, (void**)ctx);
 }
 
 #endif /* CORE_CM4 */

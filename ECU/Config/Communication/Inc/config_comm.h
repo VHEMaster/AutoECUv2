@@ -19,6 +19,7 @@
 #include "signals.h"
 #include "rs422.h"
 #include "lwipdrv.h"
+#include "doip.h"
 #endif /* CORE_CM4 */
 
 #include "config_comm_types.h"
@@ -47,6 +48,7 @@ error_t ecu_comm_get_router_ctx(ecu_comm_router_t instance, router_ctx_t **ctx);
 error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ctx);
 error_t ecu_comm_get_rs422_ctx(ecu_comm_rs422_t instance, rs422_ctx_t **ctx);
 error_t ecu_comm_get_lwipdrv_ctx(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t **ctx);
+error_t ecu_comm_get_doip_ctx(ecu_comm_doip_t instance, doip_ctx_t **ctx);
 #endif /* CORE_CM4 */
 
 #endif /* CONFIG_COMMUNICATION_INC_CONFIG_COMM_H_ */

@@ -52,6 +52,7 @@
 #define RAM_SECTION
 #define ITCM_FUNC
 #endif
+#define RAM_D3_SECTION            __attribute__((section(".commbss")))
 #define SHARED_SECTION            __attribute__((section(".sharedbss")))
 #define SHARED_SECTION_EX(s)      __attribute__((section(".sharedbss." s)))
 

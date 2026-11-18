@@ -18,5 +18,6 @@
 #include "versioned_signals.h"
 #include "versioned_rs422.h"
 #include "versioned_lwipdrv.h"
+#include "versioned_doip.h"
 
 #endif /* CONFIG_VERSIONED_COMMUNICATION_INC_VERSIONED_COMM_H_ */
