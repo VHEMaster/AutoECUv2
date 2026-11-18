@@ -2,9 +2,9 @@
 
 **Open-source engine control firmware for a custom STM32H745-based ECU.**
 
-AutoECUv2 brings crank-angle scheduling, engine calculations, sensor acquisition, actuator control, and Classic CAN / CAN FD communication into a modular C firmware project. It is an independent automotive engineering project built around dedicated ECU hardware and the STM32H7 platform.
+AutoECUv2 brings crank-angle scheduling, engine calculations, sensor acquisition, actuator control, Classic CAN / CAN FD diagnostics, and a serial IP link into a modular C firmware project. It is an independent automotive engineering project built around dedicated ECU hardware and the STM32H7 platform.
 
-The project emphasizes explicit hardware integration, configurable engine behavior, and predictable execution of time-critical work. The Cortex-M7 runs engine control and owns persistent configuration. The Cortex-M4 runs the communication stack, including Classic CAN / CAN FD, ISO-TP, Router, Signals, and the implemented diagnostic services.
+The project emphasizes explicit hardware integration, configurable engine behavior, and predictable execution of time-critical work. The Cortex-M7 runs engine control and owns persistent configuration. The Cortex-M4 runs the communication stack, including Classic CAN / CAN FD, ISO-TP, Router, Signals, diagnostic services, and lwIP PPPoS over RS-422.
 
 **Status: active development.** Core engine-control components are implemented, while some communication services and control modules remain partial or experimental. Vehicle validation and standards conformance testing remain ongoing.
 
@@ -16,6 +16,7 @@ The project emphasizes explicit hardware integration, configurable engine behavi
 - Electronic throttle, boost-control valve, idle-control, fuel-pump, and cooling-fan logic.
 - Classic CAN and CAN FD frames up to 64 bytes, configurable signal packing/decoding, and routing in both directions.
 - ISO-TP TX/RX over Classic CAN and CAN FD, plus a subset of OBD-II and UDS diagnostics.
+- RS-422 with circular DMA reception and buffered DMA transmission, plus an IPv4 PPPoS link for a connected PC.
 - Versioned configuration structures, redundant external QSPI flash storage with CRC checks, and default-configuration recovery.
 - Absolute-timestamp output pulse queues, chronological insertion, and configurable late-pulse policies.
 - Foreground, periodic, and event-driven execution, with hardware timers, DMA acquisition, and MDMA-backed memory/CRC transfers.
@@ -35,6 +36,7 @@ The project emphasizes explicit hardware integration, configurable engine behavi
 | Knock acquisition | Crank-angle-triggered ADC sampling windows and DMA buffering. DSP-based knock detection and automatic knock correction are development work. |
 | CAN / CAN FD | Configurable arbitration/data bitrates and bit-rate switching; Classic CAN frames up to 8 bytes and CAN FD frames up to 64 bytes. |
 | CAN signals | Configurable scaling and packing/decoding, Intel/Motorola layouts, signed/unsigned values, counters, and CRC support. Router integration includes incoming and outgoing signals with frame-format selection. |
+| Serial IP | lwIP 2.2.1 in bare-metal mode on CM4, with a PPPoS server over RS-422 and an optional Windows Direct Cable handshake. |
 | Diagnostics | ISO-TP TX/RX for Classic CAN and CAN FD, extended Single Frame and First Frame length encoding, and selected OBD-II live-data/vehicle-information and UDS read-data services. The current ISO-TP payload buffer is limited to 1024 bytes. |
 | Configuration storage | Versioned sections, two flash copies, CRC validation, asynchronous load/save/default operations, and fallback to defaults when stored data cannot be used. |
 | VVT / KWP | Configuration and API groundwork; complete operational behavior is still pending. |
@@ -64,13 +66,13 @@ The ECU application is organized into layers with distinct responsibilities:
 
 | Layer | Responsibility | Source |
 | --- | --- | --- |
-| Drivers | GPIO, SPI, CAN, flash, CRC, timekeeping, input capture, queued output pulses, and ADC acquisition. | [Drivers](ECU/Drivers) |
+| Drivers | GPIO, SPI, CAN, RS-422, flash, CRC, timekeeping, input capture, queued output pulses, and ADC acquisition. | [Drivers](ECU/Drivers) |
 | Devices | Device-specific protocols, register configuration, and state machines for external ICs. | [Devices](ECU/Devices) |
 | Sensors | Physical measurements, conversion, validity handling, and CKP/CMP decoding. | [Sensors](ECU/Sensors) |
 | Core / CalcData | Engine state, selected data sources, lookup tables, and calculated control targets. | [Core](ECU/Core) |
 | Timings | Crank-angle event scheduling for ignition, injection, cylinder balance, and knock-sampling windows. | [Timings](ECU/Timings) |
 | Modules | Control behavior for throttle, boost, idle-related actuators, and auxiliary outputs. | [Modules](ECU/Modules) |
-| Communication | CAN signals, frame routing, diagnostic transport, and diagnostic services. | [Communication](ECU/Communication) |
+| Communication | CAN signals, frame routing, diagnostic transport and services, and the lwIP integration for serial IP. | [Communication](ECU/Communication) |
 | MiddleLayer | Initialization, component wiring, callbacks, and execution-loop integration. | [MiddleLayer](ECU/MiddleLayer) |
 | Config | Hardware mappings, device settings, sensor definitions, engine parameters, and calibration data. | [Config](ECU/Config) |
 
@@ -85,9 +87,9 @@ The central integration point is [MiddleLayer](ECU/MiddleLayer). For a new contr
 | Core | Responsibilities |
 | --- | --- |
 | CM7 | Engine calculations, sensors, actuators, angle-based scheduling, calibration, and persistent QSPI configuration. |
-| CM4 | FDCAN and communication UART ownership, ISO-TP, Router, Signals, and OBD-II / UDS runtime. |
+| CM4 | FDCAN and RS-422 UART ownership, ISO-TP, Router, Signals, OBD-II / UDS, and lwIP / PPPoS. |
 
-The two projects build from the same ECU source tree and select core-specific code through `CORE_CM7` and `CORE_CM4`. [IPC](Multicore/Ipc) provides shared-memory, FIFO, buffered transfer, and nonblocking RPC primitives. CM7 uses RPC to configure and reset communication components on CM4 and to submit selected CAN and ISO-TP operations. RPC responses can carry both an operation result and data.
+The two projects build from the same ECU source tree and select core-specific code through `CORE_CM7` and `CORE_CM4`. [IPC](Multicore/Ipc) provides shared-memory, FIFO, buffered transfer, and nonblocking RPC primitives. CM7 uses RPC to configure communication components on CM4, submit selected CAN and ISO-TP operations, and request resets. RS-422 and LwIPDrv are registered as communication components with IPC configuration handlers. RPC responses can carry both an operation result and data.
 
 CM7 publishes the parameter layout and value pools in shared D2 SRAM. Startup waits for the initial MDMA copy to complete, with a CPU copy as fallback on error. Periodic MDMA copies refresh the value pools. OBD-II and outgoing Signals can read the resulting CM4-visible values. Periodic publication can overlap CM4 reads, so readers may observe mixed updates. Signals upstream still needs a write-back path to CM7 for engine parameters.
 
@@ -101,7 +103,9 @@ Injection timing includes a phase-aware handover from semi-sequential to sequent
 
 ## Communication
 
-The communication stack separates the CAN driver, signal encoding, routing, transport, and diagnostic services:
+### CAN and diagnostics
+
+The CAN path separates frame I/O, signal encoding, routing, ISO-TP transport, and diagnostic services.
 
 | Component | Current behavior |
 | --- | --- |
@@ -117,7 +121,23 @@ ISO-TP implements the CAN FD extended Single Frame length field and the extended
 
 The current default CAN configuration enables CAN FD support with a **500 kbit/s nominal bitrate** and **1 Mbit/s data bitrate**. ISO-TP defaults still select **Classic CAN**. These are separate settings; enabling CAN FD at the controller does not switch every diagnostic connection to CAN FD. See [CAN configuration](ECU/Config/Communication/Src/config_can.c), [ISO-TP configuration](ECU/Config/Communication/Src/config_isotp.c), and [routing configuration](ECU/Config/Communication/Src/config_router.c).
 
-KWP integration remains groundwork. RS-422 transport remains a development direction.
+KWP integration remains groundwork.
+
+### RS-422 and PPPoS
+
+| Component | Current behavior |
+| --- | --- |
+| [RS-422 driver](ECU/Drivers/Rs422) | Full-duplex USART1. RX uses a 4096-byte circular DMA buffer with contiguous spans available through a zero-copy API. TX uses an 8192-byte FIFO and UART DMA. |
+| [LwIPDrv](ECU/Communication/LwIPDrv) | Runs the PPPoS server and lwIP timeouts in the CM4 foreground loop. It feeds received spans of up to 512 bytes to the PPP parser and sends PPP output through the RS-422 TX FIFO. |
+| [lwIP options](lwip-static/Inc/lwipopts.h) | Bare-metal operation (`NO_SYS=1`), IPv4 and raw TCP APIs, and fixed-size memory pools. UDP, sockets, netconn, and Ethernet are disabled in this configuration. |
+
+The ECU defaults enable RS-422 and LwIPDrv. The default serial settings are **115200 baud, 8N1, no hardware flow control**. The ECU uses **10.77.0.2** and offers **10.77.0.1** to its PPP peer. See [RS-422 configuration](ECU/Config/Communication/Src/config_rs422.c) and [lwIP driver configuration](ECU/Config/Communication/Src/config_lwipdrv.c).
+
+The bundled lwIP includes a Windows Direct Cable compatibility option. With `PPPOS_CLIENTSERVER_SUPPORT=1` (the repository default), the PPPoS listener can answer the serial `CLIENT` preamble with `CLIENTSERVER` before PPP negotiation. Set it to `0` in [lwipopts.h](lwip-static/Inc/lwipopts.h) and rebuild the library to disable the preamble handler. The same listener also accepts a peer that starts with standard PPP framing.
+
+After PPP negotiation, `ping 10.77.0.2` checks IPv4 connectivity. The 512-byte foreground read limit is a DMA processing chunk. PPP frame parsing can span multiple reads.
+
+In `master`, the serial link provides IP connectivity. The implemented OBD-II and UDS services use the CAN diagnostic path. DoIP integration with LwIPDrv and Router is being developed on [dev/ai/doip](https://github.com/VHEMaster/AutoECUv2/tree/dev/ai/doip).
 
 ## Repository layout
 
@@ -128,7 +148,8 @@ KWP integration remains groundwork. RS-422 transport remains a development direc
 | [CM4](CM4) | CM4 project, startup, peripheral initialization, and interrupt handlers. |
 | [Common](Common) | Shared project support code. |
 | [Drivers](Drivers) | Bundled STM32 HAL and CMSIS dependencies. |
-| [Middlewares](Middlewares) | Bundled middleware dependencies. |
+| [Middlewares](Middlewares) | Bundled middleware dependencies, including the lwIP source. |
+| [lwip-static](lwip-static) | STM32CubeIDE project and options for the CM4 static lwIP library. |
 | [Multicore](Multicore) | Inter-core boot synchronization and IPC primitives. |
 | [Math](Math) | Shared numerical routines. |
 | [AutoECUv2.ioc](AutoECUv2.ioc) | STM32CubeMX peripheral and project configuration. |
@@ -152,11 +173,11 @@ cd AutoECUv2
 ```
 
 1. Open STM32CubeIDE and choose **File → Import → General → Existing Projects into Workspace**.
-2. Select the repository root and import the supplied projects, including `AutoECUv2_CM7` and `AutoECUv2_CM4`.
+2. Select the repository root and import `AutoECUv2_CM7`, `AutoECUv2_CM4`, and `lwip-static_CM4`.
 3. Keep the repository directory structure intact. Project resources reference shared directories including `ECU`, `Common`, `Drivers`, and `Multicore`.
-4. Activate `Build_Debug` and build both `AutoECUv2_CM7` and `AutoECUv2_CM4` from the same revision.
+4. Activate `Build_Debug` in all three projects. Build `lwip-static_CM4` first, then build `AutoECUv2_CM4` and `AutoECUv2_CM7` from the same revision.
 
-Both projects provide `Build_Debug` and `Build_Release` configurations and produce separate ELF images. Start with the debug configuration when bringing up hardware or investigating behavior.
+`lwip-static_CM4` produces `liblwip-static_CM4.a`. CM4 links that archive from the matching configuration directory under [lwip-static](lwip-static). CM4 and CM7 produce separate ELF images.
 
 Build settings are maintained in the committed STM32CubeIDE project files. The repository does not currently provide a standalone CMake or Make-based build entry point.
 
@@ -167,8 +188,6 @@ Use the STM32CubeIDE debugger with a probe supported by your board. Check the ta
 Opening the `.ioc` file is useful for inspecting peripheral configuration. Treat code regeneration as a separate change and review its diff before accepting changes to initialization or project settings.
 
 ## Configuration and calibration
-
-**Updating from an older build:** Back up saved Signals settings. The message-list limits changed from 24 to 16 upstream and from 64 to 32 downstream, which changed the stored V1 layout. Loading a Signals configuration saved with the older layout can fail validation and fall back to defaults.
 
 Configuration is split by responsibility rather than kept in a single monolithic file:
 
@@ -210,6 +229,7 @@ Areas for further work include:
 - Stronger regression coverage for synchronization, output scheduling, configuration validation, and recovery paths.
 - DSP processing of knock-window samples, including filtering and frequency-domain analysis.
 - Completion of VVT control and additional diagnostic services.
+- DoIP validation and interoperability and throughput testing for the RS-422 PPPoS link.
 - Broader interoperability and regression testing of Classic CAN / CAN FD, signal routing, and ISO-TP boundary cases.
 - Larger ISO-TP payload buffers and API/storage changes if transfers beyond the current 1024-byte limit are needed.
 - Development of KWP support beyond the current API groundwork.
