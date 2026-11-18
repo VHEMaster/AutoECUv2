@@ -32,6 +32,15 @@ static const etc_config_t ecu_modules_etc_config_default = {
 
     .motor_reach_threshold = 4.0f,
     .motor_reach_timeout = 200 * TIME_US_IN_MS,
+
+    .adaptation_setup = {
+        .position_min = 0.0f,
+        .position_max = 95.0f,
+        .dutycycle_max = 0.45f,
+        .tps_average_samples = ETC_ADAPTATION_TPS_AVERAGE_DEFAULT,
+        .disable_pid_tuning = true,
+        .disable_model = false,
+    },
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
@@ -141,6 +150,74 @@ error_t ecu_modules_etc_reset(ecu_module_etc_t instance)
     etc_ctx = &ecu_modules_etc_ctx[instance];
 
     err = etc_reset(etc_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_adaptation_start(ecu_module_etc_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    err = etc_adaptation_start(etc_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_adaptation_process(ecu_module_etc_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    err = etc_adaptation_process(etc_ctx->ctx);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_adaptation_result(ecu_module_etc_t instance, etc_adaptation_config_t *result)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    err = etc_adaptation_result(etc_ctx->ctx, result);
+
+  } while(0);
+
+  return err;
+}
+
+error_t ecu_modules_etc_adaptation_cancel(ecu_module_etc_t instance)
+{
+  error_t err = E_OK;
+  ecu_modules_etc_ctx_t *etc_ctx;
+
+  do {
+    BREAK_IF_ACTION(instance >= ECU_MODULE_ETC_MAX, err = E_PARAM);
+
+    etc_ctx = &ecu_modules_etc_ctx[instance];
+
+    err = etc_adaptation_cancel(etc_ctx->ctx);
 
   } while(0);
 

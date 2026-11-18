@@ -321,8 +321,14 @@ error_t ecu_devices_motor_set_enabled(ecu_device_motor_t instance, bool enabled)
 
       if(enabled == false) {
         status = HAL_TIM_PWM_Stop_IT(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
+        if(motor_ctx->channel_ccr != NULL) {
+          *motor_ctx->channel_ccr = 0;
+        }
       } else {
         status = HAL_TIM_PWM_Start_IT(motor_ctx->htim_pwm, motor_ctx->channel_pwm);
+        if(status != HAL_OK) {
+          (void)l9960_set_enabled(motor_ctx->ctx, false);
+        }
       }
       BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
 

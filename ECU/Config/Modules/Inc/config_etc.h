@@ -29,6 +29,11 @@ error_t ecu_modules_etc_get_default_config(ecu_module_etc_t instance, etc_config
 error_t ecu_modules_etc_configure(ecu_module_etc_t instance, const etc_config_t *config);
 error_t ecu_modules_etc_reset(ecu_module_etc_t instance);
 
+error_t ecu_modules_etc_adaptation_start(ecu_module_etc_t instance);
+error_t ecu_modules_etc_adaptation_process(ecu_module_etc_t instance);
+error_t ecu_modules_etc_adaptation_result(ecu_module_etc_t instance, etc_adaptation_config_t *result);
+error_t ecu_modules_etc_adaptation_cancel(ecu_module_etc_t instance);
+
 error_t ecu_modules_etc_set_enabled(ecu_module_etc_t instance, bool enabled);
 error_t ecu_modules_etc_set_target_position(ecu_module_etc_t instance, float position);
 error_t ecu_modules_etc_get_data(ecu_module_etc_t instance, etc_data_t *data);
