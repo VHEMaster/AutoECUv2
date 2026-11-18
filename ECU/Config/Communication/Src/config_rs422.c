@@ -55,7 +55,7 @@ typedef struct ecu_comm_rs422_ctx_tag {
 #ifdef CORE_CM7
 static const rs422_config_t ecu_comm_rs422_default_config[ECU_COMM_RS422_MAX] = {
   {
-    .baudrate = 115200,
+    .baudrate = 3000000,
   }, //ECU_RS422_IF_1
 };
 
