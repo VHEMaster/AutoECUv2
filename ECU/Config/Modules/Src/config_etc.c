@@ -24,11 +24,10 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .pid_position = {
         .Kp = 150.0,
         .Ki = 50.0,
-        .Kd = 0.10f,
+        .Kd = 0.30f,
     },
     .pid_speed = {
-        .Kp = 0.005f,
-        .Ki = 0.100f,
+        .Kp = 0.003f,
     },
 
     .motor_reach_threshold = 4.0f,
