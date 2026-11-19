@@ -57,6 +57,7 @@ static const etc_config_t ecu_modules_etc_config_default = {
 
     .relaxation_brake_deceleration = 40000.0f,
     .tensioning_brake_deceleration = 0.0f,
+    .approach_brake_distance = 5.0f,
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {

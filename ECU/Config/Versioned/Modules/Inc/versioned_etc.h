@@ -52,6 +52,7 @@ typedef struct {
     /* TPS percentage points/s². Zero disables the corresponding speed limit. */
     float relaxation_brake_deceleration;
     float tensioning_brake_deceleration;
+    float approach_brake_distance; /* TPS percentage points. Zero disables the approach zone. */
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;

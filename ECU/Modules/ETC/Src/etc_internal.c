@@ -59,6 +59,13 @@ static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float targe
   float position = ctx->position_current;
   float parking = ctx->data.parking_position;
   float remaining = target - position;
+  float distance = fabsf(remaining);
+  float brake_distance = ctx->config.approach_brake_distance;
+
+  if(distance >= brake_distance) {
+    return speed;
+  }
+
   /* Limit only speed commands pointing toward the position target. */
   if((remaining > 0.0f && speed > 0.0f) || (remaining < 0.0f && speed < 0.0f)) {
     bool relaxing = (position > parking && remaining < 0.0f) ||
@@ -66,9 +73,13 @@ static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float targe
     float deceleration = relaxing ? ctx->config.relaxation_brake_deceleration :
         ctx->config.tensioning_brake_deceleration;
     if(deceleration > 0.0f) {
-      float limit_squared = 2.0f * deceleration * fabsf(remaining);
+      float limit_squared = 2.0f * deceleration * distance;
       if(speed * speed > limit_squared) {
-        speed = copysignf(fast_sqrt(limit_squared), speed);
+        float limited_speed = copysignf(fast_sqrt(limit_squared), speed);
+        /* Blend into the limit over the outer half of the approach zone. */
+        float blend = MIN(1.0f, 2.0f * (brake_distance - distance) / brake_distance);
+        blend = blend * blend * (3.0f - 2.0f * blend);
+        speed = BLEND(speed, limited_speed, blend);
       }
     }
   }
