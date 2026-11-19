@@ -33,33 +33,25 @@ static float etc_internal_spring_interpolate(const etc_spring_table_t *table, fl
 
 static float etc_internal_spring_effort(const etc_ctx_t *ctx)
 {
-  const etc_spring_table_t *below = &ctx->config.spring_below_parking;
-  const etc_spring_table_t *above = &ctx->config.spring_above_parking;
   float position = ctx->position_current;
-  float parking_lower = ctx->data.parking_position - below->deadband;
-  float parking_upper = ctx->data.parking_position + above->deadband;
+  float parking = ctx->data.parking_position;
 
-  if(position < parking_lower) {
-    const etc_spring_point_t *edge = &below->points[below->points_count - 1];
-    bool relaxing = ctx->spring_approach_direction > 0;
-    if(position > edge->position) {
-      return math_interpolate(edge->position, position, parking_lower,
-          etc_internal_spring_point_effort(edge, relaxing), 0.0f);
-    }
-    return etc_internal_spring_interpolate(below, position, relaxing);
+  if(position == parking) {
+    return 0.0f;
   }
 
-  if(position > parking_upper) {
-    const etc_spring_point_t *edge = &above->points[0];
-    bool relaxing = ctx->spring_approach_direction < 0;
-    if(position < edge->position) {
-      return math_interpolate(parking_upper, position, edge->position,
-          0.0f, etc_internal_spring_point_effort(edge, relaxing));
-    }
-    return etc_internal_spring_interpolate(above, position, relaxing);
+  bool below = position < parking;
+  const etc_spring_table_t *table = below ? &ctx->config.spring_below_parking : &ctx->config.spring_above_parking;
+  bool relaxing = below ? ctx->spring_approach_direction > 0 : ctx->spring_approach_direction < 0;
+  float distance = fabsf(position - parking);
+
+  if(distance < table->deadband) {
+    /* Fade from the effort at the deadband boundary to zero at parking. */
+    float boundary = below ? parking - table->deadband : parking + table->deadband;
+    return etc_internal_spring_interpolate(table, boundary, relaxing) * (distance / table->deadband);
   }
 
-  return 0.0f;
+  return etc_internal_spring_interpolate(table, position, relaxing);
 }
 
 error_t etc_internal_process(etc_ctx_t *ctx)
