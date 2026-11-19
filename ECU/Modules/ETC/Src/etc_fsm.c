@@ -73,10 +73,10 @@ error_t etc_fsm(etc_ctx_t *ctx)
         err = ecu_sensors_tps_get_value(ctx->config.sensor_tps, &ctx->tps_data);
         if(err == E_OK) {
           if(ctx->tps_data.data_valid == true && ctx->tps_data.position_valid == true) {
-            ctx->default_position_sampling = ctx->tps_data.position;
-            ctx->default_position_samples = 1;
+            ctx->parking_position_sampling = ctx->tps_data.position;
+            ctx->parking_position_samples = 1;
             ctx->reset_time = now;
-            ctx->fsm_process = ETC_FSM_DEFAULT_SAMPLING;
+            ctx->fsm_process = ETC_FSM_PARKING_POSITION_SAMPLING;
             break;
           }
         } else if(err != E_AGAIN) {
@@ -91,15 +91,15 @@ error_t etc_fsm(etc_ctx_t *ctx)
           ctx->fsm_process = ETC_FSM_CONDITION;
         }
         break;
-      case ETC_FSM_DEFAULT_SAMPLING:
-        if(time_diff(now, ctx->reset_time) > ETC_TPS_DEFAULT_POSITION_SAMPLE_PERIOD_US) {
+      case ETC_FSM_PARKING_POSITION_SAMPLING:
+        if(time_diff(now, ctx->reset_time) > ETC_TPS_PARKING_POSITION_SAMPLE_PERIOD_US) {
           err = ecu_sensors_tps_get_value(ctx->config.sensor_tps, &ctx->tps_data);
           if(err == E_OK) {
             if(ctx->tps_data.data_valid == true && ctx->tps_data.position_valid == true) {
-              ctx->default_position_sampling += ctx->tps_data.position;
-              if(++ctx->default_position_samples >= ETC_TPS_DEFAULT_POSITION_SAMPLES) {
-                ctx->default_position_sampling /= ctx->default_position_samples;
-                ctx->data.default_position = ctx->default_position_sampling;
+              ctx->parking_position_sampling += ctx->tps_data.position;
+              if(++ctx->parking_position_samples >= ETC_TPS_PARKING_POSITION_SAMPLES) {
+                ctx->parking_position_sampling /= ctx->parking_position_samples;
+                ctx->data.parking_position = ctx->parking_position_sampling;
 
                 err = E_OK;
                 ctx->reset_errcode = err;

@@ -15,8 +15,8 @@
 #include "time.h"
 
 #define ETC_TPS_TIMEOUT_US                          (200 * TIME_US_IN_MS)
-#define ETC_TPS_DEFAULT_POSITION_SAMPLES            (8)
-#define ETC_TPS_DEFAULT_POSITION_SAMPLE_PERIOD_US   (5 * TIME_US_IN_MS)
+#define ETC_TPS_PARKING_POSITION_SAMPLES             (8)
+#define ETC_TPS_PARKING_POSITION_SAMPLE_PERIOD_US    (5 * TIME_US_IN_MS)
 
 typedef enum {
   ETC_FSM_CONDITION = 0,
@@ -25,7 +25,7 @@ typedef enum {
   ETC_FSM_DIAGOFF,
   ETC_FSM_RECONFIGURE,
   ETC_FSM_TPS_WAIT,
-  ETC_FSM_DEFAULT_SAMPLING,
+  ETC_FSM_PARKING_POSITION_SAMPLING,
   ETC_FSM_MAX
 }etc_fsm_t;
 
@@ -50,7 +50,7 @@ typedef struct {
     bool active;
     float target_position;
     float current_position;
-    float default_position;
+    float parking_position;
     float dutycycle;
     float output_voltage;
 }etc_data_t;
@@ -74,8 +74,8 @@ typedef struct {
     tps_diag_t tps_diag;
     l9960_diag_t motor_diag;
 
-    float default_position_sampling;
-    uint8_t default_position_samples;
+    float parking_position_sampling;
+    uint8_t parking_position_samples;
 
     math_pid_ctx_t pid_position;
     math_pid_ctx_t pid_speed;

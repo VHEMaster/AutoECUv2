@@ -19,6 +19,19 @@ typedef enum {
   ETC_CONFIG_VERSION_MAX
 }etc_config_versions_t;
 
+#define ETC_SPRING_POINTS_MAX   (8)
+
+typedef struct {
+    float position; /* TPS position in percent. */
+    float effort; /* Signed motor effort before PWM conversion. */
+}etc_spring_point_t;
+
+typedef struct {
+    uint32_t points_count;
+    etc_spring_point_t points[ETC_SPRING_POINTS_MAX]; /* Ascending positions. */
+    float deadband;
+}etc_spring_table_t;
+
 typedef struct {
     bool enabled;
     ecu_gpio_input_pin_t power_voltage_pin;
@@ -31,6 +44,9 @@ typedef struct {
 
     float motor_reach_threshold;
     time_delta_us_t motor_reach_timeout;
+
+    etc_spring_table_t spring_below_parking;
+    etc_spring_table_t spring_above_parking;
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;

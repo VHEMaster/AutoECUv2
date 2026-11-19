@@ -7,8 +7,50 @@
 
 #include "etc_internal.h"
 #include "compiler.h"
+#include "interpolation.h"
 #include "math_fast.h"
 #include <math.h>
+
+static float etc_internal_spring_interpolate(const etc_spring_point_t *points, uint8_t count, float position)
+{
+  uint8_t i = 1;
+
+  while(i < count - 1 && position > points[i].position) {
+    i++;
+  }
+
+  position = CLAMP(position, points[i - 1].position, points[i].position);
+  return math_interpolate(points[i - 1].position, position, points[i].position,
+      points[i - 1].effort, points[i].effort);
+}
+
+static float etc_internal_spring_effort(const etc_ctx_t *ctx)
+{
+  const etc_spring_point_t *points;
+  const etc_spring_point_t *edge;
+  float position = ctx->position_current;
+  float parking_lower = ctx->data.parking_position - ctx->config.spring_below_parking.deadband;
+  float parking_upper = ctx->data.parking_position + ctx->config.spring_above_parking.deadband;
+
+  if(position < parking_lower) {
+    points = ctx->config.spring_below_parking.points;
+    edge = &points[ctx->config.spring_below_parking.points_count - 1];
+    if(position > edge->position) {
+      return math_interpolate(edge->position, position, parking_lower, edge->effort, 0.0f);
+    }
+    return etc_internal_spring_interpolate(points, ctx->config.spring_below_parking.points_count, position);
+  }
+
+  if(position > parking_upper) {
+    points = ctx->config.spring_above_parking.points;
+    if(position < points[0].position) {
+      return math_interpolate(parking_upper, position, points[0].position, 0.0f, points[0].effort);
+    }
+    return etc_internal_spring_interpolate(points, ctx->config.spring_above_parking.points_count, position);
+  }
+
+  return 0.0f;
+}
 
 error_t etc_internal_process(etc_ctx_t *ctx)
 {
@@ -114,12 +156,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       math_pid_set_target(&ctx->pid_speed, speed);
       current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
 
-      //TODO: replace this piece of crap later :)
-      if(ctx->position_current < ctx->data.default_position - 0.3f) {
-        current += -0.3f;
-      } else if(ctx->position_current > ctx->data.default_position + 0.3f) {
-        current += 0.3f;
-      }
+      current += etc_internal_spring_effort(ctx);
 
       dutycycle = current / power_voltage;
       dutycycle = CLAMP(dutycycle, -1.0f, 1.0f);

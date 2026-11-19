@@ -32,6 +32,27 @@ static const etc_config_t ecu_modules_etc_config_default = {
 
     .motor_reach_threshold = 4.0f,
     .motor_reach_timeout = 200 * TIME_US_IN_MS,
+
+    .spring_below_parking = {
+        .deadband = 0.1f,
+        .points_count = 3,
+        .points = {
+          { .position = 1.0f, .effort = -0.40f },
+          { .position = 5.0f, .effort = -0.35f },
+          { .position = 7.0f, .effort = -0.37f },
+        },
+    },
+    .spring_above_parking = {
+        .deadband = 0.1f,
+        .points_count = 5,
+        .points = {
+          { .position = 10.0f, .effort = 0.32f },
+          { .position = 15.0f, .effort = 0.25f },
+          { .position = 25.0f, .effort = 0.32f },
+          { .position = 50.0f, .effort = 0.43f },
+          { .position = 90.0f, .effort = 0.65f },
+        },
+    },
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {

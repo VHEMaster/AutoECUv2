@@ -39,6 +39,9 @@ error_t etc_configure(etc_ctx_t *ctx, const etc_config_t *config)
     BREAK_IF_ACTION(ctx == NULL || config == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
+    BREAK_IF_ACTION(config->spring_below_parking.points_count > ETC_SPRING_POINTS_MAX, err = E_PARAM);
+    BREAK_IF_ACTION(config->spring_above_parking.points_count > ETC_SPRING_POINTS_MAX, err = E_PARAM);
+
     if(ctx->reset_request == false) {
       ctx->configured = false;
 
