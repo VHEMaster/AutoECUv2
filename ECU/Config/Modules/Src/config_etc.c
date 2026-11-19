@@ -54,6 +54,7 @@ static const etc_config_t ecu_modules_etc_config_default = {
           { .position = 90.0f, .effort_tension = 0.65f, .effort_relaxation = 0.35f },
         },
     },
+    .relaxation_brake_deceleration = 10000.0f,
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {

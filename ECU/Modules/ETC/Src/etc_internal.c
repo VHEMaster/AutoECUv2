@@ -54,6 +54,26 @@ static float etc_internal_spring_effort(const etc_ctx_t *ctx)
   return etc_internal_spring_interpolate(table, position, relaxing);
 }
 
+static float etc_internal_limit_relaxation_speed(const etc_ctx_t *ctx, float target, float speed)
+{
+  float position = ctx->position_current;
+  float parking = ctx->data.parking_position;
+  float remaining = target - position;
+  float deceleration = ctx->config.relaxation_brake_deceleration;
+
+  /* Limit only speed commands that approach the target while unloading the spring. */
+  if(deceleration > 0.0f &&
+      ((position > parking && remaining < 0.0f && speed < 0.0f) ||
+       (position < parking && remaining > 0.0f && speed > 0.0f))) {
+    float limit_squared = 2.0f * deceleration * fabsf(remaining);
+    if(speed * speed > limit_squared) {
+      speed = copysignf(fast_sqrt(limit_squared), speed);
+    }
+  }
+
+  return speed;
+}
+
 error_t etc_internal_process(etc_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -165,6 +185,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
       math_pid_set_target(&ctx->pid_position, target);
       speed = math_pid_update(&ctx->pid_position, ctx->position_current, now);
+      speed = etc_internal_limit_relaxation_speed(ctx, target, speed);
 
       math_pid_set_target(&ctx->pid_speed, speed);
       current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
