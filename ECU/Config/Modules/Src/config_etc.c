@@ -19,12 +19,12 @@ typedef struct {
 
 static const etc_config_t ecu_modules_etc_config_default = {
     .power_voltage_pin = ECU_IN_PORT2_VIGN,
-    .pwm_freq = 4000,
+    .pwm_freq = 18000,
 
     .pid_position = {
         .Kp = 300.0,
         .Ki = 0.0f,
-        .Kd = 1.20f,
+        .Kd = 1.80f,
     },
     .pid_speed = {
         .Kp = 0.003f,
@@ -38,28 +38,28 @@ static const etc_config_t ecu_modules_etc_config_default = {
         .deadband = 0.05f,
         .points_count = 4,
         .points = {
-          { .position = 1.0f, .effort_tension = -0.40f, .effort_relaxation = -0.19f },
-          { .position = 5.0f, .effort_tension = -0.35f, .effort_relaxation = -0.18f },
-          { .position = 7.0f, .effort_tension = -0.37f, .effort_relaxation = -0.17f },
-          { .position = 8.0f, .effort_tension = -0.18f, .effort_relaxation = -0.15f },
+          { .position = 1.0f, .effort_tension = -0.46f, .effort_relaxation = -0.35f },
+          { .position = 5.0f, .effort_tension = -0.46f, .effort_relaxation = -0.35f },
+          { .position = 7.0f, .effort_tension = -0.49f, .effort_relaxation = -0.36f },
+          { .position = 8.0f, .effort_tension = -0.35f, .effort_relaxation = -0.15f },
         },
     },
     .spring_above_parking = {
         .deadband = 0.05f,
         .points_count = 6,
         .points = {
-          { .position = 9.0f,  .effort_tension = 0.18f, .effort_relaxation = 0.20f },
-          { .position = 10.0f, .effort_tension = 0.32f, .effort_relaxation = 0.24f },
-          { .position = 15.0f, .effort_tension = 0.25f, .effort_relaxation = 0.21f },
-          { .position = 25.0f, .effort_tension = 0.32f, .effort_relaxation = 0.25f },
-          { .position = 50.0f, .effort_tension = 0.48f, .effort_relaxation = 0.28f },
-          { .position = 90.0f, .effort_tension = 0.65f, .effort_relaxation = 0.35f },
+          { .position = 9.0f,  .effort_tension = 0.35f, .effort_relaxation = 0.35f },
+          { .position = 10.0f, .effort_tension = 0.40f, .effort_relaxation = 0.38f },
+          { .position = 15.0f, .effort_tension = 0.40f, .effort_relaxation = 0.38f },
+          { .position = 25.0f, .effort_tension = 0.45f, .effort_relaxation = 0.38f },
+          { .position = 50.0f, .effort_tension = 0.49f, .effort_relaxation = 0.39f },
+          { .position = 90.0f, .effort_tension = 0.65f, .effort_relaxation = 0.45f },
         },
     },
 
-    .relaxation_brake_deceleration = 30000.0f,
-    .tensioning_brake_deceleration = 100000.0f,
-    .approach_brake_distance = 40.0f,
+    .relaxation_brake_deceleration = 15000.0f,
+    .tensioning_brake_deceleration = 130000.0f,
+    .approach_brake_distance = 45.0f,
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {

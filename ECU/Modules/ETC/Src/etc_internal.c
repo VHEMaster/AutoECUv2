@@ -59,7 +59,6 @@ static float etc_internal_spring_effort(const etc_ctx_t *ctx)
   float distance = fabsf(position - parking);
 
   if(distance < table->deadband) {
-    /* Fade from the effort at the deadband boundary to zero at parking. */
     float boundary = below ? parking - table->deadband : parking + table->deadband;
     return etc_internal_spring_interpolate(table, boundary, relaxing) * (distance / table->deadband);
   }
@@ -71,8 +70,9 @@ static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float error
 {
   float brake_distance = ctx->config.approach_brake_distance;
 
-  /* Limit only speed commands pointing toward the position target. */
-  if(distance >= brake_distance || !((error > 0.0f && speed > 0.0f) || (error < 0.0f && speed < 0.0f))) {
+  if(distance >= brake_distance ||
+      !((error > 0.0f && speed > 0.0f) ||
+          (error < 0.0f && speed < 0.0f))) {
     return speed;
   }
 
@@ -92,9 +92,9 @@ static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float error
     return limited_speed;
   }
 
-  /* Blend into the limit over the outer half of the approach zone. */
   float blend = MIN(1.0f, 2.0f * (brake_distance - distance) / brake_distance);
   blend = blend * blend * (3.0f - 2.0f * blend);
+
   return BLEND(speed, limited_speed, blend);
 }
 
@@ -128,6 +128,10 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     err = ecu_sensors_tps_get_diag(ctx->config.sensor_tps, &ctx->tps_diag);
     if(err != E_OK && err != E_AGAIN) {
       ctx->diag.bits.tps_handle_error = true;
+    }
+
+    if(enabled == false) {
+      ctx->diag.data = 0u;
     }
 
     if(ctx->tps_data.data_valid != true) {
@@ -194,7 +198,6 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       float position_error = target - ctx->position_current;
       float distance = fabsf(position_error);
 
-      /* Keep the approach direction through settling at an unchanged target. */
       if(ctx->spring_approach_direction == 0 || target != ctx->spring_target_position) {
         if(position_error > 0.0f) {
           ctx->spring_approach_direction = 1;

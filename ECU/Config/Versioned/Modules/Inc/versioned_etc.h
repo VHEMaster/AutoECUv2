@@ -22,15 +22,14 @@ typedef enum {
 #define ETC_SPRING_POINTS_MAX   (8)
 
 typedef struct {
-    float position; /* TPS position in percent. */
-    /* Signed motor efforts before PWM conversion. */
+    float position;
     float effort_tension;
     float effort_relaxation;
 }etc_spring_point_t;
 
 typedef struct {
     uint32_t points_count;
-    etc_spring_point_t points[ETC_SPRING_POINTS_MAX]; /* Ascending positions. */
+    etc_spring_point_t points[ETC_SPRING_POINTS_MAX];
     float deadband;
 }etc_spring_table_t;
 
@@ -49,10 +48,10 @@ typedef struct {
 
     etc_spring_table_t spring_below_parking;
     etc_spring_table_t spring_above_parking;
-    /* TPS percentage points/s². Zero disables the corresponding speed limit. */
+
     float relaxation_brake_deceleration;
     float tensioning_brake_deceleration;
-    float approach_brake_distance; /* TPS percentage points. Zero disables the approach zone. */
+    float approach_brake_distance;
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;
