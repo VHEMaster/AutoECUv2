@@ -49,7 +49,9 @@ typedef struct {
 
     etc_spring_table_t spring_below_parking;
     etc_spring_table_t spring_above_parking;
-    float relaxation_brake_deceleration; /* TPS percentage points/s². Zero disables the speed limit. */
+    /* TPS percentage points/s². Zero disables the corresponding speed limit. */
+    float relaxation_brake_deceleration;
+    float tensioning_brake_deceleration;
 
     uint32_t align ALIGNED_CACHE;
 }etc_config_v1_t ALIGNED_CACHE;
