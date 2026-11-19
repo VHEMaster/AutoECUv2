@@ -22,9 +22,9 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .pwm_freq = 4000,
 
     .pid_position = {
-        .Kp = 150.0,
+        .Kp = 300.0,
         .Ki = 0.0f,
-        .Kd = 0.80f,
+        .Kd = 1.50f,
     },
     .pid_speed = {
         .Kp = 0.003f,
@@ -54,8 +54,9 @@ static const etc_config_t ecu_modules_etc_config_default = {
           { .position = 90.0f, .effort_tension = 0.65f, .effort_relaxation = 0.35f },
         },
     },
-    .relaxation_brake_deceleration = 10000.0f,
-    .tensioning_brake_deceleration = 10000.0f,
+
+    .relaxation_brake_deceleration = 40000.0f,
+    .tensioning_brake_deceleration = 0.0f,
 };
 
 static RAM_SECTION ecu_modules_etc_ctx_t ecu_modules_etc_ctx[ECU_MODULE_ETC_MAX] = {
