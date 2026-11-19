@@ -9,8 +9,8 @@
 #define MATH_MISC_H_
 
 #include "compiler.h"
+#include "math_misc.h"
 #include <float.h>
-#include <stddef.h>
 
 OPTIMIZE_FAST
 STATIC_INLINE void math_minmax(const float *array, unsigned int size, float *pmin, float *pmax)
@@ -64,32 +64,20 @@ STATIC_INLINE float math_median(const float *array, unsigned int size)
   return value;
 }
 
-/* Search ascending float keys at the start of each element. end_index bounds the left index. */
-OPTIMIZE_FAST
-STATIC_INLINE int math_binary_search_strided(const void *array, size_t stride, int start_index, int end_index,
-    float element)
-{
-  const unsigned char *bytes = array;
-  int iterations = 0;
-  while(start_index <= end_index && ++iterations < 256) {
-    int middle = start_index + ((end_index - start_index) >> 1);
-    const unsigned char *entry = bytes + (size_t)middle * stride;
-    float left = *(const float *)entry;
-    float right = *(const float *)(entry + stride);
-    if(left <= element && right > element)
-      return middle;
-    if(right <= element)
-      start_index = middle + 1;
-    else if(left >= element)
-      end_index = middle - 1;
-  }
-  return -1;
-}
-
 OPTIMIZE_FAST
 STATIC_INLINE int math_binary_search(const float *array, int start_index, int end_index, float element)
 {
-  return math_binary_search_strided(array, sizeof(*array), start_index, end_index, element);
+  int iterations = 0;
+  while(start_index <= end_index && ++iterations < 256) {
+    int middle = start_index + ((end_index - start_index ) >> 1);
+    if (array[middle] <= element && array[middle + 1] > element)
+      return middle;
+    if (array[middle + 1] <= element)
+      start_index = middle + 1;
+    else if(array[middle] >= element)
+      end_index = middle - 1;
+  }
+  return -1;
 }
 
 OPTIMIZE_FAST

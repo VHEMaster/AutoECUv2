@@ -9,14 +9,13 @@
 #include "compiler.h"
 #include "interpolation.h"
 #include "math_fast.h"
-#include "math_misc.h"
 #include <math.h>
 
 static float etc_internal_spring_interpolate(const etc_spring_table_t *table, float position, bool relaxing)
 {
   const etc_spring_point_t *points = table->points;
   const etc_spring_point_t *left, *right;
-  int last = table->points_count - 1;
+  uint32_t last = table->points_count - 1;
   float left_effort, right_effort;
 
   if(position <= points[0].position) {
@@ -24,12 +23,18 @@ static float etc_internal_spring_interpolate(const etc_spring_table_t *table, fl
   } else if(position >= points[last].position) {
     left = right = &points[last];
   } else {
-    int index = math_binary_search_strided(&table->points, sizeof(*points), 0, last - 1, position);
-    if(index < 0) {
-      return 0.0f;
+    uint32_t low = 0;
+    uint32_t high = last;
+    while(high - low > 1) {
+      uint32_t middle = low + (high - low) / 2;
+      if(position < points[middle].position) {
+        high = middle;
+      } else {
+        low = middle;
+      }
     }
-    left = &points[index];
-    right = &points[index + 1];
+    left = &points[low];
+    right = &points[high];
   }
 
   if(relaxing) {
