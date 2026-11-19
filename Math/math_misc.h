@@ -11,6 +11,7 @@
 #include "compiler.h"
 #include "math_misc.h"
 #include <float.h>
+#include <stddef.h>
 
 OPTIMIZE_FAST
 STATIC_INLINE void math_minmax(const float *array, unsigned int size, float *pmin, float *pmax)
@@ -78,6 +79,28 @@ STATIC_INLINE int math_binary_search(const float *array, int start_index, int en
       end_index = middle - 1;
   }
   return -1;
+}
+
+/* Find the left index of an interval in ascending float keys spaced stride bytes apart.
+ * The caller supplies at least two keys and handles values outside [first, last).
+ */
+STATIC_INLINE size_t math_binary_search_strided(const void *array, size_t stride, size_t last, float element)
+{
+  const unsigned char *bytes = array;
+  size_t low = 0;
+  size_t high = last;
+
+  while(high - low > 1) {
+    size_t middle = low + (high - low) / 2;
+    const float *key = (const float *)(bytes + middle * stride);
+    if(element < *key) {
+      high = middle;
+    } else {
+      low = middle;
+    }
+  }
+
+  return low;
 }
 
 OPTIMIZE_FAST
