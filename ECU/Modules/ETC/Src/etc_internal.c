@@ -9,26 +9,42 @@
 #include "compiler.h"
 #include "interpolation.h"
 #include "math_fast.h"
+#include "math_misc.h"
 #include <math.h>
-
-static float etc_internal_spring_point_effort(const etc_spring_point_t *point, bool relaxing)
-{
-  return relaxing ? point->effort_relaxation : point->effort_tension;
-}
 
 static float etc_internal_spring_interpolate(const etc_spring_table_t *table, float position, bool relaxing)
 {
   const etc_spring_point_t *points = table->points;
-  uint32_t i = 1;
+  const etc_spring_point_t *left, *right;
+  int last = table->points_count - 1;
+  float left_effort, right_effort;
 
-  while(i < table->points_count - 1 && position > points[i].position) {
-    i++;
+  if(position <= points[0].position) {
+    left = right = &points[0];
+  } else if(position >= points[last].position) {
+    left = right = &points[last];
+  } else {
+    int index = math_binary_search_strided(&table->points, sizeof(*points), 0, last - 1, position);
+    if(index < 0) {
+      return 0.0f;
+    }
+    left = &points[index];
+    right = &points[index + 1];
   }
 
-  position = CLAMP(position, points[i - 1].position, points[i].position);
-  return math_interpolate(points[i - 1].position, position, points[i].position,
-      etc_internal_spring_point_effort(&points[i - 1], relaxing),
-      etc_internal_spring_point_effort(&points[i], relaxing));
+  if(relaxing) {
+    left_effort = left->effort_relaxation;
+    right_effort = right->effort_relaxation;
+  } else {
+    left_effort = left->effort_tension;
+    right_effort = right->effort_tension;
+  }
+
+  if(left == right) {
+    return left_effort;
+  }
+
+  return math_interpolate(left->position, position, right->position, left_effort, right_effort);
 }
 
 static float etc_internal_spring_effort(const etc_ctx_t *ctx)
@@ -54,37 +70,35 @@ static float etc_internal_spring_effort(const etc_ctx_t *ctx)
   return etc_internal_spring_interpolate(table, position, relaxing);
 }
 
-static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float target, float speed)
+static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float error, float distance, float speed)
 {
-  float position = ctx->position_current;
-  float parking = ctx->data.parking_position;
-  float remaining = target - position;
-  float distance = fabsf(remaining);
   float brake_distance = ctx->config.approach_brake_distance;
 
-  if(distance >= brake_distance) {
+  /* Limit only speed commands pointing toward the position target. */
+  if(distance >= brake_distance || !((error > 0.0f && speed > 0.0f) || (error < 0.0f && speed < 0.0f))) {
     return speed;
   }
 
-  /* Limit only speed commands pointing toward the position target. */
-  if((remaining > 0.0f && speed > 0.0f) || (remaining < 0.0f && speed < 0.0f)) {
-    bool relaxing = (position > parking && remaining < 0.0f) ||
-        (position < parking && remaining > 0.0f);
-    float deceleration = relaxing ? ctx->config.relaxation_brake_deceleration :
-        ctx->config.tensioning_brake_deceleration;
-    if(deceleration > 0.0f) {
-      float limit_squared = 2.0f * deceleration * distance;
-      if(speed * speed > limit_squared) {
-        float limited_speed = copysignf(fast_sqrt(limit_squared), speed);
-        /* Blend into the limit over the outer half of the approach zone. */
-        float blend = MIN(1.0f, 2.0f * (brake_distance - distance) / brake_distance);
-        blend = blend * blend * (3.0f - 2.0f * blend);
-        speed = BLEND(speed, limited_speed, blend);
-      }
-    }
+  float position = ctx->position_current;
+  float parking = ctx->data.parking_position;
+  bool relaxing = (position > parking && error < 0.0f) ||
+      (position < parking && error > 0.0f);
+  float deceleration = relaxing ? ctx->config.relaxation_brake_deceleration :
+      ctx->config.tensioning_brake_deceleration;
+  float limit_squared = 2.0f * deceleration * distance;
+  if(!(deceleration > 0.0f && speed * speed > limit_squared)) {
+    return speed;
   }
 
-  return speed;
+  float limited_speed = copysignf(fast_sqrt(limit_squared), speed);
+  if(distance <= 0.5f * brake_distance) {
+    return limited_speed;
+  }
+
+  /* Blend into the limit over the outer half of the approach zone. */
+  float blend = MIN(1.0f, 2.0f * (brake_distance - distance) / brake_distance);
+  blend = blend * blend * (3.0f - 2.0f * blend);
+  return BLEND(speed, limited_speed, blend);
 }
 
 error_t etc_internal_process(etc_ctx_t *ctx)
@@ -98,7 +112,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
   // TODO: set minimum control time delta
   // TODO: derivative filters, plausibility, TPS validity?
 
-  float speed, current, voltage, power_voltage, dutycycle, target;
+  float speed, current, power_voltage, dutycycle, target;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -127,9 +141,9 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       enabled = false;
     }
 
-    ctx->position_prev = ctx->position_current;
+    float position_prev = ctx->position_current;
     ctx->position_current = ctx->tps_data.position_unfiltered;
-    ctx->current_speed = (ctx->position_current - ctx->position_prev) / ((float)time_delta * 0.000001f);
+    ctx->current_speed = (ctx->position_current - position_prev) / ((float)time_delta * 0.000001f);
 
     (void)input_get_value(ctx->power_voltage_pin, &input_analog_value, NULL);
     power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
@@ -143,11 +157,9 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       enabled = false;
     }
 
-    if(ctx->tps_diag.data != 0) {
+    ctx->diag.bits.tps_diag_error = ctx->tps_diag.data != 0;
+    if(ctx->diag.bits.tps_diag_error) {
       enabled = false;
-      ctx->diag.bits.tps_diag_error = true;
-    } else {
-      ctx->diag.bits.tps_diag_error = false;
     }
 
     err = ecu_devices_motor_set_enabled(ctx->config.device_motor, enabled);
@@ -166,11 +178,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
     l9960_status_openload_t motor_openload = ctx->motor_diag.bits.ol;
     ctx->motor_diag.bits.ol = 0;
 
-    if(ctx->motor_diag.data != 0 || motor_openload == L9960_STATUS_OL_OPENLOAD) {
-      ctx->diag.bits.motor_error = true;
-    } else {
-      ctx->diag.bits.motor_error = false;
-    }
+    ctx->diag.bits.motor_error = ctx->motor_diag.data != 0 || motor_openload == L9960_STATUS_OL_OPENLOAD;
 
     math_pid_set_koffs(&ctx->pid_position, &ctx->config.pid_position);
     math_pid_set_koffs(&ctx->pid_speed, &ctx->config.pid_speed);
@@ -186,11 +194,14 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->pos_reach_time = now;
       dutycycle = 0.0f;
     } else {
+      float position_error = target - ctx->position_current;
+      float distance = fabsf(position_error);
+
       /* Keep the approach direction through settling at an unchanged target. */
       if(ctx->spring_approach_direction == 0 || target != ctx->spring_target_position) {
-        if(target > ctx->position_current) {
+        if(position_error > 0.0f) {
           ctx->spring_approach_direction = 1;
-        } else if(target < ctx->position_current) {
+        } else if(position_error < 0.0f) {
           ctx->spring_approach_direction = -1;
         }
         ctx->spring_target_position = target;
@@ -198,7 +209,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
       math_pid_set_target(&ctx->pid_position, target);
       speed = math_pid_update(&ctx->pid_position, ctx->position_current, now);
-      speed = etc_internal_limit_approach_speed(ctx, target, speed);
+      speed = etc_internal_limit_approach_speed(ctx, position_error, distance, speed);
 
       math_pid_set_target(&ctx->pid_speed, speed);
       current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
@@ -213,10 +224,9 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       } else if(dutycycle > 0) {
         dutycycle = fast_sqrt(dutycycle);
       }
-      voltage = dutycycle * power_voltage;
       ctx->data.dutycycle = dutycycle;
 
-      if(fabsf(ctx->position_current - target) < ctx->config.motor_reach_threshold) {
+      if(distance < ctx->config.motor_reach_threshold) {
         ctx->pos_reach_time = now;
         ctx->diag.bits.position_reach_failure = false;
       } else if(time_diff(now, ctx->pos_reach_time) > ctx->config.motor_reach_timeout) {
@@ -224,7 +234,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       }
 
       ctx->target_speed = speed;
-      ctx->data.output_voltage = voltage;
+      ctx->data.output_voltage = dutycycle * power_voltage;
       ctx->data.active = true;
     }
 

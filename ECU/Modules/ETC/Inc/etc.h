@@ -84,7 +84,6 @@ typedef struct {
     error_t reset_errcode;
     input_id_t power_voltage_pin;
     float position_current;
-    float position_prev;
     float power_voltage;
     float current_speed;
     float target_speed;
@@ -104,7 +103,6 @@ error_t etc_reset(etc_ctx_t *ctx);
 error_t etc_get_data(etc_ctx_t *ctx, etc_data_t *data);
 error_t etc_get_diag(etc_ctx_t *ctx, etc_diag_t *diag);
 
-void etc_loop_main(etc_ctx_t *ctx);
 void etc_loop_slow(etc_ctx_t *ctx);
 void etc_loop_fast(etc_ctx_t *ctx);
 

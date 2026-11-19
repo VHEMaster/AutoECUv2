@@ -90,28 +90,15 @@ error_t etc_reset(etc_ctx_t *ctx)
 
 void etc_loop_slow(etc_ctx_t *ctx)
 {
-  error_t err = E_OK;
-
-  if(ctx->ready) {
-    if(ctx->configured) {
-      err = etc_internal_process(ctx);
-      if(err != E_OK && err != E_AGAIN) {
-        //TODO: set error in future
-      }
-    }
+  if(ctx->ready && ctx->configured) {
+    (void)etc_internal_process(ctx);
   }
 }
 
 ITCM_FUNC void etc_loop_fast(etc_ctx_t *ctx)
 {
-  error_t err = E_OK;
-
   if(ctx->ready) {
-    err = etc_fsm(ctx);
-    if(err != E_OK && err != E_AGAIN) {
-      //TODO: set error in future
-    }
-
+    (void)etc_fsm(ctx);
   }
 }
 
