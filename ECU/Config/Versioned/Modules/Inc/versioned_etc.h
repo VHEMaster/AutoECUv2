@@ -23,7 +23,9 @@ typedef enum {
 
 typedef struct {
     float position; /* TPS position in percent. */
-    float effort; /* Signed motor effort before PWM conversion. */
+    /* Signed motor efforts before PWM conversion. */
+    float effort_tension;
+    float effort_relaxation;
 }etc_spring_point_t;
 
 typedef struct {

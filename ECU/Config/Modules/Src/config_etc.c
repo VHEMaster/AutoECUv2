@@ -33,24 +33,25 @@ static const etc_config_t ecu_modules_etc_config_default = {
     .motor_reach_threshold = 4.0f,
     .motor_reach_timeout = 200 * TIME_US_IN_MS,
 
+    /* Initial relaxation efforts from the directional thresholds of the second adaptation run. */
     .spring_below_parking = {
         .deadband = 0.1f,
         .points_count = 3,
         .points = {
-          { .position = 1.0f, .effort = -0.40f },
-          { .position = 5.0f, .effort = -0.35f },
-          { .position = 7.0f, .effort = -0.37f },
+          { .position = 1.0f, .effort_tension = -0.40f, .effort_relaxation = -0.19f },
+          { .position = 5.0f, .effort_tension = -0.35f, .effort_relaxation = -0.18f },
+          { .position = 7.0f, .effort_tension = -0.37f, .effort_relaxation = -0.17f },
         },
     },
     .spring_above_parking = {
         .deadband = 0.1f,
         .points_count = 5,
         .points = {
-          { .position = 10.0f, .effort = 0.32f },
-          { .position = 15.0f, .effort = 0.25f },
-          { .position = 25.0f, .effort = 0.32f },
-          { .position = 50.0f, .effort = 0.43f },
-          { .position = 90.0f, .effort = 0.65f },
+          { .position = 10.0f, .effort_tension = 0.32f, .effort_relaxation = 0.24f },
+          { .position = 15.0f, .effort_tension = 0.25f, .effort_relaxation = 0.21f },
+          { .position = 25.0f, .effort_tension = 0.32f, .effort_relaxation = 0.25f },
+          { .position = 50.0f, .effort_tension = 0.48f, .effort_relaxation = 0.28f },
+          { .position = 90.0f, .effort_tension = 0.65f, .effort_relaxation = 0.35f },
         },
     },
 };

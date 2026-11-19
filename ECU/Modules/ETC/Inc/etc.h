@@ -88,6 +88,8 @@ typedef struct {
     float power_voltage;
     float current_speed;
     float target_speed;
+    float spring_target_position;
+    int8_t spring_approach_direction;
 
     time_us_t reset_time;
     time_us_t process_time;

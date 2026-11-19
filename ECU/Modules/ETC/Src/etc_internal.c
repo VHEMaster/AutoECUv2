@@ -11,42 +11,52 @@
 #include "math_fast.h"
 #include <math.h>
 
-static float etc_internal_spring_interpolate(const etc_spring_point_t *points, uint8_t count, float position)
+static float etc_internal_spring_point_effort(const etc_spring_point_t *point, bool relaxing)
 {
-  uint8_t i = 1;
+  return relaxing ? point->effort_relaxation : point->effort_tension;
+}
 
-  while(i < count - 1 && position > points[i].position) {
+static float etc_internal_spring_interpolate(const etc_spring_table_t *table, float position, bool relaxing)
+{
+  const etc_spring_point_t *points = table->points;
+  uint32_t i = 1;
+
+  while(i < table->points_count - 1 && position > points[i].position) {
     i++;
   }
 
   position = CLAMP(position, points[i - 1].position, points[i].position);
   return math_interpolate(points[i - 1].position, position, points[i].position,
-      points[i - 1].effort, points[i].effort);
+      etc_internal_spring_point_effort(&points[i - 1], relaxing),
+      etc_internal_spring_point_effort(&points[i], relaxing));
 }
 
 static float etc_internal_spring_effort(const etc_ctx_t *ctx)
 {
-  const etc_spring_point_t *points;
-  const etc_spring_point_t *edge;
+  const etc_spring_table_t *below = &ctx->config.spring_below_parking;
+  const etc_spring_table_t *above = &ctx->config.spring_above_parking;
   float position = ctx->position_current;
-  float parking_lower = ctx->data.parking_position - ctx->config.spring_below_parking.deadband;
-  float parking_upper = ctx->data.parking_position + ctx->config.spring_above_parking.deadband;
+  float parking_lower = ctx->data.parking_position - below->deadband;
+  float parking_upper = ctx->data.parking_position + above->deadband;
 
   if(position < parking_lower) {
-    points = ctx->config.spring_below_parking.points;
-    edge = &points[ctx->config.spring_below_parking.points_count - 1];
+    const etc_spring_point_t *edge = &below->points[below->points_count - 1];
+    bool relaxing = ctx->spring_approach_direction > 0;
     if(position > edge->position) {
-      return math_interpolate(edge->position, position, parking_lower, edge->effort, 0.0f);
+      return math_interpolate(edge->position, position, parking_lower,
+          etc_internal_spring_point_effort(edge, relaxing), 0.0f);
     }
-    return etc_internal_spring_interpolate(points, ctx->config.spring_below_parking.points_count, position);
+    return etc_internal_spring_interpolate(below, position, relaxing);
   }
 
   if(position > parking_upper) {
-    points = ctx->config.spring_above_parking.points;
-    if(position < points[0].position) {
-      return math_interpolate(parking_upper, position, points[0].position, 0.0f, points[0].effort);
+    const etc_spring_point_t *edge = &above->points[0];
+    bool relaxing = ctx->spring_approach_direction < 0;
+    if(position < edge->position) {
+      return math_interpolate(parking_upper, position, edge->position,
+          0.0f, etc_internal_spring_point_effort(edge, relaxing));
     }
-    return etc_internal_spring_interpolate(points, ctx->config.spring_above_parking.points_count, position);
+    return etc_internal_spring_interpolate(above, position, relaxing);
   }
 
   return 0.0f;
@@ -142,6 +152,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
     if(enabled == false) {
       ctx->data.active = false;
+      ctx->spring_approach_direction = 0;
       ctx->data.dutycycle = 0;
       ctx->target_speed = 0;
       ctx->data.output_voltage = 0;
@@ -150,6 +161,16 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->pos_reach_time = now;
       dutycycle = 0.0f;
     } else {
+      /* Keep the approach direction through settling at an unchanged target. */
+      if(ctx->spring_approach_direction == 0 || target != ctx->spring_target_position) {
+        if(target > ctx->position_current) {
+          ctx->spring_approach_direction = 1;
+        } else if(target < ctx->position_current) {
+          ctx->spring_approach_direction = -1;
+        }
+        ctx->spring_target_position = target;
+      }
+
       math_pid_set_target(&ctx->pid_position, target);
       speed = math_pid_update(&ctx->pid_position, ctx->position_current, now);
 
