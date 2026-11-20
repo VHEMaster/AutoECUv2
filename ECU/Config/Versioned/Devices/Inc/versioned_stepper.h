@@ -30,6 +30,8 @@ typedef struct {
     tle4729_config_relation_t voltage_to_step_time_mult;
     tle4729_config_relation_t speed_to_step_time_ms;
     uint8_t acceleration_steps;
+    bool ph1_inverted;
+    bool ph2_inverted;
 
     int32_t pos_min;
     int32_t pos_max;

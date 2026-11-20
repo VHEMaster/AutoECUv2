@@ -35,8 +35,6 @@ typedef struct {
     gpio_t error1;
     gpio_t error2;
 
-    uint32_t ph_bsrr[4];
-
 }tle4729_init_ctx_t;
 
 typedef struct {
@@ -54,6 +52,8 @@ typedef struct {
     time_us_t current_step_last;
     time_us_t last_moving;
     tle4729_mode_t last_mode;
+
+    uint32_t ph_bsrr[4];
 
     int32_t pos_target;
     int32_t pos_current;

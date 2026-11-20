@@ -52,6 +52,8 @@ static RAM_SECTION ecu_devices_stepper_ctx_t ecu_devices_stepper_ctx[ECU_DEVICE_
           },
           .pos_min = 0,
           .pos_max = 127,
+          .ph1_inverted = false,
+          .ph2_inverted = false,
       },
     },
 };

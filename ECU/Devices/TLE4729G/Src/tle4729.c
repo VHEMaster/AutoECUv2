@@ -44,10 +44,10 @@ ITCM_FUNC STATIC_INLINE void tle4729_step_increment(tle4729_ctx_t *ctx)
     current_step = ctx->pos_current & 3;
 
     if(ctx->init.ph1.port == ctx->init.ph2.port) {
-      ctx->init.ph1.port->BSRR = ctx->init.ph_bsrr[current_step];
+      ctx->init.ph1.port->BSRR = ctx->ph_bsrr[current_step];
     } else {
-      ph1 = (ctx->init.ph_bsrr[current_step] & ctx->init.ph1.pin) > 0;
-      ph2 = (ctx->init.ph_bsrr[current_step] & ctx->init.ph2.pin) > 0;
+      ph1 = (ctx->ph_bsrr[current_step] & ctx->init.ph1.pin) > 0;
+      ph2 = (ctx->ph_bsrr[current_step] & ctx->init.ph2.pin) > 0;
       prim = EnterCritical();
       gpio_write(&ctx->init.ph1, ph1);
       gpio_write(&ctx->init.ph2, ph2);
@@ -118,10 +118,10 @@ error_t tle4729_init(tle4729_ctx_t *ctx, const tle4729_init_ctx_t *init_ctx)
       memcpy(&ctx->init, init_ctx, sizeof(tle4729_init_ctx_t));
     }
 
-    ctx->init.ph_bsrr[0] = (ctx->init.ph1.pin | ctx->init.ph2.pin) << 16;
-    ctx->init.ph_bsrr[1] = ctx->init.ph1.pin | (ctx->init.ph2.pin << 16);
-    ctx->init.ph_bsrr[2] = ctx->init.ph1.pin | ctx->init.ph2.pin;
-    ctx->init.ph_bsrr[3] = (ctx->init.ph1.pin << 16) | ctx->init.ph2.pin;
+    ctx->ph_bsrr[0] = (ctx->init.ph1.pin | ctx->init.ph2.pin) << 16;
+    ctx->ph_bsrr[1] = ctx->init.ph1.pin | (ctx->init.ph2.pin << 16);
+    ctx->ph_bsrr[2] = ctx->init.ph1.pin | ctx->init.ph2.pin;
+    ctx->ph_bsrr[3] = (ctx->init.ph1.pin << 16) | ctx->init.ph2.pin;
 
   } while(0);
 
@@ -155,6 +155,30 @@ error_t tle4729_configure(tle4729_ctx_t *ctx, const tle4729_config_t *config_ctx
 
     if(config_ctx != &ctx->config) {
       memcpy(&ctx->config, config_ctx, sizeof(tle4729_config_t));
+    }
+
+    if(ctx->config.ph1_inverted) {
+      ctx->ph_bsrr[0] = ctx->init.ph1.pin;
+      ctx->ph_bsrr[1] = ctx->init.ph1.pin << 16;
+      ctx->ph_bsrr[2] = ctx->init.ph1.pin << 16;
+      ctx->ph_bsrr[3] = ctx->init.ph1.pin;
+    } else {
+      ctx->ph_bsrr[0] = ctx->init.ph1.pin << 16;
+      ctx->ph_bsrr[1] = ctx->init.ph1.pin;
+      ctx->ph_bsrr[2] = ctx->init.ph1.pin;
+      ctx->ph_bsrr[3] = ctx->init.ph1.pin << 16;
+    }
+
+    if(ctx->config.ph2_inverted) {
+      ctx->ph_bsrr[0] |= ctx->init.ph2.pin;
+      ctx->ph_bsrr[1] |= ctx->init.ph2.pin;
+      ctx->ph_bsrr[2] |= ctx->init.ph2.pin << 16;
+      ctx->ph_bsrr[3] |= ctx->init.ph2.pin << 16;
+    } else {
+      ctx->ph_bsrr[0] |= ctx->init.ph2.pin << 16;
+      ctx->ph_bsrr[1] |= ctx->init.ph2.pin << 16;
+      ctx->ph_bsrr[2] |= ctx->init.ph2.pin;
+      ctx->ph_bsrr[3] |= ctx->init.ph2.pin;
     }
 
     ctx->configured = ctx->config.enabled;
