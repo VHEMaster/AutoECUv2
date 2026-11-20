@@ -39,6 +39,7 @@ typedef struct {
     ecu_sensor_tps_t sensor_tps;
     ecu_device_motor_t device_motor;
     uint16_t pwm_freq;
+    bool dir_inverted;
 
     math_pid_koffs_t pid_position;
     math_pid_koffs_t pid_speed;

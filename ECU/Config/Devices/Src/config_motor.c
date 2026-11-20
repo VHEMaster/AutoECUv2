@@ -37,7 +37,7 @@ static const l9960_config_t ecu_devices_motor_config_default = {
     .tdiag1 = L9960_CONFIG_TD1_45US,
     .voltage_slew_rate = L9960_CONFIG_VSR_FAST,
     .current_slow_rate = L9960_CONFIG_ISR_FAST,
-    .no_slew_rate = L9960_CONFIG_NOSR_NOT_ALLOWED,
+    .no_slew_rate = L9960_CONFIG_NOSR_ALLOWED,
     .temp_depent_slew_rate = L9960_CONFIG_TDSR_NOT_ALLOWED,
     .current_limit = L9960_CONFIG_CL_RANGE1,
     .undervoltage_window = L9960_CONFIG_UVW_20US,
@@ -129,6 +129,7 @@ error_t ecu_devices_motor_get_default_config(ecu_device_motor_t instance, l9960_
   return err;
 }
 
+ITCM_FUNC
 static void ecu_devices_motor_pulse_cplt(TIM_HandleTypeDef *htim)
 {
   ecu_devices_motor_ctx_t *motor_ctx;
@@ -352,7 +353,7 @@ error_t ecu_devices_motor_set_dutycycle(ecu_device_motor_t instance, float dutyc
     arr = motor_ctx->htim_pwm->Instance->ARR;
 
     value = fabsf(dutycycle);
-    value *= motor_ctx->htim_pwm->Instance->ARR;
+    value *= arr;
     value = roundf(value);
     ccr = MIN(value, arr);
 

@@ -110,6 +110,8 @@ error_t etc_internal_process(etc_ctx_t *ctx)
   // TODO: derivative filters, plausibility, TPS validity?
 
   float speed, current, power_voltage, dutycycle, target;
+  float position_error;
+  float distance;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -195,8 +197,8 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->pos_reach_time = now;
       dutycycle = 0.0f;
     } else {
-      float position_error = target - ctx->position_current;
-      float distance = fabsf(position_error);
+      position_error = target - ctx->position_current;
+      distance = fabsf(position_error);
 
       if(ctx->spring_approach_direction == 0 || target != ctx->spring_target_position) {
         if(position_error > 0.0f) {
@@ -220,7 +222,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       dutycycle = CLAMP(dutycycle, -1.0f, 1.0f);
 
       if(dutycycle < 0) {
-        dutycycle = -fast_sqrt(fabsf(dutycycle));
+        dutycycle = -fast_sqrt(-dutycycle);
       } else if(dutycycle > 0) {
         dutycycle = fast_sqrt(dutycycle);
       }
@@ -236,6 +238,10 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       ctx->target_speed = speed;
       ctx->data.output_voltage = dutycycle * power_voltage;
       ctx->data.active = true;
+    }
+
+    if(ctx->config.dir_inverted != false) {
+      dutycycle = -dutycycle;
     }
 
     err = ecu_devices_motor_set_dutycycle(ctx->config.device_motor, dutycycle);
