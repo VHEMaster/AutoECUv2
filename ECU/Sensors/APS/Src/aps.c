@@ -187,8 +187,18 @@ void aps_loop_slow(aps_ctx_t *ctx)
           pos_unfiltered /= signals_ok;
           imbalance = pos_max - pos_min;
           if(imbalance > ctx->config.signals_position_imbalance_max) {
-            ctx->diag.bits.signals_imbalance = true;
-            position_valid = false;
+            if(ctx->imbalance_timewindow >= ctx->config.signals_position_imbalance_timewindow) {
+              ctx->diag.bits.signals_imbalance = true;
+              position_valid = false;
+            } else {
+              ctx->imbalance_timewindow += time_delta;
+            }
+          } else {
+            if(ctx->imbalance_timewindow <= time_delta) {
+              ctx->imbalance_timewindow = 0;
+            } else {
+              ctx->imbalance_timewindow -= time_delta;
+            }
           }
         } else {
           position_valid = false;

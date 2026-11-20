@@ -33,6 +33,7 @@ typedef struct {
     aps_config_signal_t signals[APS_CONFIG_SIGNALS_MAX];
 
     float signals_position_imbalance_max;
+    time_delta_us_t signals_position_imbalance_timewindow;
 
     float position_min;
     float position_max;

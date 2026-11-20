@@ -57,6 +57,7 @@ typedef struct {
     time_us_t startup_time;
     time_us_t signal_poll_time;
     time_delta_us_t poll_delta;
+    time_delta_us_t imbalance_timewindow;
 
 }aps_ctx_t;
 

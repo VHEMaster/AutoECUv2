@@ -35,6 +35,8 @@ static const aps_config_t ecu_sensors_aps_config_default = {
         },
     },
     .signals_position_imbalance_max = 1.0f,
+    .signals_position_imbalance_timewindow = 5 * TIME_US_IN_MS,
+
     .position_min = 0.0f,
     .position_max = 100.0f,
 
