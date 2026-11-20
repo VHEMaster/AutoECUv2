@@ -12,7 +12,7 @@
 
 typedef struct {
     GPIO_TypeDef *port;
-    uint16_t pin;
+    uint32_t pin;
 }gpio_t;
 
 void gpio_init(gpio_t *ctx, GPIO_TypeDef *port, uint16_t pin);
@@ -33,12 +33,12 @@ STATIC_INLINE bool gpio_valid(const gpio_t *ctx)
 
 STATIC_INLINE void gpio_set(gpio_t *ctx)
 {
-  ctx->port->BSRR |= ctx->pin;
+  ctx->port->BSRR = ctx->pin;
 }
 
 STATIC_INLINE void gpio_reset(gpio_t *ctx)
 {
-  ctx->port->BSRR |= ctx->pin << 16u;
+  ctx->port->BSRR = ctx->pin << 16u;
 }
 
 STATIC_INLINE bool gpio_read(const gpio_t *ctx)
@@ -58,8 +58,9 @@ STATIC_INLINE void gpio_write(gpio_t *ctx, bool value)
 STATIC_INLINE void gpio_toggle(gpio_t *ctx)
 {
   uint32_t odr = ctx->port->ODR;
+  uint32_t pin = ctx->pin;
 
-  ctx->port->BSRR = ((odr & ctx->pin) << 16U) | (~odr & ctx->pin);
+  ctx->port->BSRR = ((odr & pin) << 16u) | (~odr & pin);
 }
 
 #endif /* DRIVERS_GPIO_INC_GPIO_H_ */
