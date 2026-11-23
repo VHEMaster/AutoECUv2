@@ -11,6 +11,7 @@
 #include "common.h"
 #include "time.h"
 #include "versioned_uds.h"
+#include "versioned_id.h"
 
 #define UDS_DATA_LENGTH_MAX           1024u
 #define UDS_ASCII_LENGTH_MAX          64u
@@ -254,6 +255,8 @@ typedef struct uds_ctx_tag {
     bool downstream_available;
 
     time_us_t downstream_time;
+
+    ecu_config_data_identification_t id;
 
 }uds_ctx_t;
 

@@ -9,6 +9,7 @@
 #include "uds_private.h"
 
 #include "config_comm.h"
+#include "config_global_ipc.h"
 
 static const uds_setup_did_t uds_setup_data_items[] = {
     { .did = UDS_DID_VIN, .type = UDS_DID_TYPE_STRING, },
@@ -31,9 +32,6 @@ error_t uds_init(uds_ctx_t *ctx, const uds_init_ctx_t *init)
     ctx->data_setup = uds_setup_data_items;
     ctx->data_values = uds_data_values;
 
-    ctx->data_values[0].supported = true;
-    ctx->data_values[0].ascii = "VIN01234567890123";
-
     ctx->initialized = true;
 
   } while(0);
@@ -49,6 +47,20 @@ error_t uds_configure(uds_ctx_t *ctx, const uds_config_t *config)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
+
+    ctx->configured = false;
+
+    err = ecu_config_global_read(ECU_CONFIG_TYPE_CALIBRATION, ECU_CONFIG_CALIB_TYPE_ID, 0u, 0u, &ctx->id, sizeof(ctx->id));
+    BREAK_IF_ACTION(err == E_BUSY, err = E_AGAIN);
+    BREAK_IF(err != E_OK);
+
+    for(uint32_t i = 0; i < ITEMSOF(uds_setup_data_items); i++) {
+      if(ctx->data_setup[i].did == UDS_DID_VIN) {
+        ctx->data_values[i].supported = true;
+        ctx->data_values[i].ascii = ctx->id.vin;
+        break;
+      }
+    }
 
     memcpy(&ctx->config, config, sizeof(uds_config_t));
 
