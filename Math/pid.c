@@ -61,7 +61,7 @@ INLINE float math_pid_update(math_pid_ctx_t *pid, float input, time_us_t time)
 
   pid->Error = error;
   P = error * pid->K.Kp;
-  I += error * dtf * pid->K.Ki;
+  I = FMAF(error * dtf, pid->K.Ki, I);
   D = diff / dtf * pid->K.Kd;
 
   I = CLAMPF(I, pid->ClampFrom, pid->ClampTo);
