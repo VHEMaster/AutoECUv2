@@ -202,7 +202,7 @@ error_t obd2_configure(obd2_ctx_t *ctx, const obd2_config_t *config)
 {
   error_t err = E_OK;
   uint8_t pid;
-  uint32_t i,l;
+  uint32_t l;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -217,36 +217,30 @@ error_t obd2_configure(obd2_ctx_t *ctx, const obd2_config_t *config)
 
     ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
 
+    memset(ctx->ecuname, 0u, sizeof(ctx->ecuname));
+    l = strnlen(ctx->id.ecu_type, ECU_CONFIG_ID_ECU_TYPE_LENGTH);
+    memcpy(&ctx->ecuname[0], ctx->id.ecu_type, l);
+    ctx->ecuname[ECU_CONFIG_ID_ECU_TYPE_LENGTH] = '-';
+    l = strnlen(ctx->id.ecu_name, ECU_CONFIG_ID_ECU_NAME_LENGTH);
+    memcpy(&ctx->ecuname[ECU_CONFIG_ID_ECU_TYPE_LENGTH + 1], ctx->id.ecu_name, l);
+
     pid = OBD2_PID_09_VIN;
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid].count = 1;
     ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->id.vin;
-    ctx->mode9_data[pid].length[0] = strlen(ctx->id.vin);
+    ctx->mode9_data[pid].length[0] = ECU_CONFIG_ID_VIN_LENGTH;
 
     pid = OBD2_PID_09_CALID;
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid].count = 1;
     ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->id.calibration_id;
-    ctx->mode9_data[pid].length[0] = strlen(ctx->id.calibration_id);
+    ctx->mode9_data[pid].length[0] = ECU_CONFIG_ID_CALIB_ID_LENGTH;
 
     pid = OBD2_PID_09_ECU_NAME;
     ctx->mode9_data[pid].supported = true;
     ctx->mode9_data[pid].count = 1;
-
-    i = 0;
-    l = strlen(ctx->id.ecu_type);
-    memcpy(&ctx->ecuname[i], ctx->id.ecu_type, l);
-    i += l;
-
-    ctx->ecuname[i++] = '\0';
-    ctx->ecuname[i++] = '-';
-
-    l = strlen(ctx->id.ecu_name);
-    memcpy(&ctx->ecuname[i], ctx->id.ecu_name, l);
-    i += l;
-
     ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->ecuname;
-    ctx->mode9_data[pid].length[0] = i;
+    ctx->mode9_data[pid].length[0] = ECU_CONFIG_ID_ECU_TYPE_LENGTH + 1 + ECU_CONFIG_ID_ECU_NAME_LENGTH;
 
     ctx->configured = ctx->config.enabled;
 

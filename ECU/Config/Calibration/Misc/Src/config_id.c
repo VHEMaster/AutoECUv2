@@ -10,7 +10,7 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_data_identification_t ecu_calibration_id_config_default = {
-    .vin = "VIN01234567890123",
+    .vin = "HEYVINOFAUTOECUV2",
     .ecu_type = "ECM",
     .ecu_name = "AutoECUv2",
     .calibration_id = "v1.23.45.678",
