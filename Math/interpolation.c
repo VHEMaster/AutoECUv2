@@ -73,7 +73,7 @@ sMathInterpolateInput math_interpolate_input(float value, const float *table, ui
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d(sMathInterpolateInput *input, const float *table)
+float math_interpolate_1d(const sMathInterpolateInput *input, const float *table)
 {
   float result;
   float output[2];
@@ -87,17 +87,20 @@ float math_interpolate_1d(sMathInterpolateInput *input, const float *table)
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_ex(sMathInterpolateInput *input, const float *table, bool limit)
+float math_interpolate_1d_ex(const sMathInterpolateInput *input, const float *table, bool limit)
 {
+  sMathInterpolateInput input_local;
   if(limit) {
-    input->mult = CLAMPF(input->mult, 0.0f, 1.0f);
+    input_local = *input;
+    input_local.mult = CLAMPF(input_local.mult, 0.0f, 1.0f);
+    input = &input_local;
   }
 
   return math_interpolate_1d(input, table);
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
+float math_interpolate_2d(const sMathInterpolateInput *input_x, const sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
@@ -117,19 +120,26 @@ float math_interpolate_2d(sMathInterpolateInput *input_x, sMathInterpolateInput 
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_ex(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
+float math_interpolate_2d_ex(const sMathInterpolateInput *input_x, const sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size], bool limit)
 {
+  sMathInterpolateInput input_x_local;
+  sMathInterpolateInput input_y_local;
+
   if(limit) {
-    input_x->mult = CLAMPF(input_x->mult, 0.0f, 1.0f);
-    input_y->mult = CLAMPF(input_y->mult, 0.0f, 1.0f);
+    input_x_local = *input_x;
+    input_y_local = *input_y;
+    input_x_local.mult = CLAMPF(input_x_local.mult, 0.0f, 1.0f);
+    input_y_local.mult = CLAMPF(input_y_local.mult, 0.0f, 1.0f);
+    input_x = &input_x_local;
+    input_y = &input_y_local;
   }
 
   return math_interpolate_2d(input_x, input_y, x_size, table);
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_point(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
+float math_interpolate_2d_point(const sMathInterpolateInput *input_x, const sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
@@ -147,7 +157,7 @@ float math_interpolate_2d_point(sMathInterpolateInput *input_x, sMathInterpolate
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_set(sMathInterpolateInput *input, float *table, float new_value, float limit_l, float limit_h)
+float math_interpolate_1d_set(const sMathInterpolateInput *input, float *table, float new_value, float limit_l, float limit_h)
 {
   float previous;
   float diff;
@@ -175,7 +185,7 @@ float math_interpolate_1d_set(sMathInterpolateInput *input, float *table, float 
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_set(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
+float math_interpolate_2d_set(const sMathInterpolateInput *input_x, const sMathInterpolateInput *input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -211,7 +221,7 @@ float math_interpolate_2d_set(sMathInterpolateInput *input_x, sMathInterpolateIn
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_set_point(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
+float math_interpolate_2d_set_point(const sMathInterpolateInput *input_x, const sMathInterpolateInput *input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -238,7 +248,7 @@ float math_interpolate_2d_set_point(sMathInterpolateInput *input_x, sMathInterpo
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_offset(sMathInterpolateInput *input, const float *table, uint32_t offset)
+float math_interpolate_1d_offset(const sMathInterpolateInput *input, const float *table, uint32_t offset)
 {
   float result;
   float output[2];
