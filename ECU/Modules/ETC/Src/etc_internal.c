@@ -92,8 +92,8 @@ static float etc_internal_limit_approach_speed(const etc_ctx_t *ctx, float error
     return limited_speed;
   }
 
-  float blend = MIN(1.0f, 2.0f * (brake_distance - distance) / brake_distance);
-  blend = blend * blend * (3.0f - 2.0f * blend);
+  float blend = 2.0f * (brake_distance - distance) / brake_distance;
+  blend = blend * blend * FMAF(-2.0f, blend, 3.0f);
 
   return BLEND(speed, limited_speed, blend);
 }
