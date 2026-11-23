@@ -36,6 +36,7 @@
 #define MAXF(a,b)                 __builtin_fmaxf((a),(b))
 #define CLAMPF(val,min,max)       (MAXF((min), MINF((max), (val))))
 #define BLEND(l, r, a)            blendf((l),(r),(a))
+#define LROUNDF(val)              __builtin_lroundf((val))
 
 #define ALIGNOF(x)                alignof(x)
 #define ALIGNED(x)                __attribute__((aligned(x)))
