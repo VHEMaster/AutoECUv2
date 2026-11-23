@@ -20,9 +20,6 @@ sMathInterpolateInput math_interpolate_input(float value, const float *table, ui
   if(value != value || size == 0)
     return result;
 
-  result.input = value;
-  result.size = size;
-
   if(size == 1)
   {
     idx0 = 0;
@@ -62,8 +59,6 @@ sMathInterpolateInput math_interpolate_input(float value, const float *table, ui
 
   result.indexes[0] = idx0;
   result.indexes[1] = idx1;
-  result.values[0] = val0;
-  result.values[1] = val1;
 
   if(val1 != val0)
     result.mult = (value - val0) / (val1 - val0);

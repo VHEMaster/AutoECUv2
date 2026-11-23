@@ -256,7 +256,6 @@ void maf_loop_slow(maf_ctx_t *ctx)
           } else if(ctx->config.calc_mode == MAF_CALC_MODE_TABLE_VALUE) {
             last = signal_mode_cfg->table.items - 1;
             value_div_step = input_value / signal_mode_cfg->input_step;
-            interpolate_input.input = input_value;
             interpolate_input.indexes[0] = floorf(value_div_step);
             interpolate_input.indexes[1] = interpolate_input.indexes[0] + 1;
             interpolate_input.mult = value_div_step - interpolate_input.indexes[0];

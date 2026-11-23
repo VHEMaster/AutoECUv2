@@ -12,10 +12,7 @@
 #include "bool.h"
 
 typedef struct {
-    float values[2];
     uint32_t indexes[2];
-    uint32_t size;
-    float input;
     float mult;
 }sMathInterpolateInput;
 
@@ -44,7 +41,6 @@ float math_interpolate_2d_set_point(const sMathInterpolateInput *input_x, const 
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h);
 
 float math_interpolate_1d_offset(const sMathInterpolateInput *input, const float *table, uint32_t offset);
-
 
 float math_interpolate(float input_left, float input_mid, float input_right, float base_left, float base_right);
 
