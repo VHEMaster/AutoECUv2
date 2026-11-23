@@ -49,10 +49,12 @@ INLINE void math_pid_init(math_pid_ctx_t *pid)
 INLINE float math_pid_update(math_pid_ctx_t *pid, float input, time_us_t time)
 {
   float error = pid->Target - input;
+  float diff = pid->Current - input;
   float output;
   float P,I,D;
   uint32_t dt = time_diff(time, pid->LastTime);
-  float dtf = dt * 0.000001f; //  / 1000000.0f
+  float dtf = dt * TIME_S_IN_US;
+
   pid->LastTime = time;
 
   I = pid->I;
@@ -60,9 +62,9 @@ INLINE float math_pid_update(math_pid_ctx_t *pid, float input, time_us_t time)
   pid->Error = error;
   P = error * pid->K.Kp;
   I += error * dtf * pid->K.Ki;
-  D = -(input - pid->Current) / dtf * pid->K.Kd;
+  D = diff / dtf * pid->K.Kd;
 
-  I = CLAMP(I, pid->ClampFrom, pid->ClampTo);
+  I = CLAMPF(I, pid->ClampFrom, pid->ClampTo);
 
   pid->P = P;
   pid->I = I;
@@ -72,7 +74,7 @@ INLINE float math_pid_update(math_pid_ctx_t *pid, float input, time_us_t time)
 
   output = P + I + D;
 
-  output = CLAMP(output, pid->ClampFrom, pid->ClampTo);
+  output = CLAMPF(output, pid->ClampFrom, pid->ClampTo);
 
   pid->Output = output;
 

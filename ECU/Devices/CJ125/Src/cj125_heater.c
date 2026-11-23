@@ -177,7 +177,7 @@ error_t cj125_heater_fsm(cj125_ctx_t *ctx)
             ctx->heater_fsm_last = now;
 
             voltage_temp = math_pid_update(&ctx->heater_pid, ctx->data.temp_value, now) + ctx->config.heater_nominal_voltage;
-            ctx->data.heater_voltage = CLAMP(voltage_temp, 0.0f, ctx->config.heater_max_voltage);
+            ctx->data.heater_voltage = CLAMPF(voltage_temp, 0.0f, ctx->config.heater_max_voltage);
           }
           break;
         case CJ125_HEATER_ERROR:
@@ -242,7 +242,7 @@ error_t cj125_update_heater_voltage(cj125_ctx_t *ctx)
     dutycycle = voltage / power_voltage;
   }
 
-  dutycycle = CLAMP(dutycycle, 0.0f, 1.0f);
+  dutycycle = CLAMPF(dutycycle, 0.0f, 1.0f);
   dutycycle *= dutycycle;
 
   ctx->data.heater_dutycycle = dutycycle;

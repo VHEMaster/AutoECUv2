@@ -90,7 +90,7 @@ OPTIMIZE_FAST
 float math_interpolate_1d_ex(sMathInterpolateInput input, const float *table, bool limit)
 {
   if(limit) {
-    input.mult = CLAMP(input.mult, 0.0f, 1.0f);
+    input.mult = CLAMPF(input.mult, 0.0f, 1.0f);
   }
 
   return math_interpolate_1d(input, table);
@@ -121,8 +121,8 @@ float math_interpolate_2d_ex(sMathInterpolateInput input_x, sMathInterpolateInpu
     uint32_t x_size, const float (*table)[x_size], bool limit)
 {
   if(limit) {
-    input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-    input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+    input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+    input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
   }
 
   return math_interpolate_2d(input_x, input_y, x_size, table);

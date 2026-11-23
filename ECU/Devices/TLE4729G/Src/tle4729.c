@@ -78,7 +78,7 @@ ITCM_FUNC STATIC_INLINE void tle4729_calculate_next_move(tle4729_ctx_t *ctx)
 
   }
 
-  speed = CLAMP(speed, -1.0f, 1.0f);
+  speed = CLAMPF(speed, -1.0f, 1.0f);
   if(fabsf(speed) < (r_acceleration_steps * 0.5f)) {
     if(ctx->pos_target == ctx->pos_current) {
       ctx->moving = false;
@@ -301,7 +301,7 @@ error_t tle4729_set_target(tle4729_ctx_t *ctx, int32_t position)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
-    ctx->pos_target = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+    ctx->pos_target = CLAMPF(position, ctx->config.pos_min, ctx->config.pos_max);
 
   } while(0);
 
@@ -331,7 +331,7 @@ error_t tle4729_set_current(tle4729_ctx_t *ctx, int32_t position)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
-    ctx->pos_current = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+    ctx->pos_current = CLAMPF(position, ctx->config.pos_min, ctx->config.pos_max);
 
   } while(0);
 
@@ -362,7 +362,7 @@ error_t tle4729_pos_reset(tle4729_ctx_t *ctx, int32_t position)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured, err = E_NOTRDY);
 
-    position = CLAMP(position, ctx->config.pos_min, ctx->config.pos_max);
+    position = CLAMPF(position, ctx->config.pos_min, ctx->config.pos_max);
 
     prim = EnterCritical();
     ctx->pos_target = position;

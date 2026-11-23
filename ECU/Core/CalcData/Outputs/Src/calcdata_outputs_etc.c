@@ -234,7 +234,7 @@ void calcdata_outputs_etc(ecu_core_ctx_t *ctx)
         math_pid_reset(pid_maf, now);
       }
       pid_feedback_pos = pid_rpm_feedback_pos + pid_maf_feedback_pos;
-      pid_feedback_pos = CLAMP(pid_feedback_pos, setup_idle->reg_pid_min, setup_idle->reg_pid_max);
+      pid_feedback_pos = CLAMPF(pid_feedback_pos, setup_idle->reg_pid_min, setup_idle->reg_pid_max);
 
       if(runup_flag) {
         target_pos = etc_idle_target_pos->value;

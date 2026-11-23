@@ -32,6 +32,10 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#define MINF(a,b)   __builtin_fminf((a),(b))
+#define MAXF(a,b)   __builtin_fmaxf((a),(b))
+#define CLAMPF(val,min,max) (MAXF((min), MINF((max), (val))))
+
 #define ALIGNOF(x)                alignof(x)
 #define ALIGNED(x)                __attribute__((aligned(x)))
 #define ALIGNMENT_CACHE           (CACHE_LINE_SIZE)

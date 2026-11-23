@@ -229,7 +229,7 @@ void calcdata_inputs_calc_iat_manifold(ecu_core_ctx_t *ctx)
       iat_alpha_blending = &bank_ctx->outputs[CALCDATA_OUTPUT_IAT_ALPHA_BLENDING].variants[calc_variant];
 
       if(iat_alpha_blending->valid && ect_value[b]->valid && crankshaft->validity >= CKP_DATA_VALID) {
-        blending = CLAMP(iat_alpha_blending->value, 0.0f, 1.0f);
+        blending = CLAMPF(iat_alpha_blending->value, 0.0f, 1.0f);
         data_iat_valid = true;
         blending_volume_sum = 0;
         for(ecu_config_calcdata_setup_iat_sensor_alpha_blending_filter_number_t f = 0;

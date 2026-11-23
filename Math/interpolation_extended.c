@@ -275,8 +275,8 @@ INLINE float math_interpolate_2d_s32(sMathInterpolateInput input_x, sMathInterpo
 INLINE float math_interpolate_2d_limit_u8(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const uint8_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_u8(input_x, input_y, x_size, table, transform);
 }
@@ -284,8 +284,8 @@ INLINE float math_interpolate_2d_limit_u8(sMathInterpolateInput input_x, sMathIn
 INLINE float math_interpolate_2d_limit_u16(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const uint16_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_u16(input_x, input_y, x_size, table, transform);
 }
@@ -293,8 +293,8 @@ INLINE float math_interpolate_2d_limit_u16(sMathInterpolateInput input_x, sMathI
 INLINE float math_interpolate_2d_limit_u32(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const uint32_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_u32(input_x, input_y, x_size, table, transform);
 }
@@ -302,8 +302,8 @@ INLINE float math_interpolate_2d_limit_u32(sMathInterpolateInput input_x, sMathI
 INLINE float math_interpolate_2d_limit_s8(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const int8_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_s8(input_x, input_y, x_size, table, transform);
 }
@@ -311,8 +311,8 @@ INLINE float math_interpolate_2d_limit_s8(sMathInterpolateInput input_x, sMathIn
 INLINE float math_interpolate_2d_limit_s16(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const int16_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_s16(input_x, input_y, x_size, table, transform);
 }
@@ -320,8 +320,8 @@ INLINE float math_interpolate_2d_limit_s16(sMathInterpolateInput input_x, sMathI
 INLINE float math_interpolate_2d_limit_s32(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
     uint32_t x_size, const int32_t (*table)[x_size], const sMathInterpolationTransform *transform)
 {
-  input_x.mult = CLAMP(input_x.mult, 0.0f, 1.0f);
-  input_y.mult = CLAMP(input_y.mult, 0.0f, 1.0f);
+  input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
+  input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
 
   return math_interpolate_2d_s32(input_x, input_y, x_size, table, transform);
 }
@@ -450,23 +450,23 @@ INLINE float math_interpolate_2d_set_u8(sMathInterpolateInput input_x, sMathInte
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, 0, UCHAR_MAX);
-  limit_l = CLAMP(limit_l, 0, UCHAR_MAX);
+  limit_h = CLAMPF(limit_h, 0, UCHAR_MAX);
+  limit_l = CLAMPF(limit_l, 0, UCHAR_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -494,23 +494,23 @@ INLINE float math_interpolate_2d_set_u16(sMathInterpolateInput input_x, sMathInt
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, 0, USHRT_MAX);
-  limit_l = CLAMP(limit_l, 0, USHRT_MAX);
+  limit_h = CLAMPF(limit_h, 0, USHRT_MAX);
+  limit_l = CLAMPF(limit_l, 0, USHRT_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -538,23 +538,23 @@ INLINE float math_interpolate_2d_set_u32(sMathInterpolateInput input_x, sMathInt
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, 0, UINT_MAX);
-  limit_l = CLAMP(limit_l, 0, UINT_MAX);
+  limit_h = CLAMPF(limit_h, 0, UINT_MAX);
+  limit_l = CLAMPF(limit_l, 0, UINT_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -582,23 +582,23 @@ INLINE float math_interpolate_2d_set_s8(sMathInterpolateInput input_x, sMathInte
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, SCHAR_MIN, SCHAR_MAX);
-  limit_l = CLAMP(limit_l, SCHAR_MIN, SCHAR_MAX);
+  limit_h = CLAMPF(limit_h, SCHAR_MIN, SCHAR_MAX);
+  limit_l = CLAMPF(limit_l, SCHAR_MIN, SCHAR_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -626,23 +626,23 @@ INLINE float math_interpolate_2d_set_s16(sMathInterpolateInput input_x, sMathInt
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, SHRT_MIN, SHRT_MAX);
-  limit_l = CLAMP(limit_l, SHRT_MIN, SHRT_MAX);
+  limit_h = CLAMPF(limit_h, SHRT_MIN, SHRT_MAX);
+  limit_l = CLAMPF(limit_l, SHRT_MIN, SHRT_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -670,23 +670,23 @@ INLINE float math_interpolate_2d_set_s32(sMathInterpolateInput input_x, sMathInt
   limit_h = (limit_h - transform->offset) / transform->gain;
   limit_l = (limit_l - transform->offset) / transform->gain;
 
-  limit_h = CLAMP(limit_h, INT_MIN, INT_MAX);
-  limit_l = CLAMP(limit_l, INT_MIN, INT_MAX);
+  limit_h = CLAMPF(limit_h, INT_MIN, INT_MAX);
+  limit_l = CLAMPF(limit_l, INT_MIN, INT_MAX);
 
   val = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[0]] = val;
 
   val = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[0]][input_x.indexes[1]] = val;
 
   val = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[0]] = val;
 
   val = input_2d[1][1] + diff * input_x.mult * input_y.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   table[input_y.indexes[1]][input_x.indexes[1]] = val;
 
   return diff;
@@ -708,9 +708,9 @@ INLINE float math_interpolate_2d_set_point_u8(sMathInterpolateInput input_x, sMa
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, 0, UCHAR_MAX);
+  new_value = CLAMPF(new_value, 0, UCHAR_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -733,9 +733,9 @@ INLINE float math_interpolate_2d_set_point_u16(sMathInterpolateInput input_x, sM
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, 0, USHRT_MAX);
+  new_value = CLAMPF(new_value, 0, USHRT_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -758,9 +758,9 @@ INLINE float math_interpolate_2d_set_point_u32(sMathInterpolateInput input_x, sM
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, 0, UINT_MAX);
+  new_value = CLAMPF(new_value, 0, UINT_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -783,9 +783,9 @@ INLINE float math_interpolate_2d_set_point_s8(sMathInterpolateInput input_x, sMa
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, SCHAR_MIN, SCHAR_MAX);
+  new_value = CLAMPF(new_value, SCHAR_MIN, SCHAR_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -808,9 +808,9 @@ INLINE float math_interpolate_2d_set_point_s16(sMathInterpolateInput input_x, sM
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, SHRT_MIN, SHRT_MAX);
+  new_value = CLAMPF(new_value, SHRT_MIN, SHRT_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -833,9 +833,9 @@ INLINE float math_interpolate_2d_set_point_s32(sMathInterpolateInput input_x, sM
   previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]] * transform->gain + transform->offset;
   diff = new_value - previous;
 
-  new_value = CLAMP(new_value, limit_l, limit_h);
+  new_value = CLAMPF(new_value, limit_l, limit_h);
   new_value = (new_value - transform->offset) / transform->gain;
-  new_value = CLAMP(new_value, INT_MIN, INT_MAX);
+  new_value = CLAMPF(new_value, INT_MIN, INT_MAX);
 
   table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
 
@@ -857,15 +857,15 @@ INLINE float math_interpolate_1d_set_u8(sMathInterpolateInput input, uint8_t *ta
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, UCHAR_MAX);
+  val = CLAMPF(val, 0, UCHAR_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, UCHAR_MAX);
+  val = CLAMPF(val, 0, UCHAR_MAX);
   table[input.indexes[1]] = val;
 
   return diff;
@@ -886,15 +886,15 @@ INLINE float math_interpolate_1d_set_u16(sMathInterpolateInput input, uint16_t *
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, USHRT_MAX);
+  val = CLAMPF(val, 0, USHRT_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, USHRT_MAX);
+  val = CLAMPF(val, 0, USHRT_MAX);
   table[input.indexes[1]] = val;
 
   return diff;
@@ -915,15 +915,15 @@ INLINE float math_interpolate_1d_set_u32(sMathInterpolateInput input, uint32_t *
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, UINT_MAX);
+  val = CLAMPF(val, 0, UINT_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, 0, UINT_MAX);
+  val = CLAMPF(val, 0, UINT_MAX);
   table[input.indexes[1]] = val;
 
   return diff;
@@ -944,15 +944,15 @@ INLINE float math_interpolate_1d_set_s8(sMathInterpolateInput input, int8_t *tab
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, SCHAR_MIN, SCHAR_MAX);
+  val = CLAMPF(val, SCHAR_MIN, SCHAR_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, SCHAR_MIN, SCHAR_MAX);
+  val = CLAMPF(val, SCHAR_MIN, SCHAR_MAX);
   table[input.indexes[1]] = val;
 
   return diff;
@@ -973,15 +973,15 @@ INLINE float math_interpolate_1d_set_s16(sMathInterpolateInput input, int16_t *t
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, SHRT_MIN, SHRT_MAX);
+  val = CLAMPF(val, SHRT_MIN, SHRT_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, SHRT_MIN, SHRT_MAX);
+  val = CLAMPF(val, SHRT_MIN, SHRT_MAX);
   table[input.indexes[1]] = val;
 
   return diff;
@@ -1002,15 +1002,15 @@ INLINE float math_interpolate_1d_set_s32(sMathInterpolateInput input, int32_t *t
   diff = new_value - previous;
 
   val = output[0] + diff * (1.0f - input.mult);
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, INT_MIN, INT_MAX);
+  val = CLAMPF(val, INT_MIN, INT_MAX);
   table[input.indexes[0]] = val;
 
   val = output[1] + diff * input.mult;
-  val = CLAMP(val, limit_l, limit_h);
+  val = CLAMPF(val, limit_l, limit_h);
   val = (val - transform->offset) * transform->gain;
-  val = CLAMP(val, INT_MIN, INT_MAX);
+  val = CLAMPF(val, INT_MIN, INT_MAX);
   table[input.indexes[1]] = val;
 
   return diff;

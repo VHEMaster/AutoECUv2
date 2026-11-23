@@ -758,7 +758,7 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_value_internal(ecu_gpio_output_
     }
 
     fvalue = (float)value * output_if->pwm_cfg.period_multiplier;
-    value = CLAMP(fvalue, 0, output_if->pwm_cfg.pwm_period);
+    value = CLAMPF(fvalue, 0, output_if->pwm_cfg.pwm_period);
     *reg = value;
 
   } while(0);
@@ -1357,7 +1357,7 @@ ITCM_FUNC error_t ecu_config_gpio_output_pwm_set_dutycycle(ecu_gpio_output_pin_t
     output_if = &ecu_gpio_setup.outputs_if[output->if_id];
 
     fvalue = dutycycle * output_if->pwm_cfg.pwm_period;
-    value = CLAMP(fvalue, 0, output_if->pwm_cfg.pwm_period);
+    value = CLAMPF(fvalue, 0, output_if->pwm_cfg.pwm_period);
 
     err = ecu_config_gpio_output_pwm_set_value_internal(output, value);
 

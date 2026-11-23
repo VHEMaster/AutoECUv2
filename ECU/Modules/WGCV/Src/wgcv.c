@@ -177,7 +177,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
             math_pid_set_target(&ctx->pid_speed, pid_speed);
             pid_current = math_pid_update(&ctx->pid_speed, ctx->current_speed, now);
 
-            pid_current = CLAMP(pid_current, -1.0f, 1.0f);
+            pid_current = CLAMPF(pid_current, -1.0f, 1.0f);
           } else {
             pid_current = 0.0f;
             pid_reset = true;
@@ -217,7 +217,7 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
         output_dutycycle = input_dutycycle;
         output_dutycycle *= dutycycle_max - dutycycle_min;
         output_dutycycle += dutycycle_min;
-        output_dutycycle = CLAMP(output_dutycycle, dutycycle_min, dutycycle_max);
+        output_dutycycle = CLAMPF(output_dutycycle, dutycycle_min, dutycycle_max);
       }
 
       if(ctx->data.force_pwm_engaged) {

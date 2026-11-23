@@ -210,12 +210,12 @@ void tps_loop_slow(tps_ctx_t *ctx)
         if(ctx->config.dead_zone > 0) {
           pos_unfiltered = (pos_unfiltered - ctx->config.dead_zone) / ((100.0f - ctx->config.dead_zone) * 0.01f);
         }
-        pos_clamp = CLAMP(pos_unfiltered, ctx->config.position_min_clamp, ctx->config.position_max_clamp);
+        pos_clamp = CLAMPF(pos_unfiltered, ctx->config.position_min_clamp, ctx->config.position_max_clamp);
         pos = ctx->data.position;
 
         allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
         pos_diff = pos_clamp - pos;
-        pos_diff = CLAMP(pos_diff, -allowed_rate, allowed_rate);
+        pos_diff = CLAMPF(pos_diff, -allowed_rate, allowed_rate);
         pos += pos_diff;
 
         ctx->data.position = pos;

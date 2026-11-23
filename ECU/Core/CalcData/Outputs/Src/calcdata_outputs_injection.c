@@ -112,7 +112,7 @@ void calcdata_outputs_injection(ecu_core_ctx_t *ctx)
       output_inj_mass_start = runup_inj_small_charge->value;
     } else {
       time_blending = (startup_revs_counter - startup_large_revs) / startup_large_to_small_trans_revs;
-      time_blending = CLAMP(time_blending, 0.0f, 1.0f);
+      time_blending = CLAMPF(time_blending, 0.0f, 1.0f);
       output_inj_mass_start = BLEND(runup_inj_large_charge->value, runup_inj_small_charge->value, time_blending);
     }
 

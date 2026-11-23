@@ -436,7 +436,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
               if(map_data_fuelramp_b[b].valid) {
                 temp_val = map_data_fuelramp_b[b].pressure;
-                temp_val = CLAMP(temp_val,
+                temp_val = CLAMPF(temp_val,
                     group_config->performance_fuel_pressure_fuelramp_clamp_min,
                     group_config->performance_fuel_pressure_fuelramp_clamp_max);
                 ramp_pressure_gr += temp_val - 1.0f;
@@ -444,7 +444,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
               }
               if(map_data_manifold_b[b].valid) {
                 temp_val = map_data_manifold_b[b].pressure;
-                temp_val = CLAMP(temp_val,
+                temp_val = CLAMPF(temp_val,
                     group_config->performance_fuel_pressure_manifold_clamp_min,
                     group_config->performance_fuel_pressure_manifold_clamp_max);
                 ramp_pressure_gr -= temp_val - 1.0f;

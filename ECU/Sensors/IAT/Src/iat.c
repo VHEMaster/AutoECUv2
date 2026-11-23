@@ -158,8 +158,8 @@ void iat_loop_slow(iat_ctx_t *ctx)
             interpolate_input.indexes[0] = floorf(value_div_step);
             interpolate_input.indexes[1] = interpolate_input.indexes[0] + 1;
             interpolate_input.mult = value_div_step - interpolate_input.indexes[0];
-            interpolate_input.indexes[0] = CLAMP(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
-            interpolate_input.indexes[1] = CLAMP(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
+            interpolate_input.indexes[0] = CLAMPF(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
+            interpolate_input.indexes[1] = CLAMPF(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
 
             value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == IAT_CALC_MODE_RESISTANCE_CALCULATED) {
@@ -182,7 +182,7 @@ void iat_loop_slow(iat_ctx_t *ctx)
           value_old = ctx->data.temperature;
           allowed_rate = ctx->config.slew_rate * ((float)time_delta * 0.000001f);
           value_diff = value - value_old;
-          value_diff = CLAMP(value_diff, -allowed_rate, allowed_rate);
+          value_diff = CLAMPF(value_diff, -allowed_rate, allowed_rate);
           value = value_old + value_diff;
         }
 

@@ -154,7 +154,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
 
     ctx->data.current_position = ctx->tps_data.position;
     target = ctx->data.target_position;
-    target = CLAMP(target, 0.0f, 100.0f);
+    target = CLAMPF(target, 0.0f, 100.0f);
 
     if(ctx->diag.bits.position_reach_failure != false) {
       enabled = false;
@@ -219,7 +219,7 @@ error_t etc_internal_process(etc_ctx_t *ctx)
       current += etc_internal_spring_effort(ctx);
 
       dutycycle = current / power_voltage;
-      dutycycle = CLAMP(dutycycle, -1.0f, 1.0f);
+      dutycycle = CLAMPF(dutycycle, -1.0f, 1.0f);
 
       if(dutycycle < 0) {
         dutycycle = -fast_sqrt(-dutycycle);
