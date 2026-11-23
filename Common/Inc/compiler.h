@@ -22,8 +22,6 @@
 
 #define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 #define ITEMSOF(ARRAY) (sizeof((ARRAY)) / sizeof((ARRAY)[0]))
-#define CLAMP(val,min,max) ((val) < (min) ? (min) : (val) > (max) ? (max) : (val))
-#define BLEND(l,r,a) (((l) * (1.0f - (a))) + ((r) * (a)))
 
 #ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -32,9 +30,12 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-#define MINF(a,b)   __builtin_fminf((a),(b))
-#define MAXF(a,b)   __builtin_fmaxf((a),(b))
-#define CLAMPF(val,min,max) (MAXF((min), MINF((max), (val))))
+#define CLAMP(val,min,max)       (MAX((min), MIN((max), (val))))
+
+#define MINF(a,b)                 __builtin_fminf((a),(b))
+#define MAXF(a,b)                 __builtin_fmaxf((a),(b))
+#define CLAMPF(val,min,max)       (MAXF((min), MINF((max), (val))))
+#define BLEND(l, r, a)            blendf((l),(r),(a))
 
 #define ALIGNOF(x)                alignof(x)
 #define ALIGNED(x)                __attribute__((aligned(x)))
@@ -93,6 +94,11 @@
 #define HAS_BIT(field, bit)       (((field) & (bit)) == (bit))
 #define SET_BIT(field, bit)       ((field) |= (bit))
 #define RESET_BIT(field, bit)     ((field) &= ~(bit))
+
+STATIC_INLINE float blendf(float l, float r, float a)
+{
+    return __builtin_fmaf(a, r - l, l);
+}
 
 #if __CORTEX_M == (7) && defined(CORE_CM7)
 OPTIMIZE_FAST
