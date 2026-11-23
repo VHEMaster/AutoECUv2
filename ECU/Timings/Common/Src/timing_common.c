@@ -27,9 +27,6 @@ ITCM_FUNC error_t timing_pulse_schedule(ecu_gpio_output_pin_t output_pin, time_u
     err = ecu_config_gpio_output_get_id(output_pin, &pin);
     BREAK_IF(err != E_OK);
 
-    pulse_start &= time_mask_us();
-    pulse_end &= time_mask_us();
-
     err = queuedpulses_schedule(pin, pulse_start, pulse_end, CORE_OUTPUT_ACTIVE,
         late_policy == TIMING_LATE_POLICY_KEEP_WIDTH);
 
