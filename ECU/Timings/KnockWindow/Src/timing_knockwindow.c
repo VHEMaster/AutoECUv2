@@ -415,7 +415,7 @@ ITCM_FUNC static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx
   uint32_t samples_cut_start = 0;
   uint32_t samples_cut_end = 0;
 
-  position_start -= r_multiplying * 0.5f;
+  position_start = FMAF(r_multiplying, -0.5f, position_start);
 
   if(position_start_diff > 0) {
     samples_cut_start = roundf(position_start_diff * multiplying);
