@@ -108,6 +108,7 @@ error_t iat_reset(iat_ctx_t *ctx)
 void iat_loop_slow(iat_ctx_t *ctx)
 {
   error_t err = E_OK;
+  uint32_t last;
   input_value_t input_analog_value;
   sMathInterpolateInput interpolate_input = {0};
   const iat_config_signal_mode_cfg_t *signal_mode_cfg = NULL;
@@ -153,13 +154,14 @@ void iat_loop_slow(iat_ctx_t *ctx)
           if(ctx->config.calc_mode == IAT_CALC_MODE_TABLE_REF_VALUE) {
             value = math_interpolate_1d_direct(ctx->data.input_value, signal_mode_cfg->table.input, signal_mode_cfg->table.output, signal_mode_cfg->table.items);
           } else if(ctx->config.calc_mode == IAT_CALC_MODE_TABLE_VALUE) {
+            last = signal_mode_cfg->table.items - 1;
             value_div_step = ctx->data.input_value / signal_mode_cfg->input_step;
             interpolate_input.input = ctx->data.input_value;
             interpolate_input.indexes[0] = floorf(value_div_step);
             interpolate_input.indexes[1] = interpolate_input.indexes[0] + 1;
             interpolate_input.mult = value_div_step - interpolate_input.indexes[0];
-            interpolate_input.indexes[0] = CLAMPF(interpolate_input.indexes[0], 0, signal_mode_cfg->table.items - 1);
-            interpolate_input.indexes[1] = CLAMPF(interpolate_input.indexes[1], 0, signal_mode_cfg->table.items - 1);
+            interpolate_input.indexes[0] = MIN(interpolate_input.indexes[0], last);
+            interpolate_input.indexes[1] = MIN(interpolate_input.indexes[1], last);
 
             value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == IAT_CALC_MODE_RESISTANCE_CALCULATED) {
