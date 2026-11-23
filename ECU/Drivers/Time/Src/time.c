@@ -51,23 +51,20 @@ ITCM_FUNC OPTIMIZE_FAST INLINE time_us_t time_interpolate_time(float input_left,
 
 ITCM_FUNC OPTIMIZE_FAST INLINE float time_interpolate_value(time_us_t time_left, time_us_t time_mid, time_us_t time_right, float value_left, float value_right)
 {
-  float result;
-  time_delta_us_t time_delta;
-  time_delta_us_t time_offset;
+  const uint32_t sign_bit = (TIME_TIMEBASE_MASK + 1u) >> 1u;
 
+  time_delta_us_t time_delta;
+  uint32_t offset;
+  int32_t signed_offset;
   float mult;
+  float result;
 
   if(time_right != time_left) {
       time_delta = time_diff(time_right, time_left);
-      time_offset = time_diff(time_mid, time_left);
+      offset = time_diff(time_mid, time_left);
+      signed_offset = (int32_t)(offset ^ sign_bit) - (int32_t)sign_bit;
 
-      if(time_offset > (TIME_TIMEBASE_MASK >> 1)) {
-        time_offset = (TIME_TIMEBASE_MASK + 1) - time_offset;
-        mult = -(float)time_offset / (float)time_delta;
-      } else {
-        mult = (float)time_offset / (float)time_delta;
-      }
-
+      mult = (float)signed_offset / (float)time_delta;
 
       result = (value_right - value_left) * mult + value_left;
   } else {
