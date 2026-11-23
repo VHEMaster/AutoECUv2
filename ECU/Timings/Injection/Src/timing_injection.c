@@ -162,8 +162,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
   float signal_prepare_advance_cy;
   float us_per_degree;
-  float us_per_degree_pulsed;
-  float us_per_degree_revolution;
+  float us_per_degree_inv;
   float degrees_before_prepare;
   float degrees_before_inject_cur;
   float degrees_before_inject_prev;
@@ -248,10 +247,19 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
     crankshaft_period = crankshaft->sensor_data.period;
     signal_prepare_advance = config->signal_prepare_advance;
 
-    us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
-    us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
     dutycycle_period = crankshaft->sensor_data.period;
     dutycycle_period_inv = 1.0f / dutycycle_period;
+
+    switch(config->uspd_source) {
+      default:
+      case INJECTION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
+        us_per_degree = crankshaft->sensor_data.us_per_degree_pulsed;
+        break;
+      case INJECTION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
+        us_per_degree = crankshaft->sensor_data.us_per_degree_revolution;
+        break;
+    }
+    us_per_degree_inv = 1.0f / us_per_degree;
 
     input_valid = banks_count > 0 ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -512,16 +520,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
             runtime_gr->initialized = true;
 
-            switch(config->uspd_source) {
-              default:
-              case INJECTION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
-                us_per_degree = us_per_degree_pulsed;
-                break;
-              case INJECTION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
-                us_per_degree = us_per_degree_revolution;
-                break;
-            }
-
             needtoclear = false;
             sequentialed_mode_req = TIMING_RUNTIME_CYLINDER_SEQUENTIALED_NONE;
 
@@ -645,7 +643,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                     signal_prepare_advance_cy = signal_prepare_advance;
 
                     if(group_config->phase_mode == INJECTION_CONFIG_GROUP_PHASE_MODE_ENDING) {
-                      signal_prepare_advance_cy += pulse_time_cy / us_per_degree;
+                      signal_prepare_advance_cy += pulse_time_cy * us_per_degree_inv;
                     }
 
                     while(injection_phase_cy > degrees_per_cycle * 0.5f) {

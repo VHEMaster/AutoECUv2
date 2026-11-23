@@ -143,8 +143,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   float ignition_advance_cy_add;
   float signal_prepare_advance_gr;
   float us_per_degree;
-  float us_per_degree_pulsed;
-  float us_per_degree_revolution;
+  float us_per_degree_inv;
   float degrees_before_prepare;
   float degrees_before_ignite_cur;
   float degrees_before_ignite_prev;
@@ -193,6 +192,17 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
     crankshaft_mode = crankshaft->mode;
     crankshaft_period = crankshaft->sensor_data.period;
     signal_prepare_advance = config->signal_prepare_advance;
+
+    switch(config->uspd_source) {
+      default:
+      case IGNITION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
+        us_per_degree = crankshaft->sensor_data.us_per_degree_pulsed;
+        break;
+      case IGNITION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
+        us_per_degree = crankshaft->sensor_data.us_per_degree_revolution;
+        break;
+    }
+    us_per_degree_inv = 1.0f / us_per_degree;
 
     input_valid = banks_count ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -267,9 +277,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
             saturation_time = saturation_time_table * saturation_rpm_mult_table;
             runtime_gr->saturation_time = saturation_time;
 
-            us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
-            us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
-
             advance_slew_rate_mode = group_config->advance_slew_rate_mode;
             if(advance_slew_rate_mode == IGNITION_CONFIG_GROUP_ADVANCE_SLEW_RATE_MODE_BY_SECOND) {
               ignition_advance_gr_scale = time_delta * TIME_S_IN_US;
@@ -328,18 +335,8 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
 
             runtime_gr->initialized = true;
 
-            switch(config->uspd_source) {
-              default:
-              case IGNITION_CONFIG_USPD_SOURCE_PER_SENSOR_PULSE:
-                us_per_degree = us_per_degree_pulsed;
-                break;
-              case IGNITION_CONFIG_USPD_SOURCE_PER_REVOLUTION:
-                us_per_degree = us_per_degree_revolution;
-                break;
-            }
-
             signal_prepare_advance_gr = signal_prepare_advance;
-            signal_prepare_advance_gr += saturation_time / us_per_degree;
+            signal_prepare_advance_gr += saturation_time * us_per_degree_inv;
 
             needtoclear = false;
             distributor = false;
