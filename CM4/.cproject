@@ -81,6 +81,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Communication/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Hardware/Inc"/>
@@ -130,7 +131,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="Config/Common/Src/config_common_private.c|Config/Versioned/Timings|Config/Versioned/Sensors|Config/Versioned/Runtime|Config/Versioned/Modules|Config/Versioned/Devices|Config/Versioned/Calibration|Config/Hardware/Src/config_spi.c|Config/Hardware/Src/config_rcc.c|Config/Hardware/Src/config_loop.c|Config/Hardware/Src/config_gpio.c|Config/Global|Config/Misc|Config/Timings|Config/Sensors|Config/Modules|Config/Flash|Config/Devices|Config/Calibration|Core|Devices|MiddleLayer/Src/middlelayer_timings.c|MiddleLayer/Src/middlelayer_spi.c|MiddleLayer/Src/middlelayer_sensors.c|MiddleLayer/Src/middlelayer_modules.c|MiddleLayer/Src/middlelayer_gpio.c|MiddleLayer/Src/middlelayer_devices.c|Drivers/Spi|Drivers/QueuedPulses|Drivers/PulsedAdc|Drivers/Outputs|Drivers/Inputs|Drivers/Flash|Drivers/Crc|Timings|Sensors|Modules" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Config/Global/Src/config_engine.c|Config/Common/Src/config_common_private.c|Config/Versioned/Timings|Config/Versioned/Sensors|Config/Versioned/Runtime|Config/Versioned/Modules|Config/Versioned/Devices|Config/Versioned/Calibration|Config/Hardware/Src/config_spi.c|Config/Hardware/Src/config_rcc.c|Config/Hardware/Src/config_loop.c|Config/Hardware/Src/config_gpio.c|Config/Global/Src/config_global.c|Config/Global/Src/config_global_fsm.c|Config/Misc|Config/Timings|Config/Sensors|Config/Modules|Config/Flash|Config/Devices|Config/Calibration|Core|Devices|MiddleLayer/Src/middlelayer_timings.c|MiddleLayer/Src/middlelayer_spi.c|MiddleLayer/Src/middlelayer_sensors.c|MiddleLayer/Src/middlelayer_modules.c|MiddleLayer/Src/middlelayer_gpio.c|MiddleLayer/Src/middlelayer_devices.c|Drivers/Spi|Drivers/QueuedPulses|Drivers/PulsedAdc|Drivers/Outputs|Drivers/Inputs|Drivers/Flash|Drivers/Crc|Timings|Sensors|Modules" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_DEVICE"/>
@@ -215,6 +216,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Communication/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Hardware/Inc"/>
@@ -264,7 +266,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="Config/Common/Src/config_common_private.c|Config/Versioned/Timings|Config/Versioned/Sensors|Config/Versioned/Runtime|Config/Versioned/Modules|Config/Versioned/Devices|Config/Versioned/Calibration|Config/Hardware/Src/config_spi.c|Config/Hardware/Src/config_rcc.c|Config/Hardware/Src/config_loop.c|Config/Hardware/Src/config_gpio.c|Config/Global|Config/Misc|Config/Timings|Config/Sensors|Config/Modules|Config/Flash|Config/Devices|Config/Calibration|Core|Devices|MiddleLayer/Src/middlelayer_timings.c|MiddleLayer/Src/middlelayer_spi.c|MiddleLayer/Src/middlelayer_sensors.c|MiddleLayer/Src/middlelayer_modules.c|MiddleLayer/Src/middlelayer_gpio.c|MiddleLayer/Src/middlelayer_devices.c|Drivers/Spi|Drivers/QueuedPulses|Drivers/PulsedAdc|Drivers/Outputs|Drivers/Inputs|Drivers/Flash|Drivers/Crc|Timings|Sensors|Modules" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Config/Global/Src/config_engine.c|Config/Common/Src/config_common_private.c|Config/Versioned/Timings|Config/Versioned/Sensors|Config/Versioned/Runtime|Config/Versioned/Modules|Config/Versioned/Devices|Config/Versioned/Calibration|Config/Hardware/Src/config_spi.c|Config/Hardware/Src/config_rcc.c|Config/Hardware/Src/config_loop.c|Config/Hardware/Src/config_gpio.c|Config/Global/Src/config_global.c|Config/Global/Src/config_global_fsm.c|Config/Misc|Config/Timings|Config/Sensors|Config/Modules|Config/Flash|Config/Devices|Config/Calibration|Core|Devices|MiddleLayer/Src/middlelayer_timings.c|MiddleLayer/Src/middlelayer_spi.c|MiddleLayer/Src/middlelayer_sensors.c|MiddleLayer/Src/middlelayer_modules.c|MiddleLayer/Src/middlelayer_gpio.c|MiddleLayer/Src/middlelayer_devices.c|Drivers/Spi|Drivers/QueuedPulses|Drivers/PulsedAdc|Drivers/Outputs|Drivers/Inputs|Drivers/Flash|Drivers/Crc|Timings|Sensors|Modules" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_DEVICE"/>

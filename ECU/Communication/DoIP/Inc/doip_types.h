@@ -11,6 +11,7 @@
 #include "common.h"
 #include "time.h"
 #include "versioned_doip.h"
+#include "versioned_id.h"
 
 #define DOIP_PAYLOAD_LEN_MAX       1024u
 #define DOIP_HEADER_LEN            8u
@@ -117,7 +118,7 @@ typedef struct doip_ctx_tag {
     doip_error_code_t error_code;
     uint32_t error_code_counter[DOIP_MAX];
 
-    const char *vin_ptr;
+    ecu_config_data_identification_t id;
 
 }doip_ctx_t;
 

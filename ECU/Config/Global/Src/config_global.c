@@ -13,6 +13,7 @@
 #include "config_extern.h"
 #include "config_global.h"
 #include "config_global_fsm.h"
+#include "config_global_ipc.h"
 
 #include "versioned_devices.h"
 #include "versioned_modules.h"
@@ -1176,6 +1177,9 @@ error_t ecu_config_global_init(void)
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
     status = HAL_MDMA_RegisterCallback(ctx->hdma, HAL_MDMA_XFER_ABORT_CB_ID, ecu_config_dma_abort_cb);
     BREAK_IF_ACTION(status != HAL_OK, err = E_HAL);
+
+    err = ecu_config_global_ipc_init(ctx);
+    BREAK_IF(err != E_OK);
 
     ctx->global_ready = true;
   } while(0);

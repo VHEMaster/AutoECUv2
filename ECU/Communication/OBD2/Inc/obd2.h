@@ -10,6 +10,7 @@
 
 #include "obd2_types.h"
 #include "versioned_obd2.h"
+#include "versioned_id.h"
 
 typedef struct obd2_ctx_tag obd2_ctx_t;
 
@@ -42,6 +43,9 @@ typedef struct obd2_ctx_tag {
     bool downstream_available;
 
     time_us_t downstream_time;
+
+    ecu_config_data_identification_t id;
+    char ecuname[ECU_CONFIG_ID_ECU_TYPE_MAX + ECU_CONFIG_ID_ECU_NAME_MAX + 2u];
 
 }obd2_ctx_t;
 

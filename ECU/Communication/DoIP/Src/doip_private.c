@@ -284,7 +284,7 @@ void doip_receive_complete(doip_ctx_t *ctx, doip_connection_t *connection)
 uint16_t doip_identification_write(doip_ctx_t *ctx, uint8_t version, uint8_t *buffer)
 {
   doip_header_write(buffer, version, 0x0004u, 33u);
-  memcpy(&buffer[8], ctx->vin_ptr, 17u);
+  memcpy(&buffer[8], ctx->id.vin, 17u);
   doip_write_u16(&buffer[25], ctx->config.logical_address);
   memcpy(&buffer[27], ctx->config.eid, 6u);
   memcpy(&buffer[33], ctx->config.gid, 6u);

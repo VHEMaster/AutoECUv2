@@ -78,7 +78,6 @@
 #include "config_engine.h"
 #include "config_common.h"
 
-#ifdef CORE_CM7
 #define ECU_CONFIG_ITEM_VERSIONS_MAX      (4)
 #define ECU_CONFIG_DOUBLEBUFFER_TIMEOUT   (10 * TIME_US_IN_MS)
 
@@ -193,6 +192,7 @@ typedef enum {
   ECU_CONFIG_OP_MAX,
 }ecu_config_op_t;
 
+#ifdef CORE_CM7
 #define ECU_CONFIG_PARAMETERS_MAX ( \
     (ECU_DEVICES_PARAMETERS_MAX)  + \
     (ECU_SENSORS_PARAMETERS_MAX)  + \

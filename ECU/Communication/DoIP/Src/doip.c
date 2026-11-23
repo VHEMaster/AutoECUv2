@@ -8,6 +8,7 @@
 #include "doip.h"
 #include "doip_private.h"
 #include "doip_fsm.h"
+#include "config_global_ipc.h"
 
 error_t doip_init(doip_ctx_t *ctx, const doip_init_ctx_t *init)
 {
@@ -20,9 +21,6 @@ error_t doip_init(doip_ctx_t *ctx, const doip_init_ctx_t *init)
     memcpy(&ctx->init, init, sizeof(doip_init_ctx_t));
     ctx->initialized = true;
     ctx->loop_time = time_now_us();
-
-    // TODO: get it from CM7
-    ctx->vin_ptr = "VIN01234567890123";
 
   } while(0);
 
@@ -45,9 +43,14 @@ error_t doip_configure(doip_ctx_t *ctx, const doip_config_t *config)
     BREAK_IF_ACTION(config->max_connections == 0u || config->max_connections > DOIP_CONNECTIONS_MAX, err = E_PARAM);
     BREAK_IF_ACTION(config->initial_timeout == 0u || config->inactivity_timeout == 0u ||
         config->alive_timeout == 0u || config->receive_timeout == 0u, err = E_PARAM);
-    BREAK_IF_ACTION(!ATOMIC_TRY_LOCK(ctx->lock), err = E_AGAIN);
+    BREAK_IF_ACTION(ATOMIC_ISLOCKED(ctx->lock), err = E_AGAIN);
 
     ctx->configured = false;
+
+    err = ecu_config_global_read(ECU_CONFIG_TYPE_CALIBRATION, ECU_CONFIG_CALIB_TYPE_ID, 0u, 0u, &ctx->id, sizeof(ctx->id));
+    BREAK_IF_ACTION(err == E_BUSY, err = E_AGAIN);
+    BREAK_IF(err != E_OK);
+
     for(uint32_t i = 0; i < DOIP_CONNECTIONS_COUNT; i++) {
       doip_connection_clear(&ctx->connections[i]);
     }
@@ -412,7 +415,7 @@ error_t doip_datagram_process(doip_ctx_t *ctx, const uint8_t *payload, uint16_t 
       if(nack == 0xFFu) {
         if(type >= 1u && type <= 3u) {
           if((type != 2u || memcmp(&payload[8], ctx->config.eid, 6u) == 0) &&
-              (type != 3u || memcmp(&payload[8], ctx->vin_ptr, 17u) == 0)) {
+              (type != 3u || memcmp(&payload[8], ctx->id.vin, 17u) == 0)) {
             size = doip_identification_write(ctx, version == 0xFFu ? ctx->config.protocol_version : version, response);
           }
         } else if(type == 0x4001u) {

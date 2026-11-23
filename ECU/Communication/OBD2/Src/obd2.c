@@ -7,6 +7,7 @@
 
 #include "obd2.h"
 #include "obd2_private.h"
+#include "config_global_ipc.h"
 
 static const obd2_mode1_setup_t obd2_mode1_setup[OBD2_PID_01_MAX] = {
   { .type = OBD2_PID_TYPE_RAW_SINGLE_DWORD }, // OBD2_PID_01_SUPPORTED_01_20 (0x00)
@@ -190,33 +191,6 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
 
     ctx->mode1_setup = obd2_mode1_setup;
 
-    uint8_t pid;
-
-    ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
-
-    // TODO: get it from CM7
-    static const uint8_t vin[17] = "VIN01234567890123";
-    static const uint8_t calid_1[16] = "v1.23.45.678";
-    static const uint8_t ecu_name[20] = "ECM\0-AutoECUv2";
-
-    pid = OBD2_PID_09_VIN;
-    ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = vin;
-    ctx->mode9_data[pid].length[0] = sizeof(vin);
-
-    pid = OBD2_PID_09_CALID;
-    ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = calid_1;
-    ctx->mode9_data[pid].length[0] = sizeof(calid_1);
-
-    pid = OBD2_PID_09_ECU_NAME;
-    ctx->mode9_data[pid].supported = true;
-    ctx->mode9_data[pid].count = 1;
-    ctx->mode9_data[pid].value[0] = ecu_name;
-    ctx->mode9_data[pid].length[0] = sizeof(ecu_name);
-
     ctx->initialized = true;
 
   } while(0);
@@ -227,13 +201,52 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
 error_t obd2_configure(obd2_ctx_t *ctx, const obd2_config_t *config)
 {
   error_t err = E_OK;
+  uint8_t pid;
+  uint32_t i,l;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
+    err = ecu_config_global_read(ECU_CONFIG_TYPE_CALIBRATION, ECU_CONFIG_CALIB_TYPE_ID, 0u, 0u, &ctx->id, sizeof(ctx->id));
+    BREAK_IF_ACTION(err == E_BUSY, err = E_AGAIN);
+    BREAK_IF(err != E_OK);
+
     memcpy(&ctx->config, config, sizeof(obd2_config_t));
+
+    ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
+
+    pid = OBD2_PID_09_VIN;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->id.vin;
+    ctx->mode9_data[pid].length[0] = strlen(ctx->id.vin);
+
+    pid = OBD2_PID_09_CALID;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+    ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->id.calibration_id;
+    ctx->mode9_data[pid].length[0] = strlen(ctx->id.calibration_id);
+
+    pid = OBD2_PID_09_ECU_NAME;
+    ctx->mode9_data[pid].supported = true;
+    ctx->mode9_data[pid].count = 1;
+
+    i = 0;
+    l = strlen(ctx->id.ecu_type);
+    memcpy(&ctx->ecuname[i], ctx->id.ecu_type, l);
+    i += l;
+
+    ctx->ecuname[i++] = '\0';
+    ctx->ecuname[i++] = '-';
+
+    l = strlen(ctx->id.ecu_name);
+    memcpy(&ctx->ecuname[i], ctx->id.ecu_name, l);
+    i += l;
+
+    ctx->mode9_data[pid].value[0] = (uint8_t *)ctx->ecuname;
+    ctx->mode9_data[pid].length[0] = i;
 
     ctx->configured = ctx->config.enabled;
 
