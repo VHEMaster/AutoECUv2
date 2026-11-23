@@ -423,7 +423,7 @@ ITCM_FUNC static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx
       samples_cut_start = samples_count;
     samples_buffer += samples_cut_start;
     samples_count -= samples_cut_start;
-    position_start -= samples_cut_start * r_multiplying;
+    position_start = FMAF(-(float)samples_cut_start, r_multiplying, position_start);
   }
 
   if(position_cplt_diff > 0) {
@@ -431,7 +431,7 @@ ITCM_FUNC static void knockwindow_buffer_normalize(knockwindow_setup_runtime_ctx
     if(samples_cut_end > samples_count)
       samples_cut_end = samples_count;
     samples_count -= samples_cut_end;
-    position_cplt += samples_cut_end * r_multiplying;
+    position_cplt = FMAF((float)samples_cut_end, r_multiplying, position_cplt);
   }
 
   sampling_cplt_ctx->samples_buffer = samples_buffer;
