@@ -83,9 +83,13 @@ typedef struct {
     bool ready;
     bool configured;
 
+    input_id_t power_voltage_pin;
+
     injection_runtime_ctx_t runtime;
     timing_base_data_t timing_base_data;
     time_us_t signal_handle_last;
+
+    ignition_runtime_ctx_t *runtime_ignition;
 
 }injection_ctx_t;
 

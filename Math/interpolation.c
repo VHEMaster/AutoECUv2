@@ -73,109 +73,109 @@ sMathInterpolateInput math_interpolate_input(float value, const float *table, ui
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d(sMathInterpolateInput input, const float *table)
+float math_interpolate_1d(sMathInterpolateInput *input, const float *table)
 {
   float result;
   float output[2];
 
-  output[0] = table[input.indexes[0]];
-  output[1] = table[input.indexes[1]];
+  output[0] = table[input->indexes[0]];
+  output[1] = table[input->indexes[1]];
 
-  result = (output[1] - output[0]) * input.mult + output[0];
+  result = (output[1] - output[0]) * input->mult + output[0];
 
   return result;
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_ex(sMathInterpolateInput input, const float *table, bool limit)
+float math_interpolate_1d_ex(sMathInterpolateInput *input, const float *table, bool limit)
 {
   if(limit) {
-    input.mult = CLAMPF(input.mult, 0.0f, 1.0f);
+    input->mult = CLAMPF(input->mult, 0.0f, 1.0f);
   }
 
   return math_interpolate_1d(input, table);
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+float math_interpolate_2d(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
   float output_1d[2];
   float input_2d[2][2];
 
-  input_2d[0][0] = table[input_y.indexes[0]][input_x.indexes[0]];
-  input_2d[0][1] = table[input_y.indexes[0]][input_x.indexes[1]];
-  input_2d[1][0] = table[input_y.indexes[1]][input_x.indexes[0]];
-  input_2d[1][1] = table[input_y.indexes[1]][input_x.indexes[1]];
+  input_2d[0][0] = table[input_y->indexes[0]][input_x->indexes[0]];
+  input_2d[0][1] = table[input_y->indexes[0]][input_x->indexes[1]];
+  input_2d[1][0] = table[input_y->indexes[1]][input_x->indexes[0]];
+  input_2d[1][1] = table[input_y->indexes[1]][input_x->indexes[1]];
 
-  output_1d[0] = (input_2d[0][1] - input_2d[0][0]) * input_x.mult + input_2d[0][0];
-  output_1d[1] = (input_2d[1][1] - input_2d[1][0]) * input_x.mult + input_2d[1][0];
-  result = (output_1d[1] - output_1d[0]) * input_y.mult + output_1d[0];
+  output_1d[0] = (input_2d[0][1] - input_2d[0][0]) * input_x->mult + input_2d[0][0];
+  output_1d[1] = (input_2d[1][1] - input_2d[1][0]) * input_x->mult + input_2d[1][0];
+  result = (output_1d[1] - output_1d[0]) * input_y->mult + output_1d[0];
 
   return result;
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_ex(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+float math_interpolate_2d_ex(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size], bool limit)
 {
   if(limit) {
-    input_x.mult = CLAMPF(input_x.mult, 0.0f, 1.0f);
-    input_y.mult = CLAMPF(input_y.mult, 0.0f, 1.0f);
+    input_x->mult = CLAMPF(input_x->mult, 0.0f, 1.0f);
+    input_y->mult = CLAMPF(input_y->mult, 0.0f, 1.0f);
   }
 
   return math_interpolate_2d(input_x, input_y, x_size, table);
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+float math_interpolate_2d_point(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
     uint32_t x_size, const float (*table)[x_size])
 {
   float result = 0.0f;
   uint8_t index_x = 0;
   uint8_t index_y = 0;
 
-  if(input_x.mult >= 0.5f)
+  if(input_x->mult >= 0.5f)
     index_x = 1;
-  if(input_y.mult >= 0.5f)
+  if(input_y->mult >= 0.5f)
     index_y = 1;
 
-  result = table[input_y.indexes[index_y]][input_x.indexes[index_x]];
+  result = table[input_y->indexes[index_y]][input_x->indexes[index_x]];
 
   return result;
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_set(sMathInterpolateInput input, float *table, float new_value, float limit_l, float limit_h)
+float math_interpolate_1d_set(sMathInterpolateInput *input, float *table, float new_value, float limit_l, float limit_h)
 {
   float previous;
   float diff;
   float output[2];
 
-  output[0] = table[input.indexes[0]];
-  output[1] = table[input.indexes[1]];
+  output[0] = table[input->indexes[0]];
+  output[1] = table[input->indexes[1]];
 
-  previous = (output[1] - output[0]) * input.mult + output[0];
+  previous = (output[1] - output[0]) * input->mult + output[0];
 
   diff = new_value - previous;
 
-  table[input.indexes[0]] = output[0] + diff * (1.0f - input.mult);
-  table[input.indexes[1]] = output[1] + diff * input.mult;
+  table[input->indexes[0]] = output[0] + diff * (1.0f - input->mult);
+  table[input->indexes[1]] = output[1] + diff * input->mult;
 
 
   for(int i = 0; i < 2; i++) {
-    if(table[input.indexes[i]] > limit_h)
-      table[input.indexes[i]] = limit_h;
-    else if(table[input.indexes[i]] < limit_l)
-      table[input.indexes[i]] = limit_l;
+    if(table[input->indexes[i]] > limit_h)
+      table[input->indexes[i]] = limit_h;
+    else if(table[input->indexes[i]] < limit_l)
+      table[input->indexes[i]] = limit_l;
   }
 
   return diff;
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+float math_interpolate_2d_set(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -183,27 +183,27 @@ float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpolateInp
   float output_1d[2];
   float input_2d[2][2];
 
-  input_2d[0][0] = table[input_y.indexes[0]][input_x.indexes[0]];
-  input_2d[0][1] = table[input_y.indexes[0]][input_x.indexes[1]];
-  input_2d[1][0] = table[input_y.indexes[1]][input_x.indexes[0]];
-  input_2d[1][1] = table[input_y.indexes[1]][input_x.indexes[1]];
+  input_2d[0][0] = table[input_y->indexes[0]][input_x->indexes[0]];
+  input_2d[0][1] = table[input_y->indexes[0]][input_x->indexes[1]];
+  input_2d[1][0] = table[input_y->indexes[1]][input_x->indexes[0]];
+  input_2d[1][1] = table[input_y->indexes[1]][input_x->indexes[1]];
 
-  output_1d[0] = (input_2d[0][1] - input_2d[0][0]) * input_x.mult + input_2d[0][0];
-  output_1d[1] = (input_2d[1][1] - input_2d[1][0]) * input_x.mult + input_2d[1][0];
-  previous = (output_1d[1] - output_1d[0]) * input_y.mult + output_1d[0];
+  output_1d[0] = (input_2d[0][1] - input_2d[0][0]) * input_x->mult + input_2d[0][0];
+  output_1d[1] = (input_2d[1][1] - input_2d[1][0]) * input_x->mult + input_2d[1][0];
+  previous = (output_1d[1] - output_1d[0]) * input_y->mult + output_1d[0];
   diff = new_value - previous;
 
-  table[input_y.indexes[0]][input_x.indexes[0]] = input_2d[0][0] + diff * (1.0f - input_x.mult) * (1.0f - input_y.mult);
-  table[input_y.indexes[0]][input_x.indexes[1]] = input_2d[0][1] + diff * input_x.mult * (1.0f - input_y.mult);
-  table[input_y.indexes[1]][input_x.indexes[0]] = input_2d[1][0] + diff * (1.0f - input_x.mult) * input_y.mult;
-  table[input_y.indexes[1]][input_x.indexes[1]] = input_2d[1][1] + diff * input_x.mult * input_y.mult;
+  table[input_y->indexes[0]][input_x->indexes[0]] = input_2d[0][0] + diff * (1.0f - input_x->mult) * (1.0f - input_y->mult);
+  table[input_y->indexes[0]][input_x->indexes[1]] = input_2d[0][1] + diff * input_x->mult * (1.0f - input_y->mult);
+  table[input_y->indexes[1]][input_x->indexes[0]] = input_2d[1][0] + diff * (1.0f - input_x->mult) * input_y->mult;
+  table[input_y->indexes[1]][input_x->indexes[1]] = input_2d[1][1] + diff * input_x->mult * input_y->mult;
 
   for(int i = 0; i < 2; i++) {
     for(int j = 0; j < 2; j++) {
-      if(table[input_y.indexes[i]][input_x.indexes[j]] > limit_h)
-        table[input_y.indexes[i]][input_x.indexes[j]] = limit_h;
-      else if(table[input_y.indexes[i]][input_x.indexes[j]] < limit_l)
-        table[input_y.indexes[i]][input_x.indexes[j]] = limit_l;
+      if(table[input_y->indexes[i]][input_x->indexes[j]] > limit_h)
+        table[input_y->indexes[i]][input_x->indexes[j]] = limit_h;
+      else if(table[input_y->indexes[i]][input_x->indexes[j]] < limit_l)
+        table[input_y->indexes[i]][input_x->indexes[j]] = limit_l;
     }
   }
 
@@ -211,7 +211,7 @@ float math_interpolate_2d_set(sMathInterpolateInput input_x, sMathInterpolateInp
 }
 
 OPTIMIZE_FAST
-float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathInterpolateInput input_y,
+float math_interpolate_2d_set_point(sMathInterpolateInput *input_x, sMathInterpolateInput *input_y,
     uint32_t x_size, float (*table)[x_size], float new_value, float limit_l, float limit_h)
 {
   float previous;
@@ -219,12 +219,12 @@ float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathInterpol
   uint8_t index_x = 0;
   uint8_t index_y = 0;
 
-  if(input_x.mult >= 0.5f)
+  if(input_x->mult >= 0.5f)
     index_x = 1;
-  if(input_y.mult >= 0.5f)
+  if(input_y->mult >= 0.5f)
     index_y = 1;
 
-  previous = table[input_y.indexes[index_y]][input_x.indexes[index_x]];
+  previous = table[input_y->indexes[index_y]][input_x->indexes[index_x]];
   diff = new_value - previous;
 
   if(new_value > limit_h)
@@ -232,22 +232,22 @@ float math_interpolate_2d_set_point(sMathInterpolateInput input_x, sMathInterpol
   else if(new_value < limit_l)
     new_value = limit_l;
 
-  table[input_y.indexes[index_y]][input_x.indexes[index_x]] = new_value;
+  table[input_y->indexes[index_y]][input_x->indexes[index_x]] = new_value;
 
   return diff;
 }
 
 OPTIMIZE_FAST
-float math_interpolate_1d_offset(sMathInterpolateInput input, const float *table, uint32_t offset)
+float math_interpolate_1d_offset(sMathInterpolateInput *input, const float *table, uint32_t offset)
 {
   float result;
   float output[2];
   uint32_t offset_items = offset / sizeof(*table);
 
-  output[0] = table[input.indexes[0] * offset_items];
-  output[1] = table[input.indexes[1] * offset_items];
+  output[0] = table[input->indexes[0] * offset_items];
+  output[1] = table[input->indexes[1] * offset_items];
 
-  result = (output[1] - output[0]) * input.mult + output[0];
+  result = (output[1] - output[0]) * input->mult + output[0];
 
   return result;
 }

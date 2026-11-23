@@ -77,6 +77,8 @@ typedef struct {
     bool ready;
     bool configured;
 
+    input_id_t power_voltage_pin;
+
     ignition_runtime_ctx_t runtime;
     time_us_t signal_handle_last;
 

@@ -45,6 +45,8 @@ error_t ignition_configure(ignition_ctx_t *ctx, const ignition_config_t *config)
     }
 
     if(ctx->config.enabled) {
+      err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &ctx->power_voltage_pin);
+      BREAK_IF(err != E_OK);
 
       ctx->configured = true;
     }
@@ -94,7 +96,6 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
 
   timing_base_crankshaft_mode_t crankshaft_mode;
   ignition_config_group_mode_t group_mode;
-  input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
   uint32_t banks_count;
@@ -180,14 +181,9 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
     cylinders_count = calibration_config->cylinders.cylinders_count;
     cylinders_count_inv = 1.0f / cylinders_count;
 
-    err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
-    if(err == E_OK) {
-      (void)input_get_value(power_voltage_pin, &input_analog_value, NULL);
-      power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
-      runtime->power_voltage = power_voltage;
-    } else {
-      power_voltage = runtime->power_voltage;
-    }
+    (void)input_get_value(ctx->power_voltage_pin, &input_analog_value, NULL);
+    power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
+    runtime->power_voltage = power_voltage;
 
     crankshaft_mode = crankshaft->mode;
     crankshaft_period = crankshaft->sensor_data.period;

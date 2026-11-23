@@ -41,12 +41,20 @@ error_t injection_configure(injection_ctx_t *ctx, const injection_config_t *conf
     BREAK_IF_ACTION(ctx->ready == false, err = E_NOTRDY);
 
     ctx->configured = false;
+    ctx->runtime_ignition = NULL;
 
     if(&ctx->config != config) {
       memcpy(&ctx->config, config, sizeof(injection_config_t));
     }
 
     if(ctx->config.enabled) {
+      // TODO: assign proper instance
+      err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &ctx->runtime_ignition);
+      BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
+      BREAK_IF_ACTION(ctx->runtime_ignition == NULL, err = E_FAULT);
+
+      err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &ctx->power_voltage_pin);
+      BREAK_IF(err != E_OK);
 
       ctx->configured = true;
     }
@@ -93,10 +101,10 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   error_t err;
   time_us_t now, last;
   time_float_delta_us_t time_delta;
+  ignition_runtime_ctx_t *runtime_ignition;
 
   timing_base_crankshaft_mode_t crankshaft_mode;
   injection_config_group_mode_t group_mode;
-  input_id_t power_voltage_pin;
   input_value_t input_analog_value;
   float power_voltage;
 
@@ -121,7 +129,6 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   const timing_base_data_crankshaft_t *crankshaft_data_cy;
 
   float signal_prepare_advance;
-  ignition_runtime_ctx_t *runtime_ignition = NULL;
   injection_runtime_ctx_t *runtime;
   injection_runtime_group_ctx_t *runtime_gr;
   injection_runtime_group_cylinder_ctx_t *runtime_cy;
@@ -208,13 +215,11 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   bool slew_adder_valid;
 
   do {
+    runtime_ignition = ctx->runtime_ignition;
+
     BREAK_IF(ctx->configured == false);
     BREAK_IF(ctx->config.enabled == false);
-
-    // TODO: assign proper instance
-    err = ecu_timings_ignition_get_runtime_data_ptr(ECU_TIMING_IGNITION_1, &runtime_ignition);
-    BREAK_IF_ACTION(err != E_OK, err = E_FAULT);
-    BREAK_IF_ACTION(runtime_ignition == NULL, err = E_FAULT);
+    BREAK_IF(runtime_ignition == NULL);
 
     now = time_now_us();
     last = ctx->signal_handle_last;
@@ -233,14 +238,9 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
     banks_count_r = 1.0f / banks_count;
 
-    err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
-    if(err == E_OK) {
-      (void)input_get_value(power_voltage_pin, &input_analog_value, NULL);
-      power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
-      runtime->power_voltage = power_voltage;
-    } else {
-      power_voltage = runtime->power_voltage;
-    }
+    (void)input_get_value(ctx->power_voltage_pin, &input_analog_value, NULL);
+    power_voltage = (float)input_analog_value * INPUTS_ANALOG_MULTIPLIER_R;
+    runtime->power_voltage = power_voltage;
 
     crankshaft_mode = crankshaft->mode;
     crankshaft_rpm = crankshaft->sensor_data.rpm;

@@ -263,7 +263,7 @@ void maf_loop_slow(maf_ctx_t *ctx)
             interpolate_input.indexes[0] = MIN(interpolate_input.indexes[0], last);
             interpolate_input.indexes[1] = MIN(interpolate_input.indexes[1], last);
 
-            ctx->data.mass_air_flow = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            ctx->data.mass_air_flow = math_interpolate_1d(&interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == MAF_CALC_MODE_OFFSET_GAIN) {
             ctx->data.mass_air_flow = input_value * signal_mode_cfg->gain + signal_mode_cfg->offset;
           } else {

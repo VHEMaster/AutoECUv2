@@ -161,7 +161,7 @@ void ops_loop_slow(ops_ctx_t *ctx)
             interpolate_input.indexes[0] = MIN(interpolate_input.indexes[0], last);
             interpolate_input.indexes[1] = MIN(interpolate_input.indexes[1], last);
 
-            value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            value = math_interpolate_1d(&interpolate_input, signal_mode_cfg->table.output);
           } else {
             data_valid = false;
             value = 0;

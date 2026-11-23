@@ -491,7 +491,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
                 source_interp_x[b]->ctx = math_interpolate_input(source_values_x[b]->value.value, source_data_x, source_data_size_x);
                 source_values_x[b]->value.valid = true;
               }
-              output_value[b].value = math_interpolate_1d_ex(source_interp_x[b]->ctx, dest_data, limit);
+              output_value[b].value = math_interpolate_1d_ex(&source_interp_x[b]->ctx, dest_data, limit);
               output_value[b].valid = true;
             } else {
               source_interp_x[b]->valid = false;
@@ -548,7 +548,7 @@ error_t core_calcdata_proc_calc_output(ecu_core_ctx_t *ctx,
                 source_interp_y[b]->valid = true;
               }
               output_value[b].value = math_interpolate_2d_ex(
-                  source_interp_x[b]->ctx, source_interp_y[b]->ctx,
+                  &source_interp_x[b]->ctx, &source_interp_y[b]->ctx,
                   source_data_size_x, (const float (*)[source_data_size_x])dest_data, limit);
               output_value[b].valid = true;
             } else {

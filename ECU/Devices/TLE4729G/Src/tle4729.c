@@ -89,10 +89,10 @@ ITCM_FUNC STATIC_INLINE void tle4729_calculate_next_move(tle4729_ctx_t *ctx)
   }
 
   mii_step_time_mult = math_interpolate_input(ctx->pwr_voltage, ctx->config.voltage_to_step_time_mult.input, ctx->config.voltage_to_step_time_mult.items);
-  step_time_mult = math_interpolate_1d(mii_step_time_mult, ctx->config.voltage_to_step_time_mult.output);
+  step_time_mult = math_interpolate_1d(&mii_step_time_mult, ctx->config.voltage_to_step_time_mult.output);
 
   mii_step_time_ms = math_interpolate_input(fabsf(speed), ctx->config.speed_to_step_time_ms.input, ctx->config.speed_to_step_time_ms.items);
-  step_time_us = math_interpolate_1d(mii_step_time_ms, ctx->config.speed_to_step_time_ms.output) * TIME_US_IN_MS;
+  step_time_us = math_interpolate_1d(&mii_step_time_ms, ctx->config.speed_to_step_time_ms.output) * TIME_US_IN_MS;
   step_time_us *= step_time_mult;
 
   ctx->current_step_time = step_time_us;

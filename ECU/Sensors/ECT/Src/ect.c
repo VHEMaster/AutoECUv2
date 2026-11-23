@@ -163,7 +163,7 @@ void ect_loop_slow(ect_ctx_t *ctx)
             interpolate_input.indexes[0] = MIN(interpolate_input.indexes[0], last);
             interpolate_input.indexes[1] = MIN(interpolate_input.indexes[1], last);
 
-            value = math_interpolate_1d(interpolate_input, signal_mode_cfg->table.output);
+            value = math_interpolate_1d(&interpolate_input, signal_mode_cfg->table.output);
           } else if(ctx->config.calc_mode == ECT_CALC_MODE_RESISTANCE_CALCULATED) {
             value = math_calc_ntc_thermistor(
                 ctx->config.signal_resistance_calculated.calibration_temperature,

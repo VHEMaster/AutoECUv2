@@ -73,7 +73,7 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
 
       ctx->data.heat_resistance = ur_volt_sub_vcc / (Vri * Irm);
       mii_temperature = math_interpolate_input(ctx->data.heat_resistance, ctx->config.res_to_temp_relation.input, ctx->config.res_to_temp_relation.items);
-      ctx->data.temp_value = math_interpolate_1d(mii_temperature, ctx->config.res_to_temp_relation.output);
+      ctx->data.temp_value = math_interpolate_1d(&mii_temperature, ctx->config.res_to_temp_relation.output);
 
       ctx->data_temp_valid = true;
 
@@ -98,7 +98,7 @@ error_t cj125_update_data(cj125_ctx_t *ctx, bool force)
         ctx->data.lambda_current_tc = ctx->data.lambda_current;
       }
       mii_current = math_interpolate_input(ctx->data.lambda_current_tc, ctx->config.curr_to_lambda_relation.input, ctx->config.curr_to_lambda_relation.items);
-      ctx->data.lambda_value = math_interpolate_1d(mii_current, ctx->config.curr_to_lambda_relation.output);
+      ctx->data.lambda_value = math_interpolate_1d(&mii_current, ctx->config.curr_to_lambda_relation.output);
 
       ctx->data_lambda_valid = true;
     }

@@ -206,8 +206,8 @@ void wgcv_loop_slow(wgcv_ctx_t *ctx)
       interpolate_input_min = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_closed.input, ctx->config.voltage_to_pwm_dutycycle.full_closed.items);
       interpolate_input_max = math_interpolate_input(power_voltage, ctx->config.voltage_to_pwm_dutycycle.full_open.input, ctx->config.voltage_to_pwm_dutycycle.full_open.items);
 
-      dutycycle_min = math_interpolate_1d(interpolate_input_min, ctx->config.voltage_to_pwm_dutycycle.full_closed.output);
-      dutycycle_max = math_interpolate_1d(interpolate_input_max, ctx->config.voltage_to_pwm_dutycycle.full_open.output);
+      dutycycle_min = math_interpolate_1d(&interpolate_input_min, ctx->config.voltage_to_pwm_dutycycle.full_closed.output);
+      dutycycle_max = math_interpolate_1d(&interpolate_input_max, ctx->config.voltage_to_pwm_dutycycle.full_open.output);
 
       if(input_dutycycle <= ctx->config.input_dutycycle_min) {
         output_dutycycle = ctx->config.pwm_dutycycle_min;
