@@ -99,6 +99,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   float power_voltage;
   uint32_t banks_count;
   uint32_t cylinders_count;
+  float cylinders_count_inv;
 
   ignition_config_group_advance_slew_rate_mode_t advance_slew_rate_mode;
   timing_base_runtime_cylinder_sequentialed_type_t sequentialed_mode;
@@ -156,6 +157,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
   time_us_t time_to_ignite;
 
   uint32_t process_update_trigger_counter_gr;
+  int32_t delta_us;
   uint8_t process_update_trigger_counter_gr_1of3;
   bool process_update_trigger = false;
   bool slew_adder_valid;
@@ -177,6 +179,7 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
     calibration_config = ctx->init.calibration_config;
     banks_count = calibration_config->cylinders.banks_count;
     cylinders_count = calibration_config->cylinders.cylinders_count;
+    cylinders_count_inv = 1.0f / cylinders_count;
 
     err = ecu_config_gpio_input_get_id(config->power_voltage_pin, &power_voltage_pin);
     if(err == E_OK) {
@@ -318,8 +321,8 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
               runtime_gr->advance_cy[cy] = ignition_advance_gr_cy[cy];
               ignition_advance_gr_mean += ignition_advance_gr_cy[cy];
             }
-            ignition_advance_gr_requested_mean /= cylinders_count;
-            ignition_advance_gr_mean /= cylinders_count;
+            ignition_advance_gr_requested_mean *= cylinders_count_inv;
+            ignition_advance_gr_mean *= cylinders_count_inv;
             runtime_gr->advance_requested_mean = ignition_advance_gr_requested_mean;
             runtime_gr->advance_mean = ignition_advance_gr_mean;
 
@@ -429,9 +432,13 @@ ITCM_FUNC void ignition_signal_update_callback(ignition_ctx_t *ctx, const timing
                     if(!runtime_cy->scheduled && !runtime_cy->ignited) {
                       degrees_before_prepare = degrees_before_ignite_cur - signal_prepare_advance_gr;
                       if(degrees_before_prepare < 0.0f) {
-                        time_to_saturate = crankshaft_data->sensor_data.current.timestamp +
-                            roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
-                        time_to_ignite = time_to_saturate + saturation_time;
+                        delta_us = LROUNDF((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
+                        if(delta_us >= 0) {
+                          time_to_saturate = time_add(crankshaft_data->sensor_data.current.timestamp, delta_us);
+                        } else {
+                          time_to_saturate = time_sub(crankshaft_data->sensor_data.current.timestamp, -delta_us);
+                        }
+                        time_to_ignite = time_add(time_to_saturate, LROUNDF(saturation_time));
 
                         if(input_allowed_b[bank_cy]) {
                           runtime_cy->time_start = time_now_tick();

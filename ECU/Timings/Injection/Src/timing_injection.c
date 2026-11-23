@@ -177,9 +177,12 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   float dutycycle_gr_mean;
   uint32_t dutycycle_gr_count;
   float dutycycle_period;
+  float dutycycle_period_inv;
+  float dutycycle_period_inv_cy;
 
   time_us_t time_to_activate;
   time_us_t time_to_inject;
+  int32_t delta_us;
 
   map_data_t map_data_manifold_b[ECU_BANK_MAX];
   map_data_t map_data_fuelramp_b[ECU_BANK_MAX];
@@ -246,6 +249,8 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
     us_per_degree_pulsed = crankshaft->sensor_data.us_per_degree_pulsed;
     us_per_degree_revolution = crankshaft->sensor_data.us_per_degree_revolution;
+    dutycycle_period = crankshaft->sensor_data.period;
+    dutycycle_period_inv = 1.0f / dutycycle_period;
 
     input_valid = banks_count > 0 ? true : false;
     for(ecu_bank_t b = 0; b < banks_count; b++) {
@@ -599,14 +604,15 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
                     injection_time_cy = injection_time_gr_b[bank_cy];
                     injection_time_cy *= cy_config->performance_static_mul;
-                    dutycycle_period = crankshaft->sensor_data.period;
 
+                    dutycycle_period_inv_cy = dutycycle_period_inv;
                     if(injection_time_cy > 0.0f) {
                       if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
                         injection_time_cy *= group_config->performance_static_seq_mul;
                         injection_time_cy += group_config->performance_static_seq_add;
                         injection_time_cy += cy_config->performance_static_add;
-                        dutycycle_period *= 2.0f;
+                        dutycycle_period_inv_cy *= 0.5f;
+
                       } else {
                         injection_time_cy *= group_config->performance_static_semiseq_mul;
                         injection_time_cy += group_config->performance_static_semiseq_add;
@@ -617,7 +623,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
 
                     if(injection_time_cy > 0.0f) {
                       pulse_time_cy = lag_time_cy + injection_time_cy;
-                      dutycycle_cy = pulse_time_cy / dutycycle_period;
+                      dutycycle_cy = pulse_time_cy * dutycycle_period_inv_cy;
                     } else {
                       pulse_time_cy = 0.0f;
                       dutycycle_cy = 0.0f;
@@ -684,9 +690,13 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                           runtime_cy->dutycycle = dutycycle_cy;
 
                           if(pulse_time_cy) {
-                            time_to_activate = crankshaft_data_cy->sensor_data.current.timestamp +
-                                roundf((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
-                            time_to_inject = time_to_activate + pulse_time_cy;
+                            delta_us = LROUNDF((signal_prepare_advance + degrees_before_prepare) * us_per_degree);
+                            if(delta_us >= 0) {
+                              time_to_activate = time_add(crankshaft_data_cy->sensor_data.current.timestamp, delta_us);
+                            } else {
+                              time_to_activate = time_sub(crankshaft_data_cy->sensor_data.current.timestamp, -delta_us);
+                            }
+                            time_to_inject = time_add(time_to_activate, LROUNDF(pulse_time_cy));
 
                             runtime_cy->time_start = time_now_tick();
                             err = timing_pulse_schedule(cy_config->output_pin,
