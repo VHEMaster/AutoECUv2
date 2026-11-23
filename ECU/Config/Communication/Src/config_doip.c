@@ -50,7 +50,6 @@ static const doip_config_t ecu_comm_doip_default_config[ECU_COMM_DOIP_MAX] = {
       .tester_address_start = 0x0E00,
       .tester_address_end = 0x0FFF,
       .max_connections = DOIP_CONNECTIONS_MAX,
-      .vin = "VIN01234567890123",
       .eid = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x01 },
       .gid = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x01 },
       .anouncement_amount = 0,

@@ -10,7 +10,10 @@
 #include "versioned_calibration.h"
 
 static const ecu_config_data_identification_t ecu_calibration_id_config_default = {
-
+    .vin = "VIN01234567890123",
+    .ecu_type = "ECM",
+    .ecu_name = "AutoECUv2",
+    .calibration_id = "v1.23.45.678",
 };
 
 error_t ecu_calibration_id_get_default_config(ecu_calibration_instance_t instance, ecu_config_data_identification_t *config)

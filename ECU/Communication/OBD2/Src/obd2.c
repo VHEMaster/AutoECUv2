@@ -194,6 +194,7 @@ error_t obd2_init(obd2_ctx_t *ctx, const obd2_init_ctx_t *init)
 
     ctx->mode9_data[OBD2_PID_09_SUPPORTED_01_20].supported = true;
 
+    // TODO: get it from CM7
     static const uint8_t vin[17] = "VIN01234567890123";
     static const uint8_t calid_1[16] = "v1.23.45.678";
     static const uint8_t ecu_name[20] = "ECM\0-AutoECUv2";

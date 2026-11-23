@@ -25,7 +25,6 @@ typedef struct {
     uint16_t tester_address_start;
     uint16_t tester_address_end;
     uint8_t max_connections;
-    uint8_t vin[17];
     uint8_t eid[6];
     uint8_t gid[6];
     uint32_t anouncement_amount;

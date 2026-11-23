@@ -21,6 +21,9 @@ error_t doip_init(doip_ctx_t *ctx, const doip_init_ctx_t *init)
     ctx->initialized = true;
     ctx->loop_time = time_now_us();
 
+    // TODO: get it from CM7
+    ctx->vin_ptr = "VIN01234567890123";
+
   } while(0);
 
   return err;
@@ -409,7 +412,7 @@ error_t doip_datagram_process(doip_ctx_t *ctx, const uint8_t *payload, uint16_t 
       if(nack == 0xFFu) {
         if(type >= 1u && type <= 3u) {
           if((type != 2u || memcmp(&payload[8], ctx->config.eid, 6u) == 0) &&
-              (type != 3u || memcmp(&payload[8], ctx->config.vin, 17u) == 0)) {
+              (type != 3u || memcmp(&payload[8], ctx->vin_ptr, 17u) == 0)) {
             size = doip_identification_write(ctx, version == 0xFFu ? ctx->config.protocol_version : version, response);
           }
         } else if(type == 0x4001u) {

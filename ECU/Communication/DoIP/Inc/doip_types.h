@@ -116,6 +116,9 @@ typedef struct doip_ctx_tag {
     time_us_t loop_time;
     doip_error_code_t error_code;
     uint32_t error_code_counter[DOIP_MAX];
+
+    const char *vin_ptr;
+
 }doip_ctx_t;
 
 #endif /* COMMUNICATION_DOIP_INC_DOIP_TYPES_H_ */
