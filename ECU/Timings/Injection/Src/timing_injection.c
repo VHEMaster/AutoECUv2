@@ -177,6 +177,7 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
   float dutycycle_gr_mean;
   uint32_t dutycycle_gr_count;
   float dutycycle_period;
+  float dutycycle_period_cy;
   float dutycycle_period_inv;
   float dutycycle_period_inv_cy;
 
@@ -680,7 +681,11 @@ ITCM_FUNC void injection_signal_update_callback(injection_ctx_t *ctx, const timi
                             if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CUTOFF) {
                               pulse_time_cy = 0;
                             } else if(group_config->dutycycle_limit_mode == INJECTION_CONFIG_GROUP_DUTYCYCLE_LIMIT_MODE_CLAMP) {
-                              pulse_time_cy = dutycycle_period * group_config->dutycycle_limit;
+                              dutycycle_period_cy = dutycycle_period;
+                              if(sequentialed_mode_cy == TIMING_RUNTIME_CYLINDER_SEQUENTIAL) {
+                                dutycycle_period_cy *= 2.0f;
+                              }
+                              pulse_time_cy = dutycycle_period_cy * group_config->dutycycle_limit;
                             }
                           } else {
                             runtime_cy->dutycycle_limit_flag = false;
