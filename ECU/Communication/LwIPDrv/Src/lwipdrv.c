@@ -93,6 +93,7 @@ error_t lwipdrv_configure(lwipdrv_ctx_t *ctx, const lwipdrv_config_t *config)
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
+    BREAK_IF_ACTION(config->lcp_echo_enabled && config->lcp_echo_interval == 0u, err = E_PARAM);
     memcpy(&ctx->config, config, sizeof(lwipdrv_config_t));
     ctx->configured = ctx->config.enabled;
     ctx->reset_trigger = true;
@@ -134,6 +135,9 @@ static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
     ppp_set_ipcp_ouraddr(ctx->lwip.ppp, &ctx->lwip.addr_our);
     ppp_set_ipcp_hisaddr(ctx->lwip.ppp, &ctx->lwip.addr_his);
     ppp_set_silent(ctx->lwip.ppp, true);
+
+    ctx->lwip.ppp->settings.lcp_echo_interval = ctx->config.lcp_echo_enabled ? ctx->config.lcp_echo_interval : 0u;
+    ctx->lwip.ppp->settings.lcp_echo_fails = ctx->config.lcp_echo_fails;
 
     err = ppp_listen(ctx->lwip.ppp);
     BREAK_IF(err != ERR_OK);

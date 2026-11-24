@@ -21,6 +21,10 @@ typedef struct {
     uint8_t ip_addr_our[4];
     uint8_t ip_addr_his[4];
 
+    bool lcp_echo_enabled;
+    uint8_t lcp_echo_interval;
+    uint8_t lcp_echo_fails;
+
     uint32_t align ALIGNED_CACHE;
 }lwipdrv_config_v1_t ALIGNED_CACHE;
 

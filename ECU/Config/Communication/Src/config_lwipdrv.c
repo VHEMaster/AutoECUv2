@@ -45,6 +45,9 @@ static const lwipdrv_config_t ecu_comm_lwipdrv_default_config[ECU_COMM_LWIPDRV_M
   {
       .ip_addr_our = { 10, 77, 0, 2 },
       .ip_addr_his = { 10, 77, 0, 1 },
+      .lcp_echo_enabled = true,
+      .lcp_echo_interval = 1u,
+      .lcp_echo_fails = 3u,
   }, //ECU_LWIPDRV_IF_1
 };
 
