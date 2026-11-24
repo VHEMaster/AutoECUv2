@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "main.h"
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"

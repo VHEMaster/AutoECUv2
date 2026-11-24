@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>lwip-static_CM4</project>
+		<project>usbd-static_CM4</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -54,26 +55,6 @@
 			<name>Multicore</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Multicore</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/ST/STM32_USB_Device_Library/usbd_cdc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/ST/STM32_USB_Device_Library/usbd_core.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/ST/STM32_USB_Device_Library/usbd_ctlreq.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/ST/STM32_USB_Device_Library/usbd_ioreq.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
