@@ -49,7 +49,7 @@
 #define         DEVICE_ID2          (UID_BASE + 0x4)
 #define         DEVICE_ID3          (UID_BASE + 0x8)
 
-#define  USB_SIZ_STRING_SERIAL       0x1A
+#define  USB_SIZ_STRING_SERIAL       50u
 
 /* USER CODE BEGIN EXPORTED_CONSTANTS */
 
@@ -105,6 +105,7 @@
 
 /** Descriptor for the Usb device. */
 extern USBD_DescriptorsTypeDef FS_Desc;
+void USBD_FS_SetIdentity(uint16_t vid, uint16_t pid, const uint32_t uid[3]);
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 

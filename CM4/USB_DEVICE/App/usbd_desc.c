@@ -22,6 +22,7 @@
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_conf.h"
+#include "usbd_vendor_requests.h"
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -69,9 +70,6 @@
 #define USBD_PRODUCT_STRING_FS     "AutoECUv2"
 #define USBD_CONFIGURATION_STRING_FS     "Vendor Config"
 #define USBD_INTERFACE_STRING_FS     "AutoECU Bulk"
-#define DEVICE_SERIAL0     (*(uint32_t *) 0x11223344)
-#define DEVICE_SERIAL1     (*(uint32_t *) 0x55667788)
-#define DEVICE_SERIAL2     (*(uint32_t *) 0x12345678)
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -103,7 +101,7 @@
   * @{
   */
 
-static void Get_SerialNum(void);
+
 static void IntToUnicode(uint32_t value, uint8_t * pbuf, uint8_t len);
 
 /**
@@ -141,6 +139,7 @@ USBD_DescriptorsTypeDef FS_Desc =
 , USBD_FS_SerialStrDescriptor
 , USBD_FS_ConfigStrDescriptor
 , USBD_FS_InterfaceStrDescriptor
+, USBD_VENDOR_BOS
 };
 
 #if defined ( __ICCARM__ ) /* IAR Compiler */
@@ -151,7 +150,7 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 {
   0x12,                       /*bLength */
   USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
-  0x00,                       /*bcdUSB */
+  0x10,                       /*bcdUSB */
   0x02,
   0x00,                       /*bDeviceClass*/
   0x00,                       /*bDeviceSubClass*/
@@ -161,11 +160,11 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   HIBYTE(USBD_VID),           /*idVendor*/
   LOBYTE(USBD_PID_FS),        /*idProduct*/
   HIBYTE(USBD_PID_FS),        /*idProduct*/
-  0x00,                       /*bcdDevice rel. 2.00*/
+  0x01,                       /*bcdDevice rel. 2.01*/
   0x02,
   USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
   USBD_IDX_PRODUCT_STR,       /*Index of product string*/
-  USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
+  0,                          /* Serial supplied by CM7 before enumeration */
   USBD_MAX_NUM_CONFIGURATION  /*bNumConfigurations*/
 };
 
@@ -287,7 +286,7 @@ uint8_t * USBD_FS_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 
   /* Update the serial number string descriptor with the data from the unique
    * ID */
-  Get_SerialNum();
+
   /* USER CODE BEGIN USBD_FS_SerialStrDescriptor */
 
   /* USER CODE END USBD_FS_SerialStrDescriptor */
@@ -337,27 +336,15 @@ uint8_t * USBD_FS_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *leng
   * @param  None
   * @retval None
   */
-static void Get_SerialNum(void)
+void USBD_FS_SetIdentity(uint16_t vid, uint16_t pid, const uint32_t uid[3])
 {
-  uint32_t deviceserial0;
-  uint32_t deviceserial1;
-  uint32_t deviceserial2;
-
-/* USER CODE BEGIN SerialNum */
-
-  deviceserial0 = DEVICE_SERIAL0;
-  deviceserial1 = DEVICE_SERIAL1;
-  deviceserial2 = DEVICE_SERIAL2;
-
-/* USER CODE END SerialNum */
-
-  deviceserial0 += deviceserial2;
-
-  if (deviceserial0 != 0)
-  {
-    IntToUnicode(deviceserial0, &USBD_StringSerial[2], 8);
-    IntToUnicode(deviceserial1, &USBD_StringSerial[18], 4);
-  }
+  USBD_FS_DeviceDesc[8] = LOBYTE(vid);
+  USBD_FS_DeviceDesc[9] = HIBYTE(vid);
+  USBD_FS_DeviceDesc[10] = LOBYTE(pid);
+  USBD_FS_DeviceDesc[11] = HIBYTE(pid);
+  for(uint32_t i = 0; i < 3u; i++)
+    IntToUnicode(uid[i], &USBD_StringSerial[2u + 16u * i], 8u);
+  USBD_FS_DeviceDesc[16] = USBD_IDX_SERIAL_STR;
 }
 
 /**
