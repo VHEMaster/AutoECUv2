@@ -81,7 +81,7 @@ static RAM_SECTION signals_ctx_t ecu_config_signals_ctx[ECU_COMM_SIGNALS_MAX] = 
 static RAM_SECTION rs422_ctx_t ecu_config_rs422_ctx[ECU_COMM_RS422_MAX] = {0};
 static RAM_SECTION lwipdrv_ctx_t ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_MAX] = {0};
 static RAM_D3_SECTION doip_ctx_t ecu_config_doip_ctx[ECU_COMM_DOIP_MAX] = {0};
-static RAM_SECTION usb_ctx_t ecu_config_usb_ctx[ECU_COMM_USB_MAX] = {0};
+static RAM_D3_SECTION usb_ctx_t ecu_config_usb_ctx[ECU_COMM_USB_MAX] = {0};
 
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
