@@ -57,6 +57,10 @@ void usb_loop_main(usb_ctx_t *ctx);
 
 error_t usb_tx(usb_ctx_t *ctx, const void *buffer, uint32_t length);
 error_t usb_rx(usb_ctx_t *ctx, void *buffer, uint32_t *p_length);
+
+error_t usb_rx_nocopy(usb_ctx_t *ctx, const void **p_buffer, uint32_t *p_length);
+error_t usb_rx_release(usb_ctx_t *ctx, uint32_t length);
+
 bool usb_is_connected(const usb_ctx_t *ctx);
 uint32_t usb_get_generation(const usb_ctx_t *ctx);
 

@@ -241,18 +241,22 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
      * After link-up non-owner input is drained, never passed to PPP. */
     bytes = 512u;
     err = rs422_rx_nocopy(ctx->init.rs422_ctx, &buffer, &bytes);
-    if(err == E_OK && bytes > 0u && ctx->lwip.ppp->phase != PPP_PHASE_DEAD &&
-        (ctx->configured || ctx->lwip.close_pending) &&
-        lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_RS422)) {
-      pppos_input(ctx->lwip.ppp, buffer, bytes);
+    if(err == E_OK && bytes > 0u) {
+      if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
+          lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_RS422)) {
+        pppos_input(ctx->lwip.ppp, buffer, bytes);
+      }
+      (void)rs422_rx_release(ctx->init.rs422_ctx, bytes);
     }
 
-    bytes = sizeof(ctx->lwip.usb_rx_buffer);
-    err = usb_rx(ctx->init.usb_ctx, ctx->lwip.usb_rx_buffer, &bytes);
-    if(err == E_OK && bytes > 0u && ctx->lwip.ppp->phase != PPP_PHASE_DEAD &&
-        (ctx->configured || ctx->lwip.close_pending) &&
-        lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_USB)) {
-      pppos_input(ctx->lwip.ppp, ctx->lwip.usb_rx_buffer, bytes);
+    bytes = 256u;
+    err = usb_rx_nocopy(ctx->init.usb_ctx, &buffer, &bytes);
+    if(err == E_OK && bytes > 0u) {
+      if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
+          lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_USB)) {
+        pppos_input(ctx->lwip.ppp, buffer, bytes);
+      }
+      (void)usb_rx_release(ctx->init.usb_ctx, bytes);
     }
 
     link_up = ctx->configured && ctx->lwip.link_up &&

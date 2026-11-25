@@ -278,59 +278,61 @@ error_t rs422_rx(rs422_ctx_t *ctx, void *buffer, uint32_t *p_length)
 error_t rs422_rx_nocopy(rs422_ctx_t *ctx, const void **p_buffer, uint32_t *p_length)
 {
   error_t err = E_OK;
-  uint32_t buffer_size;
-  uint32_t write_checkup;
-  uint32_t write_pointer;
-  uint32_t write_original;
-  uint32_t read_pointer;
-  uint32_t read_checkup;
-  uint32_t read_original;
   uint32_t capacity;
-  uint32_t read;
-  uint32_t contiguous;
+  uint32_t buffer_size;
+  uint32_t read_pointer;
+  uint32_t write_pointer;
+  uint32_t length;
+
+  RETURN_IF(ctx == NULL || p_buffer == NULL || p_length == NULL, E_PARAM);
+
+  capacity = *p_length;
+  *p_length = 0u;
+  *p_buffer = NULL;
 
   do {
-    BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(p_buffer == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(p_length == NULL, err = E_PARAM);
-
-    capacity = *p_length;
-    *p_buffer = NULL;
+    BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
 
     buffer_size = ctx->init.buffer_rx_size;
-    write_pointer = ATOMIC_LOAD(ctx->rx_write_pointer);
     read_pointer = ATOMIC_LOAD(ctx->rx_read_pointer);
-    write_original = write_pointer;
-    read_original = read_pointer;
-
     write_pointer = buffer_size - __HAL_DMA_GET_COUNTER(ctx->init.handle->hdmarx);
+    ATOMIC_STORE(ctx->rx_write_pointer, write_pointer);
 
-    read = GetUsedToRead(buffer_size, read_pointer, write_pointer);
-    if(read > capacity) {
-      read = capacity;
-    }
+    length = MIN(GetUsedToRead(buffer_size, read_pointer, write_pointer), capacity);
+    length = MIN(length, buffer_size - read_pointer);
+    BREAK_IF(length == 0u);
 
-    contiguous = buffer_size - read_pointer;
-    if(read > contiguous) {
-      read = contiguous;
-    }
+    *p_buffer = (const uint8_t *)ctx->init.buffer_rx + read_pointer;
+    *p_length = length;
 
-    write_checkup = ATOMIC_EXCHANGE_RELEASE(ctx->rx_write_pointer, write_pointer);
-    read_pointer += read;
+  } while(0);
+
+  return err;
+}
+
+error_t rs422_rx_release(rs422_ctx_t *ctx, uint32_t length)
+{
+  error_t err = E_OK;
+  uint32_t buffer_size;
+  uint32_t read_pointer;
+  uint32_t write_pointer;
+  uint32_t available;
+
+  RETURN_IF(ctx == NULL, E_PARAM);
+
+  do {
+    buffer_size = ctx->init.buffer_rx_size;
+    read_pointer = ATOMIC_LOAD(ctx->rx_read_pointer);
+    write_pointer = ATOMIC_LOAD(ctx->rx_write_pointer);
+
+    available = MIN(GetUsedToRead(buffer_size, read_pointer, write_pointer), buffer_size - read_pointer);
+    BREAK_IF_ACTION(length > available, err = E_PARAM);
+
+    read_pointer += length;
     if(read_pointer >= buffer_size) {
-      read_pointer = 0u;
+      read_pointer -= buffer_size;
     }
-    read_checkup = ATOMIC_EXCHANGE_RELEASE(ctx->rx_read_pointer, read_pointer);
-    if(write_original != write_checkup || read_original != read_checkup) {
-      ATOMIC_STORE_RELAXED(ctx->rx_write_pointer, 0u);
-      ATOMIC_STORE(ctx->rx_read_pointer, 0u);
-      err = E_IO;
-      read = 0u;
-    } else if(read > 0u) {
-      *p_buffer = (const uint8_t *)ctx->init.buffer_rx + read_original;
-    }
-
-    *p_length = read;
+    ATOMIC_STORE(ctx->rx_read_pointer, read_pointer);
 
   } while(0);
 

@@ -127,13 +127,10 @@ uint32_t usb_get_generation(const usb_ctx_t *ctx)
 error_t usb_tx(usb_ctx_t *ctx, const void *buffer, uint32_t length)
 {
   error_t err = E_OK;
-  uint32_t prim;
   uint32_t used;
 
   RETURN_IF(ctx == NULL, E_PARAM);
   RETURN_IF(length > 0u && buffer == NULL, E_PARAM);
-
-  prim = EnterCritical();
 
   do {
     BREAK_IF_ACTION(usb_is_connected(ctx) == false, err = E_INVALACT);
@@ -147,29 +144,75 @@ error_t usb_tx(usb_ctx_t *ctx, const void *buffer, uint32_t length)
 
   } while(0);
 
-  ExitCritical(prim);
-
   return err;
 }
 
 error_t usb_rx(usb_ctx_t *ctx, void *buffer, uint32_t *p_length)
 {
-  uint32_t prim;
-  uint32_t length;
+  error_t err = E_AGAIN;
+  uint32_t length = 0u;
 
   RETURN_IF(ctx == NULL || p_length == NULL, E_PARAM);
   RETURN_IF(*p_length > 0u && buffer == NULL, E_PARAM);
 
-  prim = EnterCritical();
+  do {
+    length = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, *p_length);
+    BREAK_IF(length == 0u);
 
-  length = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, *p_length);
-  if(length > 0u) {
     usb_ring_read(ctx->rx_buffer, USB_RX_BUFFER_SIZE, ctx->rx_read_pointer, buffer, length);
     ctx->rx_read_pointer += length;
-  }
+    err = E_OK;
+
+  } while(0);
+
   *p_length = length;
 
-  ExitCritical(prim);
+  return err;
+}
 
-  return length > 0u ? E_OK : E_AGAIN;
+error_t usb_rx_nocopy(usb_ctx_t *ctx, const void **p_buffer, uint32_t *p_length)
+{
+  error_t err = E_OK;
+  uint32_t capacity;
+  uint32_t position;
+  uint32_t length;
+
+  RETURN_IF(ctx == NULL || p_buffer == NULL || p_length == NULL, E_PARAM);
+
+  capacity = *p_length;
+  *p_length = 0u;
+  *p_buffer = NULL;
+
+  do {
+    position = ctx->rx_read_pointer & (USB_RX_BUFFER_SIZE - 1u);
+    length = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, capacity);
+    length = MIN(length, USB_RX_BUFFER_SIZE - position);
+    BREAK_IF(length == 0u);
+
+    *p_buffer = &ctx->rx_buffer[position];
+    *p_length = length;
+
+  } while(0);
+
+  return err;
+}
+
+error_t usb_rx_release(usb_ctx_t *ctx, uint32_t length)
+{
+  error_t err = E_OK;
+  uint32_t position;
+  uint32_t available;
+
+  RETURN_IF(ctx == NULL, E_PARAM);
+
+  do {
+    position = ctx->rx_read_pointer & (USB_RX_BUFFER_SIZE - 1u);
+    available = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, USB_RX_BUFFER_SIZE - position);
+    BREAK_IF_ACTION(length == 0u || length > available, err = E_PARAM);
+
+    ctx->rx_read_pointer += length;
+
+  } while(0);
+
+  return err;
 }

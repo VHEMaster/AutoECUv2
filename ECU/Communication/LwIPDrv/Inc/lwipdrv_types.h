@@ -46,7 +46,6 @@ typedef struct {
     bool no_carrier;
     uint32_t usb_generation;
     lwipdrv_arbiter_t arbiter;
-    uint8_t usb_rx_buffer[256u];
 
 }lwipdrv_lwip_ctx_t;
 
