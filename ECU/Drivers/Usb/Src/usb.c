@@ -102,6 +102,7 @@ void usb_loop_main(usb_ctx_t *ctx)
     BREAK_IF(ctx == NULL || ctx->initialized == false);
 
     usb_fsm(ctx);
+    usb_sync_rings(ctx);
 
     BREAK_IF(ctx->configured == false);
 
@@ -113,7 +114,8 @@ void usb_loop_main(usb_ctx_t *ctx)
 
 bool usb_is_connected(const usb_ctx_t *ctx)
 {
-  return ctx != NULL && ctx->configured && ATOMIC_LOAD(ctx->attached);
+  return ctx != NULL && ctx->configured && ATOMIC_LOAD(ctx->attached) &&
+      ctx->ring_generation == ATOMIC_LOAD(ctx->generation);
 }
 
 uint32_t usb_get_generation(const usb_ctx_t *ctx)
@@ -137,6 +139,7 @@ error_t usb_tx(usb_ctx_t *ctx, const void *buffer, uint32_t length)
     BREAK_IF(length == 0u);
 
     usb_ring_write(ctx->init.tx_buffer, ctx->init.tx_buffer_size, ctx->tx_write_pointer, buffer, length);
+    BREAK_IF_ACTION(usb_is_connected(ctx) == false, err = E_INVALACT);
     ctx->tx_write_pointer += length;
 
   } while(0);
@@ -153,10 +156,12 @@ error_t usb_rx(usb_ctx_t *ctx, void *buffer, uint32_t *p_length)
   RETURN_IF(*p_length > 0u && buffer == NULL, E_PARAM);
 
   do {
+    BREAK_IF(usb_is_connected(ctx) == false);
     length = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, *p_length);
     BREAK_IF(length == 0u);
 
     usb_ring_read(ctx->init.rx_buffer, ctx->init.rx_buffer_size, ctx->rx_read_pointer, buffer, length);
+    BREAK_IF_ACTION(usb_is_connected(ctx) == false, length = 0u);
     ctx->rx_read_pointer += length;
     err = E_OK;
 
@@ -181,6 +186,7 @@ error_t usb_rx_nocopy(usb_ctx_t *ctx, const void **p_buffer, uint32_t *p_length)
   *p_buffer = NULL;
 
   do {
+    BREAK_IF(usb_is_connected(ctx) == false);
     position = ctx->rx_read_pointer & (ctx->init.rx_buffer_size - 1u);
     length = MIN(ctx->rx_write_pointer - ctx->rx_read_pointer, capacity);
     length = MIN(length, ctx->init.rx_buffer_size - position);

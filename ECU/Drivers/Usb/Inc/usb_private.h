@@ -12,7 +12,7 @@
 #include "usb_device.h"
 
 void usb_set_device_ctx(usb_ctx_t *ctx);
-void usb_clear(usb_ctx_t *ctx);
+void usb_sync_rings(usb_ctx_t *ctx);
 void usb_ring_write(uint8_t *ring, uint32_t capacity, uint32_t offset, const void *data, uint32_t length);
 void usb_ring_read(const uint8_t *ring, uint32_t capacity, uint32_t offset, void *data, uint32_t length);
 void usb_arm_rx(usb_ctx_t *ctx, USBD_HandleTypeDef *pdev);

@@ -40,6 +40,7 @@ typedef struct usb_ctx_tag {
     uint32_t uid[3];
     bool attached;
     uint32_t generation;
+    uint32_t ring_generation;
     bool rx_armed;
     bool tx_busy;
     bool tx_zlp;
@@ -62,6 +63,7 @@ void usb_loop_main(usb_ctx_t *ctx);
 error_t usb_tx(usb_ctx_t *ctx, const void *buffer, uint32_t length);
 error_t usb_rx(usb_ctx_t *ctx, void *buffer, uint32_t *p_length);
 
+/* Release a borrowed span in the same main-loop iteration, before usb_loop_main(). */
 error_t usb_rx_nocopy(usb_ctx_t *ctx, const void **p_buffer, uint32_t *p_length);
 error_t usb_rx_release(usb_ctx_t *ctx, uint32_t length);
 

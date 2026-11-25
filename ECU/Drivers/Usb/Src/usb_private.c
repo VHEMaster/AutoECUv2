@@ -16,8 +16,15 @@ void usb_set_device_ctx(usb_ctx_t *ctx)
   usb_device_ctx = ctx;
 }
 
-void usb_clear(usb_ctx_t *ctx)
+void usb_sync_rings(usb_ctx_t *ctx)
 {
+  uint32_t prim;
+
+  if(ctx->ring_generation == ATOMIC_LOAD(ctx->generation)) {
+    return;
+  }
+
+  prim = EnterCritical();
   ctx->rx_read_pointer = 0u;
   ctx->rx_write_pointer = 0u;
   ctx->tx_read_pointer = 0u;
@@ -26,6 +33,8 @@ void usb_clear(usb_ctx_t *ctx)
   ctx->tx_busy = false;
   ctx->tx_zlp = false;
   ctx->tx_length = 0u;
+  ctx->ring_generation = ATOMIC_LOAD(ctx->generation);
+  ExitCritical(prim);
 }
 
 void usb_ring_write(uint8_t *ring, uint32_t capacity, uint32_t offset, const void *data, uint32_t length)
@@ -58,7 +67,7 @@ void usb_arm_rx(usb_ctx_t *ctx, USBD_HandleTypeDef *pdev)
   prim = EnterCritical();
 
   do {
-    BREAK_IF(ctx->rx_armed || ATOMIC_LOAD(ctx->attached) == false);
+    BREAK_IF(ctx->rx_armed || usb_is_connected(ctx) == false);
 
     used = ctx->rx_write_pointer - ctx->rx_read_pointer;
     BREAK_IF(ctx->init.rx_buffer_size - used < ctx->init.rx_packet_size);
@@ -78,7 +87,7 @@ void usb_start_tx(usb_ctx_t *ctx, USBD_HandleTypeDef *pdev)
 
   prim = EnterCritical();
   do {
-    BREAK_IF(ctx->tx_busy || ATOMIC_LOAD(ctx->attached) == false);
+    BREAK_IF(ctx->tx_busy || usb_is_connected(ctx) == false);
     BREAK_IF(pdev->dev_state != USBD_STATE_CONFIGURED);
 
     length = MIN(ctx->tx_write_pointer - ctx->tx_read_pointer, ctx->init.tx_packet_size);
@@ -115,7 +124,6 @@ void USBD_VENDOR_Opened(USBD_HandleTypeDef *pdev)
   do {
     BREAK_IF(ctx == NULL);
 
-    usb_clear(ctx);
     ATOMIC_POST_INCREMENT(ctx->generation, 1u);
     ATOMIC_STORE(ctx->attached, true);
 
@@ -133,7 +141,6 @@ void USBD_VENDOR_Closed(USBD_HandleTypeDef *pdev)
 
     ATOMIC_STORE(ctx->attached, false);
     ATOMIC_POST_INCREMENT(ctx->generation, 1u);
-    usb_clear(ctx);
 
   } while(0);
 }
@@ -146,7 +153,7 @@ void USBD_VENDOR_Received(USBD_HandleTypeDef *pdev, uint32_t length)
   UNUSED(pdev);
 
   do {
-    BREAK_IF(ctx == NULL || ctx->rx_armed == false);
+    BREAK_IF(usb_is_connected(ctx) == false || ctx->rx_armed == false);
 
     ctx->rx_armed = false;
     used = ctx->rx_write_pointer - ctx->rx_read_pointer;
@@ -165,7 +172,7 @@ void USBD_VENDOR_Transmitted(USBD_HandleTypeDef *pdev)
   UNUSED(pdev);
 
   do {
-    BREAK_IF(ctx == NULL || ctx->tx_busy == false);
+    BREAK_IF(usb_is_connected(ctx) == false || ctx->tx_busy == false);
 
     ctx->tx_read_pointer += ctx->tx_length;
     ctx->tx_zlp = ctx->tx_length != 0u && (ctx->tx_length % ctx->init.rx_packet_size) == 0u;
