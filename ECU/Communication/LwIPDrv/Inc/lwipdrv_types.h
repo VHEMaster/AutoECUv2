@@ -11,6 +11,8 @@
 #include "common.h"
 
 #include "rs422.h"
+#include "usb.h"
+#include "lwipdrv_arbiter.h"
 #include "doip_lwip.h"
 #include "versioned_lwipdrv.h"
 #include "config_comm_types.h"
@@ -27,6 +29,7 @@ typedef struct lwipdrv_ctx_tag lwipdrv_ctx_t;
 typedef struct {
     ecu_comm_rs422_t rs422_instance;
     rs422_ctx_t *rs422_ctx;
+    usb_ctx_t *usb_ctx;
     doip_ctx_t *doip_ctx;
 }lwipdrv_init_ctx_t;
 
@@ -40,6 +43,10 @@ typedef struct {
     bool link_up;
     bool restart_pending;
     bool close_pending;
+    bool no_carrier;
+    uint32_t usb_generation;
+    lwipdrv_arbiter_t arbiter;
+    uint8_t usb_rx_buffer[256u];
 
 }lwipdrv_lwip_ctx_t;
 

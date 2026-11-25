@@ -7,6 +7,7 @@
 
 #include "lwipdrv.h"
 #include "time.h"
+#include "usbd_vendor_requests.h"
 
 static uint32_t lwipdrv_ppp_output_cb(ppp_pcb *pcb, const void *data, uint32_t len, void *arg)
 {
@@ -14,13 +15,24 @@ static uint32_t lwipdrv_ppp_output_cb(ppp_pcb *pcb, const void *data, uint32_t l
   error_t err = E_OK;
   lwipdrv_ctx_t *ctx = arg;
 
-  err = rs422_tx(ctx->init.rs422_ctx, data, len);
+  UNUSED(pcb);
+
+  switch(lwipdrv_arbiter_tx(&ctx->lwip.arbiter)) {
+    case LWIPDRV_TRANSPORT_RS422:
+      err = rs422_tx(ctx->init.rs422_ctx, data, len);
+      break;
+    case LWIPDRV_TRANSPORT_USB:
+      err = usb_tx(ctx->init.usb_ctx, data, len);
+      break;
+    default:
+      return 0u;
+  }
+
   if(err == E_OK) {
     ret = len;
   }
 
   return ret;
-
 }
 
 static void lwipdrv_ppp_link_cb(ppp_pcb *pcb, int status, void *arg)
@@ -28,8 +40,13 @@ static void lwipdrv_ppp_link_cb(ppp_pcb *pcb, int status, void *arg)
   lwipdrv_ctx_t *ctx = arg;
 
   ctx->lwip.link_up = status == PPPERR_NONE;
-  if(status != PPPERR_NONE && ctx->configured) {
-    ctx->lwip.restart_pending = true;
+  if(ctx->lwip.link_up) {
+    lwipdrv_arbiter_link_up(&ctx->lwip.arbiter);
+  } else {
+    lwipdrv_arbiter_close(&ctx->lwip.arbiter);
+    if(ctx->configured) {
+      ctx->lwip.restart_pending = true;
+    }
   }
 
   (void)pcb;
@@ -64,10 +81,13 @@ error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(init == NULL, err = E_PARAM);
-    BREAK_IF_ACTION(init->rs422_ctx == NULL, err = E_PARAM);
+    BREAK_IF_ACTION(init->rs422_ctx == NULL || init->usb_ctx == NULL, err = E_PARAM);
 
     memset(ctx, 0u, sizeof(lwipdrv_ctx_t));
     memcpy(&ctx->init, init, sizeof(lwipdrv_init_ctx_t));
+
+    lwipdrv_arbiter_reset(&ctx->lwip.arbiter);
+    ctx->lwip.usb_generation = usb_get_generation(ctx->init.usb_ctx);
 
     lwip_init();
 
@@ -113,18 +133,21 @@ static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
       ctx->lwip.restart_pending = true;
       ctx->lwip.close_pending = false;
       ctx->lwip.link_up = false;
+      lwipdrv_arbiter_close(&ctx->lwip.arbiter);
       doip_lwip_stop(&ctx->doip);
     }
     BREAK_IF(!ctx->lwip.restart_pending);
 
     if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD) {
       if(!ctx->lwip.close_pending) {
-        (void)ppp_close(ctx->lwip.ppp, 0u);
         ctx->lwip.close_pending = true;
+        (void)ppp_close(ctx->lwip.ppp, ctx->lwip.no_carrier ? 1u : 0u);
       }
       break;
     }
     ctx->lwip.close_pending = false;
+    ctx->lwip.no_carrier = false;
+    lwipdrv_arbiter_reset(&ctx->lwip.arbiter);
     if(!ctx->configured) {
       ctx->lwip.restart_pending = false;
       break;
@@ -186,22 +209,57 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
   error_t err = E_OK;
   uint32_t bytes;
   const void *buffer;
+  uint32_t usb_generation;
+  bool usb_changed;
+  bool link_up;
 
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->initialized == false);
 
-    lwipdrv_ppp_restart(ctx);
+    usb_generation = usb_get_generation(ctx->init.usb_ctx);
+    usb_changed = usb_generation != ctx->lwip.usb_generation;
+    ctx->lwip.usb_generation = usb_generation;
+    if(lwipdrv_arbiter_tx(&ctx->lwip.arbiter) == LWIPDRV_TRANSPORT_USB &&
+        (usb_changed || usb_is_connected(ctx->init.usb_ctx) == false)) {
+      ctx->lwip.no_carrier = true;
+      if(ctx->lwip.restart_pending == false) {
+        ctx->reset_trigger = true;
+      }
+    }
 
+    if((USBD_VENDOR_TakeRequests() & 1u) && ctx->lwip.arbiter.owner == LWIPDRV_TRANSPORT_USB &&
+        ctx->lwip.link_up && !ctx->lwip.restart_pending) {
+      ctx->reset_trigger = true;
+    }
+
+    lwipdrv_ppp_restart(ctx);
     sys_check_timeouts();
 
+    /* Before link-up either transport can contribute bytes; the last RX
+     * source receives PPP replies. Simultaneous negotiation is unsupported.
+     * After link-up non-owner input is drained, never passed to PPP. */
     bytes = 512u;
     err = rs422_rx_nocopy(ctx->init.rs422_ctx, &buffer, &bytes);
-    if(err == E_OK && bytes > 0u) {
+    if(err == E_OK && bytes > 0u && ctx->lwip.ppp->phase != PPP_PHASE_DEAD &&
+        (ctx->configured || ctx->lwip.close_pending) &&
+        lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_RS422)) {
       pppos_input(ctx->lwip.ppp, buffer, bytes);
     }
 
-    doip_lwip_loop(&ctx->doip, ctx->configured && ctx->lwip.link_up && !ctx->lwip.restart_pending);
+    bytes = sizeof(ctx->lwip.usb_rx_buffer);
+    err = usb_rx(ctx->init.usb_ctx, ctx->lwip.usb_rx_buffer, &bytes);
+    if(err == E_OK && bytes > 0u && ctx->lwip.ppp->phase != PPP_PHASE_DEAD &&
+        (ctx->configured || ctx->lwip.close_pending) &&
+        lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_USB)) {
+      pppos_input(ctx->lwip.ppp, ctx->lwip.usb_rx_buffer, bytes);
+    }
+
+    link_up = ctx->configured && ctx->lwip.link_up &&
+        netif_is_link_up(&ctx->lwip.ppp_netif) && !ctx->lwip.restart_pending;
+    doip_lwip_loop(&ctx->doip, link_up);
+    USBD_VENDOR_SetLinkStatus(ctx->lwip.arbiter.owner, link_up,
+        ctx->configured && !ctx->lwip.restart_pending);
 
   } while(0);
 }
