@@ -148,6 +148,7 @@ static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
     ctx->lwip.close_pending = false;
     ctx->lwip.no_carrier = false;
     lwipdrv_arbiter_reset(&ctx->lwip.arbiter);
+    ctx->lwip.link_up = false;
     if(!ctx->configured) {
       ctx->lwip.restart_pending = false;
       break;
@@ -263,7 +264,7 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
         netif_is_link_up(&ctx->lwip.ppp_netif) && !ctx->lwip.restart_pending;
     doip_lwip_loop(&ctx->doip, link_up);
     USBD_VENDOR_SetLinkStatus(ctx->lwip.arbiter.owner, link_up,
-        ctx->configured && !ctx->lwip.restart_pending);
+        ctx->configured && !ctx->lwip.restart_pending && usb_is_connected(ctx->init.usb_ctx));
 
   } while(0);
 }

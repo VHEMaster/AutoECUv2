@@ -82,6 +82,14 @@ static uint8_t vendor_setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
       req->wIndex == 0u && req->wValue == 0u && req->wLength == 0u) {
     return USBD_OK;
   }
+
+  /* Core already clears the halt and sends the status stage. */
+  if(req->bmRequest == 0x02u && req->bRequest == USB_REQ_CLEAR_FEATURE &&
+      req->wValue == USB_FEATURE_EP_HALT && req->wLength == 0u &&
+      (req->wIndex == USBD_VENDOR_EP_IN || req->wIndex == USBD_VENDOR_EP_OUT)) {
+    return USBD_OK;
+  }
+
   USBD_CtlError(pdev, req);
   return USBD_FAIL;
 }
