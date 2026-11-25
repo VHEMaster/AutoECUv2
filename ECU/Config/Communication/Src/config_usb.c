@@ -120,6 +120,24 @@ error_t ecu_comm_usb_get_default_config(ecu_comm_usb_t instance, usb_config_t *c
 }
 #endif /* CORE_CM7 */
 
+#ifdef CORE_CM4
+static error_t ecu_comm_usb_configure_local(ecu_comm_usb_t instance, usb_ctx_t *ctx,
+    const usb_config_t *config, const uint32_t uid[3])
+{
+  error_t err = usb_configure(ctx, config, uid);
+  error_t enabled_err;
+
+  if(err != E_AGAIN) {
+    enabled_err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_USB, instance, ctx->configured);
+    if(err == E_OK) {
+      err = enabled_err;
+    }
+  }
+
+  return err;
+}
+#endif /* CORE_CM4 */
+
 error_t ecu_comm_usb_configure(ecu_comm_usb_t instance, const usb_config_t *config)
 {
   error_t err = E_OK;
@@ -142,11 +160,8 @@ error_t ecu_comm_usb_configure(ecu_comm_usb_t instance, const usb_config_t *conf
 #endif /* CORE_CM7 */
 
 #ifdef CORE_CM4
-    err = usb_configure(usb_ctx->ctx, config, usb_ctx->ctx->uid);
-    BREAK_IF(err != E_OK);
-
-    err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_USB, instance, usb_ctx->ctx->configured);
-    BREAK_IF(err != E_OK);
+    BREAK_IF_ACTION(usb_ctx->ctx == NULL, err = E_INVALACT);
+    err = ecu_comm_usb_configure_local(instance, usb_ctx->ctx, config, usb_ctx->ctx->uid);
 #endif /* CORE_CM4 */
 
   } while(0);
@@ -220,9 +235,8 @@ static error_t ecu_comm_usb_rpc_executor_configure_execute(uint32_t *p_resp_coun
     BREAK_IF_ACTION((rpc = usb_ctx->rpc_pointer) == NULL || usb_ctx->rpc_instance >= ECU_COMM_USB_MAX, err = E_PARAM);
     BREAK_IF_ACTION(usb_ctx != &ecu_comm_usb_ctx[usb_ctx->rpc_instance], err = E_PARAM);
 
-    err = usb_configure(usb_ctx->ctx, &rpc->config, rpc->uid);
-    if(err == E_OK)
-      err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_USB, usb_ctx->rpc_instance, usb_ctx->ctx->configured);
+    BREAK_IF_ACTION(usb_ctx->ctx == NULL, err = E_INVALACT);
+    err = ecu_comm_usb_configure_local(usb_ctx->rpc_instance, usb_ctx->ctx, &rpc->config, rpc->uid);
     if(err != E_AGAIN) {
       *p_result = err;
       err = E_OK;

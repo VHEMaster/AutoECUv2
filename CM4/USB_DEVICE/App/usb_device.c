@@ -24,7 +24,6 @@
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
-#include "usbd_vendor.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -57,35 +56,25 @@ USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE END 1 */
 
-/**
-  * Init USB device Library, add supported class and start the library
-  * @retval None
-  */
-USBD_StatusTypeDef USB_DEVICE_Start(void)
+USBD_StatusTypeDef USB_DEVICE_Init(void)
 {
   HAL_PWREx_EnableUSBVoltageDetector();
+  return USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
+}
 
-  if(USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK) {
-    return USBD_FAIL;
-  }
-
-  if(USBD_RegisterClass(&hUsbDeviceFS, &USBD_VENDOR) != USBD_OK ||
-      USBD_Start(&hUsbDeviceFS) != USBD_OK) {
-    USBD_DeInit(&hUsbDeviceFS);
-    return USBD_FAIL;
-  }
-  return USBD_OK;
+USBD_StatusTypeDef USB_DEVICE_Start(void)
+{
+  return USBD_Start(&hUsbDeviceFS);
 }
 
 void USB_DEVICE_Stop(void)
 {
-  USBD_Stop(&hUsbDeviceFS);
-  USBD_DeInit(&hUsbDeviceFS);
+  (void)USBD_Stop(&hUsbDeviceFS);
 }
 
-void MX_USB_DEVICE_Init(void)
+USBD_StatusTypeDef USB_DEVICE_DeInit(void)
 {
-  if(USB_DEVICE_Start() != USBD_OK) Error_Handler();
+  return USBD_DeInit(&hUsbDeviceFS);
 }
 
 /**

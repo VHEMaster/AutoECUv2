@@ -11,8 +11,15 @@
 #include "common.h"
 #include "versioned_usb.h"
 
-typedef struct {
+#include "usb_fsm.h"
+
+typedef struct usb_ctx_tag {
     usb_config_t config;
+    usb_fsm_t fsm;
+    bool request_init;
+    bool request_reset;
+    error_t request_errcode;
+
     bool initialized;
     bool configured;
 

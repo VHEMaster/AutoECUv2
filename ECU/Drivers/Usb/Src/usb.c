@@ -6,8 +6,6 @@
  */
 
 #include "usb.h"
-#include "usb_device.h"
-#include "usbd_desc.h"
 
 error_t usb_init(usb_ctx_t *ctx)
 {
@@ -24,10 +22,15 @@ error_t usb_init(usb_ctx_t *ctx)
   return err;
 }
 
+static bool usb_config_matches(const usb_ctx_t *ctx, const usb_config_t *config, const uint32_t uid[3])
+{
+  return ctx->config.enabled == config->enabled && ctx->config.vid == config->vid &&
+      ctx->config.pid == config->pid && memcmp(ctx->uid, uid, sizeof(ctx->uid)) == 0;
+}
+
 error_t usb_configure(usb_ctx_t *ctx, const usb_config_t *config, const uint32_t uid[3])
 {
   error_t err = E_OK;
-  USBD_StatusTypeDef status;
 
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
@@ -35,12 +38,16 @@ error_t usb_configure(usb_ctx_t *ctx, const usb_config_t *config, const uint32_t
     BREAK_IF_ACTION(config == NULL || uid == NULL, err = E_PARAM);
     BREAK_IF_ACTION(config->enabled && (config->vid == 0u || config->pid == 0u), err = E_PARAM);
 
-    BREAK_IF(ctx->configured && config->enabled &&
-        ctx->config.vid == config->vid && ctx->config.pid == config->pid &&
-        memcmp(ctx->uid, uid, sizeof(ctx->uid)) == 0);
+    if(ATOMIC_LOAD(ctx->request_init)) {
+      err = ATOMIC_LOAD(ctx->request_errcode);
+      BREAK_IF(err == E_AGAIN);
 
-    err = usb_reset(ctx);
-    BREAK_IF(err != E_OK);
+      ATOMIC_STORE(ctx->request_init, false);
+      BREAK_IF(!ctx->request_reset && usb_config_matches(ctx, config, uid));
+      err = E_OK;
+    }
+
+    BREAK_IF(ctx->configured && usb_config_matches(ctx, config, uid));
 
     if(&ctx->config != config) {
       memcpy(&ctx->config, config, sizeof(usb_config_t));
@@ -49,14 +56,10 @@ error_t usb_configure(usb_ctx_t *ctx, const usb_config_t *config, const uint32_t
       memcpy(ctx->uid, uid, sizeof(ctx->uid));
     }
 
-    if(ctx->config.enabled) {
-      USBD_FS_SetIdentity(ctx->config.vid, ctx->config.pid, ctx->uid);
-      status = USB_DEVICE_Start();
-      BREAK_IF_ACTION(status != USBD_OK, err = E_FAULT);
-
-      ctx->configured = true;
-
-    }
+    ctx->request_reset = false;
+    ATOMIC_STORE(ctx->request_errcode, E_AGAIN);
+    ATOMIC_STORE(ctx->request_init, true);
+    err = E_AGAIN;
 
   } while(0);
 
@@ -71,9 +74,20 @@ error_t usb_reset(usb_ctx_t *ctx)
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->initialized == false, err = E_INVALACT);
 
+    if(ATOMIC_LOAD(ctx->request_init)) {
+      err = ATOMIC_LOAD(ctx->request_errcode);
+      BREAK_IF(err == E_AGAIN);
+
+      ATOMIC_STORE(ctx->request_init, false);
+      BREAK_IF(ctx->request_reset);
+      err = E_OK;
+    }
+
     if(ctx->configured) {
-      ctx->configured = false;
-      USB_DEVICE_Stop();
+      ctx->request_reset = true;
+      ATOMIC_STORE(ctx->request_errcode, E_AGAIN);
+      ATOMIC_STORE(ctx->request_init, true);
+      err = E_AGAIN;
     }
 
   } while(0);
@@ -83,5 +97,10 @@ error_t usb_reset(usb_ctx_t *ctx)
 
 void usb_loop_main(usb_ctx_t *ctx)
 {
-  (void)ctx;
+  do {
+    BREAK_IF(ctx == NULL || ctx->initialized == false);
+
+    usb_fsm(ctx);
+
+  } while(0);
 }
