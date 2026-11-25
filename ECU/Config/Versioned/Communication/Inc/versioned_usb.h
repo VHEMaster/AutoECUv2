@@ -10,8 +10,6 @@ typedef enum {
 
 typedef struct {
     bool enabled;
-    uint16_t vid;
-    uint16_t pid;
 
     uint32_t align ALIGNED_CACHE;
 }usb_config_v1_t ALIGNED_CACHE;

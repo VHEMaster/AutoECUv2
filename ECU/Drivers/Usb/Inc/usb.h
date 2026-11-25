@@ -12,12 +12,22 @@
 #include "versioned_usb.h"
 #include "usb_fsm.h"
 
-#define USB_RX_BUFFER_SIZE 4096u
-#define USB_TX_BUFFER_SIZE 4096u
-#define USB_PACKET_SIZE 64u
-#define USB_TX_TRANSFER_SIZE 256u
+typedef struct {
+    uint8_t *rx_packet;
+    uint8_t *tx_packet;
+    uint8_t *rx_buffer;
+    uint8_t *tx_buffer;
+    uint32_t rx_packet_size;
+    uint32_t tx_packet_size;
+    uint32_t rx_buffer_size;
+    uint32_t tx_buffer_size;
+
+    uint16_t vid;
+    uint16_t pid;
+}usb_init_ctx_t;
 
 typedef struct usb_ctx_tag {
+    usb_init_ctx_t init;
     usb_config_t config;
     usb_fsm_t fsm;
     bool request_init;
@@ -28,7 +38,6 @@ typedef struct usb_ctx_tag {
     bool configured;
 
     uint32_t uid[3];
-
     bool attached;
     uint32_t generation;
     bool rx_armed;
@@ -42,14 +51,9 @@ typedef struct usb_ctx_tag {
     uint32_t tx_write_pointer;
     uint32_t tx_length;
 
-    uint8_t rx_packet[USB_PACKET_SIZE] ALIGNED(4u);
-    uint8_t tx_packet[USB_TX_TRANSFER_SIZE] ALIGNED(4u);
-    uint8_t rx_buffer[USB_RX_BUFFER_SIZE];
-    uint8_t tx_buffer[USB_TX_BUFFER_SIZE];
-
 }usb_ctx_t;
 
-error_t usb_init(usb_ctx_t *ctx);
+error_t usb_init(usb_ctx_t *ctx, const usb_init_ctx_t *init_ctx);
 error_t usb_configure(usb_ctx_t *ctx, const usb_config_t *config, const uint32_t uid[3]);
 error_t usb_reset(usb_ctx_t *ctx);
 

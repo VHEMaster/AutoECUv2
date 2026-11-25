@@ -237,10 +237,7 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
     lwipdrv_ppp_restart(ctx);
     sys_check_timeouts();
 
-    /* Before link-up either transport can contribute bytes; the last RX
-     * source receives PPP replies. Simultaneous negotiation is unsupported.
-     * After link-up non-owner input is drained, never passed to PPP. */
-    bytes = 512u;
+    bytes = 256u;
     err = rs422_rx_nocopy(ctx->init.rs422_ctx, &buffer, &bytes);
     if(err == E_OK && bytes > 0u) {
       if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&

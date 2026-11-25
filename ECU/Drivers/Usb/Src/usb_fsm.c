@@ -46,7 +46,7 @@ void usb_fsm(usb_ctx_t *ctx)
         ATOMIC_STORE(ctx->request_errcode, err);
         break;
       case USB_FSM_SET_IDENTITY:
-        USBD_FS_SetIdentity(ctx->config.vid, ctx->config.pid, ctx->uid);
+        USBD_FS_SetIdentity(ctx->init.vid, ctx->init.pid, ctx->uid);
 
         ctx->fsm = USB_FSM_INIT;
         continue;

@@ -24,6 +24,17 @@ typedef struct {
 }usb_rpc_config_t;
 
 #ifdef CORE_CM4
+
+#define ECU_COMM_USB_RX_BUFFER_SIZE     (4096u)
+#define ECU_COMM_USB_TX_BUFFER_SIZE     (4096u)
+#define ECU_COMM_USB_RX_PACKET_SIZE     (64u)
+#define ECU_COMM_USB_TX_TRANSFER_SIZE   (256u)
+
+static uint8_t ecu_comm_usb_rx_packet[ECU_COMM_USB_RX_PACKET_SIZE];
+static uint8_t ecu_comm_usb_tx_packet[ECU_COMM_USB_TX_TRANSFER_SIZE];
+static RAM_D3_SECTION ALIGNED(4) uint8_t ecu_comm_usb_rx_buffer[ECU_COMM_USB_RX_BUFFER_SIZE];
+static RAM_D3_SECTION ALIGNED(4) uint8_t ecu_comm_usb_tx_buffer[ECU_COMM_USB_TX_BUFFER_SIZE];
+
 static error_t ecu_comm_usb_rpc_executor_configure_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
 static error_t ecu_comm_usb_rpc_executor_configure_execute(uint32_t *p_resp_count, error_t *p_result, void *usrdata);
 static error_t ecu_comm_usb_rpc_executor_reset_unpack(uint32_t arg_index, const void *buffer, uint32_t capacity, uint32_t *p_pos, void *usrdata);
@@ -38,6 +49,7 @@ typedef struct ecu_comm_usb_ctx_tag {
     usb_rpc_config_t rpc_config;
 #endif /* CORE_CM7 */
 #ifdef CORE_CM4
+    usb_init_ctx_t init;
     usb_ctx_t *ctx;
 
     ecu_comm_instance_t rpc_instance;
@@ -48,9 +60,7 @@ typedef struct ecu_comm_usb_ctx_tag {
 #ifdef CORE_CM7
 static const usb_config_t ecu_comm_usb_default_config[ECU_COMM_USB_MAX] = {
   {
-      /* Existing development IDs; use allocated VID/PID for production. */
-      .vid = 0x0483u,
-      .pid = 0x5740u,
+
   }, //ECU_USB_IF_1
 };
 
@@ -61,9 +71,22 @@ static const bool ecu_comm_usb_enabled_default[ECU_COMM_USB_MAX] = {
 
 static RAM_SECTION ecu_comm_usb_ctx_t ecu_comm_usb_ctx[ECU_COMM_USB_MAX] = {
     {
-
+#ifdef CORE_CM4
+        .init = {
+            .rx_packet = ecu_comm_usb_rx_packet,
+            .tx_packet = ecu_comm_usb_tx_packet,
+            .rx_buffer = ecu_comm_usb_rx_buffer,
+            .tx_buffer = ecu_comm_usb_tx_buffer,
+            .rx_packet_size = sizeof(ecu_comm_usb_rx_packet),
+            .tx_packet_size = sizeof(ecu_comm_usb_tx_packet),
+            .rx_buffer_size = sizeof(ecu_comm_usb_rx_buffer),
+            .tx_buffer_size = sizeof(ecu_comm_usb_tx_buffer),
+            .vid = 0x0483u,
+            .pid = 0x5740u,
+        },
+#endif /* CORE_CM4 */
 #ifdef CORE_CM7
-      .config_default = &ecu_comm_usb_default_config[ECU_COMM_USB_1],
+        .config_default = &ecu_comm_usb_default_config[ECU_COMM_USB_1],
 #endif /* CORE_CM7 */
     },
 };
@@ -80,7 +103,7 @@ error_t ecu_comm_usb_init(ecu_comm_usb_t instance, usb_ctx_t *ctx)
     usb_ctx = &ecu_comm_usb_ctx[instance];
     usb_ctx->ctx = ctx;
 
-    err = usb_init(usb_ctx->ctx);
+    err = usb_init(usb_ctx->ctx, &usb_ctx->init);
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_set_comm_enabled(ECU_COMM_TYPE_USB, instance, false);

@@ -28,7 +28,6 @@ void usb_clear(usb_ctx_t *ctx)
   ctx->tx_length = 0u;
 }
 
-/* Unsigned counters preserve the full capacity of the power-of-two rings. */
 void usb_ring_write(uint8_t *ring, uint32_t capacity, uint32_t offset, const void *data, uint32_t length)
 {
   uint32_t position = offset & (capacity - 1u);
@@ -54,47 +53,56 @@ void usb_ring_read(const uint8_t *ring, uint32_t capacity, uint32_t offset, void
 void usb_arm_rx(usb_ctx_t *ctx, USBD_HandleTypeDef *pdev)
 {
   uint32_t used;
+  uint32_t prim;
+
+  prim = EnterCritical();
 
   do {
     BREAK_IF(ctx->rx_armed || ATOMIC_LOAD(ctx->attached) == false);
 
     used = ctx->rx_write_pointer - ctx->rx_read_pointer;
-    BREAK_IF(USB_RX_BUFFER_SIZE - used < USB_PACKET_SIZE);
-    BREAK_IF(USBD_VENDOR_Receive(pdev, ctx->rx_packet, USB_PACKET_SIZE) != USBD_OK);
+    BREAK_IF(ctx->init.rx_buffer_size - used < ctx->init.rx_packet_size);
+    BREAK_IF(USBD_VENDOR_Receive(pdev, ctx->init.rx_packet, ctx->init.rx_packet_size) != USBD_OK);
 
     ctx->rx_armed = true;
 
   } while(0);
+
+  ExitCritical(prim);
 }
 
 void usb_start_tx(usb_ctx_t *ctx, USBD_HandleTypeDef *pdev)
 {
   uint32_t length;
+  uint32_t prim;
 
+  prim = EnterCritical();
   do {
     BREAK_IF(ctx->tx_busy || ATOMIC_LOAD(ctx->attached) == false);
     BREAK_IF(pdev->dev_state != USBD_STATE_CONFIGURED);
 
-    length = MIN(ctx->tx_write_pointer - ctx->tx_read_pointer, USB_TX_TRANSFER_SIZE);
+    length = MIN(ctx->tx_write_pointer - ctx->tx_read_pointer, ctx->init.tx_packet_size);
     BREAK_IF(length == 0u && ctx->tx_zlp == false);
 
     if(length > 0u) {
-      usb_ring_read(ctx->tx_buffer, USB_TX_BUFFER_SIZE, ctx->tx_read_pointer, ctx->tx_packet, length);
+      usb_ring_read(ctx->init.tx_buffer, ctx->init.tx_buffer_size, ctx->tx_read_pointer, ctx->init.tx_packet, length);
     }
 
-    BREAK_IF(USBD_VENDOR_Transmit(pdev, ctx->tx_packet, length) != USBD_OK);
+    BREAK_IF(USBD_VENDOR_Transmit(pdev, ctx->init.tx_packet, length) != USBD_OK);
 
     ctx->tx_length = length;
     ctx->tx_busy = true;
     ctx->tx_zlp = false;
 
   } while(0);
+
+  ExitCritical(prim);
 }
 
 bool usb_config_matches(const usb_ctx_t *ctx, const usb_config_t *config, const uint32_t uid[3])
 {
-  return ctx->config.enabled == config->enabled && ctx->config.vid == config->vid &&
-      ctx->config.pid == config->pid && memcmp(ctx->uid, uid, sizeof(ctx->uid)) == 0;
+  return ctx->config.enabled == config->enabled &&
+    memcmp(ctx->uid, uid, sizeof(ctx->uid)) == 0;
 }
 
 
@@ -142,9 +150,9 @@ void USBD_VENDOR_Received(USBD_HandleTypeDef *pdev, uint32_t length)
 
     ctx->rx_armed = false;
     used = ctx->rx_write_pointer - ctx->rx_read_pointer;
-    BREAK_IF(length == 0u || length > USB_PACKET_SIZE || length > USB_RX_BUFFER_SIZE - used);
+    BREAK_IF(length == 0u || length > ctx->init.rx_packet_size || length > ctx->init.rx_buffer_size - used);
 
-    usb_ring_write(ctx->rx_buffer, USB_RX_BUFFER_SIZE, ctx->rx_write_pointer, ctx->rx_packet, length);
+    usb_ring_write(ctx->init.rx_buffer, ctx->init.rx_buffer_size, ctx->rx_write_pointer, ctx->init.rx_packet, length);
     ctx->rx_write_pointer += length;
 
   } while(0);
@@ -160,7 +168,7 @@ void USBD_VENDOR_Transmitted(USBD_HandleTypeDef *pdev)
     BREAK_IF(ctx == NULL || ctx->tx_busy == false);
 
     ctx->tx_read_pointer += ctx->tx_length;
-    ctx->tx_zlp = ctx->tx_length != 0u && (ctx->tx_length % USB_PACKET_SIZE) == 0u;
+    ctx->tx_zlp = ctx->tx_length != 0u && (ctx->tx_length % ctx->init.rx_packet_size) == 0u;
     ctx->tx_length = 0u;
     ctx->tx_busy = false;
 
