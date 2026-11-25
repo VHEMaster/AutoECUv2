@@ -66,7 +66,6 @@
 									<listOptionValue builtIn="false" value="../USB_DEVICE/Target"/>
 									<listOptionValue builtIn="false" value="../../usbd-static/Inc"/>
 									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/ISOTP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/DoIP/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Communication/OBD2/Inc"/>
@@ -79,6 +78,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Drivers/Usb/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Communication/Inc"/>
@@ -214,6 +214,7 @@
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Gpio/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Can/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Drivers/Rs422/Inc"/>
+									<listOptionValue builtIn="false" value="../../ECU/Drivers/Usb/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Communication/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Versioned/Calibration/Inc"/>
 									<listOptionValue builtIn="false" value="../../ECU/Config/Communication/Inc"/>

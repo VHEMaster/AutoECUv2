@@ -74,6 +74,7 @@
 #include "config_rs422.h"
 #include "config_lwipdrv.h"
 #include "config_doip.h"
+#include "config_usb.h"
 
 #include "config_engine.h"
 #include "config_common.h"
@@ -168,6 +169,7 @@ typedef enum {
   ECU_CONFIG_COMM_TYPE_RS422,
   ECU_CONFIG_COMM_TYPE_LWIPDRV,
   ECU_CONFIG_COMM_TYPE_DOIP,
+  ECU_CONFIG_COMM_TYPE_USB,
   ECU_CONFIG_COMM_TYPE_ALL,
   ECU_CONFIG_COMM_TYPE_MAX
 }ecu_config_comm_type_t;

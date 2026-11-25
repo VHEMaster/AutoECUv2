@@ -76,6 +76,9 @@
 
 /** USB Device initialization function. */
 void MX_USB_DEVICE_Init(void);
+USBD_StatusTypeDef USB_DEVICE_Start(void);
+void USB_DEVICE_Stop(void);
+extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /*
  * -- Insert functions declaration here --

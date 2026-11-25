@@ -22,7 +22,6 @@
 #include "main.h"
 #include "usbd_def.h"
 #include "usbd_core.h"
-#include "usbd_cdc.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -353,7 +352,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
   if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
   {
-    Error_Handler( );
+    return USBD_FAIL;
   }
 
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
@@ -627,27 +626,6 @@ USBD_StatusTypeDef USBD_LL_SetTestMode(USBD_HandleTypeDef *pdev, uint8_t testmod
   return USBD_OK;
 }
 #endif /* USBD_HS_TESTMODE_ENABLE */
-/**
-  * @brief  Static single allocation.
-  * @param  size: Size of allocated memory
-  * @retval None
-  */
-void *USBD_static_malloc(uint32_t size)
-{
-  UNUSED(size);
-  static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
-  return mem;
-}
-
-/**
-  * @brief  Dummy memory free
-  * @param  p: Pointer to allocated  memory address
-  * @retval None
-  */
-void USBD_static_free(void *p)
-{
-  UNUSED(p);
-}
 
 /**
   * @brief  Delays routine for the USB device library.

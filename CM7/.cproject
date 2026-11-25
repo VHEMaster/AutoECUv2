@@ -172,7 +172,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Drivers/Usb|Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 					</sourceEntries>
@@ -347,7 +347,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
+						<entry excluding="Drivers/Usb|Drivers/Rs422|MiddleLayer/Src/middlelayer_comm.c|Drivers/Can|Communication" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ECU"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Multicore"/>
 					</sourceEntries>

@@ -860,6 +860,14 @@ static const flash_mem_layout_section_info_t flash_mem_layout_sections[] = {
         .uses_full_block = false,
     },
     {
+        .section_type = FLASH_SECTION_TYPE_COMM_USB,
+        .section_index = ECU_COMM_USB_1,
+        .section_length = ECU_FLASH_SECTOR_SIZE,
+        .block_index = 11,
+        .sector_index = 6,
+        .uses_full_block = false,
+    },
+    {
         .section_type = FLASH_SECTION_TYPE_TIMING_BASE,
         .section_index = ECU_TIMING_BASE_1,
         .section_length = ECU_FLASH_SECTOR_SIZE,

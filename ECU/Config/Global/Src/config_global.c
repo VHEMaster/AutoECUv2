@@ -934,6 +934,26 @@ static const ecu_config_device_config_t ecu_config_global_comms_config[ECU_CONFI
           },
       }
     }, //ECU_CONFIG_COMM_TYPE_DOIP
+    {
+      .device_type = ECU_COMM_TYPE_USB,
+      .instances_count = ECU_COMM_USB_MAX,
+      .configure_func = (ecu_config_configure_func_t)ecu_comm_usb_configure,
+      .reset_func = (ecu_config_reset_func_t)ecu_comm_usb_reset,
+      .generic = {
+          .flash_section_type = FLASH_SECTION_TYPE_COMM_USB,
+          .get_default_cfg_func = (ecu_config_get_default_cfg_func_t)ecu_comm_usb_get_default_config,
+          .data_ptr = &ecu_config_global_engine.comm.usb[0],
+          .data_size = sizeof(ecu_config_global_engine.comm.usb[0]),
+          .versions_count = USB_CONFIG_VERSION_MAX,
+          .versions = {
+              {
+                  .version = USB_CONFIG_VERSION_V1,
+                  .size = sizeof(usb_config_v1_t),
+                  .translate_func = NULL,
+              }
+          },
+      }
+    }, //ECU_CONFIG_COMM_TYPE_USB
 };
 
 static ecu_config_executive_ctx_t ecu_config_global_flash_ctx;

@@ -61,30 +61,31 @@ USBD_HandleTypeDef hUsbDeviceFS;
   * Init USB device Library, add supported class and start the library
   * @retval None
   */
-void MX_USB_DEVICE_Init(void)
+USBD_StatusTypeDef USB_DEVICE_Start(void)
 {
-  /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
-
-  /* USER CODE END USB_DEVICE_Init_PreTreatment */
-
-  /* Init Device Library, add supported class and start the library. */
-  if (USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK)
-  {
-    Error_Handler();
-  }
-  if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_VENDOR) != USBD_OK)
-  {
-    Error_Handler();
-  }
-  if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
-  {
-    Error_Handler();
-  }
-
-  /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
   HAL_PWREx_EnableUSBVoltageDetector();
 
-  /* USER CODE END USB_DEVICE_Init_PostTreatment */
+  if(USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK) {
+    return USBD_FAIL;
+  }
+
+  if(USBD_RegisterClass(&hUsbDeviceFS, &USBD_VENDOR) != USBD_OK ||
+      USBD_Start(&hUsbDeviceFS) != USBD_OK) {
+    USBD_DeInit(&hUsbDeviceFS);
+    return USBD_FAIL;
+  }
+  return USBD_OK;
+}
+
+void USB_DEVICE_Stop(void)
+{
+  USBD_Stop(&hUsbDeviceFS);
+  USBD_DeInit(&hUsbDeviceFS);
+}
+
+void MX_USB_DEVICE_Init(void)
+{
+  if(USB_DEVICE_Start() != USBD_OK) Error_Handler();
 }
 
 /**

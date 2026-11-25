@@ -18,6 +18,7 @@
 #include "config_rs422.h"
 #include "config_lwipdrv.h"
 #include "config_doip.h"
+#include "config_usb.h"
 
 #include "compiler.h"
 
@@ -139,6 +140,16 @@ void middlelayer_comm_init(void)
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
 
       err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_RS422, i, true);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+    }
+    BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+
+    for(int i = 0; i < ECU_COMM_USB_MAX; i++) {
+      err = ecu_comm_get_comm_ctx(ECU_COMM_TYPE_USB, i, &comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+      err = ecu_comm_usb_init(i, (usb_ctx_t *)comm_ctx);
+      BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
+      err = ecu_comm_set_comm_initialized(ECU_COMM_TYPE_USB, i, true);
       BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
     }
     BREAK_IF_ACTION(err != E_OK, BREAKPOINT(0));
