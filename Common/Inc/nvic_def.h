@@ -61,5 +61,8 @@
 #define NVIC_PRIO_CM4_TO_CM7_EV 15
 #define NVIC_PRIO_CORE_HOLD 15
 #define NVIC_PRIO_FLASH 15
+#define NVIC_PRIO_USB 9
+#define NVIC_PRIO_USB_EP1_IN 9
+#define NVIC_PRIO_USB_EP1_OUT 9
 
 #endif /* INC_NVIC_DEF_H_ */

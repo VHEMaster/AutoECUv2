@@ -19,8 +19,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32h7xx.h"
-#include "stm32h7xx_hal.h"
+#include "main.h"
 #include "usbd_def.h"
 #include "usbd_core.h"
 #include "usbd_cdc.h"
@@ -83,7 +82,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_FS;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -92,11 +91,11 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
     __HAL_RCC_USB_OTG_FS_CLK_ENABLE();
 
     /* Peripheral interrupt init */
-    HAL_NVIC_SetPriority(OTG_FS_EP1_OUT_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(OTG_FS_EP1_OUT_IRQn, NVIC_PRIO_USB_EP1_OUT, 0);
     HAL_NVIC_EnableIRQ(OTG_FS_EP1_OUT_IRQn);
-    HAL_NVIC_SetPriority(OTG_FS_EP1_IN_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(OTG_FS_EP1_IN_IRQn, NVIC_PRIO_USB_EP1_IN, 0);
     HAL_NVIC_EnableIRQ(OTG_FS_EP1_IN_IRQn);
-    HAL_NVIC_SetPriority(OTG_FS_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(OTG_FS_IRQn, NVIC_PRIO_USB, 0);
     HAL_NVIC_EnableIRQ(OTG_FS_IRQn);
   /* USER CODE BEGIN USB_OTG_FS_MspInit 1 */
 
