@@ -148,24 +148,22 @@ USBD_DescriptorsTypeDef FS_Desc =
 /** USB standard device descriptor. */
 __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 {
-  0x12,                       /*bLength */
-  USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
-  0x10,                       /*bcdUSB */
-  0x02,
-  0x00,                       /*bDeviceClass*/
-  0x00,                       /*bDeviceSubClass*/
-  0x00,                       /*bDeviceProtocol*/
-  USB_MAX_EP0_SIZE,           /*bMaxPacketSize*/
-  LOBYTE(USBD_VID),           /*idVendor*/
-  HIBYTE(USBD_VID),           /*idVendor*/
-  LOBYTE(USBD_PID_FS),        /*idProduct*/
-  HIBYTE(USBD_PID_FS),        /*idProduct*/
-  0x01,                       /*bcdDevice rel. 2.01*/
-  0x02,
-  USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
-  USBD_IDX_PRODUCT_STR,       /*Index of product string*/
-  0,                          /* Serial supplied by CM7 before enumeration */
-  USBD_MAX_NUM_CONFIGURATION  /*bNumConfigurations*/
+  0x12,                        /* bLength: device descriptor size in bytes. */
+  USB_DESC_TYPE_DEVICE,        /* bDescriptorType: Device. */
+  0x10, 0x02,                  /* bcdUSB: USB 2.10, including BOS support. */
+  0x00,                        /* bDeviceClass: class is specified by the interface. */
+  0x00,                        /* bDeviceSubClass: zero for interface-level class. */
+  0x00,                        /* bDeviceProtocol: zero for interface-level class. */
+  USB_MAX_EP0_SIZE,            /* bMaxPacketSize0: EP0 maximum packet size in bytes. */
+  LOBYTE(USBD_VID),            /* idVendor: low byte of default VID from USBD_VID. */
+  HIBYTE(USBD_VID),            /* idVendor: high byte, both bytes set by USBD_FS_SetIdentity. */
+  LOBYTE(USBD_PID_FS),         /* idProduct: low byte of default PID from USBD_PID_FS. */
+  HIBYTE(USBD_PID_FS),         /* idProduct: high byte, both bytes set by USBD_FS_SetIdentity. */
+  0x02, 0x02,                  /* bcdDevice: device release 2.02 in BCD. */
+  USBD_IDX_MFC_STR,            /* iManufacturer: manufacturer string index. */
+  USBD_IDX_PRODUCT_STR,        /* iProduct: product string index. */
+  0,                           /* iSerialNumber: set by USBD_FS_SetIdentity before enumeration. */
+  USBD_MAX_NUM_CONFIGURATION   /* bNumConfigurations: number of available configurations. */
 };
 
 /* USB_DeviceDescriptor */
@@ -186,24 +184,25 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 /** USB lang identifier descriptor. */
 __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END =
 {
-     USB_LEN_LANGID_STR_DESC,
-     USB_DESC_TYPE_STRING,
-     LOBYTE(USBD_LANGID_STRING),
-     HIBYTE(USBD_LANGID_STRING)
+  USB_LEN_LANGID_STR_DESC,      /* bLength: header and one 16-bit language ID. */
+  USB_DESC_TYPE_STRING,        /* bDescriptorType: String (index zero lists language IDs). */
+  LOBYTE(USBD_LANGID_STRING),   /* wLANGID: low byte of 0x0409 (English, United States). */
+  HIBYTE(USBD_LANGID_STRING)    /* wLANGID: high byte. */
 };
 
 #if defined ( __ICCARM__ ) /* IAR Compiler */
   #pragma data_alignment=4
 #endif /* defined ( __ICCARM__ ) */
-/* Internal string descriptor. */
+/* USBD_GetString writes the length, type and UTF-16LE text from the USBD_*_STRING* defines. */
 __ALIGN_BEGIN uint8_t USBD_StrDesc[USBD_MAX_STR_DESC_SIZ] __ALIGN_END;
 
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
   #pragma data_alignment=4
 #endif
 __ALIGN_BEGIN uint8_t USBD_StringSerial[USB_SIZ_STRING_SERIAL] __ALIGN_END = {
-  USB_SIZ_STRING_SERIAL,
-  USB_DESC_TYPE_STRING,
+  USB_SIZ_STRING_SERIAL,       /* bLength: header plus 24 UTF-16LE hex characters. */
+  USB_DESC_TYPE_STRING,        /* bDescriptorType: String. */
+  /* USBD_FS_SetIdentity fills the text from the three UID words. */
 };
 
 /**

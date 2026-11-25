@@ -2,10 +2,38 @@
 #include "usbd_ctlreq.h"
 
 static uint8_t config_desc[] = {
-  9, USB_DESC_TYPE_CONFIGURATION, 32, 0, 1, 1, 0, 0xC0, 0,
-  9, USB_DESC_TYPE_INTERFACE, 0, 0, 2, 0xFF, 0, 0, 0,
-  7, USB_DESC_TYPE_ENDPOINT, USBD_VENDOR_EP_OUT, 2, USBD_VENDOR_MPS, 0, 0,
-  7, USB_DESC_TYPE_ENDPOINT, USBD_VENDOR_EP_IN, 2, USBD_VENDOR_MPS, 0, 0
+  9,                              /* bLength: configuration header size in bytes. */
+  USB_DESC_TYPE_CONFIGURATION,    /* bDescriptorType: Configuration. */
+  32, 0,                          /* wTotalLength: 9-byte configuration + 9-byte interface + two 7-byte endpoints. */
+  1,                              /* bNumInterfaces: one interface. */
+  1,                              /* bConfigurationValue: value used in SET_CONFIGURATION. */
+  0,                              /* iConfiguration: no configuration string index. */
+  0xC0,                           /* bmAttributes: mandatory bit 7 and self-powered bit 6. */
+  0,                              /* bMaxPower: zero bus power, in 2 mA units. */
+
+  9,                              /* bLength: interface descriptor size in bytes. */
+  USB_DESC_TYPE_INTERFACE,        /* bDescriptorType: Interface. */
+  0,                              /* bInterfaceNumber: interface 0. */
+  0,                              /* bAlternateSetting: default setting. */
+  2,                              /* bNumEndpoints: two endpoints beyond EP0. */
+  0xFF,                           /* bInterfaceClass: vendor-specific. */
+  0,                              /* bInterfaceSubClass: zero. */
+  0,                              /* bInterfaceProtocol: zero. */
+  0,                              /* iInterface: no interface string index. */
+
+  7,                              /* bLength: endpoint descriptor size in bytes. */
+  USB_DESC_TYPE_ENDPOINT,         /* bDescriptorType: Endpoint. */
+  USBD_VENDOR_EP_OUT,             /* bEndpointAddress: endpoint 1 OUT. */
+  2,                              /* bmAttributes: bulk transfer. */
+  USBD_VENDOR_MPS, 0,             /* wMaxPacketSize: full-speed bulk maximum in bytes. */
+  0,                              /* bInterval: unused for full-speed bulk. */
+
+  7,                              /* bLength: endpoint descriptor size in bytes. */
+  USB_DESC_TYPE_ENDPOINT,         /* bDescriptorType: Endpoint. */
+  USBD_VENDOR_EP_IN,              /* bEndpointAddress: endpoint 1 IN. */
+  2,                              /* bmAttributes: bulk transfer. */
+  USBD_VENDOR_MPS, 0,             /* wMaxPacketSize: full-speed bulk maximum in bytes. */
+  0                               /* bInterval: unused for full-speed bulk. */
 };
 
 static uint8_t *vendor_get_config(uint16_t *length)
