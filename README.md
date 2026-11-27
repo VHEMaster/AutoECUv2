@@ -139,6 +139,22 @@ After PPP negotiation, `ping 10.77.0.2` checks IPv4 connectivity. The 512-byte f
 
 In `master`, the serial link provides IP connectivity. The implemented OBD-II and UDS services use the CAN diagnostic path. DoIP integration with LwIPDrv and Router is being developed on [dev/ai/doip](https://github.com/VHEMaster/AutoECUv2/tree/dev/ai/doip).
 
+### TunerStudio integration (planned)
+
+Integration with [TunerStudio](https://www.tunerstudio.com/) is planned as an additional tuning and calibration interface for AutoECUv2. The goal is to let users configure and tune the ECU using familiar third-party software without replacing the existing communication and diagnostic interfaces.
+
+The initial [TunerStudio component](ECU/Communication/TunerStudio) provides TCP/IP and direct RS-422 transport scaffolds on CM4, alongside DoIP, with versioned configuration and inter-core configuration/reset RPC. Both transports can be enabled independently, with a configurable TCP port (2000 by default) and a selectable RS-422 instance. Direct RS-422 does not require PPP and reserves the selected physical port; PPP over USB remains available for TCP/IP and DoIP. LwIPDrv independently enables RS-422 and USB. TunerStudio arbitrates the two streams and routes replies to the originating transport. The dedicated protocol module (`tunerstudio_protocol.c`) currently echoes raw bytes from either transport for testing; it does not yet implement the TunerStudio protocol.
+
+Planned functionality includes:
+
+- ECU identification and a TunerStudio-compatible request/reply protocol over direct RS-422 and TCP/IP.
+- ECU Definition (`.ini`) files describing configuration parameters, calibration tables, axes, units, and data types, with generation from firmware metadata where practical.
+- Live engine parameters, dashboard channels, and data logging using the existing runtime parameter infrastructure.
+- Reading and editing configuration values, curves, and calibration maps, with controlled application and persistent storage through CM7.
+- Integration of selected ECU calibration and diagnostic routines.
+
+TunerStudio compatibility is a development goal, not a currently supported or validated tuning workflow. The existing ECU configuration and diagnostic interfaces will remain independent of this integration.
+
 ## Repository layout
 
 | Path | Contents |
@@ -230,6 +246,7 @@ Areas for further work include:
 - DSP processing of knock-window samples, including filtering and frequency-domain analysis.
 - Completion of VVT control and additional diagnostic services.
 - DoIP validation and interoperability and throughput testing for the RS-422 PPPoS link.
+- TunerStudio integration for ECU configuration, calibration, live monitoring, and data logging.
 - Broader interoperability and regression testing of Classic CAN / CAN FD, signal routing, and ISO-TP boundary cases.
 - Larger ISO-TP payload buffers and API/storage changes if transfers beyond the current 1024-byte limit are needed.
 - Development of KWP support beyond the current API groundwork.
