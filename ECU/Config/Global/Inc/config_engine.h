@@ -88,6 +88,7 @@ typedef struct {
     lwipdrv_config_t lwipdrv[ECU_COMM_LWIPDRV_MAX];
     doip_config_t doip[ECU_COMM_DOIP_MAX];
     usb_config_t usb[ECU_COMM_USB_MAX];
+    tunerstudio_config_t tunerstudio[ECU_COMM_TUNERSTUDIO_MAX];
 
 }ecu_config_engine_comm_t;
 

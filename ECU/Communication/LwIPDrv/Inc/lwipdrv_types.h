@@ -14,6 +14,7 @@
 #include "usb.h"
 #include "lwipdrv_arbiter.h"
 #include "doip_lwip.h"
+#include "tunerstudio_lwip.h"
 #include "versioned_lwipdrv.h"
 #include "config_comm_types.h"
 
@@ -31,6 +32,7 @@ typedef struct {
     rs422_ctx_t *rs422_ctx;
     usb_ctx_t *usb_ctx;
     doip_ctx_t *doip_ctx;
+    tunerstudio_ctx_t *tunerstudio_ctx;
 }lwipdrv_init_ctx_t;
 
 typedef struct {
@@ -44,6 +46,8 @@ typedef struct {
     bool restart_pending;
     bool close_pending;
     bool no_carrier;
+    bool rs422_reserved;
+    bool rs422_switch_pending;
     uint32_t usb_generation;
     lwipdrv_arbiter_t arbiter;
 
@@ -54,11 +58,13 @@ typedef struct lwipdrv_ctx_tag {
     lwipdrv_init_ctx_t init;
     bool initialized;
     bool configured;
+    ATOMIC_LOCK_TYPE lock;
 
     bool reset_trigger;
 
     lwipdrv_lwip_ctx_t lwip;
     doip_lwip_ctx_t doip;
+    tunerstudio_lwip_ctx_t tunerstudio;
 
 }lwipdrv_ctx_t;
 

@@ -20,6 +20,7 @@
 #include "rs422.h"
 #include "lwipdrv.h"
 #include "doip.h"
+#include "tunerstudio.h"
 #include "usb.h"
 #endif /* CORE_CM4 */
 
@@ -50,6 +51,7 @@ error_t ecu_comm_get_signals_ctx(ecu_comm_signals_t instance, signals_ctx_t **ct
 error_t ecu_comm_get_rs422_ctx(ecu_comm_rs422_t instance, rs422_ctx_t **ctx);
 error_t ecu_comm_get_lwipdrv_ctx(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t **ctx);
 error_t ecu_comm_get_doip_ctx(ecu_comm_doip_t instance, doip_ctx_t **ctx);
+error_t ecu_comm_get_tunerstudio_ctx(ecu_comm_tunerstudio_t instance, tunerstudio_ctx_t **ctx);
 error_t ecu_comm_get_usb_ctx(ecu_comm_usb_t instance, usb_ctx_t **ctx);
 #endif /* CORE_CM4 */
 

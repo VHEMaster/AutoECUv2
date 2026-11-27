@@ -22,7 +22,8 @@
     ECU_COMM_RS422_MAX    + \
     ECU_COMM_LWIPDRV_MAX  + \
     ECU_COMM_DOIP_MAX     + \
-    ECU_COMM_USB_MAX)
+    ECU_COMM_USB_MAX      + \
+    ECU_COMM_TUNERSTUDIO_MAX)
 
 typedef enum {
   ECU_COMM_LOOP_TYPE_MAIN = 0,
@@ -82,6 +83,7 @@ static RAM_SECTION rs422_ctx_t ecu_config_rs422_ctx[ECU_COMM_RS422_MAX] = {0};
 static RAM_SECTION lwipdrv_ctx_t ecu_config_lwipdrv_ctx[ECU_COMM_LWIPDRV_MAX] = {0};
 static RAM_D3_SECTION doip_ctx_t ecu_config_doip_ctx[ECU_COMM_DOIP_MAX] = {0};
 static RAM_SECTION usb_ctx_t ecu_config_usb_ctx[ECU_COMM_USB_MAX] = {0};
+static RAM_SECTION tunerstudio_ctx_t ecu_config_tunerstudio_ctx[ECU_COMM_TUNERSTUDIO_MAX] = {0};
 
 static const ecu_config_comm_config_t ecu_config_comm = {
     .interfaces = {
@@ -149,6 +151,12 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .loop_main = (ecu_comm_loop_func_t)usb_loop_main,
             .instance_max = ECU_COMM_USB_MAX,
         }, //ECU_COMM_TYPE_USB
+        {
+            .loop_slow = (ecu_comm_loop_func_t)NULL,
+            .loop_main = (ecu_comm_loop_func_t)tunerstudio_loop_main,
+            .loop_comm = (ecu_comm_loop_func_t)NULL,
+            .instance_max = ECU_COMM_TUNERSTUDIO_MAX,
+        }, //ECU_COMM_TYPE_TUNERSTUDIO
     },
     .comm = {
         {
@@ -230,6 +238,11 @@ static const ecu_config_comm_config_t ecu_config_comm = {
             .type = ECU_COMM_TYPE_USB,
             .instance = ECU_COMM_USB_1,
             .ctx = &ecu_config_usb_ctx[ECU_COMM_USB_1],
+        },
+        {
+            .type = ECU_COMM_TYPE_TUNERSTUDIO,
+            .instance = ECU_COMM_TUNERSTUDIO_1,
+            .ctx = &ecu_config_tunerstudio_ctx[ECU_COMM_TUNERSTUDIO_1],
         },
     },
 };
@@ -532,6 +545,11 @@ error_t ecu_comm_get_lwipdrv_ctx(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t **ct
 error_t ecu_comm_get_doip_ctx(ecu_comm_doip_t instance, doip_ctx_t **ctx)
 {
   return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_DOIP, instance, (void**)ctx);
+}
+
+error_t ecu_comm_get_tunerstudio_ctx(ecu_comm_tunerstudio_t instance, tunerstudio_ctx_t **ctx)
+{
+  return ecu_comm_get_comm_ctx(ECU_COMM_TYPE_TUNERSTUDIO, instance, (void**)ctx);
 }
 
 error_t ecu_comm_get_usb_ctx(ecu_comm_usb_t instance, usb_ctx_t **ctx)

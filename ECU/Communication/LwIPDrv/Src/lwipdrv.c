@@ -6,6 +6,7 @@
  */
 
 #include "lwipdrv.h"
+#include "tunerstudio_rs422.h"
 #include "time.h"
 #include "usbd_vendor_requests.h"
 
@@ -19,9 +20,15 @@ static uint32_t lwipdrv_ppp_output_cb(ppp_pcb *pcb, const void *data, uint32_t l
 
   switch(lwipdrv_arbiter_tx(&ctx->lwip.arbiter)) {
     case LWIPDRV_TRANSPORT_RS422:
+      if(ctx->config.rs422_enabled == false || ctx->lwip.rs422_reserved || ctx->lwip.rs422_switch_pending) {
+        return 0u;
+      }
       err = rs422_tx(ctx->init.rs422_ctx, data, len);
       break;
     case LWIPDRV_TRANSPORT_USB:
+      if(ctx->config.usb_enabled == false) {
+        return 0u;
+      }
       err = usb_tx(ctx->init.usb_ctx, data, len);
       break;
     default:
@@ -96,6 +103,7 @@ error_t lwipdrv_init(lwipdrv_ctx_t *ctx, const lwipdrv_init_ctx_t *init)
     BREAK_IF_ACTION(ctx->lwip.ppp == NULL, err = E_FAULT);
 
     doip_lwip_init(&ctx->doip, ctx->init.doip_ctx, &ctx->lwip.ppp_netif);
+    tunerstudio_lwip_init(&ctx->tunerstudio, ctx->init.tunerstudio_ctx, &ctx->lwip.ppp_netif);
 
     ctx->initialized = true;
 
@@ -114,9 +122,12 @@ error_t lwipdrv_configure(lwipdrv_ctx_t *ctx, const lwipdrv_config_t *config)
     BREAK_IF_ACTION(config == NULL, err = E_PARAM);
 
     BREAK_IF_ACTION(config->lcp_echo_enabled && config->lcp_echo_interval == 0u, err = E_PARAM);
+    BREAK_IF_ACTION(!ATOMIC_TRY_LOCK(ctx->lock), err = E_AGAIN);
+
     memcpy(&ctx->config, config, sizeof(lwipdrv_config_t));
     ctx->configured = ctx->config.enabled;
     ctx->reset_trigger = true;
+    ATOMIC_RELEASE(ctx->lock);
 
   } while(0);
 
@@ -135,6 +146,7 @@ static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
       ctx->lwip.link_up = false;
       lwipdrv_arbiter_close(&ctx->lwip.arbiter);
       doip_lwip_stop(&ctx->doip);
+      tunerstudio_lwip_stop(&ctx->tunerstudio);
     }
     BREAK_IF(!ctx->lwip.restart_pending);
 
@@ -149,7 +161,7 @@ static void lwipdrv_ppp_restart(lwipdrv_ctx_t *ctx)
     ctx->lwip.no_carrier = false;
     lwipdrv_arbiter_reset(&ctx->lwip.arbiter);
     ctx->lwip.link_up = false;
-    if(!ctx->configured) {
+    if(!ctx->configured || (!ctx->config.rs422_enabled && !ctx->config.usb_enabled)) {
       ctx->lwip.restart_pending = false;
       break;
     }
@@ -179,8 +191,10 @@ error_t lwipdrv_reset(lwipdrv_ctx_t *ctx)
   do {
     BREAK_IF_ACTION(ctx == NULL, err = E_PARAM);
     BREAK_IF_ACTION(ctx->configured == false, err = E_INVALACT);
+    BREAK_IF_ACTION(!ATOMIC_TRY_LOCK(ctx->lock), err = E_AGAIN);
 
     ctx->reset_trigger = true;
+    ATOMIC_RELEASE(ctx->lock);
 
   } while(0);
 
@@ -205,6 +219,46 @@ void lwipdrv_loop_comm(lwipdrv_ctx_t *ctx)
   } while(0);
 }
 
+static void lwipdrv_rs422_select(lwipdrv_ctx_t *ctx)
+{
+  bool reserved;
+
+  tunerstudio_rs422_ctx_t *serial = &ctx->init.tunerstudio_ctx->rs422;
+
+  tunerstudio_rs422_select(serial);
+  reserved = serial->rs422_ctx == ctx->init.rs422_ctx;
+
+  if(reserved != ctx->lwip.rs422_reserved) {
+    ctx->lwip.rs422_reserved = reserved;
+    ctx->lwip.rs422_switch_pending = true;
+
+    if(reserved && lwipdrv_arbiter_tx(&ctx->lwip.arbiter) == LWIPDRV_TRANSPORT_RS422) {
+      ctx->lwip.no_carrier = true;
+      ctx->reset_trigger = true;
+    }
+  }
+}
+
+static void lwipdrv_rs422_switch(lwipdrv_ctx_t *ctx)
+{
+  rs422_ctx_t *rs422_ctx = ctx->init.rs422_ctx;
+
+  do {
+    BREAK_IF(ctx->lwip.rs422_switch_pending == false);
+
+    /* A PPP session or negotiation using this port must close first. */
+    BREAK_IF(ctx->lwip.rs422_reserved &&
+        lwipdrv_arbiter_tx(&ctx->lwip.arbiter) == LWIPDRV_TRANSPORT_RS422);
+
+    /* Do not interleave previously queued TX with the new transport. */
+    BREAK_IF(rs422_ctx->configured && (rs422_ctx->tx_busy ||
+        ATOMIC_LOAD(rs422_ctx->tx_read_pointer) != ATOMIC_LOAD(rs422_ctx->tx_write_pointer)));
+
+    ctx->lwip.rs422_switch_pending = false;
+
+  } while(0);
+}
+
 void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
 {
   error_t err = E_OK;
@@ -217,6 +271,7 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
   do {
     BREAK_IF(ctx == NULL);
     BREAK_IF(ctx->initialized == false);
+    BREAK_IF(!ATOMIC_TRY_LOCK(ctx->lock));
 
     usb_generation = usb_get_generation(ctx->init.usb_ctx);
     usb_changed = usb_generation != ctx->lwip.usb_generation;
@@ -234,34 +289,52 @@ void lwipdrv_loop_main(lwipdrv_ctx_t *ctx)
       ctx->reset_trigger = true;
     }
 
+    lwipdrv_rs422_select(ctx);
+    if((lwipdrv_arbiter_tx(&ctx->lwip.arbiter) == LWIPDRV_TRANSPORT_RS422 && ctx->config.rs422_enabled == false) ||
+        (lwipdrv_arbiter_tx(&ctx->lwip.arbiter) == LWIPDRV_TRANSPORT_USB && ctx->config.usb_enabled == false)) {
+      ctx->lwip.no_carrier = true;
+      if(ctx->lwip.restart_pending == false) {
+        ctx->reset_trigger = true;
+      }
+    }
     lwipdrv_ppp_restart(ctx);
     sys_check_timeouts();
+    lwipdrv_rs422_switch(ctx);
 
-    bytes = 256u;
-    err = rs422_rx_nocopy(ctx->init.rs422_ctx, &buffer, &bytes);
-    if(err == E_OK && bytes > 0u) {
-      if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
-          lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_RS422)) {
-        pppos_input(ctx->lwip.ppp, buffer, bytes);
+    if(ctx->config.rs422_enabled && ctx->lwip.rs422_reserved == false && ctx->lwip.rs422_switch_pending == false) {
+      bytes = 256u;
+      err = rs422_rx_nocopy(ctx->init.rs422_ctx, &buffer, &bytes);
+      if(err == E_OK && bytes > 0u) {
+        if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
+            lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_RS422)) {
+          pppos_input(ctx->lwip.ppp, buffer, bytes);
+        }
+        (void)rs422_rx_release(ctx->init.rs422_ctx, bytes);
       }
-      (void)rs422_rx_release(ctx->init.rs422_ctx, bytes);
     }
 
-    bytes = 256u;
-    err = usb_rx_nocopy(ctx->init.usb_ctx, &buffer, &bytes);
-    if(err == E_OK && bytes > 0u) {
-      if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
-          lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_USB)) {
-        pppos_input(ctx->lwip.ppp, buffer, bytes);
+    ctx->init.tunerstudio_ctx->rs422.available =
+        ctx->init.tunerstudio_ctx->rs422.rs422_ctx != ctx->init.rs422_ctx || ctx->lwip.rs422_switch_pending == false;
+
+    if(ctx->config.usb_enabled) {
+      bytes = 256u;
+      err = usb_rx_nocopy(ctx->init.usb_ctx, &buffer, &bytes);
+      if(err == E_OK && bytes > 0u) {
+        if(ctx->lwip.ppp->phase != PPP_PHASE_DEAD && (ctx->configured || ctx->lwip.close_pending) &&
+            lwipdrv_arbiter_rx(&ctx->lwip.arbiter, LWIPDRV_TRANSPORT_USB)) {
+          pppos_input(ctx->lwip.ppp, buffer, bytes);
+        }
+        (void)usb_rx_release(ctx->init.usb_ctx, bytes);
       }
-      (void)usb_rx_release(ctx->init.usb_ctx, bytes);
     }
 
     link_up = ctx->configured && ctx->lwip.link_up &&
         netif_is_link_up(&ctx->lwip.ppp_netif) && !ctx->lwip.restart_pending;
     doip_lwip_loop(&ctx->doip, link_up);
+    tunerstudio_lwip_loop(&ctx->tunerstudio, link_up);
     USBD_VENDOR_SetLinkStatus(ctx->lwip.arbiter.owner, link_up,
-        ctx->configured && !ctx->lwip.restart_pending && usb_is_connected(ctx->init.usb_ctx));
+        ctx->configured && ctx->config.usb_enabled && !ctx->lwip.restart_pending && usb_is_connected(ctx->init.usb_ctx));
+    ATOMIC_RELEASE(ctx->lock);
 
   } while(0);
 }

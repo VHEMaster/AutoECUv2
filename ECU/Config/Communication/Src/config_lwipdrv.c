@@ -48,6 +48,8 @@ static const lwipdrv_config_t ecu_comm_lwipdrv_default_config[ECU_COMM_LWIPDRV_M
       .lcp_echo_enabled = true,
       .lcp_echo_interval = 1u,
       .lcp_echo_fails = 3u,
+      .rs422_enabled = true,
+      .usb_enabled = true,
   }, //ECU_LWIPDRV_IF_1
 };
 
@@ -88,6 +90,9 @@ error_t ecu_comm_lwipdrv_init(ecu_comm_lwipdrv_t instance, lwipdrv_ctx_t *ctx)
     BREAK_IF(err != E_OK);
 
     err = ecu_comm_get_doip_ctx(ECU_COMM_DOIP_1, &lwipdrv_ctx->init.doip_ctx);
+    BREAK_IF(err != E_OK);
+
+    err = ecu_comm_get_tunerstudio_ctx(ECU_COMM_TUNERSTUDIO_1, &lwipdrv_ctx->init.tunerstudio_ctx);
     BREAK_IF(err != E_OK);
 
     err = lwipdrv_init(lwipdrv_ctx->ctx, &lwipdrv_ctx->init);

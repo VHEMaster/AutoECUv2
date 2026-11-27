@@ -27,6 +27,7 @@ typedef enum {
   ECU_COMM_TYPE_LWIPDRV,
   ECU_COMM_TYPE_DOIP,
   ECU_COMM_TYPE_USB,
+  ECU_COMM_TYPE_TUNERSTUDIO,
   ECU_COMM_TYPE_MAX
 }ecu_comm_type_t;
 
@@ -89,6 +90,11 @@ typedef enum {
   ECU_COMM_USB_1 = 0,
   ECU_COMM_USB_MAX
 }ecu_comm_usb_t;
+
+typedef enum {
+  ECU_COMM_TUNERSTUDIO_1 = 0,
+  ECU_COMM_TUNERSTUDIO_MAX
+}ecu_comm_tunerstudio_t;
 
 typedef union {
     uint32_t word;

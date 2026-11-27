@@ -25,6 +25,9 @@ typedef struct {
     uint8_t lcp_echo_interval;
     uint8_t lcp_echo_fails;
 
+    bool rs422_enabled;
+    bool usb_enabled;
+
     uint32_t align ALIGNED_CACHE;
 }lwipdrv_config_v1_t ALIGNED_CACHE;
 
